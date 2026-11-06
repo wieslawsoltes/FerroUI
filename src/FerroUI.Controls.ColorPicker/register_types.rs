@@ -65,9 +65,9 @@ pub fn register_types() {
         // documents create), and with it the controls and the base crate.
         ferroui_markup_xaml::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
         crate::markup_types::register();
         // The theme documents as assets: what lets a document the run-time loader loads
         // include them (the tests of this crate do).

@@ -165,13 +165,13 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupType::register_all(MARKUP_TYPES);
+        MarkupType::register_table(MARKUP_TYPES);
         // An instantiation of a contract of the base crate, not a type of the namespaces of
         // this crate: `IAddChild<On>`.
-        MarkupType::register(<AddChildOfOn as MarkupTyped>::MARKUP);
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupType::register_table(&[<AddChildOfOn as MarkupTyped>::MARKUP]);
+        MarkupAssembly::register_table(&ASSEMBLY);
         ValueTypes::register_global(register_value_types);
     });
 }

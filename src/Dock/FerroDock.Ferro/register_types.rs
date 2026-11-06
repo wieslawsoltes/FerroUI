@@ -63,15 +63,15 @@ pub fn register_types() {
     ferroui_base::data::core::ValueTypes::register_nullable::<
         std::rc::Rc<dyn ferrodock_model::core::IHostWindow>,
     >();
-    ferroui_base::metadata::MarkupType::register(<crate::converters::TitleOrTypeNameConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::TitleOrTypeNameConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::TitleOrTypeNameConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|converter| converter.clone());
 
-    TypeInfo::register_all(&[crate::controls::DelayedUniformTabPanel::TYPE]);
-    ferroui_base::TypeInfo::register_all(&[crate::controls::HostWindowTitleBar::TYPE]);
-    ferroui_base::metadata::MarkupType::register_all(&[
+    TypeInfo::register_table(&[crate::controls::DelayedUniformTabPanel::TYPE]);
+    ferroui_base::TypeInfo::register_table(&[crate::controls::HostWindowTitleBar::TYPE]);
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::themes::DockDensityStyle as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::converters::IntLessThanConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
     ]);
@@ -80,69 +80,69 @@ pub fn register_types() {
         std::rc::Rc<crate::converters::IntLessThanConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::EitherNotNullConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::EitherNotNullConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IMultiValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::SplitViewPanePlacementConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::SplitViewPanePlacementConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::SplitViewPanePlacementConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::SplitViewDisplayModeConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::SplitViewDisplayModeConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::SplitViewDisplayModeConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::OrientationConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::OrientationConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::DockModeConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::DockModeConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::AlignmentConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::AlignmentConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::TypeInfo::register_all(&[crate::controls::PinnedDockHostPanel::TYPE]);
-    ferroui_base::TypeInfo::register_all(&[crate::controls::PinnedDockControl::TYPE]);
-    ferroui_base::metadata::MarkupType::register_all(&[<crate::converters::GripModeConverters as ferroui_base::metadata::MarkupTyped>::MARKUP,<crate::converters::ReferenceEqualsMultiConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
+    ferroui_base::TypeInfo::register_table(&[crate::controls::PinnedDockHostPanel::TYPE]);
+    ferroui_base::TypeInfo::register_table(&[crate::controls::PinnedDockControl::TYPE]);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::GripModeConverters as ferroui_base::metadata::MarkupTyped>::MARKUP,<crate::converters::ReferenceEqualsMultiConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::ReferenceEqualsMultiConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IMultiValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::DocumentLayoutModeMatchConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::DocumentLayoutModeMatchConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::DocumentLayoutModeMatchConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::DocumentTabDockConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::DocumentTabDockConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::DocumentTabDockConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::DocumentTabOrientationConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::DocumentTabOrientationConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::DocumentTabOrientationConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::IsMaximizedConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::IsMaximizedConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
@@ -151,7 +151,7 @@ pub fn register_types() {
         data::core::ValueTypes,
         metadata::{MarkupType, MarkupTyped},
     };
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         crate::commands::ScrollViewerLineCommand::MARKUP,
         crate::commands::ScrollViewerLineDirection::MARKUP,
         crate::converters::ScrollViewerScrollButtonVisibilityConverter::MARKUP,
@@ -164,27 +164,27 @@ pub fn register_types() {
         std::rc::Rc<crate::converters::ScrollViewerScrollButtonVisibilityConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IMultiValueConverter>,
     >(|c| c.clone());
-    ferroui_base::TypeInfo::register_all(&[
+    ferroui_base::TypeInfo::register_table(&[
         crate::controls::DocumentControl::TYPE,
         crate::controls::ToolControl::TYPE,
     ]);
-    ferroui_base::metadata::MarkupType::register(<crate::converters::OwnerIsToolDockConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::OwnerIsToolDockConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::OwnerIsToolDockConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::DocumentTabLayoutMatchConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::DocumentTabLayoutMatchConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::DocumentTabLayoutMatchConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|c| c.clone());
-    ferroui_base::metadata::MarkupType::register(<crate::converters::BorderFillMarginConverter as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    ferroui_base::metadata::MarkupType::register_table(&[<crate::converters::BorderFillMarginConverter as ferroui_base::metadata::MarkupTyped>::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_cast::<
         std::rc::Rc<crate::converters::BorderFillMarginConverter>,
         std::rc::Rc<dyn ferroui_base::data::converters::IMultiValueConverter>,
     >(|c| c.clone());
-    ferroui_base::TypeInfo::register_all(&[crate::controls::DockableControl::TYPE]);
-    ferroui_base::metadata::MarkupType::register_all(&[
+    ferroui_base::TypeInfo::register_table(&[crate::controls::DockableControl::TYPE]);
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::DockCapabilityConverters as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::converters::CanRemoveDockableConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::converters::DocumentCloseButtonVisibilityConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
@@ -200,18 +200,18 @@ pub fn register_types() {
     crate::dock_model_registration::register();
     crate::controls::register_managed_models();
     crate::selectors::register_types();
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <dyn crate::contract::IExternalDockSurface as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     crate::command_bars::register_types();
-    ferroui_base::metadata::MarkupType::register_all(&[
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::selectors::DockSelectorItem as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::selectors::DockSelectorMode as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <dyn crate::selectors::IDockSelectorService as ferroui_base::metadata::MarkupTyped>::MARKUP,
     ]);
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::NotNullConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     ferroui_base::data::core::ValueTypes::register_nullable::<
         std::rc::Rc<crate::converters::NotNullConverter>,
     >();
@@ -220,7 +220,7 @@ pub fn register_types() {
         std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>,
     >(|value| value.clone());
 
-    ferroui_base::metadata::MarkupType::register_all(&[
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::converters::ManagedDockableIsToolWindowConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::converters::ManagedDockableToolDockConverter as ferroui_base::metadata::MarkupTyped>::MARKUP,
     ]);
@@ -243,7 +243,7 @@ pub fn register_types() {
     ferrodock_settings::register_types();
     ferrodock_controls_deferred_content_control::register_types();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         <crate::controls::DockControl as StaticType>::TYPE,
         <crate::controls::HostWindow as StaticType>::TYPE,
         <crate::controls::ToolChromeControl as StaticType>::TYPE,
@@ -302,7 +302,7 @@ pub fn register_types() {
     ferroui_base::data::core::ValueTypes::register_nullable::<
         std::rc::Rc<dyn crate::controls::ManagedDockableBaseImpl>,
     >();
-    ferroui_base::metadata::MarkupType::register_all(&[
+    ferroui_base::metadata::MarkupType::register_table(&[
         <dyn crate::IHostOverlayServicesMetadata as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <dyn crate::controls::IDockTarget as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <crate::controls::ManagedDockableBase as ferroui_base::metadata::MarkupTyped>::MARKUP,
@@ -325,7 +325,7 @@ pub fn register_types() {
         <dyn crate::DialogRequestCollectionMetadata as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <dyn crate::ConfirmationRequestCollectionMetadata as ferroui_base::metadata::MarkupTyped>::MARKUP,
     ]);
-    ferroui_base::metadata::MarkupAssembly::register(&ASSEMBLY);
+    ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
 }
 
 fn register_mdi_types() {

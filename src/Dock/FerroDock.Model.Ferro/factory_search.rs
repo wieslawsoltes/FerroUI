@@ -175,7 +175,7 @@ ferroui_base::ferro_markup_type!(interface DockableQueryEnumeratorReference as "
 });
 
 pub(crate) fn register() {
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         DockablePredicateReference::MARKUP,
         RootPredicateReference::MARKUP,
         DockableQueryReference::MARKUP,

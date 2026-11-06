@@ -69,7 +69,7 @@ ferroui_base::ferro_markup_type!(class GridDockSplitterReference as "GridDockSpl
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(GridDockSplitterReference::MARKUP);
+    MarkupType::register_table(&[GridDockSplitterReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IGridDockSplitter>>();
     ValueTypes::register_cast::<Rc<dyn IGridDockSplitter>, Rc<dyn IDockable>>(|model| {
         model.clone()

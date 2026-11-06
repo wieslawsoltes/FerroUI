@@ -270,6 +270,6 @@ ferroui_base::ferro_markup_type!(static FactoryExtensionsMetadata as "FactoryExt
 
 pub(crate) fn register() {
     use ferroui_base::metadata::{MarkupType, MarkupTyped};
-    MarkupType::register(<dyn IFactoryMetadata as MarkupTyped>::MARKUP);
-    MarkupType::register(FactoryExtensionsMetadata::MARKUP);
+    MarkupType::register_table(&[<dyn IFactoryMetadata as MarkupTyped>::MARKUP]);
+    MarkupType::register_table(&[FactoryExtensionsMetadata::MARKUP]);
 }

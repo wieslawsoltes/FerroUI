@@ -76,7 +76,7 @@ ferroui_base::ferro_markup_type!(class ToolDockReference as "ToolDock" {
  methods: [fn AddTool(Option<Rc<dyn IDockable>>) => (|this: &ToolDockReference, tool| this.model.add_tool(tool))],
 });
 pub(crate) fn register() {
-    MarkupType::register(ToolDockReference::MARKUP);
+    MarkupType::register_table(&[ToolDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IToolDock>>();
     ValueTypes::register_cast::<Rc<dyn IToolDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IToolDock>, Rc<dyn IDock>>(|model| model.clone());

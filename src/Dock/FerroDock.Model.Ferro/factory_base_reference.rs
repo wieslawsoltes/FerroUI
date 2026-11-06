@@ -255,7 +255,7 @@ fn Find(Option<Rc<dyn IDock>>,Option<DockablePredicateReference>)->DockableQuery
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(FactoryBaseReference::MARKUP);
+    MarkupType::register_table(&[FactoryBaseReference::MARKUP]);
     ValueTypes::register_nullable::<FactoryBaseReference>();
     ValueTypes::register_nullable::<Rc<dyn IFactory>>();
     ValueTypes::register_reference_identity::<Rc<dyn IFactory>>(|v| Rc::as_ptr(v) as *const ());

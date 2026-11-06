@@ -61,7 +61,7 @@ pub(crate) fn register() {
     ValueTypes::register_boxed_cast::<Rc<dyn IDockable>, Rc<ManagedWindowDock>>(dock);
     ValueTypes::register_boxed_cast::<Rc<dyn IDock>, Rc<ManagedWindowDock>>(dock);
     ValueTypes::register_boxed_cast::<Rc<dyn IDock>, ManagedDockableBaseReference>(managed_base);
-    MarkupType::register_all(&[ManagedDockWindowDocument::MARKUP, ManagedWindowDock::MARKUP]);
+    MarkupType::register_table(&[ManagedDockWindowDocument::MARKUP, ManagedWindowDock::MARKUP]);
     ValueTypes::register_reference::<ManagedDockWindowDocument>();
     ValueTypes::register_conversion::<Rc<ManagedDockWindowDocument>, Option<Rc<dyn IDataTemplate>>>(
         |model| Some(Some(model.clone())),

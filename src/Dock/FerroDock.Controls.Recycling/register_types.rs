@@ -21,10 +21,10 @@ pub fn register_types() {
     ferrodock_controls_recycling_model_ferro::register_types();
     ferrodock_runtime::register_value_type::<ferroui_base::Ref<ferroui_controls::Control>>();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         <ControlRecycling as StaticType>::TYPE,
         <ControlRecyclingDataTemplate as StaticType>::TYPE,
     ]);
     register_rust_paths();
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

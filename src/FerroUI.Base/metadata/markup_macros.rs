@@ -467,6 +467,7 @@ macro_rules! __ferro_markup_items {
                 ),
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*)),
+                value_markup: $crate::__ferro_value_markup!($type_),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -540,6 +541,7 @@ macro_rules! __ferro_markup_items {
                 typed_path_element: ::std::option::Option::None,
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*)),
+                value_markup: $crate::__ferro_value_markup!($type_),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -2000,4 +2002,30 @@ macro_rules! __ferro_compiler_metadata {
         $crate::metadata::NotRecorded::new()
     };
     ($($tokens:tt)*) => {};
+}
+
+/// The `value_markup` of a declared property ([`MarkupProperty::value_markup`](crate::metadata::MarkupProperty::value_markup)):
+/// with the tables of types trimmed, the function that finds the metadata of the value type;
+/// otherwise none, as the tables hold every type (and the function would only link more). The
+/// definition is chosen by the features of this crate, wherever the declaration is.
+#[doc(hidden)]
+#[macro_export]
+#[cfg(not(feature = "type-tables"))]
+macro_rules! __ferro_value_markup {
+    ($type_:ty) => {
+        || {
+            #[allow(unused_imports)]
+            use $crate::metadata::{__NoTypeMarkup as _, __TypeMarkup as _};
+            (&&$crate::metadata::__TypeMarkupProbe::<$type_>::NEW).__type_markup()
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+#[cfg(feature = "type-tables")]
+macro_rules! __ferro_value_markup {
+    ($type_:ty) => {
+        || ::std::option::Option::None
+    };
 }

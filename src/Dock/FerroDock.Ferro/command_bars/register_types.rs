@@ -18,7 +18,7 @@ use ferroui_base::{
 use ferroui_controls::{Control, ItemsSource};
 use std::rc::Rc;
 pub(crate) fn register_types() {
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         DefaultDockCommandBarAdapter::MARKUP,
         DockCommandBarManager::MARKUP,
         <dyn IDockCommandBarAdapter>::MARKUP,

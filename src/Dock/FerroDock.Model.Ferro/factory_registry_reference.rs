@@ -82,10 +82,10 @@ static HOST_WINDOWS_METADATA: MarkupType = MarkupType {
     ..*<dyn HostWindowListMetadata as MarkupTyped>::MARKUP
 };
 pub(crate) fn register() {
-    MarkupType::register(DockableControlMapReference::MARKUP);
-    MarkupType::register(DockableObjectMapReference::MARKUP);
-    MarkupType::register(&DOCK_CONTROLS_METADATA);
-    MarkupType::register(&HOST_WINDOWS_METADATA);
+    MarkupType::register_table(&[DockableControlMapReference::MARKUP]);
+    MarkupType::register_table(&[DockableObjectMapReference::MARKUP]);
+    MarkupType::register_table(&[&DOCK_CONTROLS_METADATA]);
+    MarkupType::register_table(&[&HOST_WINDOWS_METADATA]);
     ferroui_base::__ferro_compiler_metadata! {
      MarkupType::register_rust_paths(&[(&DOCK_CONTROLS_METADATA,"::ferrodock_model_ferro::DockControlListMetadata",true),(&HOST_WINDOWS_METADATA,"::ferrodock_model_ferro::HostWindowListMetadata",true)]);
     }

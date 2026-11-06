@@ -123,9 +123,9 @@ pub fn register_types() {
         ferroui_controls_color_picker::register_types();
         ferroui_controls_treedatagrid::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupType::register_all(MARKUP_TYPES);
+        MarkupType::register_table(MARKUP_TYPES);
         TreeNodeList::register();
         crate::diagnostics::view_models::ValueFrameViewModelList::register();
         crate::diagnostics::view_models::PseudoClassViewModelList::register();
@@ -138,7 +138,7 @@ pub fn register_types() {
         ValueTypes::register_global(crate::diagnostics::view_models::register_main_value_types);
         ValueTypes::register_global(crate::diagnostics::view_models::register_details_value_types);
         ferroui_base::data::model::ModelTypes::register::<FilterViewModel>(|b| b.notify_property_changed().notify_data_error_info());
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
         // The assets (`Assets/`) and the loader table of the compiled markup, which the build of
         // the crate generates: a load of the document of a class by its URI creates an instance
         // of the class, whose constructor populates it.

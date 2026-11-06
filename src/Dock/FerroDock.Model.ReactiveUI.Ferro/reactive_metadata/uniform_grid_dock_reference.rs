@@ -71,7 +71,7 @@ ferroui_base::ferro_markup_type!(class UniformGridDockReference as "UniformGridD
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(UniformGridDockReference::MARKUP);
+    MarkupType::register_table(&[UniformGridDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IUniformGridDock>>();
     ValueTypes::register_cast::<Rc<dyn IUniformGridDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IUniformGridDock>, Rc<dyn IDock>>(|model| model.clone());

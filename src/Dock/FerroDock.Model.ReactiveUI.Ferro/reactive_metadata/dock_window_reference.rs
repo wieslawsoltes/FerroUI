@@ -98,7 +98,7 @@ ferroui_base::ferro_markup_type!(class DockWindowReference as "DockWindow"{
     ],
 });
 pub(crate) fn register() {
-    MarkupType::register(DockWindowReference::MARKUP);
+    MarkupType::register_table(&[DockWindowReference::MARKUP]);
     ValueTypes::register_nullable::<DockWindowReference>();
     ValueTypes::register_nullable::<Rc<dyn IHostWindow>>();
     ValueTypes::register_cast::<DockWindowReference, Rc<dyn IDockWindow>>(|v| v.model());

@@ -114,10 +114,11 @@ pub struct TransformedDocument {
     pub configuration: Rc<TransformerConfiguration>,
     /// The base URI the contexts of the document get, as it was given.
     pub base_uri: Option<String>,
-    /// The namespace information the contexts of the document get, as the value of an
-    /// `rt::XmlNamespaceTable` ([`namespace_table`]); nothing when the language maps no
-    /// namespace information provider.
-    pub namespaces: Option<String>,
+    /// The namespace information the contexts of the document get, which the emitter writes
+    /// as the value of an `rt::XmlNamespaceTable` with the types the reflection-binding paths
+    /// of the document name; nothing when the language maps no namespace information
+    /// provider.
+    pub namespaces: Option<NamespaceTable>,
     /// The build method of the document in its group (what a call from another
     /// document of the group calls).
     pub build: Option<Rc<dyn IXamlMethod>>,
@@ -371,38 +372,82 @@ fn method_not_found(
     Some(described)
 }
 
-/// The namespace information of a document as the value of an `rt::XmlNamespaceTable`
-/// (the argument of `rt::create_context`): what the namespace information provider of
-/// the document gives the contexts of the run-time loader, prefixes in order, one per
-/// line.
-pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &XamlDocument) -> String {
+/// A type that a reflection-binding path of a document names, as the compiler resolved it
+/// (`emitter::reflection_path_types`): the CLR namespace and the assembly of the entry of
+/// a namespace table it is found through, the name the path gives it, and the expression of
+/// the `fn() -> CastTarget` that yields it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct PathType {
+    pub clr_namespace: String,
+    pub assembly: String,
+    pub name: String,
+    pub target: String,
+}
+
+/// The namespace information of a document as the compiler resolved it: for each prefix, in
+/// order, the namespaces and the assemblies it maps to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct NamespaceTable {
+    entries: Vec<(String, Vec<(String, String)>)>,
+}
+
+impl NamespaceTable {
+    /// The table as the value of an `rt::XmlNamespaceTable` (the argument of
+    /// `rt::create_context`), one prefix per line, each entry with the types of
+    /// `path_types` found through it ([`namespace_entry`]).
+    pub(crate) fn source(&self, path_types: &[PathType]) -> String {
+        let entries: Vec<String> = self
+            .entries
+            .iter()
+            .map(|(prefix, infos)| {
+                let infos: Vec<String> =
+                    infos.iter().map(|(clr_namespace, assembly)| namespace_entry(clr_namespace, assembly, path_types)).collect();
+                format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
+            })
+            .collect();
+        format!("&[\n{}]", entries.concat())
+    }
+}
+
+/// One entry of a namespace table: the namespace, the assembly and the types of
+/// `path_types` that were resolved through an entry of the same namespace and assembly, by
+/// name.
+fn namespace_entry(clr_namespace: &str, assembly: &str, path_types: &[PathType]) -> String {
+    let types: Vec<String> = path_types
+        .iter()
+        .filter(|path_type| path_type.clr_namespace == clr_namespace && path_type.assembly == assembly)
+        .map(|path_type| format!("({}, {})", rust_string_literal(&path_type.name), path_type.target))
+        .collect();
+    format!("({}, {}, &[{}])", rust_string_literal(clr_namespace), rust_string_literal(assembly), types.join(", "))
+}
+
+/// The namespace information of a document: what the namespace information provider of the
+/// document gives the contexts of the run-time loader, prefixes in order.
+pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &XamlDocument) -> NamespaceTable {
     let namespaces = XmlNamespaceInfoProvider::new(configuration.clone(), document).xml_namespaces();
     let mut prefixes: Vec<&String> = namespaces.keys().collect();
     prefixes.sort();
-    let entries: Vec<String> = prefixes
+    let entries = prefixes
         .into_iter()
         .map(|prefix| {
-            let infos: Vec<String> = namespaces[prefix]
+            let infos = namespaces[prefix]
                 .iter()
-                .map(|info| {
-                    format!(
-                        "({}, {})",
-                        rust_string_literal(&info.clr_namespace),
-                        rust_string_literal(info.clr_assembly_name.as_deref().unwrap_or(""))
-                    )
-                })
+                .map(|info| (info.clr_namespace.clone(), info.clr_assembly_name.clone().unwrap_or_default()))
                 .collect();
-            format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
+            (prefix.clone(), infos)
         })
         .collect();
-    format!("&[\n{}]", entries.concat())
+    NamespaceTable { entries }
 }
 
-/// The same static table for a lexical element scope. Prefix meanings are resolved by the
-/// compiler's namespace helper, exactly as the runtime namespace information provider does.
+/// The same static table for a lexical element scope, as the value of an
+/// `rt::XmlNamespaceTable`. Prefix meanings are resolved by the compiler's namespace
+/// helper, exactly as the runtime namespace information provider does; each entry has the
+/// types of `path_types` found through it.
 pub(crate) fn namespace_table_for_aliases(
     configuration: &TransformerConfiguration,
     aliases: &std::collections::HashMap<String, String>,
+    path_types: &[PathType],
 ) -> String {
     let mut prefixes: Vec<_> = aliases.keys().collect();
     prefixes.sort();
@@ -411,7 +456,7 @@ pub(crate) fn namespace_table_for_aliases(
             .unwrap_or_default();
         let infos: Vec<_> = resolved.into_iter().map(|info| {
             let assembly = info.assembly_name.or_else(|| info.assembly.map(|assembly| assembly.name())).unwrap_or_default();
-            format!("({}, {})", rust_string_literal(&info.clr_namespace), rust_string_literal(&assembly))
+            namespace_entry(&info.clr_namespace, &assembly, path_types)
         }).collect();
         format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
     }).collect();

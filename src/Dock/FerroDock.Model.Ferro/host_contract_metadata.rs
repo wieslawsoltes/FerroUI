@@ -48,7 +48,7 @@ ferroui_base::ferro_markup_type!(interface dyn IHostWindowStateMetadata as "IHos
 });
 
 pub(crate) fn register() {
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         <dyn IHostWindowMetadata>::MARKUP,
         <dyn IHostWindowStateMetadata>::MARKUP,
         <dyn IDockManagerStateMetadata>::MARKUP,

@@ -275,7 +275,7 @@ pub(crate) const TYPES: &[&MarkupType] = &[
 ];
 
 pub(crate) fn register_markup() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
     ValueTypes::register_global(|| {
         ValueTypes::register_nullable::<Rc<InkPresenter>>();
         ValueTypes::register_nullable::<Rc<InkInputProcessingConfiguration>>();

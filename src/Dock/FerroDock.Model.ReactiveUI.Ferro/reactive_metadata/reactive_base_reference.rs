@@ -43,7 +43,7 @@ pub(crate) fn register() {
         data::core::ValueTypes,
         metadata::{MarkupType, MarkupTyped},
     };
-    MarkupType::register(<ReactiveBaseReference as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<ReactiveBaseReference as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<ReactiveBaseReference>();
     ValueTypes::register_cast::<ReactiveBaseReference, ReactiveObjectReference>(|value| {
         value.base()

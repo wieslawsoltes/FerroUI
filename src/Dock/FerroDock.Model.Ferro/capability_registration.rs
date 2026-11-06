@@ -11,7 +11,7 @@ use ferroui_base::{
 };
 use std::rc::Rc;
 pub(crate) fn register() {
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         <dyn IDockCapabilityPolicyMetadata>::MARKUP,
         <dyn DockCapabilityPolicyMetadata>::MARKUP,
         <dyn DockCapabilityOverridesMetadata>::MARKUP,

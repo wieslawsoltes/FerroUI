@@ -25,6 +25,8 @@ pub use markup_type::{
     MarkupInvokeError, MarkupLiteral, MarkupMethod, MarkupParameter, MarkupProperty, MarkupType, MarkupTypeKind, MarkupTyped,
     MarkupValue, TypeOf,
 };
+#[doc(hidden)]
+pub use markup_type::{__NoTypeMarkup, __TypeMarkup, __TypeMarkupProbe};
 #[cfg(feature = "compiler-metadata")]
 pub use property_accessors::{declared_property_accessors, property_accessors, record_property_accessor, PropertyAccessor};
 #[cfg(feature = "compiler-metadata")]

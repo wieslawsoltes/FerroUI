@@ -12,6 +12,6 @@ const TYPE_LISTS: &[&[&MarkupType]] = &[composition::TYPES];
 /// metadata. Called once by `register_types()`.
 pub(crate) fn register() {
     for types in TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
 }

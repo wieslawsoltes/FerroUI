@@ -23,8 +23,8 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_base::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        MarkupAssembly::register(&ASSEMBLY);
-        MarkupType::register_all(&[
+        MarkupAssembly::register_table(&ASSEMBLY);
+        MarkupType::register_table(&[
             <crate::SeriesKind as MarkupTyped>::MARKUP,
             <crate::AxisPosition as MarkupTyped>::MARKUP,
             <crate::FindingStrategy as MarkupTyped>::MARKUP,

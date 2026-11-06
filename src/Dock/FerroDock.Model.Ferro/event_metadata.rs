@@ -226,152 +226,152 @@ ferroui_base::ferro_markup_type!(class dyn GlobalDockTrackingStateMetadata as "G
 });
 pub(crate) fn register() {
     register_rust_paths();
-    MarkupType::register(<dyn ActiveDockableChangedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn ActiveDockableChangedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<ActiveDockableChangedEventArgs>();
     ValueTypes::register_reference_identity::<ActiveDockableChangedEventArgs>(
         ActiveDockableChangedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableActivatedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableActivatedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableActivatedEventArgs>();
     ValueTypes::register_reference_identity::<DockableActivatedEventArgs>(
         DockableActivatedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableAddedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableAddedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableAddedEventArgs>();
     ValueTypes::register_reference_identity::<DockableAddedEventArgs>(
         DockableAddedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableClosedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableClosedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableClosedEventArgs>();
     ValueTypes::register_reference_identity::<DockableClosedEventArgs>(
         DockableClosedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableClosingEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableClosingEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableClosingEventArgs>();
     ValueTypes::register_reference_identity::<DockableClosingEventArgs>(
         DockableClosingEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableDeactivatedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableDeactivatedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableDeactivatedEventArgs>();
     ValueTypes::register_reference_identity::<DockableDeactivatedEventArgs>(
         DockableDeactivatedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableDockedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableDockedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableDockedEventArgs>();
     ValueTypes::register_reference_identity::<DockableDockedEventArgs>(
         DockableDockedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableHiddenEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableHiddenEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableHiddenEventArgs>();
     ValueTypes::register_reference_identity::<DockableHiddenEventArgs>(
         DockableHiddenEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableInitEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableInitEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableInitEventArgs>();
     ValueTypes::register_reference_identity::<DockableInitEventArgs>(
         DockableInitEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableMovedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableMovedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableMovedEventArgs>();
     ValueTypes::register_reference_identity::<DockableMovedEventArgs>(
         DockableMovedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableOwnerChangingEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableOwnerChangingEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableOwnerChangingEventArgs>();
     ValueTypes::register_reference_identity::<DockableOwnerChangingEventArgs>(
         DockableOwnerChangingEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockablePinnedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockablePinnedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockablePinnedEventArgs>();
     ValueTypes::register_reference_identity::<DockablePinnedEventArgs>(
         DockablePinnedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableRemovedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableRemovedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableRemovedEventArgs>();
     ValueTypes::register_reference_identity::<DockableRemovedEventArgs>(
         DockableRemovedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableRestoredEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableRestoredEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableRestoredEventArgs>();
     ValueTypes::register_reference_identity::<DockableRestoredEventArgs>(
         DockableRestoredEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableSwappedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableSwappedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableSwappedEventArgs>();
     ValueTypes::register_reference_identity::<DockableSwappedEventArgs>(
         DockableSwappedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableUndockedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableUndockedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableUndockedEventArgs>();
     ValueTypes::register_reference_identity::<DockableUndockedEventArgs>(
         DockableUndockedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn DockableUnpinnedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn DockableUnpinnedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableUnpinnedEventArgs>();
     ValueTypes::register_reference_identity::<DockableUnpinnedEventArgs>(
         DockableUnpinnedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn FocusedDockableChangedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn FocusedDockableChangedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<FocusedDockableChangedEventArgs>();
     ValueTypes::register_reference_identity::<FocusedDockableChangedEventArgs>(
         FocusedDockableChangedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn GlobalDockTrackingChangedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn GlobalDockTrackingChangedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<GlobalDockTrackingChangedEventArgs>();
     ValueTypes::register_reference_identity::<GlobalDockTrackingChangedEventArgs>(
         GlobalDockTrackingChangedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowActivatedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowActivatedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowActivatedEventArgs>();
     ValueTypes::register_reference_identity::<WindowActivatedEventArgs>(
         WindowActivatedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowAddedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowAddedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowAddedEventArgs>();
     ValueTypes::register_reference_identity::<WindowAddedEventArgs>(
         WindowAddedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowClosedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowClosedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowClosedEventArgs>();
     ValueTypes::register_reference_identity::<WindowClosedEventArgs>(
         WindowClosedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowClosingEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowClosingEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowClosingEventArgs>();
     ValueTypes::register_reference_identity::<WindowClosingEventArgs>(
         WindowClosingEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowDeactivatedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowDeactivatedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowDeactivatedEventArgs>();
     ValueTypes::register_reference_identity::<WindowDeactivatedEventArgs>(
         WindowDeactivatedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowMoveDragBeginEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowMoveDragBeginEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowMoveDragBeginEventArgs>();
     ValueTypes::register_reference_identity::<WindowMoveDragBeginEventArgs>(
         WindowMoveDragBeginEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowMoveDragEndEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowMoveDragEndEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowMoveDragEndEventArgs>();
     ValueTypes::register_reference_identity::<WindowMoveDragEndEventArgs>(
         WindowMoveDragEndEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowMoveDragEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowMoveDragEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowMoveDragEventArgs>();
     ValueTypes::register_reference_identity::<WindowMoveDragEventArgs>(
         WindowMoveDragEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowOpenedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowOpenedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowOpenedEventArgs>();
     ValueTypes::register_reference_identity::<WindowOpenedEventArgs>(
         WindowOpenedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn WindowRemovedEventArgsMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn WindowRemovedEventArgsMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<WindowRemovedEventArgs>();
     ValueTypes::register_reference_identity::<WindowRemovedEventArgs>(
         WindowRemovedEventArgs::reference_identity,
     );
-    MarkupType::register(<dyn GlobalDockTrackingStateMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn GlobalDockTrackingStateMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<GlobalDockTrackingState>();
     ValueTypes::register_reference_identity::<GlobalDockTrackingState>(
         GlobalDockTrackingState::reference_identity,

@@ -97,7 +97,7 @@ fn notifier(value: &dyn AnyValue) -> Option<&dyn INotifyPropertyChanged> {
 }
 pub(crate) fn register() {
     // Register before consumer metadata: the shared registry preserves first identity.
-    MarkupType::register(&DOCKABLE_METADATA);
+    MarkupType::register_table(&[&DOCKABLE_METADATA]);
     // The notifier descriptor is the registered identity; emitted members still
     // belong to the original public declaration carrier.
     ferroui_base::__ferro_compiler_metadata! {
