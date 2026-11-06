@@ -150,7 +150,7 @@ impl IPageTransition for PageSlide {
 
         start_async(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::new();
@@ -184,10 +184,12 @@ impl IPageTransition for PageSlide {
                 tasks.push(animation.run_async_with_clock(to, None, cancellation_token.clone()));
             }
 
-            when_all(tasks).await;
+            if let Err(error) = when_all(tasks).await {
+                return Err(error);
+            }
 
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             if let Some(from) = &from {
@@ -202,6 +204,7 @@ impl IPageTransition for PageSlide {
                     to.set_render_transform(None);
                 }
             }
+            Ok(())
         })
     }
 

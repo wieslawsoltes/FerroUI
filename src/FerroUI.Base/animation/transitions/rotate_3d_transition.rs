@@ -173,7 +173,7 @@ impl IPageTransition for Rotate3DTransition {
 
         start_async(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::with_capacity(if from.is_some() && to.is_some() { 2 } else { 1 });
@@ -237,7 +237,9 @@ impl IPageTransition for Rotate3DTransition {
                 tasks.push(animation.run_async_with_clock(to, None, cancellation_token.clone()));
             }
 
-            when_all(tasks).await;
+            if let Err(error) = when_all(tasks).await {
+                return Err(error);
+            }
 
             if !cancellation_token.is_cancelled() {
                 if let Some(to) = &to {
@@ -249,6 +251,7 @@ impl IPageTransition for Rotate3DTransition {
                     from.set_z_index(1);
                 }
             }
+            Ok(())
         })
     }
 

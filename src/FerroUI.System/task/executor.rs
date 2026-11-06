@@ -363,6 +363,19 @@ where
     })
 }
 
+/// The future of a task whose outcome its future gives: the output of `future`, an error
+/// included, is written to `cell` ([`spawn_local_on_result`]).
+fn result_future<F, T>(future: F, cell: Arc<JoinCell<T>>) -> LocalFuture
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    Box::pin(async move {
+        let outcome = future.await;
+        drop(cell.complete(outcome));
+    })
+}
+
 /// What a task with a handle does when it fails: writes the failure to `cell`.
 fn handle_failure<T: 'static>(cell: Arc<JoinCell<T>>) -> OnFailure {
     Box::new(move |failure: Failure| {
@@ -413,6 +426,29 @@ where
     F::Output: 'static,
 {
     spawn_with_handle(future, Route::Schedule(schedule), first_poll)
+}
+
+/// Runs `future` as a task of the current thread whose polls run on `schedule`, as
+/// [`spawn_local_on`], and gives a handle whose outcome is the output of the future: `Ok(value)`
+/// is the value of the task, and `Err(error)` ends the task with `error`, as if it had been
+/// aborted ([`JoinError::Canceled`]) or had panicked ([`JoinError::Panicked`], whose payload
+/// the future makes). A future reports the failure of its task this way without unwinding, so
+/// that the failure reaches the observers of the handle with `panic = "abort"` too (#567). A
+/// panic of the future still fails the task as with [`spawn_local_on`], and an abort still
+/// cancels it.
+pub fn spawn_local_on_result<F, T>(future: F, schedule: Arc<dyn Schedule>, first_poll: FirstPoll) -> JoinHandle<T>
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    let cell = Arc::new(JoinCell::new());
+    let header = spawn_routed(
+        result_future(future, cell.clone()),
+        Route::Schedule(schedule),
+        first_poll,
+        handle_failure(cell.clone()),
+    );
+    JoinHandle::new(header, cell)
 }
 
 /// Runs the future that `create` makes as a task of the thread of `schedule`, and gives its
