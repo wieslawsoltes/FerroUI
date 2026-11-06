@@ -23,16 +23,35 @@ fn main() {
         "egl",
         "glesv2",
     ];
+    let mut libraries = Vec::new();
     for package in packages {
-        let library = pkg_config::Config::new()
+        let probe = pkg_config::Config::new()
             .cargo_metadata(false)
             .atleast_version(if package.starts_with("gstreamer") {
                 "1.24"
             } else {
                 "1.0"
             })
-            .probe(package)
-            .unwrap_or_else(|error| panic!("Linux media profile needs system {package}: {error}"));
+            .probe(package);
+        match probe {
+            Ok(library) => libraries.push(library),
+            Err(error) => {
+                // Without its system libraries the crate builds the bridge that opens no session:
+                // the application's media report a native failure, the workspace still builds.
+                println!(
+                    "cargo:warning=native Linux media is unavailable in this build (it needs system {package}: {})",
+                    error.to_string().lines().next().unwrap_or_default()
+                );
+                println!("cargo:rerun-if-changed=native/media_unavailable.c");
+                cc::Build::new()
+                    .file("native/media_unavailable.c")
+                    .flag_if_supported("-std=c11")
+                    .compile("ferroui_media_linux");
+                return;
+            }
+        }
+    }
+    for library in libraries {
         for path in library.include_paths {
             build.include(path);
         }
