@@ -78,9 +78,33 @@ fn snapshot(k: &ComputedKeyboard) -> Value {
             .collect::<Vec<_>>()
     ])
 }
+/// `value` with every number written as its bits that is a NaN written as the default NaN of ARM
+/// (positive, quiet), which the reference digests were recorded with.
+fn arm_nan(value: Value) -> Value {
+    match value {
+        Value::String(text) => match u64::from_str_radix(&text, 16) {
+            Ok(bits) if text.len() == 16 && f64::from_bits(bits).is_nan() => {
+                Value::String(format!("{:016x}", f64::NAN.to_bits()))
+            }
+            _ => Value::String(text),
+        },
+        Value::Array(items) => Value::Array(items.into_iter().map(arm_nan).collect()),
+        Value::Object(map) => {
+            Value::Object(map.into_iter().map(|(k, v)| (k, arm_nan(v))).collect())
+        }
+        other => other,
+    }
+}
 fn verify(k: &ComputedKeyboard, expected: &Value) {
-    let data = serde_json::to_vec(&snapshot(k)).unwrap();
-    let hash = format!("{:x}", Sha256::digest(data));
+    let snapshot = snapshot(k);
+    let digest =
+        |value: &Value| format!("{:x}", Sha256::digest(serde_json::to_vec(value).unwrap()));
+    let mut hash = digest(&snapshot);
+    if hash != expected["digest"].as_str().unwrap() {
+        // A NaN computed from operands that are not NaN is negative on x86-64 and positive on
+        // ARM, where the reference was recorded: compare the computed NaNs as ARM's.
+        hash = digest(&arm_nan(snapshot));
+    }
     assert_eq!(hash, expected["digest"].as_str().unwrap(), "{expected}");
     assert_eq!(
         k.keys().collect::<Result<Vec<_>, _>>().unwrap().len(),

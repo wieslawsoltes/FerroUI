@@ -14,7 +14,7 @@ for generator in ['resources', 'icon_data', 'builtin_themes']:
     run('python3', 'scripts/generate_'+generator+'.py', '--check')
 run('cargo','fmt','-p','ferroboard-core','-p','ferroboard-core-ferro','-p','ferroboard-controls','-p','ferroboard-sample','--','--check')
 run('cargo','fmt','--manifest-path','tests/FerroBoard.Native.Consumer/Cargo.toml','--','--check')
-run('cargo','test','--locked','--workspace')
+run('cargo','test','--locked','--workspace','--no-fail-fast')
 run('cargo','test','--locked','--manifest-path','tests/FerroBoard.Native.Consumer/Cargo.toml')
 run('cargo','clippy','--locked','--workspace','--all-targets','--','-D','warnings')
 run('cargo','clippy','--locked','--manifest-path','tests/FerroBoard.Native.Consumer/Cargo.toml','--all-targets','--','-D','warnings')
