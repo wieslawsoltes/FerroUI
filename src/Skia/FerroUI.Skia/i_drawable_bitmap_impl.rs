@@ -30,6 +30,9 @@ pub trait IDrawableBitmapImpl: IBitmapImpl {
 /// Returns `None` for bitmaps created by another backend.
 pub fn try_get_drawable_bitmap(bitmap: &dyn IBitmapImpl) -> Option<&dyn IDrawableBitmapImpl> {
     let any = bitmap.as_any();
+    if let Some(bitmap) = any.downcast_ref::<crate::leased_gpu_bitmap::LeasedGpuBitmap>() {
+        return Some(bitmap);
+    }
 
     if let Some(bitmap) = any.downcast_ref::<ImmutableBitmap>() {
         return Some(bitmap);

@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-media-camera-apple"
+description = "AVFoundation camera capture with shared CoreVideo frames"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-apple.workspace = true
+serde_json.workspace = true
+[build-dependencies]
+cc.workspace = true
+
+[features]
+controls = ["ferroui-media-apple/controls"]
+native-lifetime-tests = []
+
+[package.metadata.release]
+group = "platforms"

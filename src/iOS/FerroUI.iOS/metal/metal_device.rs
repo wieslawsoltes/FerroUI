@@ -3,7 +3,7 @@
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::DisposableLock;
-use ferroui_metal::IMetalDevice;
+use ferroui_metal::{IMetalDevice, IMetalExternalObjectsFeature};
 use objc2::rc::Retained;
 use objc2::runtime::ProtocolObject;
 use objc2_metal::{MTLCommandQueue, MTLDevice};
@@ -61,6 +61,10 @@ impl IOptionalFeatureProvider for MetalDevice {
     /// backend of the port finds the Metal contract of a graphics context
     /// (`ferroui-metal`).
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IMetalExternalObjectsFeature>() {
+            let this: Rc<dyn IMetalExternalObjectsFeature> = self.weak_self.upgrade()?;
+            return Some(Rc::new(this));
+        }
         if feature_type == TypeId::of::<dyn IMetalDevice>() {
             let this: Rc<dyn IMetalDevice> = self.weak_self.upgrade()?;
             return Some(Rc::new(this));

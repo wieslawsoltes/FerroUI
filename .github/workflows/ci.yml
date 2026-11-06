@@ -236,7 +236,7 @@ jobs:
             libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev pkg-config \
             fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
             libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang \
-            mesa-vulkan-drivers
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev mesa-vulkan-drivers
       - name: Test
         env:
           BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}

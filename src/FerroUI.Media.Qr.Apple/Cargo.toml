@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-media-qr-apple"
+description = "Optional offline Vision QR recognition of retained CoreVideo frames"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-qr = {workspace=true,default-features=false}
+ferroui-media-apple.workspace = true
+serde_json.workspace = true
+[build-dependencies]
+cc.workspace = true
+[dev-dependencies]
+rxing = {version="=0.9.3",default-features=false,features=["qrcode","encoders","encoding_rs"]}
+[features]
+test-fixtures = []
+[package.metadata.release]
+group = "platforms"

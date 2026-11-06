@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-media-video-windows"
+description = "Media Foundation playback with native WASAPI audio timing"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-windows.workspace = true
+ferroui-media-opengl.workspace = true
+[features]
+controls = ["ferroui-media-opengl/controls"]
+[package.metadata.release]
+group = "platforms"

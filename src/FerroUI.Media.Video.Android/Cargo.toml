@@ -1,0 +1,24 @@
+[package]
+name = "ferroui-media-video-android"
+description = "Android native playback and audio with shared GPU frame output"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-android.workspace = true
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android.workspace = true
+[features]
+controls = ["ferroui-media-android/controls"]
+[package.metadata.release]
+group = "platforms"

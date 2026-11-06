@@ -603,6 +603,24 @@ pub fn int_array_of(object: &dyn JavaRef) -> Vec<i32> {
     unsafe { read_int_array(object.raw()) }
 }
 
+/// Copies an independently owned encoded result with an explicit allocation
+/// limit. Media preview must use shared native textures instead of this API.
+pub fn bounded_byte_array_of(object: &dyn JavaRef, limit: usize) -> Option<Vec<u8>> {
+    let env = env();
+    if !instance_of(env, object.raw(), "[B") {
+        panic!("The Java object is not an array of byte.");
+    }
+    // SAFETY: the type was checked, the bounded buffer spans the entire array.
+    unsafe {
+        let length=jni!(env,GetArrayLength,object.raw());
+        if length<0 || length as usize>limit {return None;}
+        let mut bytes=vec![0u8;length as usize];
+        jni!(env,GetByteArrayRegion,object.raw(),0,length,bytes.as_mut_ptr().cast());
+        check_exception(env,&||"bounded byte array copy".into());
+        Some(bytes)
+    }
+}
+
 /// The values of a `float[]`.
 ///
 /// # Panics

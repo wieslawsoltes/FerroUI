@@ -132,11 +132,13 @@ const threadedScript = fs.readFileSync(path.join(threaded, module.script), "utf8
 const imports = new Set();
 for (const match of threadedScript.matchAll(/^[ \t]*import\b[^;\n]*?["'](\.{1,2}\/[^"']+)["']/gm)) { imports.add(match[1]); }
 // Besides the script module of the platform, an application's own scripts (the wasm-bindgen
-// imports of its host): each is a shared file at the root of the site, re-exported from the
-// directory of the module with threads so that the page and the module use one instance.
+// imports of its host) and the snippets of its crates (`snippets/<crate>/<file>.js`, the inline
+// JavaScript wasm-bindgen writes): each is a shared file of the site, re-exported from the same
+// place in the directory of the module with threads so that the page and the module use one
+// instance.
 const reexported = [...imports].map((specifier) => specifier.slice(2));
-const unknown = reexported.filter((name) => name.includes("/") || ofModule.has(name) || !plainSet.has(name));
-if (unknown.length > 0) { fail(`the script of the module with threads imports ${unknown.join(", ")}: not a shared file at the root of the site`); }
+const unknown = reexported.filter((name) => name.startsWith("../") || ofModule.has(name) || !plainSet.has(name));
+if (unknown.length > 0) { fail(`the script of the module with threads imports ${unknown.join(", ")}: not a shared file of the site`); }
 if (!reexported.includes(PLATFORM)) { fail(`the script of the module with threads does not import ./${PLATFORM}`); }
 if (!threadedScript.includes("ferrouiThreads")) { fail(`${path.join(threaded, module.script)} does not say it was built with threads (no export ferrouiThreads)`); }
 
@@ -163,9 +165,13 @@ fs.mkdirSync(path.join(out, THREADS_DIRECTORY));
 for (const name of ofModule) { fs.copyFileSync(path.join(threaded, name), path.join(out, THREADS_DIRECTORY, name)); }
 for (const name of workerScripts) { fs.copyFileSync(path.join(threaded, name), path.join(out, THREADS_DIRECTORY, name)); }
 for (const name of reexported) {
+    // From threads/<name> back to the root of the site: one level for the directory of the
+    // module, one for each directory of the name.
+    const up = "../".repeat(name.split("/").length);
+    fs.mkdirSync(path.dirname(path.join(out, THREADS_DIRECTORY, name)), { recursive: true });
     fs.writeFileSync(path.join(out, THREADS_DIRECTORY, name),
         `// The script of the module with threads imports ./${name}; the host page imports the one of the site.\n`
-        + `// They have to be one instance (scripts/browser/combine-site.mjs).\nexport * from "../${name}";\n`);
+        + `// They have to be one instance (scripts/browser/combine-site.mjs).\nexport * from "${up}${name}";\n`);
 }
 
 const megabytes = (bytes) => `${(bytes / 1_000_000).toFixed(2)} MB`;

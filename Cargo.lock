@@ -421,6 +421,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "byteorder-lite"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
+
+[[package]]
 name = "bytes"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -486,6 +492,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "chrono"
+version = "0.4.45"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
+dependencies = [
+ "iana-time-zone",
+ "js-sys",
+ "num-traits",
+ "wasm-bindgen",
+ "windows-link 0.2.1",
+]
+
+[[package]]
 name = "cipher"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -504,6 +523,15 @@ dependencies = [
  "glob",
  "libc",
  "libloading",
+]
+
+[[package]]
+name = "codepage-437"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e40c1169585d8d08e5675a39f2fc056cd19a258fc4cba5e3bbf4a9c1026de535"
+dependencies = [
+ "csv",
 ]
 
 [[package]]
@@ -559,6 +587,13 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-camera-controls",
+ "ferroui-media-controls",
+ "ferroui-media-qr",
+ "ferroui-media-video",
+ "ferroui-media-video-controls",
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
@@ -567,6 +602,7 @@ dependencies = [
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
+ "image",
  "mini-mvvm",
  "skia-safe",
  "treedatagrid-demo",
@@ -594,6 +630,10 @@ dependencies = [
  "ferroui-controls",
  "ferroui-devtools",
  "ferroui-fonts-inter",
+ "ferroui-media-browser",
+ "ferroui-media-camera",
+ "ferroui-media-camera-browser",
+ "ferroui-media-video-browser",
  "wasm-bindgen",
 ]
 
@@ -611,6 +651,21 @@ dependencies = [
  "ferroui-headless-vnc",
  "ferroui-linuxframebuffer",
  "ferroui-mcp",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-camera",
+ "ferroui-media-camera-apple",
+ "ferroui-media-camera-linux",
+ "ferroui-media-camera-windows",
+ "ferroui-media-controls",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "ferroui-media-qr-apple",
+ "ferroui-media-video",
+ "ferroui-media-video-apple",
+ "ferroui-media-video-linux",
+ "ferroui-media-video-windows",
+ "ferroui-media-windows",
  "ferroui-native",
  "ferroui-vello",
  "ferroui-wayland",
@@ -665,6 +720,12 @@ checksum = "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9"
 dependencies = [
  "unicode-segmentation",
 ]
+
+[[package]]
+name = "core-foundation-sys"
+version = "0.8.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core_detect"
@@ -765,6 +826,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
 dependencies = [
  "hybrid-array",
+]
+
+[[package]]
+name = "csv"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52cd9d68cf7efc6ddfaaee42e7288d3a99d613d4b50f76ce9827ae0c6e14f938"
+dependencies = [
+ "csv-core",
+ "itoa",
+ "ryu",
+ "serde_core",
+]
+
+[[package]]
+name = "csv-core"
+version = "0.1.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "704a3c26996a80471189265814dbc2c257598b96b8a7feae2d31ace646bb9782"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]
@@ -2039,6 +2121,7 @@ dependencies = [
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
+ "objc2-io-surface",
  "objc2-metal",
  "objc2-open-gl-es",
  "objc2-quartz-core",
@@ -2149,6 +2232,283 @@ dependencies = [
  "filedescriptor",
  "getrandom 0.4.3",
  "serde_json",
+]
+
+[[package]]
+name = "ferroui-media"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+]
+
+[[package]]
+name = "ferroui-media-android"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+]
+
+[[package]]
+name = "ferroui-media-apple"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+]
+
+[[package]]
+name = "ferroui-media-browser"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "ferroui-opengl",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "ferroui-media-camera"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-camera-android"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-camera",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-camera-apple"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-camera",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-camera-browser"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-browser",
+ "ferroui-media",
+ "ferroui-media-browser",
+ "ferroui-media-camera",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "ferroui-media-camera-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-controls",
+]
+
+[[package]]
+name = "ferroui-media-camera-linux"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "jpeg-encoder",
+ "pkg-config",
+]
+
+[[package]]
+name = "ferroui-media-camera-windows"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-opengl",
+ "ferroui-media-windows",
+ "jpeg-encoder",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-linux"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+ "pkg-config",
+]
+
+[[package]]
+name = "ferroui-media-metal"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-metal",
+]
+
+[[package]]
+name = "ferroui-media-opengl"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "ferroui-opengl",
+]
+
+[[package]]
+name = "ferroui-media-qr"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+ "rxing",
+]
+
+[[package]]
+name = "ferroui-media-qr-android"
+version = "0.5.0-preview.1"
+dependencies = [
+ "base64",
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-qr",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-qr-apple"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-qr",
+ "rxing",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-video"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-video-android"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-apple"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-browser"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-browser",
+ "ferroui-media-browser",
+ "ferroui-media-video",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "ferroui-media-video-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media-controls",
+ "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-linux"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-windows"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+ "ferroui-media-windows",
+]
+
+[[package]]
+name = "ferroui-media-windows"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+ "ferroui-win32",
 ]
 
 [[package]]
@@ -3356,6 +3716,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "iana-time-zone"
+version = "0.1.65"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e31bc9ad994ba00e440a8aa5c9ef0ec67d5cb5e5cb0cc7f8b744a35b389cc470"
+dependencies = [
+ "android_system_properties",
+ "core-foundation-sys",
+ "iana-time-zone-haiku",
+ "js-sys",
+ "log",
+ "wasm-bindgen",
+ "windows-core 0.62.2",
+]
+
+[[package]]
+name = "iana-time-zone-haiku"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "icu_calendar"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3655,6 +4039,21 @@ checksum = "cb68373c0d6620ef8105e855e7745e18b0d00d3bdb07fb532e434244cdb9a714"
 dependencies = [
  "icu_normalizer",
  "icu_properties",
+]
+
+[[package]]
+name = "image"
+version = "0.25.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85ab80394333c02fe689eaf900ab500fbd0c2213da414687ebf995a65d5a6104"
+dependencies = [
+ "bytemuck",
+ "byteorder-lite",
+ "moxcms",
+ "num-traits",
+ "png",
+ "zune-core",
+ "zune-jpeg",
 ]
 
 [[package]]
@@ -4145,6 +4544,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "moxcms"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b"
+dependencies = [
+ "num-traits",
+ "pxfm",
+]
+
+[[package]]
 name = "mozangle"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4227,10 +4636,73 @@ dependencies = [
 ]
 
 [[package]]
+name = "num"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35bd024e8b2ff75562e5f34e7f4905839deb4b22955ef5e73d2fea1b9813cb23"
+dependencies = [
+ "num-bigint",
+ "num-complex",
+ "num-integer",
+ "num-iter",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "num-conv"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "521739c6d2bac4aa25192232afe6841231376b2b26d4d9fae5ecf8ca5772e441"
+
+[[package]]
+name = "num-integer"
+version = "0.1.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ce2d95d4b3734dc35aa2f45e1aa22cd416814592a4f9d9205e11affd5b8e10b"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "num-iter"
+version = "0.1.46"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c92800bd69a1eac91786bcfe9da64a897eb72911b8dc3095decbd07429e8048b"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-rational"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
+dependencies = [
+ "num-bigint",
+ "num-integer",
+ "num-traits",
+]
 
 [[package]]
 name = "num-traits"
@@ -4335,6 +4807,7 @@ dependencies = [
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
+ "objc2-io-surface",
 ]
 
 [[package]]
@@ -4578,6 +5051,92 @@ dependencies = [
 ]
 
 [[package]]
+name = "portable-media"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-camera",
+ "ferroui-media-camera-apple",
+ "ferroui-media-camera-controls",
+ "ferroui-media-camera-linux",
+ "ferroui-media-camera-windows",
+ "ferroui-media-controls",
+ "ferroui-media-linux",
+ "ferroui-media-metal",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+ "ferroui-media-video-apple",
+ "ferroui-media-video-controls",
+ "ferroui-media-video-linux",
+ "ferroui-media-video-windows",
+ "ferroui-media-windows",
+ "ferroui-native",
+ "ferroui-opengl",
+ "ferroui-skia",
+ "ferroui-themes-fluent",
+ "ferroui-x11",
+ "image",
+ "skia-safe",
+]
+
+[[package]]
+name = "portable-media-browser"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "ferroui-media",
+ "ferroui-media-browser",
+ "ferroui-media-camera",
+ "ferroui-media-camera-browser",
+ "ferroui-media-controls",
+ "ferroui-media-video",
+ "ferroui-media-video-browser",
+ "ferroui-media-video-controls",
+ "ferroui-themes-fluent",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "portable-media-mobile"
+version = "0.5.0-preview.1"
+dependencies = [
+ "base64",
+ "cc",
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-ios",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-apple",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-camera-apple",
+ "ferroui-media-camera-controls",
+ "ferroui-media-controls",
+ "ferroui-media-metal",
+ "ferroui-media-opengl",
+ "ferroui-media-qr",
+ "ferroui-media-qr-android",
+ "ferroui-media-qr-apple",
+ "ferroui-media-video",
+ "ferroui-media-video-android",
+ "ferroui-media-video-apple",
+ "ferroui-media-video-controls",
+ "ferroui-opengl",
+ "ferroui-themes-simple",
+ "image",
+]
+
+[[package]]
 name = "potential_utf"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4657,6 +5216,12 @@ dependencies = [
  "sha2 0.10.9",
  "wgpu-native",
 ]
+
+[[package]]
+name = "pxfm"
+version = "0.1.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
 
 [[package]]
 name = "quick-xml"
@@ -5014,6 +5579,22 @@ name = "rustversion"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+
+[[package]]
+name = "rxing"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "842b2a567172af73f7d18ee076f7bbb4ed8545c933b11f43868f0b1bba203157"
+dependencies = [
+ "chrono",
+ "codepage-437",
+ "encoding_rs",
+ "num",
+ "once_cell",
+ "regex",
+ "thiserror 2.0.21",
+ "unicode-segmentation",
+]
 
 [[package]]
 name = "ryu"

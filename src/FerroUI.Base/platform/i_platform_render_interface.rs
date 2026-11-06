@@ -187,6 +187,10 @@ pub trait IPlatformRenderInterface: 'static {
 
 /// A render backend bound to a graphics context (or to software rendering).
 pub trait IPlatformRenderInterfaceContext: IOptionalFeatureProvider {
+    /// Advances nonblocking GPU completion/retirement on the render thread.
+    fn poll_pending_gpu_work(&self) -> bool {
+        false
+    }
     /// Creates a render target for one of the given surfaces.
     fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget>;
 

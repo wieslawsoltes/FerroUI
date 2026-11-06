@@ -2,6 +2,7 @@
 //! view over its Metal layer with its render target and drawing session.
 
 mod metal_device;
+mod external_frames;
 mod metal_drawing_session;
 mod metal_platform_graphics;
 mod metal_platform_surface;

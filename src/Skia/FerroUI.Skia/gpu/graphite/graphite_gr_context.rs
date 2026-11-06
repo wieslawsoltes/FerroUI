@@ -1,11 +1,12 @@
 use super::GraphitePrewarmContext;
 use crate::gpu::{ISkiaGrContext, SkiaGpuBackend, SkiaPrewarm};
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::rendering::composition::frames::{FrameError, FrameLease, GpuCompletion};
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::gpu::Mipmapped;
-use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use skia_safe::{
-    images, AlphaType, BlendMode, ConditionallySend, Data, Image, ImageInfo, Paint, SamplingOptions, Surface,
-    SurfaceProps,
+    images, AlphaType, BlendMode, ConditionallySend, Data, Image, ImageInfo, Paint,
+    SamplingOptions, Surface, SurfaceProps,
 };
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -45,6 +46,16 @@ struct GraphiteState {
     uploaded_images: HashMap<u32, UploadedImage>,
     recorder: graphite::Recorder,
     context: graphite::Context,
+    frame_completion: GpuCompletion,
+    completion_handler: Option<Box<dyn Fn(GpuCompletion)>>,
+}
+
+impl Drop for GraphiteState {
+    fn drop(&mut self) {
+        // This token covers only commands not yet snapped/submitted; submitted
+        // tokens have moved to native completion callbacks in flush_state.
+        self.frame_completion.complete();
+    }
 }
 
 /// A Graphite context and the recorder all drawing of the backend goes
@@ -64,6 +75,7 @@ struct GraphiteState {
 /// once and hands out the texture for as long as the image is alive.
 pub struct GraphiteGrContext {
     state: RefCell<Option<GraphiteState>>,
+    frame_context_id: u64,
     /// How many raster images were uploaded (or tried).
     uploads: Cell<u64>,
 }
@@ -74,14 +86,23 @@ impl GraphiteGrContext {
     pub fn new(mut context: graphite::Context) -> Option<Self> {
         let recorder = context.make_recorder(None)?;
         Some(Self {
-            state: RefCell::new(Some(GraphiteState { uploaded_images: HashMap::new(), recorder, context })),
+            state: RefCell::new(Some(GraphiteState {
+                uploaded_images: HashMap::new(),
+                recorder,
+                context,
+                frame_completion: GpuCompletion::new(),
+                completion_handler: None,
+            })),
+            frame_context_id: crate::gpu::next_frame_context_id(),
             uploads: Cell::new(0),
         })
     }
 
     fn with_state<R>(&self, f: impl FnOnce(&mut GraphiteState) -> R) -> R {
         let mut state = self.state.borrow_mut();
-        f(state.as_mut().expect("the Graphite context has been disposed"))
+        f(state
+            .as_mut()
+            .expect("the Graphite context has been disposed"))
     }
 
     /// Runs `f` with the recorder, for creating surfaces that wrap platform
@@ -90,9 +111,18 @@ impl GraphiteGrContext {
         self.with_state(|state| f(&mut state.recorder))
     }
 
+    /// Installs native asynchronous completion on this context's actual queue.
+    pub(crate) fn set_frame_completion_handler(&self, handler: Box<dyn Fn(GpuCompletion)>) {
+        self.with_state(|state| state.completion_handler = Some(handler));
+    }
+
     /// Releases the recorder and the context.
     pub fn dispose(&self) {
-        *self.state.borrow_mut() = None;
+        let mut state = self.state.borrow_mut();
+        if let Some(state) = state.as_mut() {
+            Self::flush_state(state);
+        }
+        *state = None;
     }
 
     /// Whether the context has been disposed.
@@ -101,16 +131,38 @@ impl GraphiteGrContext {
     }
 
     fn flush_state(state: &mut GraphiteState) {
+        let completion = std::mem::take(&mut state.frame_completion);
         if let Some(mut recording) = state.recorder.snap() {
             let info = InsertRecordingInfo::new(&mut recording);
-            state.context.insert_recording(&info);
+            let inserted = state.context.insert_recording(&info) == graphite::InsertStatus::Success;
+            let submitted = state.context.submit(None);
+            if inserted && submitted {
+                if completion.retained_frames() == 0 {
+                    completion.complete();
+                } else if let Some(handler) = &state.completion_handler {
+                    handler(completion);
+                } else {
+                    completion.mark_indeterminate();
+                }
+            } else {
+                // Submission failure cannot establish whether commands ran.
+                completion.mark_indeterminate();
+            }
+        } else {
+            // Preserve the context's ordinary empty-flush processing too.
+            let _ = state.context.submit(None);
+            // A fully clipped draw can retain a lease without recording a GPU
+            // read. No recording means no read was submitted, so no fence is
+            // required and an empty-submit result must not quarantine storage.
+            completion.complete();
         }
-        state.context.submit(None);
 
         // The texture of an image nothing else holds cannot be asked for
         // again. The recording that was just inserted keeps the textures it
         // draws with alive by itself.
-        state.uploaded_images.retain(|_, uploaded| uploaded.is_source_in_use());
+        state
+            .uploaded_images
+            .retain(|_, uploaded| uploaded.is_source_in_use());
     }
 
     /// Makes a copy of a texture image that has mipmaps.
@@ -119,11 +171,21 @@ impl GraphiteGrContext {
     /// copy of a surface can be asked for with mipmaps, so the texture is
     /// drawn onto a surface of its size and the copy of that is taken.
     fn make_mipmapped_texture(recorder: &mut graphite::Recorder, texture: &Image) -> Option<Image> {
-        let mut surface =
-            graphite::surfaces::render_target(recorder, texture.image_info(), Mipmapped::No, None, None)?;
+        let mut surface = graphite::surfaces::render_target(
+            recorder,
+            texture.image_info(),
+            Mipmapped::No,
+            None,
+            None,
+        )?;
         let mut paint = Paint::default();
         paint.set_blend_mode(BlendMode::Src);
-        surface.canvas().draw_image_with_sampling_options(texture, (0.0, 0.0), SamplingOptions::default(), Some(&paint));
+        surface.canvas().draw_image_with_sampling_options(
+            texture,
+            (0.0, 0.0),
+            SamplingOptions::default(),
+            Some(&paint),
+        );
         graphite::surfaces::as_image_copy(&surface, None, Mipmapped::Yes)
     }
 
@@ -135,7 +197,10 @@ impl GraphiteGrContext {
 
     /// The number of raster images the context keeps an upload for.
     pub fn uploaded_image_count(&self) -> usize {
-        self.state.borrow().as_ref().map_or(0, |state| state.uploaded_images.len())
+        self.state
+            .borrow()
+            .as_ref()
+            .map_or(0, |state| state.uploaded_images.len())
     }
 
     /// How many raster images the context uploaded (or tried to) since it
@@ -147,11 +212,27 @@ impl GraphiteGrContext {
 }
 
 impl ISkiaGrContext for GraphiteGrContext {
+    fn frame_context_id(&self) -> Option<u64> {
+        Some(self.frame_context_id)
+    }
+    fn retain_frame(&self, frame: FrameLease) -> Result<(), FrameError> {
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or(FrameError::StaleGeneration)?;
+        if state.completion_handler.is_none() {
+            return Err(FrameError::MissingSynchronization);
+        }
+        state.frame_completion.retain(frame)
+    }
+
     fn backend(&self) -> SkiaGpuBackend {
         SkiaGpuBackend::Graphite
     }
 
-    fn create_surface(&self, image_info: &ImageInfo, surface_props: &SurfaceProps) -> Option<Surface> {
+    fn create_surface(
+        &self,
+        image_info: &ImageInfo,
+        surface_props: &SurfaceProps,
+    ) -> Option<Surface> {
         self.with_state(|state| {
             graphite::surfaces::render_target(
                 &mut state.recorder,
@@ -192,7 +273,10 @@ impl ISkiaGrContext for GraphiteGrContext {
             let row_bytes = info.min_row_bytes();
             let mut pixels = vec![0u8; row_bytes * info.height().max(0) as usize];
 
-            if !state.context.read_pixels(surface, &info, &mut pixels, row_bytes, (0, 0)) {
+            if !state
+                .context
+                .read_pixels(surface, &info, &mut pixels, row_bytes, (0, 0))
+            {
                 return None;
             }
 
@@ -206,7 +290,12 @@ impl ISkiaGrContext for GraphiteGrContext {
         }
 
         let mut state = self.state.borrow_mut();
-        let Some(GraphiteState { uploaded_images, recorder, .. }) = state.as_mut() else {
+        let Some(GraphiteState {
+            uploaded_images,
+            recorder,
+            ..
+        }) = state.as_mut()
+        else {
             return image.clone();
         };
 
@@ -216,9 +305,16 @@ impl ISkiaGrContext for GraphiteGrContext {
             self.uploads.set(self.uploads.get() + 1);
             let texture = graphite::images::texture_from_image(recorder, image);
             if texture.is_none() {
-                Self::log_upload_failure(image, "Unable to upload a {Width}x{Height} image to the GPU; it is not drawn.");
+                Self::log_upload_failure(
+                    image,
+                    "Unable to upload a {Width}x{Height} image to the GPU; it is not drawn.",
+                );
             }
-            UploadedImage { source: image.clone(), texture, mipmapped_texture: None }
+            UploadedImage {
+                source: image.clone(),
+                texture,
+                mipmapped_texture: None,
+            }
         });
 
         let Some(texture) = &uploaded.texture else {
@@ -242,7 +338,10 @@ impl ISkiaGrContext for GraphiteGrContext {
     }
 
     fn is_lost(&self) -> bool {
-        self.state.borrow().as_ref().is_some_and(|state| state.context.is_device_lost())
+        self.state
+            .borrow()
+            .as_ref()
+            .is_some_and(|state| state.context.is_device_lost())
     }
 
     /// A recorder of its own, made by the context, whose pipelines compile

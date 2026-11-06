@@ -23,5 +23,6 @@ mod skia_gpu_render_target;
 pub use i_skia_gpu::{ISkiaGpu, ISkiaSurface, ScopedGrContext};
 pub use i_skia_gpu_render_session::{ISkiaGpuRenderSession, SkiaSurfaceOrigin};
 pub use i_skia_gpu_render_target::ISkiaGpuRenderTarget;
+pub(crate) use i_skia_gr_context::next_frame_context_id;
 pub use i_skia_gr_context::{drawable_image, needs_mipmaps, ISkiaGrContext, SkiaGpuBackend, SkiaPrewarm};
 pub use skia_gpu_render_target::SkiaGpuRenderTarget;

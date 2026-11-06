@@ -1,11 +1,24 @@
-use super::{IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
-use crate::rendering::composition::{CompositionGpuImportedImageSynchronizationCapabilities, ICompositionImportableSharedGpuContextImage};
+use super::{
+    IPlatformHandle, PlatformGraphicsDrmFormat,
+    PlatformGraphicsExternalImageProperties,
+};
+use crate::rendering::composition::{
+    CompositionGpuImportedImageSynchronizationCapabilities,
+    ICompositionImportableSharedGpuContextImage,
+};
 use std::rc::Rc;
 use std::sync::Arc;
 
 /// The import of GPU objects created outside of the framework into the
 /// render context: a feature of the render interface context.
 pub trait IExternalObjectsRenderInterfaceContextFeature {
+    /// Native context/share-group identity, distinct from an adapter UUID/LUID.
+    fn shared_context_id(&self) -> Option<u64> {
+        None
+    }
+    fn shared_context_generation(&self) -> u64 {
+        1
+    }
     /// Returns the list of image handle types supported by the current GPU backend, see [`KnownPlatformGraphicsExternalImageHandleTypes`](super::KnownPlatformGraphicsExternalImageHandleTypes)
     fn supported_image_handle_types(&self) -> Vec<String>;
 
@@ -33,10 +46,15 @@ pub trait IExternalObjectsRenderInterfaceContextFeature {
         image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage>;
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore>;
+    fn import_semaphore(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+    ) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore>;
 
-    fn get_synchronization_capabilities(&self, image_handle_type: &str)
-        -> CompositionGpuImportedImageSynchronizationCapabilities;
+    fn get_synchronization_capabilities(
+        &self,
+        image_handle_type: &str,
+    ) -> CompositionGpuImportedImageSynchronizationCapabilities;
 
     fn device_uuid(&self) -> Option<Vec<u8>>;
 
@@ -84,7 +102,23 @@ pub trait IPlatformRenderInterfaceImportedObject {
 
 /// A GPU image imported into the render context.
 pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImportedObject {
-    fn snapshot_with_keyed_mutex(&self, acquire_index: u32, release_index: u32) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
+    /// Wrap immutable producer storage without a snapshot. A backend must retain
+    /// `frame` through every actual GPU read; unsupported backends fail explicitly.
+    fn acquire_shared_bitmap(
+        &self,
+        _frame: crate::rendering::composition::frames::FrameLease,
+    ) -> Result<
+        Arc<crate::platform::SharedBitmapImpl>,
+        crate::rendering::composition::frames::FrameError,
+    > {
+        Err(crate::rendering::composition::frames::FrameError::MissingImporter)
+    }
+
+    fn snapshot_with_keyed_mutex(
+        &self,
+        acquire_index: u32,
+        release_index: u32,
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     fn snapshot_with_semaphores(
         &self,
@@ -104,7 +138,9 @@ pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImporte
 }
 
 /// A GPU semaphore imported into the render context.
-pub trait IPlatformRenderInterfaceImportedSemaphore: IPlatformRenderInterfaceImportedObject {
+pub trait IPlatformRenderInterfaceImportedSemaphore:
+    IPlatformRenderInterfaceImportedObject
+{
     /// Lets the backend that imported the semaphore recover its concrete
     /// type (the cast upstream performs on the semaphores of a snapshot).
     fn as_any(&self) -> &dyn std::any::Any;

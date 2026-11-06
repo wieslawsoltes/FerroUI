@@ -8,6 +8,7 @@ import { WebRenderTargetRegistry } from "./ferroui/rendering/webRenderTargetRegi
 import { WebRenderTarget } from "./ferroui/rendering/webRenderTarget";
 import { SoftwareRenderTarget } from "./ferroui/rendering/softwareRenderTarget";
 import { WebGlRenderTarget } from "./ferroui/rendering/webGlRenderTarget";
+import { SharedGlFrames } from "./ferroui/rendering/sharedGlFrames";
 import { FerroExports } from "./ferroui/ferroExports";
 import { CompletionHelper } from "./ferroui/completionHelper";
 import { ScreenHelper } from "./ferroui/screens";
@@ -52,6 +53,7 @@ export {
     WebRenderTargetRegistry,
     SoftwareRenderTarget,
     WebGlRenderTarget,
+    SharedGlFrames,
     FerroExports,
     CompletionHelper,
     ScreenHelper,

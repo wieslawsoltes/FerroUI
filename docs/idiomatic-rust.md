@@ -17,6 +17,8 @@ A `get_` method that mirrors no .NET member is reviewed like any other helper; i
 
 ## 2. What becomes idiomatic Rust and std
 
+A mechanism is also chosen for its size: what the framework instantiates per type, per property or per class, every application links. The porting guide lists the rules, with the measurements of hello world they come from ([PORTING-GUIDE.md](porting/PORTING-GUIDE.md), "Binary size: what a port costs"; [binary-size.md](binary-size.md), section 5.4).
+
 The types in the signatures of the API, the mechanisms of resource lifetime and errors, and the implementation underneath use std. Where std has nothing, one well-established crate is chosen once for the whole workspace, and no other crate is used for the same need.
 
 ### 2.1 Type replacements
