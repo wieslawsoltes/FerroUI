@@ -10,7 +10,7 @@ use ferroui_controls::automation::peers::{
 };
 use ferroui_controls::automation::provider::IExpandCollapseProvider;
 use ferroui_controls::automation::{
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    AutomationError, ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -89,17 +89,18 @@ impl IExpandCollapseProvider for SheetExpandCollapseProvider {
     fn shows_menu(&self) -> bool {
         false
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.ensure_enabled()?;
         if self.0.owner().expand() {
             Ok(())
         } else {
             Err(ElementNotEnabledError::with_message(
                 "Sheet expansion was declined.",
-            ))
+            )
+            .into())
         }
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.ensure_enabled()?;
         let owner = self.0.owner();
         if owner.is_dismiss_enabled() && owner.hide() {
@@ -107,7 +108,8 @@ impl IExpandCollapseProvider for SheetExpandCollapseProvider {
         } else {
             Err(ElementNotEnabledError::with_message(
                 "Sheet dismissal is disabled or was declined.",
-            ))
+            )
+            .into())
         }
     }
 }

@@ -1,6 +1,6 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::ElementNotEnabledError;
+use crate::automation::AutomationError;
 
 /// Exposes methods and properties to support access by a UI Automation client to controls
 /// that can be set to a value within a range.
@@ -43,7 +43,12 @@ pub trait IRangeValueProvider {
     /// Sets the value of the control.
     ///
     /// Windows: `IRangeValueProvider.SetValue`. macOS: `NSAccessibilityProtocol.setAccessibilityValue`.
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError>;
+    ///
+    /// # Errors
+    ///
+    /// An [`AutomationError`] when the state of the element refuses the call
+    /// (the exception the member throws in the original).
+    fn set_value(&self, value: f64) -> Result<(), AutomationError>;
 }
 
 impl PartialEq for dyn IRangeValueProvider {

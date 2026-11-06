@@ -1,6 +1,6 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::ElementNotEnabledError;
+use crate::automation::AutomationError;
 
 /// Contains values that specify the toggle state of a UI Automation element.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -30,7 +30,12 @@ pub trait IToggleProvider {
     /// Cycles through the toggle states of a control.
     ///
     /// Windows: `IToggleProvider.Toggle`. macOS: `NSAccessibilityProtocol.accessibilityPerformPress`.
-    fn toggle(&self) -> Result<(), ElementNotEnabledError>;
+    ///
+    /// # Errors
+    ///
+    /// An [`AutomationError`] when the state of the element refuses the call
+    /// (the exception the member throws in the original).
+    fn toggle(&self) -> Result<(), AutomationError>;
 }
 
 impl PartialEq for dyn IToggleProvider {

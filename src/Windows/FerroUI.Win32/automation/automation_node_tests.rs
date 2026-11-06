@@ -24,7 +24,9 @@ use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer}
 use ferroui_controls::automation::RangeValuePatternIdentifiers;
 use ferroui_controls::automation::provider::ToggleState;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, CheckBox, Control, MenuItem, MenuItemToggleType, Slider, StackPanel, TextBox, Window};
+use ferroui_controls::{
+    Button, CheckBox, Control, MenuItem, MenuItemToggleType, ProgressBar, Slider, StackPanel, TextBox, Window,
+};
 use ferroui_microcom::{ComObject, ComPtr, HResult, IUnknown, E_NOINTERFACE};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -79,6 +81,22 @@ fn toggle_state_of_checkable_menu_item_can_be_read_from_another_thread() {
 }
 
 // The tests below are not from the reference.
+
+/// A call the state of the control refuses answers the result code of the
+/// exception of the reference (#567): the value of a progress bar is read
+/// only (`InvalidOperationException`), an error of the provider and not a
+/// panic.
+#[test]
+fn a_refused_call_answers_the_result_code_of_the_exception_of_the_reference() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let progress_bar = ProgressBar::new();
+    let peer = ControlAutomationPeer::create_peer_for_element(&progress_bar);
+    let node = AutomationNode::get_or_create(Some(&peer)).expect("a node");
+
+    let range = node.cast::<IRangeValueProvider>().unwrap();
+    assert_eq!(1, range.get_is_read_only().unwrap());
+    assert_eq!(Err(HResult(ferroui_microcom::COR_E_INVALIDOPERATION)), range.set_value(50.0));
+}
 
 /// What stands in for the automation core: it writes down what the nodes
 /// raise, with the number of the node.

@@ -1,5 +1,5 @@
 use super::node_info::NodeInfo;
-use ferroui_controls::automation::ElementNotEnabledError;
+use ferroui_controls::automation::{AutomationError, ElementNotEnabledError};
 
 /// The arguments of an action of a node: what the access helper reads of
 /// the bundle of the system.
@@ -24,6 +24,20 @@ pub enum NodeActionError {
 impl From<ElementNotEnabledError> for NodeActionError {
     fn from(error: ElementNotEnabledError) -> Self {
         Self::ElementNotEnabled(error)
+    }
+}
+
+impl From<AutomationError> for NodeActionError {
+    /// A call the state of the element refuses (#567). An argument out of
+    /// range is an operation that is not valid here: the system is told
+    /// "not performed" either way.
+    fn from(error: AutomationError) -> Self {
+        match error {
+            AutomationError::ElementNotEnabled(error) => Self::ElementNotEnabled(error),
+            AutomationError::NotSupported(message) => Self::NotSupported(message),
+            AutomationError::InvalidOperation(message) => Self::InvalidOperation(message),
+            error => Self::InvalidOperation(error.to_string()),
+        }
     }
 }
 

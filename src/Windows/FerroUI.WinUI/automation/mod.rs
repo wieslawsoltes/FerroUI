@@ -36,8 +36,29 @@ pub(crate) fn trace(what: &str) {
     }
 }
 
+/// The result code of a call of a provider of the framework that the state
+/// of its element refuses (#567): `UIA_E_ELEMENTNOTENABLED` for an element
+/// that is not enabled, and for the other refusals the result code of the
+/// exception the reference throws (`UIA_E_INVALIDOPERATION`,
+/// `COR_E_ARGUMENTOUTOFRANGE`, `COR_E_NOTSUPPORTED`), as the Windows backend
+/// answers.
+#[cfg(windows)]
+pub(crate) fn automation_error_code(error: &ferroui_controls::automation::AutomationError) -> ferroui_microcom::HResult {
+    use ferroui_controls::automation::AutomationError;
+    use ferroui_microcom::{HResult, COR_E_INVALIDOPERATION, E_FAIL};
+    match error {
+        AutomationError::ElementNotEnabled(_) => ELEMENT_NOT_ENABLED,
+        AutomationError::InvalidOperation(_) => HResult(COR_E_INVALIDOPERATION),
+        AutomationError::ArgumentOutOfRange(_) => HResult(0x8013_1502),
+        AutomationError::NotSupported(_) => HResult(0x8013_1515),
+        _ => HResult(E_FAIL),
+    }
+}
+
 /// The result of a call of a provider of the framework as a result of COM.
 #[cfg(windows)]
-pub(crate) fn enabled<T>(result: Result<T, ferroui_controls::automation::ElementNotEnabledError>) -> Result<T, ferroui_microcom::HResult> {
-    result.map_err(|_| ELEMENT_NOT_ENABLED)
+pub(crate) fn enabled<T, E: Into<ferroui_controls::automation::AutomationError>>(
+    result: Result<T, E>,
+) -> Result<T, ferroui_microcom::HResult> {
+    result.map_err(|error| automation_error_code(&error.into()))
 }

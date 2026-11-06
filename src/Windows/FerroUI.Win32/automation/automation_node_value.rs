@@ -1,10 +1,10 @@
 //! The value pattern of a node (the port of `AutomationNode.Value.cs`).
 
-use super::automation_node::{AutomationNode, ELEMENT_NOT_ENABLED};
+use super::automation_node::{automation_error_code, AutomationNode, ELEMENT_NOT_ENABLED};
 use super::interop::IValueProviderImpl;
 use super::marshalling::string_to_bstr;
 use ferroui_controls::automation::provider::IValueProvider;
-use ferroui_controls::automation::ElementNotEnabledError;
+use ferroui_controls::automation::{AutomationError, ElementNotEnabledError};
 use ferroui_microcom::{HResult, COR_E_INVALIDOPERATION};
 use std::rc::Rc;
 
@@ -28,10 +28,13 @@ impl IValueProviderImpl for AutomationNode {
         };
         self.invoke_sync_provider(move |x: &Rc<dyn IValueProvider>| {
             // An element that is not enabled has the result code of the
-            // system; any other failure of the provider (a value that is
-            // read only) is an operation that is not valid.
+            // system, a refusal of the automation error its code (a calendar
+            // is `NotSupported`); any other failure of the provider (a value
+            // it cannot parse) is an operation that is not valid.
             x.set_value(value.as_deref()).map_err(|error| {
-                if error.downcast_ref::<ElementNotEnabledError>().is_some() {
+                if let Some(error) = error.downcast_ref::<AutomationError>() {
+                    automation_error_code(error)
+                } else if error.downcast_ref::<ElementNotEnabledError>().is_some() {
                     ELEMENT_NOT_ENABLED
                 } else {
                     HResult(COR_E_INVALIDOPERATION)

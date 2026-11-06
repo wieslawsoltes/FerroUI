@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{ISelectionProvider, IValueProvider, ProviderError, ProviderAdapter};
-use crate::automation::{ElementNotEnabledError, SelectionPatternIdentifiers, ValuePatternIdentifiers};
+use crate::automation::{AutomationError, SelectionPatternIdentifiers, ValuePatternIdentifiers};
 use crate::calendar::{Calendar, CalendarSelectionMode};
 use crate::SelectionChangedEventArgs;
 use ferroui_base::utilities::CultureInfo;
@@ -143,8 +143,12 @@ impl CalendarAutomationPeer {
 
     /// Not supported: the value of a calendar is read-only (the value
     /// provider contract).
-    pub fn set_value(&self, _value: Option<&str>) -> Result<(), ElementNotEnabledError> {
-        panic!("Specified method is not supported.");
+    ///
+    /// # Errors
+    ///
+    /// Always [`AutomationError::NotSupported`].
+    pub fn set_value(&self, _value: Option<&str>) -> Result<(), AutomationError> {
+        Err(AutomationError::not_supported())
     }
 
     fn owner_selected_dates_changed(&self, _e: &SelectionChangedEventArgs) {
