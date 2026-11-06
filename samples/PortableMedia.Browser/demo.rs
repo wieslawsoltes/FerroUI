@@ -24,7 +24,7 @@ struct Demo {
     capture: Option<CameraCapture>,
     camera: Option<CameraSession>,
     photo: Option<CameraPhoto>,
-    poll: Option<Rc<dyn IDisposable>>,
+    poll: Option<ferroui_base::reactive::Subscription>,
     subscriptions: Vec<MediaSubscription>,
 }
 ferroui_base::ferro_thread_local! {static DEMO:RefCell<Demo>=RefCell::new(Demo::default());}
