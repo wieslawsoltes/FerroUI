@@ -477,7 +477,13 @@ instance, inlined into them.
 
 | `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
 |---|---:|
-| ... | TBD |
+| fewer closures (4.9) | 41.95 MB |
+| one observer for untyped bindings | 40.39 MB (**-1.56 MB**) |
+
+The property, binding and styling benchmarks (`base::`, `data::`, `styling::` of
+`ferroui-benchmarks`, release, alternate runs) are within the noise of the machine: the median
+benchmark is 2 % faster, and the two resource lookups that are slower in both runs (`find_pre_resource`,
+`find_not_existing_resource`, 8 to 14 %) differ by as much between two runs of the same code.
 
 ## 5. What an executable is made of
 
