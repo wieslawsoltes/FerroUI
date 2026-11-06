@@ -187,10 +187,10 @@ The default Metal profile has its own passing
 [CGL](MACOS-CGL-VERIFICATION.md) still fails its reset-memory gate. Positive Linux
 DMA-BUF verification and the other profile-specific hardware/release gates remain
 as recorded in the [handover](PLATFORM-HANDOVER.md) and platform verification
-notes. The workspace Skia source correction also needs an upstream/published
-dependency solution before independently published crates give downstream users
-the same correction; see
-[the dependency boundary](../../external/rust-skia-bindings/FERROUI-PATCH.md).
+notes. The Skia source correction of the Metal soak is its own change
+([#573](https://github.com/wieslawsoltes/FerroUI/pull/573)), and it also needs an
+upstream/published dependency solution before independently published crates
+give downstream users the same correction.
 
 An experimental integration merge is a separate decision from declaring those
 release gates complete. Catalog pages do not close missing platform evidence.

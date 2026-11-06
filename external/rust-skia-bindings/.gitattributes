@@ -1,4 +1,0 @@
-# Preserve published source formatting and unified-diff context markers.
-README.md -whitespace
-src/*.cpp -whitespace
-patches/*.patch -whitespace

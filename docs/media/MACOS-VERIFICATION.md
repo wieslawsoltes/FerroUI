@@ -43,14 +43,13 @@ with Skia's existing `sk_cfp` manual-ownership helper. Graphite's other ownershi
 code requires manual reference counting; enabling ARC for the whole backend is
 not the fix.
 
-The root Cargo patch selects the preserved `skia-bindings` 0.153.3 source in
-`external/rust-skia-bindings`. macOS Graphite/Metal builds bypass the affected
-published archive and apply the strict, idempotent source hotfix. The binding
-crate's original MIT license, attribution and VCS metadata are preserved, and
-the Skia patch carries its BSD license. See
-[FERROUI-PATCH.md](../../external/rust-skia-bindings/FERROUI-PATCH.md) for build
-requirements and the downstream publishing boundary. Other target/backend
-selections retain the upstream build/download path.
+The fix is its own change, [#573](https://github.com/wieslawsoltes/FerroUI/pull/573):
+a root Cargo patch selects the preserved `skia-bindings` 0.153.3 source in
+`external/rust-skia-bindings`, macOS Graphite/Metal builds bypass the affected
+published archive and apply the strict, idempotent source hotfix, and other
+target/backend selections retain the upstream build/download path. Its
+`FERROUI-PATCH.md` records the build requirements and the downstream publishing
+boundary. The Metal soak results below were measured with the fix.
 
 Original failures remain failures. They are retained in `full-run-1` (stale
 volume transport) and `full-run-2` (native memory), with earlier capture-coordinate

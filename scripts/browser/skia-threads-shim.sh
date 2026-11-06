@@ -70,16 +70,7 @@ lock_field() {
 }
 VERSION="$(lock_field version)"
 CHECKSUM="$(lock_field checksum)"
-# A skia-bindings of the workspace's [patch.crates-io] (a path, so the lock has no checksum): the
-# published crate of its version is downloaded, and the sources the shim compiles must be those of
-# the patched copy, byte for byte (a patch of other sources, such as the Graphite Metal fix of
-# external/rust-skia-bindings, does not change the browser build).
-PATCHED=""
-if [ -z "$CHECKSUM" ]; then
-  PATCHED="$(sed -n 's/^skia-bindings = { *path = "\([^"]*\)" *}.*/\1/p' "$ROOT/Cargo.toml")"
-  [ -n "$PATCHED" ] && [ -f "$ROOT/$PATCHED/Cargo.toml" ] || PATCHED=""
-fi
-[ -n "$VERSION" ] && { [ -n "$CHECKSUM" ] || [ -n "$PATCHED" ]; } || { echo "cannot read the version and the checksum of skia-bindings from Cargo.lock" >&2; exit 1; }
+[ -n "$VERSION" ] && [ -n "$CHECKSUM" ] || { echo "cannot read the version and the checksum of skia-bindings from Cargo.lock" >&2; exit 1; }
 
 command -v emcc >/dev/null || { echo "emcc is not on PATH: activate the Emscripten SDK first (source <tools directory>/env.sh)" >&2; exit 1; }
 EMSCRIPTEN_VERSION="$(emcc -dumpversion)"
@@ -123,19 +114,8 @@ mkdir -p "$WORK/crate" "$WORK/prebuilt" "$WORK/skia" "$WORK/objects"
 echo "-- the crate skia-bindings $VERSION"
 download "https://static.crates.io/crates/skia-bindings/skia-bindings-$VERSION.crate" "$WORK/crate.tar.gz"
 FOUND="$(sha256 "$WORK/crate.tar.gz")"
-if [ -n "$CHECKSUM" ]; then
-  [ "$FOUND" = "$CHECKSUM" ] || { echo "the crate file has the checksum $FOUND, Cargo.lock has $CHECKSUM" >&2; exit 1; }
-fi
+[ "$FOUND" = "$CHECKSUM" ] || { echo "the crate file has the checksum $FOUND, Cargo.lock has $CHECKSUM" >&2; exit 1; }
 tar -xzf "$WORK/crate.tar.gz" -C "$WORK/crate" --strip-components=1
-if [ -n "$PATCHED" ]; then
-  for FILE in .cargo_vcs_info.json $(cd "$ROOT/$PATCHED" && echo src/*.h) $(for SOURCE in $SHIM_SOURCES; do echo "src/$SOURCE.cpp"; done); do
-    cmp -s "$WORK/crate/$FILE" "$ROOT/$PATCHED/$FILE" || {
-      echo "$FILE of the published skia-bindings $VERSION differs from $PATCHED/$FILE: the shim would not be that of the patched crate" >&2
-      exit 1
-    }
-  done
-  echo "   the sources of the shim are those of $PATCHED"
-fi
 for SOURCE in $SHIM_SOURCES; do
   [ -f "$WORK/crate/src/$SOURCE.cpp" ] || { echo "the crate has no src/$SOURCE.cpp" >&2; exit 1; }
 done
