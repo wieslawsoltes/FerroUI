@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.ferroboard.sample" android:versionCode="1" android:versionName="0.1.0">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="36" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <application android:name="org.ferroui.android.FerroApplication" android:label="FerroBoard"
+        android:hasCode="true" android:extractNativeLibs="true" android:allowBackup="true" android:supportsRtl="true">
+        <meta-data android:name="org.ferroui.android.library" android:value="ferroboard_android" />
+        <activity android:name="org.ferroboard.android.MainActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|uiMode"
+            android:windowSoftInputMode="adjustNothing|stateHidden"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

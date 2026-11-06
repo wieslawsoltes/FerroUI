@@ -1,0 +1,9 @@
+{"scenario":"empty","trace":[],"error":null,"refreshing":false,"count":0}
+{"scenario":"order","trace":["first:True","second:True"],"error":null,"refreshing":false,"count":2}
+{"scenario":"clear-mid","trace":["first:True"],"error":"InvalidOperationException","refreshing":false,"count":0}
+{"scenario":"append-last","trace":["first:True"],"error":"InvalidOperationException","refreshing":false,"count":2}
+{"scenario":"replace-identical","trace":["first:True"],"error":"InvalidOperationException","refreshing":false,"count":1}
+{"scenario":"throw","trace":["first:True"],"error":"ArgumentException","refreshing":false,"count":2}
+{"scenario":"modify-then-throw","trace":["first:True"],"error":"ArgumentException","refreshing":false,"count":0}
+{"scenario":"nested","trace":["first:True","first:True","second:True","after-nested:False","second:False"],"error":null,"refreshing":false,"count":2}
+{"scenario":"nested-throw-caught","trace":["first:True","first:True","caught:False","second:False"],"error":null,"refreshing":false,"count":2}

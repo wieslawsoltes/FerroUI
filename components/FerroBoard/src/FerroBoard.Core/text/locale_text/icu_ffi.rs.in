@@ -1,0 +1,20 @@
+use std::ffi::{c_char, c_void};
+unsafe extern "C" {
+    #[cfg(target_os = "emscripten")]
+    #[link_name = "udata_setCommonData@SUFFIX@"]
+    pub fn set_common_data(data: *const c_void, status: *mut i32);
+    #[link_name = "ucol_open@SUFFIX@"]
+    pub fn open(locale: *const c_char, status: *mut i32) -> *mut c_void;
+    #[link_name = "ucol_close@SUFFIX@"]
+    pub fn close(collator: *mut c_void);
+    #[link_name = "ucol_setStrength@SUFFIX@"]
+    pub fn set_strength(collator: *mut c_void, strength: i32);
+    #[link_name = "ucol_strcoll@SUFFIX@"]
+    pub fn compare(collator: *const c_void, left: *const u16, left_len: i32, right: *const u16, right_len: i32) -> i32;
+    #[link_name = "usearch_openFromCollator@SUFFIX@"]
+    pub fn search_open(pattern: *const u16, pattern_len: i32, text: *const u16, text_len: i32, collator: *const c_void, breaker: *mut c_void, status: *mut i32) -> *mut c_void;
+    #[link_name = "usearch_first@SUFFIX@"]
+    pub fn search_first(search: *mut c_void, status: *mut i32) -> i32;
+    #[link_name = "usearch_close@SUFFIX@"]
+    pub fn search_close(search: *mut c_void);
+}

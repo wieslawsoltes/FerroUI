@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:app="using:FerroBoard.Sample">
+ <TextBlock Text="Enable languages; switch with the globe key, a swipe or a long press on space." TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
+ <TextBox x:Name="Filter" PlaceholderText="Filter languages" Margin="0,0,0,4"/>
+ <ScrollViewer MaxHeight="260"><ItemsControl x:Name="Choices">
+  <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="0"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+  <ItemsControl.ItemTemplate><DataTemplate x:DataType="app:LanguageRowBindings"><app:LanguageCheckBox Row="{CompiledBinding}"/></DataTemplate></ItemsControl.ItemTemplate>
+ </ItemsControl></ScrollViewer>
+</StackPanel>

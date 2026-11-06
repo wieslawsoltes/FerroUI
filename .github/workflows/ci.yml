@@ -227,7 +227,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             xvfb xauth libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
-            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev pkg-config \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev libicu-dev pkg-config \
             fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
             libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang \
             libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev
@@ -241,6 +241,16 @@ jobs:
             -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers \
             --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
             --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
+
+      - name: Test the detachable FerroBoard component
+        env:
+          CARGO_BUILD_JOBS: 1
+        run: |
+          export FERROBOARD_WORK_DIR="$RUNNER_TEMP/ferroboard"
+          export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+          export CARGO_TARGET_DIR="$PWD/target"
+          source components/FerroBoard/scripts/env.sh
+          python3 components/FerroBoard/scripts/check_component.py
 
   # macOS: on a pull request only what runs on macOS alone: the native platform (AppKit,
   # ferroui-native), Metal, the desktop entry point, Skia with the fonts of the system (CoreText), and

@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "ScreenKeyboard.Sample",
+  "display": "standalone",
+  "name": "ScreenKeyboard.Sample",
+  "short_name": "ScreenKeyboard.Sample",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

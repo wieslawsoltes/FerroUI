@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:e="clr-namespace:FerroBoard.Engine;assembly=FerroBoard.Core"
+ x:DataType="e:KeyboardEngine">
+ <ContentControl Content="{CompiledBinding Clock}"/>
+ <ContentControl Content="{CompiledBinding SuggestionProviderFactory}"/>
+</StackPanel>

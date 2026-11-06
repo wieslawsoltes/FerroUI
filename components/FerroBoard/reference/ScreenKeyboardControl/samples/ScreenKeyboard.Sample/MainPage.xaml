@@ -1,0 +1,81 @@
+<Page x:Class="ScreenKeyboard.Sample.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:ScreenKeyboard.Sample"
+      xmlns:sk="using:ScreenKeyboard.Controls"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+  <sk:ScreenKeyboardHost x:Name="Host" VisibilityMode="Auto">
+    <SplitView x:Name="Split"
+               PanePlacement="Right"
+               DisplayMode="Inline"
+               IsPaneOpen="True"
+               OpenPaneLength="380"
+               PaneBackground="{ThemeResource LayerFillColorDefaultBrush}">
+      <SplitView.Pane>
+        <local:SettingsPanel x:Name="SettingsPane" />
+      </SplitView.Pane>
+
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Padding="24,16,16,8" ColumnSpacing="12">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel Spacing="2">
+            <TextBlock Text="ScreenKeyboard" Style="{ThemeResource TitleTextBlockStyle}" />
+            <TextBlock Text="A FlorisBoard-inspired on-screen keyboard for Uno Platform. Tap a field to start typing — try glide typing, long press, swiping on the space bar and the emoji panel."
+                       TextWrapping="Wrap"
+                       Opacity="0.75" />
+          </StackPanel>
+          <ToggleButton x:Name="SettingsToggle"
+                        Grid.Column="1"
+                        VerticalAlignment="Top"
+                        IsChecked="{Binding IsPaneOpen, ElementName=Split, Mode=TwoWay}"
+                        Content="Settings" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+          <StackPanel Padding="24,8,24,24" Spacing="14" MaxWidth="760" HorizontalAlignment="Stretch">
+            <TextBox x:Name="MessageBox"
+                     Header="Message (multi-line)"
+                     PlaceholderText="Write something… (new lines with enter)"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="110" />
+            <TextBox x:Name="NameBox" Header="Full name" InputScope="PersonalFullName" PlaceholderText="Words are capitalized" />
+            <TextBox x:Name="EmailBox" Header="Email" InputScope="EmailSmtpAddress" PlaceholderText="@ key and no auto-capitalization"
+                     sk:ScreenKeyboardInput.EnterAction="Next" />
+            <TextBox x:Name="WebsiteBox" Header="Website" InputScope="Url" PlaceholderText="URL layout with / key" />
+            <TextBox x:Name="SearchBox" Header="Search" InputScope="Search" PlaceholderText="Enter key becomes a search button" />
+            <Grid ColumnSpacing="12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <TextBox x:Name="AmountBox" Header="Amount" InputScope="Number" PlaceholderText="Numeric pad" />
+              <TextBox x:Name="PhoneBox" Grid.Column="1" Header="Phone" InputScope="TelephoneNumber" PlaceholderText="Phone pad" />
+            </Grid>
+            <Grid ColumnSpacing="12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <TextBox x:Name="PriceBox" Header="Price" InputScope="CurrencyAmount" PlaceholderText="Advanced numeric" />
+              <PasswordBox x:Name="PasswordField" Grid.Column="1" Header="Password" PlaceholderText="Nothing is learned here" />
+            </Grid>
+            <TextBox x:Name="ChatBox" Header="Chat" sk:ScreenKeyboardInput.InputKind="Chat" PlaceholderText="Enter sends; emoji suggestions with :shortcodes" />
+            <TextBox Header="No suggestions" sk:ScreenKeyboardInput.SuggestionsEnabled="False" PlaceholderText="Suggestions and auto-correct disabled" />
+            <TextBox Header="Keyboard disabled" sk:ScreenKeyboardInput.IsEnabled="False" PlaceholderText="Use your physical keyboard here" />
+            <TextBlock x:Name="StatusText" Opacity="0.7" TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </SplitView>
+  </sk:ScreenKeyboardHost>
+</Page>

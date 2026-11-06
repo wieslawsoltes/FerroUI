@@ -1,0 +1,150 @@
+name: Release
+
+# Publishes ScreenKeyboard.Core and ScreenKeyboard.Uno to nuget.org using NuGet Trusted Publishing:
+# GitHub issues a short-lived OIDC token, nuget.org exchanges it for a 1-hour API key (no stored API keys).
+# Setup: see docs/building.md#publishing-to-nugetorg-trusted-publishing
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g. 1.2.3 or 1.3.0-preview.1)'
+        required: true
+      publish:
+        description: 'Publish to nuget.org (uncheck for a dry run that only builds the packages)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
+
+jobs:
+  pack:
+    name: Test and pack
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          dotnet-version: |
+            8.0.x
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$VERSION' is not a valid semantic version"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing version $VERSION"
+
+      - name: Install workloads
+        run: dotnet workload install android ios wasm-tools
+
+      - name: Test
+        run: dotnet test tests/ScreenKeyboard.Core.Tests -c Release
+
+      - name: Pack
+        shell: bash
+        run: |
+          dotnet pack src/ScreenKeyboard.Core -c Release -o artifacts/packages -p:Version=${{ steps.version.outputs.version }}
+          dotnet pack src/ScreenKeyboard.Uno -c Release -o artifacts/packages -p:Version=${{ steps.version.outputs.version }} \
+            "-p:SkTargetFrameworks=net10.0%3Bnet10.0-desktop%3Bnet10.0-browserwasm%3Bnet10.0-android%3Bnet10.0-ios%3Bnet10.0-windows10.0.26100"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: |
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg
+          if-no-files-found: error
+
+  publish-nuget:
+    name: Publish to nuget.org (trusted publishing)
+    needs: pack
+    if: github.event_name == 'push' || inputs.publish
+    runs-on: ubuntu-latest
+    # The environment scopes the trusted publishing policy (set "Environment" to "nuget" on nuget.org)
+    # and allows protection rules such as required reviewers before anything is published.
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/ScreenKeyboard.Uno/${{ needs.pack.outputs.version }}
+    permissions:
+      id-token: write   # required to request the GitHub OIDC token for NuGet/login
+      contents: read
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: artifacts/packages
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Exchanges the GitHub OIDC token for a short-lived (1 hour) nuget.org API key.
+      # NUGET_USER is the nuget.org profile name (not the e-mail address) that owns the trusted publishing policy.
+      - name: NuGet login (OIDC → temporary API key)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push packages
+        shell: bash
+        run: |
+          # Symbol packages (.snupkg) next to the .nupkg files are pushed automatically.
+          for package in artifacts/packages/*.nupkg; do
+            dotnet nuget push "$package" \
+              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+              --source "$NUGET_SOURCE" \
+              --skip-duplicate
+          done
+
+  github-release:
+    name: GitHub release
+    needs: [pack, publish-nuget]
+    if: always() && needs.pack.result == 'success' && (needs.publish-nuget.result == 'success' || needs.publish-nuget.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: artifacts/packages
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.pack.outputs.version }}
+          name: v${{ needs.pack.outputs.version }}
+          generate_release_notes: true
+          draft: ${{ needs.publish-nuget.result == 'skipped' }}
+          prerelease: ${{ contains(needs.pack.outputs.version, '-') }}
+          files: |
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg

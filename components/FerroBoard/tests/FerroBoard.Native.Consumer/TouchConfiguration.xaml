@@ -1,0 +1,21 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ x:DataType="k:OnScreenKeyboard">
+ <StackPanel.DataContext>
+  <k:OnScreenKeyboard AutoAttach="False">
+   <k:OnScreenKeyboard.Settings>
+    <s:KeyboardSettings AutoCapitalization="False" AutoCorrect="False" GlideTyping="False"
+     ShowSuggestions="False" LearnWords="False" ClipboardHistoryEnabled="False"/>
+   </k:OnScreenKeyboard.Settings>
+  </k:OnScreenKeyboard>
+ </StackPanel.DataContext>
+ <Slider Minimum="1" Maximum="50" Value="{CompiledBinding TouchProcessor.CursorStepDistance, Mode=TwoWay}"/>
+ <Slider Minimum="1" Maximum="50" Value="{CompiledBinding TouchProcessor.DeleteStepDistance, Mode=TwoWay}"/>
+ <Slider Minimum="-200" Maximum="0" Value="{CompiledBinding TouchProcessor.PopupMinY, Mode=TwoWay}"/>
+ <Slider Minimum="1" Maximum="12" Value="{CompiledBinding TouchProcessor.PopupMaxColumns, Mode=TwoWay}"/>
+ <TextBlock Text="{CompiledBinding SmartbarActions.Count}"/>
+ <TextBlock DataContext="{CompiledBinding SmartbarActions}"/>
+ <TextBlock DataContext="{CompiledBinding TouchProcessor}"/>
+</StackPanel>

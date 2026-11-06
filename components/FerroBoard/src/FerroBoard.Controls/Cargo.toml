@@ -1,0 +1,29 @@
+[package]
+name = "ferroboard-controls"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+build = "build.rs"
+links = "ferroboard_controls_xaml"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroboard-core-ferro = { path = "../FerroBoard.Core.Ferro" }
+ferroboard-core = { path = "../FerroBoard.Core" }
+ferroui-system.workspace = true
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+indexmap = "2.14.2"
+url = "2.5.8"
+[dev-dependencies]
+ferroui-headless.workspace = true
+serde_json = "1.0"
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android.workspace = true
+
+[package.metadata.ferroboard.android]
+java_sources = "java"

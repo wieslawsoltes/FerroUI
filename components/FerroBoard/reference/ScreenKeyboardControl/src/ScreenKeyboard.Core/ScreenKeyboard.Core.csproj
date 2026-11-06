@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>ScreenKeyboard</RootNamespace>
+    <PackageId>ScreenKeyboard.Core</PackageId>
+    <Description>Platform-agnostic engine for professional on-screen keyboards: FlorisBoard-compatible layouts (90+ layouts, 70+ languages), key popups, shift/caps state machine, composers (Hangul, Kana, Telex), glide (swipe) typing, word suggestions and autocorrect, emoji catalog with skin tones and search, clipboard history and fully testable touch-gesture processing.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\florisboard\**\*.json;Resources\florisboard\**\*.gz" LogicalName="ScreenKeyboard.Resources.%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="Resources\florisboard\LICENSE" Pack="true" PackagePath="licenses\florisboard\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="..\..\build\icon.png" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ScreenKeyboard.Core.Tests" />
+  </ItemGroup>
+</Project>

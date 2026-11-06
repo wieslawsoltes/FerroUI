@@ -61,6 +61,10 @@ runtime-markup = [
 ]
 
 [dependencies]
+# The detachable on-screen keyboard component and its compiled markup models.
+ferroboard-core = { path = "../../components/FerroBoard/src/FerroBoard.Core" }
+ferroboard-core-ferro = { path = "../../components/FerroBoard/src/FerroBoard.Core.Ferro" }
+ferroboard-controls = { path = "../../components/FerroBoard/src/FerroBoard.Controls" }
 ferroui-media.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true

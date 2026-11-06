@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:l="clr-namespace:FerroBoard.Layouts;assembly=FerroBoard.Core"
+ x:DataType="l:MultiTextKeyData">
+ <TextBlock Text="{CompiledBinding CodePoints.Length}"/>
+ <TextBlock Text="{CompiledBinding CodePoints[1]}"/>
+</StackPanel>

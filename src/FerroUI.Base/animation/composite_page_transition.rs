@@ -52,6 +52,9 @@ impl IPageTransition for CompositePageTransition {
                 match task.await {
                     Ok(()) => {}
                     // A failed transition fails the composite with its panic.
+                    // Exception-like (#567), deferred: the `JoinHandle` of
+                    // `IPageTransition::start` carries the failure as `JoinError::Panicked`,
+                    // which the executor of `ferroui-system` only makes from a panic.
                     Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
                     Err(JoinError::Canceled) => canceled = true,
                 }

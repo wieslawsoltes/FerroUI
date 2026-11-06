@@ -128,6 +128,8 @@ impl TaskShared {
         };
         match status {
             TaskStatus::Canceled => return Err(Canceled),
+            // Boundary (#567): the panic of the future faulted the task, and is raised again to
+            // the observer, as the reference rethrows the exception of a faulted task.
             TaskStatus::Faulted => match panic {
                 Some(payload) => resume_unwind(payload),
                 None => panic!("The failure of the dispatcher task has already been observed."),
@@ -268,6 +270,8 @@ impl<T: 'static> DispatcherTask<T> {
             let mut state = self.shared.lock();
             (state.status, state.panic.take())
         };
+        // Boundary (#567): the panic of the future is raised again to the waiter, as the
+        // reference rethrows the exception of a faulted task.
         if let Some(payload) = panic {
             resume_unwind(payload);
         }
@@ -329,6 +333,8 @@ impl<T: 'static> TaskStart<T> {
     /// returns; a panic of the callback faults the task, whose body is then
     /// a future that is ready at once.
     pub(crate) fn run<F: Future<Output = T> + 'static>(self, callback: impl FnOnce() -> F) -> TaskBody<F> {
+        // Boundary (#567): the callback is application code; its panic faults the task, as an
+        // exception faults a task of the reference, instead of unwinding through the dispatcher.
         match catch_unwind(AssertUnwindSafe(callback)) {
             Ok(future) => self.body(future),
             Err(payload) => {
@@ -359,6 +365,8 @@ where
             return Poll::Ready(());
         };
         let start = &mut this.start;
+        // Boundary (#567): the future is application code; its panic faults the task, as an
+        // exception faults a task of the reference, instead of unwinding through the executor.
         let polled = catch_unwind(AssertUnwindSafe(|| match future.as_mut().poll(cx) {
             Poll::Pending => Poll::Pending,
             Poll::Ready(value) => {

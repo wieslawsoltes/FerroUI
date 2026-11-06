@@ -1,0 +1,16 @@
+<k:ScreenKeyboardHost xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ VisibilityMode="Auto" IsAnimated="False">
+ <StackPanel Margin="12" Spacing="4">
+  <TextBlock Text="Password"/>
+  <k:ProtectedPasswordTextBox x:Name="PasswordInput" AutomationProperties.AutomationId="PasswordInput" AutomationProperties.Name="Password input"
+   MaxLength="4" k:ScreenKeyboardInput.EnterAction="Next"/>
+  <TextBlock Text="PIN"/>
+  <k:ProtectedPasswordTextBox x:Name="PinInput" AutomationProperties.AutomationId="PinInput" AutomationProperties.Name="PIN input"
+   MaxLength="3" k:ScreenKeyboardInput.InputKind="NumericPassword" k:ScreenKeyboardInput.EnterAction="Next"/>
+  <TextBlock Text="Public text"/>
+  <TextBox x:Name="PublicInput" AutomationProperties.AutomationId="PublicInput" AutomationProperties.Name="Public input" k:ScreenKeyboardInput.Capitalization="None"/>
+  <TextBlock x:Name="PrivacyStatus" AutomationProperties.AutomationId="PrivacyStatus" AutomationProperties.Name="Privacy status" Text="READY"/>
+ </StackPanel>
+</k:ScreenKeyboardHost>

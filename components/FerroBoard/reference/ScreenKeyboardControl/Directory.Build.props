@@ -1,0 +1,44 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Deterministic>true</Deterministic>
+    <!--
+      NU1507: multiple package sources with CPM
+      NETSDK1201: RID without self-contained
+      PRI257: default language not in resources
+    -->
+    <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257</NoWarn>
+  </PropertyGroup>
+
+  <!-- Versioning: override with /p:Version=x.y.z in CI -->
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == '' and '$(Configuration)' == 'Debug'">dev</VersionSuffix>
+  </PropertyGroup>
+
+  <!-- Shared NuGet metadata -->
+  <PropertyGroup>
+    <Authors>Wiesław Šoltés</Authors>
+    <Company>Wiesław Šoltés</Company>
+    <Product>ScreenKeyboard</Product>
+    <Copyright>Copyright © Wiesław Šoltés and contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/wieslawsoltes/ScreenKeyboardControl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wieslawsoltes/ScreenKeyboardControl</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>uno;unoplatform;winui;keyboard;on-screen-keyboard;osk;virtual-keyboard;soft-keyboard;touch;kiosk;swipe;glide;emoji;florisboard</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

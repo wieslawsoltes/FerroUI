@@ -1,0 +1,106 @@
+{
+  "algorithm_source_commit": "60629d14374c56f1cb51819049ad1fa529307f8d",
+  "selected_runtime": "10.0.13-servicing.26504.104+4099f83977f4d29604a9aeb971fb0a7bc1d5f699",
+  "runtime_source_availability": "Exact servicing commit returns HTTP 404 from public dotnet/runtime; v10.0.0 algorithm used as secondary source, verified against actual runtime fixtures; not asserted byte-identical to unavailable servicing source",
+  "managed_property_version": "Unicode 16.0.0, independently verified across all scalar values and BMP flags",
+  "uax16_source_deviations": 7,
+  "sources": [
+    {
+      "path": "reference/unicode-16.0.0/GraphemeBreakProperty.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/auxiliary/GraphemeBreakProperty.txt",
+      "sha256": "c29360bd6f7132811d701d29069541e827eb44bfc4c8fbde8c370d6982689dc1",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/unicode-16.0.0/GraphemeBreakTest.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/auxiliary/GraphemeBreakTest.txt",
+      "sha256": "ee2b9354d270ac061b29f09662cafea06341d77e704b8cc6bd72aaeeda363cb5",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/unicode-16.0.0/LICENSE.txt",
+      "url": "https://www.unicode.org/license.txt",
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/unicode-16.0.0/UnicodeData.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/UnicodeData.txt",
+      "sha256": "ff58e5823bd095166564a006e47d111130813dcf8bf234ef79fa51a870edb48f",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/unicode-16.0.0/emoji-data.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/emoji/emoji-data.txt",
+      "sha256": "f1365a5173eee18e1f98b240cdc492e84a25f1ce7e0c9d1094eb29c41a22696a",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/dotnet-runtime/GenUnicodeProp.csproj",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Private.CoreLib/Tools/GenUnicodeProp/GenUnicodeProp.csproj",
+      "sha256": "1d3057bba07cc5defe6173d4f0cb8a9c7b309c8380f29f41f07f169017ef9afd",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/LICENSE.TXT",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/LICENSE.TXT",
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/TextSegmentationUtility.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Private.CoreLib/src/System/Text/Unicode/TextSegmentationUtility.cs",
+      "sha256": "2e10b76aaf50aa56e0c0a2b4b42fb5cbe7251aa09de8ac73a05cf5fcae1388a9",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/revision.json",
+      "url": null,
+      "sha256": "4051f611fc655207c4a478bd9d539a183d7e5252894a4d95ce858e64a52d34c6",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/unicode-16.0.0/DerivedNormalizationProps.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/DerivedNormalizationProps.txt",
+      "sha256": "4d4c03892dea9146d674b686e495df2d55a28d071ac474041d73518f887abddc",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/unicode-16.0.0/NormalizationTest.txt",
+      "url": "https://www.unicode.org/Public/16.0.0/ucd/NormalizationTest.txt",
+      "sha256": "d811971453e7075e1ad56fb1b301eece5aa80757b81f6156e74a1bfb3ae5ceb1",
+      "license": "Unicode-3.0"
+    },
+    {
+      "path": "reference/dotnet-runtime/OrdinalCasing.Icu.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Private.CoreLib/src/System/Globalization/OrdinalCasing.Icu.cs",
+      "sha256": "6bfed1b23de49b2178979473c9307bfdfe5cd67ad43315f605e8d6e516619fbd",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/pal_casing.c",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/native/libs/System.Globalization.Native/pal_casing.c",
+      "sha256": "e7a999771263d07663e5babb588d106ce34a302ddce8912a525b4b8fa65ebd3a",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/JsonDocument.TryGetProperty.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Text.Json/src/System/Text/Json/Document/JsonDocument.TryGetProperty.cs",
+      "sha256": "3873114822a250f79459dc9adf4c4f8ac1ddace1141af068cbe3e859571e30f1",
+      "license": "MIT"
+    },
+    {
+      "path": "reference/dotnet-runtime/Lazy.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Private.CoreLib/src/System/Lazy.cs",
+      "sha256": "281a55f0808d96e0c82a7b055d3f43c7e4a4c22089db577da26c0290b01503bc",
+      "license": "MIT"
+    }
+  ],
+  "canonical_normalization": {
+    "standard": "Unicode 16.0.0 UAX15 revision56",
+    "url": "https://www.unicode.org/reports/tr15/tr15-56.html",
+    "runtime_equivalence": "RemoveDiacritics digest matches all 1112064 valid scalars and 99825 conformance strings; BaseChar digest matches all 65536 UTF-16 chars including failures",
+    "icu_binary_version": "not established; behavioral equivalence measured on selected macOS runtime"
+  },
+  "native_icu_audit": "docs/collation-provenance.json: selected macOS runtime and system ICU78.1, native Unicode17; distinct from independently measured managed Unicode16 property data. Exact Apple ICU source build provenance remains unestablished."
+}

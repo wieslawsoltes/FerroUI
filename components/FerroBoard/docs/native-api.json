@@ -1,0 +1,1591 @@
+{
+  "ferroui_revision": "09c4f95e5cb91f4fa913c264a2bb34971e2d4f82",
+  "screen_keyboard_revision": "3694995fabbebc45a801a455880e3d31888367f1",
+  "scope": "Native integration ledger with partial current-state reconciliations; full audit remains incomplete. Historical CLR/BCL gaps are provenance, not native delivery requirements.",
+  "mappings": [
+    {
+      "source": "DependencyObject/attached properties",
+      "native": "FerroObject + existing static owner/property registrations,6original readonly MarkupField definitions and12public static method descriptors; nullable root/object bridges",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/input/screen_keyboard_input.rs",
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "src/FerroBoard.Controls/input/metadata.rs",
+        "src/FerroBoard.Controls/tests/input_static.rs",
+        "tests/FerroBoard.Markup.Consumer/input_static_tests.rs",
+        "tests/FerroBoard.Markup.Consumer/InputStatic.xaml",
+        "docs/input-static.json"
+      ],
+      "remaining": "Owner broadening to the selected native property root and114 source static API cases are verified.6source process-wide property identity worker rows are dependency-blocked by selected framework thread/context ownership. Full WinUI property-system/CLR/annotation/field/binder/visual-traversal/platform behavior remains incomplete."
+    },
+    {
+      "source": "TextBox text, offsets and replacement",
+      "native": "TextBox UTF-8 Option<String>, UTF-16 caret and selection endpoints; cached Utf16Text bridge",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "docs/native-input-adapter-lifetime.json",
+        "docs/native-input-cache.json",
+        "docs/NATIVE-TEXT-CACHE.md",
+        "src/FerroBoard.Controls/tests/native_input_cache.rs"
+      ],
+      "remaining": "Native String cannot store unpaired surrogates. try_replace rejects before mutation; void target bridge raises rather than claiming success. General Core text contract remains wider. Stable text/selection reads now reuse a shared UTF16 snapshot via native effective Text revisions, with zero measured allocations after warmup. Actual edits/native caret setters and total input latency still require broader measurement. Native ownership update: weak callbacks and Rust Drop remove owned hooks; borrowed controls remain usable. Managed GC/queued-owner retention is intentionally migrated, not emulated."
+    },
+    {
+      "source": "TextChanged/SelectionChanged and DispatcherQueue low-priority suppression",
+      "native": "Own-edit suppression plus active native text-input client batched selection events; endpoint-property fallback when the client is unavailable/inactive.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "src/FerroBoard.Controls/tests/native_input_adapter_lifetime.rs",
+        "docs/native-input-adapter-lifetime.json",
+        "docs/native-selection-notifications.json",
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Eight focused regressions cover final UTF16 ranges, reentrant replacement, client acquisition reentry, readonly/focus/template transitions and disposal. Inactive/unavailable clients still expose endpoint fallback; there is no public arbitrary caret+range transaction. Native OS/IME/device behavior remains unverified.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "PasswordBoxInputTarget",
+      "native": "Native masked TextBox adapter/peer guards plus always-opaque ProtectedPasswordTextBox companion",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "src/FerroBoard.Controls/input/protected_password_text_box.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "docs/sample.json",
+        "docs/native-input-adapter-lifetime.json",
+        "docs/native-password-automation.json",
+        "docs/NATIVE-PASSWORD-AUTOMATION.md",
+        "src/FerroBoard.Controls/tests/native_password_automation.rs",
+        "src/FerroBoard.Controls/examples/password_automation_mapping.rs"
+      ],
+      "remaining": "Selected isolated SDK now hides masked/revealed values, value-provider lookup, text-change payloads and root child queries; retained value handles recheck state. Native editing stays available. Dedicated secure-text roles, OS accessibility clients/caches, arbitrary custom peers/annotations/retained custom children and full PasswordBox/platform equivalence remain unverified. Owner release is tested after queued native TextChanged drains; other expired-owner peer APIs retain existing framework behavior."
+    },
+    {
+      "source": "InputScope, character casing, spellcheck/autoprediction and enter hints",
+      "native": "TextInputOptions content type/casing/return type/show suggestions/is_sensitive + TextBox accepts_return",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "src/FerroBoard.Controls/tests/input_targets.rs"
+      ],
+      "remaining": "No separate source spellcheck flag equivalent. Explicit/inherited AutoCapitalization false and every native scope need broader fixtures. Masked generic TextBox is also marked private with no NLP before source attached overrides."
+    },
+    {
+      "source": "Next/Previous SearchRoot = XamlRoot.Content",
+      "native": "Window-scoped native Tab navigation uses a live TopLevel visual subtree and rejects foreign-window candidates.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "src/FerroBoard.Controls/tests/native_window_focus.rs",
+        "docs/native-window-focus.json"
+      ],
+      "remaining": "Five native Headless cases cover plain/password controls, two windows/keyboards, disabled/detached/reparented/data-templated fields and callback handling. OS activation, physical traversal/accessibility and arbitrary custom scopes remain unverified."
+    },
+    {
+      "source": "DispatcherKeyboardScheduler",
+      "native": "Current/explicit Dispatcher NORMAL one-shot timer, native last-handle Drop/explicit cancellation and consumed callback payloads",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/scheduler.rs",
+        "docs/native-touch-lifetime.json",
+        "docs/NATIVE-TOUCH-LIFETIME.md"
+      ],
+      "remaining": "Nonpositive delays clamp to 1ms and positive ticks retain Duration conversion. Handles now use native shared RAII: keep a clone until completion; explicit dispose cancels immediately. Payload release and reentrant cancellation are verified with deterministic dispatcher tests. Native OS precision, dispatcher shutdown/thread exit and broader platform behavior remain unverified; custom scheduler drop semantics remain implementation-specific."
+    },
+    {
+      "source": "TouchButton : Grid",
+      "native": "Native Grid subclass with source pointer state machine, weak timer receivers/Drop cleanup and a private Button/Invoke automation peer",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/touch_button.rs",
+        "src/FerroBoard.Controls/tests/touch_button.rs",
+        "src/FerroBoard.Controls/primitives/touch_button_lifetime_tests.rs",
+        "docs/native-button-lifetime.json",
+        "src/FerroBoard.Controls/primitives/touch_button_automation_peer.rs",
+        "docs/NATIVE-TOUCH-BUTTON-ACCESSIBILITY.md",
+        "docs/native-touch-button-accessibility.json",
+        "docs/NATIVE-LIVE-VALIDATION.md",
+        "docs/native-live-validation.json"
+      ],
+      "remaining": "Selected real macOS Button roles, native element activation, target focus and Tab/Enter behavior now have evidence with exact build provenance. VoiceOver/client caches, retained OS provider lifetime, disabled OS elements, all languages/layouts, physical input and full native/API/platform verification remain incomplete. SDK invoke errors retain descriptions; broader inherited disposed-owner queries keep SDK behavior. Native Rust ownership remains intentional; CLR GC/generated runtime emulation is not a delivery requirement."
+    },
+    {
+      "source": "ReleasePointerCapture(pointer)",
+      "native": "Check captured owner is this element before pointer.capture(None)",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/touch_button.rs"
+      ],
+      "remaining": "Headless capture transfer, release/capture-lost reentrancy and shared multi-pointer state tested. A raw Headless input test also covers overlapping independent contacts through TouchDevice. Physical pen/touch/multitouch remain unverified."
+    },
+    {
+      "source": "PointerCanceled/PointerCaptureLost",
+      "native": "Separate capture-lost handler; no PointerCanceled routed event at pin",
+      "status": "platform_unverified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/touch_button.rs",
+        "src/FerroBoard.Controls/tests/touch_button.rs"
+      ],
+      "remaining": "Pinned TouchDevice RawTouchCancel disposes the pointer and raises capture loss. Headless raw-input test verifies cancellation disposes pending repeat and prevents click. Every native backend/cancel path and physical input remain unverified."
+    },
+    {
+      "source": "FocusNeutral.AllowFocusOnInteraction=false and IsTabStop=false",
+      "native": "Inherited native AllowFocusOnInteraction=false with source type-gated tab-stop tree walk, installed before pointer focus dispatch",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/focus_neutral.rs",
+        "docs/focus-interaction.json",
+        "docs/focus-tab-policy.json",
+        "docs/focus-traversal.json",
+        "docs/focus-framework-roles.json",
+        "docs/native-password-automation.json"
+      ],
+      "remaining": "Current source tree roles/depth/mutation behavior and four focused unit regressions are verified. Physical pointer/activation, all custom control families and native OS focus semantics still need broader verification; no focus-restore workaround is used."
+    },
+    {
+      "source": "Brushes shared mutable cache",
+      "native": "ferro_thread_local cache of Ref<SolidColorBrush>, distinct transparent field instance",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/touch_button.rs"
+      ],
+      "remaining": "Same UI-thread reference identity tested. Source static cache cross-thread behavior not equivalent to native thread-affine objects; no cross-thread shared brush contract claimed."
+    },
+    {
+      "source": "GetIntermediatePoints newest-first in Uno KeysView",
+      "native": "KeysView forwards FerroUI chronological previous/current pointer samples in keyboard coordinates through get_intermediate_points(Some(self))",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/keys_view.rs",
+        "src/FerroBoard.Controls/views/keys_view_tests.rs",
+        "docs/native-password-automation.json"
+      ],
+      "remaining": "Coalesced chronological move and raw scaled-input/focus/rollover tests pass. Physical pen/touch/multitouch, backend coalescing and all transform/capture paths remain unverified; source Uno newest-first reversal is intentionally not applied to chronological FerroUI samples."
+    },
+    {
+      "source": "Native reusable library metadata",
+      "native": "FerroBoard.Controls ASSEMBLY/register_types, native declarations, Core.Ferro metadata boundary and independent compiled/runtime XAML consumers",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/native_markup.rs",
+        "src/FerroBoard.Controls/lib.rs",
+        "src/FerroBoard.Core.Ferro/lib.rs",
+        "tests/FerroBoard.Markup.Consumer/lib.rs",
+        "docs/native-engine-defaults.json",
+        "docs/native-password-automation.json",
+        "docs/native-consumer-runtime.json",
+        "tests/FerroBoard.Native.Consumer/tests.rs"
+      ],
+      "remaining": "A separate downstream workspace passes five functions in both compiled and actual runtime XAML modes, including settings/themes, attached properties, targets/providers, events and quick actions. All markup/assets, full native public API coverage and OS/device ownership remain incomplete. General CLR/reflection contracts are outside native delivery scope."
+    },
+    {
+      "source": "IconFactory, IconData.g.cs and Material Symbols data",
+      "native": "Shared process-wide Mutex command cache (Arc<[Command]>); immutable generated path table; native PathGeometry/PathFigure/LineSegment/BezierSegment and Path",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/icons/icon_factory.rs",
+        "src/FerroBoard.Controls/icons/icon_data.rs",
+        "docs/icons.json",
+        "tests/fixtures/icons.jsonl",
+        "src/FerroBoard.Controls/tests/touch_button.rs"
+      ],
+      "remaining": "918 unchanged-source algorithm cases match exact bits in debug/release. The C# oracle uses data containers, not WinUI; native property validation, rendering, accessibility and full metadata remain unverified. Source HasIcon reads custom Dictionary without locking; native bridge synchronizes it. Threaded command cache sharing tested, concurrent registration/read source behavior is not established. Only parsed commands are cached; public geometry/figures are fresh and mutable."
+    },
+    {
+      "source": "IconFactory custom paths and invariant Double.Parse",
+      "native": "UTF-16 U+0020 token split, original M/L/C/Z parser; explicit null/missing/invalid errors; native numeric helper plus measured trailing-NUL rule and source negative canonical NaN",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/icons/icon_factory.rs",
+        "scripts/icon-reference/Program.cs",
+        "tests/fixtures/icons.jsonl"
+      ],
+      "remaining": "All recorded malformed/unknown/numeric/unpaired-token cases match source. Complete System.Double parser equivalence outside measured inputs and WinUI validation is not established. Typed Result errors map exceptions; numeric/nullable registration helpers bridge source unnamed enum and null values, no generic fallback on invalid paths."
+    },
+    {
+      "source": "KeyboardTheme/KeyStyleRule plain reference models and lists",
+      "native": "Arc models; ThemeList is a thin identity-equality newtype over Arc<Mutex<Vec<T>>> with native Rust locking/Vec APIs; owned rendering snapshots",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/themes/keyboard_theme.rs",
+        "src/FerroBoard.Controls/themes/keyboard_theme_properties.rs",
+        "src/FerroBoard.Controls/themes/shared_list.rs",
+        "tests/fixtures/themes.jsonl",
+        "src/FerroBoard.Controls/themes/metadata.rs",
+        "tests/FerroBoard.Native.Consumer/Hosted.xaml",
+        "docs/native-consumer-runtime.json",
+        "docs/native-theme-vectors.json",
+        "tests/FerroBoard.Native.Consumer/Resources/Keyboard.xaml"
+      ],
+      "remaining": "Native KeyStyleRules/KeyCodes builders and edits have compiled/runtime consumer evidence; 2,157 source theme rows remain unchanged. Collection mutation uses native snapshots instead of managed fail-fast enumerators. Exhaustive native rendering/high contrast, performance and platform/release audit remain open. CLR collection/GC emulation is outside delivery scope."
+    },
+    {
+      "source": "KeyboardThemes static registry and Changed",
+      "native": "Process-wide locked OrdinalKey dictionary/indexed insertion order of Arc themes; callbacks snapshot and invoke synchronously after unlock; removed callback captures drop outside the mutex",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/themes/keyboard_themes.rs",
+        "src/FerroBoard.Controls/themes/builtin_themes.rs",
+        "tests/fixtures/themes.jsonl",
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "docs/native-rendered-themes.json",
+        "docs/native-extension-disposal.json"
+      ],
+      "remaining": "Registry dispatch is synchronous after unlock with native Send+Sync callbacks. OnScreenKeyboard queues theme application to its own dispatcher. That native threading contract is deliberate; general managed delegate/GC reproduction is not missing keyboard functionality. Native OS theme/activation, high contrast and complete lifecycle verification remain open."
+    },
+    {
+      "source": "KeyboardTheme JSON and color parsing",
+      "native": "Shared Core UTF16 ordered JSON bridge with comment/trailing-comma options; exact measured indented writer, clone through JSON, direct Color values",
+      "status": "partially_verified",
+      "evidence": [
+        "tests/fixtures/themes.jsonl",
+        "scripts/theme-reference/ColorModel.cs",
+        "scripts/generate_theme_properties.py"
+      ],
+      "remaining": "2157 source cases include exact JSON text, clone normalization of invalid/null fields, all colors/numbers, deterministic float samples and source-defined errors. ColorModel is a data value only; no native render/high-contrast/system-theme proof. Numeric formatting beyond tested values and exception messages/offsets remain unverified. Existing strict Core JSON callers remain strict; Source options normalizer shared via additive exports."
+    },
+    {
+      "source": "KeyStyle/KeyStyles/KeyView/FontWeightsEx",
+      "native": "Native Grid subclass with source Borders/Grid/TextBlocks/Path composition; source ordered rule resolution, geometry/capping/cached icon/hint/sublabel updates",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/key_view.rs",
+        "src/FerroBoard.Controls/views/key_view_tests.rs",
+        "tests/fixtures/key-view.jsonl",
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "docs/native-key-accessibility.json"
+      ],
+      "remaining": "Integrated in the full OnScreenKeyboard; source style/property-assignment fixtures and selected native tests pass. Native labels require valid Unicode while Core text remains broader. Actual OS accessibility clients, exhaustive text/font/high-contrast/scaling/rendering and performance remain incomplete. Managed runtime/GC or internal CLR constructor emulation is not a native delivery requirement."
+    },
+    {
+      "source": "KeyboardStrings static localizable properties",
+      "native": "58 generated shared process-wide nullable UTF16 properties, synchronized getters/setters without change events",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/keyboard_strings.rs",
+        "scripts/generate_keyboard_strings.py",
+        "tests/fixtures/key-view.jsonl"
+      ],
+      "remaining": "All defaults verified; localized supplementary/ZWJ name and null roundtrip exercised with native AutomationProperties. Full static property markup registration, assembly/namespace compatibility and accessibility consumption remain missing. Native UTF8 setter cannot represent unpaired surrogates and reports explicit capability error."
+    },
+    {
+      "source": "Headless control test ownership",
+      "native": "Pinned HeadlessUnitTestSession owns unit-test UI objects on one dispatcher with per-test isolation",
+      "status": "tested",
+      "evidence": [
+        "src/FerroBoard.Controls/tests/support/headless_session.rs",
+        "src/FerroBoard.Controls/icons/icon_factory.rs",
+        "src/FerroBoard.Controls/views/key_view_tests.rs",
+        "src/FerroBoard.Controls/tests/support/headless.rs",
+        "src/FerroBoard.Controls/tests/input_targets.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "src/FerroBoard.Controls/tests/touch_button.rs"
+      ],
+      "remaining": "Replaces direct independent AppBuilder setups after observed global dispatcher/render-loop teardown race. Unit UI tests and the 16 native integration UI tests now use the pinned HeadlessUnitTestSession with per-test isolation on a shared UI owner within each binary. Scheduler manual-clock tests remain separate. This is test infrastructure, not native input/rendering/platform parity proof."
+    },
+    {
+      "source": "KeysView native composition, pointer routing, keyboard identity and trail fading",
+      "native": "Native Grid with hit-disabled key/trail layers, shared computed-key identity, chronological keyboard-space pointer samples, native gesture exclusion and weak timer/event ownership.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/keys_view.rs",
+        "src/FerroBoard.Controls/views/keys_view_tests.rs",
+        "tests/fixtures/keys-view.jsonl",
+        "scripts/keys-view-reference/Program.cs",
+        "docs/native-api.json",
+        "docs/native-key-accessibility.json",
+        "docs/native-gesture-containment.json",
+        "docs/NATIVE-GESTURE-CONTAINMENT.md"
+      ],
+      "remaining": "Integrated OnScreenKeyboard/host/metadata and native AllowFocusOnInteraction=false are present. Sixteen selected KeysView tests pass, including native key peers, weak ownership, capture/release/loss, coalesced samples, scaled raw touches and rollover, source trail timers and ancestor gesture containment with unaffected sibling scrolling. Source ManipulationMode.None maps to native prevent_gesture_recognition. Uncaptured contact remains approximated by native button flags where IsInContact is absent. Physical pen/touch/multitouch, every backend/transform/capture path, unusual pointer IDs and full latency/allocation coverage remain unverified. Managed GC/runtime reproduction is intentionally outside native delivery scope."
+    },
+    {
+      "source": "UniformWrapPanel ordinary properties, columns and layout overrides",
+      "native": "Public native Panel subclass; source floating casts and geometry; plain Cell properties deliberately do not invalidate measure",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/uniform_wrap_panel.rs",
+        "src/FerroBoard.Controls/primitives/uniform_wrap_panel_tests.rs",
+        "tests/fixtures/uniform-wrap.jsonl",
+        "scripts/uniform-wrap-reference/Program.cs"
+      ],
+      "remaining": "Source columns/measure/arrange and plain properties ported; 732 data-oracle cases plus native child constraints/bounds and setter invalidation test. Real WinUI native validation/rendering/default rounding/child-collection reentrancy, metadata/consumer and extreme child counts remain unverified. Measure uses native shared children snapshot; Uno SDK6.7.30 UIElementCollection mutation behavior not established."
+    },
+    {
+      "source": "SmartbarView/SmartbarAction/EmojiSearchState/TextKeyDataFactory",
+      "native": "Internal native Grid tree and public SmartbarAction reexport; versioned shared ActionList, synchronous engine/delegate callbacks, raw icon values, private search state, exact source helper key types",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/smartbar_view.rs",
+        "src/FerroBoard.Controls/views/view_helpers.rs",
+        "src/FerroBoard.Controls/views/smartbar_view_tests.rs",
+        "tests/fixtures/smartbar.jsonl",
+        "scripts/smartbar-reference/Program.cs"
+      ],
+      "remaining": "Full selected view tree/actions/suggestions/search algorithms ported; 153 unchanged-source/runtime cases and five native tests. SmartbarAction public root reexport preserves raw icon/null fields and synchronous dispatch; synthesized record equality/hash/printing/deconstruction and delegate semantics remain missing. Full owner/metadata/consumer, true FocusNeutral and scroll-mode translation/platform scrolling, UTF16 native storage, custom IReadOnlyList results/collection-reentrant native property updates, all lifecycle/GC/performance/accessibility checks incomplete. Explicit release_visual_children bridges current child callback cycles only; older external children retain callbacks/owner as source. Scalar formatter is scoped to one string argument, not general CLR String.Format."
+    },
+    {
+      "source": "FocusNeutral.Apply",
+      "native": "Inherited AllowFocusOnInteraction=false plus source-specific tab-stop/tree traversal through native control families.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/focus_neutral.rs",
+        "src/FerroBoard.Controls/views/smartbar_view_tests.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "docs/focus-interaction.json",
+        "src/FerroBoard.Controls/tests/focus_interaction.rs"
+      ],
+      "remaining": "The principal interaction-focus property is present, not missing. Selected source role/depth/mutation and Headless pointer/compiled-consumer behavior has evidence. Native OS activation, physical input and arbitrary custom content/scope behavior remain unverified."
+    },
+    {
+      "source": "Uno Grid CornerRadius/BorderBrush/BorderThickness/Padding on TouchButton",
+      "native": "One native Border child wraps existing content Grid; inherited Panel background changes mirrored to Border. TouchButton render intentionally delegates painting to child to avoid square underpainting",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/primitives/touch_button.rs",
+        "src/FerroBoard.Controls/tests/touch_button.rs",
+        "tests/fixtures/smartbar.jsonl"
+      ],
+      "remaining": "Source composition split is deliberate because native Grid lacks these source properties. Extra native Border changes visual tree; typed setters/getters implemented, full inherited metadata/style binding/validation, exact border pixel output and rounded hit tests unverified. No framework patch."
+    },
+    {
+      "source": "PanelUi and ClipboardPanelView",
+      "native": "Native Grid/ScrollViewer/UniformWrapPanel, source TouchButton callbacks and shared ClipboardItem Rc, synchronous weak History.Changed bridge guarded by local visibility",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/panel_views.rs",
+        "src/FerroBoard.Controls/views/padded_grid.rs",
+        "src/FerroBoard.Controls/views/panel_views_tests.rs",
+        "src/FerroBoard.Controls/tests/support/view_fixture.rs",
+        "tests/fixtures/panels.jsonl",
+        "scripts/panels-reference/Program.cs",
+        "docs/native-api.json",
+        "docs/native-view-lifetime.json",
+        "src/FerroBoard.Controls/views/emoji_panel_view.rs"
+      ],
+      "remaining": "Source panel algorithms and selected callback/layout fixtures remain implemented. Weak owner callbacks, explicit cleanup and Drop now remove owned subscriptions; managed GC cycles are not a delivery requirement. Complete native rendering, transformed/physical input, scrolling/accessibility and public metadata verification remain open."
+    },
+    {
+      "source": "EditingPanelView",
+      "native": "Native Grid with padded inner cell grid, fixed 4x5 rows/columns and 18 buttons, literal command/key types, saved repeat delays and max(40,interval), weak synchronous engine StateChanged selection decoration",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/panel_views.rs",
+        "src/FerroBoard.Controls/views/padded_grid.rs",
+        "src/FerroBoard.Controls/views/panel_views_tests.rs",
+        "src/FerroBoard.Controls/tests/support/view_fixture.rs",
+        "tests/fixtures/panels.jsonl",
+        "scripts/panels-reference/Program.cs",
+        "docs/native-api.json",
+        "docs/native-view-lifetime.json",
+        "src/FerroBoard.Controls/views/emoji_panel_view.rs"
+      ],
+      "remaining": "Source panel algorithms and selected callback/layout fixtures remain implemented. Weak owner callbacks, explicit cleanup and Drop now remove owned subscriptions; managed GC cycles are not a delivery requirement. Complete native rendering, transformed/physical input, scrolling/accessibility and public metadata verification remain open."
+    },
+    {
+      "source": "SubtypePickerView",
+      "native": "Native Grid overlay/card/scroll list, active-by-id labels and fallback component id, card bubble handling, close-before-ManageRequested synchronous snapshot event",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/panel_views.rs",
+        "src/FerroBoard.Controls/views/padded_grid.rs",
+        "src/FerroBoard.Controls/views/panel_views_tests.rs",
+        "src/FerroBoard.Controls/tests/support/view_fixture.rs",
+        "tests/fixtures/panels.jsonl",
+        "scripts/panels-reference/Program.cs",
+        "docs/native-api.json"
+      ],
+      "remaining": "Engine subtypes use current shared Core Vec snapshot, not complete CLR read-only collection/custom mutation semantics. Typed source identity/default label cases and native TextBox focus checked; physical input, scrolling, exact source rounded hit behavior, accessibility, metadata/GC/error-type parity unverified. Background card test uses a flat painted portion, not rounded corner."
+    },
+    {
+      "source": "Uno Grid.Padding on panel item grids and editing root",
+      "native": "Internal PaddedGrid outer Grid containing Border and inner Grid; private source rows/columns/children addressed explicitly on inner Grid",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/padded_grid.rs",
+        "src/FerroBoard.Controls/views/panel_views_tests.rs",
+        "src/FerroBoard.Controls/tests/support/view_fixture.rs"
+      ],
+      "remaining": "Documented visual composition split, not a native Grid metadata/property alias. Source-written fixture adapter skips only declared padding nodes. Normal native inset geometry tested; full Grid inherited APIs, negative/nonfinite validation, actual source layout/events/accessibility/visual tree identities and default rounding remain unverified. No framework patch."
+    },
+    {
+      "source": "EmojiPanelView categories/tabs/pages and tone/history actions",
+      "native": "Native Grid/Canvas/ScrollViewer/UniformWrapPanel/TouchButtons; ordinal shared page cache, source history invalidation, live emoji-list enumeration, explicit UTF16 native boundary, synchronous captured variant and pin/remove callbacks",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/emoji_panel_view.rs",
+        "src/FerroBoard.Controls/views/emoji_panel_view_tests.rs",
+        "tests/fixtures/emoji-panel.jsonl",
+        "scripts/emoji-panel-reference/Program.cs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "docs/native-api.json",
+        "docs/native-view-lifetime.json",
+        "src/FerroBoard.Controls/views/panel_views.rs",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Source panel algorithms and selected callback/layout fixtures remain implemented. Weak owner callbacks, explicit cleanup and Drop now remove owned subscriptions; managed GC cycles are not a delivery requirement. Complete native rendering, transformed/physical input, scrolling/accessibility and public metadata verification remain open.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "EmojiPanelView default Enum.TryParse<EmojiCategory>",
+      "native": "Added case-sensitive path to the previously measured shared enum bridge; numeric/whitespace/NUL/comma-name behavior retained, other callers remain ignore-case",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/enum_bridge.rs",
+        "tests/fixtures/emoji-panel.jsonl"
+      ],
+      "remaining": "11 source UI parser cases plus existing bridge fixtures; complete CLR enum metadata/reflection and all numeric/culture cases still require API audit."
+    },
+    {
+      "source": "EmojiPanelView handledEventsToo pointer dismissal and popup coordinates",
+      "native": "Native DIRECT|BUBBLE handler with handled_events_too=true; visual-parent identity traversal; native translate_point and source clamp/min/max formulas in keyboard DIPs",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/emoji_panel_view.rs",
+        "src/FerroBoard.Controls/views/emoji_panel_view_tests.rs",
+        "tests/fixtures/emoji-panel.jsonl",
+        "scripts/emoji-panel-reference/Program.cs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "docs/native-api.json"
+      ],
+      "remaining": "Source oracle uses explicit supplied logical metrics/translation/parents only. Native raw popup clicks and supplied narrow/fractional geometry verified, but physical/transformed platform pointer/gesture/capture, overflow hit tests and source WinUI visual ancestry differences remain unverified."
+    },
+    {
+      "source": "Shared tab strip moved to a new ScrollViewer during theme rebuild",
+      "native": "After source bottom-bar Clear, explicitly set prior native scroller Content=None before assigning same tabs instance to next scroller",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/emoji_panel_view.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs"
+      ],
+      "remaining": "Verified native pin retains presenter child after scroller removal. Explicit release is a documented integration adapter, not source code behavior or full native/source event parity. Old internal scroller Content and notifications differ; no framework patch. Actual Uno platform transfer behavior not executed."
+    },
+    {
+      "source": "Native scrolling test setup for EmojiPanelView",
+      "native": "One Headless test uses a real native ScrollContentPresenter FuncControlTemplate patterned on pinned ScrollViewer unit tests; production controls retain host theme/template ownership",
+      "status": "tested",
+      "evidence": [
+        "src/FerroBoard.Controls/views/emoji_panel_view_tests.rs"
+      ],
+      "remaining": "Bare Headless app has no application control theme and default ContentControl presenter has zero scroll extent. Test template proves native offset/layout APIs, not full application theme, scrollbar, wheel/touch gesture, inertia or physical platform behavior."
+    },
+    {
+      "source": "OnScreenKeyboard owner and dependency properties",
+      "native": "Native UserControl subclass with programmatic Grid/Border/Canvas composition; Settings/Theme reference-identity property wrappers and AutoAttach styled property",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "src/FerroBoard.Controls/on_screen_keyboard_tests.rs",
+        "tests/fixtures/owner.jsonl",
+        "scripts/owner-reference/README.md",
+        "docs/native-engine-defaults.json",
+        "docs/native-consumer-runtime.json",
+        "docs/NATIVE-RESOURCES.md"
+      ],
+      "remaining": "Parameterless/explicit native construction, hosted/standalone compiled/runtime XAML and Rust extensions have downstream evidence. Omitted dependencies use owned native registries; explicit sharing preserves supplied identity. Full native API/metadata/activation/device verification remains open. CLR sealedness/generated member/GC replication and process-global singleton emulation are not required."
+    },
+    {
+      "source": "Scoped FocusManager.GotFocus/GetFocusedElement(XamlRoot)",
+      "native": "Weak own-TopLevel focus hooks and explicit window filtering, with inherited native interaction-focus suppression.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/on_screen_keyboard_tests.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "docs/native-keyboard-lifetime.json",
+        "docs/focus-interaction.json"
+      ],
+      "remaining": "Scoped focus and weak hook teardown have evidence; the framework focus lookup still requires window filtering. Native activation/popup roots/custom scopes and broader physical input verification remain open."
+    },
+    {
+      "source": "Private emoji search, previews/popups, layout/resize and theme dispatch",
+      "native": "Native private search routing/restoration, overlays/sizing and a UI-local weak owner map for shared theme dispatch.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "src/FerroBoard.Controls/on_screen_keyboard_tests.rs",
+        "tests/fixtures/owner.jsonl",
+        "docs/native-keyboard-lifetime.json",
+        "docs/native-view-lifetime.json"
+      ],
+      "remaining": "Owner and six-view lifetime cleanup now uses weak hooks and Drop. Complete custom owner/search interactions, native scaling/rendering/emoji/accessibility and broad performance/platform verification remain open. Source managed global-owner retention is intentionally migrated."
+    },
+    {
+      "source": "SystemClipboardService / KeyboardHaptics",
+      "native": "Per-window clipboard/local Rust futures; public KeyboardHapticService::native() composes reusable Controls-owned Android Vibrator JNI/Java and iOS AudioToolbox adapters; source desktop no-op preserved.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/services/platform_services.rs",
+        "src/FerroBoard.Controls/tests/platform_services.rs",
+        "scripts/platform-services-reference/README.md",
+        "tests/fixtures/platform-services.jsonl",
+        "src/FerroBoard.Controls/services/clipboard_monitor.rs",
+        "docs/native-clipboard.json",
+        "docs/native-clipboard-futures.json",
+        "docs/native-android-host.json",
+        "docs/native-ios-feedback.json"
+      ],
+      "remaining": "Selected Android typing/denied vibration works. iOS source dispatch mapping, build/link and composition-root installation are verified; zero iOS execution/physical vibration. Public hosts install the concrete service at composition root. Clipboard OS timing/denial, physical feedback and broad platform verification remain open; no CLR service emulation required."
+    },
+    {
+      "source": "ScreenKeyboardHost / KeyboardVisibilityMode / ContentProperty",
+      "native": "Native host/control composition with default owned engine/resources, hosted/standalone constructors, weak cleanup and focused-field reveal.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/screen_keyboard_host.rs",
+        "src/FerroBoard.Controls/screen_keyboard_host_tests.rs",
+        "tests/fixtures/host.jsonl",
+        "tests/FerroBoard.Markup.Consumer/ExplicitHost.xaml",
+        "samples/FerroBoard.Sample/MainWindow.xaml",
+        "samples/FerroBoard.Sample/tests.rs",
+        "docs/native-host-scroll.json",
+        "docs/native-host-lifetime.json",
+        "docs/native-engine-defaults.json",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Native Control content replaces source UIElement. Exact Uno centered/animated reveal deliberately migrates to native minimal reveal unless a custom handler is supplied. Physical placement, activation/accessibility, broader API/metadata and performance remain open; process-global resource singleton emulation is not a missing requirement.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "Floating/dragging/docked viewport and geometry",
+      "native": "Same native keyboard reparented between host Grid and floating Grid/Canvas/Border; native update_layout, pointer capture and source clamping",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/screen_keyboard_host_tests.rs",
+        "tests/fixtures/host.jsonl"
+      ],
+      "remaining": "Source width minimum320, +2 frame width, stored unclamped drag position, height fallback320, narrow/fractional/NaN geometry and parent/row ordering preserved. .NET Math.Clamp permits NaN maximum; private comparison helper avoids Rust clamp panic. Source NaN bit patterns checked. Controlled fractional test disables rounding, actual defaults remain unverified. No native PointerCanceled; capture-loss reset projection documented. Physical touch/pen/multiwindow placement/scaling/render shadows/accessibility/lifetime/performance unverified."
+    },
+    {
+      "source": "Storyboard DoubleAnimation on original TranslateTransform.Y / HoldEnd / Stop",
+      "native": "Pinned native Animation + per-setter built-in DoubleAnimator + IClock and removable animation-priority terminal value",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/screen_keyboard_host.rs",
+        "src/FerroBoard.Controls/screen_keyboard_host_tests.rs",
+        "tests/fixtures/host.jsonl"
+      ],
+      "remaining": "Source 180ms CubicEaseOut descriptor preserved. Native default TransformAnimator redirects to Visual.current RenderTransform; explicit per-setter native DoubleAnimator targets ORIGINAL transform even after public render-transform replacement. Native forward-fill overwrites local base, so terminal animation-priority token models removable HoldEnd. Exact threshold, reversal/cancel, visibility/event order, base preservation and reentrant Stop cleanup tested. Actual WinUI clock/frame/property/compositor order and dependent-animation semantics remain platform-unverified; source descriptor oracle does not emulate animation timing."
+    },
+    {
+      "source": "StartBringIntoView(AnimationDesired=true, VerticalAlignmentRatio=0.5)",
+      "native": "Queued weak host work invokes an optional custom source-hint handler or native minimal bring_into_view, rechecked after keyboard/window viewport changes.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/screen_keyboard_host.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "scripts/host-reference/README.md",
+        "tests/fixtures/host.jsonl",
+        "samples/FerroBoard.Sample/host_scroll_tests.rs",
+        "docs/native-host-scroll.json"
+      ],
+      "remaining": "The selected framework has no exact animation/alignment API. Native minimal reveal is an explicit completed integration migration, not a centered/animated parity claim. Source hints remain available to custom handlers. Physical scrolling/placement and broader native platform behavior remain unverified."
+    },
+    {
+      "source": "Core plain object metadata and original namespace registration",
+      "native": "Separate ferroboard-core-ferro SDK; original Rc<KeyboardSettings>, 64 accessors, 19 original enum descriptors, shared subtype list view; native source scan exports",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core.Ferro",
+        "scripts/generate_core_markup.py",
+        "tests/FerroBoard.Markup.Consumer/SettingsBindings.xaml",
+        "tests/FerroBoard.Markup.Consumer/tests.rs",
+        "src/FerroBoard.Core.Ferro/input_metadata.rs",
+        "docs/native-consumer-runtime.json",
+        "docs/NATIVE-RESOURCES.md"
+      ],
+      "remaining": "Native settings, engines, targets/editors/providers and selected public model consumers have compiled/runtime evidence. Complete native public metadata coverage remains unaudited; plain non-object-model document roots retain a recorded framework limitation. Reproducing every CLR delegate/collection/reflection/generated member is outside native delivery scope."
+    },
+    {
+      "source": "Uno UI reusable library, nested settings/themes and compiled events",
+      "native": "FerroBoard.Controls/Core registrations and FerroBoard namespaces preserve public control names and actual shared settings/theme/EnterAction handles for native compiled/runtime consumers.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/native_markup.rs",
+        "src/FerroBoard.Controls/themes/metadata.rs",
+        "tests/FerroBoard.Markup.Consumer",
+        "src/FerroBoard.Core.Ferro/lib.rs",
+        "tests/FerroBoard.Markup.Consumer/lib.rs",
+        "docs/native-engine-defaults.json",
+        "docs/native-keyboard-lifetime.json"
+      ],
+      "remaining": "Selected native constructors, bindings, events, attached properties, targets/providers and consumer extensions have evidence. Complete native metadata/API coverage and individual markup event unsubscription remain incomplete; the add-only framework event contract uses owner-scoped cleanup. General CLR lifetime/reflection emulation is not a delivery gate."
+    },
+    {
+      "source": "Standalone plain model XAML root",
+      "native": "Pinned ordinary emitter rejects non-object-model roots; nested Core settings work",
+      "status": "dependency_blocked",
+      "evidence": [
+        "tests/FerroBoard.Markup.Consumer/fixtures/PlainSettings.xaml.repro",
+        "tests/FerroBoard.Markup.Consumer/tests.rs"
+      ],
+      "remaining": "Focused shared emitter correction needed; no patch from FerroDock copied and no extra native object substituted for the actual Core settings class."
+    },
+    {
+      "source": "Process-wide immutable defaults and record/class equality",
+      "native": "Owned native default engine dependencies plus explicitly shared Rc registries; existing immutable Arc/LazyLock model defaults and domain equality remain.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/shared-ownership.json",
+        "src/FerroBoard.Core/tests/shared_defaults.rs",
+        "tests/fixtures/shared-defaults.json",
+        "scripts/shared-defaults-reference/README.md",
+        "src/FerroBoard.Core/engine/keyboard_engine.rs",
+        "docs/NATIVE-RESOURCES.md",
+        "docs/native-engine-defaults.json"
+      ],
+      "remaining": "with_defaults/new omitted resources now work; caller-supplied sharing retains identity. Source process-global mutable resources intentionally migrate to composition-root ownership. Full native public model/serialization/extension coverage still requires audit; CLR generated record/hash/runtime surfaces are legacy cleanup, not completion requirements."
+    },
+    {
+      "source": "ITextInputTarget / TextBufferTarget / EditorController / explicit KeyboardEngine metadata",
+      "native": "Native Core input/editor/engine metadata over original handles, meaningful custom trait dispatch and parameterless or explicit engine construction.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core.Ferro/input_metadata.rs",
+        "src/FerroBoard.Core.Ferro/editor_metadata.rs",
+        "src/FerroBoard.Core.Ferro/engine_metadata.rs",
+        "src/FerroBoard.Core.Ferro/input_tests.rs",
+        "tests/FerroBoard.Markup.Consumer/InputConsumer.xaml",
+        "tests/FerroBoard.Markup.Consumer/TargetBindings.xaml",
+        "tests/FerroBoard.Markup.Consumer/tests.rs",
+        "docs/input-metadata.json",
+        "docs/native-engine-defaults.json",
+        "docs/native-engine-lifetime.json"
+      ],
+      "remaining": "Selected compiled/runtime target/editor/engine/provider usage is verified. Complete native extension/collection/event metadata and physical platform behavior remain incomplete. Ownership uses weak callbacks/Drop; source managed-GC and generated-record/reflection equivalence are not required."
+    },
+    {
+      "source": "Native password control automation",
+      "native": "Native masked TextBox adapter/peer guards plus always-opaque ProtectedPasswordTextBox companion",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/input/protected_password_text_box.rs",
+        "src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+        "samples/FerroBoard.Sample/MainWindow.xaml",
+        "docs/sample.json",
+        "docs/native-password-automation.json",
+        "docs/NATIVE-PASSWORD-AUTOMATION.md",
+        "src/FerroBoard.Controls/tests/native_password_automation.rs",
+        "src/FerroBoard.Controls/examples/password_automation_mapping.rs"
+      ],
+      "remaining": "Selected isolated SDK now hides masked/revealed values, value-provider lookup, text-change payloads and root child queries; retained value handles recheck state. Native editing stays available. Dedicated secure-text roles, OS accessibility clients/caches, arbitrary custom peers/annotations/retained custom children and full PasswordBox/platform equivalence remain unverified. Owner release is tested after queued native TextChanged drains; other expired-owner peer APIs retain existing framework behavior."
+    },
+    {
+      "source": "SettingsPanel StringComparer.CurrentCulture / CurrentCultureIgnoreCase and String.Contains dependency",
+      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the Emscripten ICU68.2 port with matching immutable data.",
+      "status": "partially_verified",
+      "evidence": [
+        "tests/fixtures/culture-index.tsv",
+        "docs/collation-provenance.json",
+        "src/FerroBoard.Core/text/locale_text/mod.rs",
+        "src/FerroBoard.Core/text/locale_text/icu.rs",
+        "src/FerroBoard.Core/text/locale_text/windows.rs",
+        "src/FerroBoard.Core/build.rs",
+        "docs/native-locale-integration.json",
+        "docs/native-windows-build.json",
+        "docs/native-linux-build.json",
+        "samples/FerroBoard.Sample/Cargo.toml",
+        "docs/native-ios-locale.json",
+        "src/FerroBoard.Core/text/locale_text/core_foundation.rs",
+        "tests/fixtures/apple-locale-differences.json",
+        "docs/native-browser-locale.json",
+        "docs/native-browser-host.json",
+        "src/FerroBoard.Core/text/locale_text/current.rs",
+        "src/FerroBoard.Core/text/locale_text/tests.rs",
+        "docs/native-remove-legacy-collation.json"
+      ],
+      "remaining": "Native locale and shared browser sample have selected IAB/Node/input/storage evidence; source width differences remain explicit. Threaded/other-browser, mobile/physical, complete API/accessibility/services/lifecycle/performance and final release checks remain open."
+    },
+    {
+      "source": "Selected Uno ToggleSwitch key callbacks (settings adapter)",
+      "native": [
+        "HeaderedToggleSwitch::on_key_down",
+        "HeaderedToggleSwitch::on_key_up"
+      ],
+      "status": "partially_verified",
+      "targets": [
+        "src/FerroBoard.Controls/primitives/headered_inputs.rs",
+        "src/FerroBoard.Controls/primitives/headered_toggle_key_tests.rs"
+      ],
+      "evidence": [
+        "tests/fixtures/toggle-keys.jsonl",
+        "scripts/toggle-key-reference/README.md",
+        "docs/native-toggle-keys.json"
+      ],
+      "remaining": "Native keyboard latch/Enter/Space/order, routed focus and raw mouse/touch verified. Selected native Key enum has no GamepadA; two source-only sequences remain explicit. Native :dragging is a guard signal, not proof of full Uno pointer/drag/capture cancellation, physical input, audio or automation parity. No general CLR/control-runtime emulation is required."
+    },
+    {
+      "source": "ITextInputTarget Enter actions / XamlRoot search context",
+      "native": "Live TopLevel visual scope, native Tab navigation and window-owned focus with explicit current/target start",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "src/FerroBoard.Controls/tests/native_window_focus.rs",
+        "src/FerroBoard.Controls/examples/focus_scope_mapping.rs",
+        "docs/native-window-focus.json"
+      ],
+      "remaining": "Five native Headless cases cover cross-window/plain/password navigation, disabled filtering, detached/closed roots, callbacks/reentrant detach, two keyboards/reparent/teardown and data-templated fields. Native policy returns unhandled without a live window and rejects external candidates. OS activation, physical input/accessibility, arbitrary custom scopes/navigation and full platform parity remain unverified. No CLR/focus-manager service emulation."
+    },
+    {
+      "source": "IClipboardService and KeyboardEngine async clipboard methods",
+      "native": "Local Rust ClipboardFuture/ClipboardOperation with Result, explicit ClipboardSpawner hook and native dispatcher",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/NATIVE-ASYNC.md",
+        "docs/native-clipboard-futures.json",
+        "src/FerroBoard.Core/tests/native_clipboard_futures.rs",
+        "src/FerroBoard.Controls/tests/native_clipboard_executor.rs"
+      ],
+      "remaining": "Intentional Rust lazy/drop/Result migration; source Task status, repeatable await and eager unawaited lifetime are not port goals. Key prefix/ready ordering and source platform fallbacks retained. Physical OS clipboard write/denial, platform scheduling/timing and broader metadata/custom consumer coverage remain unverified."
+    },
+    {
+      "source": "KeyboardTouchProcessor ownership and scheduled callbacks",
+      "native": "Weak scheduled receiver with original pointer state; quiet active/retired installed-timer cleanup on Core Drop; explicit cancel_all preserves input cancellation",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/input/keyboard_touch_processor.rs",
+        "src/FerroBoard.Core/tests/native_touch_lifetime.rs",
+        "docs/native-touch-lifetime.json",
+        "docs/NATIVE-TOUCH-LIFETIME.md",
+        "docs/native-touch-reentrant.json",
+        "docs/NATIVE-REENTRANT-TOUCH.md",
+        "src/FerroBoard.Core/tests/native_touch_reentrant.rs"
+      ],
+      "remaining": "Live source behavior remains exact. Drop includes weakly tracked states retired before handle installation and distinguishes Rc identity when IDs are reused. Drop does not emit gesture events or cancel engine contact state; callers needing those effects use cancel_all. Arbitrary foreign work/overwritten handles, custom destructor failures, weak-tracking performance, OS timing/shutdown/physical input and complete API/platform verification remain incomplete."
+    },
+    {
+      "source": "GlideTypingClassifier private lookup storage / ordered key geometry",
+      "native": "Rust HashMap lookup/cache maps, HashSet normalized computed-key deduplication and explicit Vec key geometry preserve source order and classification behavior.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/glide/glide_typing_classifier.rs",
+        "src/FerroBoard.Core/tests/native_glide_maps.rs",
+        "docs/native-glide-maps.json",
+        "docs/NATIVE-GLIDE-STORAGE.md",
+        "tests/fixtures/native-glide-order.jsonl"
+      ],
+      "remaining": "All 43 selected source/native glide, geometry and integrated engine tests pass, with unchanged ranked outputs/cache/point counts and existing geometry comparisons. Strict/release/sample and relocated startup/persistence pass. Physical input, complete native API/platform/accessibility and broad allocation/latency profiling remain incomplete."
+    },
+    {
+      "source": "Native compiled sample real-renderer theme/emoji verification",
+      "native": "Opt-in Skia/HarfBuzz + Headless real-pixel frames from compiled App/MainWindow, with explicit native local storage and no extra packages or CLR services.",
+      "status": "partially_verified",
+      "evidence": [
+        "samples/FerroBoard.Sample/examples/render_themes.rs",
+        "docs/native-rendered-themes.json",
+        "docs/NATIVE-RENDERED-THEMES.md"
+      ],
+      "remaining": "Four selected Light/Dark keyboard/emoji frames, 172 exact header brush observations and editing target/focus checks pass. Arabic/Japanese and selected color/ZWJ/flag samples inspected. All-font/script/emoji, high-contrast/scaling, native OS input/accessibility and other-platform verification remain open."
+    },
+    {
+      "source": "Native desktop sample interaction verification",
+      "native": "Actual production executable in isolated macOS app/profile; Cua native mouse/keyboard and AX/screenshots",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/NATIVE-DESKTOP-VALIDATION.md",
+        "docs/native-desktop-validation.json",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Ten selected native paths observed. Physical devices/capture/activation, full accessibility roles/actions/client behavior, native scrolling/reveal, mouse popup selection, exhaustive glyph coverage and other platforms remain incomplete. No broad CLR/BCL compatibility requirement is introduced.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "KeyView/KeysView native accessibility activation",
+      "native": "Existing FerroUI Button/Invoke peer with weak owners; live Core InputKey dispatch guarded by scene/frame/row membership",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/key_automation_peer.rs",
+        "src/FerroBoard.Controls/views/key_accessibility_tests.rs",
+        "docs/NATIVE-KEY-ACCESSIBILITY.md",
+        "docs/native-key-accessibility.json",
+        "docs/NATIVE-LIVE-VALIDATION.md",
+        "docs/native-live-validation.json"
+      ],
+      "remaining": "Selected real macOS Button roles, native element activation, target focus and Tab/Enter behavior now have evidence with exact build provenance. VoiceOver/client caches, retained OS provider lifetime, disabled OS elements, all languages/layouts, physical input and full native/API/platform verification remain incomplete. SDK invoke errors retain descriptions; broader inherited disposed-owner queries keep SDK behavior. Native Rust ownership remains intentional; CLR GC/generated runtime emulation is not a delivery requirement."
+    },
+    {
+      "source": "Core resource, layout, dictionary and touch performance verification",
+      "native": "Opt-in release Rust example; Instant samples and batched loops over production Core APIs with a manual scheduler",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/examples/core_profile.rs",
+        "docs/NATIVE-CORE-PROFILE.md",
+        "docs/native-core-profile.json",
+        "docs/native-dictionary-normalization.json",
+        "docs/native-fuzzy-workspace.json",
+        "docs/native-learning-storage.json"
+      ],
+      "remaining": "Core profiles and selected per-operation allocation tests exist for dictionary normalization and fuzzy-search scratch storage; it is stale to say there are no allocation measurements. Controlled end-to-end UI/rendering allocations, real timer/device latency, glide/all-language performance and the new learned-store costs remain unmeasured."
+    },
+    {
+      "source": "EmojiCatalog.Search keyword prefixes and casing",
+      "native": "Borrowed UTF-16 terms/prefixes, slice name-word iterators and live keyword guards; unchanged source Unicode/casing/scoring",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/emoji/emoji_catalog.rs",
+        "src/FerroBoard.Core/text/ordinal.rs",
+        "src/FerroBoard.Core/tests/emoji.rs",
+        "tests/fixtures/native-emoji-search.jsonl",
+        "docs/native-emoji-search.json",
+        "docs/native-emoji-vectors.json",
+        "docs/native-emoji-search-cost.json"
+      ],
+      "remaining": "Per-operation native Rust allocation requests and 36 instrumented timing workloads now measured. Native UI/device/rendering/concurrent-mutation/other-platform budgets remain unverified."
+    },
+    {
+      "source": "Sample startup and layout/settings locale sorting on Windows/Linux",
+      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the Emscripten ICU68.2 port with matching immutable data.",
+      "status": "partially_verified",
+      "evidence": [
+        "samples/FerroBoard.Sample/program.rs",
+        "src/FerroBoard.Core/layouts/keyboard_resources.rs",
+        "samples/FerroBoard.Sample/settings_panel.rs",
+        "src/FerroBoard.Core/text/locale_text/mod.rs",
+        "src/FerroBoard.Core/text/locale_text/icu.rs",
+        "src/FerroBoard.Core/text/locale_text/windows.rs",
+        "src/FerroBoard.Core/build.rs",
+        "docs/native-locale-integration.json",
+        "docs/native-windows-build.json",
+        "docs/native-linux-build.json",
+        "samples/FerroBoard.Sample/Cargo.toml",
+        "docs/native-ios-locale.json",
+        "src/FerroBoard.Core/text/locale_text/core_foundation.rs",
+        "tests/fixtures/apple-locale-differences.json",
+        "docs/native-browser-locale.json",
+        "docs/native-browser-host.json",
+        "src/FerroBoard.Core/text/locale_text/current.rs",
+        "src/FerroBoard.Core/text/locale_text/tests.rs",
+        "docs/native-remove-legacy-collation.json"
+      ],
+      "remaining": "Native locale and shared browser sample have selected IAB/Node/input/storage evidence; source width differences remain explicit. Threaded/other-browser, mobile/physical, complete API/accessibility/services/lifecycle/performance and final release checks remain open."
+    },
+    {
+      "source": "Native form wheel and scrollbar interaction",
+      "native": "Existing native ScrollViewer handler with background forwarding in both compiled WinUI scroll templates; opt-in plain-window wheel diagnostic",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-live-validation.json",
+        "samples/FerroBoard.Sample/wheel_routing_tests.rs",
+        "samples/FerroBoard.Sample/examples/wheel_routing_probe.rs",
+        "docs/native-wheel-routing.json",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Current native wheel scrolling and focused-field reveal pass selected Cua paths. Physical wheel/touchpad timing, other platforms and full native scrolling/layout interactions remain unverified.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "WordDictionary.Normalize / ASCII words",
+      "native": "Rust ASCII lowercase shortcut with one owned UTF-16 result; non-ASCII retains the unchanged Unicode algorithm",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/text/word_dictionary.rs",
+        "src/FerroBoard.Core/tests/native_dictionary_normalization.rs",
+        "docs/native-dictionary-normalization.json"
+      ],
+      "remaining": "All ASCII unit pairs, selected Unicode/error cases, 28 source/native dictionary/suggestion/learning/glide tests and exact Core-profile ranked outputs pass. Test-thread allocation measurements cover five words only; end-to-end native/UI latency, all allocations and physical/platform verification remain open."
+    },
+    {
+      "source": "KeysView ManipulationMode.None",
+      "native": "PointerEventArgs::prevent_gesture_recognition on keyboard press after native capture; native pointer lifetime resets exclusion.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/views/keys_view.rs",
+        "src/FerroBoard.Controls/views/keys_view_tests.rs",
+        "docs/native-gesture-containment.json"
+      ],
+      "remaining": "Raw Headless touch verifies containment, 0.75-scale coordinates, capture/release/cancel and sibling scrolling. Physical-device/all-platform recognizer behavior remains unverified."
+    },
+    {
+      "source": "ScreenKeyboard.Core and Uno reusable libraries / native Windows NLS integration",
+      "native": "Actual Windows target cfg compilation for Core, FerroBoard controls and an independent compiled source-style XAML consumer; MSVC release Core code generation and native NLS imports.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/NATIVE-WINDOWS-BUILD.md",
+        "docs/native-windows-build.json"
+      ],
+      "remaining": "GNU all-target Core check and MSVC release Core/all-target lint plus controls check pass. Independent compiled XAML consumer MSVC check also passes; its sample dependency disables Desktop. Native Windows execution, NLS data/behavior, desktop backend, focus/input/clipboard/accessibility and full port parity remain unverified. GNU release lacks host dlltool; MSVC release passes."
+    },
+    {
+      "source": "OnScreenKeyboard key popup overlay and KeyboardTouchProcessor popup selection/release",
+      "native": "Raw Headless mouse input selects the rendered popup visual through captured KeysView events; native TextBoxInputTarget receives \u00e1 with UTF-16 caret and external focus preserved.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/on_screen_keyboard_tests.rs",
+        "docs/NATIVE-KEY-POPUP.md",
+        "docs/native-key-popup.json"
+      ],
+      "remaining": "Three normal/scaled/one-handed/split-request configurations, effective split-gap precedence, before/at long-press delay, rendered selection, downward cancellation and raw contact disposal pass within eight owner tests. Real-window native popup/focus, physical touch/pen/multitouch and all-platform behavior remain unverified. No production algorithm change or runtime emulation."
+    },
+    {
+      "source": "Port-added CultureCollation .NET-tailored compatibility adapter",
+      "native": "Removed: the optional legacy-collation-compat feature, CultureCollation implementation, PAL-specific generated tables/generator and two legacy probes are retired. LocaleText remains the existing native platform service.",
+      "status": "implemented",
+      "evidence": [
+        "src/FerroBoard.Core/Cargo.toml",
+        "src/FerroBoard.Core/text/mod.rs",
+        "src/FerroBoard.Core/text/locale_text/mod.rs",
+        "src/FerroBoard.Core.Ferro/Cargo.toml",
+        "scripts/check_native_consumer.py",
+        "docs/native-remove-legacy-collation.json"
+      ],
+      "remaining": "No CLR comparer/bootstrap compatibility API is required. Actual native locale/platform verification remains scoped by the LocaleText mappings; this removal does not establish complete native/platform parity."
+    },
+    {
+      "source": "WordDictionary.FindSimilar / recursive Search temporary rows",
+      "native": "Invocation-local Vec row reuse; live ancestors own their rows and completed siblings reuse storage. No shared cache or callback memoization.",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/text/word_dictionary.rs",
+        "src/FerroBoard.Core/tests/native_dictionary_normalization.rs",
+        "docs/NATIVE-FUZZY-WORKSPACE.md",
+        "docs/native-fuzzy-workspace.json"
+      ],
+      "remaining": "Focused allocation and unchanged source behavioral fixtures cover this storage change. Native end-to-end latency, rendering allocations and complete API/platform/delivery verification remain incomplete."
+    },
+    {
+      "source": "Reusable-library metadata and native extension boundary / independent consumer",
+      "native": "Separate downstream Cargo workspace with public controls/Core/metadata dependencies only; source-style compiled XAML plus Rust target/provider/layout/action extensions.",
+      "status": "partially_verified",
+      "evidence": [
+        "tests/FerroBoard.Native.Consumer/Cargo.toml",
+        "tests/FerroBoard.Native.Consumer/tests.rs",
+        "scripts/check_native_consumer.py",
+        "docs/NATIVE-INDEPENDENT-CONSUMER.md",
+        "docs/native-independent-consumer.json",
+        "docs/native-consumer-runtime.json",
+        "docs/native-consumer-actions.json",
+        "docs/native-consumer-resources.json"
+      ],
+      "remaining": "Selected relative external theme/settings assets now pass compiled/pure-runtime and denied-source binary checks. Arbitrary assets, all extension cases, native OS/device/accessibility clients and complete metadata/platform delivery remain unverified."
+    },
+    {
+      "source": "SmartbarAction / SmartbarView.BuildActions and TouchButton.Click / public native extension activation",
+      "native": "Independent consumer source-style Actions.xaml plus public visual-tree mouse coordinates and Button/IInvokeProvider activation; callback uses KeyboardEngine, external TextBox remains focused.",
+      "status": "partially_verified",
+      "evidence": [
+        "tests/FerroBoard.Native.Consumer/Actions.xaml",
+        "tests/FerroBoard.Native.Consumer/tests.rs",
+        "docs/NATIVE-CONSUMER-ACTIONS.md",
+        "docs/native-consumer-actions.json",
+        "docs/native-consumer-runtime.json"
+      ],
+      "remaining": "The separate native consumer now passes both compiled and real runtime XAML scenarios, including arranged-control mouse and accessibility-provider activation of custom actions. Relative external assets, all extension cases, native OS/device/accessibility clients and complete metadata/platform delivery remain unverified."
+    },
+    {
+      "source": "Reusable library delivery / independent source consumer relocation",
+      "native": "Fresh source export with exact vendored SDK and separate consumer lock; all local manifests resolve inside moved source tree, with original checkout/SDK/old-target reads denied during build/tests.",
+      "status": "partially_verified",
+      "evidence": [
+        "scripts/export_source.py",
+        "tests/FerroBoard.Native.Consumer/Cargo.toml",
+        "docs/NATIVE-RELOCATED-CONSUMER.md",
+        "docs/native-relocated-consumer.json",
+        "docs/native-relocated-sample.json"
+      ],
+      "remaining": "An immutable earlier source export passes fresh relocated consumer builds and desktop startup/persistence with original paths denied. It predates current production fixes; a fresh final export/release gate is still needed. Signing/notarization, other machines/platforms, physical input and complete API/delivery remain open."
+    },
+    {
+      "source": "Independent consumer public markup loading / constructors, bindings, events and native extensions",
+      "native": "Eight functions: six positive scenarios in compiled/runtime modes, runtime-only error/retry checks and native emoji APIs. Seven compiled documents and four embedded runtime assets; source copies/resource identity preserved.",
+      "status": "partially_verified",
+      "evidence": [
+        "tests/FerroBoard.Native.Consumer/Cargo.toml",
+        "tests/FerroBoard.Native.Consumer/tests.rs",
+        "scripts/check_native_consumer.py",
+        "docs/NATIVE-CONSUMER-RUNTIME.md",
+        "docs/native-consumer-runtime.json",
+        "docs/native-consumer-resources.json"
+      ],
+      "remaining": "Selected resource graph and denied-original-path executable checks pass. Arbitrary markup/assets/extensions, native OS/device/assistive-client/platform/release verification remain open."
+    },
+    {
+      "source": "UserDictionary private learned counts and bigram contexts in Text/Suggestions.cs",
+      "native": "std HashMap lookup/count storage and BTreeMap ranking priorities; private domain-only WordCounts/PredictionContext; standard native snapshots",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Core/text/user_dictionary.rs",
+        "src/FerroBoard.Core/tests/native_learning_boundary.rs",
+        "scripts/learning-storage-reference/Program.cs",
+        "tests/fixtures/native-learning-storage.jsonl",
+        "docs/native-learning-storage.json"
+      ],
+      "remaining": "Selected source/reference, engine/privacy, sample and independent consumer checks pass. Broader native timing/allocation, platform/device and complete delivery verification remain open. Historical general CLR/BCL collection contracts are not reimplemented or delivery requirements."
+    },
+    {
+      "source": "Sample MainPage UI, App startup and source Loaded/Unloaded persistence",
+      "native": "One passive MainView shared by desktop MainWindow and MainViewSession; common Rc session composition, native single-view lifetime and explicit storage service injection",
+      "status": "partially_verified",
+      "evidence": [
+        "samples/FerroBoard.Sample/MainView.xaml",
+        "samples/FerroBoard.Sample/composition.rs",
+        "samples/FerroBoard.Sample/app.rs",
+        "samples/FerroBoard.Sample/single_view_tests.rs",
+        "samples/FerroBoard.Sample/tests/single_view_lifetime.rs",
+        "docs/native-single-view.json",
+        "docs/native-current-interaction.json"
+      ],
+      "remaining": "Headless startup/input-root/editing/lifecycle coverage and iOS sample-library compilation only. Native iOS executable/packaging, UIKit scene/background integration, runtime/device/accessibility/performance verification remain incomplete; Android/browser default locale and launchers remain missing.",
+      "latest_native_interaction": {
+        "status": "partially_verified",
+        "scope": "docs/native-current-interaction.json",
+        "limits": "Selected current Mac Cua paths only; not physical device, OS accessibility/IME, all interactions or other-platform proof."
+      }
+    },
+    {
+      "source": "Uno sample iOS target and application persistence platform services",
+      "native": "Separate Rust iOS launcher; Foundation NSFileManager Application Support URL, existing file adapter and real IFerroAppDelegate background subscription with RAII removal",
+      "status": "partially_verified",
+      "evidence": [
+        "samples/FerroBoard.iOS/main.rs",
+        "samples/FerroBoard.iOS/storage.rs",
+        "samples/FerroBoard.iOS/lifecycle.rs",
+        "scripts/bundle_ios.py",
+        "docs/native-ios-host.json"
+      ],
+      "remaining": "Three tests execute on Mac; simulator executable/bundle and device release compilation do not establish any iOS execution, native UI/scene/persistence/device parity."
+    },
+    {
+      "source": "Native text/password target platform input-method ownership",
+      "native": "Rust SystemInputMethodGuard over a removable FerroUI property priority value; keyboard-owned Android/iOS adapter factories and per-target RAII restoration",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/services/system_input_method_guard.rs",
+        "src/FerroBoard.Controls/input/text_box_input_target.rs",
+        "src/FerroBoard.Controls/tests/native_input_method.rs",
+        "docs/native-system-ime.json",
+        "docs/native-ios-feedback.json"
+      ],
+      "remaining": "Android selected runtime verified; iOS compile/source evidence only. Platform IME composition is disabled while owned; custom non-visual targets need explicit policy. Physical devices, broad IME/raw hardware input and native iOS behavior remain unverified."
+    },
+    {
+      "source": "ISuggestionProvider result ICollection/CopyTo facet (retired native migration)",
+      "native": "Standard FromIterator for Rc<Suggestion> and nullable candidates, including fallible Result collection; no managed CopyTo/capacity/destination-array alias",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-suggestion-iterators.json",
+        "src/FerroBoard.Core/text/suggestion_list.rs",
+        "src/FerroBoard.Core/tests/suggestion_list.rs",
+        "tests/FerroBoard.Native.Consumer/tests.rs"
+      ],
+      "remaining": "The existing resource-list storage/custom cursors and generic metadata remain legacy cleanup/isolation. Full native platform/performance/API verification remains open; 120 archived ICollection rows are intentionally retired, not matched."
+    },
+    {
+      "source": "PasswordBox native adapter/control privacy and suggestion errors",
+      "native": "ProtectedPasswordTextBox dependency XAML consumers and native password/PIN/public target checks; SuggestionError implements standard Rust Display/Error with existing collection cause",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-password-consumer.json",
+        "tests/FerroBoard.Native.Consumer/PrivacyHosted.xaml",
+        "tests/FerroBoard.Native.Android/password_probe.rs"
+      ],
+      "remaining": "Masked read-only/disabled cases, external caret/selection, complete native secure roles/assistive focus and every event channel, physical/API26/platform/release audit remain open."
+    },
+    {
+      "source": "PasswordBoxInputTarget.Replace and TextBoxInputTarget.Replace native adaptation",
+      "native": "Masked FerroUI TextBox follows live read-only/effective enabled policy before replacement; blocked edits leave text/caret/notifications unchanged, including pending paste completion.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-masked-edit-guards.json",
+        "src/FerroBoard.Controls/tests/native_editing_boundaries.rs"
+      ],
+      "remaining": "Intentional native policy migration from WinUI PasswordBox. Arbitrary external selection, pending detach, full secure roles/assistive clients/devices/platforms remain open."
+    },
+    {
+      "source": "KeyboardEngine.CopyAsync/CutAsync/PasteAsync and native target lifecycle",
+      "native": "Existing Rust futures use the live target after completion, with native UTF16 range updates, old-adapter RAII cleanup and focus/IME restoration.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-target-synchronization.json",
+        "src/FerroBoard.Controls/tests/native_target_synchronization.rs"
+      ],
+      "remaining": "No API migration or production change. Bounded injected-provider/API36 cases; arbitrary external IME/composition, physical devices, secure roles and all native panels/platforms remain open."
+    },
+    {
+      "source": "EmojiPanelView private page cache; OnScreenKeyboard emoji search and target restoration",
+      "native": "Private std HashMap with exact UTF16 key equality/native page identity. Actual default panel/search touch and Enter paths restore the original native target.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-emoji-panel.json",
+        "tests/FerroBoard.Native.Android/emoji_probe.rs"
+      ],
+      "remaining": "Private cache enumeration order is intentionally not a contract; no public API/metadata migration. Nondefault Back visibility follows source. Direct grid/tone/recent/scroll/all locales/physical/AX/IME/font/platform/performance/release scope remains open."
+    },
+    {
+      "source": "EmojiPanelView category/variant/recent actions and EmojiHistory notifications",
+      "native": "Existing public library behavior verified through actual Android touches, native cell drag/offset observations, ordered pin/remove snapshots, preference reuse and private non-recording.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-emoji-interaction.json",
+        "tests/FerroBoard.Native.Android/emoji_probe.rs"
+      ],
+      "remaining": "No production/API migration. Test-only scroll-container identifier and weak native observation. Full locales/configurations, physical/API26/other platforms, all popup cancellations/AX/IME/fonts/performance/release remain open."
+    },
+    {
+      "source": "OnScreenKeyboard resize point coordinates and ScreenKeyboardHost focused-field reveal",
+      "native": "Weak native root plus press-time root-to-keyboard Matrix; unchanged source scale math; existing queued native minimal bring-into-view",
+      "status": "partially_verified",
+      "evidence": [
+        "src/FerroBoard.Controls/on_screen_keyboard.rs",
+        "src/FerroBoard.Controls/screen_keyboard_host_tests.rs",
+        "docs/NATIVE-SCROLL-REVEAL.md",
+        "docs/native-scroll-reveal.json"
+      ],
+      "remaining": "Coordinate-frame migration is intentional, not a native Uno trace parity claim. Docked long-document visibility is verified; centered/animated reveal, canceled/overlapping/rotated/DPI-changing/physical/other-platform paths remain incomplete."
+    },
+    {
+      "source": "OnScreenKeyboard.TouchProcessor and SmartbarActions",
+      "native": "Read-only markup getters over original processor/shared Vec; native Rc identity carriers and actual FerroUI metadata/compiled bindings.",
+      "status": "partially_verified",
+      "evidence": [
+        "docs/native-control-members.json",
+        "docs/NATIVE-CONTROL-MEMBERS.md",
+        "tests/FerroBoard.Native.Consumer/TouchConfiguration.xaml",
+        "tests/FerroBoard.Native.Consumer/ActionDetails.xaml",
+        "tests/FerroBoard.Native.Consumer/tests/action_metadata.rs"
+      ],
+      "remaining": "Selected markup configuration/data/collection paths only. Other touch state/events/scheduler contracts stay Rust APIs; full API/native/platform/AX/performance/release proof remains incomplete."
+    }
+  ],
+  "input_static_supplement": "docs/input-static.json",
+  "focus_interaction_scope": "docs/focus-interaction.json",
+  "focus_framework_roles_scope": "docs/focus-framework-roles.json",
+  "native_focus_attempt": "docs/native-focus.json",
+  "native_focus_attempt_limit": "Pre-fix private macOS sample process observed;UI tool blocked by locked Mac. No current-code native focus/rendering/input success is claimed.",
+  "evaluator_default_scalars_scope": "docs/evaluator-default-scalars.json",
+  "clock_delegate_identity_scope": "docs/clock-delegate-identity.json",
+  "clock_hash_binding_scope": "docs/clock-hash-binding.json",
+  "method_binding_lifetime_scope": "docs/method-binding-lifetime.json",
+  "computed_key_text_scope": "docs/computed-key-text.json",
+  "computed_key_properties_scope": "docs/computed-key-properties.json",
+  "text_key_covariance_scope": "docs/text-key-covariance.json",
+  "geometry_record_scope": "docs/geometry-record.json",
+  "compute_context_state_scope": "docs/compute-context-state.json",
+  "compute_context_record_scope": "docs/compute-context-record.json",
+  "currency_set_api_scope": "docs/currency-set-api.json",
+  "compute_context_api_scope": "docs/compute-context-api.json",
+  "computed_null_context_scope": "docs/computed-null-context.json",
+  "popup_mapping_state_scope": "docs/popup-mapping-state.json",
+  "popup_dictionary_api_scope": "docs/popup-dictionary-api.json",
+  "native_focus_unlocked_scope": "docs/native-focus-unlocked.json",
+  "winui_theme_default_scope": "docs/winui-theme-default.json",
+  "popup_mapping_api_scope": "docs/popup-mapping-api.json",
+  "computed_rows_null_scope": "docs/computed-rows-null.json",
+  "computed_keyboard_api_scope": "docs/computed-keyboard-api.json",
+  "layout_computer_api_scope": "docs/layout-computer-api.json",
+  "subtype_records_scope": "docs/subtype-records.json",
+  "native_engine_default_ownership": {
+    "status": "partially_verified",
+    "scope": "docs/native-engine-defaults.json",
+    "guide": "docs/NATIVE-RESOURCES.md",
+    "migration": "Owned bundled defaults and explicit Rc sharing replace source process-global mutable Default identity; no global/TLS/runtime emulation.",
+    "metadata": "Existing three-argument constructor retained; parameterless constructor appended and independent compiled/runtime consumer verified.",
+    "remaining": "Physical platform/API/performance scope incomplete; 16 source singleton identity rows remain source-only."
+  },
+  "current_reconciliation": {
+    "date": "2026-10-29",
+    "evidence": "docs/native-delivery-audit.json",
+    "reconciled_entries": [
+      "TextChanged/SelectionChanged and DispatcherQueue low-priority suppression",
+      "Native reusable library metadata",
+      "KeyboardTheme/KeyStyleRule plain reference models and lists",
+      "KeyboardThemes static registry and Changed",
+      "FocusNeutral.Apply",
+      "PanelUi and ClipboardPanelView",
+      "EditingPanelView",
+      "EmojiPanelView categories/tabs/pages and tone/history actions",
+      "OnScreenKeyboard owner and dependency properties",
+      "Core plain object metadata and original namespace registration",
+      "SettingsPanel StringComparer.CurrentCulture / CurrentCultureIgnoreCase and String.Contains dependency",
+      "Sample startup and layout/settings locale sorting on Windows/Linux",
+      "Core resource, layout, dictionary and touch performance verification",
+      "Reusable-library metadata and native extension boundary / independent consumer",
+      "SmartbarAction / SmartbarView.BuildActions and TouchButton.Click / public native extension activation",
+      "Reusable library delivery / independent source consumer relocation"
+    ],
+    "remaining": "Current native delivery matrix supersedes historical missing/CLR claims. Android/browser launchers exist; iOS runtime, Windows/Linux execution, complete native API/metadata, device/accessibility/performance and final release audits remain open. General CLR/BCL emulation is excluded."
+  },
+  "partially_verified_services": [
+    "SystemClipboardService",
+    "KeyboardHaptics",
+    "EmojiFontFallbackService"
+  ],
+  "partially_verified_controls": [
+    "FocusNeutral",
+    "OnScreenKeyboard",
+    "ScreenKeyboardHost",
+    "previews/popups",
+    "smartbar/quick actions",
+    "emoji/clipboard/editing/language panels",
+    "glide trail renderer",
+    "editable XAML/ReactiveUI sample",
+    "KeysView key grid/pointer routing",
+    "keyboard-level live theme application/system light-dark following"
+  ],
+  "category_status_note": "Former unimplemented lists were stale: these services/controls have native implementations and selected evidence. They remain partially verified; the mapping entries and functional status document specific native limitations. List membership is not a completion claim.",
+  "native_relocated_sample_delivery": {
+    "scope": "docs/native-relocated-sample.json",
+    "status": "partially_verified",
+    "remaining": "Native OS/device interaction, release signing and other-platform/machine checks remain unverified."
+  },
+  "native_touch_contact_storage": {
+    "scope": "docs/native-touch-storage.json",
+    "status": "partially_verified",
+    "remaining": "Physical/native OS/device/performance and complete API/platform verification remain open."
+  },
+  "native_touch_handle_retirement": {
+    "scope": "docs/native-touch-drop.json",
+    "status": "partially_verified",
+    "remaining": "Selected public scheduler Drop reentry verified; arbitrary destructor faults and native OS/device/platform checks remain open."
+  },
+  "native_button_handle_retirement": {
+    "scope": "docs/native-button-retirement.json",
+    "status": "partially_verified",
+    "remaining": "Selected timer/scheduler retirement reentry covered; native OS/devices, arbitrary destructor faults and complete delivery audit remain open."
+  },
+  "native_input_selection_notifications": {
+    "scope": "docs/native-selection-notifications.json",
+    "status": "partially_verified",
+    "remaining": "Superseded for native TextBox operations by native-selection-signal: read-only/untemplated/inactive fields observe completed operations. Independent property setters remain independent operations. Full native/IME/device verification remains open."
+  },
+  "native_learning_storage_scope": "docs/native-learning-storage.json",
+  "native_ios_locale_scope": "docs/native-ios-locale.json",
+  "native_single_view_sample_scope": "docs/native-single-view.json",
+  "native_current_workspace_scope": "docs/native-current-workspace.json",
+  "native_current_relocation_scope": "docs/native-current-relocation.json",
+  "native_android_locale_scope": "docs/native-android-locale.json",
+  "native_android_host_scope": "docs/native-android-host.json",
+  "native_system_ime_scope": "docs/native-system-ime.json",
+  "native_ios_feedback_scope": "docs/native-ios-feedback.json",
+  "native_android_services_scope": "docs/native-android-services.json",
+  "native_android_pointers_scope": "docs/native-android-pointers.json",
+  "native_android_cancellation_scope": "docs/native-android-cancellation.json",
+  "native_android_canceled_pointer_scope": "docs/native-android-canceled-pointer.json",
+  "native_android_clipboard_scope": "docs/native-android-clipboard.json",
+  "native_browser_locale_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-browser-locale.json",
+    "native_core_probe": "Node and actual IAB pass; no browser keyboard UI claim",
+    "remaining": "Browser sample now runs with selected input/storage evidence; threaded, complete native controls/services/OS/device and full API verification remain open."
+  },
+  "native_browser_host_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-browser-host.json",
+    "native": "Shared compiled XAML sample, real FerroUI browser controls/input, native web storage and artifact/dependency checks.",
+    "remaining": "Opaque-frame activation, mobile/physical/other-browser, full accessibility/services/lifecycle/performance and final delivery remain open."
+  },
+  "native_emoji_vectors_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-emoji-vectors.json",
+    "native": "Shared Arc<parking_lot::Mutex<Vec<_>>>; owned Arc iterator snapshots and Vec search results; standard Display/Error and typed causes. Live catalog/history edits and event order retained.",
+    "intentional_migrations": [
+      "No .NET fixed-array restrictions, mutation-version exceptions or shared unrelated empty-array identity.",
+      "History remains single-threaded; cached catalog data stays shared; consumers release guards before callbacks."
+    ],
+    "remaining": "Broad UI/device/font/assistive-client/performance/platform/release evidence remains open."
+  },
+  "native_emoji_search_cost_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-emoji-search-cost.json",
+    "native": "Borrowed UTF-16 terms, slice split iterators and synchronous per-entry keyword guards; no cache or async behavior.",
+    "evidence": "36 exact native before/after ranked outputs, source corpora, allocation regression and selected engine/control/consumer checks.",
+    "remaining": "Native UI/device/rendering/other-platform latency and complete release/performance verification remain open."
+  },
+  "native_consumer_resources_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-consumer-resources.json",
+    "native": "Seven compiled XAML documents and four embedded runtime-only assets use real FerroUI relative includes and public native settings/theme metadata. Source settings copies, shared theme identity and typed asset/number errors tested.",
+    "remaining": "Arbitrary resource/markup forms, plain model roots, native OS/device/accessibility/performance and full release remain open."
+  },
+  "native_theme_vectors_scope": "docs/native-theme-vectors.json",
+  "native_suggestion_iterators_scope": "docs/native-suggestion-iterators.json",
+  "native_android_pointer_repeatability_scope": "docs/native-android-pointer-repeatability.json",
+  "native_password_consumer_scope": "docs/native-password-consumer.json",
+  "native_masked_edit_guards_scope": "docs/native-masked-edit-guards.json",
+  "native_target_synchronization_scope": "docs/native-target-synchronization.json",
+  "native_emoji_panel_scope": "docs/native-emoji-panel.json",
+  "native_emoji_interaction_scope": "docs/native-emoji-interaction.json",
+  "native_clipboard_panel_scope": "docs/native-clipboard-panel.json",
+  "native_host_activity_scope": "docs/native-host-activity.json",
+  "native_layout_interaction_scope": "docs/native-layout-interaction.json",
+  "native_scroll_reveal_scope": "docs/native-scroll-reveal.json",
+  "native_drag_cancellation_scope": "docs/native-drag-cancellation.json",
+  "native_orientation_scope": "docs/native-orientation.json",
+  "native_first_tap_scope": "docs/native-first-tap.json",
+  "native_transform_scope": "docs/native-transform.json",
+  "native_android_glide_scope": "docs/native-android-glide.json",
+  "native_glide_casing_scope": "docs/native-glide-casing.json",
+  "native_key_errors_scope": "docs/native-key-errors.json",
+  "native_layout_change_scope": "docs/native-layout-change.json",
+  "native_control_members_scope": "docs/native-control-members.json",
+  "native_source_package_scope": "docs/native-source-package.json",
+  "native_multi_window_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-multi-window.json",
+    "scope": "Real desktop two-window sample probe, public native smartbar callbacks and App::construct base-construction helper; Core/control API unchanged.",
+    "remaining": "Initial native activation focus loss remains unresolved; Headless restoration and later native round trips do not prove startup/activation reliability."
+  },
+  "native_activation_comparison_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-activation-comparison.json",
+    "scope": "Standalone framework focus comparison and diagnostic-only sample probe changes; public Core/control API unchanged.",
+    "remaining": "Controlled A/B check records six peer actions including setup, with two full return cycles preserving exact values and targets. Computed lowercase-b replacement survives a further cycle. Earlier B-to-Ban remains unassigned/non-reproduced; broad native reliability and full API scope remain open."
+  },
+  "native_language_errors_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-language-errors.json",
+    "scope": "Standard Rust Error/Display and borrowed causes for dictionary, normalization, learning, glide, language models and engine/suggestion wrappers; cached Arc/panic payload identity retained.",
+    "remaining": "Selected downstream native Rust integration; complete API, physical devices, platform/accessibility/performance and release verification remain open."
+  },
+  "native_offline_source_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-offline-source.json",
+    "scope": "Optional native Cargo registry source bundle for all six locked native workspaces; public keyboard API unchanged.",
+    "remaining": "Detached extracted build evidence is separate from source integrity; full native API/device/platform/accessibility/performance/signing/publication verification remains open."
+  },
+  "native_selection_write_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-selection-write.json",
+    "scope": "Native TextBox caret/range change scope; active clients see final ranges across keyboard adapters; same-caret collapse clears selection.",
+    "remaining": "The inactive/unavailable-client notification gap is corrected by native-selection-signal. Full native/platform/device/IME/API verification remains open."
+  },
+  "native_selection_signal_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-selection-signal.json",
+    "scope": "Native TextBox selection signal uses existing change scopes independently of presenter/IME activation; adapter owns one weak selection subscription and no input client request.",
+    "remaining": "Independent endpoint property writes are independent operations. Broad physical/native IME/platform/accessibility/API verification and final release remain incomplete."
+  },
+  "native_member_inventory_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-member-inventory.json",
+    "mapping": "docs/native-member-map.json",
+    "scope": "173 declarations in three Core files, with native migrations and existing behavioral evidence; 88 stale missing flags reconciled.",
+    "remaining": "Subsequent audits extend mapping to 535 declarations in eight files, with 53 missing-labelled declarations for review. Explicit legacy boundaries are not completion requirements. Full useful API/XAML/native/platform/device/accessibility/performance/release scope remains open."
+  },
+  "native_key_composer_audit_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-key-composer-audit.json",
+    "mapping": "docs/native-member-map.json",
+    "scope": "97 KeyCode constants, nine settings enum types and 66 names, all source-written composer declarations, and independent mutable-composer integration; 231 added mappings and 212 stale flags reconciled.",
+    "remaining": "Subsequent JSON/key audit extends mapping to 535 declarations and leaves 53 missing-labelled declarations to review; counts are not feature totals or a percentage. Full useful API/native/IME/platform/accessibility/performance/release scope remains open."
+  },
+  "native_layout_errors_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-layout-errors.json",
+    "mapping": "docs/native-member-map.json",
+    "scope": "Standard layout Error/Display, borrowed resource error causes, retryable lazy I/O and JSON/key source declarations; 131 mappings added and 39 stale missing labels reconciled.",
+    "remaining": "Existing LayoutJsonError message flattening and 12 explicit legacy boundaries remain documented. Full native API/XAML/IME/platform/device/accessibility/performance/release verification remains open."
+  },
+  "native_current_package_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-current-package.json",
+    "scope": "Fresh immutable offline development source package, current selected SDK and native consumers; archive integrity and detached fresh-build evidence are separate.",
+    "remaining": "Current-host source build does not establish full native GUI/IME/device/platform/accessibility/performance/registry/signing/release parity. Resource/default/clipboard source helpers remain native migrations or documented limits; no CLR emulation is requested."
+  },
+  "native_subtype_fallback_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-subtype-fallback.json",
+    "behavior": "Native lookup rejection uses existing invariant casing for activation and returns original tag for display. Null/encoding errors remain explicit; no runtime emulation.",
+    "member_inventory": "2155 partially_verified / 52 missing / 1 dependency_blocked; labels are not feature counts or completion percentages.",
+    "remaining": "Current native runtime and complete public API/platform/device/accessibility/performance/release verification remain open."
+  },
+  "native_android_selection_scope": {
+    "status": "partially_verified",
+    "evidence": "docs/native-android-selection.json",
+    "native_cases": "Current-SDK API36 ARM64: three selection runs (12 cases) and three unchanged pointer runs (93 assertions). Exact UTF16 ranges/reentrant text+caret/inactive target behavior; synthetic OS taps, real controls.",
+    "production_or_sdk_changes": false,
+    "remaining": "Mac current selection probe, physical/API26/pen/complete IME/AX/performance/release and full useful API verification remain open."
+  },
+  "native_android_accessibility_focus_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-android-accessibility-focus.json",
+    "native_focus_actions": true,
+    "keyboard_and_accessibility_focus_distinct": true,
+    "physical_assistive_client_verified": false
+  },
+  "native_glide_unit_casing_scope": {
+    "scope": "docs/native-glide-unit-casing.json",
+    "status": "partially_verified",
+    "public_api_changes": false,
+    "exhaustive_unit_outputs": 65536,
+    "allocation_tests": 2
+  },
+  "native_source_refresh_scope": {
+    "status": "partially_verified",
+    "scope": "docs/native-source-refresh.json",
+    "native_workspaces": 7,
+    "public_api_changes": false,
+    "validation": "fresh extracted consumer25/strict lint/sample build passed; separate pinned native rendering prerequisite; no GUI runtime proof",
+    "receipt": "/Volumes/SSD/temp/ferrokeyboard/native-source-refresh-stage/FerroBoard-source-20261031-current.tar.gz.validation.json",
+    "archive_sha256": "8a39be3511e50e188e44ec8104a6ea7df4b4b00a3b188e7ae91df254a2f5f8bb"
+  },
+  "native_browser_selection_scope": {
+    "scope": "docs/native-browser-selection.json",
+    "status": "partially_verified",
+    "native_api_changes": false,
+    "platform_correction": "actual text-input selection subscription and selection-only DOM bridge",
+    "native_scenarios": 8
+  },
+  "native_extension_disposal_scope": {
+    "scope": "docs/native-extension-disposal.json",
+    "status": "partially_verified",
+    "public_api_changes": false,
+    "new_failing_before_regressions": 9,
+    "ownership": "release callback/provider/composer captures after registry locks and borrows end"
+  },
+  "native_browser_input_options_scope": {
+    "scope": "docs/native-browser-input-options.json",
+    "status": "partially_verified",
+    "public_api_changes": false,
+    "private_native_editor": true,
+    "remaining": "Sample native InputScope equivalents, native multiline, complete device IME/accessibility/lifecycle verification"
+  },
+  "native_sample_input_options_scope": {
+    "scope": "docs/native-sample-input-options.json",
+    "status": "partially_verified",
+    "sample_fields": 8,
+    "public_library_api_changes": false,
+    "remaining": "Browser multiline DOM editor/caret normalization, native phone-specific input hint and full platform/device IME verification",
+    "current_followup": "docs/native-browser-multiline.json"
+  },
+  "native_browser_multiline_scope": {
+    "scope": "docs/native-browser-multiline.json",
+    "status": "partially_verified",
+    "public_library_api_changes": false,
+    "public_multiline_native_typing": true,
+    "source_utf16_offsets": true,
+    "remaining": "Sensitive multiline, non-password private-field policy, complete IME/preedit/cancellation, physical devices, accessibility, latency and full API/release verification",
+    "current_followup": "docs/native-browser-sensitive-text.json"
+  },
+  "native_browser_sensitive_text_scope": {
+    "scope": "docs/native-browser-sensitive-text.json",
+    "status": "partially_verified",
+    "public_keyboard_api_changes": false,
+    "native_framework_extension": "TextInputMethodClient::input_options(focused_element, options), default pass-through",
+    "remaining": "Full native option lifecycle/live-role handling, composition/device/assistive-client/privacy-path/performance/release/API verification"
+  },
+  "native_browser_input_lifetime_scope": {
+    "scope": "docs/native-browser-input-lifetime.json",
+    "status": "partially_verified",
+    "public_keyboard_api_changes": false,
+    "native_framework_change": "Browser composition cancellation, context checks and Rust RAII subscription/root cleanup",
+    "remaining": "Physical/mobile IME, complete beforeinput ordering, cross-session DOM ordering, other-platform current SDK runtime, broad API/performance/release verification"
+  },
+  "native_source_input_refresh_scope": {
+    "scope": "docs/native-source-input-refresh.json",
+    "status": "partially_verified",
+    "archive": {
+      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz",
+      "sha256": "f9f4aa1d16d950d790482f6eac6b100966e0d98480683617d818589c0f71fabd"
+    },
+    "receipt": {
+      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz.validation.json",
+      "sha256": "a3f040dd483ce31723920868580d01a3b54c21c149a7d46722bc0724eedb6b01"
+    },
+    "validation": "Fresh extracted consumer34, strict lint and desktop sample build with original paths/network denied; native runtime not rerun",
+    "public_api_changes": false
+  },
+  "native_macos_input_current_scope": {
+    "scope": "docs/native-macos-input-current.json",
+    "status": "partially_verified",
+    "native_cases": 29,
+    "tab_steps": 10,
+    "public_api_changes": false,
+    "unassigned": "Initial default-duration mouse Enter miss; explicit150ms/AX/native Return work",
+    "remaining": "Native short-click reproducibility, physical IME/devices/VoiceOver, native option/secure-mode flags, complete API/performance/release verification"
+  },
+  "native_control_contracts_scope": {
+    "scope": "docs/native-control-contracts.json",
+    "map": "docs/native-control-contract-map.json",
+    "status": "partially_verified",
+    "public_control_declarations": 47,
+    "primary_constructor_explicit": true,
+    "ownership_fix": "Explicit release preserves caller/other-view engine targets, matching Rust Drop; Detach remains explicit.",
+    "workspace_tests": 999,
+    "independent_consumer_tests": 39,
+    "remaining": "Core/other-control/attached-property and all XAML event-route coverage, native IME/device/AX/performance/release verification"
+  },
+  "native_source_control_refresh_scope": {
+    "scope": "docs/native-source-control-refresh.json",
+    "status": "partially_verified",
+    "archive": {
+      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz",
+      "sha256": "70694c6f38054f08c6e343c6d3ad84ccd42d2c982d83074ba4c3a31bce58334e"
+    },
+    "receipt": {
+      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz.validation.json",
+      "sha256": "0e822d57ff29b9ebf7d67822dfe2a9f5176bd17db6bec5fc2cd9289d95fbcc6b"
+    },
+    "source_equivalent_consumer_tests": 39,
+    "fresh_compile_rerun": false,
+    "native_runtime_selected": true,
+    "public_api_changed_by_delivery": false
+  },
+  "native_glide_workspace_scope": {
+    "scope": "docs/native-glide-workspace.json",
+    "status": "partially_verified",
+    "public_api_changed": false,
+    "storage": "Local Rust Vec reuse within synchronous classifier calls; no new persistent cache or scheduling",
+    "source_rankings_exact": true,
+    "workspace_tests": 1002,
+    "independent_consumer_tests": 39,
+    "remaining": "End-to-end UI/device/performance, broader classifier inputs and full native API/release review"
+  },
+  "native_shared_view_scope": {
+    "scope": "docs/native-shared-view.json",
+    "status": "partially_verified",
+    "native_platform": "macOS arm64",
+    "native_action_cases": 7,
+    "public_api_changed": false,
+    "behavior": "Public explicit-release ownership preserves the other shared view target; repeated release, visual removal and active-adapter detach exercised natively",
+    "remaining": "Other shared-view/reentrant/search configurations, physical devices, broad IME/AX/multiwindow/platform/API/performance/release verification"
+  },
+  "native_input_ownership": {
+    "scope": "docs/native-input-ownership.json",
+    "sdk_revision": "1d6d25dc629595d8f438dd0f629f5f45e50df872",
+    "source_dispose_migration": "TextBoxInputTarget/PasswordBoxInputTarget use final Rc Drop or explicit detach(); IDisposable implementations and compatibility aliases are removed",
+    "keyboard_ownership": "Private Rust enum of concrete native adapters; Core ITextInputTarget remains the custom-target contract",
+    "private_sdk_boundary": "Native selection notifications still return the actual SDK0.4 subscription handle; it is private and retired using that SDK contract",
+    "full_native_verification": false
+  },
+  "native_legacy_collation_removal": {
+    "evidence": "docs/native-remove-legacy-collation.json",
+    "scope": "Current native source removes the optional CLR/PAL comparer rather than retaining an opt-in compatibility runtime; native locale and keyboard Unicode behavior remain unchanged."
+  },
+  "native_popup_scope": {
+    "sdk_revision": "1d6d25dc629595d8f438dd0f629f5f45e50df872",
+    "evidence": "docs/native-popup-check.json",
+    "scope": "Current rebuilt RAM sample native mouse long-press default alternatives, language-picker choice/backdrop dismissal/focus and external configuration dropdown/Escape/typing recovery observed. No new library code or full platform/device/accessibility/close-lifecycle proof."
+  },
+  "native_latest_main_selection": {
+    "sdk": "9c66b15cca1e0778e83a4ef4f848ff5839d3ae02",
+    "base": "cd89e3f3b08fe5a1f8cc64a385dd9fbf6aa2770a",
+    "evidence": "docs/native-upstream-main.json",
+    "scope": "Same native control patch bytes, new upstream graphics/docs. Previous native GUI scopes remain historical until current-SDK runtime checks."
+  }
+}

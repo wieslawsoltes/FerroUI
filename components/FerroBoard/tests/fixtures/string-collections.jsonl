@@ -1,0 +1,22 @@
+{"tag":"type","name":"System.Collections.Generic.IReadOnlyList\u00601[System.String]","isInterface":true,"interfaces":["System.Collections.Generic.IEnumerable\u00601[System.String]","System.Collections.Generic.IReadOnlyCollection\u00601[System.String]","System.Collections.IEnumerable"]}
+{"tag":"property","owner":"System.Collections.Generic.IReadOnlyList\u00601[System.String]","name":"Item","type":"System.String","read":true,"write":false,"index":["System.Int32"]}
+{"tag":"source-only-variance","owner":"System.Collections.Generic.IReadOnlyList\u00601[System.String]","variance":["Covariant"]}
+{"tag":"type","name":"System.Collections.Generic.IReadOnlyCollection\u00601[System.String]","isInterface":true,"interfaces":["System.Collections.Generic.IEnumerable\u00601[System.String]","System.Collections.IEnumerable"]}
+{"tag":"property","owner":"System.Collections.Generic.IReadOnlyCollection\u00601[System.String]","name":"Count","type":"System.Int32","read":true,"write":false,"index":[]}
+{"tag":"source-only-variance","owner":"System.Collections.Generic.IReadOnlyCollection\u00601[System.String]","variance":["Covariant"]}
+{"tag":"type","name":"System.Collections.Generic.IEnumerable\u00601[System.String]","isInterface":true,"interfaces":["System.Collections.IEnumerable"]}
+{"tag":"method","owner":"System.Collections.Generic.IEnumerable\u00601[System.String]","name":"GetEnumerator","returns":"System.Collections.Generic.IEnumerator\u00601[System.String]","parameters":[],"virtualMethod":true,"abstractMethod":true}
+{"tag":"source-only-variance","owner":"System.Collections.Generic.IEnumerable\u00601[System.String]","variance":["Covariant, AllowByRefLike"]}
+{"tag":"type","name":"System.Collections.IEnumerable","isInterface":true,"interfaces":[]}
+{"tag":"method","owner":"System.Collections.IEnumerable","name":"GetEnumerator","returns":"System.Collections.IEnumerator","parameters":[],"virtualMethod":true,"abstractMethod":true}
+{"tag":"type","name":"System.Collections.Generic.IEnumerator\u00601[System.String]","isInterface":true,"interfaces":["System.Collections.IEnumerator","System.IDisposable"]}
+{"tag":"property","owner":"System.Collections.Generic.IEnumerator\u00601[System.String]","name":"Current","type":"System.String","read":true,"write":false,"index":[]}
+{"tag":"source-only-variance","owner":"System.Collections.Generic.IEnumerator\u00601[System.String]","variance":["Covariant, AllowByRefLike"]}
+{"tag":"type","name":"System.Collections.IEnumerator","isInterface":true,"interfaces":[]}
+{"tag":"property","owner":"System.Collections.IEnumerator","name":"Current","type":"System.Object","read":true,"write":false,"index":[]}
+{"tag":"method","owner":"System.Collections.IEnumerator","name":"MoveNext","returns":"System.Boolean","parameters":[],"virtualMethod":true,"abstractMethod":true}
+{"tag":"method","owner":"System.Collections.IEnumerator","name":"Reset","returns":"System.Void","parameters":[],"virtualMethod":true,"abstractMethod":true}
+{"tag":"type","name":"System.IDisposable","isInterface":true,"interfaces":[]}
+{"tag":"method","owner":"System.IDisposable","name":"Dispose","returns":"System.Void","parameters":[],"virtualMethod":true,"abstractMethod":true}
+{"tag":"snapshot","same":false,"before":[[65,108,112,104,97],[66,101,116,97]],"after":[[65,108,112,104,97],[66,101,116,97],[71,97,109,109,97]],"mutable":true}
+{"tag":"property","owner":"DictionarySuggestionProvider","same":true,"values":[[99,104,97,110,103,101,100],null,[55296]]}

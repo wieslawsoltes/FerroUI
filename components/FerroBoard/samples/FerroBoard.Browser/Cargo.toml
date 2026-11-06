@@ -1,0 +1,24 @@
+[package]
+name = "ferroboard-browser"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[workspace]
+
+[[bin]]
+name = "ferroboard-browser"
+path = "program.rs"
+
+[dependencies]
+ferroboard-sample = { path = "../FerroBoard.Sample", default-features = false }
+ferroboard-core = { path = "../../src/FerroBoard.Core" }
+ferroui-base = { path = "../../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../../src/FerroUI.Controls" }
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+ferroui-browser = { path = "../../../../src/Browser/FerroUI.Browser" }
+ferroui-fonts-inter = { path = "../../../../src/FerroUI.Fonts.Inter" }
+wasm-bindgen = "=0.2.129"
+web-sys = { version = "=0.3.106", features = ["Window", "Storage", "console"] }

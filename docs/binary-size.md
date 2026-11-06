@@ -350,56 +350,93 @@ found and refused exactly as before.
 | Executable | 51.26 MB | 50.71 MB | -0.55 MB (-1.1 %) |
 
 The rest of #566 makes the tables of types that every crate registers at start-up (6.5 MB of hello
-world, measured by building it without them) registered only by what looks types up by name.
+world, measured by building it without them) registered only by what looks types up by name
+(section 4.6).
 
-### 4.6 Trimming the tables of types (#566, part 2, opt-in)
+### 4.6 Trimming the tables of types (#566)
 
 Every crate's `register_types()` registers its table of classes, its markup assembly and its markup
 types at start-up. The tables reference every class with its constructor, properties and markup
-accessors, so the linker keeps all of them. An application that loads only compiled markup does
-not look types up by name, and can opt out of the tables with the `ferroui-base` feature
-`trim-type-tables`:
-
-```toml
-ferroui-base = { workspace = true, features = ["trim-type-tables"] }
-```
+accessors, so the linker kept all of them. By default the tables are now trimmed: an application
+that loads only compiled markup does not look types up by name, and does not register them.
 
 A crate of the framework registers its tables with the trimmable forms `TypeInfo::register_table`,
-`MarkupType::register_table` and `MarkupAssembly::register_table`. These are then inlined no-ops,
-and link-time optimisation drops what only the tables reach. A type is still registered when it is
-first used: a class when it is initialised, with its markup metadata (`TypeInfo::markup`).
+`MarkupType::register_table` and `MarkupAssembly::register_table`. Without the `ferroui-base`
+feature `type-tables` these are inlined no-ops, and link-time optimisation drops what only the
+tables reach. A type is still registered when it is used:
+- a class when it is initialised, with its markup metadata (`TypeInfo::markup`);
+- the metadata of the value type of a property (`T` or `Option<T>` with metadata) when the property
+  is registered (`MarkupType::register_used`), so enumeration members convert to text and text
+  parses to value types;
+- the metadata of the value types of the properties of a registered type
+  (`MarkupProperty::value_markup`), which a binding through a view-model property finds by handle;
+- the classes named by the reflection-binding paths of a compiled document (`$parent[TextBox]`,
+  `(DataValidationErrors.HasErrors)`), which the compiler resolves into typed references in the
+  namespace table of the document.
 
 The plain functions `TypeInfo::register_all`, `MarkupType::register`, `MarkupType::register_all`
 and `MarkupAssembly::register` always register, whatever the features say. An application
 registers its own types (its view models, its assembly) with them from its `register_types()`, so
-its reflection bindings find its own properties with the tables trimmed, and it needs no change
-when trimming becomes the default.
+its reflection bindings find its own properties with no change.
 
-What looks types up by name enables the feature `type-tables`, which keeps the tables whatever an
-application says. These are:
+What looks types up by name enables the feature `type-tables`, which keeps the tables. These are:
 - the run-time XAML loader, the designer and `ferroui-designer-support`;
 - diagnostics, DevTools, hot reload and Inspect;
 - the declarative View API, which parses selector strings;
 - the behaviors' member lookup.
 
-Feature unification gives the tables to every application that links one of them.
+Feature unification gives the tables to every application that links one of them. An application
+that looks types up by name itself enables the feature:
+
+```toml
+ferroui-base = { workspace = true, features = ["type-tables"] }
+```
 
 | `samples/HelloWorld`, `dist`, macOS ARM64 | Size | Start-up (median of 9) |
 |---|---:|---:|
-| main | 50.78 MB | 214 ms |
-| `trim-type-tables` | 44.36 MB (**-6.42 MB, -12.6 %**) | 215 ms |
+| with the tables (before #566) | 50.78 MB | 214 ms |
+| trimmed, opt-in (#582) | 44.36 MB | 215 ms |
+| trimmed, with what trimmed builds need (#583, the default) | 45.28 MB (**-5.50 MB, -10.8 %**) | |
 
-The feature is opt-in for now. Without the tables, a compiled-markup application differs in three
-edge cases:
-- setting null through untyped code on a property whose value is the handle of a class that was
-  never initialised;
-- conversions of text or numbers to an enumeration in run-time bindings, which use the enumeration's
-  markup metadata;
-- looking up by name a type that was never used.
+The default was flipped after a run of 24 compiled desktop samples without the tables: with the
+fixes of #583, each logs exactly what it logs with the tables (`FERROUI_SMOKE_EXIT_MS`, binding
+diagnostics compared sample for sample).
 
-Once a test run of the compiled samples without the tables covers these cases and they are fixed,
-trimming becomes the default. Hello world opts in as the example.
+### 4.7 Unwinding (#567)
 
+Every function that owns a value with a destructor has a landing pad and unwind records, so a panic
+can run the destructors on its way up. In hello world's `dist` build these are 6.63 MB of unwind
+sections (`__eh_frame` 3.67 MB, `__gcc_except_tab` 2.23 MB, `__unwind_info` 0.73 MB) and about
+3.1 MB of landing-pad code in `__text`.
+
+Panics used as exceptions are not what keeps them. `ferroui-base` has 30 sites of
+`catch_unwind`, `resume_unwind` and `panic_any` outside tests, and every one is a boundary:
+the dispatcher loop and its jobs, the render loop, the isolation of user handlers, or the rethrow
+of a caught panic after cleanup (the try/finally of the original). The classification is in
+[porting/panics-as-exceptions.md](porting/panics-as-exceptions.md). Turning panics into `Result`
+removes few of these records. The cost comes from unwinding itself.
+
+An application that treats any panic as fatal can build without unwinding, with the opt-in
+profile `dist-abort` (`cargo build --profile dist-abort`, `panic = "abort"` over `dist`):
+
+| `samples/HelloWorld`, macOS ARM64, tables of types trimmed | `dist` | `dist-abort` |
+|---|---:|---:|
+| executable | 45.28 MB | 35.71 MB (**-9.57 MB, -21 %**) |
+| `__text` | 34.48 MB | 31.35 MB |
+| unwind sections | 6.63 MB | 0.26 MB |
+
+What changes with `dist-abort`: a panic ends the process at once, without running destructors.
+- The dispatcher no longer isolates a panicking job or event handler. With unwinding, the panic is
+  caught, the frame is cleaned up and the panic is raised again on the dispatcher, the way the
+  original rethrows an exception of a handler.
+- The render loop no longer survives a panicking frame.
+- Compiled markup throws a markup error as a panic (`ferroui_markup_xaml::throw`). That is already
+  fatal outside an error scope. The error scope of the WinUI importer (`with_xaml_errors`) can no
+  longer turn such a throw into `Err`.
+- The Designer reports invalid animations by catching their panics, so it is not built with this
+  profile.
+
+The default stays `dist`, with unwinding.
 ### 4.8 Class tables are constants (#569)
 
 A class's table of virtual members was built at run time by `Subclassable::build_vtable`, a

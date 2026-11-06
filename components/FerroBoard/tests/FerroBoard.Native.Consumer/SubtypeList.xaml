@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ x:DataType="s:SubtypeList">
+ <TextBlock Text="{CompiledBinding Count}"/>
+ <ContentControl Content="{CompiledBinding [0]}"/>
+ <ListBox ItemsSource="{CompiledBinding}"/>
+ <ItemsControl ItemsSource="{Binding}"/>
+</StackPanel>

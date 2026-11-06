@@ -1,0 +1,15 @@
+{"tag":"type","name":"ScreenKeyboard.Text.SuggestionRequest","sealedType":true,"baseType":"System.Object","interfaces":["System.IEquatable\u00601[ScreenKeyboard.Text.SuggestionRequest]"]}
+{"tag":"constructor","parameters":[]}
+{"tag":"property","name":"Word","type":"System.String","read":true,"write":true,"init":true}
+{"tag":"property","name":"PrecedingText","type":"System.String","read":true,"write":true,"init":true}
+{"tag":"property","name":"MaxCount","type":"System.Int32","read":true,"write":true,"init":true}
+{"tag":"property","name":"AllowAutoCorrect","type":"System.Boolean","read":true,"write":true,"init":true}
+{"tag":"property","name":"Culture","type":"System.Globalization.CultureInfo","read":true,"write":true,"init":true}
+{"tag":"property","name":"KeyProximity","type":"System.Func\u00603[System.Char,System.Char,System.Double]","read":true,"write":true,"init":true}
+{"tag":"method","name":"ToString","returns":"System.String","parameters":[],"virtualMethod":true,"finalMethod":false,"staticMethod":false,"special":false}
+{"tag":"method","name":"op_Inequality","returns":"System.Boolean","parameters":["ScreenKeyboard.Text.SuggestionRequest","ScreenKeyboard.Text.SuggestionRequest"],"virtualMethod":false,"finalMethod":false,"staticMethod":true,"special":true}
+{"tag":"method","name":"op_Equality","returns":"System.Boolean","parameters":["ScreenKeyboard.Text.SuggestionRequest","ScreenKeyboard.Text.SuggestionRequest"],"virtualMethod":false,"finalMethod":false,"staticMethod":true,"special":true}
+{"tag":"method","name":"GetHashCode","returns":"System.Int32","parameters":[],"virtualMethod":true,"finalMethod":false,"staticMethod":false,"special":false}
+{"tag":"method","name":"Equals","returns":"System.Boolean","parameters":["System.Object"],"virtualMethod":true,"finalMethod":false,"staticMethod":false,"special":false}
+{"tag":"method","name":"Equals","returns":"System.Boolean","parameters":["ScreenKeyboard.Text.SuggestionRequest"],"virtualMethod":true,"finalMethod":true,"staticMethod":false,"special":false}
+{"tag":"method","name":"\u003CClone\u003E$","returns":"ScreenKeyboard.Text.SuggestionRequest","parameters":[],"virtualMethod":false,"finalMethod":false,"staticMethod":false,"special":false}

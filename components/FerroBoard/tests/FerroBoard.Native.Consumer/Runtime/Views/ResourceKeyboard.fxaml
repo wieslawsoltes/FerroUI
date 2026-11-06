@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls">
+ <StackPanel.Resources>
+  <ResourceDictionary><ResourceDictionary.MergedDictionaries>
+   <ResourceInclude Source="../Resources/Keyboard.fxaml"/>
+  </ResourceDictionary.MergedDictionaries></ResourceDictionary>
+ </StackPanel.Resources>
+ <k:OnScreenKeyboard x:Name="Primary" AutoAttach="False"
+  Settings="{StaticResource SharedSettings}" Theme="{StaticResource SharedTheme}"/>
+ <k:OnScreenKeyboard x:Name="Secondary" AutoAttach="False"
+  Settings="{StaticResource SharedSettings}" Theme="{StaticResource SharedTheme}"/>
+ <TextBox Text="mail" k:ScreenKeyboardInput.InputKind="Email"
+  k:ScreenKeyboardInput.IsPrivate="True" k:ScreenKeyboardInput.SuggestionsEnabled="False"/>
+</StackPanel>

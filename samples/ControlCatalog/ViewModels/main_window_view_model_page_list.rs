@@ -61,6 +61,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ToggleSwitchPage.xaml", "ToggleSwitch", Icons::TOGGLE, "An on/off switch with a sliding knob");
         }),
         section("Text", Icons::TEXT_BOX, &mut unavailable, |s| {
+            s.add("/Pages/FerroBoardPage.xaml", "FerroBoard", Icons::TEXT_INPUT, "On-screen keyboard with suggestions, gestures, emoji and native input targets");
             s.add("/Pages/AutoCompleteBoxPage.xaml", "AutoCompleteBox", Icons::TEXT_INPUT, "Text input with completion suggestions");
             // Not from upstream: AutoSuggestBox of WinUI (docs/porting/winui-controls.md).
             s.add("/Pages/AutoSuggestBoxPage.xaml", "AutoSuggestBox", Icons::TEXT_INPUT, "Text input with suggestions the app filters");

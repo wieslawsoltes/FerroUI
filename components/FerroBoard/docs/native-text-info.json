@@ -1,0 +1,283 @@
+{
+  "status": "partially_verified",
+  "source_revision": "3694995fabbebc45a801a455880e3d31888367f1",
+  "ferroui_revision": "09c4f95e5cb91f4fa913c264a2bb34971e2d4f82",
+  "scope": "Native TextInfo string-uppercase API and exact nullable UTF16 method ABI in actual independent compiled/runtime consumers; original callback targets; Core uppercase return identity and measured ASCII allocation fast paths. Native CultureInfo/request/provider graph remains incomplete.",
+  "reference_inputs": [
+    {
+      "path": "scripts/native-text-info-reference/Program.cs",
+      "sha256": "a3860420a917c15c07d389744970b0f5f6d07409d788529d798a671cf99639b6"
+    },
+    {
+      "path": "scripts/native-text-info-reference/NativeTextInfoReference.csproj",
+      "sha256": "d803af91cc4872a23b8a5be07442595963ca97b2a8e590b519aa6b61d7e65f27"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/src/ScreenKeyboard.Core/Text/TextUtils.cs",
+      "sha256": "aad1947a9a15913807372122bdca4e154dd47b78c1409e16526f8c0bb867bf6c"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/src/ScreenKeyboard.Core/Text/Suggestions.cs",
+      "sha256": "a65ac5c94ced387b06d5c01a7b63d462378276eafe02bd513c4c2096ad660c1d"
+    }
+  ],
+  "implementation_inputs": [
+    {
+      "path": "src/FerroBoard.Core/tests/casing_models.rs",
+      "sha256": "cabb1c3aa2f3b38541760c940f11b6a67f340240691a7f3938a451dd3d905f11"
+    },
+    {
+      "path": "src/FerroBoard.Core/text/text_culture.rs",
+      "sha256": "d8e6b3cb8847a94974566645a2a24ec547c3056118c33f4540da64521470503c"
+    },
+    {
+      "path": "src/FerroBoard.Core/text/mod.rs",
+      "sha256": "bd9a77eb09b0bfa577e4fe9494f9050c0b120d6122aab4c7021277446f720cc8"
+    },
+    {
+      "path": "src/FerroBoard.Core/text/ascii_casing_data.rs",
+      "sha256": "df2351dcc06e81e727c9962211094e6f9ad16b25d6fc2b753ff54ff1ae14ae79"
+    },
+    {
+      "path": "src/FerroBoard.Core/NOTICE.md",
+      "sha256": "df432808ca20b5ce89183ff40d5a0c4444fb0c695556f3516b9642e88da6359f"
+    },
+    {
+      "path": "src/FerroBoard.Core.Ferro/lib.rs",
+      "sha256": "9c4dc80703c16f6b98204aa2771d9352e58de50852c1c1fc3bd7370da4511ab8"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/native_text_info_tests.rs",
+      "sha256": "be4ffb564bcaf3075c810f18406329d446351238955ab0114149ef496001593b"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/NativeTextInfo.xaml",
+      "sha256": "9de2a3e9c5740bde067b53210d64d655d5d4e4b148f3a5fb35fc2b989d45a462"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/lib.rs",
+      "sha256": "9abd57034b717d3c29f69cd07b3af1aceac5bdad530e9fd1645706cd6c2bd1b6"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/build.rs",
+      "sha256": "7c55c7a76193d54293b39dbbb8529a7f50c0e32cfacfb31ae6e1d02b7572aaef"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/Cargo.toml",
+      "sha256": "a601fa937e05799ffb700e40b0980adefff40342cf5eee83cc0d2acb825e6c66"
+    },
+    {
+      "path": "scripts/generate_ascii_casing.py",
+      "sha256": "e9736567e9aa04825c34f58caec2b079b67f1b0e1c2d1233b915b25026f85a34"
+    }
+  ],
+  "fixture": {
+    "path": "tests/fixtures/native-text-info.jsonl",
+    "sha256": "8931e3c40f3d5615c6be8a1f5a4454bae87eb6418cc5d57af161aba940eaf7ef",
+    "rows": 141,
+    "native_parity_rows": 131,
+    "partially_verified_rows": 10,
+    "debug_release_identical": true,
+    "tags": {
+      "metadata": 1,
+      "identity": 10,
+      "upper": 120,
+      "domain": 10
+    },
+    "runtime": ".NET 10.0.13",
+    "sdk": "10.0.402",
+    "hash_format": "SHA256 of raw UTF16 code units in little-endian order; no Encoding replacement fallback",
+    "os": "macOS 27.0.1 (26A434)"
+  },
+  "ascii_fixture": {
+    "path": "tests/fixtures/ascii-casing.jsonl",
+    "sha256": "208764f380b5897da4ba600d786c39e49da97ee833387f0ec519d7eda18ae5e0",
+    "rows": 1086,
+    "debug_release_identical": true,
+    "non_invariant_cultures": [
+      "az",
+      "az-Cyrl",
+      "az-Cyrl-AZ",
+      "az-Latn",
+      "az-Latn-AZ",
+      "en-US-POSIX",
+      "tr",
+      "tr-CY",
+      "tr-TR"
+    ],
+    "runtime": ".NET 10.0.13",
+    "sdk": "10.0.402",
+    "os": "macOS 27.0.1 (26A434)"
+  },
+  "secondary_runtime": {
+    "revision": "60629d14374c56f1cb51819049ad1fa529307f8d",
+    "tag": "v10.0.0",
+    "license": "MIT",
+    "sources": [
+      {
+        "path": "reference/dotnet-runtime-culture/TextInfo.cs",
+        "sha256": "b7291cef3ef1990f0d42d601e1245f13eed3f10378a2360bf7d8395f938ace30"
+      },
+      {
+        "path": "reference/dotnet-runtime-culture/LICENSE.TXT",
+        "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+      }
+    ],
+    "limits": "Secondary source algorithm reference; not asserted byte-identical to unavailable .NET 10.0.13 servicing source. Actual runtime independently measured."
+  },
+  "framework_change": {
+    "manifest": "docs/ferroui-header-template-patch.json",
+    "patch_sha256": "bd9a30a654925e9460d023e7e167201708d79c50f2f6eb6327c8debe303d6766",
+    "changed_files": 44,
+    "previous_patch": {
+      "path": "reference/ferroui-patches/header-template-build-before-native-text-info.patch",
+      "sha256": "305140cc1faf055cdf1b5addc37f08746c9d22be7676d8588a599c37ad677693"
+    },
+    "previous_manifest": {
+      "path": "reference/ferroui-patches/header-template-build-before-native-text-info.json",
+      "sha256": "1fb6722665920f146ec62a1dab1a616d7c24f80b959449b0b313c370d3210b84"
+    }
+  },
+  "dependency_change": {
+    "before_lock": "reference/dependency-history/Cargo.before-native-text-info.lock",
+    "before_lock_sha256": "9d23e744aaa50003db797c42d42ef3ffd1fd482ed7707dc8b6277d7c36940ce1",
+    "after_lock_sha256": "a0cf9314eb0c64ba5ccca4df4b45db64523e5e11b6987c2debcd7a5acef440fe",
+    "owner": "ferroboard-markup-consumer",
+    "edge": "dev-dependencies.sha2 = 0.10",
+    "scope": "Only one development dependency edge to an already locked package; no added/removed/version/source/license package changes. Exact TOML package graph equality checked after this sole edge."
+  },
+  "prior_input_transitions": [
+    {
+      "manifest": "docs/request-culture.json",
+      "path": "src/FerroBoard.Core/NOTICE.md",
+      "before_sha256": "8abc81f5f1afb1b379c165c4e41402a4ce603125e3094b823d55d7c13d7a2c9f",
+      "after_sha256": "df432808ca20b5ce89183ff40d5a0c4444fb0c695556f3516b9642e88da6359f"
+    },
+    {
+      "manifest": "docs/request-culture.json",
+      "path": "src/FerroBoard.Core/text/mod.rs",
+      "before_sha256": "c1a4aa14a0203e09b36c50bac3f905c952a4de44ef7bcdfc8e6074d0259e7ecc",
+      "after_sha256": "bd9a77eb09b0bfa577e4fe9494f9050c0b120d6122aab4c7021277446f720cc8"
+    },
+    {
+      "manifest": "docs/key-proximity.json",
+      "path": "src/FerroBoard.Core.Ferro/lib.rs",
+      "before_sha256": "390e95c5dd57699aed6eeb693e867636ce379aa5762e08d14dc63dcbaec36e3f",
+      "after_sha256": "9c4dc80703c16f6b98204aa2771d9352e58de50852c1c1fc3bd7370da4511ab8"
+    },
+    {
+      "manifest": "docs/key-proximity.json",
+      "path": "tests/FerroBoard.Markup.Consumer/lib.rs",
+      "before_sha256": "52f42de5e185c9288685e1ab7b25d763bdf00592b941c220a84ccbdc3298951c",
+      "after_sha256": "9abd57034b717d3c29f69cd07b3af1aceac5bdad530e9fd1645706cd6c2bd1b6"
+    },
+    {
+      "manifest": "docs/char.json",
+      "path": "tests/FerroBoard.Markup.Consumer/build.rs",
+      "before_sha256": "a42407fe044183be751aaf33b49b9ea06147319918dfe5719bb9cf10d1940ea0",
+      "after_sha256": "7c55c7a76193d54293b39dbbb8529a7f50c0e32cfacfb31ae6e1d02b7572aaef"
+    }
+  ],
+  "other_modified_inputs": [
+    {
+      "path": "src/FerroBoard.Core/tests/casing_models.rs",
+      "before_sha256": "3aed09d8f0f97939be5e1315de7ff0622549680de22b5d687cd17fd23374d0bc",
+      "after_sha256": "cabb1c3aa2f3b38541760c940f11b6a67f340240691a7f3938a451dd3d905f11"
+    },
+    {
+      "path": "src/FerroBoard.Core/text/text_culture.rs",
+      "before_sha256": "c470f5f96d1d63c090b3e730543a03b6e629fdb231e61db70286c9f5694ea34b",
+      "after_sha256": "d8e6b3cb8847a94974566645a2a24ec547c3056118c33f4540da64521470503c"
+    },
+    {
+      "path": "tests/FerroBoard.Markup.Consumer/Cargo.toml",
+      "before_sha256": "d34656d8189d850fd0b46580d8c0dbd455e4ba756d23bb534d98186e20093b58",
+      "after_sha256": "a601fa937e05799ffb700e40b0980adefff40342cf5eee83cc0d2acb825e6c66"
+    }
+  ],
+  "findings": [
+    "TextInfo.ToUpper(string) is nonvirtual; CultureInfo.TextInfo is a separate virtual getter.",
+    "TextInfo.Equals compares CultureName while reference identity remains separate.",
+    "Unchanged non-ASCII output and cultures without invariant ASCII comparison allocate a new string. Empty and invariant-ASCII-already-uppercase inputs retain the original reference.",
+    "Equal scalar casing profiles do not imply equal collation/allocation fast paths; all 1,086 culture names measured individually.",
+    "Runtime and build-time method paths must preserve actual Option<Utf16Text> carrier instead of erasing it to preferred CLR String storage.",
+    "Nullable CLR logical element identity differs from native Option<Rc<T>> storage; metadata keeps both."
+  ],
+  "validation": {
+    "status": "scoped gates passed; full port incomplete",
+    "workspace_tests": 517,
+    "workspace_suites": 78,
+    "core": 256,
+    "controls": 97,
+    "sdk": 20,
+    "independent_consumer": 103,
+    "sample": 41,
+    "failed": 0,
+    "ignored": 0,
+    "post_clippy_test_helper_change": "Five affected independent consumer tests rerun and pass after replacing unnecessary unwrap with a match; production code unchanged after full workspace pass.",
+    "strict_workspace_all_target_clippy": "passed",
+    "release_libraries": "passed",
+    "sample_and_consumer_builds": "passed",
+    "framework_tests": {
+      "base_metadata": 50,
+      "text_info": 5,
+      "scanner": 46,
+      "model": 28,
+      "emitter": 20,
+      "runtime_type_system": 26,
+      "binding_filter": 82,
+      "full_framework_suite_run": false
+    },
+    "owned_and_included_fmt": "passed",
+    "fmt_all": {
+      "exit_code": 1,
+      "dependency_diff_headers": 55981,
+      "owned_diff_headers": 0
+    },
+    "static_checks": "23 generators and all source/member/resource/metadata/input/settings/header/Unicode/name/pin/patch/lock/license/corpus integrity checks passed; fresh Roslyn output matches 2,208 declarations and all 351 source hashes remain unchanged.",
+    "dependencies": "212 exact package versions/sources/licenses verified by fresh locked metadata. Sole additional dev edge to existing sha2 checked separately against retained lock.",
+    "diagnostics": "Initial named-macro/test invoker syntax corrected. Native emitter first lacked public actual signature paths and nullable UTF16 carrier; separate native nullable storage and public spelling preserve the ABI. Source identity comparisons corrected after measuring nonvirtual ToUpper, TextInfo culture-name equality and per-culture ASCII flags. Locator scope test corrected to explicit disposal. Initial Clippy unnecessary unwrap corrected, affected tests rerun. Existing dependency/linker warnings remain.",
+    "logs_directory": "/Volumes/SSD/temp/ferrokeyboard/native-text-info-stage",
+    "native_application_launched": false,
+    "cargo_processes": "All stage commands terminal after final gate runner; no native application launched."
+  },
+  "limits": [
+    "Full original CultureInfo reference/virtual Name/Equals/ToString/TextInfo contract and request/provider/factory/result native metadata remain incomplete. Existing native CultureInfo remains value-like.",
+    "TextInfo exposes required string ToUpper and ListSeparator getter only; Char overload/ToLower/Clone/read-only/mutable setter/interfaces/hash/display and complete BCL members remain incomplete.",
+    "Ten null failures compare partial error/argument behavior; CLR exception object and stack identity are not modeled.",
+    "Current host fallback caches per-culture aliases; full GetCultureInfo global cache/constructors/aliases/LCID/ClearCachedData/AsyncLocal/GC/thread behavior is unverified.",
+    "Lowercase and TextUtils.Capitalize substring/concatenation return identity remain incomplete.",
+    "Missing casing data fails explicitly. No generic Rust Unicode fallback or network dependency is added.",
+    "Native input/platform/rendering/accessibility/performance remain unverified by these Headless consumers. Full framework suite not run."
+  ],
+  "next": [
+    "Implement shared original native CultureInfo reference/virtual graph and actual request/provider/factory/result members with independent source-style consumers.",
+    "Measure and preserve remaining lowercase/substring/concatenation identity and source composer/editor behavior.",
+    "Continue complete source/member/resource/control/gesture/platform parity audit; current inventory stays partial."
+  ],
+  "inventory_status": {
+    "files": {
+      "partially_verified": 267,
+      "missing": 84
+    },
+    "members": {
+      "partially_verified": 1677,
+      "missing": 530,
+      "dependency_blocked": 1
+    }
+  },
+  "native_reproducer": {
+    "path": "scripts/native-culture-reference-repro.rs",
+    "sha256": "98999e9d328cb9ed58f03ce09258381cd2f8376e2b8ef500439db181bed022ec",
+    "historical_exit_code": 101,
+    "current_compile_exit_code": 0,
+    "current_compile_log": "/Volumes/SSD/temp/ferrokeyboard/native-text-info-stage/native-repro-final-stderr.log",
+    "limits": "Original unchanged Base-only probe now compiles. Executing casing requires a configured exact host service. SDK registration and actual behavior are independently exercised by NativeTextInfo compiled/runtime consumers; full CultureInfo reference/virtual behavior is still incomplete."
+  },
+  "built_sample": {
+    "path": "/Volumes/SSD/temp/ferrokeyboard/native-culture-stage/prior-ferroboard-sample",
+    "sha256": "6dccd0bdd8b6a1475b12f16d0e1538b9619ff008d76d785b3c5b76e28d552a3d",
+    "native_launch": false
+  },
+  "historical_artifacts": "Previous ordinary sample and historical bundle verified unchanged; neither launched nor replaced."
+}

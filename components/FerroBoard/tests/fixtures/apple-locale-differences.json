@@ -1,0 +1,160 @@
+{
+  "backend": "Public CoreFoundation compare/search with explicit locale and nonliteral/localized flags",
+  "measurement": "macOS host public API; not iOS runtime evidence",
+  "source_fixture": "tests/fixtures/culture-comparison.tsv",
+  "source_fixture_sha256": "bc048978d977abc7a5e5980d974cf7418aad3dc9eb0c2e71638f359590f9c842",
+  "total_cases": 150,
+  "source_equal": 125,
+  "differences": [
+    {
+      "index": 17,
+      "native": "False",
+      "source": "\tcontains\tTrue\t0061,00AD,0062\t0061,0062\tTrue",
+      "reason": "Apple search does not ignore an interior soft hyphen"
+    },
+    {
+      "index": 19,
+      "native": "0",
+      "source": "\tcompare\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\t1",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 20,
+      "native": "True",
+      "source": "\tcontains\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\tFalse",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 24,
+      "native": "0",
+      "source": "\tcompare\tFalse\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 25,
+      "native": "0",
+      "source": "\tcompare\tTrue\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 47,
+      "native": "False",
+      "source": "en-US\tcontains\tTrue\t0061,00AD,0062\t0061,0062\tTrue",
+      "reason": "Apple search does not ignore an interior soft hyphen"
+    },
+    {
+      "index": 49,
+      "native": "0",
+      "source": "en-US\tcompare\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\t1",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 50,
+      "native": "True",
+      "source": "en-US\tcontains\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\tFalse",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 54,
+      "native": "0",
+      "source": "en-US\tcompare\tFalse\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 55,
+      "native": "0",
+      "source": "en-US\tcompare\tTrue\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 77,
+      "native": "False",
+      "source": "de-DE\tcontains\tTrue\t0061,00AD,0062\t0061,0062\tTrue",
+      "reason": "Apple search does not ignore an interior soft hyphen"
+    },
+    {
+      "index": 79,
+      "native": "0",
+      "source": "de-DE\tcompare\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\t1",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 80,
+      "native": "True",
+      "source": "de-DE\tcontains\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\tFalse",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 84,
+      "native": "0",
+      "source": "de-DE\tcompare\tFalse\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 85,
+      "native": "0",
+      "source": "de-DE\tcompare\tTrue\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 107,
+      "native": "False",
+      "source": "tr-TR\tcontains\tTrue\t0061,00AD,0062\t0061,0062\tTrue",
+      "reason": "Apple search does not ignore an interior soft hyphen"
+    },
+    {
+      "index": 109,
+      "native": "0",
+      "source": "tr-TR\tcompare\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\t1",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 110,
+      "native": "True",
+      "source": "tr-TR\tcontains\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\tFalse",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 114,
+      "native": "0",
+      "source": "tr-TR\tcompare\tFalse\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 115,
+      "native": "0",
+      "source": "tr-TR\tcompare\tTrue\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 137,
+      "native": "False",
+      "source": "sv-SE\tcontains\tTrue\t0061,00AD,0062\t0061,0062\tTrue",
+      "reason": "Apple search does not ignore an interior soft hyphen"
+    },
+    {
+      "index": 139,
+      "native": "0",
+      "source": "sv-SE\tcompare\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\t1",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 140,
+      "native": "True",
+      "source": "sv-SE\tcontains\tTrue\t0053,0074,0072,0061,00DF,0065\t0053,0054,0052,0041,0053,0053,0045\tFalse",
+      "reason": "Apple case-insensitive linguistic comparison/search equates sharp-s and ss"
+    },
+    {
+      "index": 144,
+      "native": "0",
+      "source": "sv-SE\tcompare\tFalse\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    },
+    {
+      "index": 145,
+      "native": "0",
+      "source": "sv-SE\tcompare\tTrue\tFF21\t0041\t1",
+      "reason": "Apple localized comparison equates fullwidth and ASCII Latin A"
+    }
+  ]
+}
