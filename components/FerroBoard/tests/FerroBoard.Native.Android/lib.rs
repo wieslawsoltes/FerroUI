@@ -195,7 +195,7 @@ mod host {
     pub fn build() -> AppBuilder {
         let locale =
             ferroboard_core::text::locale_text::system_locale_name().expect("native locale");
-        ferroui_base::utilities::CultureInfo::set_current_culture(
+        ferroui_base::utilities::CultureInfo::set_current_formatting(
             ferroui_base::utilities::CultureInfo::get_culture_info(&locale),
         );
         AppBuilder::configure::<ConsumerApp>()

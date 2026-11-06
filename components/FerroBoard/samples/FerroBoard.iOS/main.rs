@@ -29,7 +29,7 @@ mod host {
         fn create_app_builder(&self, delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder {
             let locale = ferroboard_core::text::locale_text::system_locale_name()
                 .expect("FerroBoard iOS could not read the system locale");
-            CultureInfo::set_current_culture(CultureInfo::get_culture_info(&locale));
+            CultureInfo::set_current_formatting(CultureInfo::get_culture_info(&locale));
             let folder = application_data_folder().expect(
                 "FerroBoard iOS could not resolve its native application support directory",
             );

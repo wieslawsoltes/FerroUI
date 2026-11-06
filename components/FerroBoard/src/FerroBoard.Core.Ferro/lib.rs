@@ -105,7 +105,7 @@ pub use editor_metadata::{EditorControllerMetadata, PunctuationRuleMetadata};
 mod input_tests;
 
 fn native_current_culture() -> Result<String, locale_text::CollationError> {
-    Ok(ferroui_base::utilities::CultureInfo::current_culture()
+    Ok(ferroui_base::utilities::CultureInfo::current_formatting()
         .name()
         .to_string())
 }

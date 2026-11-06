@@ -11,7 +11,7 @@ fn main() -> std::process::ExitCode {
             return std::process::ExitCode::FAILURE;
         }
     };
-    ferroui_base::utilities::CultureInfo::set_current_culture(
+    ferroui_base::utilities::CultureInfo::set_current_formatting(
         ferroui_base::utilities::CultureInfo::get_culture_info(&culture),
     );
     let args = std::env::args().skip(1).collect::<Vec<_>>();

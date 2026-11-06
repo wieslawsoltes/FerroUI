@@ -7,13 +7,13 @@ use ferroboard_core::{
 };
 use ferroui_base::{
     Rect, Size,
-    animation::{PlayState, TimeSpan},
+    animation::{PlayState, SignedDuration},
     reactive::{IObservable, IObserver, LightweightSubject},
 };
 use ferroui_controls::{StackPanel, TextBox, Window};
 use serde_json::{Value, json};
 struct Clock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 impl Clock {
@@ -24,11 +24,11 @@ impl Clock {
         })
     }
     fn step(&self, ticks: i64) {
-        self.subject.on_next(TimeSpan::from_ticks(ticks));
+        self.subject.on_next(SignedDuration::from_ticks(ticks));
     }
 }
-impl IObservable<TimeSpan> for Clock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for Clock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

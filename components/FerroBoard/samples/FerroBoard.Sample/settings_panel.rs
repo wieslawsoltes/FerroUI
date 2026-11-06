@@ -175,7 +175,7 @@ impl SettingsPanel {
         Ok(())
     }
     fn snapshot_themes(&self) -> Result<Rc<ThemeChoices>, SettingsPanelError> {
-        let compare = LocaleText::new(CultureInfo::current_culture().name())
+        let compare = LocaleText::new(CultureInfo::current_formatting().name())
             .map_err(|e| SettingsPanelError::Resource(e.to_string()))?;
         ThemeChoices::snapshot(
             KeyboardThemes::all(),
@@ -199,7 +199,7 @@ impl SettingsPanel {
             .cast::<ItemsControl>()
             .unwrap();
         let engine = self.engine()?;
-        let compare = LocaleText::new(CultureInfo::current_culture().name())
+        let compare = LocaleText::new(CultureInfo::current_formatting().name())
             .map_err(|e| SettingsPanelError::Resource(e.to_string()))?;
         let catalog = LanguageCatalog::snapshot(&engine.resources(), |a, b| {
             compare.compare(a, b, true).map_err(|e| e.to_string())
@@ -212,7 +212,7 @@ impl SettingsPanel {
             self.context.settings_source(),
             catalog,
             Rc::new(move |a, b| {
-                let name = CultureInfo::current_culture().name().to_string();
+                let name = CultureInfo::current_formatting().name().to_string();
                 let old = cache
                     .borrow()
                     .as_ref()

@@ -116,15 +116,13 @@ impl State {
         }
         *state.pending.borrow_mut() = Some(read);
         let weak = Rc::downgrade(state);
-        drop(
-            Dispatcher::current_dispatcher().invoke_async_task_local_with_priority(
-                move || ReadSample {
-                    state: weak,
-                    generation,
-                },
-                DispatcherPriority::BACKGROUND,
-            ),
-        );
+        drop(Dispatcher::current_dispatcher().spawn_local_with_priority(
+            ReadSample {
+                state: weak,
+                generation,
+            },
+            DispatcherPriority::BACKGROUND,
+        ));
     }
     fn accept(&self, result: Result<Option<String>, ClipboardError>) {
         match result {

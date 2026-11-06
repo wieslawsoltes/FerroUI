@@ -167,13 +167,9 @@ impl IClipboardService for SystemClipboardService {
             let write = clipboard.set_text_async(Some(&text));
             // Preserve source completed-write ordering while the native backend can pend.
             // Dispatcher owns this future; no Task/TaskCompletionSource adapter is involved.
-            drop(
-                Dispatcher::current_dispatcher()
-                    .to_task_scheduler()
-                    .start_local(async move {
-                        let _ = write.await; // Source catches platform clipboard exceptions.
-                    }),
-            );
+            drop(Dispatcher::current_dispatcher().start_local(async move {
+                let _ = write.await; // Source catches platform clipboard exceptions.
+            }));
         }
         Box::pin(std::future::ready(Ok(())))
     }

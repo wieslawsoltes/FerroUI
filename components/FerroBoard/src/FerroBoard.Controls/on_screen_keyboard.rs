@@ -368,7 +368,7 @@ impl OnScreenKeyboard {
         if engine.clipboard_spawner().is_none() {
             let dispatcher = Dispatcher::current_dispatcher();
             engine.set_clipboard_spawner(Some(Rc::new(move |job| {
-                drop(dispatcher.to_task_scheduler().start_local(job));
+                drop(dispatcher.start_local(job));
             })));
         }
         let use_window_clipboard = engine.clipboard_service().as_ref().type_id()

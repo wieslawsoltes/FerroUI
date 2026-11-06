@@ -23,7 +23,7 @@ mod host {
     pub fn run_main(options: &str) -> Result<(), JsValue> {
         let locale = ferroboard_core::text::locale_text::system_locale_name()
             .map_err(|error| JsValue::from_str(&error.to_string()))?;
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info(&locale));
+        CultureInfo::set_current_formatting(CultureInfo::get_culture_info(&locale));
         SampleOptions::shared().parse(Some(&options.into()));
         AppBuilder::configure::<App>()
             .with_inter_font()

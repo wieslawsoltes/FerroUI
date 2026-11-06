@@ -12,18 +12,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let outcome = Rc::new(RefCell::new(None));
     let output = outcome.clone();
     let service = SystemClipboardService::new();
-    drop(
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            // Discard the text immediately. Neither contents, length nor hashes are retained.
-            let status = service
-                .read_text()
-                .await
-                .map(|_| ())
-                .map_err(|error| error.kind());
-            *output.borrow_mut() = Some(status);
-            Dispatcher::ui_thread().begin_invoke_shutdown(DispatcherPriority::NORMAL);
-        }),
-    );
+    drop(Dispatcher::ui_thread().spawn_local(async move {
+        // Discard the text immediately. Neither contents, length nor hashes are retained.
+        let status = service
+            .read_text()
+            .await
+            .map(|_| ())
+            .map_err(|error| error.kind());
+        *output.borrow_mut() = Some(status);
+        Dispatcher::ui_thread().begin_invoke_shutdown(DispatcherPriority::NORMAL);
+    }));
     let watchdog = DispatcherTimer::with_callback(
         Duration::from_secs(5),
         DispatcherPriority::NORMAL,

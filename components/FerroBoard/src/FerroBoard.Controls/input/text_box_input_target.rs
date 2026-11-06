@@ -113,7 +113,7 @@ impl TextBoxInputTarget {
                 receiver.raise_if_external();
             }
         });
-        *target.selection_token.borrow_mut() = Some(token.into());
+        *target.selection_token.borrow_mut() = Some(token);
         Ok(target)
     }
     pub(crate) fn for_keyboard(

@@ -47,7 +47,7 @@ impl ManualScheduler {
             .now
             .get()
             .checked_add(ticks)
-            .expect("TimeSpan addition overflow");
+            .expect("SignedDuration addition overflow");
         loop {
             let index = {
                 let entries = self.entries.borrow();
@@ -79,7 +79,7 @@ impl IKeyboardScheduler for ManualScheduler {
             .now
             .get()
             .checked_add(i64::try_from(delay.as_nanos() / 100).unwrap())
-            .expect("TimeSpan addition overflow");
+            .expect("SignedDuration addition overflow");
         self.entries.borrow_mut().push(Entry { id, due, action });
         let token = Token {
             owner: self.self_ref.clone(),

@@ -30,7 +30,7 @@ fn state(e: &KeyboardEngine) -> Value {
     let target = e.target();
     let editor = e.editor();
     let context = e.create_compute_context().unwrap();
-    json!({"attached":target.is_some(),"text":units(&target.as_ref().map_or_default(|t|t.text())),"start":target.as_ref().map_or(0,|t|t.selection_start()),"length":target.as_ref().map_or(0,|t|t.selection_length()),"mode":e.mode().0,"shift":e.shift_state().0,"panel":e.ui_mode().0,"version":e.keyboard().unwrap().version(),"selecting":editor.as_ref().is_some_and(|v|v.is_selecting()),"undo":editor.as_ref().is_some_and(|v|v.can_undo()),"redo":editor.as_ref().is_some_and(|v|v.can_redo()),"incognito":e.is_incognito(),"variation":context.variation().0,"enter":context.enter_action().0,"suggestions":suggestions(e)})
+    json!({"attached":target.is_some(),"text":units(&target.as_ref().map(|t| t.text()).unwrap_or_default()),"start":target.as_ref().map_or(0,|t|t.selection_start()),"length":target.as_ref().map_or(0,|t|t.selection_length()),"mode":e.mode().0,"shift":e.shift_state().0,"panel":e.ui_mode().0,"version":e.keyboard().unwrap().version(),"selecting":editor.as_ref().is_some_and(|v|v.is_selecting()),"undo":editor.as_ref().is_some_and(|v|v.can_undo()),"redo":editor.as_ref().is_some_and(|v|v.can_redo()),"incognito":e.is_incognito(),"variation":context.variation().0,"enter":context.enter_action().0,"suggestions":suggestions(e)})
 }
 struct Provider(Rc<RefCell<Vec<Value>>>);
 impl PartialEq for Provider {

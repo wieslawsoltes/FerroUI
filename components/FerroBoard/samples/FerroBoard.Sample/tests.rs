@@ -888,18 +888,18 @@ fn compiled_theme_choices_preserve_culture_snapshot_unknown_values_and_apply_sha
         struct CultureGuard(CultureInfo);
         impl Drop for CultureGuard {
             fn drop(&mut self) {
-                CultureInfo::set_current_culture(self.0.clone());
+                CultureInfo::set_current_formatting(self.0.clone());
             }
         }
-        let _guard = CultureGuard(CultureInfo::current_culture());
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info("sv-SE"));
+        let _guard = CultureGuard(CultureInfo::current_formatting());
+        CultureInfo::set_current_formatting(CultureInfo::get_culture_info("sv-SE"));
         let null_label = Arc::new(KeyboardTheme::default());
         null_label.set_id(Some("sample_null_label_test".into()));
         null_label.set_name(None);
         KeyboardThemes::register(null_label.clone()).unwrap();
         let session = SampleSession::new(crate::storage_tests::file_storage());
         assert_eq!(
-            CultureInfo::current_culture().name(),
+            CultureInfo::current_formatting().name(),
             "sv-SE",
             "session must preserve a host's culture"
         );

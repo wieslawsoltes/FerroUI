@@ -68,7 +68,7 @@ pub fn verify<D: Driver>(fixture: &str) -> usize {
         let row: Value = serde_json::from_str(line).unwrap();
         let input = row["json"].as_str().unwrap();
         let tag = row["tag"].as_str().unwrap();
-        if !D::CORE && !(tag == "layout" && row["action"] == "resource") {
+        if !(D::CORE || tag == "layout" && row["action"] == "resource") {
             continue;
         }
         let actual: Result<Value, LayoutJsonError> = (|| {

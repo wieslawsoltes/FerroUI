@@ -38,7 +38,7 @@ fn dropping_host_removes_subscriptions_without_releasing_a_retained_keyboard() {
 }
 
 use ferroui_base::{
-    animation::{IClock, PlayState, TimeSpan},
+    animation::{IClock, PlayState, SignedDuration},
     reactive::{IObservable, IObserver, LightweightSubject},
     threading::Dispatcher,
 };
@@ -46,11 +46,11 @@ use ferroui_controls::{Control, Window};
 use ferroui_system::IDisposable;
 use std::cell::{Cell, RefCell};
 struct Clock {
-    ticks: LightweightSubject<TimeSpan>,
+    ticks: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for Clock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for Clock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.ticks.subscribe(observer)
     }
 }
@@ -80,10 +80,10 @@ fn dropping_host_cancels_closing_animation_and_queued_callbacks() {
         window.show();
         Dispatcher::current_dispatcher().run_jobs(None);
         host.set_is_keyboard_open(true);
-        clock.ticks.on_next(TimeSpan::from_ticks(0));
-        clock.ticks.on_next(TimeSpan::from_ticks(1_800_000));
+        clock.ticks.on_next(SignedDuration::from_ticks(0));
+        clock.ticks.on_next(SignedDuration::from_ticks(1_800_000));
         host.set_is_keyboard_open(false);
-        clock.ticks.on_next(TimeSpan::from_ticks(2_000_000));
+        clock.ticks.on_next(SignedDuration::from_ticks(2_000_000));
         assert!(clock.ticks.has_observers());
         window.set_content(None);
         window.close();
@@ -96,7 +96,7 @@ fn dropping_host_cancels_closing_animation_and_queued_callbacks() {
         // Native Clock stops immediately and removes its parent hook on the next parent tick.
         // The host callback must already be unreachable; no completion may change the keyboard.
         let visible = keyboard.is_visible();
-        clock.ticks.on_next(TimeSpan::from_ticks(9_000_000));
+        clock.ticks.on_next(SignedDuration::from_ticks(9_000_000));
         assert!(
             !clock.ticks.has_observers(),
             "stopped native clock must detach on its next tick"

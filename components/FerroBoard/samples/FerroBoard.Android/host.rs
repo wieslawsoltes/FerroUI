@@ -13,7 +13,7 @@ use std::{path::PathBuf, rc::Rc};
 pub fn build() -> AppBuilder {
     let locale = ferroboard_core::text::locale_text::system_locale_name()
         .expect("FerroBoard Android could not read the system locale");
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info(&locale));
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info(&locale));
     let context = FerroAndroidApplication::context();
     let directory = call_object(&context, "getFilesDir", "()Ljava/io/File;", &[])
         .expect("Android application files directory is unavailable");

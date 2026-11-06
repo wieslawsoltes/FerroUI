@@ -29,7 +29,7 @@ fn state(engine: &KeyboardEngine) -> Value {
             });
     json!({
         "attached": target.is_some(),
-        "text": target.as_ref().map_or_default(|t| t.text()).units(),
+        "text": target.as_ref().map(|t| t.text()).unwrap_or_default().units(),
         "start": target.as_ref().map_or(0, |t| t.selection_start()),
         "length": target.as_ref().map_or(0, |t| t.selection_length()),
         "shift": engine.shift_state().0,

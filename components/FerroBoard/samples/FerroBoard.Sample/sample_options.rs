@@ -3,7 +3,7 @@ use ferroboard_core::{
     settings::{KeyboardSettings, OneHandedMode, ThemeMode},
     text::{OrdinalKey, TextUtils, Utf16Text, ordinal_ignore_case_equal},
 };
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::{
     cell::RefCell,
     rc::Rc,
@@ -29,7 +29,7 @@ impl std::fmt::Display for OptionError {
 impl std::error::Error for OptionError {}
 #[derive(Default)]
 pub struct SampleOptions {
-    values: Mutex<Dictionary<OrdinalKey, Option<Utf16Text>>>,
+    values: Mutex<SlotOrderMap<OrdinalKey, Option<Utf16Text>>>,
 }
 impl SampleOptions {
     pub fn shared() -> Arc<Self> {
@@ -38,7 +38,7 @@ impl SampleOptions {
         SHARED.clone()
     }
     /// The stable mutable Values collection. Guards never span application callbacks.
-    pub fn values(&self) -> MutexGuard<'_, Dictionary<OrdinalKey, Option<Utf16Text>>> {
+    pub fn values(&self) -> MutexGuard<'_, SlotOrderMap<OrdinalKey, Option<Utf16Text>>> {
         self.values
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
