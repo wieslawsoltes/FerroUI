@@ -357,6 +357,51 @@ fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
     });
 }
 
+/// A conversion between two value types, as the registry finds it: a registered one, or one it
+/// derives from the entries of the registry.
+enum Conversion {
+    /// Registered with [`ValueTypes::register_conversion`] (or a cast, which is also a conversion).
+    Registered(ConvertFn),
+    /// The root handle (`Ref<FerroObject>`) to the handle of a class: the object, when it is of
+    /// the class. Derived from the object entry of the class ([`ValueTypes::register_object`]).
+    RootToHandle(FromObjectFn),
+    /// The root handle to the nullable form of the handle of a class: the object wrapped, when it
+    /// is of the class.
+    RootToNullableHandle(FromObjectFn, NullableOperation),
+}
+
+impl Conversion {
+    /// The conversion of values of the type `from` to the type `to`, when there is one.
+    fn find(from: TypeId, to: TypeId) -> Option<Conversion> {
+        with_registry(|r| {
+            if let Some(convert) = r.conversions.get(&(from, to)) {
+                return Some(Conversion::Registered(convert.clone()));
+            }
+            if from != TypeId::of::<Ref<FerroObject>>() {
+                return None;
+            }
+            if let Some(&(_, from_object, _)) = r.objects.get(&to) {
+                return Some(Conversion::RootToHandle(from_object));
+            }
+            let inner = r.nullable_inner.get(&to)?;
+            let &(_, from_object, _) = r.objects.get(&inner.id())?;
+            Some(Conversion::RootToNullableHandle(from_object, *r.nullable.get(&to)?))
+        })
+    }
+
+    /// `value` converted, or `None` when it does not convert.
+    fn apply(&self, value: &BoxedValue) -> Option<BoxedValue> {
+        match self {
+            Conversion::Registered(convert) => convert(value),
+            Conversion::RootToHandle(from_object) => from_object(value.downcast_ref::<Ref<FerroObject>>()?.clone()),
+            Conversion::RootToNullableHandle(from_object, nullable) => {
+                let handle = from_object(value.downcast_ref::<Ref<FerroObject>>()?.clone())?;
+                nullable(NullableRequest::Wrap(handle.as_any()))
+            }
+        }
+    }
+}
+
 fn insert_object(id: TypeId, as_object: ObjectFn, from_object: FromObjectFn, class: &'static TypeInfo) {
     with_registry(|r| {
         r.objects.insert(id, (as_object, from_object, class));
@@ -550,8 +595,8 @@ impl ValueTypes {
         }
         insert_object(TypeId::of::<Ref<T>>(), as_object::<T>, from_object::<T>, T::TYPE);
         Self::register_nullable::<Ref<T>>();
-        Self::register_conversion::<Ref<FerroObject>, Ref<T>>(|o| o.cast::<T>());
-        Self::register_conversion::<Ref<FerroObject>, Option<Ref<T>>>(|o| o.cast::<T>().map(Some));
+        // The conversions of the root handle to `Ref<T>` and `Option<Ref<T>>` are derived from
+        // this entry when they are looked up (`Conversion::find`): no code per class.
     }
 
     /// Registers the element reference type of class `T`
@@ -989,9 +1034,7 @@ impl ValueTypes {
 
     /// Looks up a registered conversion.
     pub fn try_convert_registered(value: &BoxedValue, target: ValueType) -> Option<BoxedValue> {
-        let key = (value_type_id(&**value), target.id());
-        let f = with_registry(|r| r.conversions.get(&key).cloned());
-        f.and_then(|f| f(value))
+        Conversion::find(value_type_id(&**value), target.id()).and_then(|conversion| conversion.apply(value))
     }
 
     /// Converts a value to exactly `target`. Returns `None` if no conversion
@@ -1020,9 +1063,9 @@ impl ValueTypes {
         if target.is::<BoxedValue>() {
             return Some(Some(Rc::new(value.clone())));
         }
-        let conversion = with_registry(|r| r.conversions.get(&(id, target.id())).cloned());
-        if let Some(convert) = conversion {
-            if let Some(v) = convert(value) {
+        let conversion = Conversion::find(id, target.id());
+        if let Some(conversion) = conversion {
+            if let Some(v) = conversion.apply(value) {
                 return Some(Some(v));
             }
         } else if let Some(v) = Self::try_cast(value, target) {
