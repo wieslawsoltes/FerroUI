@@ -401,6 +401,25 @@ The default was flipped after a run of 24 compiled desktop samples without the t
 fixes of #583, each logs exactly what it logs with the tables (`FERROUI_SMOKE_EXIT_MS`, binding
 diagnostics compared sample for sample).
 
+### 4.8 Class tables are constants (#569)
+
+A class's table of virtual members was built at run time by `Subclassable::build_vtable`, a
+function per pair of a class and each of its ancestors: every class built the part of each
+ancestor with its own overrides. That was 1,146 functions in hello world (1.1 MB of code for
+`InputElement`, `StyledElement` and `Visual` alone).
+
+Every slot is known when the program is compiled: the function of the class, or, for a member
+the class states it does not override, the slot of its parent's table. So the table is now a
+constant, `Subclassable::VTABLE`. The table of a class (`ObjectType::CLASS_VTABLE`) is a static
+of the executable, and `ObjectType::vtable` returns it with no `OnceLock`. A slot that forwards
+reads its parent's table through a `const fn`, so the root class (its own parent) never names
+its own table.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after |
+|---|---:|---:|
+| `release` (with symbols) | 73.56 MB | 72.21 MB (-1.35 MB) |
+| `dist` | 45.28 MB | 43.03 MB (**-2.25 MB, -5.0 %**) |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
