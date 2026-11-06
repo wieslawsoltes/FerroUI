@@ -1630,6 +1630,95 @@ fn component_reload_preserves_root_model_and_installs_a_fresh_namescope() {
     }
 }
 
+/// Step X7 of #525 (docs/porting/x-bind.md): a component reload of markup with `{x:Bind}`
+/// binds the new content to the preserved root, not to the detached candidate, and updates the
+/// bindings of the root once the content is in place: the bindings the reload added are read at
+/// once (`OneTime` included), `OneWay` ones follow the root afterwards, and a revision whose path
+/// does not resolve fails and keeps the content and its bindings.
+#[test]
+fn component_reload_updates_the_x_bind_bindings_of_the_preserved_root() {
+    use ferroui_base::{controls::NameScope, threading::Dispatcher, BoxedValue, Ref};
+    use ferroui_controls::{ContentPage, StackPanel, TextBlock};
+    use ferroui_markup_xaml::markup_extensions::XBindings;
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let page = |body: &str| {
+        format!(
+            r#"<ContentPage xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">{body}</ContentPage>"#
+        )
+    };
+    let uri = "ferres://component/XBind.xaml".to_string();
+    let initial = page(r#"<TextBlock x:Name="Label" Text="{x:Bind Tag, Mode=OneWay}"/>"#);
+    let root = ContentPage::new();
+    root.set_tag(Some(Rc::new("live tag".to_string())));
+    ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_root_instance(Some(Rc::new(root.clone()) as BoxedValue), &initial),
+        None,
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let label = |root: &Ref<ContentPage>| {
+        NameScope::get_name_scope(root)
+            .and_then(|scope| scope.find_as::<TextBlock>("Label"))
+            .expect("the label of the current content")
+    };
+    let bindings = XBindings::get_for_root(&root).expect("the x:Bind of the document creates the bindings of its root");
+    // The root is not in a visual tree: the host initializes it, as its attach would.
+    bindings.initialize().unwrap_or_else(|errors| panic!("{errors}"));
+    assert_eq!(label(&root).text().as_deref(), Some("live tag"));
+
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.clone(), initial.clone()).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::ComponentReloadTarget::content_page(
+        &root,
+        uri.clone(),
+        initial,
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+
+    // New bound elements: they read the preserved root, through the root's own bindings.
+    session.submit(
+        uri.clone(),
+        page(
+            r#"<StackPanel><TextBlock x:Name="Label" Text="{x:Bind Tag, Mode=OneWay}"/><TextBlock Text="{x:Bind Label.Text, Mode=OneWay}"/></StackPanel>"#,
+        ),
+    );
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let panel = Ref::<StackPanel>::from_xaml_object(&root.content().unwrap()).expect("the reloaded content");
+    let mirror = panel.children().get(1).cast::<TextBlock>().expect("the mirror of the label");
+    assert!(Rc::ptr_eq(&XBindings::get_for_root(&root).unwrap(), &bindings), "the root keeps its bindings");
+    assert!(bindings.is_initialized());
+    assert_eq!(label(&root).text().as_deref(), Some("live tag"));
+    assert_eq!(mirror.text().as_deref(), Some("live tag"));
+    root.set_tag(Some(Rc::new("changed".to_string())));
+    assert_eq!(label(&root).text().as_deref(), Some("changed"));
+    assert_eq!(mirror.text().as_deref(), Some("changed"));
+    assert!(bindings.diagnostics().is_empty(), "{:?}", bindings.diagnostics());
+
+    // A OneTime binding of a revision reads the root when the revision is applied, then keeps it.
+    session.submit(uri.clone(), page(r#"<TextBlock x:Name="Label" Text="{x:Bind Tag}"/>"#));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let once = label(&root);
+    assert_eq!(once.text().as_deref(), Some("changed"));
+    root.set_tag(Some(Rc::new("after the reload".to_string())));
+    assert_eq!(once.text().as_deref(), Some("changed"));
+
+    // A path the root does not have is the compile error of the revision: nothing changes.
+    let content = root.content().unwrap();
+    session.submit(uri.clone(), page(r#"<TextBlock x:Name="Label" Text="{x:Bind NoSuchMember}"/>"#));
+    assert_eq!(session.apply_pending().unwrap().status, ReloadStatus::Failed);
+    assert!(Rc::ptr_eq(&root.content().unwrap(), &content));
+    assert!(label(&root).ptr_eq(&once));
+    // Update reads the OneTime binding of the current content again. (The bindings of a previous
+    // content stay registered until that content is released, so the result is not asserted.)
+    let _ = bindings.update();
+    assert_eq!(once.text().as_deref(), Some("after the reload"));
+}
+
 #[test]
 fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transactionally() {
     use ferroui_base::{
@@ -2392,16 +2481,9 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
         .register_document(view_uri.into(), view.into())
         .unwrap();
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
-    let base = ferroui_base::utilities::Uri::try_create(
-        view_uri,
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let base = ferroui_base::utilities::UriRef::parse_absolute(view_uri).unwrap();
     let include = ferroui_markup_xaml::styling::ResourceInclude::new(Some(base));
-    include.set_source(ferroui_base::utilities::Uri::try_create(
-        "Values.xaml",
-        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
-    ));
+    include.set_source(ferroui_base::utilities::UriRef::parse("Values.xaml").ok());
     assert_eq!(include.development_source().as_deref(), Some(resource_uri));
     let resources = Application::current().unwrap().resources();
     resources.add_merged_dictionary(include.as_resource_provider());
@@ -2625,16 +2707,9 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
         .register_document(view_uri.into(), view.into())
         .unwrap();
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
-    let base = ferroui_base::utilities::Uri::try_create(
-        view_uri,
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let base = ferroui_base::utilities::UriRef::parse_absolute(view_uri).unwrap();
     let include = ferroui_markup_xaml::styling::StyleInclude::new(Some(base));
-    include.set_source(ferroui_base::utilities::Uri::try_create(
-        "Values.xaml",
-        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
-    ));
+    include.set_source(ferroui_base::utilities::UriRef::parse("Values.xaml").ok());
     assert_eq!(include.development_source().as_deref(), Some(resource_uri));
     let styles = Application::current().unwrap().styles();
     let index = styles.count();
@@ -2722,11 +2797,7 @@ fn linked_resource_provenance_does_not_retain_document_roots() {
     let _scope = Dispatcher::unit_test_scope();
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
-    let uri = ferroui_base::utilities::Uri::try_create(
-        "ferres://provenance/Values.xaml",
-        ferroui_base::utilities::UriKind::Absolute,
-    )
-    .unwrap();
+    let uri = ferroui_base::utilities::UriRef::parse_absolute("ferres://provenance/Values.xaml").unwrap();
     let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
         RuntimeXamlLoaderDocument::with_base_uri(
             Some(uri.clone()),
@@ -2740,7 +2811,7 @@ fn linked_resource_provenance_does_not_retain_document_roots() {
     let provider: Rc<dyn IResourceProvider> = dictionary.into();
     assert_eq!(
         provider.development_source().as_deref(),
-        Some(uri.absolute_uri())
+        Some(uri.as_str())
     );
     drop(value);
     drop(provider);
@@ -3425,4 +3496,32 @@ fn local_binding_reload_snapshots_source_updates_at_commit() {
         30.0,
         "rollback restored a stale preparation snapshot"
     );
+}
+
+/// Document identity by the text of the URL (C5 of #423): one document reached by two spellings
+/// of its URI (the case of the scheme and the authority, a dot segment, a relative include) is one
+/// key of the session, as it was one canonical `Uri`; the key is the text the loaders resolve an
+/// include to.
+#[test]
+fn a_document_reached_by_two_spellings_is_one_document() {
+    assert_eq!(document_key("FERRES://Identity/Views/Main.xaml"), "ferres://identity/Views/Main.xaml");
+    assert_eq!(document_key("ferres://identity/Views/./Main.xaml"), "ferres://identity/Views/Main.xaml");
+    // A text that is not a URL is its own key.
+    assert_eq!(document_key("Views/Main.xaml"), "Views/Main.xaml");
+    let base = document_url("FERRES://Identity/Views/Main.xaml").unwrap();
+    for source in ["Values.xaml", "./Values.xaml", "../Views/Values.xaml", "/Views/Values.xaml", "FERRES://IDENTITY/Views/Values.xaml"] {
+        assert_eq!(include_key(&base, source).as_deref(), Some("ferres://identity/Views/Values.xaml"), "{source}");
+    }
+
+    let mut session = HotReloadSession::new();
+    let view = r#"<Border xmlns="https://github.com/ferroui"/>"#;
+    session.register_document("FERRES://Identity/Views/Main.xaml".into(), view.into()).unwrap();
+    assert_eq!(session.sources().keys().collect::<Vec<_>>(), ["ferres://identity/Views/Main.xaml"]);
+    // The other spelling names the registered document.
+    assert!(session.register_document("ferres://identity/Views/Main.xaml".into(), view.into()).is_err());
+    assert_eq!(session.sources().len(), 1);
+    assert!(session.reapply_document("ferres://IDENTITY/Views/Main.xaml").is_ok());
+    // A `file:` URL of a drive keeps its drive for a rooted include (the URL standard).
+    let base = document_url("file:///C:/App/Views/Main.xaml").unwrap();
+    assert_eq!(include_key(&base, "/Styles/Base.xaml").as_deref(), Some("file:///C:/Styles/Base.xaml"));
 }

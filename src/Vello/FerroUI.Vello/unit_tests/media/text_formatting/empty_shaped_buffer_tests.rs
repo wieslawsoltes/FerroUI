@@ -17,7 +17,7 @@ use ferroui_base::media::text_formatting::{
 };
 use ferroui_base::media::{Brushes, FontManager, TextAlignment, TextWrapping, Typeface};
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::FerroLocator;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
@@ -122,7 +122,7 @@ impl GlyphlessSystemFontCollection {
 
         FontCollectionBase::try_add_font_source(
             &collection,
-            &Uri::new(&format!("resm:{GLYPHLESS_FONT}?assembly={ASSEMBLY}"), UriKind::Absolute).unwrap(),
+            &UriRef::parse_absolute(&format!("resm:{GLYPHLESS_FONT}?assembly={ASSEMBLY}")).unwrap(),
         );
 
         collection
@@ -134,7 +134,7 @@ impl FontCollectionBaseImpl for GlyphlessSystemFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         FontManager::system_fonts_key()
     }
 }

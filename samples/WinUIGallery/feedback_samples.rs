@@ -1,4 +1,4 @@
-//! Original ProgressRing, RatingControl and InfoBadge event handlers in Rust.
+//! Original ProgressRing, RatingControl, InfoBadge and PersonPicture event handlers in Rust.
 //! Controls own input, rendering and value semantics; the sample owns only its UI behavior.
 
 use ferroui_base::controls::ResourceKey;
@@ -8,7 +8,7 @@ use ferroui_base::{ObjectType, Ref};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::{
     ComboBox, Control, InfoBadge, NavigationView, NavigationViewPaneDisplayMode, NumberBox,
-    ProgressRing, RatingControl, TextBlock, ToggleSwitch,
+    PersonPicture, ProgressRing, RadioButton, RatingControl, TextBlock, ToggleSwitch,
 };
 use std::rc::Rc;
 
@@ -17,6 +17,53 @@ pub(crate) fn wire(root: &Ref<Control>) {
     wire_ratings(root);
     wire_badges(root);
     wire_navigation_badge(root);
+    wire_person_picture(root);
+}
+
+/// `RadioButtons_SelectionChanged` of `PersonPicturePage.xaml.cs`: the checked radio button picks
+/// the profile image, the display name or the initials, and clears the other two.
+fn wire_person_picture(root: &Ref<Control>) {
+    let Some(picture) = find::<PersonPicture>(root, "personPicture") else {
+        return;
+    };
+    let radios: Vec<_> = ["ProfileImageRadio", "DisplayNameRadio", "InitialsRadio"]
+        .into_iter()
+        .map(|name| root.get_control::<RadioButton>(name).downgrade())
+        .collect();
+    let update = {
+        let picture = picture.downgrade();
+        let radios = radios.clone();
+        move || {
+            let Some(picture) = picture.upgrade() else { return };
+            let checked = |index: usize| radios[index].upgrade().is_some_and(|radio| radio.is_checked() == Some(true));
+            if checked(0) {
+                let image = crate::assets::load_bitmap("ferres://WinUIGallery/Assets/ControlImages/PersonPicture.png")
+                    .ok()
+                    .map(|bitmap| Rc::new(bitmap) as Rc<dyn ferroui_base::media::IImageBrushSource>);
+                picture.set_profile_picture(image);
+                picture.set_display_name("");
+                picture.set_initials("");
+            } else if checked(1) {
+                picture.set_profile_picture(None);
+                picture.set_display_name("Jane Doe");
+                picture.set_initials("");
+            } else if checked(2) {
+                picture.set_profile_picture(None);
+                picture.set_display_name("");
+                picture.set_initials("SB");
+            }
+        }
+    };
+    update();
+    let update = Rc::new(update);
+    for radio in radios.iter().filter_map(|radio| radio.upgrade()) {
+        let update = update.clone();
+        radio.property_changed(move |change| {
+            if change.property() == ToggleButton::is_checked_property().as_property() {
+                update();
+            }
+        });
+    }
 }
 
 fn wire_navigation_badge(root: &Ref<Control>) {

@@ -6,7 +6,7 @@ use ferroui_base::media::{
     BaselineAlignment, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
     FontWeight, IBrush, MediaCollection, TextAlignment, TextDecoration, TextDecorationCollection,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Ref, Thickness};
 use std::rc::Rc;
 
@@ -15,7 +15,7 @@ use std::rc::Rc;
 /// `Some(None)` explicitly clears it. Snapshots copy mutable formatting collections.
 #[derive(Default)]
 pub struct CharacterFormat {
-    pub language: Option<CultureInfo>,
+    pub language: Option<Locale>,
     pub font_family: Option<FontFamily>,
     pub font_size: Option<f64>,
     pub font_style: Option<FontStyle>,
@@ -208,16 +208,9 @@ impl CharacterFormat {
         result
     }
 
+    /// Whether the assigned values are valid. A language is a locale, which is
+    /// always a valid XML language tag.
     pub fn validate(&self) -> Result<(), super::DocumentError> {
-        if self
-            .language
-            .as_ref()
-            .is_some_and(|language| !super::text_language::is_valid_language_tag(language.name()))
-        {
-            return Err(super::DocumentError::InvalidFormat(
-                "Language must be a valid XML language tag",
-            ));
-        }
         if self.font_size.is_some_and(|v| !v.is_finite() || v <= 0.0) {
             return Err(super::DocumentError::InvalidFormat(
                 "FontSize must be finite and positive",
@@ -297,21 +290,21 @@ impl CharacterFormat {
         self.apply_to(element);
     }
 
-    /// The assigned native LanguageTag value. None means that this patch leaves
-    /// language unchanged; mixed range values use TextFormatValue as usual.
-    pub fn language_tag(&self) -> Option<&str> {
-        self.language.as_ref().map(CultureInfo::name)
+    /// The assigned native LanguageTag value: the BCP-47 tag of the locale, empty
+    /// for the invariant culture (the unknown locale `und`). None means that this
+    /// patch leaves language unchanged; mixed range values use TextFormatValue as
+    /// usual.
+    pub fn language_tag(&self) -> Option<String> {
+        self.language.as_ref().map(super::text_language::language_tag)
     }
 
-    /// Assigns the language without losing the original tag or modifying any
-    /// other character formatting. Validation completes before this patch changes.
+    /// Assigns the language of a tag without modifying any other character
+    /// formatting: the empty tag is the invariant culture (the unknown locale
+    /// `und`), any other tag has to be a valid XML language tag and a BCP-47
+    /// language tag (the locale holds it with the case of its subtags
+    /// normalized). Validation completes before this patch changes.
     pub fn set_language_tag(&mut self, tag: &str) -> Result<(), super::DocumentError> {
-        if !super::text_language::is_valid_language_tag(tag) {
-            return Err(super::DocumentError::InvalidFormat(
-                "Language must be a valid XML language tag",
-            ));
-        }
-        self.language = Some(CultureInfo::get_culture_info(tag));
+        self.language = Some(super::text_language::parse_language_tag(tag)?);
         Ok(())
     }
 }

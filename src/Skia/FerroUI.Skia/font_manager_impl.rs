@@ -4,7 +4,7 @@ use ferroui_base::media::{
     FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface,
 };
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{current_ui_locale, Locale};
 use skia_safe::font_style::{Weight, Width};
 use skia_safe::{Data, FontMgr};
 use std::cell::RefCell;
@@ -29,7 +29,7 @@ impl FontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<skia_safe::Typeface> {
         let is_normal_stretch = font_stretch == FontStretch::Normal;
 
@@ -54,15 +54,17 @@ impl FontManagerImpl {
         let culture = match culture {
             Some(culture) => culture,
             None => {
-                current_culture = CultureInfo::current_ui_culture();
+                current_culture = current_ui_locale();
                 &current_culture
             }
         };
+        // The BCP-47 tag of the locale; empty for the invariant culture, the unknown locale.
+        let culture_name = if *culture == Locale::UNKNOWN { String::new() } else { culture.to_string() };
 
         self.sk_font_manager.borrow().match_family_style_character(
             family_name.unwrap_or(""),
             sk_font_style,
-            &[culture.name()],
+            &[culture_name.as_str()],
             codepoint,
         )
     }
@@ -98,7 +100,7 @@ impl IFontManagerImpl for FontManagerImpl {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         let sk_typeface = self.try_match_character_typeface(
             codepoint,

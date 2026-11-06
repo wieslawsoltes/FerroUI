@@ -12,7 +12,6 @@ use ferrodock_model::{
     core::{IDock, IDockWindow, IDockable, IFactory},
 };
 use ferroui_base::{data::core::ValueTypes, BoxedValue, Ref};
-use ferroui_system::collections::generic::Dictionary;
 use indexmap::IndexSet;
 use std::{
     any::TypeId,
@@ -125,7 +124,7 @@ impl DockControlFactoryService {
         Self::prune_control_recycling(factory, &dockables);
     }
     fn prune_dictionary<V>(
-        dictionary: Rc<RefCell<Dictionary<Rc<dyn IDockable>, V>>>,
+        dictionary: Rc<RefCell<HashMap<Rc<dyn IDockable>, V>>>,
         dockables: &Dockables,
     ) {
         if dictionary.borrow().is_empty() {

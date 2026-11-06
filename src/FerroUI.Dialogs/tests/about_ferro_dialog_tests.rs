@@ -9,7 +9,8 @@ use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
+use url::Url;
 use ferroui_base::{Ref, StyledElement};
 use ferroui_controls::platform::IWindowImpl;
 use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
@@ -58,11 +59,11 @@ fn the_dialog_loads_its_document_and_binds_its_texts() {
 /// A launcher that records the addresses it is asked to open.
 #[derive(Default)]
 struct RecordingLauncher {
-    uris: RefCell<Vec<Uri>>,
+    uris: RefCell<Vec<Url>>,
 }
 
 impl ILauncher for RecordingLauncher {
-    fn launch_uri_async(&self, uri: &Uri) -> LocalBoxFuture<bool> {
+    fn launch_uri_async(&self, uri: &Url) -> LocalBoxFuture<bool> {
         self.uris.borrow_mut().push(uri.clone());
         Box::pin(std::future::ready(true))
     }
@@ -96,7 +97,7 @@ fn clicking_the_button_opens_the_address_of_the_project() {
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
     Dispatcher::ui_thread().run_jobs(None);
 
-    let expected = Uri::absolute("https://github.com/wieslawsoltes/FerroUI").expect("an absolute URI");
+    let expected = Url::parse("https://github.com/wieslawsoltes/FerroUI").expect("a URL");
     assert_eq!(vec![expected], *launcher.uris.borrow());
 }
 
@@ -107,7 +108,7 @@ fn loading_the_document_by_its_uri_creates_the_dialog() {
     crate::register_types();
     let _app = UnitTestApplication::start(TestServices::styled_window());
 
-    let uri = Uri::absolute(AboutFerroDialog::DOCUMENT_URI).expect("the URI of the document");
+    let uri = UriRef::parse(AboutFerroDialog::DOCUMENT_URI).expect("the URI of the document");
     let loaded = FerroXamlLoader::load(&uri, None).expect("the document is loaded");
 
     let dialog = from_markup_value::<Ref<AboutFerroDialog>>(&Some(loaded));

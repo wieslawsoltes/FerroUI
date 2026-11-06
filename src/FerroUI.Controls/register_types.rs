@@ -170,6 +170,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::automation::peers::RadioButtonsAutomationPeer,
     crate::automation::peers::RangeBaseAutomationPeer,
     crate::automation::peers::RatingControlAutomationPeer,
+    crate::automation::peers::PersonPictureAutomationPeer,
+    crate::automation::peers::PagerControlAutomationPeer,
     crate::automation::peers::ScrollBarAutomationPeer,
     crate::automation::peers::ScrollViewerAutomationPeer,
     crate::automation::peers::SelectingItemsControlAutomationPeer,
@@ -287,6 +289,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::radio_button::RadioButton,
     crate::radio_buttons::RadioButtons,
     crate::rating_control::RatingControl,
+    crate::person_picture::PersonPicture,
+    crate::contact::Contact,
+    crate::pager_control::PagerControl,
     crate::rating_item_info::RatingItemFontInfo,
     crate::rating_item_info::RatingItemImageInfo,
     crate::rating_item_info::RatingItemInfo,
@@ -375,6 +380,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::primitives::TitleBarTemplateSettings,
     crate::primitives::InfoBarPanel,
     crate::primitives::InfoBarTemplateSettings,
+    crate::primitives::PersonPictureTemplateSettings,
+    crate::primitives::PagerControlTemplateSettings,
     crate::primitives::LightDismissOverlayLayer,
     crate::primitives::NavigationViewTemplateSettings,
     crate::primitives::OverlayLayer,
@@ -495,6 +502,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::visual_state::StateTriggerBase,
     crate::visual_state::StateTrigger,
     crate::visual_state::AdaptiveTrigger,
+    // --- x:Bind phasing (WinUI, docs/porting/x-bind.md) ---
+    // FerroUI.Controls.Templates
+    crate::templates::XamlBindingHelper,
     // --- leftovers ---
 ];
 

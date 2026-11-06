@@ -1,0 +1,235 @@
+<!-- Ported from the pinned ItemsRepeater examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The data templates keep the markup of the source page; x:Bind becomes {Binding} over the
+     markup types of repeater_samples.rs, ThemeResource becomes DynamicResource, the layouts
+     (including the custom ActivityFeedLayout and VariedImageSizeLayout) and the template
+     selectors are native Rust objects set by repeater_samples.rs, and the C# handlers are Rust.
+     The Tag of the roots of the selected templates names the template for the tests. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Resources>
+    <DataTemplate x:Key="HorizontalBarTemplate">
+      <Border Width="{Binding MaxLength}" HorizontalAlignment="Left">
+        <Border.Background>
+          <SolidColorBrush Color="{DynamicResource SystemChromeLowColor}" />
+        </Border.Background>
+        <Rectangle Width="{Binding Length}" Height="24" HorizontalAlignment="Left">
+          <Rectangle.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemAccentColor}" />
+          </Rectangle.Fill>
+        </Rectangle>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="VerticalBarTemplate">
+      <Border Height="{Binding MaxHeight}" VerticalAlignment="Top">
+        <Border.Background>
+          <SolidColorBrush Color="{DynamicResource SystemChromeLowColor}" />
+        </Border.Background>
+        <Rectangle Width="48" Height="{Binding Height}" VerticalAlignment="Top">
+          <Rectangle.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemAccentColor}" />
+          </Rectangle.Fill>
+        </Rectangle>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="CircularTemplate">
+      <Grid>
+        <Ellipse Width="{Binding MaxDiameter}" Height="{Binding MaxDiameter}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Ellipse.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemChromeLowColor}" />
+          </Ellipse.Fill>
+        </Ellipse>
+        <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Ellipse.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemAccentColor}" />
+          </Ellipse.Fill>
+        </Ellipse>
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="NormalItemTemplate">
+      <Border Tag="Normal" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding}" />
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="AccentItemTemplate">
+      <Border Tag="Accent" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="{DynamicResource SystemControlForegroundChromeWhiteBrush}"
+                   Text="{Binding}" />
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="StringDataTemplate">
+      <Grid Tag="String" Margin="10" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+        <TextBlock Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="{DynamicResource SystemControlForegroundChromeWhiteBrush}"
+                   Text="{Binding}" TextWrapping="Wrap" />
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="IntDataTemplate">
+      <Grid Tag="Int" Margin="10" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+        <!-- HeaderTextBlockStyle: 46 pixels, light. -->
+        <TextBlock Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="46" FontWeight="Light" Text="{Binding}" />
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="FlowItemTemplate">
+      <Border Width="96" Height="64" BorderThickness="1" CornerRadius="4"
+              Background="{DynamicResource ControlFillColorDefaultBrush}"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding}" />
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="RecipeTemplate">
+      <StackPanel Margin="5" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+        <StackPanel Height="75" Margin="8" Background="{Binding Color}" Opacity="0.8">
+          <TextBlock Padding="12" FontSize="35" TextAlignment="Center"
+                     Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                     Text="{Binding Num}" />
+        </StackPanel>
+        <!-- TitleTextBlockStyle: 28 pixels, semibold; BodyTextBlockStyle: 14 pixels. -->
+        <TextBlock x:Name="recipeName" Margin="15,0,10,0" FontSize="28" FontWeight="SemiBold"
+                   Text="{Binding Name}" TextWrapping="Wrap" />
+        <TextBlock Margin="15,0,15,15" FontSize="14" Text="{Binding Ingredients}" />
+      </StackPanel>
+    </DataTemplate>
+  </StackPanel.Resources>
+
+  <!-- Basic, non-interactive items laid out by ItemsRepeater -->
+  <StackPanel x:Name="ItemsRepeaterExample1" Spacing="12">
+    <TextBlock Text="Basic, non-interactive items laid out by ItemsRepeater" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <ScrollViewer x:Name="BarScrollViewer" MaxHeight="500"
+                    HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <ItemsRepeater x:Name="repeater" ItemTemplate="{StaticResource HorizontalBarTemplate}" />
+      </ScrollViewer>
+      <StackPanel Grid.Column="1" Spacing="12">
+        <Button x:Name="AddBtn" MinWidth="150" Content="Add Item" />
+        <Button x:Name="DeleteBtn" MinWidth="150" Content="Remove Item" />
+        <RadioButtons x:Name="BarLayouts" Header="Layout" SelectedIndex="0"
+                      AutomationProperties.Name="Layout">
+          <x:String>StackLayout - Vertical</x:String>
+          <x:String>StackLayout - Horizontal</x:String>
+          <x:String>UniformGridLayout</x:String>
+        </RadioButtons>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <!-- Virtualizing, scrollable list of items laid out by ItemsRepeater -->
+  <StackPanel x:Name="ItemsRepeaterExample2" Spacing="12">
+    <TextBlock Text="Virtualizing, scrollable list of items laid out by ItemsRepeater" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <ItemsRepeaterScrollHost>
+        <ScrollViewer x:Name="scrollViewer" Height="400" Padding="0,0,16,0">
+          <ItemsRepeater x:Name="repeater2" Margin="0,0,12,0" HorizontalAlignment="Stretch" />
+        </ScrollViewer>
+      </ItemsRepeaterScrollHost>
+      <RadioButtons x:Name="FeedLayouts" Grid.Column="1" SelectedIndex="1"
+                    AutomationProperties.Name="Layout">
+        <x:String>Uniform grid</x:String>
+        <x:String>Custom virtualizing layout</x:String>
+      </RadioButtons>
+    </Grid>
+  </StackPanel>
+
+  <!-- Use FlowLayout with ItemsRepeater to wrap and virtualize a large collection. -->
+  <StackPanel x:Name="ItemsRepeaterExample3" Spacing="8">
+    <TextBlock Text="Virtualize a wrapping collection with FlowLayout" FontSize="18" />
+    <TextBlock Text="Scroll through 500 items. ItemsRepeater creates and recycles only the elements needed near the viewport."
+               TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="Auto,220" ColumnSpacing="24">
+      <StackPanel Spacing="8">
+        <ScrollViewer x:Name="FlowScrollViewer" Width="520" Height="320" HorizontalAlignment="Left"
+                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <ItemsRepeater x:Name="FlowRepeater" HorizontalCacheLength="0" VerticalCacheLength="0"
+                         ItemTemplate="{StaticResource FlowItemTemplate}" />
+        </ScrollViewer>
+        <TextBlock x:Name="RealizedCountText" AutomationProperties.LiveSetting="Polite"
+                   Text="Realized elements: 0 of 500" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="12">
+        <RadioButtons x:Name="FlowOrientation" Header="Orientation" SelectedIndex="0"
+                      AutomationProperties.AutomationId="FlowLayoutOrientation"
+                      AutomationProperties.Name="FlowLayout orientation">
+          <x:String>Horizontal</x:String>
+          <x:String>Vertical</x:String>
+        </RadioButtons>
+        <TextBlock Text="LineAlignment" />
+        <ComboBox x:Name="FlowLineAlignment" SelectedIndex="0"
+                  AutomationProperties.AutomationId="FlowLayoutLineAlignment"
+                  AutomationProperties.Name="Line alignment">
+          <x:String>Start</x:String>
+          <x:String>Center</x:String>
+          <x:String>Space between</x:String>
+          <x:String>Space evenly</x:String>
+        </ComboBox>
+        <TextBlock Text="MinItemSpacing" />
+        <Slider x:Name="FlowItemSpacing" Maximum="32" TickFrequency="2" IsSnapToTickEnabled="True"
+                Value="8" AutomationProperties.AutomationId="FlowLayoutItemSpacing"
+                AutomationProperties.Name="Minimum item spacing" />
+        <TextBlock Text="LineSpacing" />
+        <Slider x:Name="FlowLineSpacing" Maximum="32" TickFrequency="2" IsSnapToTickEnabled="True"
+                Value="8" AutomationProperties.AutomationId="FlowLayoutLineSpacing"
+                AutomationProperties.Name="Line spacing" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <!-- ItemsRepeater with mixed-type collection -->
+  <StackPanel x:Name="ItemsRepeaterExample4" Spacing="8">
+    <TextBlock Text="ItemsRepeater with mixed-type collection" FontSize="18" />
+    <TextBlock Text="This is an ItemsRepeater that displays both integer and string items. It uses a DataTemplateSelector to choose the correct layout for each of its items."
+               TextWrapping="Wrap" />
+    <ItemsRepeater x:Name="MixedTypeRepeater" Margin="0,0,12,0" HorizontalAlignment="Stretch">
+      <ItemsRepeater.Layout>
+        <UniformGridLayout MinItemHeight="200" MinItemWidth="200" />
+      </ItemsRepeater.Layout>
+    </ItemsRepeater>
+  </StackPanel>
+
+  <!-- Laying out nested ItemsRepeaters: on the source page, not a catalog sample of its own. -->
+  <StackPanel x:Name="ItemsRepeaterNestedExample" Spacing="8">
+    <TextBlock Text="Laying out nested ItemsRepeaters" FontSize="18" />
+    <ScrollViewer HorizontalScrollBarVisibility="Auto">
+      <ItemsRepeater x:Name="outerRepeater" VerticalAlignment="Top">
+        <ItemsRepeater.Layout>
+          <StackLayout Orientation="Vertical" />
+        </ItemsRepeater.Layout>
+      </ItemsRepeater>
+    </ScrollViewer>
+  </StackPanel>
+
+  <!-- Animated Scrolling and Content Display -->
+  <StackPanel x:Name="ItemsRepeaterExample5" Spacing="8">
+    <TextBlock Text="Animated Scrolling and Content Display" FontSize="18" />
+    <Grid ColumnDefinitions="*,*">
+      <ScrollViewer x:Name="Animated_ScrollViewer" Width="250" Height="175">
+        <ItemsRepeater x:Name="animatedScrollRepeater" />
+      </ScrollViewer>
+      <Rectangle x:Name="colorRectangle" Grid.Column="1" Width="150" Height="150" Margin="10,0,0,0"
+                 AutomationProperties.Name="ColorRectangle"
+                 Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    </Grid>
+  </StackPanel>
+
+  <!-- Virtualized, Content-Heavy Layout with Filtering and Sorting -->
+  <StackPanel x:Name="ItemsRepeaterExample6" Spacing="8">
+    <TextBlock Text="Virtualized, Content-Heavy Layout with Filtering and Sorting" FontSize="18" />
+    <Grid Height="600" ColumnDefinitions="*,*">
+      <ItemsRepeaterScrollHost x:Name="tracker">
+        <ScrollViewer>
+          <ItemsRepeater x:Name="VariedImageSizeRepeater" ItemTemplate="{StaticResource RecipeTemplate}" />
+        </ScrollViewer>
+      </ItemsRepeaterScrollHost>
+      <StackPanel Grid.Column="1" Margin="10,0,0,0">
+        <TextBlock Text="Filter by ingredient..." />
+        <TextBox x:Name="FilterRecipes" Width="200" Margin="0,0,0,20" HorizontalAlignment="Left"
+                 VerticalAlignment="Top" AutomationProperties.Name="Filter by ingredient" />
+        <TextBlock Margin="0,0,0,10" Text="Sort by number of ingredients" />
+        <Button x:Name="SortAscending" Margin="0,0,0,5" Content="Least to most" />
+        <Button x:Name="SortDescending" Content="Most to least" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

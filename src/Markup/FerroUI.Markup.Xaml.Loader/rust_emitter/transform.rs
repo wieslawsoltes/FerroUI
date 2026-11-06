@@ -18,7 +18,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{IXamlAstNode, IXamlAstValueNode, XamlDocument};
@@ -238,7 +238,9 @@ pub fn transform_group(
         let xaml_document = xaml_document.borrow();
         let base_uri = resource.uri();
         if let Some(base_uri) = base_uri.as_deref() {
-            Uri::absolute(base_uri).map_err(|e| XamlError::internal("UriFormatException", format!("Invalid base URI '{base_uri}': {e}")))?;
+            // The base URI the context of the document is created with (`rt::create_context`).
+            UriRef::parse_absolute(base_uri)
+                .map_err(|e| XamlError::internal("UriFormatException", format!("Invalid base URI '{base_uri}': {e}")))?;
         }
         transformed.push(TransformedDocument {
             root: xaml_document.root()?,

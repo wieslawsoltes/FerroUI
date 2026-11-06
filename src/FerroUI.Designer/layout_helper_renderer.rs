@@ -9,7 +9,7 @@ use ferroui_base::media::{
     SolidColorBrush, StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::current_locale;
 use ferroui_base::{Point, Rect};
 use ferroui_designer_tools::{
     Affine, Axis, LayoutGuide, LayoutGuideGeometry, LayoutGuideRole, SnapGuide,
@@ -447,7 +447,7 @@ fn badge(
     let value = value.chars().take(96).collect::<String>();
     let text = FormattedText::new(
         &value,
-        CultureInfo::current_culture(),
+        current_locale(),
         FlowDirection::LeftToRight,
         Typeface::default(),
         10.5 * scale,

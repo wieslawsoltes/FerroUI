@@ -50,13 +50,13 @@ struct CultureScope(CultureInfo);
 
 impl CultureScope {
     fn new() -> Self {
-        Self(CultureInfo::current_culture())
+        Self(CultureInfo::current_formatting())
     }
 }
 
 impl Drop for CultureScope {
     fn drop(&mut self) {
-        CultureInfo::set_current_culture(self.0.clone());
+        CultureInfo::set_current_formatting(self.0.clone());
     }
 }
 
@@ -438,8 +438,8 @@ fn set_initial_focus_should_focus_day_selector_for_day_first_locale() {
     let _app = start(focus_services());
     // en-GB uses dd/MM/yyyy: the day appears first in the short date pattern
     TestCultureDataProvider::register();
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("en-GB"));
-    assert_eq!("dd/MM/yyyy", CultureInfo::current_culture().date_time_format().short_date_pattern());
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("en-GB"));
+    assert_eq!("dd/MM/yyyy", CultureInfo::current_formatting().date_time_format().short_date_pattern());
 
     let presenter = DatePickerPresenter::new();
     presenter.set_template(Some(create_picker_template()));

@@ -1,0 +1,36 @@
+<!-- Ported from SampleBuiltInSystemBackdropsWindow.xaml and SampleSystemBackdropsWindow.xaml of the
+     pinned WinUI Gallery (14061eea, SampleSupport/SamplePages); see ../NOTICE.md. The content of
+     the sample window; the window, its backdrop and the SelectionChanged handlers are in Rust
+     (window_samples.rs). The ComboBox headers are composed labels. The items of the backdrop box
+     are set from Rust: the four of the built-in window, or the allowed backdrops of the
+     controller window (its ItemsSource). The accessibility announcement of SetBackdrop is the text
+     of a polite live region. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      x:Name="BackdropWindowRoot" RowDefinitions="32,*">
+  <Border x:Name="titleBar" Margin="8,0,0,0" VerticalAlignment="Stretch" ZIndex="1">
+    <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
+      <TextBlock x:Name="AppTitle" Margin="12,0,0,0" VerticalAlignment="Center" FontSize="12" />
+    </StackPanel>
+  </Border>
+  <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+    <TextBlock x:Name="tbChangeStatus" HorizontalAlignment="Center" />
+    <!-- UIHelper.AnnounceActionForAccessibility: a polite live region with the announcement. -->
+    <TextBlock x:Name="BackdropAnnouncement" HorizontalAlignment="Center" FontSize="12"
+               AutomationProperties.LiveSetting="Polite" />
+    <StackPanel Spacing="4">
+      <TextBlock Text="Current backdrop " />
+      <ComboBox x:Name="backdropComboBox" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Current backdrop" />
+    </StackPanel>
+    <StackPanel Spacing="4">
+      <TextBlock Text="Window theme " />
+      <ComboBox x:Name="themeComboBox" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Window theme">
+        <ComboBoxItem Content="Use system setting" />
+        <ComboBoxItem Content="Light" />
+        <ComboBoxItem Content="Dark" />
+      </ComboBox>
+    </StackPanel>
+  </StackPanel>
+</Grid>

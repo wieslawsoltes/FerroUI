@@ -1,5 +1,7 @@
-use crate::data::{BindingPriority, BindingValue};
-use crate::ferro_property::{FerroPropertyInit, NotifyingCallback, PropertyRoutes};
+use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
+use crate::ferro_property::{
+    convert_property_value, copy_converted_property_value, FerroPropertyInit, NotifyingCallback, PropertyRoutes,
+};
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
@@ -127,16 +129,32 @@ impl<T: PropertyValue> StyledProperty<T> {
     /// Gets the default value for the property on the specified type.
     #[inline]
     pub fn get_default_value(&self, type_: &'static TypeInfo) -> T {
-        if let Some(value) = &*self.single_default_value.borrow() {
-            return value.clone();
-        }
-        self.get_metadata(type_).default_value().clone()
+        self.default_for(|| type_)
     }
 
     /// Gets the default value for the property on the type of `owner`.
     #[inline]
     pub fn get_default_value_for(&self, owner: &FerroObject) -> T {
-        self.get_default_value(owner.get_type())
+        self.default_for(|| owner.get_type())
+    }
+
+    #[inline]
+    fn default_for(&self, host: impl FnOnce() -> &'static TypeInfo) -> T {
+        if let Some(value) = &*self.single_default_value.borrow() {
+            return value.clone();
+        }
+        self.get_metadata(host()).default_value().clone()
+    }
+
+    /// A binding keeps the first fallback it observes for its owner, even if
+    /// the property's metadata is subsequently overridden.
+    pub(crate) fn binding_default(&self, owner: &FerroObject, cache: &RefCell<Option<T>>) -> T {
+        if let Some(value) = &*cache.borrow() {
+            return value.clone();
+        }
+        let value = self.get_default_value_for(owner);
+        *cache.borrow_mut() = Some(value.clone());
+        value
     }
 
     /// Gets the property metadata for the specified type.
@@ -186,34 +204,46 @@ impl<T: PropertyValue> StyledProperty<T> {
         self.metadata.unregister(type_);
     }
 
-    /// Converts an untyped value of another type to the value type of the
-    /// property with the implicit conversions of the managed original
-    /// (the `TryConvert` of the property, see
-    /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
-    fn convert_untyped(value: &dyn Any) -> Option<T> {
-        let converted = crate::data::core::ValueTypes::try_convert_implicit(value, std::any::TypeId::of::<T>())?;
-        let converted: &dyn crate::AnyValue = &*converted;
-        converted.downcast_ref::<T>().cloned()
-    }
-
-    /// Interprets an untyped value: a value of type `T`, or one of the unset /
-    /// do-nothing markers.
+    /// Interprets a typed payload or the cold marker / notification /
+    /// conversion cases of an untyped binding. Exact T keeps first precedence.
     pub(crate) fn from_untyped(&self, value: &dyn Any) -> BindingValue<T> {
         if let Some(v) = value.downcast_ref::<T>() {
             BindingValue::new(v.clone())
-        } else if value.is::<UnsetValueType>() {
-            BindingValue::unset()
-        } else if value.is::<DoNothingType>() {
-            BindingValue::do_nothing()
         } else if let Some(v) = value.downcast_ref::<BindingValue<T>>() {
             v.clone()
-        } else if let Some(n) = value.downcast_ref::<crate::data::BindingNotification>() {
-            n.to_binding_value(self.property_type_name())
-        } else if let Some(v) = Self::convert_untyped(value) {
-            BindingValue::new(v)
         } else {
-            BindingValue::binding_error(crate::data::BindingError::message(self.invalid_value_message()))
+            let mut typed = None;
+            let (kind, error) = resolve_untyped_binding(&self.base, value, &mut |value| {
+                typed = value.downcast_ref::<T>().cloned();
+                typed.is_some()
+            });
+            BindingValue::from_notification_parts(kind, typed, error)
         }
+    }
+}
+
+// BindingValue<T>'s custom Clone remains in the typed caller. The marker and
+// conversion policies are common, with the existing notification snapshot
+// scope retained around the payload copy.
+#[inline(never)]
+fn resolve_untyped_binding(
+    property: &FerroProperty,
+    value: &dyn Any,
+    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+) -> (BindingValueType, Option<BindingError>) {
+    if value.is::<UnsetValueType>() {
+        return (BindingValueType::UNSET_VALUE, None);
+    }
+    if value.is::<DoNothingType>() {
+        return (BindingValueType::DO_NOTHING, None);
+    }
+    if let Some(notification) = value.downcast_ref::<BindingNotification>() {
+        return notification.resolve_binding_value(property.property_type_name(), copy_value);
+    }
+    if copy_converted_property_value(property, value, copy_value) {
+        (BindingValueType::VALUE, None)
+    } else {
+        (BindingValueType::BINDING_ERROR, Some(BindingError::message(property.invalid_value_message())))
     }
 }
 
@@ -262,7 +292,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
             None
         } else if let Some(v) = value.downcast_ref::<T>() {
             o.set_value_with_priority(this, v.clone(), priority)
-        } else if let Some(v) = Self::convert_untyped(value) {
+        } else if let Some(v) = convert_property_value::<T>(self, value) {
             o.set_value_with_priority(this, v, priority)
         } else {
             self.invalid_value_type();
@@ -276,7 +306,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         } else if value.is::<DoNothingType>() {
         } else if let Some(v) = value.downcast_ref::<T>() {
             o.set_current_value(this, v.clone());
-        } else if let Some(v) = Self::convert_untyped(value) {
+        } else if let Some(v) = convert_property_value::<T>(self, value) {
             o.set_current_value(this, v);
         } else {
             self.invalid_value_type();
@@ -331,18 +361,20 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
     }
 
+    fn route_create_boxed_local_binding(
+        &'static self,
+        owner: &FerroObject,
+    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+        crate::property_store::BoxedLocalValueBindingObserver::new(owner, self)
+    }
+
     fn route_create_binding_entry(
         &'static self,
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry> {
-        crate::property_store::BindingEntry::new(
-            o,
-            frame,
-            self,
-            crate::property_store::BindingSource::Untyped(source),
-        )
+    ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
+        crate::property_store::create_boxed_binding_entry(o, frame, self, source)
     }
 }
 

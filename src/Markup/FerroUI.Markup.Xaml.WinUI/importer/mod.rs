@@ -6,7 +6,6 @@
 //! run-time loader consume the same migrated document. The normal compiler still validates
 //! every type, member, event handler, value and binding against real framework metadata.
 
-mod event_targets;
 mod migration;
 mod options;
 mod report;

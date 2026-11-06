@@ -74,6 +74,9 @@ SYSTEM_TYPES = {
     "Thread", "ThreadPool", "Monitor", "Interlocked", "Volatile", "Mutex", "Semaphore",
     "SemaphoreSlim", "ManualResetEvent", "ManualResetEventSlim", "AutoResetEvent", "CountdownEvent",
     "Barrier", "ReaderWriterLock", "ReaderWriterLockSlim", "SpinLock", "SpinWait", "WaitHandle",
+    # `CancellationToken` is the one cancellation type of the workspace (C4, the shape of
+    # `tokio_util`): its declaration in `ferroui-system` is the baseline, and another one is a
+    # duplicate.
     "CancellationToken", "CancellationTokenSource", "CancellationTokenRegistration",
     "SynchronizationContext", "ExecutionContext", "Task", "ValueTask", "TaskCompletionSource",
     "TaskScheduler", "TaskFactory", "TaskStatus", "TaskCreationOptions", "TaskContinuationOptions",
@@ -109,6 +112,11 @@ def declared(names):
     return re.compile(r"\b(?:struct|enum|union|trait|type)\s+(" + names + r")\b")
 
 
+# The direction of a pattern whose types are deprecated since 0.5.0 (docs/idiomatic-rust.md,
+# section 3): the count goes to zero, apart from the local types that keep the name over the new
+# type, when the release after 0.5 removes them.
+REMOVED_AFTER_0_5 = "deprecated in 0.5, counted until removed after 0.5"
+
 # The patterns of the inventory table of #423, in its order. Each is (key, title, regex, what is
 # counted, direction). A `decl` pattern counts declarations, a `use` pattern counts the occurrences
 # of the name (the files column is the number of files with at least one).
@@ -128,25 +136,42 @@ PATTERNS = [
     ("std_error_impls", "`impl std::error::Error for`",
      re.compile(r"\bimpl\b(?:\s*<[^>{}]*>)?\s*(?:::)?(?:(?:std|core)::)?(?:error::)?Error\s+for\b"),
      "decl", "(target shape)"),
-    ("time_span", "`TimeSpan`", re.compile(r"\bTimeSpan\b"), "use", "`std::time::Duration`"),
+    # C5 (docs/idiomatic-rust-signatures.md): the public signatures take the std and chosen-crate
+    # types. What stays by decision (section 3.9: `CultureInfo`, `DateTime`, `DateTimeOffset`, the
+    # BSON types, the microcom `Guid`) is a deliberate declaration of the baseline.
+    ("time_span", "`TimeSpan`", re.compile(r"\bTimeSpan\b"), "use",
+     f"`Duration`, or `SignedDuration` where a span can be negative; {REMOVED_AFTER_0_5}"),
+    ("signed_duration", "`SignedDuration`", re.compile(r"\bSignedDuration\b"), "use",
+     "(the port, where a span can be negative)"),
     ("date_time", "`DateTime`", re.compile(r"\bDateTime\b"), "use",
-     "`SystemTime` and a calendar type (decide once)"),
+     "keep for calendar values (O4); an instant is `SystemTime`"),
     ("date_time_offset", "`DateTimeOffset`", re.compile(r"\bDateTimeOffset\b"), "use",
-     "`SystemTime` and a calendar type (decide once)"),
-    ("culture_info", "`CultureInfo`", re.compile(r"\bCultureInfo\b"), "use", "ICU4X `Locale`"),
-    ("uri", "`Uri`", re.compile(r"\bUri\b"), "use", "`url::Url`"),
-    ("guid_types", "`Guid` type declarations", declared(r"Guid"), "decl", "one type, or `uuid`"),
-    ("guid_uses", "`Guid` (uses)", re.compile(r"\bGuid\b"), "use", "one type, or `uuid`"),
+     "keep for calendar values (O4); an instant is `SystemTime`"),
+    ("culture_info", "`CultureInfo`", re.compile(r"\bCultureInfo\b"), "use",
+     "keep as the formatting parameter (O3); an identity is ICU4X `Locale`"),
+    ("uri", "`Uri`", re.compile(r"\bUri\b"), "use",
+     "`url::Url`, or `UriRef` where a reference can be relative; the port stays the markup form"),
+    ("guid_types", "`Guid` type declarations", declared(r"Guid"), "decl",
+     f"`uuid::Uuid`; the microcom `Guid` stays (COM layout), the others {REMOVED_AFTER_0_5}"),
+    ("guid_uses", "`Guid` (uses)", re.compile(r"\bGuid\b"), "use",
+     "`uuid::Uuid`; the microcom `Guid` stays (COM layout)"),
     ("dictionary", "`Dictionary` (uses)", re.compile(r"\bDictionary\b"), "use",
-     "`HashMap`, or `IndexMap` where the order matters"),
-    ("task", "`Task<`", re.compile(r"\bTask\s*<"), "use", "futures on the dispatcher's executor"),
+     "`HashMap`, `IndexMap`, or `SlotOrderMap` where the .NET order is observable; the port's "
+     f"name {REMOVED_AFTER_0_5}, the BSON `Dictionary` stays (O6)"),
+    # C4 (docs/idiomatic-rust-async.md): the old async types are deprecated in 0.5 and counted until
+    # the release after 0.5 removes them; `CancellationToken` is the one cancellation type.
+    ("task", "`Task<`", re.compile(r"\bTask\s*<"), "use",
+     f"`JoinHandle`, `Shared` and futures; {REMOVED_AFTER_0_5}"),
     ("task_completion_source", "`TaskCompletionSource`", re.compile(r"\bTaskCompletionSource\b"),
-     "use", "a oneshot channel"),
+     "use", f"`task::oneshot`, `Shared::channel`; {REMOVED_AFTER_0_5}"),
     ("synchronization_context", "`SynchronizationContext`",
-     re.compile(r"\bSynchronizationContext\b"), "use", "the dispatcher's executor"),
-    ("cancellation_token", "`CancellationToken...`",
-     re.compile(r"\bCancellationToken(?:Source|Registration)?\b"), "use",
-     "one cancellation type (decide once)"),
+     re.compile(r"\bSynchronizationContext\b"), "use",
+     f"the `Schedule` of the thread, `Dispatcher::current_priority`; {REMOVED_AFTER_0_5}"),
+    ("cancellation_token", "`CancellationToken`", re.compile(r"\bCancellationToken\b"), "use",
+     "(target shape: the one cancellation type)"),
+    ("cancellation_token_source", "`CancellationTokenSource`, `...Registration`",
+     re.compile(r"\b(?:Local)?CancellationToken(?:Source|Registration)\b"), "use",
+     f"`CancellationToken`, `CancellationGuard`; {REMOVED_AFTER_0_5}"),
     ("event_args", "`...EventArgs` structs", re.compile(r"\bstruct\s+(\w*EventArgs)\b"), "decl",
      "keep (control API)"),
     ("inotify_property_changed", "`INotifyPropertyChanged`",

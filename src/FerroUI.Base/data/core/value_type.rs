@@ -10,6 +10,7 @@
 //! table.
 
 use crate::utilities::CultureInfo;
+use icu_locale_core::Locale;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -131,8 +132,33 @@ type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 type ConvertFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
 type AnyConvertFn = Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
-type UnwrapFn = fn(&dyn AnyValue) -> Option<BoxedValue>;
-type NullFn = fn() -> BoxedValue;
+
+// The request borrows its input: the caller retains the original owning box
+// through conversion and unwinding. Each nullable type supplies one operation
+// entry instead of separately address-taken unwrap, null and wrap leaves.
+enum NullableRequest<'a> {
+    /// The contents of a `Some` of the nullable type, `None` for a null.
+    Unwrap(&'a dyn AnyValue),
+    /// A boxed null of the nullable type.
+    Null,
+    /// A value of the inner type wrapped in the nullable type, `None` for a
+    /// value of another type.
+    Wrap(&'a dyn std::any::Any),
+}
+
+type NullableOperation = for<'a> fn(NullableRequest<'a>) -> Option<BoxedValue>;
+
+/// The typed leaf of `Option<T>`: the only nullable code compiled per type.
+fn nullable_operation<T: PropertyValue>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+    match request {
+        NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<T>>() {
+            Some(Some(v)) => Some(Rc::new(v.clone())),
+            _ => None,
+        },
+        NullableRequest::Null => Some(Rc::new(Option::<T>::None)),
+        NullableRequest::Wrap(value) => Some(Rc::new(Some(value.downcast_ref::<T>()?.clone()))),
+    }
+}
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
 type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
@@ -144,10 +170,9 @@ type CastErrorFn = Rc<dyn Fn(&dyn AnyValue) -> Option<String>>;
 #[derive(Default)]
 struct Registry {
     display: IdMap<TypeId, DisplayFn>,
-    /// `Option<T>` → unwraps to the contained `T`.
-    nullable: IdMap<TypeId, UnwrapFn>,
-    /// `Option<T>` → a boxed `None`.
-    null_values: IdMap<TypeId, NullFn>,
+    /// `Option<T>` → its operation: unwraps to the contained `T`, makes a
+    /// boxed `None`, wraps a `T`.
+    nullable: IdMap<TypeId, NullableOperation>,
     objects: IdMap<TypeId, (ObjectFn, FromObjectFn, &'static TypeInfo)>,
     /// Model types: values whose box is the shared object itself.
     references: IdMap<TypeId, ()>,
@@ -302,11 +327,20 @@ fn insert_display(id: TypeId, display: DisplayFn) {
     });
 }
 
-fn insert_nullable(id: TypeId, unwrap: UnwrapFn, null: NullFn, inner: ValueType) {
+/// Registers the nullable form `id` of `inner` and the assignability cast of
+/// a value of `inner` to it (as `register_cast::<T, Option<T>>` does), all
+/// through the one typed operation.
+#[inline(never)]
+fn insert_nullable(id: TypeId, inner: ValueType, operation: NullableOperation) {
+    let key = (inner.id(), id);
+    let wrap: ConvertFn = Rc::new(move |v: &BoxedValue| operation(NullableRequest::Wrap(v.as_any())));
+    let wrap_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| operation(NullableRequest::Wrap(v)));
     with_registry(|r| {
-        r.nullable.insert(id, unwrap);
-        r.null_values.insert(id, null);
+        r.nullable.insert(id, operation);
         r.nullable_inner.insert(id, inner);
+        r.conversions.insert(key, wrap.clone());
+        r.casts.insert(key, wrap);
+        r.any_conversions.insert(key, wrap_any);
     });
 }
 
@@ -391,17 +425,7 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
-        fn unwrap<T: PropertyValue>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<T>>() {
-                Some(Some(v)) => Some(Rc::new(v.clone())),
-                _ => None,
-            }
-        }
-        fn null<T: PropertyValue>() -> BoxedValue {
-            Rc::new(Option::<T>::None)
-        }
-        insert_nullable(TypeId::of::<Option<T>>(), unwrap::<T>, null::<T>, ValueType::of::<T>());
-        Self::register_cast::<T, Option<T>>(|v| Some(v.clone()));
+        insert_nullable(TypeId::of::<Option<T>>(), ValueType::of::<T>(), nullable_operation::<T>);
     }
 
     /// Registers an assignability cast: values of `TFrom` are values of
@@ -670,9 +694,9 @@ impl ValueTypes {
                     _ => return None,
                 }
             }
-            let unwrap = with_registry(|r| r.nullable.get(&id).copied());
-            return match unwrap {
-                Some(unwrap) => unwrap(&*value),
+            let operation = with_registry(|r| r.nullable.get(&id).copied());
+            return match operation {
+                Some(operation) => operation(NullableRequest::Unwrap(&*value)),
                 None => Some(value),
             };
         }
@@ -870,14 +894,18 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
-        fn unwrap<T: PartialEq + 'static>(value: &dyn AnyValue) -> Option<BoxedValue> {
-            match value.downcast_ref::<Option<Rc<T>>>() {
-                Some(Some(v)) => Some(v.clone() as BoxedValue),
-                _ => None,
+        // The nullable handle of a model unwraps to the model object itself,
+        // cloning its Rc, never the object (the type need not be Clone).
+        fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
+            match request {
+                NullableRequest::Unwrap(value) => match value.downcast_ref::<Option<Rc<T>>>() {
+                    Some(Some(v)) => Some(v.clone() as BoxedValue),
+                    _ => None,
+                },
+                NullableRequest::Null => Some(Rc::new(Option::<Rc<T>>::None)),
+                // The wrapping casts of a model are the boxed casts below.
+                NullableRequest::Wrap(_) => None,
             }
-        }
-        fn null<T: PartialEq + 'static>() -> BoxedValue {
-            Rc::new(Option::<Rc<T>>::None)
         }
         fn to_rc<T: PartialEq + 'static>(value: &BoxedValue) -> Option<Rc<T>> {
             let any: Rc<dyn std::any::Any> = value.clone();
@@ -889,8 +917,7 @@ impl ValueTypes {
         }
         Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
         with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
-            r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
+            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), nullable::<T>);
             r.nullable_inner.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<T>());
             r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
             r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
@@ -948,7 +975,7 @@ impl ValueTypes {
     /// Whether `target` accepts null.
     pub fn accepts_null(target: ValueType) -> bool {
         target.is_object()
-            || with_registry(|r| r.null_values.contains_key(&target.id()) || r.references.contains_key(&target.id()))
+            || with_registry(|r| r.nullable.contains_key(&target.id()) || r.references.contains_key(&target.id()))
     }
 
     /// The boxed null of a nullable target type.
@@ -956,8 +983,8 @@ impl ValueTypes {
         if target.is::<Option<BoxedValue>>() {
             return Some(Rc::new(Option::<BoxedValue>::None));
         }
-        let f = with_registry(|r| r.null_values.get(&target.id()).copied());
-        f.map(|f| f())
+        let f = with_registry(|r| r.nullable.get(&target.id()).copied());
+        f.and_then(|f| f(NullableRequest::Null))
     }
 
     /// Looks up a registered conversion.
@@ -1943,6 +1970,27 @@ fn register_defaults() {
     ValueTypes::register_parse::<::url::Url>(parse_url);
     ValueTypes::register_conversion::<String, Option<crate::utilities::UriRef>>(|text| parse_uri_ref(text).map(Some));
     ValueTypes::register_conversion::<String, Option<::url::Url>>(|text| parse_url(text).map(Some));
+
+    // A `Locale` is the other Rust form of `System.Globalization.CultureInfo` (C5 of #423,
+    // docs/idiomatic-rust-signatures.md section 3.4): the identity of a culture. A locale is
+    // the culture made from it; a culture is a locale unless its name is not a BCP-47
+    // language tag (`es-ES_tradnl`, `x-custom`, a culture made from a name in code), which
+    // the cast refuses with its error. Text converts to a locale as it converts to a culture
+    // in markup (an IETF language tag parsed into a locale, the empty text the invariant
+    // culture, the unknown locale `und`), and the text of a locale is its tag.
+    ValueTypes::register_display::<Locale>();
+    ValueTypes::register_nullable::<Locale>();
+    ValueTypes::register_cast::<Locale, CultureInfo>(|locale: &Locale| CultureInfo::from(locale));
+    ValueTypes::register_try_cast::<CultureInfo, Locale>(|culture| {
+        Locale::try_from(culture).map_err(|error| {
+            format!("The culture name '{}' is not a BCP-47 language tag and cannot be converted to a Locale: {error}.", culture.name())
+        })
+    });
+    fn parse_locale(text: &str) -> Option<Locale> {
+        crate::data::CultureInfoIetfLanguageTagConverter::convert_to_locale(text).ok()
+    }
+    ValueTypes::register_parse::<Locale>(parse_locale);
+    ValueTypes::register_conversion::<String, Option<Locale>>(|text| parse_locale(text).map(Some));
 }
 
 impl ValueTypes {
@@ -1967,6 +2015,10 @@ impl ValueTypes {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "value_type_nullable_operation_tests.rs"]
+mod nullable_operation_tests;
 
 #[cfg(test)]
 mod tests {
@@ -2909,5 +2961,57 @@ mod tests {
         let parsed = ValueTypes::try_convert(Some(&text("fonts:SystemFonts")), ValueType::of::<Option<::url::Url>>()).flatten();
         assert!(parsed.expect("a nullable URL").downcast_ref::<Option<::url::Url>>().is_some_and(Option::is_some));
         assert!(ValueTypes::try_convert(Some(&text("/Styles/Base.xaml")), url_type).is_none());
+    }
+
+    /// Not from upstream (C5 of #423): `CultureInfo` and `Locale` are the two Rust forms of
+    /// `System.Globalization.CultureInfo`. A locale is the culture of its name; a culture is
+    /// a locale unless its name is not a BCP-47 language tag, which the cast refuses with its
+    /// error.
+    #[test]
+    fn cultures_and_locales_are_two_forms_of_a_culture() {
+        use icu_locale_core::locale;
+
+        let culture = |name: &str| -> BoxedValue { Rc::new(CultureInfo::get_culture_info(name)) };
+        let locale_type = ValueType::of::<Locale>();
+        let culture_type = ValueType::of::<CultureInfo>();
+        assert!(ValueTypes::is_assignable(culture_type, locale_type));
+        assert!(ValueTypes::is_assignable(locale_type, culture_type));
+
+        // A culture of a language tag casts to its locale, the invariant culture to `und`.
+        let cast = ValueTypes::try_cast(&culture("ja-JP"), locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&locale!("ja-JP")));
+        let invariant: BoxedValue = Rc::new(CultureInfo::invariant_culture());
+        let cast = ValueTypes::try_cast(&invariant, locale_type).expect("a locale");
+        assert_eq!(cast.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let nullable = ValueTypes::try_cast(&culture("de-DE"), ValueType::of::<Option<Locale>>()).expect("a nullable locale");
+        assert_eq!(nullable.downcast_ref::<Option<Locale>>(), Some(&Some(locale!("de-DE"))));
+        assert_eq!(ValueTypes::cast_error(&culture("de-DE"), locale_type), None);
+
+        // A culture whose name is no language tag is refused, with the error of the cast.
+        let custom = culture("es-ES_tradnl");
+        assert!(ValueTypes::try_cast(&custom, locale_type).is_none());
+        assert!(ValueTypes::try_convert(Some(&custom), locale_type).is_none());
+        let error = ValueTypes::cast_error(&custom, locale_type).expect("the error of the cast");
+        assert!(error.starts_with("The culture name 'es-ES_tradnl' is not a BCP-47 language tag"), "{error}");
+
+        // A locale is the culture of its name.
+        let back = ValueTypes::try_cast(&(Rc::new(locale!("zh-Hant-TW")) as BoxedValue), culture_type).expect("a culture");
+        assert_eq!(back.downcast_ref::<CultureInfo>(), Some(&CultureInfo::get_culture_info("zh-Hant-TW")));
+        let back = ValueTypes::try_cast(&(Rc::new(Locale::UNKNOWN) as BoxedValue), culture_type).expect("a culture");
+        assert!(back.downcast_ref::<CultureInfo>().is_some_and(CultureInfo::is_invariant));
+
+        // Text converts to a locale as to a culture in markup; the text of a locale is its tag.
+        let text = |text: &str| -> BoxedValue { Rc::new(text.to_string()) };
+        let parsed = ValueTypes::try_convert(Some(&text("ko-KR")), locale_type).flatten().expect("a locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&locale!("ko-KR")));
+        let parsed = ValueTypes::try_convert(Some(&text("")), locale_type).flatten().expect("the unknown locale");
+        assert_eq!(parsed.downcast_ref::<Locale>(), Some(&Locale::UNKNOWN));
+        let parsed = ValueTypes::try_convert(Some(&text("en-GB")), ValueType::of::<Option<Locale>>()).flatten();
+        assert_eq!(parsed.expect("a nullable locale").downcast_ref::<Option<Locale>>(), Some(&Some(locale!("en-GB"))));
+        for invalid in ["zh-CHT", "x-private", "en_US"] {
+            assert!(ValueTypes::try_convert(Some(&text(invalid)), locale_type).is_none(), "{invalid}");
+        }
+        let shown = ValueTypes::to_display_string(Some(&(Rc::new(locale!("pt-BR")) as BoxedValue)));
+        assert_eq!(shown, "pt-BR");
     }
 }

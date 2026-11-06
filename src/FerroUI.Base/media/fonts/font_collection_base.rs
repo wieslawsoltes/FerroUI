@@ -10,7 +10,7 @@ use crate::media::fonts::{FontCollectionKey, FontFallbackScriptHints, IFontColle
 use crate::media::text_formatting::unicode::{Codepoint, Script};
 use crate::media::{FontFamily, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use crate::platform::{IAssetLoader, IFontManagerImpl, ASSET_SCHEME};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{parent_locale, Locale, UriRef};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The typefaces of one font family: glyph typefaces by style, weight and
@@ -145,7 +145,7 @@ impl GlyphTypefaceCache {
 }
 
 /// Identifies a script/culture bucket of the fallback cache.
-type ScriptFallbackKey = (Script, Option<CultureInfo>);
+type ScriptFallbackKey = (Script, Option<Locale>);
 
 /// The state and the shared matching, fallback and caching logic of font
 /// collections.
@@ -181,8 +181,9 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
     /// The base class state of the collection.
     fn base(this: &Self) -> &FontCollectionBase;
 
-    /// Gets the unique identifier for the font collection.
-    fn key(this: &Self) -> Uri;
+    /// Gets the unique identifier for the font collection (a URL of the
+    /// `fonts:` scheme, see [`IFontCollection::key`]).
+    fn key(this: &Self) -> url::Url;
 
     /// Tries to match a specified character to a [`Typeface`] that supports
     /// specified font properties.
@@ -193,7 +194,7 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         FontCollectionBase::try_match_character(this, codepoint, style, weight, stretch, family_name, culture)
     }
@@ -207,7 +208,7 @@ pub trait FontCollectionBaseImpl: Sized + 'static {
         _codepoint: i32,
         _key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         None
     }
@@ -254,7 +255,7 @@ pub trait IFontCollectionBase: IFontCollection {
         codepoint: i32,
         key: FontCollectionKey,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>>;
 }
 
@@ -268,14 +269,14 @@ impl<T: FontCollectionBaseImpl> IFontCollectionBase for T {
         codepoint: i32,
         key: FontCollectionKey,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         T::try_match_character_from_platform(self, codepoint, key, family_name, culture)
     }
 }
 
 impl<T: FontCollectionBaseImpl> IFontCollection for T {
-    fn key(&self) -> Uri {
+    fn key(&self) -> url::Url {
         T::key(self)
     }
 
@@ -308,7 +309,7 @@ impl<T: FontCollectionBaseImpl> IFontCollection for T {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         T::try_match_character(self, codepoint, font_style, font_weight, font_stretch, family_name, culture)
     }
@@ -402,7 +403,7 @@ impl FontCollectionBase {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         Self::try_match_character_with_script(
             this,
@@ -429,7 +430,7 @@ impl FontCollectionBase {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         let base = this.base();
@@ -565,7 +566,7 @@ impl FontCollectionBase {
         codepoint: i32,
         key: FontCollectionKey,
         skip_family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         script: Script,
         refined_script: Script,
         shaping_script: Script,
@@ -612,7 +613,7 @@ impl FontCollectionBase {
     fn score_candidate(
         candidate: &GlyphTypeface,
         requested_key: FontCollectionKey,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         script: Script,
         refined_script: Script,
     ) -> i32 {
@@ -623,9 +624,9 @@ impl FontCollectionBase {
             if candidate.family_names().contains_key(culture) {
                 score += 8;
             } else {
-                let parent = culture.parent();
+                let parent = parent_locale(culture);
 
-                if !parent.is_invariant() && candidate.family_names().contains_key(&parent) {
+                if parent != Locale::UNKNOWN && candidate.family_names().contains_key(&parent) {
                     score += 4;
                 }
             }
@@ -652,7 +653,7 @@ impl FontCollectionBase {
         score
     }
 
-    fn is_culture_compatible(candidate: &GlyphTypeface, culture: Option<&CultureInfo>, script: Script) -> bool {
+    fn is_culture_compatible(candidate: &GlyphTypeface, culture: Option<&Locale>, script: Script) -> bool {
         // If no culture or codepoint is locale-insensitive, the candidate is fine.
         let Some(culture) = culture else {
             return true;
@@ -677,9 +678,9 @@ impl FontCollectionBase {
             return true;
         }
 
-        let parent = culture.parent();
+        let parent = parent_locale(culture);
 
-        if !parent.is_invariant() && candidate.family_names().contains_key(&parent) {
+        if parent != Locale::UNKNOWN && candidate.family_names().contains_key(&parent) {
             return true;
         }
 
@@ -710,10 +711,7 @@ impl FontCollectionBase {
         }
 
         Typeface::with_style(
-            FontFamily::with_base_uri(
-                None,
-                &format!("{}#{}", this.key().absolute_uri(), glyph_typeface.family_name()),
-            ),
+            FontFamily::new(&format!("{}#{}", this.key(), glyph_typeface.family_name())),
             requested_key.style,
             requested_key.weight,
             requested_key.stretch,
@@ -731,7 +729,7 @@ impl FontCollectionBase {
         glyph_typefaces: &Rc<RefCell<GlyphTypefaceMap>>,
         key: FontCollectionKey,
         codepoint: i32,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Rc<GlyphTypeface>> {
         // The borrow of the family's typefaces ends before the platform is consulted.
@@ -754,7 +752,7 @@ impl FontCollectionBase {
         glyph_typeface: Rc<GlyphTypeface>,
         key: FontCollectionKey,
         codepoint: i32,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Rc<GlyphTypeface> {
         // The platform's character match, biased by the family already resolved, yields that family
@@ -1055,11 +1053,7 @@ impl FontCollectionBase {
     ///
     /// Returns `true` if at least one font from the specified source was
     /// successfully added to the font collection; otherwise, `false`.
-    pub fn try_add_font_source(this: &dyn IFontCollectionBase, source: &Uri) -> bool {
-        if !source.is_absolute_uri() {
-            return false;
-        }
-
+    pub fn try_add_font_source(this: &dyn IFontCollectionBase, source: &url::Url) -> bool {
         let base = this.base();
 
         let mut result = false;
@@ -1077,8 +1071,8 @@ impl FontCollectionBase {
                     .clone()
                     .unwrap_or_else(|| FerroLocator::current().get_required_service::<dyn IAssetLoader>());
 
-                for font_asset in &font_assets {
-                    let Ok(mut stream) = asset_loader.open(font_asset, None) else {
+                for font_asset in font_assets {
+                    let Ok(mut stream) = asset_loader.open(&UriRef::from(font_asset), None) else {
                         continue;
                     };
 
@@ -1129,7 +1123,7 @@ impl FontCollectionBase {
     }
 
     #[cfg(not(target_family = "wasm"))]
-    fn try_add_file_font_source(this: &dyn IFontCollectionBase, source: &Uri) -> bool {
+    fn try_add_file_font_source(this: &dyn IFontCollectionBase, source: &url::Url) -> bool {
         use std::fs::File;
         use std::path::{Path, PathBuf};
 
@@ -1181,7 +1175,7 @@ impl FontCollectionBase {
 
     /// There is no file system on this target.
     #[cfg(target_family = "wasm")]
-    fn try_add_file_font_source(_this: &dyn IFontCollectionBase, _source: &Uri) -> bool {
+    fn try_add_file_font_source(_this: &dyn IFontCollectionBase, _source: &url::Url) -> bool {
         false
     }
 
@@ -1591,7 +1585,7 @@ impl FontCollectionBase {
 /// The local operating-system representation of the path of a `file:` URI
 /// (C# `Uri.LocalPath`): the unescaped path, with Windows drive paths in
 /// their native form.
-fn local_path(uri: &Uri) -> String {
+fn local_path(uri: &url::Url) -> String {
     let path = crate::utilities::UriExtensions::get_unescape_absolute_path(uri);
 
     if cfg!(windows) && uri.scheme() == "file" {

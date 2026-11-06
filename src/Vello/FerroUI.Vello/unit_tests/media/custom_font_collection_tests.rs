@@ -14,7 +14,7 @@ use crate::FontManagerImpl;
 use ferroui_base::media::fonts::{FontCollectionBase, FontCollectionBaseImpl, IFontCollection};
 use ferroui_base::media::{FontManager, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use ferroui_base::platform::IAssetLoader;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::testing::UnitTestApplication;
 use std::path::{PathBuf, MAIN_SEPARATOR};
@@ -31,7 +31,7 @@ fn should_add_glyph_typeface_by_stream() {
 
     let font_manager = FontManager::current();
 
-    let font_collection = CustomFontCollection::new(Uri::new("fonts:custom", UriKind::Absolute).unwrap());
+    let font_collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:custom").unwrap());
 
     font_manager.add_font_collection(font_collection.clone());
 
@@ -57,9 +57,9 @@ fn should_add_glyph_typeface_by_stream() {
         FontAssetInfo::new("TwitterColorEmoji-SVGinOT.ttf", "Twitter Color Emoji", FontWeight::Normal),
     ];
 
-    let mut assets = asset_loader.get_assets(&Uri::new(ASSET_FONTS, UriKind::Absolute).unwrap(), None);
+    let mut assets = asset_loader.get_assets(&UriRef::parse(ASSET_FONTS).unwrap(), None);
 
-    assets.sort_by_key(|uri| uri.absolute_uri().to_uppercase());
+    assets.sort_by_key(|uri| uri.as_str().to_uppercase());
 
     assert_eq!(infos.len(), assets.len());
 
@@ -70,9 +70,9 @@ fn should_add_glyph_typeface_by_stream() {
         let info = &infos[i];
         let asset = &assets[i];
 
-        assert_eq!(info.path, asset.absolute_path());
+        assert_eq!(info.path, asset.path());
 
-        let mut font_stream = asset_loader.open(asset, None).expect("the font stream");
+        let mut font_stream = asset_loader.open(&UriRef::from(asset.clone()), None).expect("the font stream");
 
         let glyph_typeface = FontCollectionBase::try_add_glyph_typeface_from_stream(&*font_collection, &mut *font_stream)
             .unwrap_or_else(|| panic!("{} is added", info.path));
@@ -109,20 +109,20 @@ fn should_enumerate_font_families() {
 
     let font_manager = FontManager::current();
 
-    let font_collection = CustomFontCollection::new(Uri::new("fonts:custom", UriKind::Absolute).unwrap());
+    let font_collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:custom").unwrap());
 
     font_manager.add_font_collection(font_collection.clone());
 
     let asset_loader = FerroLocator::current().get_required_service::<dyn IAssetLoader>();
 
-    let assets: Vec<Uri> = asset_loader
-        .get_assets(&Uri::new(ASSET_FONTS, UriKind::Absolute).unwrap(), None)
+    let assets: Vec<url::Url> = asset_loader
+        .get_assets(&UriRef::parse(ASSET_FONTS).unwrap(), None)
         .into_iter()
-        .filter(|x| x.absolute_path().ends_with(".ttf"))
+        .filter(|x| x.path().ends_with(".ttf"))
         .collect();
 
     for asset in &assets {
-        let mut stream = asset_loader.open(asset, None).expect("the font stream");
+        let mut stream = asset_loader.open(&UriRef::from(asset.clone()), None).expect("the font stream");
 
         FontCollectionBase::try_add_glyph_typeface_from_stream(&*font_collection, &mut *stream);
     }
@@ -131,7 +131,7 @@ fn should_enumerate_font_families() {
 
     assert!(families.len() >= assets.len());
 
-    let other = CustomFontCollection::new(Uri::new("fonts:other", UriKind::Absolute).unwrap());
+    let other = CustomFontCollection::new(UriRef::parse_absolute("fonts:other").unwrap());
 
     for family in &families {
         let family_typefaces = family.family_typefaces();
@@ -155,14 +155,14 @@ fn should_add_font_source_from_file() {
     );
 
     let font_manager = FontManager::current();
-    let font_collection = CustomFontCollection::new(Uri::new("fonts:custom", UriKind::Absolute).unwrap());
+    let font_collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:custom").unwrap());
     font_manager.add_font_collection(font_collection.clone());
 
     // Path to the test font
     let font_path = base_directory().join("assets").join("Inter-Regular.ttf");
     assert!(font_path.is_file());
 
-    let font_uri = Uri::new(&file_uri(&font_path.to_string_lossy()), UriKind::Absolute).unwrap();
+    let font_uri = UriRef::parse_absolute(&file_uri(&font_path.to_string_lossy())).unwrap();
 
     // Add the font file
     assert!(FontCollectionBase::try_add_font_source(&*font_collection, &font_uri));
@@ -187,7 +187,7 @@ fn should_add_font_source_from_folder() {
     );
 
     let font_manager = FontManager::current();
-    let font_collection = CustomFontCollection::new(Uri::new("fonts:custom", UriKind::Absolute).unwrap());
+    let font_collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:custom").unwrap());
     font_manager.add_font_collection(font_collection.clone());
 
     // Path to the test fonts
@@ -195,7 +195,7 @@ fn should_add_font_source_from_folder() {
     assert!(fonts_folder.is_dir());
 
     let folder_uri =
-        Uri::new(&file_uri(&format!("{}{}", fonts_folder.to_string_lossy(), MAIN_SEPARATOR)), UriKind::Absolute)
+        UriRef::parse_absolute(&file_uri(&format!("{}{}", fonts_folder.to_string_lossy(), MAIN_SEPARATOR)))
             .unwrap();
 
     // Add the fonts
@@ -221,10 +221,10 @@ fn should_add_font_source_from_resource() {
     );
 
     let font_manager = FontManager::current();
-    let font_collection = CustomFontCollection::new(Uri::new("fonts:custom", UriKind::Absolute).unwrap());
+    let font_collection = CustomFontCollection::new(UriRef::parse_absolute("fonts:custom").unwrap());
     font_manager.add_font_collection(font_collection.clone());
 
-    let all_fonts_uri = Uri::new(ASSET_FONTS, UriKind::Absolute).unwrap();
+    let all_fonts_uri = UriRef::parse_absolute(ASSET_FONTS).unwrap();
 
     // Add the font resource
     assert!(FontCollectionBase::try_add_font_source(&*font_collection, &all_fonts_uri));
@@ -267,11 +267,11 @@ fn file_uri(path: &str) -> String {
 
 struct CustomFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
 }
 
 impl CustomFontCollection {
-    fn new(key: Uri) -> Rc<Self> {
+    fn new(key: url::Url) -> Rc<Self> {
         Rc::new(Self { base: FontCollectionBase::new(), key })
     }
 }
@@ -281,7 +281,7 @@ impl FontCollectionBaseImpl for CustomFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 }

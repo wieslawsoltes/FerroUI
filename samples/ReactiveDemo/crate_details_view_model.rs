@@ -2,10 +2,8 @@
 
 use crate::crate_search::CrateSearchMetadata;
 use ferroui_base::platform::storage::ILauncher;
-use ferroui_base::utilities::Uri;
+use ferroui_base::utilities::UriRef;
 use ferroui_reactiveui::{reactive_object, ReactiveCommand, ReactiveObject};
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::ObservableError;
 use std::rc::Rc;
 
 /// Gives the launcher of the platform when a page is opened (not an upstream type).
@@ -42,16 +40,15 @@ impl CrateDetailsViewModel {
         let page = metadata.page_url();
         // ReactiveCommand.Create(() => Process.Start(ProjectUrl)).
         let open_page = ReactiveCommand::create(move || {
-            let Ok(uri) = Uri::absolute(&page) else {
+            let Ok(uri) = UriRef::parse_absolute(&page) else {
                 return;
             };
             let launcher = launcher();
             // The launcher of the platform opens the address asynchronously; nothing waits for it,
             // as nothing waits for the process the reference starts.
-            let _ = Task::spawn_local(async move {
+            drop(ferroui_system::task::spawn_local(async move {
                 let _ = launcher.launch_uri_async(&uri).await;
-                Ok::<(), ObservableError>(())
-            });
+            }));
         });
         Rc::new(Self { reactive: ReactiveObject::new(), metadata, open_page })
     }

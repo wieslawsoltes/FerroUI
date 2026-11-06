@@ -21,6 +21,7 @@ path = "lib.rs"
 [dependencies]
 ferroui-reactive = { workspace = true }
 ferroui-system = { workspace = true }
+indexmap = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

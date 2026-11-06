@@ -80,14 +80,15 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let _app = start_catalog_application();
     let view_model = MainWindowViewModel::new();
 
-    assert_eq!(12, view_model.home_sections().len());
+    assert_eq!(13, view_model.home_sections().len());
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
-    let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap"]
+    let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "PersonPicture", "PagerControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap"]
         .into_iter()
         // The first page of the section "Composition" is the upstream page "Composition".
         .chain(COMPOSITION_PAGES.into_iter().skip(1))
+        .chain(CUSTOM_EFFECTS_PAGES)
         .collect::<Vec<_>>();
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {
@@ -104,7 +105,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
 /// The pages of the section "Composition" (not from upstream): the composition page of the
 /// original, then one per feature of the WinUI composition API and of the WinUI materials, in the
 /// order of the page list.
-const COMPOSITION_PAGES: [&str; 21] = [
+const COMPOSITION_PAGES: [&str; 20] = [
     "Composition overview",
     "Connected animations",
     "Implicit animations",
@@ -121,7 +122,6 @@ const COMPOSITION_PAGES: [&str; 21] = [
     "Zoom and manipulation",
     "Acrylic brush",
     "Blend and colour effects",
-    "Custom effects",
     "Lighting",
     "Reveal",
     "System backdrops",
@@ -154,6 +154,29 @@ fn the_composition_section_has_a_page_per_feature() {
     for header in ["Composition (WinUI)", "Materials (WinUI)"] {
         assert!(!all.iter().any(|page| page == header), "{header} is no longer a page");
     }
+}
+
+/// The pages of the section "Custom effects" (not from upstream, #455): one per family of the
+/// custom effects gallery (`samples/CustomEffects`), in its order.
+const CUSTOM_EFFECTS_PAGES: [&str; 5] = ["Colour effects", "Image effects", "Shader effects", "Interactive effects", "Page transitions"];
+
+/// The section "Custom effects" follows "Composition" and has a page per family of the gallery,
+/// headed by the title of the family; the single page it replaces is gone.
+#[test]
+fn the_custom_effects_section_has_a_page_per_family() {
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let sections = view_model.home_sections();
+    let titles: Vec<String> = sections.iter().map(|section| section.title()).collect();
+    let composition = titles.iter().position(|title| title == "Composition").expect("the section Composition");
+    assert_eq!(Some("Custom effects"), titles.get(composition + 1).map(String::as_str), "{titles:?}");
+    let headers: Vec<String> =
+        sections[composition + 1].items().map(|items| items.iter().map(|page| page.header()).collect()).unwrap_or_default();
+    assert_eq!(CUSTOM_EFFECTS_PAGES.to_vec(), headers);
+    let families: Vec<&str> = custom_effects::Family::ALL.iter().map(|family| family.title()).collect();
+    assert_eq!(CUSTOM_EFFECTS_PAGES.to_vec(), families);
+    let all: Vec<String> = sections.iter().flat_map(|section| section.items().unwrap().to_vec()).map(|page| page.header()).collect();
+    assert!(!all.iter().any(|page| page == "Custom effects"), "Custom effects is a section, no longer a page");
 }
 
 #[test]

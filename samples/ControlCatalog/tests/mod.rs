@@ -22,6 +22,7 @@ mod binding_reports;
 mod catalog_tour;
 #[cfg(not(feature = "runtime-markup"))]
 mod compiled_markup;
+mod custom_effects_pages;
 mod gaps;
 mod gaps_a;
 mod gaps_b;

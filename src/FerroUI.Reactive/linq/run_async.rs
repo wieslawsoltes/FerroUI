@@ -4,18 +4,19 @@
 //!
 //! Deviation (DEVIATIONS.md, Reactive): upstream returns the `AsyncSubject<TSource>`, which is its
 //! own awaiter (`IsCompleted`, `OnCompleted`, `GetResult`); here the methods return the task of
-//! that subject ([`AsyncSubject::get_awaiter`]), whose `is_completed`, `continue_with` and `result`
-//! are those members, and which `async` code awaits. The cancellation ends the subject with a
-//! [`Canceled`] (upstream's `OperationCanceledException`), which cancels the task.
+//! that subject ([`AsyncSubject::get_awaiter`]), the [`Shared`](ferroui_system::task::Shared) of
+//! its result, whose `is_finished`, `on_finished` and `result` are those members, and whose
+//! `flatten()` `async` code awaits. The cancellation ends the subject with a [`Canceled`]
+//! (upstream's `OperationCanceledException`), the error of the task.
 
 use crate::disposables::StableCompositeDisposable;
 use crate::internal::TokenRegistration;
 use crate::observer::AnonymousObserver;
 use crate::subjects::{AsyncSubject, IConnectableObservable};
 use ferroui_system::task::Canceled;
-use ferroui_system::threading::tasks::Task;
+use ferroui_system::task::Shared;
 use ferroui_system::threading::CancellationToken;
-use ferroui_system::{IDisposable, IObservable, IObserver};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::rc::Rc;
 
 /// `Cancel`: ends the subject with a cancellation (`OperationCanceledException`).
@@ -72,12 +73,15 @@ pub(crate) fn run_async_connectable_subject<T: Clone + 'static>(
 }
 
 /// The task of [`run_async_subject`].
-pub(crate) fn run_async<T: Clone + 'static>(source: Rc<dyn IObservable<T>>, token: CancellationToken) -> Task<T> {
+pub(crate) fn run_async<T: Clone + 'static>(source: Rc<dyn IObservable<T>>, token: CancellationToken) -> Shared<Result<T, ObservableError>> {
     run_async_subject(source, &token).get_awaiter()
 }
 
 /// The task of [`run_async_connectable_subject`].
-pub(crate) fn run_async_connectable<T: Clone + 'static>(source: Rc<dyn IConnectableObservable<T>>, token: CancellationToken) -> Task<T> {
+pub(crate) fn run_async_connectable<T: Clone + 'static>(
+    source: Rc<dyn IConnectableObservable<T>>,
+    token: CancellationToken,
+) -> Shared<Result<T, ObservableError>> {
     run_async_connectable_subject(source, &token).get_awaiter()
 }
 
@@ -89,7 +93,7 @@ macro_rules! run_async_methods {
         /// sequence ends, with its last value, with its error, or with
         /// `SequenceError::NoElements` when it had no value (`GetAwaiter(IObservable<TSource>)`,
         /// the subject `await` awaits).
-        fn get_awaiter(&self) -> ferroui_system::threading::tasks::Task<T>
+        fn get_awaiter(&self) -> ferroui_system::task::Shared<Result<T, ferroui_system::ObservableError>>
         where
             T: Clone,
         {
@@ -99,7 +103,7 @@ macro_rules! run_async_methods {
         /// [`get_awaiter`](Self::get_awaiter) that the cancellation of `token` cancels, disposing
         /// the subscription; a token canceled already cancels the task without subscribing
         /// (`RunAsync(IObservable<TSource>, CancellationToken)`).
-        fn run_async(&self, token: ferroui_system::threading::CancellationToken) -> ferroui_system::threading::tasks::Task<T>
+        fn run_async(&self, token: ferroui_system::threading::CancellationToken) -> ferroui_system::task::Shared<Result<T, ferroui_system::ObservableError>>
         where
             T: Clone,
         {
@@ -121,7 +125,7 @@ macro_rules! run_async_connectable_methods {
         /// Subscribes to the sequence, connects it, and gives a task of its last value
         /// (`GetAwaiter(IConnectableObservable<TSource>)`); see
         /// [`ObservableExt::get_awaiter`](crate::linq::ObservableExt::get_awaiter).
-        fn get_awaiter(self) -> ferroui_system::threading::tasks::Task<T>
+        fn get_awaiter(self) -> ferroui_system::task::Shared<Result<T, ferroui_system::ObservableError>>
         where
             Self: Sized,
             T: Clone,
@@ -132,7 +136,7 @@ macro_rules! run_async_connectable_methods {
         /// [`get_awaiter`](Self::get_awaiter) that the cancellation of `token` cancels, disposing
         /// the subscription and the connection; a token canceled already cancels the task without
         /// subscribing or connecting (`RunAsync(IConnectableObservable<TSource>, CancellationToken)`).
-        fn run_async(self, token: ferroui_system::threading::CancellationToken) -> ferroui_system::threading::tasks::Task<T>
+        fn run_async(self, token: ferroui_system::threading::CancellationToken) -> ferroui_system::task::Shared<Result<T, ferroui_system::ObservableError>>
         where
             Self: Sized,
             T: Clone,

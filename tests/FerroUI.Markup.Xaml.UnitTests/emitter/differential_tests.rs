@@ -258,6 +258,55 @@ fn a_relative_uri_literal_for_a_url_property_is_an_error() {
     }
 }
 
+/// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): the
+/// compiled form of the test of `xaml::ferro_intrinsics_tests`. A culture literal for a
+/// property that declares a `Locale` (`RichTextBlock.Language`) is the culture of the text
+/// cast to its locale; the run-time loader sets the same value.
+#[test]
+fn a_language_literal_sets_a_locale_property() {
+    let _app = xaml_test_base();
+    let document = ("rich_text_block_language.xaml", "<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(generated.source.contains("language_property(), rt::cast("), "{}", generated.source);
+
+    let loaded = try_load(document.1).expect("the text block loads");
+    let block = ValueTypes::as_object(&*loaded).and_then(|object| object.cast::<ferroui_controls::RichTextBlock>()).expect("a text block");
+    assert_eq!(block.language(), ferroui_base::utilities::locale!("ja-JP"));
+}
+
+/// Not from upstream (C5 of #423): a culture literal that is no BCP-47 tag (`x-private`, a
+/// private name, or `zh-CHT`, an old name), which no locale can be parsed from (L2), for a
+/// property that declares a `Locale` is an error of the compiler, which names the property and
+/// the tag, and a load error of the run-time loader, both with the error of the converter of
+/// an IETF tag.
+#[test]
+fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
+    let _app = xaml_test_base();
+    for (tag, compiled, loaded) in [
+        (
+            "x-private",
+            "Language: Culture IETF Name x-private is not a recognized IETF name.",
+            "Culture IETF Name x-private is not a recognized IETF name.",
+        ),
+        ("zh-CHT", "Language: Culture IETF Name zh-CHT is not a recognized IETF name.", "Culture IETF Name zh-CHT is not a recognized IETF name."),
+    ] {
+        let xaml = format!("<RichTextBlock xmlns='https://github.com/ferroui' Language='{tag}'/>");
+        let document = ("rich_text_block_invalid_language.xaml", xaml.as_str());
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+        let reason = generated.documents.iter().find_map(|(_, error)| error.clone()).expect("the document is refused");
+        assert!(reason.contains(compiled), "{reason}");
+        assert!(!generated.source.contains("language_property()"), "{}", generated.source);
+
+        let error = match try_load(&xaml) {
+            Ok(_) => panic!("the tag {tag} is not a locale"),
+            Err(error) => error,
+        };
+        let described = describe(&error);
+        assert!(described.contains(loaded), "{described}");
+    }
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")
@@ -928,7 +977,7 @@ fn documents_that_read_their_base_uri_build_equal_object_trees() {
     for name in BASE_URI_DOCUMENTS {
         let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| document == name).unwrap_or_else(|| panic!("{name} is not a document of the corpus"));
         let uri = format!("{}{name}", generated::ROOT_URI);
-        let base_uri = ferroui_base::utilities::Uri::new(&uri, ferroui_base::utilities::UriKind::Absolute).expect("the URI of the document");
+        let base_uri = ferroui_base::utilities::UriRef::parse_absolute(&uri).expect("the URI of the document");
         let interpreted = match try_load_with(xaml, None, None, Some(base_uri), false) {
             Ok(root) => dump_root(&root),
             Err(error) => failure(&error),
@@ -1256,7 +1305,7 @@ fn a_failed_end_init_is_the_error_of_the_run_time_loader() {
 #[test]
 fn compiled_documents_are_registered_by_uri() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1281,7 +1330,7 @@ fn compiled_documents_are_registered_by_uri() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     ferroui_markup_xaml::FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     match loaded {
@@ -1299,7 +1348,7 @@ fn compiled_documents_are_registered_by_uri() {
 #[test]
 fn a_compiled_document_that_fails_to_build_fails_the_load() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
-    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::utilities::UriRef;
     use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
@@ -1318,7 +1367,7 @@ fn a_compiled_document_that_fails_to_build_fails_the_load() {
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
-    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let parsed = UriRef::parse(&uri).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
     FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
     let error = loaded.err().expect("the load through FerroXamlLoader fails");

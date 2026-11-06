@@ -10,7 +10,7 @@ use ferroui_base::media::{
     Brushes, Colors, DrawingContext, FlowDirection, FontStyle, FontWeight, FormattedText, GradientStop, GradientStops,
     IBrush, IPen, LinearGradientBrush, Typeface,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Ref, RelativePoint,
     RelativeUnit, StyledElementImpl, VisualImpl,
@@ -45,7 +45,7 @@ impl VisualImpl for FormattedTextPage {
         // Create the initial formatted text string.
         let formatted_text = FormattedText::new(
             TEST_STRING,
-            CultureInfo::get_culture_info("en-us"),
+            locale!("en-US"),
             FlowDirection::LeftToRight,
             Typeface::from_name("Verdana"),
             32.0,

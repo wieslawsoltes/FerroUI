@@ -7,7 +7,6 @@ use crate::mocks::*;
 use ferroui_reactive::linq::Observable;
 use ferroui_reactive::subjects::BehaviorSubject;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::Task;
 use ferroui_system::IObserver;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -207,7 +206,7 @@ fn create_from_observable_with_param_can_execute_gates_and_executes() {
 fn create_from_task_result_can_execute_gates_and_executes() {
     with_immediate_schedulers();
     let can_execute = BehaviorSubject::new(false);
-    let command = ReactiveCommand::create_from_task_with(|| Task::from_result(PARAMETER_VALUE), Some(can_execute.as_observable()), None);
+    let command = ReactiveCommand::create_from_task_with(|| from_result(PARAMETER_VALUE), Some(can_execute.as_observable()), None);
 
     assert_gated_then_open(&command, &can_execute);
     let result = first(&command.execute_default());
@@ -219,7 +218,7 @@ fn create_from_task_result_can_execute_gates_and_executes() {
 fn create_from_task_cancellable_result_can_execute_gates_and_executes() {
     with_immediate_schedulers();
     let can_execute = BehaviorSubject::new(false);
-    let command = ReactiveCommand::create_from_task_cancellable_with(|_| Task::from_result(PARAMETER_VALUE), Some(can_execute.as_observable()), None);
+    let command = ReactiveCommand::create_from_task_cancellable_with(|_| from_result(PARAMETER_VALUE), Some(can_execute.as_observable()), None);
 
     assert_gated_then_open(&command, &can_execute);
     let result = first(&command.execute_default());
@@ -236,7 +235,7 @@ fn create_from_task_unit_can_execute_gates_and_executes() {
     let command = ReactiveCommand::create_from_task_with(
         move || {
             flag.set(true);
-            Task::from_result(())
+            from_result(())
         },
         Some(can_execute.as_observable()),
         None,
@@ -257,7 +256,7 @@ fn create_from_task_cancellable_unit_can_execute_gates_and_executes() {
     let command = ReactiveCommand::create_from_task_cancellable_with(
         move |_| {
             flag.set(true);
-            Task::from_result(())
+            from_result(())
         },
         Some(can_execute.as_observable()),
         None,
@@ -274,7 +273,7 @@ fn create_from_task_param_result_can_execute_gates_and_executes() {
     with_immediate_schedulers();
     let can_execute = BehaviorSubject::new(false);
     let command =
-        ReactiveCommand::create_from_task_param_with(|parameter: i32| Task::from_result(parameter.to_string()), Some(can_execute.as_observable()), None);
+        ReactiveCommand::create_from_task_param_with(|parameter: i32| from_result(parameter.to_string()), Some(can_execute.as_observable()), None);
 
     assert_gated_then_open(&command, &can_execute);
     let result = first(&command.execute(PARAMETER_VALUE));
@@ -287,7 +286,7 @@ fn create_from_task_cancellable_param_result_can_execute_gates_and_executes() {
     with_immediate_schedulers();
     let can_execute = BehaviorSubject::new(false);
     let command = ReactiveCommand::create_from_task_param_cancellable_with(
-        |parameter: i32, _| Task::from_result(parameter.to_string()),
+        |parameter: i32, _| from_result(parameter.to_string()),
         Some(can_execute.as_observable()),
         None,
     );
@@ -307,7 +306,7 @@ fn create_from_task_param_can_execute_gates_and_executes() {
     let command = ReactiveCommand::create_from_task_param_with(
         move |parameter: i32| {
             param.set(parameter);
-            Task::from_result(())
+            from_result(())
         },
         Some(can_execute.as_observable()),
         None,
@@ -328,7 +327,7 @@ fn create_from_task_cancellable_param_can_execute_gates_and_executes() {
     let command = ReactiveCommand::create_from_task_param_cancellable_with(
         move |parameter: i32, _| {
             param.set(parameter);
-            Task::from_result(())
+            from_result(())
         },
         Some(can_execute.as_observable()),
         None,

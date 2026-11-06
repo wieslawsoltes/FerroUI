@@ -14,7 +14,7 @@ use ferroui_base::platform::storage::{
     IStorageBookmarkFolder, IStorageFile, IStorageFolder, IStorageItem, IStorageProvider,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::Ref;
 use ferroui_controls::platform::IStorageProviderFactory;
 use ferroui_controls::TopLevel;
@@ -26,6 +26,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::{Rc, Weak};
 use std::task::{Context, Poll, Waker};
+use url::Url;
 
 // The native library technically can be used for more than just macOS,
 // in which case we should provide different bookmark platform keys, and parse accordingly.
@@ -111,7 +112,7 @@ impl StorageProviderApi {
         self.this.upgrade().expect("the storage provider API is alive while it is used")
     }
 
-    pub(crate) fn try_get_storage_item(&self, item_uri: Option<&Uri>, create: bool) -> Option<NativeStorageItem> {
+    pub(crate) fn try_get_storage_item(&self, item_uri: Option<&Url>, create: bool) -> Option<NativeStorageItem> {
         if let Some(item_uri) = item_uri {
             if let Some(item_path) = StorageProviderHelpers::try_get_path_from_file_uri(Some(item_uri)) {
                 let file_info = FileSystemInfo::file(&item_path);
@@ -120,8 +121,8 @@ impl StorageProviderApi {
                         NativeStorageItem::File(StorageFile::new(
                             self.this(),
                             file_info,
-                            item_uri.clone(),
-                            item_uri.clone(),
+                            UriRef::from(item_uri.clone()),
+                            UriRef::from(item_uri.clone()),
                         ))
                     } else {
                         NativeStorageItem::BclFile(BclStorageFile::new(file_info))
@@ -133,8 +134,8 @@ impl StorageProviderApi {
                         NativeStorageItem::Folder(StorageFolder::new(
                             self.this(),
                             directory_info,
-                            item_uri.clone(),
-                            item_uri.clone(),
+                            UriRef::from(item_uri.clone()),
+                            UriRef::from(item_uri.clone()),
                         ))
                     } else {
                         NativeStorageItem::BclFolder(BclStorageFolder::new(directory_info))
@@ -190,9 +191,9 @@ impl StorageProviderApi {
         use_value
     }
 
-    pub(crate) fn save_bookmark(&self, uri: &Uri) -> Option<String> {
+    pub(crate) fn save_bookmark(&self, uri: &UriRef) -> Option<String> {
         let mut error: *mut c_void = std::ptr::null_mut();
-        let uri_string = IFrnString::from_impl(FrnString::new(uri.absolute_uri()));
+        let uri_string = IFrnString::from_impl(FrnString::new(&uri.to_string()));
         // SAFETY: `error` is a valid out location for the call; the native
         // side stores an owned string reference there, or leaves it null.
         let bookmark_str = unsafe { self.native.save_bookmark_to_bytes(Some(&uri_string), &mut error) }.check();
@@ -216,7 +217,7 @@ impl StorageProviderApi {
 
     // Support both kinds of bookmarks when reading.
     // Since "save bookmark" implementation will be different depending on the configuration.
-    pub(crate) fn read_bookmark(&self, bookmark: &str, is_directory: bool) -> Option<Uri> {
+    pub(crate) fn read_bookmark(&self, bookmark: &str, is_directory: bool) -> Option<Url> {
         if let (DecodeResult::Success, Some(mut bytes)) = StorageBookmarkHelper::try_decode_bookmark(MAC_OS_KEY, Some(bookmark)) {
             // SAFETY: the pointer and the length describe the decoded bytes,
             // which live until the call returns; the native side reads them.
@@ -225,7 +226,7 @@ impl StorageProviderApi {
                     .check();
             return uri_string
                 .and_then(|uri_string| frn_string_to_string(&uri_string))
-                .and_then(|uri_string| Uri::try_create(&uri_string, UriKind::Absolute));
+                .and_then(|uri_string| Url::parse(&uri_string).ok());
         }
         if let Some(path) = StorageBookmarkHelper::try_decode_bcl_bookmark(bookmark) {
             return Some(StorageProviderHelpers::uri_from_file_path(&path, is_directory));
@@ -234,8 +235,8 @@ impl StorageProviderApi {
         None
     }
 
-    pub(crate) fn release_bookmark(&self, uri: &Uri) {
-        let uri_string = IFrnString::from_impl(FrnString::new(uri.absolute_uri()));
+    pub(crate) fn release_bookmark(&self, uri: &UriRef) {
+        let uri_string = IFrnString::from_impl(FrnString::new(&uri.to_string()));
         self.native.release_bookmark(Some(&uri_string));
     }
 
@@ -250,7 +251,7 @@ impl StorageProviderApi {
             options.suggested_file_type().cloned(),
         ));
         let suggested_directory =
-            options.suggested_start_location().map(|location| location.path().absolute_uri().to_owned()).unwrap_or_default();
+            options.suggested_start_location().and_then(suggested_directory_of).unwrap_or_default();
 
         let dialog = self.open_dialog_async(
             |events| {
@@ -289,7 +290,7 @@ impl StorageProviderApi {
             options.suggested_file_type().cloned(),
         ));
         let suggested_directory =
-            options.suggested_start_location().map(|location| location.path().absolute_uri().to_owned()).unwrap_or_default();
+            options.suggested_start_location().and_then(suggested_directory_of).unwrap_or_default();
 
         let dialog = self.open_dialog_async(
             |events| {
@@ -322,7 +323,7 @@ impl StorageProviderApi {
         options: FolderPickerOpenOptions,
     ) -> LocalBoxFuture<Vec<Rc<dyn IStorageFolder>>> {
         let suggested_directory =
-            options.suggested_start_location().map(|location| location.path().absolute_uri().to_owned()).unwrap_or_default();
+            options.suggested_start_location().and_then(suggested_directory_of).unwrap_or_default();
 
         let dialog = self.open_dialog_async(
             |events| {
@@ -360,7 +361,7 @@ impl StorageProviderApi {
 
             let items = result
                 .iter()
-                .filter_map(|f| Uri::try_create(f, UriKind::Absolute))
+                .filter_map(|f| Url::parse(f).ok())
                 .filter_map(|uri| api.try_get_storage_item(Some(&uri), create))
                 .collect();
 
@@ -368,13 +369,13 @@ impl StorageProviderApi {
         })
     }
 
-    pub(crate) fn try_resolve_file_reference_uri(&self, uri: &Uri) -> Option<Uri> {
-        let uri_string = IFrnString::from_impl(FrnString::new(uri.absolute_uri()));
+    pub(crate) fn try_resolve_file_reference_uri(&self, uri: &Url) -> Option<Url> {
+        let uri_string = IFrnString::from_impl(FrnString::new(uri.as_str()));
         let result_string = self.native.try_resolve_file_reference_uri(Some(&uri_string)).check();
 
         result_string
             .and_then(|result_string| frn_string_to_string(&result_string))
-            .and_then(|result_string| Uri::try_create(&result_string, UriKind::Absolute))
+            .and_then(|result_string| Url::parse(&result_string).ok())
     }
 }
 
@@ -384,6 +385,12 @@ impl IStorageProviderFactory for StorageProviderApi {
         let top_level_impl = top_level_of(&*platform_impl).expect("the top-level belongs to this backend").clone();
         Rc::new(StorageProviderImpl::new(top_level_impl, self.this()))
     }
+}
+
+/// The text of the URL of the folder a picker suggests to start in; none for a folder whose
+/// path is a relative reference (the root of the file system).
+fn suggested_directory_of(folder: &Rc<dyn IStorageFolder>) -> Option<String> {
+    folder.path().as_url().map(|url| url.as_str().to_owned())
 }
 
 fn try_get_selected_file_type(
@@ -593,9 +600,9 @@ mod tests {
             assert!(dropped.get(), "the caller must release the final URI reference");
         }
         let api = StorageProviderApi::new(native, false);
-        let uri = Uri::try_create("file:///Volumes/SSD/temp/ferrodock-port/", UriKind::Absolute).unwrap();
+        let uri = Url::parse("file:///Volumes/SSD/temp/ferrodock-port/").unwrap();
         // Non-sandboxed hosts may decline bookmarks, but must preserve the input.
-        let _ = api.save_bookmark(&uri);
+        let _ = api.save_bookmark(&UriRef::from(uri.clone()));
         let _ = api.try_resolve_file_reference_uri(&uri);
     }
 

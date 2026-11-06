@@ -12,7 +12,8 @@ use ferrodock_model::BoxedValue;
 use ferrodock_model_reactiveui::core::DockableBaseImpl;
 use ferrodock_model_reactiveui::impl_dock;
 use ferroui_reactiveui::{reactive_object, ICommand, IRoutableViewModel, IScreen, RoutingState};
-use ferroui_system::{threading::tasks::Task, IDisposable};
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::any::TypeId;
 use std::cell::{Cell, OnceCell};
 use std::rc::{Rc, Weak};
@@ -67,7 +68,7 @@ impl BusyRootDock {
         let weak = root.runtime.clone();
         root.busy().set_reload_handler(Some(Rc::new(move || {
             weak.upgrade()
-                .map_or_else(|| Task::from_result(()), |root| root.reload_current_async())
+                .map_or_else(|| Shared::ready(Ok(())), |root| root.reload_current_async())
         })));
         root.register_types(&root.types);
         root
@@ -108,11 +109,11 @@ impl BusyRootDock {
         self.dialogs().cancel_all();
         self.confirmations().cancel_all();
     }
-    fn reload_current_async(&self) -> Task<()> {
+    fn reload_current_async(&self) -> Shared<Result<(), ObservableError>> {
         let root = self.runtime.upgrade().expect("live busy root");
         spawn_catching(async move {
             if let Some(reloadable) = root.find_reloadable(root.active_dockable()) {
-                reloadable.reload_async().await?;
+                reloadable.reload_async().flatten().await?;
             }
             Ok(())
         })

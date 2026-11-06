@@ -1,0 +1,135 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/PersonPicture/PersonPicture.xaml (the implicit style of PersonPicture and
+    DefaultPersonPictureStyle; the resources are Resources/PersonPicture_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's PersonPicture is WinUI's PersonPicture (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md, G2). The parts keep WinUI's names.
+  - The visual states are the pseudo-classes the control sets. CommonStates: Photo is :photo,
+    NoPhotoOrInitials :nophotoorinitials, Group :group (Initials sets nothing). BadgeStates:
+    BadgeWithoutImageSource is :badge, BadgeWithImageSource :badgeimage (NoBadge sets nothing).
+    Visibility setters are IsVisible.
+  - The ImageBrush BadgeImageBrush, which WinUI declares in the setter of BadgingEllipse.Fill of
+    BadgeWithImageSource, belongs to the control, which sets it as the Fill of BadgingEllipse; the
+    state shows the ellipse (its Opacity).
+  - StrokeThickness of the outer ellipse is the resource PersonPictureEllipseStrokeThickness,
+    which WinUI's style sets as BorderThickness and the template binds: FerroUI's BorderThickness is
+    a Thickness, and StrokeThickness a number.
+  - The Text and FontFamily of InitialsTextBlock, which WinUI's template binds and the states
+    NoPhotoOrInitials and Group replace, are setters of a style of the part, so that the setters of
+    the states win over them.
+  - x:DeferLoadStrategy, IsTextScaleFactorEnabled, IsTabStop and the AccessibilityView of the text
+    parts are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <PersonPicture />
+        <PersonPicture DisplayName="Jane Doe" BadgeNumber="5" />
+        <PersonPicture Initials="SB" BadgeGlyph="&#xE765;" />
+        <PersonPicture IsGroup="True" Width="48" Height="48" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultPersonPictureStyle" TargetType="PersonPicture">
+    <Setter Property="Foreground" Value="{DynamicResource PersonPictureForegroundThemeBrush}" />
+    <Setter Property="Background" Value="{DynamicResource PersonPictureEllipseFillThemeBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PersonPictureEllipseFillStrokeBrush}" />
+    <Setter Property="Width" Value="96" />
+    <Setter Property="Height" Value="96" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="AutomationProperties.AccessibilityView" Value="Raw" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid">
+          <Ellipse Fill="{TemplateBinding Background}"
+                   Stroke="{TemplateBinding BorderBrush}"
+                   StrokeThickness="{DynamicResource PersonPictureEllipseStrokeThickness}"
+                   Width="{TemplateBinding Width}"
+                   Height="{TemplateBinding Height}" />
+          <TextBlock x:Name="InitialsTextBlock"
+                     FontSize="40"
+                     Foreground="{TemplateBinding Foreground}"
+                     FontWeight="{TemplateBinding FontWeight}"
+                     TextLineBounds="Tight"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center" />
+          <Ellipse x:Name="PersonPictureEllipse"
+                   Width="{TemplateBinding Width}"
+                   Height="{TemplateBinding Height}"
+                   FlowDirection="LeftToRight" />
+          <Grid x:Name="BadgeGrid"
+                IsVisible="False"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                Margin="{DynamicResource PersonPictureBadgeGridMargin}">
+            <Ellipse x:Name="BadgingBackgroundEllipse"
+                     Opacity="{DynamicResource PersonPictureEllipseBadgeStrokeOpacity}"
+                     Fill="{DynamicResource PersonPictureEllipseBadgeFillThemeBrush}"
+                     Stroke="{DynamicResource PersonPictureEllipseBadgeStrokeThemeBrush}"
+                     StrokeThickness="{DynamicResource PersonPictureEllipseBadgeStrokeThickness}" />
+            <Ellipse x:Name="BadgingEllipse" Opacity="0" FlowDirection="LeftToRight" />
+            <TextBlock x:Name="BadgeNumberTextBlock"
+                       Foreground="{DynamicResource PersonPictureEllipseBadgeForegroundThemeBrush}"
+                       FontFamily="{TemplateBinding FontFamily}"
+                       FontWeight="{TemplateBinding FontWeight}"
+                       TextLineBounds="Tight"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center" />
+            <!-- Default font family to "Segoe MDL2 Assets" -->
+            <FontIcon x:Name="BadgeGlyphIcon"
+                      Foreground="{DynamicResource PersonPictureEllipseBadgeForegroundThemeBrush}"
+                      FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                      FontWeight="{TemplateBinding FontWeight}"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center" />
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The text and the font of the initials, which the states replace: a style, so that the
+         setters of the states win over it (WinUI's template binds them). -->
+    <Style Selector="^ /template/ TextBlock#InitialsTextBlock">
+      <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource TemplatedParent}}" />
+      <Setter Property="Text" Value="{Binding TemplateSettings.ActualInitials, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <!-- CommonStates: a photo is available for display. -->
+    <Style Selector="^:photo /template/ Ellipse#PersonPictureEllipse">
+      <Setter Property="Fill" Value="{Binding TemplateSettings.ActualImageBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <!-- No photo and no initials: the placeholder symbol of a contact. -->
+    <Style Selector="^:nophotoorinitials /template/ TextBlock#InitialsTextBlock">
+      <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+      <Setter Property="Text" Value="&#xE77B;" />
+    </Style>
+    <!-- Group mode: the placeholder symbol of people. -->
+    <Style Selector="^:group /template/ TextBlock#InitialsTextBlock">
+      <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+      <Setter Property="Text" Value="&#xE716;" />
+    </Style>
+    <!-- BadgeStates -->
+    <Style Selector="^:badge /template/ Grid#BadgeGrid">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:badgeimage">
+      <Style Selector="^ /template/ Grid#BadgeGrid">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ Ellipse#BadgingEllipse">
+        <Setter Property="Opacity" Value="{DynamicResource PersonPictureEllipseBadgeImageSourceStrokeOpacity}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- The implicit style of PersonPicture (BasedOn DefaultPersonPictureStyle in WinUI). -->
+  <ControlTheme x:Key="{x:Type PersonPicture}" TargetType="PersonPicture" BasedOn="{StaticResource DefaultPersonPictureStyle}" />
+</ResourceDictionary>

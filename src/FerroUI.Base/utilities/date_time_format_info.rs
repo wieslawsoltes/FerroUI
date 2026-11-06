@@ -108,8 +108,14 @@ impl DateTimeFormatInfo {
     /// The conventions of a culture without conventions of its own attached:
     /// the data the registered provider has for the culture or the nearest
     /// of its parents, else the invariant data.
+    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub(crate) fn for_culture(culture: &CultureInfo) -> Rc<DateTimeFormatInfo> {
-        find_culture_data(culture, |provider, name| provider.get_date_time_format(name)).unwrap_or_else(Self::invariant_info)
+        find_culture_data(
+            culture,
+            |provider, locale| provider.get_date_time_format_by_locale(locale),
+            |provider, name| provider.get_date_time_format(name),
+        )
+        .unwrap_or_else(Self::invariant_info)
     }
 
     /// The conventions of the invariant culture.
@@ -119,7 +125,7 @@ impl DateTimeFormatInfo {
 
     /// The conventions of the current culture.
     pub fn current_info() -> Rc<DateTimeFormatInfo> {
-        CultureInfo::current_culture().date_time_format()
+        CultureInfo::current_formatting().date_time_format()
     }
 
     /// The calendar of the conventions; always the Gregorian one.

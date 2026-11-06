@@ -12,7 +12,7 @@ use ferroui_base::media::fonts::{
     EmbeddedFontCollection, FontCollectionBase, FontCollectionBaseImpl, GlyphTypefaceCache, IFontCollection,
 };
 use ferroui_base::media::{FontStretch, FontStyle, FontWeight, GlyphTypeface};
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_controls::testing::UnitTestApplication;
 use std::rc::Rc;
 
@@ -29,8 +29,8 @@ fn should_get_near_matching_typeface() {
             mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
         );
 
-        let _key = Uri::new("fonts:testFonts", UriKind::Absolute).unwrap();
-        let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+        let _key = UriRef::parse_absolute("fonts:testFonts").unwrap();
+        let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
         let font_collection = TestEmbeddedFontCollection::new(source.clone(), source, false);
 
@@ -50,8 +50,8 @@ fn should_not_get_typeface_for_invalid_family_name() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let key = Uri::new("fonts:testFonts", UriKind::Absolute).unwrap();
-    let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+    let key = UriRef::parse_absolute("fonts:testFonts").unwrap();
+    let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
     let font_collection = TestEmbeddedFontCollection::new(key, source, false);
 
@@ -66,8 +66,8 @@ fn should_get_typeface_for_partial_family_name() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let key = Uri::new("fonts:testFonts", UriKind::Absolute).unwrap();
-    let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+    let key = UriRef::parse_absolute("fonts:testFonts").unwrap();
+    let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
     let font_collection = TestEmbeddedFontCollection::new(key, source, false);
 
@@ -84,8 +84,8 @@ fn should_get_typeface_for_typographic_family_name() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let key = Uri::new("fonts:testFonts", UriKind::Absolute).unwrap();
-    let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+    let key = UriRef::parse_absolute("fonts:testFonts").unwrap();
+    let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
     let font_collection = TestEmbeddedFontCollection::new(key, source, false);
 
@@ -104,8 +104,8 @@ fn should_cache_synthetic_glyph_typeface() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(CustomFontManagerImpl::new())),
     );
 
-    let key = Uri::new("fonts:testFonts", UriKind::Absolute).unwrap();
-    let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+    let key = UriRef::parse_absolute("fonts:testFonts").unwrap();
+    let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
     let font_collection = TestEmbeddedFontCollection::new(key, source, true);
 
@@ -134,7 +134,7 @@ fn should_cache_nearest_match_for_mi_sans() {
         mock_platform_render_interface().with_font_manager_impl(Rc::new(FontManagerImpl::new())),
     );
 
-    let source = Uri::new(S_FONT_ASSETS, UriKind::Absolute).unwrap();
+    let source = UriRef::parse_absolute(S_FONT_ASSETS).unwrap();
 
     let font_collection = TestEmbeddedFontCollection::new(source.clone(), source, false);
 
@@ -160,7 +160,7 @@ struct TestEmbeddedFontCollection {
 }
 
 impl TestEmbeddedFontCollection {
-    fn new(key: Uri, source: Uri, create_synthetic_typefaces: bool) -> Self {
+    fn new(key: url::Url, source: url::Url, create_synthetic_typefaces: bool) -> Self {
         Self { base: EmbeddedFontCollection::new(key, source), create_synthetic_typefaces }
     }
 
@@ -174,7 +174,7 @@ impl FontCollectionBaseImpl for TestEmbeddedFontCollection {
         <EmbeddedFontCollection as FontCollectionBaseImpl>::base(&this.base)
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         <EmbeddedFontCollection as FontCollectionBaseImpl>::key(&this.base)
     }
 

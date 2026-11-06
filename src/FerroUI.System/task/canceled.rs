@@ -7,11 +7,9 @@ use std::fmt;
 ///
 /// It is the one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7):
 /// the error of a canceled dispatcher operation, of an awaited token, and of the futures of the
-/// reactive libraries that their token stops. `OperationCanceledError` (`ferroui-base`, deprecated)
-/// and [`TaskCanceledError`](crate::threading::tasks::TaskCanceledError), the error of a canceled
-/// `Task` that names it, convert to and from it (`From`);
-/// [`TaskCanceledError::is_cancellation`](crate::threading::tasks::TaskCanceledError::is_cancellation)
-/// recognizes both.
+/// reactive libraries that their token stops. `OperationCanceledError` (`ferroui-base`) and
+/// `TaskCanceledError` (`threading::tasks`), the error of a canceled `Task` that names it, both
+/// deprecated, convert to and from it (`From`); [`Canceled::is_cancellation`] recognizes both.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Canceled;
 
@@ -22,3 +20,13 @@ impl fmt::Display for Canceled {
 }
 
 impl std::error::Error for Canceled {}
+
+impl Canceled {
+    /// Whether `error` is a cancellation: a [`Canceled`], or the deprecated `TaskCanceledError` of
+    /// a canceled `Task` (`OperationCanceledException` and `TaskCanceledException` caught as such).
+    pub fn is_cancellation(error: &crate::ObservableError) -> bool {
+        #[allow(deprecated)]
+        let named = error.is::<crate::threading::tasks::TaskCanceledError>();
+        error.is::<Canceled>() || named
+    }
+}

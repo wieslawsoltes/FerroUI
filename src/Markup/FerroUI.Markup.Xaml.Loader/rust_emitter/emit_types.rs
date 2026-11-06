@@ -111,6 +111,9 @@ pub enum Known {
     /// `url::Url`: the Rust form of an absolute URI, which a member that declares it takes a
     /// URI literal as when the literal is an absolute URL.
     Url,
+    /// `icu_locale_core::Locale`: the Rust form of the identity of a culture, which a
+    /// culture literal of a member that declares it has to be a BCP-47 tag for.
+    Locale,
 }
 
 /// The Rust type that holds a value of a type of the type system (its handle).

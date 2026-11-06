@@ -17,7 +17,7 @@ impl ByteSizeHelper {
     /// `separate` puts a space between the number and the unit; as in the
     /// original, only a size of zero honours it.
     pub fn to_string(bytes: u64, separate: bool) -> String {
-        let culture = CultureInfo::current_culture();
+        let culture = CultureInfo::current_formatting();
 
         if bytes == 0 {
             let template = if separate { FORMAT_TEMPLATE_SEPARATED } else { FORMAT_TEMPLATE };

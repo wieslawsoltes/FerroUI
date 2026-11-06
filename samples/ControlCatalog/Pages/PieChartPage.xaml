@@ -6,7 +6,7 @@
   <!-- Not from upstream: the pie chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Orientation="Vertical" Spacing="16">
-      <TextBlock Classes="h2">Pies, doughnuts and gauges</TextBlock>
+      <TextBlock Classes="h2">Pies, doughnuts, gauges and an angular gauge</TextBlock>
       <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
         <StackPanel Spacing="8" Width="300">
           <TextBlock Classes="h3">Pie</TextBlock>
@@ -35,6 +35,28 @@
             <lc:PieSeries Name="Track" Fill="#1A1E1E1E" IsGauge="True" IsFillSeries="True" MaxRadialColumnWidth="30">
               <lc:ChartPoint Y="0" />
             </lc:PieSeries>
+          </lc:PieChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="300">
+          <TextBlock Classes="h3">Angular gauge</TextBlock>
+          <!-- The sections of GaugeGenerator.BuildAngularGaugeSections, ticks and a needle. -->
+          <lc:PieChart Height="280" InitialRotation="-225" MaxAngle="270" MinValue="0" MaxValue="100">
+            <lc:PieSeries Name="Low" IsGauge="True" IsRelativeToMinValue="True" HoverPushout="0"
+                          OuterRadiusOffset="70" MaxRadialColumnWidth="12" CornerRadius="6">
+              <lc:ChartPoint Y="60" />
+            </lc:PieSeries>
+            <lc:PieSeries Name="Medium" IsGauge="True" IsRelativeToMinValue="True" HoverPushout="0"
+                          OuterRadiusOffset="70" MaxRadialColumnWidth="12" CornerRadius="6">
+              <lc:ChartPoint Y="30" />
+            </lc:PieSeries>
+            <lc:PieSeries Name="High" IsGauge="True" IsRelativeToMinValue="True" HoverPushout="0"
+                          OuterRadiusOffset="70" MaxRadialColumnWidth="12" CornerRadius="6">
+              <lc:ChartPoint Y="10" />
+            </lc:PieSeries>
+            <lc:PieChart.VisualElements>
+              <lc:AngularTicksVisual LabelsSize="12" LabelsOuterOffset="10" OuterOffset="35" TicksLength="12" />
+              <lc:NeedleVisual Value="45" Width="12" />
+            </lc:PieChart.VisualElements>
           </lc:PieChart>
         </StackPanel>
       </WrapPanel>

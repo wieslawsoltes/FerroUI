@@ -1,6 +1,7 @@
 //! Bitmap effects applied to visuals and drawings: the built-in blur and
 //! drop shadow, and custom effects (#455, docs/porting/custom-effects.md):
-//! effect graphs and runtime shaders.
+//! effect graphs and runtime shaders, the images shaders sample, and the
+//! pointer input of interactive effects.
 
 mod blur_effect;
 mod custom_effect;
@@ -14,10 +15,16 @@ mod custom_effect_tests;
 mod drop_shadow_effect;
 mod effect;
 mod effect_extensions;
+mod effect_image;
+#[cfg(test)]
+mod effect_image_tests;
+mod effect_input;
 mod i_blur_effect;
 mod i_drop_shadow_effect;
 mod i_effect;
 mod immutable_luminance_to_alpha_effect;
+#[cfg(test)]
+mod interactive_effect_tests;
 pub mod library;
 #[cfg(test)]
 mod library_tests;
@@ -29,12 +36,16 @@ pub use custom_effect::{
 pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
 pub use custom_effect_shader::{
     shader_uniform_name, shader_uniform_name_matches, ShaderEffectDescription, ShaderEffectMode, ShaderEffectPadding,
-    ShaderUniformType, ShaderUniformValue, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE, SHADER_WGSL_CONTENT_BINDING,
-    SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING, SHADER_WGSL_VERTEX_ENTRY,
+    ShaderUniformType, ShaderUniformValue, MAX_SHADER_CHILDREN, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE,
+    SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_PASS_BINDING,
+    SHADER_WGSL_UNIFORMS_BINDING, SHADER_WGSL_VERTEX_ENTRY,
 };
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
 pub use effect::Effect;
 pub use effect_extensions::EffectExtensions;
+pub use effect_image::{EffectImage, EffectImagePixels, EffectImageWeak};
+pub use effect_input::{EffectHostContext, IEffectInputHandler};
+pub(crate) use effect_image::sample_image;
 pub use i_blur_effect::{IBlurEffect, ImmutableBlurEffect};
 pub use i_drop_shadow_effect::{
     IDirectionDropShadowEffect, IDropShadowEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,

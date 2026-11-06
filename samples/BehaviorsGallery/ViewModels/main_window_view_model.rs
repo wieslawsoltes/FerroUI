@@ -6,7 +6,7 @@ use ferroui_base::data::core::plugins::ObservableValue;
 use ferroui_base::input::{DataTransfer, DataTransferItem, ICommand};
 use ferroui_base::interactivity::IRoutedEventArgs;
 use ferroui_base::reactive::{IObservable, ObservableError};
-use ferroui_base::utilities::{DateTimeOffset, Decimal, Uri};
+use ferroui_base::utilities::{DateTimeOffset, Decimal, UriRef};
 use ferroui_base::{ferro_markup_type, BoxedValue};
 use ferroui_controls::platform::Screen;
 use ferroui_controls::{ItemsSource, TextBox};
@@ -256,7 +256,7 @@ impl MainWindowViewModel {
                     "Fig",
                     "Grape",
                 ]))),
-                file_items: RefCell::new(Some(item_list::<Uri>([]))),
+                file_items: RefCell::new(Some(item_list::<UriRef>([]))),
                 documents_folder_path: RefCell::new(documents.clone()),
                 new_directory_path: RefCell::new(
                     documents.map(|documents| join_path(&documents, "BehaviorsTestDirectory")),
@@ -567,7 +567,7 @@ impl MainWindowViewModel {
         println!("OpenItemCommand: {}", item.value().unwrap_or_default());
     }
 
-    fn add_file_item(&self, uri: Uri) {
+    fn add_file_item(&self, uri: UriRef) {
         if let Some(file_items) = self.file_items() {
             file_items.add(Rc::new(uri) as BoxedValue);
         }
@@ -589,11 +589,11 @@ impl MainWindowViewModel {
         }
     }
 
-    /// `SaveFile(Uri)`: the picked file (its path).
+    /// `SaveFile(Uri)`: the picked file (its path, a `UriRef`).
     fn save_file(&self, file: Option<&BoxedValue>) {
         let Some(file) = file else { return };
         let uri = match (
-            file.downcast_ref::<Uri>(),
+            file.downcast_ref::<UriRef>(),
             file.downcast_ref::<StorageFileRef>(),
         ) {
             (Some(uri), _) => uri.clone(),
@@ -631,7 +631,7 @@ impl MainWindowViewModel {
             || value.downcast_ref::<Vec<StorageItemRef>>().is_some()
         {
             self.open_files(result);
-        } else if value.downcast_ref::<Uri>().is_some()
+        } else if value.downcast_ref::<UriRef>().is_some()
             || value.downcast_ref::<StorageFileRef>().is_some()
         {
             self.save_file(result);

@@ -15,7 +15,7 @@ mod cropped_bitmap;
 mod i_bitmap;
 mod jpeg_bitmap_encoder_options;
 mod pixel_format_readers;
-mod pixel_format_transcoder;
+pub(crate) mod pixel_format_transcoder;
 mod pixel_format_writer;
 mod png_bitmap_encoder_options;
 mod render_target_bitmap;

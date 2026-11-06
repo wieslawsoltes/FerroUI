@@ -4,7 +4,7 @@ use crate::Factory;
 use ferrodock_model::controls::*;
 use ferrodock_model::core::*;
 use ferrodock_model::BoxedValue;
-use ferroui_system::collections::generic::Dictionary;
+use std::collections::HashMap;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -191,7 +191,7 @@ fn typed_locators_preserve_concrete_and_interface_identity_and_reject_mismatches
     let calls = Rc::new(Cell::new(0));
     let log = calls.clone();
     let located = document.clone();
-    let map: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+    let map: DockableLocatorMap = Rc::new(RefCell::new(HashMap::new()));
     map.borrow_mut().insert(
         "doc".into(),
         Some(Rc::new(move || {
@@ -223,7 +223,7 @@ fn typed_locators_preserve_concrete_and_interface_identity_and_reject_mismatches
 #[test]
 fn locator_callback_can_mutate_its_registry_and_return_null_without_borrow_conflicts() {
     let factory = Factory::new();
-    let registry: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+    let registry: DockableLocatorMap = Rc::new(RefCell::new(HashMap::new()));
     let weak = Rc::downgrade(&registry);
     registry.borrow_mut().insert(
         "self".into(),
@@ -246,7 +246,7 @@ fn typed_locator_supports_every_core_dockable_container_splitter_and_mdi_contrac
         ($contract:ty,$create:ident) => {{
             let item: Rc<dyn IDockable> = factory.$create();
             let located = item.clone();
-            let registry: DockableLocatorMap = Rc::new(RefCell::new(Dictionary::new()));
+            let registry: DockableLocatorMap = Rc::new(RefCell::new(HashMap::new()));
             registry
                 .borrow_mut()
                 .insert("item".into(), Some(Rc::new(move || Some(located.clone()))));

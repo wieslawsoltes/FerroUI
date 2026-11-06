@@ -571,6 +571,7 @@ checksum = "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
 name = "control-catalog"
 version = "0.5.0-preview.1"
 dependencies = [
+ "custom-effects",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
@@ -606,6 +607,7 @@ dependencies = [
  "skia-safe",
  "treedatagrid-demo",
  "unicode-normalization",
+ "url",
 ]
 
 [[package]]
@@ -845,6 +847,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "704a3c26996a80471189265814dbc2c257598b96b8a7feae2d31ace646bb9782"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "custom-effects"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-themes-winui",
+ "sample-testing",
 ]
 
 [[package]]
@@ -1170,6 +1183,7 @@ dependencies = [
  "ferroui-system",
  "ferroui-themes-fluent",
  "indexmap",
+ "url",
 ]
 
 [[package]]
@@ -1230,6 +1244,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-headless",
  "ferroui-markup-xaml",
+ "url",
 ]
 
 [[package]]
@@ -1249,6 +1264,7 @@ dependencies = [
  "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-themes-simple",
+ "url",
 ]
 
 [[package]]
@@ -1297,6 +1313,7 @@ dependencies = [
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -1561,6 +1578,7 @@ dependencies = [
  "jni-sys 0.4.1",
  "libc",
  "skia-safe",
+ "url",
 ]
 
 [[package]]
@@ -1608,6 +1626,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",
+ "url",
  "wasm-bindgen",
 ]
 
@@ -1645,6 +1664,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-system",
  "rustc-hash 2.1.3",
+ "url",
 ]
 
 [[package]]
@@ -1775,6 +1795,7 @@ dependencies = [
  "ferroui-xaml-interactivity",
  "serde",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -1853,6 +1874,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-skia",
  "ferroui-win32",
+ "url",
  "uuid",
  "xamlx",
 ]
@@ -1934,6 +1956,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-system",
  "sysinfo",
+ "url",
 ]
 
 [[package]]
@@ -1942,6 +1965,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-reactive",
  "ferroui-system",
+ "indexmap",
 ]
 
 [[package]]
@@ -1962,6 +1986,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-skia",
+ "url",
 ]
 
 [[package]]
@@ -1973,6 +1998,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-system",
  "futures-util",
+ "url",
  "uuid",
  "zbus",
 ]
@@ -2038,6 +2064,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -2099,6 +2126,7 @@ dependencies = [
  "objc2-open-gl-es",
  "objc2-quartz-core",
  "objc2-ui-kit",
+ "url",
 ]
 
 [[package]]
@@ -2191,6 +2219,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
+ "url",
 ]
 
 [[package]]
@@ -2510,6 +2539,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "microcom-codegen",
+ "url",
 ]
 
 [[package]]
@@ -2757,6 +2787,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-vulkan",
  "skia-safe",
+ "url",
 ]
 
 [[package]]
@@ -2934,6 +2965,7 @@ dependencies = [
  "peniko",
  "png",
  "skrifa",
+ "url",
  "vello",
  "vello_cpu",
  "vello_gpu",
@@ -2964,7 +2996,6 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
- "ferroui-system",
  "ferroui-themes-fluent",
  "ferroui-view-macros",
  "proc-macro2",
@@ -3027,6 +3058,7 @@ dependencies = [
  "ferroui-vulkan",
  "microcom-codegen",
  "mozangle",
+ "url",
  "windows-sys 0.61.2",
 ]
 
@@ -3059,6 +3091,7 @@ dependencies = [
  "ferroui-themes-simple",
  "ferroui-vulkan",
  "libc",
+ "url",
  "x11-dl",
  "zbus",
 ]
@@ -3100,6 +3133,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-xaml-interactions-custom",
  "ferroui-xaml-interactivity",
+ "url",
 ]
 
 [[package]]
@@ -5294,6 +5328,7 @@ dependencies = [
  "serde",
  "serde_json",
  "ureq",
+ "url",
 ]
 
 [[package]]
@@ -7627,6 +7662,9 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
+ "ferroui-controls-livecharts",
+ "ferroui-controls-repeater",
  "ferroui-desktop",
  "ferroui-harfbuzz",
  "ferroui-headless",
@@ -7697,6 +7735,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+ "url",
  "xaml-include-fixture-theme",
 ]
 

@@ -83,13 +83,15 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
+            // Not from upstream: PagerControl of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
             s.add("/Pages/RefreshContainerPage.xaml", "RefreshContainer", Icons::REFRESH, "Pull-to-refresh for scrollable content");
             s.add("/Pages/TableViewPage.xaml", "TableView", Icons::GRID, "Tabular data with resizable, sortable columns");
             // Not in the original: the pages of the TreeDataGrid demo.
             s.add("/Pages/TreeDataGridPage.xaml", "TreeDataGrid", Icons::GRID, "Virtualized rows and columns of flat and hierarchical data");
-            s.add("/Pages/CartesianChartPage.xaml", "CartesianChart", Icons::GRID, "Column, line, area and row series on X and Y axes");
-            s.add("/Pages/PieChartPage.xaml", "PieChart", Icons::GRID, "Pies, doughnuts and gauges");
+            s.add("/Pages/CartesianChartPage.xaml", "CartesianChart", Icons::GRID, "Column, line, area, row, OHLC and heat series on X and Y axes");
+            s.add("/Pages/PieChartPage.xaml", "PieChart", Icons::GRID, "Pies, doughnuts, gauges and angular gauges");
             s.add("/Pages/PolarChartPage.xaml", "PolarChart", Icons::GRID, "Polar lines and radars on angle and radius axes");
             s.add("/Pages/SankeyChartPage.xaml", "SankeyChart", Icons::GRID, "Flows between nodes in columns or on arcs");
             s.add("/Pages/TreemapChartPage.xaml", "TreemapChart", Icons::GRID, "Weighted rectangles of flat and nested nodes");
@@ -148,6 +150,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: the pages of the port of the inking controls of WinUI.
             s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
             s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
+            // Not from upstream: PersonPicture of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/PersonPicturePage.xaml", "PersonPicture", Icons::PERSON, "A person or a group: picture, initials and badges");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
@@ -173,11 +177,20 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add_page(|| crate::pages::winui_composition_pages::zoom_page().upcast(), "Zoom and manipulation", Icons::VIEWBOX, "Visuals that follow the zoom of a scroll viewer");
             s.add_page(|| crate::pages::winui_composition_pages::acrylic_brush_page().upcast(), "Acrylic brush", Icons::BLUR, "The acrylic recipe of WinUI over a busy scene");
             s.add_page(|| crate::pages::winui_composition_pages::blend_effects_page().upcast(), "Blend and colour effects", Icons::PALETTE, "Blend modes, saturation, tint and colour matrices");
-            s.add_page(|| crate::pages::winui_composition_pages::custom_effects_page().upcast(), "Custom effects", Icons::PALETTE, "Tint, grayscale, sepia, saturation, contrast, invert, glow, pixelate, scan lines and spotlight as Visual.Effect");
             s.add_page(|| crate::pages::winui_composition_pages::lighting_page().upcast(), "Lighting", Icons::LIGHTNING, "Coloured lights and the scene lighting effect");
             s.add_page(|| crate::pages::winui_composition_pages::reveal_page().upcast(), "Reveal", Icons::SPARKLE, "Reveal brushes lit by the XAML lights of WinUI");
             s.add_page(|| crate::pages::winui_composition_pages::system_backdrops_page().upcast(), "System backdrops", Icons::WINDOW, "Mica, Mica Alt and desktop acrylic window backdrops");
             s.add_page(|| crate::pages::winui_composition_pages::acrylic_menus_page().upcast(), "Acrylic menus", Icons::MENU, "Menus whose background is the desktop acrylic backdrop");
+        }),
+        // Not from upstream: the custom effects of `Visual.Effect`, one page per family
+        // (`Pages/custom_effects_pages.rs`, the sections of `samples/CustomEffects`,
+        // docs/porting/custom-effects.md, section 3.7).
+        section("Custom effects", Icons::PALETTE, &mut unavailable, |s| {
+            s.add_page(|| crate::pages::custom_effects_pages::colour_effects_page().upcast(), "Colour effects", Icons::PALETTE, "Tint, grayscale, sepia, saturation, brightness and contrast, and invert as effect graphs");
+            s.add_page(|| crate::pages::custom_effects_pages::image_effects_page().upcast(), "Image effects", Icons::IMAGE, "Glow, sharpen, edge detect and pixelate");
+            s.add_page(|| crate::pages::custom_effects_pages::shader_effects_page().upcast(), "Shader effects", Icons::SPARKLE, "Scan lines, a grid and a spotlight as runtime shaders");
+            s.add_page(|| crate::pages::custom_effects_pages::interactive_effects_page().upcast(), "Interactive effects", Icons::CURSOR, "A spotlight, a grid, water ripples and a burn-away button that follow the pointer");
+            s.add_page(|| crate::pages::custom_effects_pages::page_transitions_page().upcast(), "Page transitions", Icons::TRANSITION, "Dissolve and mask transitions between two pages, played by key frames");
         }),
         section("Status & Feedback", Icons::CHAT, &mut unavailable, |s| {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");

@@ -1,0 +1,13 @@
+<!-- Ported from the pinned PersonPicture example; see ../NOTICE.md. The profile type options are
+     the source's RadioButtons; feedback_samples.rs ports RadioButtons_SelectionChanged. The profile
+     image is the gallery's PersonPicture image (the source loads one from learn.microsoft.com). -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      ColumnDefinitions="*,220" ColumnSpacing="24">
+  <PersonPicture x:Name="personPicture" Height="300" VerticalAlignment="Top" />
+  <RadioButtons x:Name="ProfileType" Grid.Column="1" SelectedIndex="0" Header="Profile type">
+    <RadioButton x:Name="ProfileImageRadio" Content="Profile Image" IsChecked="True" />
+    <RadioButton x:Name="DisplayNameRadio" Content="Display Name" />
+    <RadioButton x:Name="InitialsRadio" Content="Initials" />
+  </RadioButtons>
+</Grid>

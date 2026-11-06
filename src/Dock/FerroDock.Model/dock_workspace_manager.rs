@@ -9,7 +9,7 @@ use crate::workspace_ordinal_data::ORDINAL_UPPER;
 use crate::{
     DockState, DockWorkspace, DockWorkspaceDirtyChangedEventArgs, DockWorkspaceTrackingOptions,
 };
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use ferroui_system::events::Event;
 use ferroui_system::{IDisposable, Subscription};
 use std::cell::{Cell, RefCell};
@@ -30,7 +30,7 @@ fn key(id: &str) -> String {
 }
 #[derive(Default)]
 struct WorkspaceStore {
-    values: Dictionary<String, Rc<DockWorkspace>>,
+    values: SlotOrderMap<String, Rc<DockWorkspace>>,
     version: u32,
 }
 /// The live, read-only dictionary values view returned by Workspaces.

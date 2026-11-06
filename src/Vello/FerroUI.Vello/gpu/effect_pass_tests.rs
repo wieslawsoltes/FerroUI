@@ -227,6 +227,84 @@ fn the_library_effects_match_their_cpu_references_in_the_gpu_modes() {
     }
 }
 
+/// The graph effects of the library in the hybrid and GPU modes at two
+/// device pixels per unit (#455, E9): under a transform of scale 2 over the
+/// whole target, the content at half its size, against their CPU references at that scale applied to the
+/// content drawn plain in the same mode, with the tolerances of scale 1; no
+/// layer drawn on the processor. The colour matrices do not depend on the
+/// scale, the blur of the glow is twice as wide, and the kernels of the
+/// convolutions step over device pixels.
+#[test]
+fn the_library_effects_match_their_cpu_references_at_twice_the_scale_in_the_gpu_modes() {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
+    };
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let effects = [
+        (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2u8),
+        (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+        (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+        (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+        (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+        (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+        (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+        (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2),
+        (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2),
+    ];
+    // The content at half its size: under the scale it covers the device
+    // pixels `content` covers at scale 1, inside the target, so that no
+    // content beyond the target reaches the glow.
+    fn small_content(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(RenderOptions { edge_mode: EdgeMode::Aliased, ..RenderOptions::default() });
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(12.0, 12.0, 10.0, 10.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(23.0, 12.0, 10.0, 10.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(12.0, 23.0, 21.0, 9.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    let scale = 2.0;
+    let transform = Matrix::create_scale(scale, scale);
+    let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+    for mode in device_modes(&device) {
+        for (effect, largest) in &effects {
+            let plain = draw_in(&device, mode, |drawing| {
+                drawing.set_transform(transform);
+                small_content(drawing);
+            });
+            let mut expected = plain.clone();
+            assert!(effect.cpu_reference(&mut expected, usize::from(SIZE), usize::from(SIZE), scale), "{effect}");
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            let actual = draw_in(&device, mode, |drawing| {
+                drawing.set_transform(transform);
+                assert!(push_custom_effect_graph(drawing, effect, bounds));
+                small_content(drawing);
+                assert!(pop_custom_effect_graph(drawing, effect, bounds));
+            });
+            assert_eq!(
+                cpu_layers,
+                crate::drawing_context_impl::cpu_layer_count(),
+                "{mode:?}: {effect} at 2x: a layer was drawn on the processor"
+            );
+            let (most, mean, _) = difference(&expected, &actual);
+            assert!(most <= *largest && mean <= 0.5, "{mode:?}: {effect} at 2x: largest difference {most}, mean {mean}");
+            let (changed, _, _) = difference(&plain, &actual);
+            assert!(changed > 0, "{mode:?}: {effect} at 2x: the content is changed");
+        }
+    }
+}
+
 // --- layers with an effect ----------------------------------------------------------------
 
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -962,6 +1040,535 @@ fn steady_frames_of_the_shader_effects_allocate_no_texture() {
             } else if let Some(previous) = allocations_after_first {
                 assert_eq!(previous, allocations, "{mode:?}: frame {frame} allocated a texture");
             }
+        }
+    }
+}
+
+// --- the images of the page transitions (#455, E6) ------------------------------------------
+
+use ferroui_base::media::effects::library::{DissolveTransitionEffect, MaskTransitionEffect};
+use ferroui_base::media::effects::EffectImage;
+use ferroui_base::platform::{AlphaFormat, PixelFormat};
+
+/// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by `pixel`:
+/// an immutable bitmap of this backend, owned by the handle.
+fn effect_image(pixel: impl Fn(u32, u32) -> [u8; 4]) -> EffectImage {
+    let side = u32::from(SIZE);
+    let mut data = Vec::with_capacity((side * side * 4) as usize);
+    for y in 0..side {
+        for x in 0..side {
+            data.extend_from_slice(&pixel(x, y));
+        }
+    }
+    let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+        PixelSize::new(i32::from(SIZE), i32::from(SIZE)),
+        Vector::new(96.0, 96.0),
+        i32::from(SIZE) * 4,
+        PixelFormat::RGBA8888,
+        AlphaFormat::Premul,
+        &data,
+    )
+    .expect("a bitmap");
+    EffectImage::from_impl(Arc::new(bitmap))
+}
+
+/// The transitions of the library at `progress` over two pages and a
+/// pattern of grey levels, and the mask transition with a translucent page.
+fn page_transitions(progress: f64) -> Vec<ImmutableCustomEffect> {
+    let from = effect_image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+    let to = effect_image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+    let pattern = effect_image(|x, y| {
+        let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+        [level, level, level, 255]
+    });
+    let glass = effect_image(|x, _| [0, 0, 160, 160 + (x % 2) as u8 * 40]);
+    vec![
+        ImmutableCustomEffect::new(DissolveTransitionEffect {
+            from_page: from,
+            to_page: to.clone(),
+            pattern: pattern.clone(),
+            progress,
+            center_x: 0.3,
+            center_y: 0.6,
+            ..DissolveTransitionEffect::default()
+        }),
+        ImmutableCustomEffect::new(MaskTransitionEffect { to_page: to, mask: pattern.clone(), progress, softness: 0.2 }),
+        ImmutableCustomEffect::new(MaskTransitionEffect { to_page: glass, mask: pattern, progress, softness: 0.5 }),
+    ]
+}
+
+/// The modules of the transitions bind their images after the content and
+/// declare the uniforms of their parameters at the offsets of WGSL's layout;
+/// no device is needed.
+#[test]
+fn the_modules_of_the_page_transitions_are_checked_by_naga() {
+    for effect in page_transitions(0.5) {
+        check_shader_module(&effect).unwrap_or_else(|reason| panic!("{effect}: {reason}"));
+    }
+    let layout = |effect: ImmutableCustomEffect| {
+        let module = check_shader_module(&effect).unwrap();
+        (module.offsets().to_vec(), module.size())
+    };
+    assert_eq!(
+        (vec![0, 8, 12, 16, 20, 32], 48),
+        layout(ImmutableCustomEffect::new(DissolveTransitionEffect::default()))
+    );
+    assert_eq!((vec![0, 8, 12, 16], 32), layout(ImmutableCustomEffect::new(MaskTransitionEffect::default())));
+}
+
+/// The transitions drawn by their passes in the hybrid and GPU modes at
+/// scales 1 and 2, their images textures of the device, against their CPU
+/// references applied to the content drawn plain in the same mode; no layer
+/// drawn on the processor.
+#[test]
+fn the_page_transitions_match_their_cpu_references_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        for effect in page_transitions(0.45) {
+            for scale in [1.0, 2.0] {
+                let transform = Matrix::create_scale(scale, scale);
+                let plain = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    content(drawing);
+                });
+                let side = i32::from(SIZE);
+                let expected = reference_in_area(&plain, &effect, (0, 0, side, side), scale);
+                let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                let actual = draw_in(&device, mode, |drawing| {
+                    drawing.set_transform(transform);
+                    let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                });
+                assert_eq!(
+                    cpu_layers,
+                    crate::drawing_context_impl::cpu_layer_count(),
+                    "{mode:?}: {effect} at {scale}x: drawn on the processor"
+                );
+                let (most, mean, _) = difference(&expected, &actual);
+                assert!(most <= 3 && mean <= 0.5, "{mode:?}: {effect} at {scale}x: largest {most}, mean {mean}");
+                let (changed, _, _) = difference(&plain, &actual);
+                assert!(changed > 0, "{mode:?}: {effect} at {scale}x: the content is changed");
+            }
+        }
+    }
+}
+
+/// Frames of the transitions whose progress changes upload no image and
+/// allocate no texture once the first frames did, and the textures of the
+/// images of dropped transitions are released by the next frame; frames
+/// whose transitions take new images keep no more textures than they draw.
+#[test]
+fn the_images_of_the_page_transitions_are_uploaded_once_and_released() {
+    use super::effect_passes::{image_texture_count, image_uploads};
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        let before = image_texture_count();
+        {
+            let effects = page_transitions(0.2);
+            let mut counts_after_first = None;
+            for frame in 0..6 {
+                let progress = 0.2 + 0.1 * f64::from(frame);
+                draw_in(&device, mode, |drawing| {
+                    for effect in &effects {
+                        let value = if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+                            ImmutableCustomEffect::new(DissolveTransitionEffect { progress, ..dissolve.clone() })
+                        } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+                            ImmutableCustomEffect::new(MaskTransitionEffect { progress, ..mask.clone() })
+                        } else {
+                            effect.clone()
+                        };
+                        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), &value);
+                        content(drawing);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                    }
+                });
+                let counts = (image_uploads(), super::effect_passes::texture_allocations());
+                match counts_after_first {
+                    None => counts_after_first = Some(counts),
+                    Some(first) => assert_eq!(first, counts, "{mode:?}: frame {frame} uploaded or allocated"),
+                }
+            }
+            // Four images: two pages, the pattern and the translucent page.
+            assert_eq!(before + 4, image_texture_count(), "{mode:?}");
+        }
+        // The transitions and their images are dropped: the next frame
+        // releases the textures.
+        draw_in(&device, mode, |drawing| content(drawing));
+        assert_eq!(before, image_texture_count(), "{mode:?}: the textures are released");
+
+        // A new page in every frame.
+        for frame in 0..12u32 {
+            let page = effect_image(|x, y| [(frame * 20) as u8, x as u8, y as u8, 255]);
+            let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: page,
+                progress: 0.5,
+                softness: 1.0,
+                ..MaskTransitionEffect::default()
+            });
+            draw_in(&device, mode, |drawing| {
+                drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), &effect);
+                content(drawing);
+                drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+            });
+            assert!(image_texture_count() <= before + 1, "{mode:?}: frame {frame}: {} textures", image_texture_count());
+        }
+        draw_in(&device, mode, |drawing| content(drawing));
+        assert_eq!(before, image_texture_count(), "{mode:?}");
+    }
+}
+
+/// A content-sampling program cannot take images (both backends refuse it):
+/// its module is refused, and it draws the content unchanged.
+#[test]
+fn a_content_sampling_program_with_images_is_refused() {
+    #[derive(Clone, Debug, Default, PartialEq)]
+    struct SamplingWithImage {
+        page: EffectImage,
+    }
+
+    impl CustomEffect for SamplingWithImage {
+        const NAME: &'static str = "vello-test-sampling-with-an-image";
+
+        fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+            f("page", (&self.page).into());
+        }
+
+        fn set_parameter(&mut self, _: &str, _: EffectParameterValue) -> bool {
+            false
+        }
+
+        fn shader() -> Option<ShaderEffectDescription> {
+            Some(
+                ShaderEffectDescription::content_sampling(
+                    "",
+                    "struct Uniforms { layer_size: vec2<f32>, layer_scale: f32, }\n\
+                     fn effect(coord: vec2<f32>) -> vec4<f32> { return sample_content(coord) + sample_page(coord); }",
+                )
+                .with_children(["page"]),
+            )
+        }
+    }
+
+    assert!(check_shader_module(&ImmutableCustomEffect::new(SamplingWithImage::default())).is_err());
+}
+
+// --- the interactive effects (#455, E7) ---------------------------------------------------
+
+use super::effect_passes::shader_pipelines_created;
+use ferroui_base::media::effects::library::{
+    BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+};
+
+/// The interactive effects of the library at a frame `t` (0 to 1) of an interaction: the pointer
+/// over the area and pressed in odd frames, a ripple aging, the flame burning; with whether each
+/// moves the content (which picks the texel under a coordinate it computes: at the edge of a
+/// square the last bit of the device's `sin` or `exp` can pick the neighbour).
+fn interactive_shader_effects(t: f64) -> Vec<(ImmutableCustomEffect, bool)> {
+    let pressed = (t * 10.0).round() as i32 % 2 == 1;
+    let mut ripple = WaterRippleShaderEffect {
+        pointer_x: 0.3 + 0.4 * t,
+        pointer_y: 0.4,
+        is_pointer_over: true,
+        is_pressed: pressed,
+        ..WaterRippleShaderEffect::default()
+    };
+    ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+    ripple.ripples[0].age = 0.2 + 0.3 * t;
+    vec![
+        (
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            false,
+        ),
+        (
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            false,
+        ),
+        (ImmutableCustomEffect::new(ripple), true),
+        (
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+            true,
+        ),
+    ]
+}
+
+/// The modules of the interactive effects parse, validate and declare the uniforms of their
+/// parameters at the offsets of WGSL's layout; no device is needed.
+#[test]
+fn the_shader_modules_of_the_interactive_effects_are_checked_by_naga() {
+    for (effect, _) in interactive_shader_effects(0.5) {
+        let module = check_shader_module(&effect).unwrap_or_else(|reason| panic!("{effect}: {reason}"));
+        assert_eq!(0, module.size() % 16, "{effect}: the block is a multiple of 16 bytes");
+        assert_eq!(effect.shader_uniform_layout().len(), module.offsets().len(), "{effect}");
+    }
+    // The flags are `i32`, the colour a `vec4<f32>` aligned to 16.
+    let module = check_shader_module(&ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default())).unwrap();
+    assert_eq!((vec![0, 8, 12, 16, 20, 24, 28, 32, 36, 48], 64), (module.offsets().to_vec(), module.size()));
+}
+
+/// The interactive effects drawn by their passes in the hybrid and GPU modes at scales 1 and 2,
+/// against their CPU references applied to the content drawn plain in the same mode: the overlays
+/// within 3 levels, the programs that move the content within a mean of a level and a half and at
+/// most 1% of the pixels further than 2 levels; no layer drawn on the processor.
+#[test]
+fn the_interactive_effects_match_their_cpu_references_in_the_gpu_modes() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let pixels = usize::from(SIZE) * usize::from(SIZE);
+    for mode in device_modes(&device) {
+        for t in [0.0, 0.5, 1.0] {
+            for (effect, moves) in interactive_shader_effects(t) {
+                for scale in [1.0, 2.0] {
+                    let transform = Matrix::create_scale(scale, scale);
+                    let plain = draw_in(&device, mode, |drawing| {
+                        drawing.set_transform(transform);
+                        content(drawing);
+                    });
+                    let side = i32::from(SIZE);
+                    let expected = reference_in_area(&plain, &effect, (0, 0, side, side), scale);
+                    let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+                    let actual = draw_in(&device, mode, |drawing| {
+                        drawing.set_transform(transform);
+                        let bounds = Rect::new(0.0, 0.0, f64::from(SIZE) / scale, f64::from(SIZE) / scale);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(bounds), &effect);
+                        content(drawing);
+                        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                    });
+                    assert_eq!(
+                        cpu_layers,
+                        crate::drawing_context_impl::cpu_layer_count(),
+                        "{mode:?}: {effect} at {scale}x: drawn on the processor"
+                    );
+                    let (most, mean, far) = difference(&expected, &actual);
+                    if moves {
+                        assert!(
+                            far * 100 <= pixels && mean <= 1.5,
+                            "{mode:?}: {effect} at {scale}x: {far} pixels further than 2 levels, mean {mean}"
+                        );
+                    } else {
+                        assert!(most <= 3 && mean <= 0.5, "{mode:?}: {effect} at {scale}x: largest {most}, mean {mean}");
+                    }
+                    let (changed, _, _) = difference(&plain, &actual);
+                    assert!(changed > 0, "{mode:?}: {effect} at {scale}x: the content is changed");
+                }
+            }
+        }
+    }
+}
+
+/// Frames of an interaction change only the uniforms of the interactive effects: once the first
+/// frames compiled their pipelines and filled the pool, no frame compiles a pipeline or allocates
+/// a texture, and none is drawn on the processor.
+#[test]
+fn frames_of_the_interactive_effects_compile_their_pipelines_once() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    for mode in device_modes(&device) {
+        let mut after_first = None;
+        for frame in 0..8 {
+            let effects = interactive_shader_effects(f64::from(frame) / 7.0);
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            draw_in(&device, mode, |drawing| {
+                for (effect, _) in &effects {
+                    drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), effect);
+                    content(drawing);
+                    drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+                }
+            });
+            assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+            let counts = (shader_pipelines_created(), super::effect_passes::texture_allocations());
+            if frame == 1 {
+                after_first = Some(counts);
+            } else if let Some(previous) = after_first {
+                assert_eq!(previous, counts, "{mode:?}: frame {frame} compiled a pipeline or allocated a texture");
+            }
+        }
+    }
+    for (effect, _) in interactive_shader_effects(0.0) {
+        assert_eq!(0, shader_failure_reports(effect.name()), "{effect}");
+    }
+}
+
+// --- the whole library (#455, E9) ----------------------------------------------------------
+
+/// Every effect of the library at a frame `t` (0 to 1) of an animation, the
+/// transitions over the images of `transitions` (made once, so that a frame
+/// changes only their progress): the graph effects (colour matrices, the glow,
+/// the convolutions), the runtime shaders, the page transitions and the
+/// interactive effects, each parameter that animates moving with `t`. The
+/// glow keeps its blur radius (its padding, and so the size of its layer,
+/// follow it) and animates its intensity.
+fn whole_library(t: f64, transitions: &[ImmutableCustomEffect]) -> Vec<ImmutableCustomEffect> {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+        SepiaEffect, SharpenEffect, TintEffect,
+    };
+    let mut effects = vec![
+        ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.2 + 0.6 * t }),
+        ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.2 + 0.8 * t }),
+        ImmutableCustomEffect::new(SepiaEffect { amount: 0.1 + 0.9 * t }),
+        ImmutableCustomEffect::new(SaturationEffect { saturation: 0.5 + 1.5 * t }),
+        ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.2 * t, contrast: 0.8 + 0.6 * t }),
+        ImmutableCustomEffect::new(InvertEffect { amount: t }),
+        ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.3 + 0.6 * t }),
+        ImmutableCustomEffect::new(SharpenEffect { strength: 0.2 + 0.8 * t }),
+        ImmutableCustomEffect::new(EdgeDetectEffect { strength: 0.5 + 0.5 * t }),
+        ImmutableCustomEffect::new(PixelateEffect { cell_size: 2.0 + 6.0 * t }),
+        ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.2 + 0.6 * t }),
+        ImmutableCustomEffect::new(SpotlightShaderEffect { strength: 0.2 + 0.6 * t, ..SpotlightShaderEffect::default() }),
+    ];
+    for effect in transitions {
+        effects.push(if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+            ImmutableCustomEffect::new(DissolveTransitionEffect { progress: t, ..dissolve.clone() })
+        } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+            ImmutableCustomEffect::new(MaskTransitionEffect { progress: t, ..mask.clone() })
+        } else {
+            effect.clone()
+        });
+    }
+    effects.extend(interactive_shader_effects(t).into_iter().map(|(effect, _)| effect));
+    effects
+}
+
+/// Draws `effect` around the content over the whole target as the render
+/// walk draws it: a graph effect as its graph, any other as an effect of the
+/// drawing context.
+fn draw_library_effect(drawing: &mut DrawingContextImpl, effect: &ImmutableCustomEffect) {
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+    if effect.has_graph() {
+        assert!(push_custom_effect_graph(drawing, effect, full()), "{effect}");
+        content(drawing);
+        assert!(pop_custom_effect_graph(drawing, effect, full()), "{effect}");
+    } else {
+        drawing.as_drawing_context_impl_with_effects().unwrap().push_effect(Some(full()), effect);
+        content(drawing);
+        drawing.as_drawing_context_impl_with_effects().unwrap().pop_effect();
+    }
+}
+
+/// The steady state of the whole library in the hybrid and GPU modes: frames
+/// that draw every effect of the library with parameters that change compile
+/// no pipeline, allocate no texture and upload no image once the first frames
+/// compiled the pipelines, filled the pool and uploaded the images; nothing
+/// is drawn on the processor and no effect fails. Effect graphs and programs
+/// are compiled once, uniforms are written per frame.
+#[test]
+fn frames_of_the_whole_library_compile_and_allocate_nothing_in_the_gpu_modes() {
+    use super::effect_passes::image_uploads;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let transitions = page_transitions(0.0);
+    for mode in device_modes(&device) {
+        let mut after_first = None;
+        for frame in 0..8 {
+            let effects = whole_library(f64::from(frame) / 7.0, &transitions);
+            let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+            draw_in(&device, mode, |drawing| {
+                for effect in &effects {
+                    draw_library_effect(drawing, effect);
+                }
+            });
+            assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+            let counts = (shader_pipelines_created(), super::effect_passes::texture_allocations(), image_uploads());
+            if frame == 2 {
+                after_first = Some(counts);
+            } else if let Some(previous) = after_first {
+                assert_eq!(
+                    previous, counts,
+                    "{mode:?}: frame {frame} compiled a pipeline, allocated a texture or uploaded an image"
+                );
+            }
+        }
+    }
+    for effect in whole_library(0.0, &transitions) {
+        assert_eq!(0, shader_failure_reports(effect.name()), "{effect}");
+    }
+}
+
+/// What stands for the prewarm on Vello: its render targets do not prewarm
+/// (gpu-rendering.md, "Pipelines made ahead of their first draw": vello and
+/// vello_hybrid make their own pipelines when their renderers are made), and
+/// the pipeline of a shader effect type is made by the first frame that draws
+/// the type, once per device. The first frame of the library makes one
+/// pipeline per runtime shader of the library, and no frame after it, in
+/// this mode or the other, makes one.
+#[test]
+fn the_first_frame_of_the_library_makes_one_pipeline_per_shader_type() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let transitions = page_transitions(0.0);
+    let shader_types = whole_library(0.0, &transitions)
+        .iter()
+        .filter(|effect| effect.has_shader())
+        .map(|effect| effect.value_type_id())
+        .collect::<std::collections::HashSet<_>>()
+        .len() as u64;
+    assert_eq!(9, shader_types, "the runtime shaders of the library");
+    let before = shader_pipelines_created();
+    for mode in device_modes(&device) {
+        for frame in 0..3 {
+            let effects = whole_library(0.2 + 0.3 * f64::from(frame), &transitions);
+            draw_in(&device, mode, |drawing| {
+                for effect in &effects {
+                    draw_library_effect(drawing, effect);
+                }
+            });
+            // The first frame of the first mode made them all; no frame
+            // after it made one.
+            let made = shader_pipelines_created() - before;
+            assert_eq!(shader_types, made, "{mode:?}: frame {frame}: {made} pipelines made, one per shader type");
         }
     }
 }

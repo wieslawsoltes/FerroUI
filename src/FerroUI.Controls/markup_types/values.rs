@@ -117,6 +117,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <AutoSuggestBoxTextChangedEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxSuggestionChosenEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxQuerySubmittedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's PagerControl, declared next to the types (G2 of #418).
+    <crate::PagerControlDisplayMode as MarkupTyped>::MARKUP,
+    <crate::PagerControlButtonVisibility as MarkupTyped>::MARKUP,
+    <crate::PagerControlSelectedIndexChangedEventArgs as MarkupTyped>::MARKUP,
     // The WinUI materials (winui-materials.md), declared next to the types.
     <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
     <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
@@ -141,6 +145,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_nullable::<NumberBoxValidationMode>();
     ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
+    ValueTypes::register_nullable::<crate::PagerControlDisplayMode>();
+    ValueTypes::register_nullable::<crate::PagerControlButtonVisibility>();
     crate::navigation::register_value_types();
     crate::navigation_view_events::register_value_types();
     ValueTypes::register_nullable::<crate::media::ApplicationTheme>();

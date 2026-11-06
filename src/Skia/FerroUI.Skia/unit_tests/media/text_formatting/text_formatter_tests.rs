@@ -21,7 +21,7 @@ use ferroui_base::media::{
     Typeface, DEFAULT_ELLIPSIS_CHAR,
 };
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::{ReadOnlyMemory, Uri, UriKind, ValueSpan};
+use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan, UriRef};
 use ferroui_base::{FerroLocator, Matrix, Point, Rect, Size};
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::any::Any;
@@ -1342,7 +1342,7 @@ fn should_wrap_chinese() {
 
 /// Upstream's `new FontFamily(new Uri("resm:...Assets?assembly=..."), "Noto Mono")`.
 fn noto_mono() -> Typeface {
-    let base_uri = Uri::try_create("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia", UriKind::Absolute)
+    let base_uri = UriRef::parse_absolute("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia")
         .expect("a valid uri");
 
     Typeface::new(FontFamily::with_base_uri(Some(&base_uri), "Noto Mono"))

@@ -14,7 +14,7 @@
 
 use control_catalog::{IPageAssets, PageAssetsFuture};
 use ferroui_base::platform::{register_assets, IAssetLoader};
-use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
+use ferroui_base::utilities::{UriExtensions, UriRef};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_browser::interop::completion_helper::await_promise;
 use wasm_bindgen::prelude::*;
@@ -50,7 +50,7 @@ impl IPageAssets for BrowserPageAssets {
 // Deviation (browser-platform.md section 14): assets registered one by one, after the application started too.
 #[wasm_bindgen(js_name = registerAsset)]
 pub fn register_asset(uri: &str, content: Vec<u8>) -> Result<(), String> {
-    let parsed = Uri::new(uri, UriKind::Absolute).map_err(|error| format!("{uri}: {error}"))?;
+    let parsed = UriRef::parse_absolute(uri).map_err(|error| format!("{uri}: {error}"))?;
     if !UriExtensions::is_asset(&parsed) {
         return Err(format!("{uri} is not the URI of an asset"));
     }

@@ -17,7 +17,7 @@ use ferroui_base::media::{
     Brushes, Color, DrawingGroup, DrawingImage, IImage, ImageDrawing, SolidColorBrush, Stretch,
 };
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, PixelRect, Rect, Ref, Thickness};
 use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::AutomationProperties;
@@ -154,10 +154,10 @@ fn show_errors(root: &Control, name: &str, errors: &[String]) {
 
 pub(crate) fn decode_to_height(uri: &str, height: i32) -> std::io::Result<Bitmap> {
     crate::assets::register();
-    let uri = Uri::new(uri, UriKind::Absolute).map_err(|error| {
+    let uri = UriRef::parse_absolute(uri).map_err(|error| {
         std::io::Error::new(std::io::ErrorKind::InvalidInput, error.to_string())
     })?;
-    let mut stream = AssetLoader::open(&uri, None)?;
+    let mut stream = AssetLoader::open(&UriRef::from(uri), None)?;
     Bitmap::decode_to_height(&mut *stream, height, BitmapInterpolationMode::HighQuality)
 }
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
-  "coverage_rule": "The complete catalog and source browser do not establish page or API parity. Every native adaptation remains partial. Runtime load tests establish constructibility; only named interaction tests establish their bounded behaviors.",
+  "coverage_rule": "The complete catalog and source browser do not establish page or API parity. A page is ported when every catalog example of it has a native adaptation with its events and bindings, or a recorded reason (not-applicable, with the Windows-only API) why it cannot; otherwise it is partial. Runtime load tests establish constructibility; only named interaction tests establish their bounded behaviors; rendering parity against Windows is a separate check.",
   "pages": {
     "AccessibilityColorContrast": {
       "status": "partial",
@@ -249,7 +249,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Element-name binding is explicitly ported to a normal shared Binding with an explicit mode. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The element bindings are the source OneWay x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "Border": {
@@ -780,7 +780,7 @@
           "name": "infobar_examples_keep_source_severity_message_action_and_options"
         }
       ],
-      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
+      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsChange.txt",
@@ -796,7 +796,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarLongShort.txt",
@@ -812,7 +812,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsDisplay.txt",
@@ -828,7 +828,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."
         }
       ]
     },
@@ -1051,6 +1051,45 @@
           "notes": "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending. Original page code-behind supplies the corresponding Rust handlers; complete API/render/accessibility parity is not established."
         }
       ]
+    },
+    "PagerControl": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/PagerControl.xaml",
+        "samples/WinUIGallery/examples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/feedback_samples_tests.rs",
+          "name": "pager_control_page_shows_each_display_mode"
+        }
+      ],
+      "notes": "All three source examples use native PagerControl: the basic pager, the number box and button panel display modes, and the unbounded pagers. The page has no code-behind upstream.",
+      "examples": []
+    },
+    "PersonPicture": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/PersonPicture.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/feedback_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/feedback_samples_tests.rs",
+          "name": "person_picture_page_switches_between_image_name_and_initials"
+        }
+      ],
+      "notes": "The source example uses native PersonPicture with its RadioButtons handler. The profile image is the gallery's PersonPicture image instead of the remote image of the source.",
+      "examples": []
     },
     "PipsPager": {
       "status": "partial",
@@ -1280,7 +1319,7 @@
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
-          "name": "winui_preview_uses_opt_in_public_loader_and_rejects_unported_bindings"
+          "name": "winui_preview_uses_opt_in_public_loader_and_compiles_x_bind"
         },
         {
           "path": "samples/WinUIGallery/tests.rs",
@@ -1351,7 +1390,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Native element binding changes StackPanel spacing interactively. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Native element x:Bind (the compiled x:Bind core) changes StackPanel spacing interactively. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "SplitButton": {
@@ -1381,7 +1420,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Native SplitView uses explicit IsPaneOpen binding to a ToggleButton; no x:Bind rewrite is assumed. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Native SplitView binds IsPaneOpen to a ToggleButton with x:Bind, compiled by the x:Bind core. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
     "StackPanel": {
@@ -1714,7 +1753,7 @@
           "name": "feedback_pages_and_callbacks_release_their_native_controls"
         }
       ],
-      "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending.",
+      "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RatingControl/RatingControlSimple.txt",
@@ -1730,7 +1769,7 @@
               "name": "rating_page_changes_caption_only_for_user_changes_and_obeys_clear_and_readonly"
             }
           ],
-          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
+          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
         },
         {
           "source": "WinUIGallery/Samples/RatingControl/RatingControlPlaceholder.txt",
@@ -1746,7 +1785,7 @@
               "name": "rating_page_tracks_fractional_placeholder_in_both_directions"
             }
           ],
-          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers and ordinary Binding explicitly replace source C# handlers and x:Bind. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
+          "notes": "Both source examples use native RatingControl: user changes update the caption, clear/read-only options remain live, and the fractional placeholder is bound in both directions. Native event handlers replace the source C# handlers; the options keep the source x:Bind, compiled by the x:Bind core. Segoe glyph availability, exact visual/input/OS accessibility acceptance and locale formatting remain pending."
         }
       ]
     },
@@ -2748,6 +2787,1135 @@
           "target_control": "FlipViewExample3"
         }
       ]
+    },
+    "ThemeShadow": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ThemeShadow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Base/media/theme_shadow.rs",
+        "src/FerroUI.Base/visual/theme_shadow.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "theme_shadow_border_casts_its_shadow_on_the_receiver_at_the_slider_elevation"
+        }
+      ],
+      "notes": "The source example uses the native ThemeShadow as the Shadow of the Border, with ShadowRect_Loaded (the grid is a receiver of the shadow) and TranslationSliderInApp_ValueChanged (the Z of the Border's Translation) in Rust. As in WinUI 3 the theme shadow is a drop shadow and the receivers draw nothing (CThemeShadow::IsDropShadowMode). The ThemeShadow is a resource set as the Shadow, as the templates of the WinUI theme share theirs; OverlayCornerRadius is its value, 8. Rendering against Windows captures remains pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ThemeShadow/ThemeshadowAppliedBorder.txt",
+          "source_sha256": "14391c0329c0104d3682dabe0280bcfa6ec40703294a2c3c4c7926d6a0db6e98",
+          "status": "ported",
+          "notes": "ThemeShadow on a Border, its receiver and the Z-translation slider (StepFrequency is TickFrequency with IsSnapToTickEnabled; Header is a composed label).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "theme_shadow_border_casts_its_shadow_on_the_receiver_at_the_slider_elevation"
+            }
+          ]
+        }
+      ]
+    },
+    "Acrylic": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Acrylic.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Base/media/acrylic_brush.rs",
+        "src/FerroUI.Themes.WinUI/Resources/AcrylicBrush_themeresources.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+        }
+      ],
+      "notes": "All three source examples use the native AcrylicBrush over the source's shapes: the theme's AcrylicInAppFillColorDefaultBrush, and the page's CustomAcrylicInAppBrush and CustomAcrylicInAppLuminosity with the source's values, page resources under their keys, changed by AcrylicPage_Loaded, Slider_ValueChanged, ColorSelector_SelectionChanged, FallbackColorSelector_SelectionChanged and LuminositySlider_ValueChanged in Rust. The SolidColorBrush items of the colour boxes and their ColorTemplate are composed items (a swatch and the colour); the handlers map the selected index to the colour. The ThemeDictionaries of the source have only Default, so the brushes are plain resources; the AdaptiveTrigger sizes are the wide ones. The link of the intro to the SystemBackdrops page is text. Rendering against Windows captures remains pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/Acrylic/DefaultAppAcrylicBrush.txt",
+          "source_sha256": "f1ee4e6ec816c2e3f04223d7b4570b7e6792b926e8b644e18409ee38405d9586",
+          "status": "ported",
+          "notes": "The theme resource AcrylicInAppFillColorDefaultBrush (a DynamicResource) over the source's shapes.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Acrylic/CustomAcrylicAppBrush.txt",
+          "source_sha256": "9060e2e85127697c2d74f139eb6fb87205ea2863bf7fc5f786645aca6363a05e",
+          "status": "ported",
+          "notes": "TintOpacity, TintColor and FallbackColor of the page's brush from the slider and the two colour boxes, as the C# handlers set them.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Acrylic/LuminosityAppAcrylic.txt",
+          "source_sha256": "b00dcddc13a034e5031167982f139ebca2a45c254b22994f40fbe4138f7b85f6",
+          "status": "ported",
+          "notes": "TintOpacity and TintLuminosityOpacity of the luminosity brush from its two sliders.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_page_keeps_three_examples_and_the_loaded_state_of_its_brushes"
+            },
+            {
+              "path": "samples/WinUIGallery/materials_samples_tests.rs",
+              "name": "acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush"
+            }
+          ]
+        }
+      ]
+    },
+    "SystemBackdrops": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SystemBackdrops.xaml",
+        "samples/WinUIGallery/Pages/SystemBackdropsWindow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "src/FerroUI.Controls/media/system_backdrop.rs",
+        "src/FerroUI.Base/rendering/composition/system_backdrops.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_backdrop"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+        }
+      ],
+      "notes": "The three \"Show window\" buttons open the source's sample windows (SampleBuiltInSystemBackdropsWindow and SampleSystemBackdropsWindow with its AllowedBackdrops) as native windows extended into the title bar: Window.SystemBackdrop with MicaBackdrop (Base, BaseAlt) and DesktopAcrylicBackdrop, and MicaController and DesktopAcrylicController (Base, Thin) on the window as their target, with a SystemBackdropConfiguration that follows activation, the theme of the window and high contrast. SetBackdrop resets the previous backdrop and falls back as the C# does where IsSupported is false (Mica is drawn on Windows 11 and macOS, desktop acrylic also where the platform blurs a transparent window); the theme box sets the window's theme and SetNoneBackdropBackground its background. The C# window adds its Activated, Closed and ActualThemeChanged handlers again for every backdrop it sets; they are added once. UIHelper.AnnounceActionForAccessibility is a polite live region, the ComboBox headers are composed labels, the badge logo image of the custom title bar is not shown and TitleBarHelper.ApplySystemThemeToCaptionButtons is left to the decorations of the window, which follow its theme. The platform's drawing of the materials is verified on the hosts, not by these tests.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsBackdropTypes.txt",
+          "source_sha256": "912cdd12c3ff0d4f8217ec25df90955f028a3265db433fec65057427935b9e73",
+          "status": "ported",
+          "notes": "The built-in window: MicaBackdrop, MicaBackdrop Kind=BaseAlt, DesktopAcrylicBackdrop and none, with the fallbacks of SetBackdrop.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_backdrop"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsMicacontroller.txt",
+          "source_sha256": "cfc75563f9a29dbd800d3c1982a841a26a5f9f045fe3e7ff46165d2ee6dd2d32",
+          "status": "ported",
+          "notes": "MicaController (Base, BaseAlt) with AddSystemBackdropTarget on the window and SetSystemBackdropConfiguration; disposed when another backdrop is set and when the window closes.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsDesktopacryliccontroller.txt",
+          "source_sha256": "9afc470b36cb2cef5207652a3741e6ea7a75c66e330f036694afd16c40c90391",
+          "status": "ported",
+          "notes": "DesktopAcrylicController (Base, Thin) with the same configuration.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration"
+            }
+          ]
+        }
+      ],
+      "source_support": [
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml",
+          "sha256": "2df97c21298982aa66acd10137965a407d3bcad9e1003d40cd6bd616b0b5435d"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml.cs",
+          "sha256": "fe344ba4b7c9c0e4c581cc4b4dbb0a8c96e4df47dfcb02c7bee603dd5f78f821"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml",
+          "sha256": "cd2c191924450d4e7060c19c58995b175607e9dc8711eda3a30a0d40d20307af"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml.cs",
+          "sha256": "93c8eb8058e8ba8203cba723f9f47c447325fe3322b47ef68e3c1a8273677e08"
+        }
+      ]
+    },
+    "TitleBar": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/TitleBar.xaml",
+        "samples/WinUIGallery/Pages/TitleBarDragRegionsWindow.xaml",
+        "samples/WinUIGallery/Pages/TitleBarWindow.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "samples/WinUIGallery/navigation_view_samples.rs",
+        "src/FerroUI.Controls/title_bar.rs",
+        "src/FerroUI.Themes.WinUI/Controls/TitleBar.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_options"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content"
+        },
+        {
+          "path": "samples/WinUIGallery/window_samples_tests.rs",
+          "name": "title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back"
+        }
+      ],
+      "notes": "All three source examples use the native TitleBar. The configuration example binds Title, Subtitle, IsBackButtonVisible and IsPaneToggleButtonVisible to the options (the source x:Bind to the named options, compiled by the x:Bind core; IsOn is IsChecked of the ToggleSwitch; Header is a composed label). The two \"Show window\" buttons open the source's sample windows, extended into a tall title bar with Mica: TitleBar.IsDragRegion of the status badge (unset, true, false), its Click, the extra button and RecomputeDragRegions; and the end-to-end window with the back button bound to Frame.CanGoBack, BackRequested, PaneToggleRequested and NavigationView navigation over the gallery's sample pages. ImageIconSource is a PathIconSource and PersonPicture a composed circle with the initials, since FerroUI has neither (G2). TitleBar_LayoutUpdated (TitleBarHelper.ApplySystemThemeToCaptionButtons) is left to the decorations of the window; the link of the intro to the AppWindowTitleBar page is text. Dragging the window is verified on the hosts, not by these tests.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/TitleBar/TitlebarConfiguration.txt",
+          "source_sha256": "c0b91f868871b26f4d983e619e82506a4306f19f3df1c44d6a1e69203d239b7d",
+          "status": "ported",
+          "notes": "Title, subtitle and the two button visibilities bound to the options; the icon, the search box and the initials in the bar.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_options"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/TitleBar/TitlebarDragRegions.txt",
+          "source_sha256": "7376ee388527d8d1509cd8193f73eb19cd95d7b6c7ab39fafcae67cc2ddc1ed0",
+          "status": "ported",
+          "notes": "TitleBarDragRegionsWindow: SetIsDragRegion and ClearValue of the badge, the badge's Click, the extra button inserted and removed, RecomputeDragRegions.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/TitleBar/EndEndTitlebarSample.txt",
+          "source_sha256": "6de73238f9e6e0d61a8afcae95abb647ccc2227e3e14b1d2b350cd331186b2af",
+          "status": "ported",
+          "notes": "TitleBarWindow: the NavigationView selection navigates the frame and sets the header; the back button follows CanGoBack; BackRequested goes back and PaneToggleRequested opens and closes the pane.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/window_samples_tests.rs",
+              "name": "title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back"
+            }
+          ]
+        }
+      ],
+      "source_support": [
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml",
+          "sha256": "5a0b13bc13af4b0f6aceda565bcbe7216add1bc9449f4606850250bad60a70ac"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml.cs",
+          "sha256": "627a72b65f70019739702f3a503be31c1e7c1988b3434b61e35d913cd1d7a297"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml",
+          "sha256": "3d4712c21d6698f044d0bb55463c6cdc56a6b58a977e30d7d0acf023f259abf1"
+        },
+        {
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml.cs",
+          "sha256": "5efa8c95799f15187d1baa24b8eec0e11a78bb866b00cd0fb7955c9f16be5cdb"
+        }
+      ]
+    },
+    "RichEditBox": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/RichEditBox.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_samples.rs",
+        "src/FerroUI.Controls/rich_edit_box.rs",
+        "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_simple_editor_accepts_typing_and_backspace"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_formatting_buttons_toggle_bold_and_italic_on_the_selection"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_color_buttons_color_the_selection_and_the_text_that_follows"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_find_box_highlights_every_match_and_clears_them_when_it_loses_focus"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_file_buttons_report_a_missing_storage_service_or_picker"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_edit_custom_menu_adds_share_only_when_it_opens_for_rebcustom"
+        }
+      ],
+      "notes": "The simple editor, the custom context menu command and the formatting editor use the native RichEditBox and its text object model: bold and italic toggles, font colors from the Rectangle of the clicked button with the TextChanged rule for new text, find with FindText highlighting and its focus handlers, and RTF open/save through the storage provider of the window. The context menu is the MenuFlyout of the WinUI theme (no CommandBarFlyout or touch SelectionFlyout); Share is a MenuItem in place of StandardUICommand. The two math examples need the math mode of the Windows RichEdit control and are recorded as not applicable, with their explanation and a diagnostic on the page. Segoe glyphs of the toolbar, exact visuals and host accessibility remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/SimpleTextEditorRicheditbox.txt",
+          "source_sha256": "bec138808bdc335bd37b8a763e8ba96b4e00bbdc289778682f22e5fe5200ba11",
+          "status": "ported",
+          "notes": "A native RichEditBox with the source automation name; typing, deletion and the theme's context menu are the control's own.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_simple_editor_accepts_typing_and_backspace"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/CustomizingRicheditboxCommandbarflyoutAdding.txt",
+          "source_sha256": "722086b74594b9b3a56662d07ee39504402510b7a99bae86c842aeb3e01202ae",
+          "status": "partial",
+          "notes": "Menu_Opening is ported to the Opening event of the box's context menu (subscribed while the box has one, the Loaded/Unloaded pair): the Share command is added when the menu opens for REBCustom, once rather than at every opening, and removed when the shared menu of the theme opens for another editor. The menu is a MenuFlyout, not a CommandBarFlyout, and Share is a MenuItem with the label of StandardUICommandKind.Share and no icon or action. The SelectionFlyout half is missing: FerroUI has no selection flyout (CommandBarFlyout is phase G2).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_custom_menu_adds_share_only_when_it_opens_for_rebcustom"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/CustomEditorRicheditbox.txt",
+          "source_sha256": "b28bd6cfc0b052f4084880dab39556c26e58d05ff08836bf6e89203b1595cea8",
+          "status": "ported",
+          "notes": "All handlers are ported: BoldButton/ItalicButton toggle the selection, ColorButton takes the color of the Rectangle in the clicked button, closes the flyout, focuses the editor and becomes the color of new text (Editor_TextChanged); FindBoxHighlightMatches/FindBoxRemoveHighlights use FindText with the system highlight colors on GotFocus, LostFocus and text changes, and Editor_GotFocus clears the highlight background. Open/Save use the storage provider of the window (an .rtf filter, the documents folder, import_rtf/export_rtf) in place of the Windows App SDK pickers; a failure is reported in a text block below the editor instead of a MessageDialog. VariableSizedWrapGrid is a three-column UniformGrid.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_formatting_buttons_toggle_bold_and_italic_on_the_selection"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_color_buttons_color_the_selection_and_the_text_that_follows"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_find_box_highlights_every_match_and_clears_them_when_it_loses_focus"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_file_buttons_report_a_missing_storage_service_or_picker"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/RichEditBoxMath.txt",
+          "source_sha256": "fc8ddedc97b382ffe31f59ae5ccf7636fb2b7ca2782bd048369567566a55c3f7",
+          "status": "not-applicable",
+          "reason": "TextDocument.SetMathMode(RichEditMathMode.MathOnly) is the math engine of the Windows RichEdit control (msftedit), a Windows-only API; the FerroUI editor has no math mode.",
+          "notes": "The page keeps the explanation and an editor without math mode, with a visible diagnostic.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichEditBox/WorkingMathmlRicheditbox.txt",
+          "source_sha256": "e53f8c75a92d15b1cc136ebfc09e46e6267ebcc6853a3c3f49f410b441a224d6",
+          "status": "not-applicable",
+          "reason": "ITextDocument.SetMathML and GetMathML need the math mode of the Windows RichEdit control (msftedit), a Windows-only API.",
+          "notes": "The page keeps the explanation, the editor, the MathML code view with its empty-content text and a disabled Set sample formula button, with a visible diagnostic.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_edit_box_page_loads_five_examples_and_records_the_unavailable_math_mode"
+            }
+          ]
+        }
+      ]
+    },
+    "RichTextBlock": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/RichTextBlock.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/text_samples.rs",
+        "src/FerroUI.Controls/rich_text_block.rs",
+        "src/FerroUI.Controls/rich_text_block_overflow.rs",
+        "src/FerroUI.Controls/documents/text_highlighter.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_overflow_flows_into_two_linked_containers"
+        },
+        {
+          "path": "samples/WinUIGallery/text_samples_tests.rs",
+          "name": "rich_text_block_highlight_follows_the_chosen_color_over_the_source_range"
+        }
+      ],
+      "notes": "All four examples use the native RichTextBlock: paragraphs with formatted runs and a hyperlink, SelectionHighlightColor, OverflowContentTarget through two RichTextBlockOverflow columns, and a TextHighlighter whose color follows the ComboBox selection over the source range 28+11. The overflow targets keep the source x:Bind of the elements; mixed text content is written as explicit Runs; the ComboBox header is composed. Exact text layout, fonts and host accessibility remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/SimpleRichtextblock.txt",
+          "source_sha256": "d2a34e472564b826c2d7a0db96de62a762c7ced9cfe8d8537c1141bf909a6d1b",
+          "status": "ported",
+          "notes": "A native RichTextBlock with the source paragraph.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockCustomSelectionHighlight.txt",
+          "source_sha256": "bd6f43253589b9f00b720f029ab23ccb4dc8a01d5f17bdfce8d4299be5736dfa",
+          "status": "ported",
+          "notes": "SelectionHighlightColor Green over the source paragraphs, with the bold italic run and the hyperlink; selection is the control's own.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_page_loads_four_examples_with_source_text_and_selection_highlight"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockOverflow.txt",
+          "source_sha256": "337d399379381a17001168d867916b513dc1d728486854b719f82b058d0041b0",
+          "status": "ported",
+          "notes": "The justified RichTextBlock flows into two linked RichTextBlockOverflow columns through the source x:Bind of the elements.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_overflow_flows_into_two_linked_containers"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/RichTextBlock/RichtextblockCustomTexthighlighting.txt",
+          "source_sha256": "0daaf2f973798b55743afadc4da30e35befed94d19355c466e063f512a23bc22",
+          "status": "ported",
+          "notes": "HighlightColorCombobox_SelectionChanged in Rust: the color named by the selected item replaces the TextHighlighter of characters 28 to 39; the initially selected Yellow item applies on load as in the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/text_samples_tests.rs",
+              "name": "rich_text_block_highlight_follows_the_chosen_color_over_the_source_range"
+            }
+          ]
+        }
+      ]
+    },
+    "ItemsRepeater": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ItemsRepeater.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/repeater_samples.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/item_template_wrapper.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/stack_layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/flow_layout.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "basic_repeater_adds_and_removes_bars_and_switches_layout_and_template"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "activity_feed_layout_alternates_narrow_and_wide_tiles_with_parity_templates"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "template_selectors_choose_by_parity_and_by_item_type"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "flow_layout_options_update_the_layout_and_the_realized_count"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "mixed_type_repeater_presents_numbers_and_text_with_their_templates"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "nested_repeaters_present_each_category_with_its_own_items"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "animated_scrolling_items_colour_the_rectangle_and_announce_the_selection"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "animated_scrolling_scale_follows_the_distance_from_the_viewport_centre"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "content_heavy_repeater_filters_and_sorts_recipes_in_columns"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "repeater_pages_and_their_handlers_release_their_native_controls"
+        }
+      ],
+      "notes": "All six catalog examples (and the nested repeaters of the source page, which has no sample definition of its own) use the native ItemsRepeater of ferroui-controls-repeater with the layouts, element factories and selectors of the port; the Gallery layouts ActivityFeedLayout and VariedImageSizeLayout are Rust VirtualizingLayouts; x:Bind becomes {Binding} over markup types and the C# handlers are Rust. Four examples are ported; the animated scrolling and content-heavy examples miss the accessibility announcements and the key-index mapping of their custom source. ThemeResource becomes DynamicResource; text styles are written as their sizes and weights. Rendering and host accessibility acceptance remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterBasicNonInteractiveItems.txt",
+          "source_sha256": "a54902629d217b8132d611e373244ca8a79916c27bd2eb8ad0b81c43d31e7fb6",
+          "status": "ported",
+          "notes": "Native ItemsRepeater over an observable list of Bar models: Add Item and Remove Item (disabled at zero items) and the layout choice set the vertical StackLayout, horizontal StackLayout or UniformGridLayout with the HorizontalBar, VerticalBar or Circular template and the MaxWidth of the source handler. The templates bind the Bar sizes with {Binding} (x:Bind). System.Random is a seeded generator; the code substitutions of the source viewer are not updated by the options.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "basic_repeater_adds_and_removes_bars_and_switches_layout_and_template"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterVirtualizingScrollableListItems.txt",
+          "source_sha256": "e794d642b11d26f937ec1bc71d9365d1ba5b78a21888fda9ec477d90914b7089",
+          "status": "ported",
+          "notes": "ItemsRepeaterScrollHost and ScrollViewer around a repeater of 500 numbers; MyDataTemplateSelector is a native IDataTemplateSelector (even Normal, odd Accent); the Gallery ActivityFeedLayout is ported to a Rust VirtualizingLayout (rows of two narrow and one wide tile, virtualized by rows, its state per context), and the option switches to the UniformGridLayout of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "activity_feed_layout_alternates_narrow_and_wide_tiles_with_parity_templates"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "template_selectors_choose_by_parity_and_by_item_type"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/FlowLayoutVirtualization.txt",
+          "source_sha256": "8aee680fc9a70616c38dd9957d4e6e74e8a7f280901fbd4068297ec41255261b",
+          "status": "ported",
+          "notes": "FlowLayout over 500 items with the orientation, line alignment, minimum item spacing and line spacing options; ElementPrepared and ElementClearing keep the realized elements and update the count once per dispatcher turn (TryEnqueue). ScrollMode has no FerroUI counterpart: the orientation sets the scroll bar visibilities, a disabled scroll bar disabling scrolling. Header becomes a label.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "flow_layout_options_update_the_layout_and_the_realized_count"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsrepeaterMixedTypeCollection.txt",
+          "source_sha256": "6d7bf0d352c3b812edccc27461c92be983ee8b50074abd23d23a8c46b73067c4",
+          "status": "ported",
+          "notes": "The mixed list of numbers and text in a UniformGridLayout; StringOrIntTemplateSelector is a native IDataTemplateSelector choosing IntDataTemplate or StringDataTemplate by the type of the item. HeaderTextBlockStyle is written as its size and weight.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "mixed_type_repeater_presents_numbers_and_text_with_their_templates"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "template_selectors_choose_by_parity_and_by_item_type"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterAnimatedScrollingContentDisplay.txt",
+          "source_sha256": "b9ce86b8eac579c012bf04c28a0d573374348ce485d2a86a4c8120a9a1d2fefe",
+          "status": "partial",
+          "notes": "Buttons of the 20 colours: a click colours the rectangle and names the selected button; GotFocus remembers the index and centres the item; GettingFocus returns focus from outside to that item; Home and End reach the first and the last item. Adapted: the composition ExpressionAnimation on the scroll manipulation property set becomes a scale set from the scroll offset after each layout pass and scroll change (same expression, about the item centre); StartBringIntoView with VerticalAlignmentRatio 0.5 becomes a scroll offset that centres the item, without the animation. Pending: the accessibility announcement of UIHelper.AnnounceActionForAccessibility (no notification event on FerroUI automation peers).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "animated_scrolling_items_colour_the_rectangle_and_announce_the_selection"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "animated_scrolling_scale_follows_the_distance_from_the_viewport_centre"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterVirtualizedContentHeavyLayout.txt",
+          "source_sha256": "b3778bae44caa700e84f3be2b66c0843d141355d74f63bf8086b55f5b1b1f7ae",
+          "status": "partial",
+          "notes": "The Gallery VariedImageSizeLayout is ported to a Rust VirtualizingLayout (columns of 200, the lowest column first, bounds cached until the items change); 1000 generated recipes (seeded generator) bound with {Binding} over the Recipe markup type; the ingredient filter (ignoring case) and the two sort orders replace the items. Pending: the IKeyIndexMapping of the custom MyItemsSource (an observable list is replaced instead) and the automation notification of the result count.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "items_repeater_page_loads_every_example_with_native_sources_and_layouts"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "content_heavy_repeater_filters_and_sorts_recipes_in_columns"
+            }
+          ]
+        }
+      ]
+    },
+    "LayoutPanel": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/LayoutPanel.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/repeater_samples.rs",
+        "src/FerroUI.Controls.Repeater/layout_panel.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/stack_layout.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "layout_panel_page_arranges_its_children_with_the_featured_tile_layout"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "layout_panel_switches_to_a_stack_and_follows_the_spacing"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "repeater_pages_and_their_handlers_release_their_native_controls"
+        }
+      ],
+      "notes": "The catalog example uses the native LayoutPanel with its border, corner radius and padding around the layout; the FeaturedTileLayout of the source (Samples/LayoutPanel/FeaturedTileLayout.cs) is a Rust NonVirtualizingLayout, and the options switch to a vertical StackLayout and set the spacing of both, as the C# handlers do. Header becomes a label, ThemeResource becomes DynamicResource. Rendering and host accessibility acceptance remain pending.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/LayoutPanel/LayoutPanelCustomLayout.txt",
+          "source_sha256": "c303b093a0f2329199d65fd9a15c0485099384d37c6acc99f0b848c3e323b5d2",
+          "status": "ported",
+          "notes": "The nine children arranged by the ported FeaturedTileLayout (the first spanning the width, then rows of two columns as high as their taller child), the layout choice (featured tile or vertical stack) and the spacing slider, with the handlers of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "layout_panel_page_arranges_its_children_with_the_featured_tile_layout"
+            },
+            {
+              "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+              "name": "layout_panel_switches_to_a_stack_and_follows_the_spacing"
+            }
+          ]
+        }
+      ]
+    },
+    "InkCanvas": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/InkCanvas.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/ink_samples.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_drawing_options_set_devices_attributes_enabled_state_and_clear"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_toolbar_options_show_hide_and_select_tools_both_ways"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_toolbar_clear_button_erases_the_strokes_of_its_canvas"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_strokes_save_clear_and_restore_keep_the_source_messages"
+        },
+        {
+          "path": "samples/WinUIGallery/ink_samples_tests.rs",
+          "name": "ink_page_releases_its_controls_with_the_page"
+        }
+      ],
+      "notes": "All three source examples use the native InkCanvas, InkPresenter and InkToolbar of ferroui-controls-inking with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, button flyout placement and clear; save, clear and restore with the source's status messages. Header is composed with a label, IsOn maps to IsChecked, TargetInkCanvas (x:Bind of an element) is set in Rust, and the saved strokes are the bytes of InkStrokeContainer::save in memory instead of SaveAsync into an InMemoryRandomAccessStream. Tests drive the presenter with ink pointer input; routed pointer input of a window, the toolbar's WinUI styles (Themes/WinUI.xaml of the crate), rendering and screen-reader acceptance are not established by them.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasDrawing.txt",
+          "source_sha256": "62c55fb9eefd8ff0842d27b81803505fee14c8035dc129370771f8b62d17f7c6",
+          "status": "ported",
+          "notes": "The pen, mouse and touch options set InkPresenter.InputDeviceTypes; the colour and width options update the default drawing attributes (CopyDefaultDrawingAttributes/UpdateDefaultDrawingAttributes); the toggle sets IsInputEnabled; Clear drawing clears the stroke container. The substitutions of the source code view stay in the catalog viewer.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_drawing_options_set_devices_attributes_enabled_state_and_clear"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasToolbar.txt",
+          "source_sha256": "19f67d3f79f8aa0e0ede2108623658bfd2e2a8f5f899e5bdf11e481c3ac2b69f",
+          "status": "ported",
+          "notes": "An InkToolbar with InitialControls None and the four source buttons targets its canvas. The show options hide and show the pencil, highlighter and eraser (falling back to the ballpoint pen), the active-tool option selects the tool and follows ActiveToolChanged, the placement option sets ButtonFlyoutPlacement, and Clear drawing clears the canvas, with the source's reentrancy guard. The toolbar draws with its WinUI styles only where the application includes Themes/WinUI.xaml of ferroui-controls-inking.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_toolbar_options_show_hide_and_select_tools_both_ways"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_toolbar_clear_button_erases_the_strokes_of_its_canvas"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/InkCanvas/InkCanvasStrokes.txt",
+          "source_sha256": "ab3f91f48f0e7d0c62fe696b58c25a7c278cc7e13c8731b1629178968c545d44",
+          "status": "ported",
+          "notes": "Save, clear and restore keep the source's stroke count, restore enabling and status messages; StrokesCollected and StrokesErased update the count. InkStrokeContainer::save and load (the portable ink format of the crate, synchronously in memory) replace SaveAsync and LoadAsync with an InMemoryRandomAccessStream.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_canvas_page_loads_three_examples_on_native_ink_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/ink_samples_tests.rs",
+              "name": "ink_strokes_save_clear_and_restore_keep_the_source_messages"
+            }
+          ]
+        }
+      ]
+    },
+    "Chart": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Chart.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/chart_samples.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_page_loads_seven_examples_with_the_source_data"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_legend_toggle_hides_and_shows_the_legend"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_bar_orientation_and_category_sort_reorder_the_series"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_axis_options_change_grid_lines_visibility_and_tick_labels"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_styled_series_check_boxes_hide_and_show_each_series"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_lines_and_markers_options_change_dash_thickness_markers_and_labels"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_time_axis_follows_the_interval_and_the_label_format"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_live_series_adds_samples_and_keeps_the_eight_most_recent"
+        },
+        {
+          "path": "samples/WinUIGallery/chart_samples_tests.rs",
+          "name": "chart_page_releases_its_charts_with_the_page"
+        }
+      ],
+      "notes": "The seven examples of the source (Microsoft.UI.Xaml.Controls.Charts) map onto the native CartesianChart of ferroui-controls-livecharts with the data and the option handlers of ChartPage.xaml.cs in Rust: Chart is CartesianChart, CategoryAxis/LinearAxis are Axis (labels from the source arrays), LineSeries/AreaSeries/BarSeries are LineSeries/AreaSeries/ColumnSeries (RowSeries when horizontal), ShowLegend is LegendPosition, ShowDataMarkers is GeometrySize, StrokeDashStyle is a dash array, and the DateTimeAxis is an axis over the days of its range with day labels and the ticks of the interval type. Not available in the native chart, and recorded per example: LegendTitle, tick marks and axis line/tick brushes, marker shapes and per-point label and marker overrides, a marker brush apart from the area fill. Rendering parity with WinUI and screen-reader acceptance are not established.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/Chart/BasicLineChart.txt",
+          "source_sha256": "8328b26e6daa21d15cfe584804e0d643c54eb4db65e78e64396d3715954e9349",
+          "status": "partial",
+          "notes": "A line series of the six profits over the month labels with the legend toggle (LegendPosition Top or Hidden). The legend has no title (LegendTitle \"Profit\"): the native legend lists the series names only.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_legend_toggle_hides_and_shows_the_legend"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/BarChart.txt",
+          "source_sha256": "0aa9d3780598f719ba132e8b21b807f9e52971bb4a9c4255179efbe78ab48cff",
+          "status": "ported",
+          "notes": "A column series of units sold per region. Orientation switches the series between column and row (the categories move to the vertical axis); SortKey (data order or value) and SortOrder reorder the points and the category labels, which the source's CategoryAxis sorts itself.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_bar_orientation_and_category_sort_reorder_the_series"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/AxisOptions.txt",
+          "source_sha256": "cc82af92deecf5b80e09fe2e89c95c512b1012be132c441e18a62ebf3a3eff30",
+          "status": "partial",
+          "notes": "Grid lines None/Major/Minor set the separator lines of the visitors axis (Minor adds the separators at every 10), the axes toggle sets IsVisible of both axes and the tick-labels toggle hides their labels with a transparent label colour. Missing: tick marks (the ShowTickMarks option is not shown) and the AxisLineBrush, TickBrush and GridLineMinorBrush of the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_axis_options_change_grid_lines_visibility_and_tick_labels"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/StyledSeries.txt",
+          "source_sha256": "5bde81e505e6572ac59598f5684221a86ef8b5a173934cd03642759e87b9803e",
+          "status": "partial",
+          "notes": "The forecast area, the actual columns with data labels and the dashed target line with the source colours and thickness; the three check boxes set IsVisible of each series. Missing: the Diamond marker shape and a DataMarkerBrush apart from the fill (the markers are circles in the stroke colour).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_styled_series_check_boxes_hide_and_show_each_series"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/LinesAndMarkers.txt",
+          "source_sha256": "775655a12115e6476c906a089dd6bddfff53ede61f5582825959fab166a0ea12",
+          "status": "partial",
+          "notes": "The daily visits line with markers and data labels; dash style (in multiples of the thickness), thickness, data markers and data labels options. Missing: marker shapes (the Marker shape option is not shown) and the Peak label and marker overrides of HighlightPeakVisits (DataLabelOverrides and DataMarkerOverrides).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_lines_and_markers_options_change_dash_thickness_markers_and_labels"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/TimeSeries.txt",
+          "source_sha256": "bdf4d9d288383a24a90e489d2ca55bff66e4b181860bee5c582de5746263b7ad",
+          "status": "ported",
+          "notes": "CreateTimeSeriesChart in Rust: the temperature area over a date axis from 2026-07-27 to 2026-09-07 (an axis over its 42 days, labelled per day). Tick interval Auto/Day/Week/Month sets the separators (the chart's own step, every day, every week, the first day of each month); the label formats month day, month.abbreviated day and shortdate are formatted in en-US.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_time_axis_follows_the_interval_and_the_label_format"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Chart/LiveObservableSeries.txt",
+          "source_sha256": "0d838fd0dc8a0556d01569daca719be32aa36236e3cf51c3edce5c9b6edc953f",
+          "status": "ported",
+          "notes": "Add sample appends the next incoming response time, keeps the eight most recent values and updates the series (the chart redraws) and the summary text, as the source's ResponseTimes and LiveSeriesSummary do.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_page_loads_seven_examples_with_the_source_data"
+            },
+            {
+              "path": "samples/WinUIGallery/chart_samples_tests.rs",
+              "name": "chart_live_series_adds_samples_and_keeps_the_eight_most_recent"
+            }
+          ]
+        }
+      ]
+    },
+    "ItemsView": {
+      "status": "pending",
+      "implementation": [],
+      "tests": [],
+      "notes": "G1 (#418) found no WinUI ItemsView on main: ferroui-controls-repeater has the ItemsRepeater, LinedFlowLayout and SelectionModel, but not ItemsView or ItemContainer (ferroui_controls::ItemsView in items_source.rs is an unrelated view of items). The three examples need its container selection modes, ItemInvoked and the ScrollView it hosts; the control is G2 work.",
+      "examples": []
+    },
+    "SystemBackdropElement": {
+      "status": "pending",
+      "implementation": [],
+      "tests": [],
+      "notes": "G1 (#418) found no SystemBackdropElement on main: the system backdrop of an element exists only inside the framework (ElementSystemBackdrop of the menu flyout presenter, crate-private). The catalog has no sample definition for the page; the element is G2 work.",
+      "examples": []
     }
   }
 }

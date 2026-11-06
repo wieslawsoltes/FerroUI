@@ -32,7 +32,7 @@ use ferroui_base::media::{Brushes, IBrush};
 use ferroui_base::platform::IPlatformRenderInterface;
 use ferroui_base::reactive::Observable;
 use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher};
-use ferroui_base::utilities::{CompareOptions, CultureInfo, ICompareRules, ICultureDataProvider};
+use ferroui_base::utilities::{locale, CompareOptions, CultureInfo, ICompareRules, ICultureDataProvider, Locale};
 use crate::utils::{
     ISelectionAdapter, SelectingItemsControlSelectionAdapter, SelectingItemsControlSelectionAdapterOverrides,
 };
@@ -2012,8 +2012,8 @@ impl ICompareRules for DigitsAreEqualRules {
 struct TestCultureRulesProvider(Rc<DigitsAreEqualRules>);
 
 impl ICultureDataProvider for TestCultureRulesProvider {
-    fn get_compare_rules(&self, culture_name: &str) -> Option<Rc<dyn ICompareRules>> {
-        (culture_name == "xx").then(|| self.0.clone() as Rc<dyn ICompareRules>)
+    fn get_compare_rules_by_locale(&self, locale: &Locale) -> Option<Rc<dyn ICompareRules>> {
+        (*locale == locale!("xx")).then(|| self.0.clone() as Rc<dyn ICompareRules>)
     }
 }
 
@@ -2053,12 +2053,12 @@ fn culture_filters_use_the_compare_rules_of_the_current_culture() {
         (EqualsOrdinalCaseSensitive, "A1", "A2", false, false),
     ];
 
-    let previous = CultureInfo::current_culture();
+    let previous = CultureInfo::current_formatting();
 
     // The culture is asked when the filter runs, not when it is created;
     // the rules of the parent culture apply to a culture without rules.
     let filters: Vec<_> = rows.iter().map(|row| get_not_null_filter(row.0)).collect();
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("xx-YY"));
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("xx-YY"));
     for (filter, (mode, search, value, expected, _)) in filters.iter().zip(rows) {
         rules.options.borrow_mut().clear();
         assert_eq!(*expected, filter(search, value), "{mode:?} {search:?} {value:?} with the rules");
@@ -2077,14 +2077,14 @@ fn culture_filters_use_the_compare_rules_of_the_current_culture() {
         }
     }
 
-    CultureInfo::set_current_culture(CultureInfo::get_culture_info("zz"));
+    CultureInfo::set_current_formatting(CultureInfo::get_culture_info("zz"));
     for (filter, (mode, search, value, _, expected)) in filters.iter().zip(rows) {
         rules.options.borrow_mut().clear();
         assert_eq!(*expected, filter(search, value), "{mode:?} {search:?} {value:?} without the rules");
         assert!(rules.options.borrow().is_empty(), "{mode:?}");
     }
 
-    CultureInfo::set_current_culture(previous);
+    CultureInfo::set_current_formatting(previous);
     locator_scope.dispose();
 }
 

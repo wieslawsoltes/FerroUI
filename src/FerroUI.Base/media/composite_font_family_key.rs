@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::media::fonts::FontFamilyKey;
-use crate::utilities::Uri;
+use crate::utilities::UriRef;
 
 /// A font family key made of the keys of several families (a family name with
 /// fallbacks, e.g. `"Inter, Segoe UI"`).
@@ -13,8 +13,8 @@ use crate::utilities::Uri;
 pub(crate) struct CompositeFontFamilyKey;
 
 impl CompositeFontFamilyKey {
-    pub fn new(source: Uri, keys: Vec<FontFamilyKey>) -> FontFamilyKey {
-        let mut key = FontFamilyKey::new(source);
+    pub fn new(source: url::Url, keys: Vec<FontFamilyKey>) -> FontFamilyKey {
+        let mut key = FontFamilyKey::new(UriRef::from(source));
         key.keys = Some(Rc::from(keys));
         key
     }

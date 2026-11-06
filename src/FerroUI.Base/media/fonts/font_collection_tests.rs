@@ -15,7 +15,7 @@ use crate::media::{
     Typeface, UnicodeRange,
 };
 use crate::platform::{IAssetLoader, IFontManagerImpl};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{Locale, UriRef};
 use crate::{FerroLocator, LocatorExtensions};
 
 const ARABIC_ALEF: i32 = 0x0627;
@@ -23,12 +23,12 @@ const HEBREW_ALEF: i32 = 0x05D0;
 /// Not covered by any font of a test collection unless said otherwise.
 const CJK_ICHI: i32 = 0x4E00;
 
-fn uri(text: &str) -> Uri {
-    Uri::absolute(text).unwrap()
+fn uri(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap()
 }
 
-fn culture(name: &str) -> CultureInfo {
-    CultureInfo::get_culture_info(name)
+fn culture(name: &str) -> Locale {
+    Locale::try_from_str(name).unwrap()
 }
 
 // ── harness ──
@@ -84,7 +84,7 @@ fn headless_scope_resolves_the_default_family() {
 /// A collection deriving from the font collection base without overrides.
 struct CustomFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
 }
 
 impl CustomFontCollection {
@@ -98,7 +98,7 @@ impl FontCollectionBaseImpl for CustomFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 }
@@ -106,7 +106,7 @@ impl FontCollectionBaseImpl for CustomFontCollection {
 /// Counts the platform fallback requests and answers them with a fixed result.
 struct RecordingFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
     platform_fallback_result: RefCell<Option<Rc<GlyphTypeface>>>,
     platform_call_count: Cell<i32>,
 }
@@ -127,7 +127,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 
@@ -136,7 +136,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
         _codepoint: i32,
         _key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         this.platform_call_count.set(this.platform_call_count.get() + 1);
         this.platform_fallback_result.borrow().clone()
@@ -151,7 +151,7 @@ impl FontCollectionBaseImpl for RecordingFontCollection {
 /// deterministically.
 struct KeyedFallbackCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
     platform_faces: RefCell<HashMap<FontCollectionKey, Rc<GlyphTypeface>>>,
     covered_codepoint: i32,
 }
@@ -176,7 +176,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 
@@ -185,7 +185,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
         codepoint: i32,
         key: FontCollectionKey,
         _family_name: Option<&str>,
-        _culture: Option<&CultureInfo>,
+        _culture: Option<&Locale>,
     ) -> Option<Rc<GlyphTypeface>> {
         if codepoint != this.covered_codepoint {
             return None;
@@ -205,7 +205,7 @@ impl FontCollectionBaseImpl for KeyedFallbackCollection {
 /// or no synthesis at all).
 struct CustomizableFontCollection {
     base: FontCollectionBase,
-    key: Uri,
+    key: url::Url,
     fallbacks: Vec<FontFallback>,
     ignorables: Vec<FontFamily>,
     create_synthetic_typefaces: bool,
@@ -238,7 +238,7 @@ impl FontCollectionBaseImpl for CustomizableFontCollection {
         &this.base
     }
 
-    fn key(this: &Self) -> Uri {
+    fn key(this: &Self) -> url::Url {
         this.key.clone()
     }
 
@@ -249,7 +249,7 @@ impl FontCollectionBaseImpl for CustomizableFontCollection {
         weight: FontWeight,
         stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         for fallback in &this.fallbacks {
             if fallback.unicode_range.is_in_range(codepoint) {
@@ -317,7 +317,7 @@ fn match_character(
     collection: &dyn IFontCollection,
     codepoint: i32,
     family_name: Option<&str>,
-    culture: Option<&CultureInfo>,
+    culture: Option<&Locale>,
 ) -> Option<Typeface> {
     collection.try_match_character(
         codepoint,
@@ -353,7 +353,7 @@ fn tier_a_returns_requested_family_when_it_covers_the_codepoint() {
     let matched = match_character(&*collection, ARABIC_ALEF, Some("Noto Sans Arabic"), None).unwrap();
 
     assert_eq!(family_of(&matched), "Noto Sans Arabic");
-    assert_eq!(matched.font_family().key().unwrap().source(), &uri("fonts:test"));
+    assert_eq!(matched.font_family().key().unwrap().source(), &UriRef::from(uri("fonts:test")));
 }
 
 #[test]
@@ -460,6 +460,38 @@ fn tier_c_scores_the_declared_culture_above_the_alphabetical_order() {
     let requested = match_character(&*collection, CJK_ICHI, Some("Alpha CJK"), Some(&culture("ja-JP"))).unwrap();
 
     assert_eq!(family_of(&requested), "Beta CJK");
+}
+
+/// Not from upstream (C5 of #423): the fallback is keyed by the locale of the text, and gives
+/// each locale the family its culture gave: the one that declares the code page of the script
+/// the locale implies, by its language and region or by its explicit script.
+#[test]
+fn the_fallback_of_a_locale_is_the_family_of_its_script() {
+    use crate::media::fonts::FontCodePageCoverage;
+
+    let _scope = TestFontScope::start();
+
+    let family = |name: &str, coverage: FontCodePageCoverage| {
+        TestFontBuilder::new(name).codepoints(&[(0x4E00, 0x4E2D)]).code_page_coverage(coverage)
+    };
+    let collection = build_collection(&[
+        family("A Japanese", FontCodePageCoverage::JapaneseJis),
+        family("B Korean", FontCodePageCoverage::KoreanWansung),
+        family("C Simplified", FontCodePageCoverage::ChineseSimplified),
+        family("D Traditional", FontCodePageCoverage::ChineseTraditional),
+    ]);
+
+    for (tag, expected) in [
+        ("ja-JP", "A Japanese"),
+        ("ko-KR", "B Korean"),
+        ("zh-CN", "C Simplified"),
+        ("zh-Hans", "C Simplified"),
+        ("zh-TW", "D Traditional"),
+        ("zh-Hant-HK", "D Traditional"),
+    ] {
+        let matched = match_character(&*collection, CJK_ICHI, None, Some(&culture(tag))).unwrap();
+        assert_eq!(family_of(&matched), expected, "{tag}");
+    }
 }
 
 #[test]
@@ -1170,7 +1202,7 @@ fn system_font_collection_matches_characters_through_the_platform_once() {
     let first = match_character(&font_collection, EMOJI, None, None).unwrap();
 
     assert_eq!(family_of(&first), "Twitter Color Emoji");
-    assert_eq!(first.font_family().key().unwrap().source(), &uri("fonts:SystemFonts"));
+    assert_eq!(first.font_family().key().unwrap().source(), &UriRef::from(uri("fonts:SystemFonts")));
     assert_eq!(scope.font_manager_impl().match_character_calls(), 1);
 
     // The platform match is registered, so the cache sweep serves it from now on.
@@ -1207,9 +1239,9 @@ fn should_add_glyph_typeface_by_stream() {
         ("TwitterColorEmoji-SVGinOT.ttf", "Twitter Color Emoji", FontWeight::Normal),
     ];
 
-    let mut assets = scope.asset_loader().get_assets(&uri(test_fonts::ASSETS), None);
+    let mut assets = scope.asset_loader().get_assets(&UriRef::from(uri(test_fonts::ASSETS)), None);
 
-    assets.sort_by_key(|asset| asset.absolute_uri().to_ascii_lowercase());
+    assets.sort_by_key(|asset| asset.as_str().to_ascii_lowercase());
 
     assert_eq!(assets.len(), infos.len());
 
@@ -1217,9 +1249,9 @@ fn should_add_glyph_typeface_by_stream() {
 
     // Load fonts
     for ((file_name, family_name, weight), asset) in infos.iter().zip(&assets) {
-        assert_eq!(asset.absolute_path(), format!("FerroUI.UnitTests.Assets.{file_name}"));
+        assert_eq!(asset.path(), format!("FerroUI.UnitTests.Assets.{file_name}"));
 
-        let mut font_stream = scope.asset_loader().open(asset, None).unwrap();
+        let mut font_stream = scope.asset_loader().open(&UriRef::from(asset.clone()), None).unwrap();
 
         let glyph_typeface =
             FontCollectionBase::try_add_glyph_typeface_from_stream(&*font_collection, &mut *font_stream).unwrap();
@@ -1255,10 +1287,10 @@ fn should_enumerate_font_families() {
 
     font_manager.add_font_collection(font_collection.clone());
 
-    let assets = scope.asset_loader().get_assets(&uri(test_fonts::ASSETS), None);
+    let assets = scope.asset_loader().get_assets(&UriRef::from(uri(test_fonts::ASSETS)), None);
 
     for asset in &assets {
-        let mut stream = scope.asset_loader().open(asset, None).unwrap();
+        let mut stream = scope.asset_loader().open(&UriRef::from(asset.clone()), None).unwrap();
 
         FontCollectionBase::try_add_glyph_typeface_from_stream(&*font_collection, &mut *stream);
     }
@@ -1307,7 +1339,7 @@ mod file_sources {
             Self(path)
         }
 
-        fn uri(&self, file_name: &str) -> Uri {
+        fn uri(&self, file_name: &str) -> url::Url {
             let path = self.0.join(file_name);
             let path = path.to_str().unwrap().replace('\\', "/").replace(' ', "%20");
 
@@ -1420,10 +1452,6 @@ fn unsupported_font_sources_add_nothing() {
     let font_collection = CustomFontCollection::new("fonts:custom");
 
     assert!(!FontCollectionBase::try_add_font_source(&*font_collection, &uri("https://example.com/fonts")));
-    assert!(!FontCollectionBase::try_add_font_source(
-        &*font_collection,
-        &Uri::new("/Assets/Fonts", crate::utilities::UriKind::Relative).unwrap()
-    ));
     assert!(!FontCollectionBase::try_add_font_source(&*font_collection, &uri("resm:Other.Assets?assembly=Other")));
     assert_eq!(font_collection.count(), 0);
 
@@ -1499,7 +1527,7 @@ fn adding_a_glyph_typeface_twice_is_accepted_and_another_one_for_the_same_key_is
     let family_typefaces = font_collection.try_get_family_typefaces("inter").unwrap();
 
     assert_eq!(family_typefaces.len(), 1);
-    assert_eq!(family_typefaces[0].font_family().key().unwrap().source(), &uri("fonts:custom"));
+    assert_eq!(family_typefaces[0].font_family().key().unwrap().source(), &UriRef::from(uri("fonts:custom")));
     assert!(font_collection.try_get_family_typefaces("Unknown").is_none());
 
     // Disposing the collection disposes its typefaces.

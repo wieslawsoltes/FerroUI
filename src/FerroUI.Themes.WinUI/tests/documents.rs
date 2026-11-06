@@ -207,6 +207,8 @@ document_tests! {
     resources_navigation_view_themeresources => "/Resources/NavigationView_themeresources.xaml";
     resources_number_box_themeresources => "/Resources/NumberBox_themeresources.xaml";
     resources_password_box_themeresources => "/Resources/PasswordBox_themeresources.xaml";
+    resources_person_picture_themeresources => "/Resources/PersonPicture_themeresources.xaml";
+    resources_pager_control_themeresources => "/Resources/PagerControl_themeresources.xaml";
     resources_pips_pager_themeresources => "/Resources/PipsPager_themeresources.xaml";
     resources_progress_bar_themeresources => "/Resources/ProgressBar_themeresources.xaml";
     resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
@@ -259,6 +261,8 @@ document_tests! {
     controls_expander => "/Controls/Expander.xaml";
     controls_numeric_up_down => "/Controls/NumericUpDown.xaml";
     controls_number_box => "/Controls/NumberBox.xaml";
+    controls_person_picture => "/Controls/PersonPicture.xaml";
+    controls_pager_control => "/Controls/PagerControl.xaml";
     controls_pips_pager => "/Controls/PipsPager.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
     controls_refresh_container => "/Controls/RefreshContainer.xaml";

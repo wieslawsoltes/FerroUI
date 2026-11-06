@@ -189,7 +189,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 | [`xamlx`](https://crates.io/crates/xamlx) | Rust port of the backend-independent part of XamlX (XAML compiler library) | [![version](https://img.shields.io/crates/v/xamlx.svg)](https://crates.io/crates/xamlx) | [![downloads](https://img.shields.io/crates/d/xamlx.svg)](https://crates.io/crates/xamlx) | [![docs.rs](https://img.shields.io/docsrs/xamlx)](https://docs.rs/xamlx) |
 | [`ferroui-markup-xaml-loader`](https://crates.io/crates/ferroui-markup-xaml-loader) | The FerroUI XAML language definition and compiler extensions built on xamlx | [![version](https://img.shields.io/crates/v/ferroui-markup-xaml-loader.svg)](https://crates.io/crates/ferroui-markup-xaml-loader) | [![downloads](https://img.shields.io/crates/d/ferroui-markup-xaml-loader.svg)](https://crates.io/crates/ferroui-markup-xaml-loader) | [![docs.rs](https://img.shields.io/docsrs/ferroui-markup-xaml-loader)](https://docs.rs/ferroui-markup-xaml-loader) |
 | [`ferroui-build`](https://crates.io/crates/ferroui-build) | Build-script support of FerroUI: compiles the markup documents of a crate to Rust source and embeds its assets | [![version](https://img.shields.io/crates/v/ferroui-build.svg)](https://crates.io/crates/ferroui-build) | [![downloads](https://img.shields.io/crates/d/ferroui-build.svg)](https://crates.io/crates/ferroui-build) | [![docs.rs](https://img.shields.io/docsrs/ferroui-build)](https://docs.rs/ferroui-build) |
-| [`ferroui-markup-xaml-winui`](https://crates.io/crates/ferroui-markup-xaml-winui) | WinUI XAML compatibility of FerroUI: an opt-in importer from WinUI XAML, its run-time loading entry points and the x:Bind property-path adapter | [![version](https://img.shields.io/crates/v/ferroui-markup-xaml-winui.svg)](https://crates.io/crates/ferroui-markup-xaml-winui) | [![downloads](https://img.shields.io/crates/d/ferroui-markup-xaml-winui.svg)](https://crates.io/crates/ferroui-markup-xaml-winui) | [![docs.rs](https://img.shields.io/docsrs/ferroui-markup-xaml-winui)](https://docs.rs/ferroui-markup-xaml-winui) |
+| [`ferroui-markup-xaml-winui`](https://crates.io/crates/ferroui-markup-xaml-winui) | WinUI XAML compatibility of FerroUI: an opt-in importer from WinUI XAML and its run-time loading entry points | [![version](https://img.shields.io/crates/v/ferroui-markup-xaml-winui.svg)](https://crates.io/crates/ferroui-markup-xaml-winui) | [![downloads](https://img.shields.io/crates/d/ferroui-markup-xaml-winui.svg)](https://crates.io/crates/ferroui-markup-xaml-winui) | [![docs.rs](https://img.shields.io/docsrs/ferroui-markup-xaml-winui)](https://docs.rs/ferroui-markup-xaml-winui) |
 
 **Render backends and text**
 
@@ -283,6 +283,10 @@ cargo run -p control-catalog-desktop
 
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
+
+# The custom effects gallery: the effects of the library on Visual.Effect, one section per
+# family (its sections are also the pages of the section Custom effects of the ControlCatalog)
+cargo run -p custom-effects
 
 # Charts: compiled XAML, line/area/bar series, shared live data and light/dark resources
 cargo run -p charts-demo --features desktop
@@ -438,7 +442,7 @@ fn main() {
 | Motion | Transitions and key-frame animations of the port | `transition(property, ms(200))`, `transitions([..])`, `animation(..)`, `use_animation` |
 | Popups | A popup's child and a context menu as elements | `Popup { .. }`, `context_menu: rsx! { ContextMenu { .. } }` |
 | Tools | Hot reload of the literals of `rsx!`, diagnostics (keys, runaway components), an inspector of components on Shift+F12 | feature `hot-reload`, `set_diagnostics_handler`, `open_inspector` |
-| Asynchronous data | A future run by a component on the executor of the thread, started again when its dependencies change; its state shown pending, ready or failed; a timer for debouncing | `use_future(deps, \|deps\| future)`, `suspense(..)`, `AsyncState`, `sleep` |
+| Asynchronous data | A future run by a component on the dispatcher of the thread, started again when its dependencies change; its state shown pending, ready or failed; a timer for debouncing | `use_future(deps, \|deps\| future)`, `suspense(..)`, `AsyncState`, `sleep` |
 | Error boundaries | A panic of a component below shows a fallback instead of ending the application; the child can be mounted again | `error_boundary(\|\| child, \|info\| fallback)`, `info.reset()` |
 | Navigation | A router of views modelled on the routing of ReactiveUI: a stack of paths, routes with parameters | `router("/", vec![route("/people/:id", \|m\| ..)])`, `use_router().navigate(..)`, `navigate_back`, `navigate_and_reset` |
 | Samples | Hello, World! in each style; the 7GUIs in builders, `rsx!` and hooks versions; XAML interoperation; the gallery; TodoMVC; ReactiveDemo as components | `samples/HelloWorld.Builders`, `.Macros`, `.Hooks`, `.ComponentHost`, `samples/SevenGuis`, `samples/ViewInterop`, `samples/ViewGallery`, `samples/TodoMvc`, `samples/ReactiveDemoComponents` |
@@ -522,6 +526,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
+- [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [LiveCharts2 port](docs/porting/livecharts2.md): the landing plan, the accounting of every upstream source, API member and test, and the [compiled sample](samples/LiveChartsDemo/README.md).
 - [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
 - [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.

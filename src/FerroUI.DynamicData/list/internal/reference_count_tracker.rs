@@ -2,12 +2,12 @@
 //! is held.
 #![allow(dead_code)]
 
-use ferroui_system::collections::generic::Dictionary;
+use ferroui_system::collections::generic::SlotOrderMap;
 use std::hash::Hash;
 
 /// The counts (`ReferenceCountTracker<T>`).
 pub(crate) struct ReferenceCountTracker<T> {
-    reference_counts: Dictionary<T, usize>,
+    reference_counts: SlotOrderMap<T, usize>,
 }
 
 impl<T: Eq + Hash + Clone> Default for ReferenceCountTracker<T> {
@@ -18,7 +18,7 @@ impl<T: Eq + Hash + Clone> Default for ReferenceCountTracker<T> {
 
 impl<T: Eq + Hash + Clone> ReferenceCountTracker<T> {
     pub(crate) fn new() -> Self {
-        Self { reference_counts: Dictionary::new() }
+        Self { reference_counts: SlotOrderMap::new() }
     }
 
     /// The items held (`Items`).

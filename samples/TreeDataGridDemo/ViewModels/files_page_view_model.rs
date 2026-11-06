@@ -10,7 +10,7 @@ use ferroui_base::ferro_markup_type;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::IImage;
 use ferroui_base::platform::AssetLoader;
-use ferroui_base::utilities::{CultureInfo, StringComparison, Uri};
+use ferroui_base::utilities::{CultureInfo, StringComparison, UriRef};
 use ferroui_base::BoxedValue;
 use ferroui_controls::{GridLength, GridUnitType, ItemsSource};
 use ferroui_controls_treedatagrid::{
@@ -412,7 +412,7 @@ fn compare_typed(comparison: FileTreeNodeComparison) -> Comparison<FileTreeNodeM
 
 /// Loads an icon of the assets of the demo (`new Bitmap(AssetLoader.Open(uri))`).
 fn load_bitmap(uri: &str) -> Rc<dyn IImage> {
-    let uri = Uri::absolute(uri).unwrap_or_else(|e| panic!("{e}"));
+    let uri = UriRef::parse(uri).unwrap_or_else(|e| panic!("{e}"));
     let mut stream = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
     let bitmap = Bitmap::from_stream(&mut stream).unwrap_or_else(|e| panic!("{e}"));
     Rc::new(bitmap) as Rc<dyn IImage>

@@ -2687,13 +2687,20 @@ mod custom_effect_graphs {
         context.pop_render_options();
     }
 
+    /// A target of `SIZE` logical pixels at `scale` device pixels each.
+    fn target(scale: i32) -> Target {
+        let dpi = Vector::new(96.0 * f64::from(scale), 96.0 * f64::from(scale));
+        Target { bitmap: render_interface().create_render_target_bitmap(PixelSize::new(SIZE * scale, SIZE * scale), dpi) }
+    }
+
     /// The premultiplied RGBA pixels of the target.
     fn pixels(target: &Target) -> Vec<u8> {
         let framebuffer = target.bitmap.lock();
+        let size = framebuffer.size();
         let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
-        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
-        for y in 0..SIZE {
-            for x in 0..SIZE {
+        let mut rgba = Vec::with_capacity((size.width * size.height * 4) as usize);
+        for y in 0..size.height {
+            for x in 0..size.width {
                 let (r, g, b, a) = read_framebuffer_pixel(&*framebuffer, x, y);
                 let scale = |c: u8| if premultiplied { c } else { ((u32::from(c) * u32::from(a) + 127) / 255) as u8 };
                 rgba.extend_from_slice(&[scale(r), scale(g), scale(b), a]);
@@ -2715,25 +2722,59 @@ mod custom_effect_graphs {
     /// reference: within `largest` levels per channel, and within a mean of
     /// half a level.
     fn assert_matches_reference(effect: ImmutableCustomEffect, largest: u8) {
+        assert_matches_reference_at(effect, 1, largest);
+    }
+
+    /// [`assert_matches_reference`] at `scale` device pixels per device
+    /// independent pixel (#455, E9): the colour matrices do not depend on it,
+    /// the blur of the glow is `scale` times as wide, and the kernels of the
+    /// convolutions step over device pixels.
+    fn assert_matches_reference_at(effect: ImmutableCustomEffect, scale: i32, largest: u8) {
         assert!(effect.has_graph(), "{effect}");
-        let plain = Target::new();
+        let plain = target(scale);
         plain.draw(scene);
         let mut expected = pixels(&plain);
-        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
 
-        let target = Target::new();
-        target.draw(|context| {
+        let drawn = target(scale);
+        drawn.draw(|context| {
             let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
             assert!(push_custom_effect_graph(context, &effect, bounds));
             scene(context);
             assert!(pop_custom_effect_graph(context, &effect, bounds));
         });
-        let actual = pixels(&target);
+        let actual = pixels(&drawn);
         let (most, mean) = difference(&expected, &actual);
-        assert!(most <= largest && mean <= 0.5, "{effect}: largest difference {most}, mean {mean}");
+        assert!(most <= largest && mean <= 0.5, "{effect} at {scale}x: largest difference {most}, mean {mean}");
         // The effect changed something.
         let (changed, _) = difference(&pixels(&plain), &actual);
-        assert!(changed > 0, "{effect}: the content is changed");
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    /// The graph effects of the library at 192 dots per inch (#455, E9), with
+    /// the tolerances of 96.
+    #[test]
+    fn the_graph_effects_match_their_cpu_references_at_twice_the_scale() {
+        for (effect, largest) in library_graph_effects() {
+            assert_matches_reference_at(effect, 2, largest);
+        }
+    }
+
+    /// The graph effects of the library at values that are not neutral, with
+    /// the largest difference to their CPU references they are held to.
+    fn library_graph_effects() -> Vec<(ImmutableCustomEffect, u8)> {
+        vec![
+            (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2),
+            (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+            (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+            (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+            (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+            (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+            (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+            (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2),
+            (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2),
+        ]
     }
 
     #[test]
@@ -2818,13 +2859,20 @@ mod custom_effect_graphs {
 /// (#455, E4): pushed as effects of the drawing context around a scene of
 /// opaque and translucent colours, at 96 and at 192 dots per inch, and
 /// compared with the CPU reference of each effect applied to the same scene
-/// drawn plain; and the fallback of a program that does not compile, does
-/// not declare the uniforms of its parameters or has children (step E6): the
-/// content unchanged, reported once.
+/// drawn plain; the page transitions, which sample images (E6), the same way,
+/// with their images made Skia images once over steady frames and released
+/// when their handles are dropped; and the fallback of a program that does
+/// not compile, does not declare the uniforms of its parameters or has
+/// children that are not images of an overlay: the content unchanged,
+/// reported once.
 mod custom_shader_effects {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
-    use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+    use ferroui_base::media::effects::library::{
+        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+    };
+    use ferroui_base::media::effects::{
+        CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
+    };
 
     /// The logical size of the targets.
     const SIZE: i32 = 100;
@@ -3042,6 +3090,553 @@ mod custom_shader_effects {
 
     #[test]
     fn a_program_with_children_draws_the_content_unchanged() {
+        // `page` is no image parameter of the effect, and a content-sampling
+        // program takes no images.
         assert_draws_unchanged_and_reports_once(ImmutableCustomEffect::new(WithChildren { amount: 0.5 }));
+    }
+
+    // --- the images of the page transitions (E6) ---------------------------------
+
+    /// An image of `width` by `height` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(width: i32, height: i32, pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((width * height * 4) as usize);
+        for y in 0..height {
+            for x in 0..width {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(width, height),
+            DPI,
+            width * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(Arc::new(bitmap))
+    }
+
+    /// Two pages of the size of the target (in device independent pixels)
+    /// and a pattern of grey levels.
+    fn pages() -> (EffectImage, EffectImage, EffectImage) {
+        let from = image(SIZE, SIZE, |x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+        let to = image(SIZE, SIZE, |x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+        let pattern = image(SIZE, SIZE, |x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+        (from, to, pattern)
+    }
+
+    /// The transitions of the library over the pages.
+    fn transitions(progress: f64) -> Vec<ImmutableCustomEffect> {
+        let (from, to, pattern) = pages();
+        // A translucent page, so that the content shows through.
+        let glass = image(SIZE, SIZE, |x, _| [0, 0, 160, 160 + (x % 2) as u8 * 40]);
+        vec![
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: from,
+                to_page: to.clone(),
+                pattern: pattern.clone(),
+                progress,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect { to_page: to, mask: pattern.clone(), progress, softness: 0.2 }),
+            ImmutableCustomEffect::new(MaskTransitionEffect { to_page: glass, mask: pattern, progress, softness: 0.5 }),
+        ]
+    }
+
+    #[test]
+    fn the_page_transitions_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for effect in transitions(0.45) {
+                assert_matches_reference(effect, scale, 3);
+            }
+        }
+    }
+
+    /// Frames that change only the progress of the transitions make their
+    /// images into Skia images once: no image is converted (or uploaded)
+    /// per frame.
+    #[test]
+    fn steady_frames_of_the_page_transitions_make_their_images_once() {
+        let effects = transitions(0.2);
+        let mut made_after_first = None;
+        for frame in 0..6 {
+            let progress = 0.2 + 0.1 * f64::from(frame);
+            let target = target(1);
+            for effect in &effects {
+                let mut value = effect.clone();
+                if let Some(dissolve) = effect.downcast_ref::<DissolveTransitionEffect>() {
+                    value = ImmutableCustomEffect::new(DissolveTransitionEffect { progress, ..dissolve.clone() });
+                } else if let Some(mask) = effect.downcast_ref::<MaskTransitionEffect>() {
+                    value = ImmutableCustomEffect::new(MaskTransitionEffect { progress, ..mask.clone() });
+                }
+                draw_with(&target, &value, scene);
+            }
+            let made = crate::custom_shader_effects::effect_images_made();
+            match made_after_first {
+                None => made_after_first = Some(made),
+                Some(first) => assert_eq!(first, made, "frame {frame} made an image again"),
+            }
+        }
+    }
+
+    /// The Skia images of the images of a transition are released once the
+    /// last handle is dropped, and frames whose transitions take new images
+    /// keep no more than the images they draw.
+    #[test]
+    fn the_images_of_a_dropped_transition_are_released() {
+        let kept = crate::custom_shader_effects::effect_images_kept;
+        let before = kept();
+        for frame in 0..24 {
+            // A new page for every frame; the last one is dropped with it.
+            let page = image(SIZE, SIZE, |x, y| [frame as u8 * 10, x as u8, y as u8, 255]);
+            let effect = ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: page,
+                progress: 0.5,
+                softness: 1.0,
+                ..MaskTransitionEffect::default()
+            });
+            draw_with(&target(1), &effect, scene);
+            assert!(kept() <= before + 1, "frame {frame}: {} images kept", kept());
+        }
+        // The next frame releases the image of the last one.
+        target(1).draw(|_| {});
+        assert_eq!(before, kept());
+    }
+
+    /// A transition at its neutral value, and the mask transition at a
+    /// progress of 0 with its images, leave the content unchanged.
+    #[test]
+    fn a_page_transition_at_its_start_draws_the_content_unchanged() {
+        let start = transitions(0.0);
+        for effect in transitions(0.45).iter().map(|effect| effect.neutral().unwrap()).chain(start.into_iter().skip(1)) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
+    /// A content-sampling program cannot take images on Skia (skia-safe binds
+    /// no setter for the children of the builder of a runtime shader image
+    /// filter): it is refused and draws the content unchanged.
+    test_effect!(
+        SamplingWithImages,
+        "skia-test-sampling-with-images",
+        ShaderEffectDescription::content_sampling(
+            "uniform float2 layer_size; uniform float layer_scale; uniform float amount; uniform shader content;\n\
+             half4 main(float2 coord) { return content.eval(coord) * half(amount); }",
+            ""
+        )
+        .with_children(["amount"])
+    );
+
+    #[test]
+    fn a_content_sampling_program_with_images_draws_the_content_unchanged() {
+        assert_draws_unchanged_and_reports_once(ImmutableCustomEffect::new(SamplingWithImages { amount: 0.5 }));
+    }
+
+    // --- the interactive effects (E7) --------------------------------------------------
+
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::Point;
+
+    /// The interactive effects of the library at a frame `t` (0 to 1) of an interaction: the
+    /// pointer over the area and pressed in odd frames, a ripple aging, the flame burning.
+    fn interactive_effects(t: f64) -> Vec<ImmutableCustomEffect> {
+        let pressed = (t * 10.0).round() as i32 % 2 == 1;
+        let mut ripple = WaterRippleShaderEffect {
+            pointer_x: 0.3 + 0.4 * t,
+            pointer_y: 0.4,
+            is_pointer_over: true,
+            is_pressed: pressed,
+            ..WaterRippleShaderEffect::default()
+        };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        vec![
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                pointer_y: 0.5,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                pointer_y: 0.5,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ignition_x: 0.5,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// Draws `effect` around the scene at `scale` and compares it with the CPU reference: a
+    /// mean difference within `mean` levels, and no more than `share` of the pixels differing by
+    /// more than `largest` levels in a channel. A program that moves the content (the water
+    /// ripple and the flame) picks the texel under a coordinate it computes, so where that
+    /// coordinate falls on the edge of a texel at the edge of a square, the last bit of a `sin`
+    /// or an `exp` of the processor picks the neighbour.
+    fn assert_close_to_reference(effect: &ImmutableCustomEffect, scale: i32, largest: u8, share: f64, mean: f64) {
+        assert!(effect.has_shader(), "{effect}");
+        let plain = target(scale);
+        plain.draw(scene);
+        let mut expected = pixels(&plain);
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
+        let drawn = target(scale);
+        draw_with(&drawn, effect, scene);
+        let actual = pixels(&drawn);
+        let far = expected
+            .chunks_exact(4)
+            .zip(actual.chunks_exact(4))
+            .filter(|(a, b)| a.iter().zip(b.iter()).any(|(a, b)| a.abs_diff(*b) > largest))
+            .count();
+        let (_, average) = difference(&expected, &actual);
+        let allowed = share * (side * side) as f64;
+        assert!(
+            far as f64 <= allowed && average <= mean,
+            "{effect} at {scale}x: {far} pixels differ by more than {largest} (at most {allowed}), mean {average}"
+        );
+        let (changed, _) = difference(&pixels(&plain), &actual);
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    #[test]
+    fn the_interactive_effects_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for t in [0.0, 0.5, 1.0] {
+                let effects = interactive_effects(t);
+                // The overlays as the other overlays; the programs that move the content with
+                // their outliers.
+                assert_matches_reference(effects[0].clone(), scale, 3);
+                assert_matches_reference(effects[1].clone(), scale, 3);
+                assert_close_to_reference(&effects[2], scale, 3, 0.01, 1.5);
+                assert_close_to_reference(&effects[3], scale, 3, 0.01, 1.5);
+            }
+        }
+    }
+
+    #[test]
+    fn a_neutral_interactive_effect_draws_the_content_unchanged() {
+        let neutral = interactive_effects(0.5).into_iter().map(|effect| effect.neutral().expect("a neutral value"));
+        let away = [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
+        ];
+        for effect in neutral.chain(away) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
+    /// Frames of an interaction change only the uniforms of the interactive effects: once the
+    /// first frame compiled their programs, no frame compiles one.
+    #[test]
+    fn frames_of_the_interactive_effects_compile_their_programs_once() {
+        let mut compiled_after_first = None;
+        for frame in 0..8 {
+            let target = target(1);
+            for effect in interactive_effects(f64::from(frame) / 7.0) {
+                draw_with(&target, &effect, scene);
+            }
+            let compiled = crate::runtime_effects::compilation_count();
+            match compiled_after_first {
+                None => compiled_after_first = Some(compiled),
+                Some(first) => assert_eq!(first, compiled, "frame {frame} compiled a program"),
+            }
+        }
+        for effect in interactive_effects(0.0) {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+    }
+}
+
+/// The steady state and the prewarm of the custom effects FerroUI ships
+/// (#455, E9), on the raster backend: every effect of the library (the graph
+/// effects, the runtime shaders, the page transitions with their images and
+/// the interactive effects) drawn in each frame with parameters that change,
+/// and the effects drawn as the prewarm of a composition target draws them
+/// (`ServerCompositionTarget::prewarm_effects`: the value each type registers,
+/// its default, around an image) ahead of the first frame.
+mod custom_effect_steady_state {
+    use super::*;
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
+        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
+        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
+        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    /// The logical size of the targets.
+    const SIZE: i32 = 100;
+
+    /// Opaque red and steel blue squares and a translucent orange band, with
+    /// aliased edges.
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(30.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(steel_blue)), None, rect(52.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(orange)), None, rect(30.0, 52.0, 42.0, 18.0), &no_shadows());
+        context.pop_render_options();
+    }
+
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            DPI,
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(Arc::new(bitmap))
+    }
+
+    /// The pages and the pattern of the transitions.
+    struct Pages {
+        from: EffectImage,
+        to: EffectImage,
+        pattern: EffectImage,
+    }
+
+    fn pages() -> Pages {
+        Pages {
+            from: image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]),
+            to: image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]),
+            pattern: image(|x, y| {
+                let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+                [level, level, level, 255]
+            }),
+        }
+    }
+
+    /// Every effect of the library at a frame `t` (0 to 1) of an animation:
+    /// each parameter that animates moves with `t`.
+    fn library(t: f64, pages: &Pages) -> Vec<ImmutableCustomEffect> {
+        let pressed = (t * 10.0).round() as i32 % 2 == 1;
+        let mut ripple = WaterRippleShaderEffect {
+            pointer_x: 0.3 + 0.4 * t,
+            is_pointer_over: true,
+            is_pressed: pressed,
+            ..WaterRippleShaderEffect::default()
+        };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.2 + 0.3 * t;
+        vec![
+            ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.2 + 0.6 * t }),
+            ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.2 + 0.8 * t }),
+            ImmutableCustomEffect::new(SepiaEffect { amount: 0.1 + 0.9 * t }),
+            ImmutableCustomEffect::new(SaturationEffect { saturation: 0.5 + 1.5 * t }),
+            ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.2 * t, contrast: 0.8 + 0.6 * t }),
+            ImmutableCustomEffect::new(InvertEffect { amount: t }),
+            ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 2.0 + 6.0 * t, intensity: 0.8 }),
+            ImmutableCustomEffect::new(SharpenEffect { strength: 0.2 + 0.8 * t }),
+            ImmutableCustomEffect::new(EdgeDetectEffect { strength: 0.5 + 0.5 * t }),
+            ImmutableCustomEffect::new(PixelateEffect { cell_size: 2.0 + 6.0 * t }),
+            ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.2 + 0.6 * t }),
+            ImmutableCustomEffect::new(SpotlightShaderEffect {
+                center_x: 0.3 + 0.4 * t,
+                strength: 0.8,
+                ..SpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(DissolveTransitionEffect {
+                from_page: pages.from.clone(),
+                to_page: pages.to.clone(),
+                pattern: pages.pattern.clone(),
+                progress: t,
+                center_x: 0.3,
+                center_y: 0.6,
+                ..DissolveTransitionEffect::default()
+            }),
+            ImmutableCustomEffect::new(MaskTransitionEffect {
+                to_page: pages.to.clone(),
+                mask: pages.pattern.clone(),
+                progress: t,
+                softness: 0.2,
+            }),
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.3 + 0.4 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                pointer_x: 0.6 - 0.2 * t,
+                is_pointer_over: true,
+                is_pressed: pressed,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.6 + 0.4 * t,
+                flame_phase: 3.0 * t,
+                is_pressed: pressed,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// The value each type of the library registers for the prewarm: its
+    /// default (`custom_effect_graph.rs`, `custom_effect_shader.rs`).
+    fn registered_values() -> Vec<ImmutableCustomEffect> {
+        fn of<T: CustomEffect>() -> ImmutableCustomEffect {
+            ImmutableCustomEffect::new(T::default())
+        }
+        vec![
+            of::<TintEffect>(),
+            of::<GrayscaleEffect>(),
+            of::<SepiaEffect>(),
+            of::<SaturationEffect>(),
+            of::<BrightnessContrastEffect>(),
+            of::<InvertEffect>(),
+            of::<GlowEffect>(),
+            of::<SharpenEffect>(),
+            of::<EdgeDetectEffect>(),
+            of::<PixelateEffect>(),
+            of::<ScanlineShaderEffect>(),
+            of::<SpotlightShaderEffect>(),
+            of::<DissolveTransitionEffect>(),
+            of::<MaskTransitionEffect>(),
+            of::<PointerSpotlightShaderEffect>(),
+            of::<ReactiveGridShaderEffect>(),
+            of::<WaterRippleShaderEffect>(),
+            of::<BurningFlameShaderEffect>(),
+        ]
+    }
+
+    /// Draws `effect` around `content` over `bounds` as the render walk
+    /// draws it: a graph effect as its graph, any other as an effect of the
+    /// drawing context.
+    fn draw_with(
+        context: &mut dyn IDrawingContextImpl,
+        effect: &ImmutableCustomEffect,
+        bounds: Rect,
+        content: impl FnOnce(&mut dyn IDrawingContextImpl),
+    ) {
+        if effect.has_graph() {
+            assert!(push_custom_effect_graph(context, effect, bounds), "{effect}");
+            content(context);
+            assert!(pop_custom_effect_graph(context, effect, bounds), "{effect}");
+        } else {
+            context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), effect);
+            content(context);
+            context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
+        }
+    }
+
+    /// A frame of the library at `t`: each effect around the scene over the
+    /// whole target.
+    fn frame(t: f64, pages: &Pages) {
+        let target = Target::new();
+        let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+        target.draw(|context| {
+            for effect in library(t, pages) {
+                draw_with(context, &effect, bounds, scene);
+            }
+        });
+    }
+
+    /// Frames of the whole library that change only parameters compile no
+    /// program and make no Skia image of an image once the first frame did:
+    /// the programs are compiled once per thread and type, the uniforms set
+    /// per frame. No effect of the library fails.
+    #[test]
+    fn frames_of_the_library_compile_no_program_after_the_first() {
+        let pages = pages();
+        frame(0.0, &pages);
+        let compiled = crate::runtime_effects::compilation_count();
+        let images = crate::custom_shader_effects::effect_images_made();
+        for index in 1..8 {
+            frame(f64::from(index) / 7.0, &pages);
+            assert_eq!(compiled, crate::runtime_effects::compilation_count(), "frame {index} compiled a program");
+            assert_eq!(images, crate::custom_shader_effects::effect_images_made(), "frame {index} made an image");
+        }
+        for effect in library(0.0, &pages) {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
+    }
+
+    /// The prewarm of a composition target draws each registered type of the
+    /// library once, at its registered value around an image, into a scene of
+    /// 128 units (`EFFECT_PREWARM_SIZE`) over its middle: that compiles every
+    /// program of the library, so the first frame that shows the library, at
+    /// other values, compiles none. Every program type is compiled by the
+    /// prewarm: at least one program for each runtime shader of the library.
+    #[test]
+    fn the_prewarm_of_the_library_compiles_what_its_first_frame_draws() {
+        let before = crate::runtime_effects::compilation_count();
+        let prewarm = Target::with_size(128, 128);
+        let stand_in = image(|x, y| [(x * 2) as u8, 128, (y * 2) as u8, 255]);
+        let stand_in_bitmap = stand_in.bitmap().expect("the image of the stand-in");
+        let area = Rect::new(32.0, 32.0, 64.0, 64.0);
+        let values = registered_values();
+        prewarm.draw(|context| {
+            for effect in &values {
+                draw_with(context, effect, area, |context| {
+                    context.push_clip(area);
+                    context.draw_bitmap(
+                        &*stand_in_bitmap,
+                        1.0,
+                        Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)),
+                        Rect::new(area.x, area.y, f64::from(SIZE), f64::from(SIZE)),
+                    );
+                    context.pop_clip();
+                });
+            }
+        });
+        let prewarmed = crate::runtime_effects::compilation_count();
+        let shaders = values.iter().filter(|effect| effect.has_shader()).count() as u64;
+        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert!(prewarmed - before >= shaders, "the prewarm compiled {} programs", prewarmed - before);
+
+        // The first frame of the library compiles nothing.
+        let pages = pages();
+        frame(0.6, &pages);
+        assert_eq!(prewarmed, crate::runtime_effects::compilation_count(), "the first frame compiled a program");
+        for effect in &values {
+            assert_eq!(0, crate::custom_shader_effects::failure_reports(effect.name()), "{effect}");
+        }
     }
 }

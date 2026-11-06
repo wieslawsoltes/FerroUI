@@ -87,7 +87,7 @@ fn instance_style(target: &Ref<Class1>, source: &Subject<String>) -> Rc<dyn Valu
     let frame: Rc<dyn ValueFrame> =
         Rc::new(TestFrame { base: ValueFrameBase::new(BindingPriority::Style, FrameType::Style) });
     frame.base().add(Rc::new(TestValueEntry { property: foo, value: s("foo") }));
-    frame.base().add(BindingEntry::new(target, Rc::downgrade(&frame), bar, BindingSource::Typed(source.observable())));
+    frame.base().add(BindingEntry::new(target, Rc::downgrade(&frame), bar, BindingSource::typed(source.observable())));
     frame
 }
 

@@ -474,7 +474,7 @@ impl DatePicker {
         let year_text = self.year_text.borrow().clone();
         let day_text = self.day_text.borrow().clone();
 
-        let date_time_format = CultureInfo::current_culture().date_time_format();
+        let date_time_format = CultureInfo::current_formatting().date_time_format();
         let fmt = date_time_format.short_date_pattern();
         let mut columns = [
             (month_text.clone(), if self.month_visible() { index_of_ignore_case(fmt, 'm') } else { -1 }),

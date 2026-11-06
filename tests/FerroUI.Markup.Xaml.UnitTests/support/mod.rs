@@ -21,6 +21,7 @@ pub mod sample_ferro_object;
 pub mod setter_tests;
 pub mod style_tests;
 pub mod test_view_model;
+pub mod x_bind;
 pub mod xaml_il_tests;
 
 pub mod converters;
@@ -57,6 +58,7 @@ const MODULES: &[&TypeModule] = &[
     &setter_tests::MODULE,
     &style_tests::MODULE,
     &xaml_il_tests::MODULE,
+    &x_bind::MODULE,
     // FerroUI.Markup.Xaml.UnitTests.Xaml
     &xaml::MODULE,
     &xaml::basic_tests::MODULE,
@@ -115,6 +117,9 @@ pub(crate) fn register() {
     TypeInfo::register_rust_paths(emitter::RUST_PATHS);
     ferroui_base::metadata::register_type_rust_paths(emitter::TYPE_RUST_PATHS);
     MarkupType::register_rust_paths(emitter::MARKUP_RUST_PATHS);
+    TypeInfo::register_rust_paths(x_bind::RUST_PATHS);
+    ferroui_base::metadata::register_type_rust_paths(x_bind::TYPE_RUST_PATHS);
+    MarkupType::register_rust_paths(x_bind::MARKUP_RUST_PATHS);
     ValueTypes::register_global(register_value_types);
     assets::register();
 }

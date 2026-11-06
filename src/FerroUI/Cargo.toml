@@ -30,7 +30,8 @@ macos-theme = ["dep:ferroui-themes-macos"]
 material-theme = ["dep:ferroui-themes-material"]
 # The XAML run-time library and the run-time loader of markup.
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
-# The WinUI XAML compatibility: the importer, its loading entry points and x:Bind.
+# The WinUI XAML compatibility: the importer and its loading entry points (its x:Bind is compiled
+# by the x:Bind core of the XAML library).
 winui-xaml = ["xaml", "dep:ferroui-markup-xaml-winui"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]

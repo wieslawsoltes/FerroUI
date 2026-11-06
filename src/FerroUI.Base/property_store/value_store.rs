@@ -9,12 +9,33 @@ use crate::diagnostics::{
     ValueFrameDiagnostic, ValueStoreDiagnostic,
 };
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
-use crate::reactive::IDisposable;
-use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use crate::ferro_property_metadata::{DefaultCoercionOperations, DefaultEffectiveValueFactory};
+use crate::reactive::{IDisposable, IObservable};
+use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
+
+// Borrowing only references keeps the factory vtable free of owning drop
+// glue. The returned Rc is the original local, with no extra clone.
+struct CoercedDefaultFactory<'a, T: PropertyValue> {
+    store: &'a ValueStore,
+    owner: &'a FerroObject,
+    property: &'static StyledProperty<T>,
+}
+
+impl<T: PropertyValue> DefaultEffectiveValueFactory<T> for CoercedDefaultFactory<'_, T> {
+    fn create_and_add(&self) -> Rc<EffectiveValue<T>> {
+        let effective = self.store.create_effective_value(self.owner, self.property);
+        self.store.add_effective_value(self.owner, self.property, effective.clone());
+        // No other owning locals or callable temporaries remain after this
+        // result is formed. On insertion unwind, effective still drops before
+        // the caller's coerced/default values and retained metadata.
+        effective
+    }
+}
 
 /// The value of an inherited property before and after a change of the
 /// inheritance ancestor: the effective value the old ancestors hold for it
@@ -159,15 +180,44 @@ impl ValueStore {
     }
 
     /// Adds a binding to a styled property.
-    pub fn add_binding<T: PropertyValue>(
+    pub fn add_binding<T: PropertyValue, U: 'static>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
-        source: BindingSource<T>,
+        source: Rc<dyn IObservable<U>>,
         priority: BindingPriority,
+        start_local: fn(&Rc<LocalValueBindingObserver<T>>, Rc<dyn IObservable<U>>),
+        frame_source: fn(Rc<dyn IObservable<U>>) -> BindingSource<T>,
     ) -> Rc<dyn IDisposable> {
         if priority == BindingPriority::LocalValue {
             let observer = LocalValueBindingObserver::new(owner, property);
+            self.dispose_existing_local_value_binding(property);
+            self.set_local_value_binding(property, observer.clone());
+            start_local(&observer, source);
+            observer
+        } else {
+            let effective = self.get_effective_value(property);
+            let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
+            let result = frame.add_binding(property, frame_source(source));
+            if effective.is_none_or(|e| priority <= e.priority()) {
+                result.start();
+            }
+            result
+        }
+    }
+
+    /// Installs a boxed source without specializing subscription ownership and
+    /// priority selection for every property value type. The typed routes only
+    /// construct the inline cache and its weak observer.
+    pub fn add_boxed_binding(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn IObservable<BoxedValue>>,
+        priority: BindingPriority,
+    ) -> Rc<dyn IDisposable> {
+        if priority == BindingPriority::LocalValue {
+            let observer = property.routes().route_create_boxed_local_binding(owner);
             self.dispose_existing_local_value_binding(property);
             self.set_local_value_binding(property, observer.clone());
             observer.start(source);
@@ -175,7 +225,7 @@ impl ValueStore {
         } else {
             let effective = self.get_effective_value(property);
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
-            let result = frame.add_binding(property, source);
+            let result = frame.add_boxed_binding(property, source);
             if effective.is_none_or(|e| priority <= e.priority()) {
                 result.start();
             }
@@ -184,16 +234,17 @@ impl ValueStore {
     }
 
     /// Adds a binding to a direct property.
-    pub fn add_direct_binding<T: PropertyValue>(
+    pub fn add_direct_binding<T: PropertyValue, U: 'static>(
         &self,
         owner: &FerroObject,
         property: &'static DirectPropertyBase<T>,
-        source: BindingSource<T>,
+        source: Rc<dyn IObservable<U>>,
+        start: fn(&Rc<DirectBindingObserver<T>>, Rc<dyn IObservable<U>>),
     ) -> Rc<dyn IDisposable> {
         let observer = DirectBindingObserver::new(owner, property);
         self.dispose_existing_local_value_binding(property);
         self.set_local_value_binding(property, observer.clone());
-        observer.start(source);
+        start(&observer, source);
         observer
     }
 
@@ -330,14 +381,7 @@ impl ValueStore {
         } else if has_value_changed {
             let priority = instance.priority();
             if priority == BindingPriority::LocalValue {
-                let effective = match self.get_effective_value(property) {
-                    Some(existing) => existing,
-                    None => {
-                        let created = property.routes().create_effective_value(owner);
-                        self.add_effective_value(owner, property, created.clone());
-                        created
-                    }
-                };
+                let effective = self.get_or_add_effective_value(owner, property);
                 effective.set_local_value_and_raise_entry(owner, &*entry);
             } else {
                 match self.get_effective_value(property) {
@@ -375,8 +419,7 @@ impl ValueStore {
         }
 
         if instance.priority() == BindingPriority::LocalValue {
-            let disposable: Rc<dyn IDisposable> = instance.clone();
-            self.on_local_value_binding_completed(owner, property, &disposable);
+            self.on_local_value_binding_completed(owner, property, instance.as_ref());
         }
     }
 
@@ -406,14 +449,7 @@ impl ValueStore {
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_value(property, value);
             let entry: Rc<dyn IValueEntry> = result.clone();
-            let effective = match self.get_effective_value(property) {
-                Some(existing) => existing,
-                None => {
-                    let created: EffectiveValueRef = self.create_effective_value(owner, property);
-                    self.add_effective_value(owner, property, created.clone());
-                    created
-                }
-            };
+            let effective = self.get_or_add_effective_value(owner, property);
             effective.set_and_raise(owner, &entry, priority);
             Some(result)
         } else {
@@ -448,11 +484,10 @@ impl ValueStore {
             }
         }
         if property.inherits() {
-            if let Some(v) = self.try_get_inherited_value(property) {
-                return cast_effective_value::<T>(&*v).value();
-            }
+            self.inherited_or_default(owner, property)
+        } else {
+            property.get_default_value_for(owner)
         }
-        property.get_default_value_for(owner)
     }
 
     pub fn with_value<T: PropertyValue, R>(
@@ -469,6 +504,16 @@ impl ValueStore {
         match value {
             Some(value) => cast_effective_value::<T>(&*value).with_value(read),
             None => read(property.get_metadata_for(owner).default_value()),
+        }
+    }
+
+    // Keep the inherited value's temporary Rc and its unwind cleanup off the
+    // hot paths for a local value or the default of a non-inheriting property.
+    #[inline(never)]
+    fn inherited_or_default<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
+        match self.try_get_inherited_value(property) {
+            Some(value) => cast_effective_value::<T>(&*value).value(),
+            None => property.get_default_value_for(owner),
         }
     }
 
@@ -493,17 +538,20 @@ impl ValueStore {
 
     pub fn coerce_default_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
         let metadata = property.get_metadata_for(owner);
-        let Some(coerce) = metadata.coerce_value() else { return };
-        let default = metadata.default_value().clone();
-        let coerced = coerce(owner, default.clone());
-        if default == coerced {
-            return;
-        }
-        // The default value isn't valid according to the coerce function, so
-        // an effective value entry is needed.
-        let effective = self.create_effective_value(owner, property);
-        self.add_effective_value(owner, property, effective.clone());
-        effective.set_coerced_default_value_and_raise(owner, coerced);
+        let Some(coercion) = metadata.coercion() else { return };
+        // Retain this exact metadata Rc through application and cleanup.
+        // The factory separately reloads metadata at the original point.
+        coercion.coerce_default(
+            &metadata,
+            owner,
+            &CoercedDefaultFactory { store: self, owner, property },
+            DefaultCoercionOperations {
+                // This route originally used PartialEq, not value_equals:
+                // preserve its distinct NaN behavior.
+                equals: <T as PartialEq>::eq,
+                set_default: EffectiveValue::<T>::set_coerced_default_value_and_raise,
+            },
+        );
     }
 
     pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
@@ -702,12 +750,12 @@ impl ValueStore {
         });
     }
 
-    pub fn on_inherited_effective_value_changed<T: PropertyValue>(
+    pub fn on_inherited_effective_value_changed(
         &self,
         owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
+        property: &'static FerroProperty,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
     ) {
         debug_assert!(property.inherits());
         owner.for_each_inheritance_child(|child| {
@@ -715,26 +763,16 @@ impl ValueStore {
         });
     }
 
-    pub fn on_inherited_effective_value_disposed<T: PropertyValue>(
-        &self,
-        owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
-    ) {
-        self.on_inherited_effective_value_changed(owner, property, old_value, new_value)
-    }
-
     pub fn on_local_value_binding_completed(
         &self,
         owner: &FerroObject,
         property: &'static FerroProperty,
-        observer: &Rc<dyn IDisposable>,
+        observer: &dyn IDisposable,
     ) {
         let removed = {
             let mut bindings = self.local_value_bindings.borrow_mut();
             match bindings.iter().position(|(id, _)| *id == property.id()) {
-                Some(index) if std::ptr::addr_eq(Rc::as_ptr(&bindings[index].1), Rc::as_ptr(observer)) => {
+                Some(index) if std::ptr::addr_eq(Rc::as_ptr(&bindings[index].1), std::ptr::from_ref(observer)) => {
                     bindings.remove(index);
                     self.local_value_expressions.borrow_mut().retain(|(id, _)| *id != property.id());
                     true
@@ -747,12 +785,12 @@ impl ValueStore {
         }
     }
 
-    fn on_ancestor_inherited_value_changed<T: PropertyValue>(
+    fn on_ancestor_inherited_value_changed(
         &self,
         owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        old_value: &T,
-        new_value: &T,
+        property: &'static FerroProperty,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
     ) {
         // If the inherited value is set locally, propagation stops here.
         if self.is_set(property) {
@@ -875,19 +913,19 @@ impl ValueStore {
         result
     }
 
-    fn get_or_add_effective_value<T: PropertyValue>(
-        &self,
-        owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-    ) -> EffectiveValueRef {
+    fn get_or_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
         match self.get_effective_value(property) {
             Some(existing) => existing,
-            None => {
-                let created: EffectiveValueRef = self.create_effective_value(owner, property);
-                self.add_effective_value(owner, property, created.clone());
-                created
-            }
+            None => self.create_and_add_effective_value(owner, property),
         }
+    }
+
+    // The construction route preserves the property's Rust type. Only a miss
+    // needs this dispatch; lookup and insertion are the same for every type.
+    fn create_and_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
+        let value = property.routes().create_effective_value(owner);
+        self.add_effective_value(owner, property, value.clone());
+        value
     }
 
     fn add_effective_value(&self, owner: &FerroObject, property: &FerroProperty, value: EffectiveValueRef) {
@@ -919,8 +957,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) {
         debug_assert!(priority < BindingPriority::Inherited);
-        let effective = property.routes().create_effective_value(owner);
-        self.add_effective_value(owner, property, effective.clone());
+        let effective = self.create_and_add_effective_value(owner, property);
         effective.set_and_raise(owner, entry, priority);
     }
 
@@ -970,7 +1007,7 @@ impl ValueStore {
 
         // Raise PropertyChanged on this object if necessary.
         let raiser = old_value.or(new_value).expect("one of the values is set");
-        raiser.raise_inherited_value_changed(owner, old_value, new_value);
+        raiser.raise_inherited_value_changed(property, owner, old_value, new_value);
 
         owner.for_each_inheritance_child(|child| {
             child.values().inherited_value_changed(child, property, old_value, new_value)
@@ -1044,8 +1081,7 @@ impl ValueStore {
                         match &current {
                             Some(current) => current.set_and_raise(owner, &entry, priority),
                             None => {
-                                let created = property.routes().create_effective_value(owner);
-                                self.add_effective_value(owner, property, created.clone());
+                                let created = self.create_and_add_effective_value(owner, property);
                                 created.set_and_raise(owner, &entry, priority);
                                 current = Some(created);
                             }
@@ -1128,9 +1164,7 @@ impl ValueStore {
                     match effective {
                         Some(effective) => effective.set_and_raise(owner, &entry, priority),
                         None => {
-                            let created = property.routes().create_effective_value(owner);
-                            self.add_effective_value(owner, property, created.clone());
-                            created.set_and_raise(owner, &entry, priority);
+                            self.add_effective_value_and_raise(owner, property, &entry, priority);
                         }
                     }
 
@@ -1275,3 +1309,7 @@ impl Drop for EvaluatingGuard<'_> {
         self.0.set(self.0.get() - 1);
     }
 }
+
+#[cfg(test)]
+#[path = "value_store_default_coercion_tests.rs"]
+mod default_coercion_tests;

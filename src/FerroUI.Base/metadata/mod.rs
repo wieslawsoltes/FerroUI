@@ -6,6 +6,10 @@ mod i_add_child;
 mod markup_assembly;
 mod markup_macros;
 mod markup_type;
+#[doc(hidden)]
+pub mod accessor;
+#[doc(hidden)]
+pub mod receiver;
 pub mod members;
 #[cfg(feature = "compiler-metadata")]
 mod property_accessors;
@@ -30,3 +34,7 @@ pub use service_provider::{service, EmptyServiceProvider, IServiceProvider};
 
 #[cfg(test)]
 mod markup_type_tests;
+#[cfg(test)]
+mod receiver_tests;
+#[cfg(test)]
+mod accessor_tests;

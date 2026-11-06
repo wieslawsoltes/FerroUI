@@ -10,7 +10,8 @@ use ferroui_base::controls::{INameScope, NameScopeRef};
 use ferroui_base::metadata::{service, IServiceProvider};
 use ferroui_base::platform::{AssetAssembly, AssetStream, IAssetLoader};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
+use ferroui_base::metadata::MarkupAssembly;
+use ferroui_base::utilities::{UriExtensions, UriRef};
 use ferroui_base::{BoxedValue, FerroLocator, PropertyValue};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -23,8 +24,14 @@ pub(crate) fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
     Rc::new(value)
 }
 
-pub(crate) fn uri(text: &str) -> Uri {
-    Uri::new(text, UriKind::RelativeOrAbsolute).unwrap()
+/// The reference of `text`, as markup reads it (the source of an include).
+pub(crate) fn uri_ref(text: &str) -> UriRef {
+    UriRef::parse(text).unwrap()
+}
+
+/// The absolute URL of `text`, as the loader reads the URI of a document.
+pub(crate) fn url(text: &str) -> url::Url {
+    UriRef::parse_absolute(text).unwrap()
 }
 
 /// A parent stack provider that only enumerates.
@@ -46,7 +53,7 @@ pub(crate) struct TestServiceProvider {
     outer: RefCell<Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>>>,
     target: RefCell<Option<(Option<BoxedValue>, Option<BoxedValue>)>>,
     root: RefCell<Option<Option<BoxedValue>>>,
-    base_uri: RefCell<Option<Option<Uri>>>,
+    base_uri: RefCell<Option<Option<url::Url>>>,
     name_scope: RefCell<Option<NameScopeRef>>,
     in_control_template: Cell<bool>,
     namespaces: RefCell<Option<XmlNamespaces>>,
@@ -97,7 +104,7 @@ impl TestServiceProvider {
     }
 
     pub(crate) fn with_base_uri(self: Rc<Self>, base_uri: &str) -> Rc<Self> {
-        *self.base_uri.borrow_mut() = Some(Some(uri(base_uri)));
+        *self.base_uri.borrow_mut() = Some(Some(url(base_uri)));
         self
     }
 
@@ -210,11 +217,11 @@ impl IRootObjectProvider for TestServiceProvider {
 }
 
 impl IUriContext for TestServiceProvider {
-    fn base_uri(&self) -> Option<Uri> {
+    fn base_uri(&self) -> Option<url::Url> {
         self.base_uri.borrow().clone().flatten()
     }
 
-    fn set_base_uri(&self, value: Option<Uri>) {
+    fn set_base_uri(&self, value: Option<url::Url>) {
         *self.base_uri.borrow_mut() = Some(value);
     }
 }
@@ -228,7 +235,9 @@ impl IFerroXamlIlXmlNamespaceInfoProvider for TestServiceProvider {
 }
 
 /// An asset loader over documents held in memory. The assembly of a URI is
-/// its authority, as spelled.
+/// its authority: the registered markup assembly of that name, ignoring case
+/// (the authority of an absolute URI is in lower case, as the standard asset
+/// loader reads it), or the authority itself.
 pub(crate) struct TestAssetLoader {
     assets: RefCell<HashMap<String, Vec<u8>>>,
 }
@@ -239,22 +248,19 @@ impl TestAssetLoader {
     }
 
     pub(crate) fn add(&self, absolute_uri: &str, content: &str) {
-        self.assets.borrow_mut().insert(uri(absolute_uri).absolute_uri().to_string(), content.as_bytes().to_vec());
+        self.assets.borrow_mut().insert(url(absolute_uri).as_str().to_owned(), content.as_bytes().to_vec());
     }
 
-    fn absolute(uri: &Uri, base_uri: Option<&Uri>) -> Option<Uri> {
-        if uri.is_absolute_uri() {
-            Some(uri.clone())
-        } else {
-            base_uri.map(|base| Uri::combine(base, uri))
-        }
+    fn absolute(uri: &UriRef, base_uri: Option<&url::Url>) -> Option<url::Url> {
+        UriExtensions::ensure_absolute(uri, base_uri).ok()
     }
 
-    fn assembly_of(uri: &Uri) -> AssetAssembly {
-        let original = uri.original_string();
-        let authority = original.split("://").nth(1).and_then(|rest| rest.split('/').next()).unwrap_or_default();
-        let _ = UriExtensions::authority(uri);
-        AssetAssembly::new(authority)
+    fn assembly_of(uri: &url::Url) -> AssetAssembly {
+        let authority = UriExtensions::authority(uri);
+        let registered = MarkupAssembly::registered_assemblies()
+            .into_iter()
+            .find(|assembly| assembly.name.eq_ignore_ascii_case(authority));
+        AssetAssembly::new(registered.map_or(authority, |assembly| assembly.name))
     }
 
     /// Makes the loader the asset loader of the calling thread until the
@@ -270,31 +276,31 @@ impl TestAssetLoader {
 impl IAssetLoader for TestAssetLoader {
     fn set_default_assembly(&self, _assembly: &AssetAssembly) {}
 
-    fn exists(&self, uri: &Uri, base_uri: Option<&Uri>) -> bool {
-        Self::absolute(uri, base_uri).is_some_and(|uri| self.assets.borrow().contains_key(uri.absolute_uri()))
+    fn exists(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> bool {
+        Self::absolute(uri, base_uri).is_some_and(|uri| self.assets.borrow().contains_key(uri.as_str()))
     }
 
-    fn open(&self, uri: &Uri, base_uri: Option<&Uri>) -> std::io::Result<Box<dyn AssetStream>> {
+    fn open(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> std::io::Result<Box<dyn AssetStream>> {
         self.open_and_get_assembly(uri, base_uri).map(|(stream, _)| stream)
     }
 
     fn open_and_get_assembly(
         &self,
-        uri: &Uri,
-        base_uri: Option<&Uri>,
+        uri: &UriRef,
+        base_uri: Option<&url::Url>,
     ) -> std::io::Result<(Box<dyn AssetStream>, AssetAssembly)> {
         let not_found = || std::io::Error::new(std::io::ErrorKind::NotFound, format!("The resource {uri} could not be found."));
         let absolute = Self::absolute(uri, base_uri).ok_or_else(not_found)?;
-        let content = self.assets.borrow().get(absolute.absolute_uri()).cloned().ok_or_else(not_found)?;
+        let content = self.assets.borrow().get(absolute.as_str()).cloned().ok_or_else(not_found)?;
         let assembly = Self::assembly_of(&absolute);
         Ok((Box::new(Cursor::new(content)), assembly))
     }
 
-    fn get_assembly(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<AssetAssembly> {
+    fn get_assembly(&self, uri: &UriRef, base_uri: Option<&url::Url>) -> Option<AssetAssembly> {
         Self::absolute(uri, base_uri).map(|uri| Self::assembly_of(&uri))
     }
 
-    fn get_assets(&self, _uri: &Uri, _base_uri: Option<&Uri>) -> Vec<Uri> {
+    fn get_assets(&self, _uri: &UriRef, _base_uri: Option<&url::Url>) -> Vec<url::Url> {
         Vec::new()
     }
 

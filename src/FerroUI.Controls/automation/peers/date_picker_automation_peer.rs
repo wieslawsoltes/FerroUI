@@ -77,7 +77,7 @@ impl DatePickerAutomationPeer {
     /// provider contract).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
         if let Some(result) =
-            value.and_then(|value| DateTimeOffset::try_parse(value, &CultureInfo::current_culture()))
+            value.and_then(|value| DateTimeOffset::try_parse(value, &CultureInfo::current_formatting()))
         {
             self.owner().set_selected_date(Some(result));
         }

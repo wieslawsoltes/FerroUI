@@ -19,7 +19,7 @@ use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::{RxAppBuilder, RxSuspension};
 use ferroui_reactiveui_controls::{view_model_of_value, StartupConfiguration};
-use ferroui_system::threading::tasks::{run_pending_wakes, Task};
+use ferroui_system::task::{run_pending, Shared};
 use ferroui_system::{IDisposable, IObservable, ObservableError};
 use sample_testing::{Shell, TestGlobalClock};
 use std::path::{Path, PathBuf};
@@ -89,7 +89,7 @@ pub fn run_until(mut done: impl FnMut() -> bool) -> bool {
     let deadline = Instant::now() + TIMEOUT;
     loop {
         run_jobs();
-        let _ = run_pending_wakes();
+        let _ = run_pending();
         if done() {
             return true;
         }
@@ -104,13 +104,14 @@ pub fn run_until(mut done: impl FnMut() -> bool) -> bool {
     }
 }
 
-/// Awaits `task` on the thread of the test (`await task`): its result, or its error.
+/// Awaits `task`, the [`Shared`] of a result, on the thread of the test (`await task`): its
+/// result, or its error.
 ///
 /// # Panics
 /// Panics when the task has not ended within [`TIMEOUT`].
-pub fn await_task<T: Clone + 'static>(task: &Task<T>) -> Result<T, ObservableError> {
-    assert!(run_until(|| task.is_completed()), "the task did not end within the timeout");
-    task.result()
+pub fn await_task<T: Clone + 'static>(task: &Shared<Result<T, ObservableError>>) -> Result<T, ObservableError> {
+    assert!(run_until(|| task.is_finished()), "the task did not end within the timeout");
+    task.result().expect("an ended task has its result")
 }
 
 /// Awaits the last value of `source` (`await source.ToTask()`).

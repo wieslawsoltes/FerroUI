@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
-use crate::utilities::CultureInfo;
+use crate::utilities::Locale;
 
-/// Resolves the ISO 15924 script subtag implied by a culture.
+/// Resolves the ISO 15924 script subtag implied by a locale.
 ///
 /// Used to disambiguate locale-sensitive scripts during font fallback (e.g.
 /// a Han ideograph should resolve to a Japanese font under `ja-JP`, a
@@ -13,31 +13,23 @@ pub(crate) struct Bcp47ScriptResolver;
 impl Bcp47ScriptResolver {
     /// Returns the four-letter ISO 15924 script subtag (e.g. `"Jpan"`,
     /// `"Hans"`, `"Hant"`, `"Kore"`, `"Latn"`, `"Cyrl"`) implied by the
-    /// culture, or `None` when no script can be inferred.
-    pub fn get_script_subtag(culture: Option<&CultureInfo>) -> Option<Cow<'static, str>> {
+    /// locale, or `None` when no script can be inferred (the unknown locale
+    /// `und`, the invariant culture, among them).
+    pub fn get_script_subtag(culture: Option<&Locale>) -> Option<Cow<'static, str>> {
         let culture = culture?;
 
-        if culture.is_invariant() {
+        if *culture == Locale::UNKNOWN {
             return None;
         }
 
-        let name = culture.name();
-
-        if name.is_empty() {
-            return None;
+        // 1. Explicit script subtag wins. The locale holds it in title case (Latn, Hans,
+        //    Cyrl, ...).
+        if let Some(explicit_script) = culture.id.script {
+            return Some(Cow::Owned(explicit_script.as_str().to_owned()));
         }
 
-        // 1. Explicit script subtag wins (BCP-47 second subtag, four letters).
-        if let Some(explicit_script) = Self::try_extract_script_subtag(name) {
-            return Some(Cow::Owned(explicit_script));
-        }
-
-        let (language, rest) = match name.find(['-', '_']) {
-            Some(language_end) => (&name[..language_end], &name[language_end + 1..]),
-            None => (name, ""),
-        };
-
-        let is = |candidates: &[&str]| candidates.iter().any(|candidate| language.eq_ignore_ascii_case(candidate));
+        let language = culture.id.language.as_str();
+        let is = |candidates: &[&str]| candidates.contains(&language);
 
         // 2. Japanese (Han + Hiragana + Katakana). The Jpan supercode picks Japanese fonts.
         if is(&["ja"]) {
@@ -51,7 +43,7 @@ impl Bcp47ScriptResolver {
 
         // 4. Chinese - Hans vs Hant disambiguation. Default to Hans when only "zh" is supplied.
         if is(&["zh"]) {
-            if Self::is_traditional_chinese_region(rest) {
+            if culture.id.region.is_some_and(|region| Self::is_traditional_chinese_region(region.as_str())) {
                 return Some(Cow::Borrowed("Hant"));
             }
 
@@ -86,43 +78,10 @@ impl Bcp47ScriptResolver {
         None
     }
 
-    fn try_extract_script_subtag(name: &str) -> Option<String> {
-        // Look for a four-letter ISO 15924 script subtag, e.g. "zh-Hans-CN" or "sr-Cyrl".
-        // The language subtag (the first one) is never a script.
-        name.split(['-', '_'])
-            .skip(1)
-            .find(|subtag| subtag.len() == 4 && subtag.bytes().all(|b| b.is_ascii_alphabetic()))
-            .map(|subtag| {
-                // Normalise to title case (Latn, Hans, Cyrl, ...).
-                let mut script = subtag.to_ascii_lowercase();
-                script[..1].make_ascii_uppercase();
-                script
-            })
-    }
-
-    fn is_traditional_chinese_region(rest: &str) -> bool {
-        // Iterate region/script subtags following "zh-".
-        for subtag in rest.split(['-', '_']) {
-            let is = |candidates: &[&str]| candidates.iter().any(|candidate| subtag.eq_ignore_ascii_case(candidate));
-
-            if is(&["Hant"]) {
-                return true;
-            }
-
-            if is(&["Hans"]) {
-                return false;
-            }
-
-            if is(&["TW", "HK", "MO"]) {
-                return true;
-            }
-
-            if is(&["CN", "SG", "MY"]) {
-                return false;
-            }
-        }
-
-        false
+    /// Whether a region of Chinese implies the traditional script (the locale holds the
+    /// region in upper case).
+    fn is_traditional_chinese_region(region: &str) -> bool {
+        ["TW", "HK", "MO"].contains(&region)
     }
 }
 
@@ -157,7 +116,7 @@ mod tests {
             ("sr-Cyrl", "Cyrl"),
             ("sr-Latn-RS", "Latn"),
         ] {
-            let culture = CultureInfo::get_culture_info(culture_name);
+            let culture = Locale::try_from_str(culture_name).unwrap();
 
             assert_eq!(
                 Bcp47ScriptResolver::get_script_subtag(Some(&culture)).as_deref(),
@@ -169,7 +128,7 @@ mod tests {
 
     #[test]
     fn invariant_culture_returns_null() {
-        assert_eq!(Bcp47ScriptResolver::get_script_subtag(Some(&CultureInfo::invariant_culture())), None);
+        assert_eq!(Bcp47ScriptResolver::get_script_subtag(Some(&Locale::UNKNOWN)), None);
     }
 
     #[test]
@@ -180,14 +139,15 @@ mod tests {
     #[test]
     fn unknown_language_returns_null() {
         // 'xx' is reserved as a private-use language tag; no canonical script.
-        let culture = CultureInfo::get_culture_info("xx");
+        let culture = Locale::try_from_str("xx").unwrap();
 
         assert_eq!(Bcp47ScriptResolver::get_script_subtag(Some(&culture)), None);
     }
 
     #[test]
     fn explicit_script_subtag_is_normalised_to_title_case() {
-        let culture = CultureInfo::get_culture_info("sr_cYRL_rs");
+        // The locale normalizes the case of the subtags of the tag it parses.
+        let culture = Locale::try_from_str("sr-cYRL-rs").unwrap();
 
         assert_eq!(Bcp47ScriptResolver::get_script_subtag(Some(&culture)).as_deref(), Some("Cyrl"));
     }

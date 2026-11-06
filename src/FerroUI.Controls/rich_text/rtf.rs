@@ -9,7 +9,7 @@ use ferroui_base::media::{
     IBrush, PenLineCap, TextAlignment, TextDecorationCollection, TextDecorationLocation,
     TextDecorationUnit, TextDecorations,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::{CultureInfo, Locale};
 use ferroui_base::Thickness;
 use std::collections::BTreeMap;
 use std::fmt::{self, Write};
@@ -310,7 +310,7 @@ struct Decoder {
     fonts: BTreeMap<i32, FontEntry>,
     colors: Vec<Option<Rc<dyn IBrush>>>,
     default_font: Option<i32>,
-    default_language: Option<CultureInfo>,
+    default_language: Option<Locale>,
     default_tab_stop: Option<f64>,
     styles: StyleTable,
     style_work: usize,
@@ -1660,10 +1660,10 @@ impl Encoder {
     }
     fn format(&mut self, format: &CharacterFormat) -> Result<(), RtfError> {
         if let Some(language) = &format.language {
-            let identifier = if language.is_invariant() {
+            let identifier = if *language == Locale::UNKNOWN {
                 1024
             } else {
-                language.lcid()
+                CultureInfo::from(language).lcid()
             };
             if identifier == 0x1000 {
                 return Err(RtfError::UnsupportedFeature(
@@ -1965,16 +1965,22 @@ impl Encoder {
     }
 }
 
-fn rtf_language(number: Option<i32>) -> Result<CultureInfo, RtfError> {
+/// The locale of a Windows language identifier; `1024` (no language) is the
+/// invariant culture, the unknown locale `und`.
+fn rtf_language(number: Option<i32>) -> Result<Locale, RtfError> {
     let identifier = number
         .filter(|value| (0..=65535).contains(value))
         .ok_or(RtfError::InvalidParameter("language identifier"))?;
     if identifier == 1024 {
-        return Ok(CultureInfo::invariant_culture());
+        return Ok(Locale::UNKNOWN);
     }
-    CultureInfo::get_culture_info_by_lcid(identifier).ok_or(RtfError::UnsupportedFeature(
-        "unknown Windows language identifier",
-    ))
+    let culture = CultureInfo::get_culture_info_by_lcid(identifier).ok_or(
+        RtfError::UnsupportedFeature("unknown Windows language identifier"),
+    )?;
+    // The traditional sort of Spanish (`es-ES_tradnl`) has no language tag.
+    Locale::try_from(&culture).map_err(|_| {
+        RtfError::UnsupportedFeature("Windows language identifier without a language tag")
+    })
 }
 
 fn rtf_measure(value: f64, scale: f64, parameter: &'static str) -> Result<i32, RtfError> {

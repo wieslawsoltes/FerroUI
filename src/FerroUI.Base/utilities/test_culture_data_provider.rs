@@ -6,7 +6,7 @@
 //! recorded output). Note the narrow no-break space (U+202F) before the
 //! designator in the time patterns of `en` and `en-US`.
 
-use super::{CalendarWeekRule, CultureTypes, DateTimeFormatInfo, DayOfWeek, ICultureDataProvider, NumberFormatInfo};
+use super::{locale, CalendarWeekRule, CultureTypes, DateTimeFormatInfo, DayOfWeek, ICultureDataProvider, Locale, NumberFormatInfo};
 use crate::FerroLocator;
 use std::rc::Rc;
 
@@ -81,10 +81,10 @@ impl Default for TestCultureDataProvider {
 }
 
 impl ICultureDataProvider for TestCultureDataProvider {
-    fn get_date_time_format(&self, culture_name: &str) -> Option<Rc<DateTimeFormatInfo>> {
-        if culture_name.eq_ignore_ascii_case("en") || culture_name.eq_ignore_ascii_case("en-US") {
+    fn get_date_time_format_by_locale(&self, locale: &Locale) -> Option<Rc<DateTimeFormatInfo>> {
+        if *locale == locale!("en") || *locale == locale!("en-US") {
             Some(Rc::clone(&self.en_us))
-        } else if culture_name.eq_ignore_ascii_case("en-GB") {
+        } else if *locale == locale!("en-GB") {
             Some(Rc::clone(&self.en_gb))
         } else {
             None
@@ -92,27 +92,27 @@ impl ICultureDataProvider for TestCultureDataProvider {
     }
 
     // number format: owned by numeric agent
-    fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
-        if culture_name.eq_ignore_ascii_case("en") {
+    fn get_number_format_by_locale(&self, locale: &Locale) -> Option<Rc<NumberFormatInfo>> {
+        if *locale == locale!("en") {
             Some(Rc::clone(&self.en_numbers))
-        } else if culture_name.eq_ignore_ascii_case("en-US") {
+        } else if *locale == locale!("en-US") {
             Some(Rc::clone(&self.en_us_numbers))
-        } else if culture_name.eq_ignore_ascii_case("en-GB") {
+        } else if *locale == locale!("en-GB") {
             Some(Rc::clone(&self.en_gb_numbers))
         } else {
             None
         }
     }
 
-    fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
-        let mut names = Vec::new();
+    fn get_locales(&self, types: CultureTypes) -> Vec<Locale> {
+        let mut locales = Vec::new();
         if types.contains(CultureTypes::NEUTRAL_CULTURES) {
-            names.push("en".to_string());
+            locales.push(locale!("en"));
         }
         if types.contains(CultureTypes::SPECIFIC_CULTURES) {
-            names.push("en-GB".to_string());
-            names.push("en-US".to_string());
+            locales.push(locale!("en-GB"));
+            locales.push(locale!("en-US"));
         }
-        names
+        locales
     }
 }

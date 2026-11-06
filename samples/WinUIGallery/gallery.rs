@@ -5,7 +5,7 @@ use crate::{examples, navigation::NavigationHistory};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::SelectingItemsControl;
@@ -280,7 +280,11 @@ impl GalleryState {
         self.body.children().add(links);
 
         if let Some(adaptation) = examples::find(entry.id) {
-            self.body.children().add(text("Port state: partial. The native examples below cover a reviewed subset of this page."));
+            self.body.children().add(text(if adaptation.ported {
+                "Port state: ported. Every catalog example of this page has a native adaptation below, or a recorded reason why it cannot have one. Rendering parity with Windows is checked separately."
+            } else {
+                "Port state: partial. The native examples below cover a reviewed subset of this page."
+            }));
             let heading = text("Native FerroUI examples");
             heading.set_font_size(20.0);
             heading.set_font_weight(FontWeight::SemiBold);
@@ -343,8 +347,8 @@ fn link(title: &str, url: &str) -> Ref<HyperlinkButton> {
     let link = HyperlinkButton::new();
     link.set_content(box_text(title));
     link.set_horizontal_alignment(HorizontalAlignment::Left);
-    if let Ok(uri) = Uri::new(url, UriKind::Absolute) {
-        link.set_navigate_uri(Some(uri));
+    if let Ok(uri) = UriRef::parse_absolute(url) {
+        link.set_navigate_uri(Some(UriRef::from(uri)));
     }
     link
 }

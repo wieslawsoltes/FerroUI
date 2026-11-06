@@ -3,18 +3,20 @@
 //!
 //! Deviation (DEVIATIONS.md, DynamicData): `IAsyncDisposable` belongs to the base library upstream;
 //! neither `ferroui-system` nor `ferroui-reactive` has it, so it lives here until `ferroui-system`
-//! does. Its `DisposeAsync` gives a `ValueTask`; here it gives a [`Task<()>`], the task type of
-//! `ferroui-system` (docs/porting/reactive.md, section 5.8).
+//! does. Its `DisposeAsync` gives a `ValueTask`; here it gives a
+//! [`Shared<Result<(), ObservableError>>`](Shared), the outcome of a task of `ferroui-system` for
+//! several observers, whose `flatten()` is a future of the result (docs/porting/reactive.md,
+//! section 5.8).
 
-use ferroui_system::threading::tasks::Task;
-use ferroui_system::IDisposable;
+use ferroui_system::task::Shared;
+use ferroui_system::{IDisposable, ObservableError};
 use std::rc::Rc;
 
 /// An object whose disposal ends later (`IAsyncDisposable`).
 pub trait IAsyncDisposable {
-    /// Starts the disposal and gives the task that ends with it; an error of the disposal faults
-    /// the task (`DisposeAsync`).
-    fn dispose_async(&self) -> Task<()>;
+    /// Starts the disposal and gives the task that ends with it; an error of the disposal is the
+    /// error of the task (`DisposeAsync`).
+    fn dispose_async(&self) -> Shared<Result<(), ObservableError>>;
 }
 
 /// How an item is disposed: at once, or by a task (`item is IDisposable`, `item is

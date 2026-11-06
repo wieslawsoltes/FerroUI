@@ -18,7 +18,7 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | O1 | The controls go into the core crate `ferroui-controls`, the navigation controls included, as #286 has them. Their XAML names are `FerroUI.Controls.*` in the default namespace `https://github.com/ferroui`; the types of navigation are in the namespace `FerroUI.Navigation` (module `ferroui_controls::navigation`). Repeater and Inking remain feature crates (decision D1 of 2026-10-23). |
 | O2, O2b | Default templates are XAML control themes, converted from the WinUI documents at the pin with `scripts/winui-theme/convert.py` into the WinUI theme crate `ferroui-themes-winui`. No template is built in Rust, and the theme tests get no allow-list. The Fluent and Simple themes have no templates for these controls for now (section 5). |
 | O3 | The behaviour code of #286 is kept for the leaf controls, with method names aligned to the C++ where they map one to one, and its differences are recorded. NavigationView lands with recorded deviations and moves onto ItemsRepeater in the follow-up F1. |
-| O4 | The WinUI XAML importer and the `x:Bind` compatibility go into a new crate, `ferroui-markup-xaml-winui`. Only `xaml_error_scope` is added to `ferroui-markup-xaml`. |
+| O4 | The WinUI XAML importer and the `x:Bind` compatibility go into a new crate, `ferroui-markup-xaml-winui`. Only `xaml_error_scope` is added to `ferroui-markup-xaml`. (Since #525, X6, the importer keeps x:Bind as written and the x:Bind core of `ferroui-markup-xaml` compiles it; the crate's adapter is removed, section 10.6.) |
 | O5 | `FerroObject::has_local_value` is not added to `ferroui-base`; InfoBadge tracks the priority of its own `CornerRadius` changes. |
 | O6 | UI Automation reports the real `SmallChange` and `LargeChange` of a range value provider (W1). |
 | O7 | The checked-in `compiled_xaml.rs` of the themes stays one file; #286's split into parts is not taken. |
@@ -43,10 +43,12 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | `AutoSuggestBox`, its text-changed, suggestion-chosen and query-submitted arguments, `AutoSuggestionBoxTextChangeReason` | `dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`, `controls/dev/AutoSuggestBox` | `AutoCompleteBox` (upstream; the control filters) | A separate type: in WinUI the application filters on `TextChanged`, with a reason. | W6 |
 | `RadioButtons` | `controls/dev/RadioButtons` | `RadioButton` (upstream) | New; `RadioButton` is its container, and the spacing comes from the `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing` resources. | W6 |
 | `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`, `RatingItemImageInfo` | `controls/dev/RatingControl` | none | New. | W6 |
+| `PersonPicture`, `PersonPictureTemplateSettings`, the contact it shows (`Contact`) | `controls/dev/PersonPicture` | none | New; `Contact` holds the members of the Windows Runtime contact the control reads (section 10.10). | G2a of #418 |
+| `PagerControl`, `PagerControlTemplateSettings`, `PagerControlDisplayMode`, `PagerControlButtonVisibility`, the selected-index-changed arguments | `controls/dev/PagerControl` | `PipsPager` (upstream; WinUI's PipsPager, another control in WinUI too) | New; the number panel is an items control (section 10.9). | G2a of #418 |
 | `Frame`, `FramePage` (WinUI `Page`), the navigation types (`NavigationMode`, `NavigationCacheMode`, `NavigationEventArgs`, `NavigatingCancelEventArgs`, `NavigationFailedEventArgs`, `PageStackEntry`) | `dxaml/xcp/dxaml/lib/Frame_Partial.cpp`, `Page_Partial.cpp`, `NavigationHistory.cpp` | `Page`, `NavigationPage`, `PageNavigationHost` (upstream) | Separate types (section 7). `FramePage` keeps the name `Page` for upstream; the navigation types are in `ferroui_controls::navigation`, so `navigation::NavigationEventArgs` does not collide with the upstream `NavigationEventArgs`. | W8 |
 | `NavigationView`, `NavigationViewItemBase`, `NavigationViewItem`, `NavigationViewItemHeader`, `NavigationViewItemSeparator`, their events and arguments | `controls/dev/NavigationView` | `SplitView` (upstream; NavigationView builds on it), `DrawerPage` (upstream; its WinUI template is drawn after the pane of NavigationView) | New. Items are hosted without ItemsRepeater and `SelectionModel` until F1; the overflow of the top pane, the transitions and `NavigationViewItemPresenter` are recorded as missing. | W8 |
 | Automation peers of the controls above | `controls/dev/*/*AutomationPeer.cpp` | | New peers in `ferroui_controls::automation::peers`. | W4 to W8 |
-| WinUI XAML importer, `x:Bind` | (FerroUI) | | `ferroui-markup-xaml-winui`. | W9 |
+| WinUI XAML importer, `x:Bind` | (FerroUI) | | `ferroui-markup-xaml-winui` (the importer); `x:Bind` is the x:Bind core of `ferroui-markup-xaml` since #525 ([x-bind.md](x-bind.md)). | W9 |
 
 Gallery pages that use existing FerroUI controls (ColorPicker as `ColorView`, FlipView as `Carousel` with `PipsPager`, `ConnectedAnimationService`) add no control.
 
@@ -57,7 +59,7 @@ Gallery pages that use existing FerroUI controls (ColorPicker as `ColorView`, Fl
 | A control with no FerroUI counterpart, or with a conflicting contract | A native type with the WinUI name | `ferroui-controls` (this page) |
 | A member with the same meaning and another spelling (`ColorPicker.IsColorSliderVisible` and `ColorView.IsColorSpectrumSliderVisible`) | A mapping of the importer, per document, with a diagnostic; no change of the API | `ferroui-markup-xaml-winui` |
 | A capability that does not conflict with an upstream-ported control | An opt-in member of that control (section 6) | `ferroui-controls` |
-| Markup semantics of WinUI only (`x:Bind` and its lifecycle, `ThemeResource` policy, `ms-appx:` URIs) | A markup extension or attached property of the compatibility crate, reached through the prefix the importer writes | `ferroui-markup-xaml-winui` |
+| Markup semantics of WinUI only (`ThemeResource` policy, `ms-appx:` URIs) | A markup extension or attached property of the compatibility crate, reached through the prefix the importer writes; `x:Bind` and its lifecycle are the x:Bind core of the XAML library, which both dialects share ([x-bind.md](x-bind.md)) | `ferroui-markup-xaml-winui` |
 | The WinUI look of the upstream-ported controls | The WinUI theme | `ferroui-themes-winui` |
 | The WinUI look of the controls of this page | Control themes converted with `convert.py` | `ferroui-themes-winui` |
 
@@ -85,6 +87,8 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `AutoSuggestBox` | WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle into the WinUI theme and its derived themes | W6 |
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml into the WinUI theme and its derived themes | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml into the WinUI theme and its derived themes | W6 |
+| `PersonPicture` | WinUI's PersonPicture: its template is converted from WinUI's PersonPicture.xaml into the WinUI theme and its derived themes | G2 of #418 |
+| `PagerControl` | WinUI's PagerControl: its template is converted from WinUI's PagerControl.xaml into the WinUI theme and its derived themes | G2 of #418 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes | W8 |
@@ -341,18 +345,19 @@ The crate `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`; t
   - The WinUI namespaces map to FerroUI's (`Microsoft.UI.Xaml.Controls` to `FerroUI.Controls`, `Microsoft.UI.Xaml.Navigation` to `FerroUI.Navigation`, and so on).
   - Audited type and member mappings with a diagnostic replace the rest, such as WinUI's inline `ColorPicker` adapted to `ColorView`.
   - What has no implementation is reported, not hidden, with the codes `WXAML0001` to `WXAML2006` and the source span of the original (`WinUIXamlMigration`, `WinUIXamlDiagnostic`).
-  - The event-target table (`importer/event_targets.rs`) is written by `scripts/winui-gallery/event_targets.py` from the WinUI API inventory `upstream-api.json`. That inventory is not committed (proposal section 9.3): the scanner of the gallery port (`scan.py`, W10b, section 10.8) makes it from the pinned checkouts, and the workflow `winui-gallery-scan.yml` runs `event_targets.py --check` after the scan.
 - **Loading** (`load.rs`): `load_winui`, `parse_winui` and `parse_winui_as` migrate the document, then load it with the run-time loader. A fresh root is loaded inside `xaml_error_scope::with_xaml_errors` (W2), so a deferred resource error comes back as `Err`. The entry points register the crate's types. A build-time compiler is fed the same migrated document.
-- **x:Bind** (`bindings/`): `WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope` and the `WinUIBindings` host lifecycle (`Initialize`, `Update`, `StopTracking`, opt-in stop on unload), in the namespace `FerroUI.Markup.Xaml.WinUI`, which the importer reaches through a `using:` prefix. It is an explicit property-path adapter on the ordinary binding engine, not WinUI's generated binding compiler. The contract and its pinned WinUI sources are in the crate's `NOTICE.md`. It is being replaced by the compiled x:Bind core of the XAML runtime library ([x-bind.md](x-bind.md), #525): FerroUI XAML has `{x:Bind}` since X1, and step X6 moves the importer onto it and removes this adapter and its diagnostics; the rows below are updated then.
+- **x:Bind** ([x-bind.md](x-bind.md), #525, X6): the importer keeps `{x:Bind ...}` and the directives `x:Phase`, `x:DefaultBindMode`, `x:Load` and `x:DeferLoadStrategy` as written. The XAML compiler (the run-time loader and the Rust emitter) maps x:Bind onto `XBindExtension` of `ferroui-markup-xaml`, the one compiled-binding core of both dialects, and checks it with WinUI's messages. `WinUIXBindPolicy::Compile` is the default; `WinUIXBindPolicy::Reject` reports every x:Bind of the document (`WXAML1007`). The importer itself reports only an x:Bind nested in an x:Bind (`WXAML1007`, WinUI's `XamlCompiler_XBindInsideXBind`). The property-path adapter of W9 (`WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope`, `WinUIBindings`, its diagnostic `WXAML2004` and the event-target table that rejected an x:Bind of an event) is removed; a host uses the `XBindings` of the core (`XBindings::get_for_root`, `initialize`, `update`, `stop_tracking`), or relies on its automatic initialization.
 
 | WinUI | Port | Kind | Why |
 |---|---|---|---|
-| The XAML compiler generates `x:Bind` code: functions, casts, indexers, converters, fallback values, event bindings, `x:Phase`, `x:DefaultBindMode`. | Dotted property paths with an explicit mode and update trigger; every other form is a diagnostic of the importer. | Missing | The adapter binds through registered property and model metadata; the other forms need generated code. |
-| The generated code initializes the bindings of a page during `Loading`. | The host calls `WinUIBindings::Initialize` after construction (and sets the `DataContext` of a typed template first); `Loaded` is not substituted. | Behaviour | There is no generated page class to hook; the lifecycle is explicit. |
-| `StopTracking` skips the reset when the generated group needs no tracking. | `StopTracking` always resets the controller to uninitialized, so a later `Initialize` refreshes every path. | Behaviour | One explicit lifecycle for every group. |
-| Sources and named elements are kept alive by the managed collector. | Source roots, named elements and intermediate values are held weakly; the declaring root or model owns its fields. | Representation | Rust ownership without cycles, as the native binding engine. |
+| The XAML compiler generates `x:Bind` code: property paths, named elements, attached and static members, casts, integer and string indexers, functions with path and literal arguments, `BindBack`, converters, `FallbackValue`, `TargetNullValue`, event bindings, `x:Phase`, `x:DefaultBindMode`, `x:Load` and `x:DeferLoadStrategy`, typed `DataTemplate` and `ControlTemplate` scopes. | The same forms, compiled by the x:Bind core into typed accessors (the Rust emitter) or invokers (the run-time loader); WinUI's diagnostics are compile or load errors with the source position (x-bind.md, sections 3.7 and 3.9 to 3.12). | Supported | One core for FerroUI XAML and WinUI XAML. |
+| The generated code initializes the bindings of a page during `Loading` (a `Window` on `Activated`), and a template instance on `DataContextChanged` until a container drives it through `ProcessBindings`. | A document root is initialized when it is attached to a visual tree (a `Window` when it is activated); a typed template instance when its data context changes to an item, or phase by phase through `IDataTemplateComponent`. A root that is not a visual is initialized with `XBindings::initialize`; a root that is already in a tree when a document populates it (a designer, hot reload) is initialized, or updated, by the population (`XBindings::update_populated`, #525, X7). | Behaviour | The framework has no `Loading` event; the attach to a visual tree follows construction and code-behind (x-bind.md, sections 3.13 and 6). |
+| x:Bind needs code-behind (`XamlCompiler_XBindWithoutCodeBehind`); a path cannot start with an attached property. | A document without `x:Class` binds to the type of its root element; `{x:Bind (Grid.Column)}` reads the attached property of the root. | Behaviour | A superset of WinUI (x-bind.md, section 3.2); a valid WinUI document is unaffected. |
+| A cast converts a number, a static field is a source, a `bool` function binds to `Visibility`, `SuspendRendering` keeps a phased element in the layout, `UnloadObject` releases a loaded element. | A cast is a type test; static members are properties; the framework's visibility is a `bool`; a phased element is hidden through `IsVisible`; `x:Load="True"` cannot be unloaded. | Behaviour | The deviations of the core (x-bind.md, sections 3.9 to 3.12). |
+| The generated `Bindings` field of a page (`this.Bindings.Update()`). | `MyPage::bindings()`, generated in the class file of a class document that uses x:Bind, returns the `XBindings` of the instance (`Option`, before the document has populated it). | Representation | A method over `XBindings::get_for_root` instead of a field (x-bind.md, section 3.13). |
+| Sources and named elements are kept alive by the managed collector. | The bindings hold their root, its sources and named elements weakly; the root owns its bindings. | Representation | Rust ownership without cycles, as the native binding engine. |
 
-Tests (75 in the crate, plus the regeneration of the compiled fixture): `importer_tests` (the migration, its diagnostics and the loading entry points), `bindings_tests` (the x:Bind lifecycle) and `compiled_tests`. In `compiled_tests` the same migrated documents run through the interpreter and through the Rust emitter, whose output, `fixtures/winui_bindings.generated.rs`, is checked in and compared with the current compiler.
+Tests: `importer_tests` (the migration, its diagnostics, x:Bind and its directives kept as written, the `Reject` policy and the loading entry points), `x_bind_tests` (WinUI documents on the core: initialization on attach, `x:DefaultBindMode`, `x:Load`, `x:Phase`, the core's WinUI-worded diagnostics as load errors) and `compiled_tests`. In `compiled_tests` the same migrated documents run through the interpreter and through the Rust emitter, whose output, `fixtures/winui_bindings.generated.rs`, is checked in and compared with the current compiler. The WinUI Gallery runs WinUI's x:Bind on the core: the preview of every catalog sample with x:Bind, a WinUI document after the Binding page's "Binding between controls", and the native pages that keep the x:Bind of their source (`samples/WinUIGallery/x_bind_tests.rs`, #525, X7).
 
 ### 10.7 WinUI Gallery (W10a)
 
@@ -367,6 +372,49 @@ The sample `samples/WinUIGallery` (package `winui-gallery`, not published) ports
 
 The workflow `winui-gallery.yml` runs the tests of the sample and checks its desktop and capture binaries on the paths of the sample and the WinUI controls (O12); it renders every page, the WinUI controls in the dark theme and the NavigationView compositions nightly and on demand. The scanner of the gallery is W10b (section 10.8).
 
+#### G1: pages of the controls on main (#418)
+
+Phase G1 of the full port (#418) gives the pending pages whose control is on main their native examples. A page is `ported` when every catalog example of it has a native adaptation with its events and bindings, or is `not-applicable` with the Windows-only API recorded in `port-status.json`; otherwise `partial`. The state is in `examples::ADAPTATIONS` (`page!(ported ...)`), shown on the page, and the test `adaptation_port_states_match_port_status` checks it against `port-status.json`.
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| ThemeShadow | 1 of 1 | ported | `materials_samples.rs` | `materials_samples_tests.rs` |
+| Acrylic | 3 of 3 | ported | `materials_samples.rs` | `materials_samples_tests.rs` |
+| SystemBackdrops | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
+| TitleBar | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
+| RichTextBlock | 4 of 4 | ported | `text_samples.rs` | `text_samples_tests.rs` |
+| RichEditBox | 2 ported, 1 partial, 2 not applicable | partial | `text_samples.rs` | `text_samples_tests.rs` |
+| ItemsRepeater | 4 ported, 2 partial | partial | `repeater_samples.rs` | `repeater_samples_tests.rs` |
+| LayoutPanel | 1 of 1 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
+| InkCanvas | 3 of 3 | ported | `ink_samples.rs` | `ink_samples_tests.rs` |
+| Chart | 3 ported, 4 partial | partial | `chart_samples.rs` | `chart_samples_tests.rs` |
+| ItemsView | 0 of 3 | pending | | |
+| SystemBackdropElement | no catalog sample | pending | | |
+
+ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `ItemContainer`) and `SystemBackdropElement` are not on main (the system backdrop of an element is crate-private, for the menu flyout presenter), so they are G2 work. The other pending pages are G2 and G3 (#418); the owner's deferrals (media, WebView2, maps, TableView) are unchanged.
+
+| WinUI Gallery | Port | Why |
+|---|---|---|
+| The sample windows of SystemBackdrops and TitleBar (`SampleSupport/SamplePages`). | Native windows built by `window_samples.rs` from `Pages/*Window.xaml`, extended into the title bar; a window lives until it closes. | The windows are the examples. |
+| `SampleSystemBackdropsWindow` adds its Activated, Closed and ActualThemeChanged handlers for every backdrop it sets. | Added once per window. | The repeated handlers of the source are a leak, not behaviour. |
+| `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
+| `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
+| `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type was on main when G1 landed (PersonPicture is G2a since). |
+| The ThemeShadow, the AcrylicBrush resources and the SolidColorBrush items with `ColorTemplate`. | A ThemeShadow resource set as `Shadow`; the brushes made in Rust with the source's values, page resources under the source's keys; composed swatch items, the handlers map the index to the colour. | As the templates of the WinUI theme share their shadow; the C# handlers change the brushes. |
+| The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
+| Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
+| `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
+| The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
+
+#### G2: the WinUI controls not on main (#418)
+
+Phase G2 ports the WinUI controls the pending pages need, one control (or one small family) per pull request, each into `ferroui-controls` with its tests, its template in the WinUI theme and its derived themes (macOS 26, Material), a ControlCatalog page and the gallery page. The order: the standalone controls first (G2a PagerControl and PersonPicture, G2b BreadcrumbBar, G2c ContentDialog and TeachingTip, G2d XamlUICommand, StandardUICommand and CommandBarFlyout, G2e ParallaxView, VariableSizedWrapGrid and SemanticZoom), then the scrolling chain (ScrollView, then ItemContainer and ItemsView, then SelectorBar and AnnotatedScrollBar), then the motion types on the composition work, and GridView and SwipeControl with #443. The media controls are #561 (on #550); AnimatedIcon and AnimatedVisualPlayer (#557), TableView (#558), CustomXamlConditionals (#559), WebView2 (#555) and MapControl (#556) are 0.6.0.
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
+| PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
+
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
 `scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
@@ -377,6 +425,32 @@ The workflow `winui-gallery.yml` runs the tests of the sample and checks its des
 | `api-evidence.json` and execution records (`data/executions/`) promote contracts and pages to `verified`; `--require-complete` gates on it. | Not taken: no contract or page is `verified`, and the scanner refuses the state for a page. | The records are per-run evidence (O8); behaviour is what the tests prove. |
 | `existing_api.py` and `ferroui-api-baseline.json`. | Not taken. | O9: the API gate guards the API. |
 | The implementation and test anchors of `api-mappings.json` name the importer in `ferroui-markup-xaml-loader` and the x:Bind adapter in `ferroui-markup-xaml`. | The anchors name `ferroui-markup-xaml-winui` (W9). | Where they landed. |
-| The event-target generator reads the committed snapshot. | `event_targets.py --api` (default: the scan's output). The table is the one W9 generated; only the hash of the inventory in its header changes, to the inventory at the pin `7e4b0c2`. | The inventory is not committed. |
+| The event-target generator reads the committed snapshot. | Removed with the x:Bind adapter (#525, X6): the importer no longer rejects an x:Bind of an event, which the x:Bind core binds. | The table had no other user. |
 
-The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts, `scan.py --check` and `event_targets.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`, the event-target table); at night it reports the drift that changes of the controls make to the report, without failing.
+The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts and `scan.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`); at night it reports the drift that changes of the controls make to the report, without failing.
+
+### 10.9 PagerControl (G2a)
+
+`src/FerroUI.Controls/pager_control.rs`, `primitives/pager_control_template_settings.rs` and `automation/peers/pager_control_automation_peer.rs`, from `controls/dev/PagerControl`. The tests are WinUI's API tests (`APITests/PagerControlTests.cs`) and the behaviour its interaction tests drive (`pager_control_tests.rs`), with the template of the WinUI theme in `the_pager_control_gets_its_parts_and_states_from_the_theme`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The number panel is an `ItemsRepeater` with a horizontal `StackLayout`, and the control asks it for the element of an index with `TryGetElement`. | An `ItemsControl` with a horizontal `StackPanel` of the same spacing; the element is `ContainerFromIndex`. | `ferroui-controls` cannot depend on the repeater crate, which depends on it (as RadioButtons, section 10.3). |
+| The visual states of `VisualStateManager`. | The pseudo-classes of the control (`:numberbox`, `:combobox`, `:numberpanel`, `:infinite`, `:firstcollapsed`, `:nexthidden`, ...), in the groups of WinUI. | The convention of the WinUI theme (section 5.1). |
+| `FirstButtonStyle`, `PreviousButtonStyle`, `NextButtonStyle`, `LastButtonStyle` are `Style`s. | Control themes, set as the `Theme` of the buttons. | FerroUI's styles of a control are control themes. |
+| The indicator of the current page moves with a `RepositionThemeTransition`; the navigation buttons have tooltips of their automation names. | No transition; no tooltips. | Not yet (the theme transitions are G2 motion work). |
+| The localized strings of `Resources.resw`. | The English strings. | As the other WinUI controls. |
+| The left and right keys move the focus from the root grid, also with the gamepad's D-pad. | From the control (the key down of the root grid bubbles to it); no gamepad keys. | FerroUI has no gamepad keys. |
+| A selected page out of range is coerced by setting it again inside its change, which raises `SelectedIndexChanged` for the value set and for the coerced value; setting the maximum of the number box when the template is applied coerces its value, which selects a page. | The same. | Kept: the order of the events is WinUI's. |
+
+### 10.10 PersonPicture (G2a)
+
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `Contact` is the Windows Runtime's `Windows.ApplicationModel.Contacts.Contact`, whose display name the system composes and whose pictures are stream references the control opens and decodes asynchronously, at the size of the control. | `ferroui_controls::Contact` with `Id`, `FirstName`, `LastName`, `DisplayNameOverride` and the four pictures as images; the display name is the override, or the first and last names. The picture of a contact is shown at once. | The Windows contact store has no counterpart off Windows. |
+| `ProfilePicture` and `BadgeImageSource` are `ImageSource`s. | Image brush sources (a bitmap), the type of the image brush that paints them. | The picture is the source of an `ImageBrush`. |
+| The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
+| The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
+| The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |

@@ -1796,6 +1796,7 @@ mod effect_prewarm_tests {
             let mut context = MockDrawingContextImpl::new(self.prewarm_log.clone());
             context.supports_effects = true;
             context.supports_layer_effects = true;
+            context.log_effects = true;
             paint(&mut context);
             true
         }
@@ -1845,5 +1846,82 @@ mod effect_prewarm_tests {
         s.run_jobs();
         assert_eq!(1, prewarm_log.count(fill), "{:?}", prewarm_log.entries());
         assert_eq!(0, s.render_interface.log().count(fill));
+    }
+
+    /// The custom effects FerroUI ships are prewarmed by the first frame of a
+    /// composition target (#455, E9): each type of the library registers its
+    /// graph or its runtime shader when the registry is first read, and the
+    /// target draws each once offscreen after its first frame, as the render
+    /// walk draws it: a runtime shader pushed as an effect of the drawing
+    /// context at the value its type registered, a graph around the image as
+    /// its layers (the colour matrices, the convolutions, the drop shadow of
+    /// the glow). The frames that follow draw none of them again.
+    #[test]
+    fn a_target_prewarms_the_custom_effects_of_the_library_after_its_first_frame() {
+        crate::media::effects::library::register_library_effects();
+        let shaders = [
+            "pixelate",
+            "scanline",
+            "spotlight",
+            "dissolve-transition",
+            "mask-transition",
+            "pointer-spotlight",
+            "reactive-grid",
+            "water-ripple",
+            "burning-flame",
+        ];
+        let graphs = ["tint", "grayscale", "sepia", "saturation", "brightness-contrast", "invert", "glow", "sharpen", "edge-detect"];
+        let names = crate::rendering::composition::effects::effect_prewarm_names();
+        for name in shaders.iter().chain(graphs.iter()) {
+            assert!(names.contains(&format!("custom-effect:{name}")), "{name}: {names:?}");
+        }
+
+        let prewarm_log = DrawingLog::new();
+        let shared = prewarm_log.clone();
+        let s = CompositorCanvas::with_size_and_setup(Size::new(100.0, 100.0), move |render_interface| {
+            render_interface.set_backend_context_factory(
+                move |log: &DrawingLog, _graphics: Option<Rc<dyn IPlatformGraphicsContext>>| {
+                    let context: Rc<dyn IPlatformRenderInterfaceContext> =
+                        Rc::new(PrewarmingContext { log: log.clone(), prewarm_log: shared.clone() });
+                    context
+                },
+            );
+        });
+
+        let pushed_shader = |log: &DrawingLog, name: &str| {
+            let marker = format!(" shader {name}(");
+            log.entries().iter().filter(|entry| entry.starts_with("PushEffect ") && entry.contains(&marker)).count()
+        };
+        let entries = prewarm_log.entries();
+        for name in shaders {
+            assert_eq!(1, pushed_shader(&prewarm_log, name), "{name}: {entries:?}");
+        }
+        // A graph is drawn at the values of its description: the colour
+        // matrix layers of grayscale (a saturation of 0) and sepia (an
+        // intensity of 1); the tint (white), the saturation (1) and the
+        // linear transfers of brightness and contrast and of invert are the
+        // identity there and draw no layer, a colour matrix layer being one
+        // program whatever its matrix. Sharpen and edge detect are
+        // convolution layers, the glow a drop shadow. Other effects
+        // registered by the process add to these.
+        assert!(prewarm_log.count("PushColorMatrixLayer") >= 2, "{entries:?}");
+        assert!(prewarm_log.count("PushConvolveMatrixLayer") >= 2, "{entries:?}");
+        assert!(entries.iter().any(|entry| entry.starts_with("PushEffect ") && entry.contains("drop-shadow(")), "{entries:?}");
+        assert_eq!(prewarm_log.count("PushEffect"), prewarm_log.count("PopEffect"), "{entries:?}");
+        assert_eq!(prewarm_log.count("PushColorMatrixLayer"), prewarm_log.count("PopColorMatrixLayer"), "{entries:?}");
+        // Nothing of it into the frames.
+        for name in shaders {
+            assert_eq!(0, pushed_shader(s.render_interface.log(), name), "{name}");
+        }
+
+        // The frames that follow prewarm nothing again.
+        let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+        s.canvas.add(&child);
+        s.run_jobs();
+        child.set_background(Some(Brushes::blue()));
+        s.run_jobs();
+        for name in shaders {
+            assert_eq!(1, pushed_shader(&prewarm_log, name), "{name}");
+        }
     }
 }

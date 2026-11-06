@@ -644,6 +644,40 @@ fn converter_culture_can_be_specified_by_ietf_language_tag() {
     assert_eq!(Some("Hello+ar-SA"), text_block.text().as_deref());
 }
 
+/// Not from upstream (C5 of #423, L2): the `ConverterCulture` of a binding is parsed into a
+/// locale, and the converter gets the culture of the locale: the case of the subtags is
+/// normalized, and a text that is no BCP-47 tag (a private name, a `_` separator, an old
+/// name) is a load error with the error of the converter of an IETF tag.
+#[test]
+fn converter_culture_is_parsed_into_a_locale() {
+    let _app = styled_window_application();
+    let xaml = |tag: &str| {
+        format!(
+            r#"
+<Window xmlns='https://github.com/ferroui'
+        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+        xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests.Xaml;assembly=FerroUI.Markup.Xaml.UnitTests'>
+  <TextBlock Name='textBlock' Text='{{Binding Greeting1, Converter={{x:Static local:BindingTests+CultureAppender.Instance}}, ConverterCulture={tag}}}'/>
+</Window>"#
+        )
+    };
+    let window: Ref<Window> = load_as(&xaml("ar-sa"));
+    let text_block = object_of::<TextBlock>(&window.content());
+
+    window.set_data_context(Some(WindowViewModel::new()));
+    window.apply_template();
+
+    assert_eq!(Some("Hello+ar-SA"), text_block.text().as_deref());
+
+    for tag in ["x-private", "en_US", "zh-CHT"] {
+        let error = match try_load(&xaml(tag)) {
+            Ok(_) => panic!("the converter culture {tag} is not a locale"),
+            Err(error) => describe(&error),
+        };
+        assert!(error.contains(&format!("Culture IETF Name {tag} is not a recognized IETF name.")), "{error}");
+    }
+}
+
 #[test]
 fn binding_classes_works() {
     let _app = styled_window_application();

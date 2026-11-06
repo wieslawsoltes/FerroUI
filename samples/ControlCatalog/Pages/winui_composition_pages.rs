@@ -6,12 +6,12 @@
 //! (visuals, brushes, animations, shadows and lights, the interaction tracker, effect brushes),
 //! `winui_composition_phase7.rs` (alpha mask shadows, `ThemeShadow`, zoom) and
 //! `winui_materials_page.rs` (acrylic, blend and colour effects, lights, Reveal, system backdrops,
-//! menus) and `custom_effects_page.rs` (the custom effects of `Visual.Effect`, #455).
+//! menus). The custom effects of `Visual.Effect` (#455) have a section of their own
+//! (`custom_effects_pages.rs`).
 //!
 //! The headers here are the ones of the entries of the page list
 //! (`ViewModels/main_window_view_model_page_list.rs`).
 
-use super::custom_effects_page::custom_effects_section;
 use super::winui_composition_page::{
     connected_animation_section, implicit_animations_section, parallax_section, pointer_section, section,
 };
@@ -48,7 +48,6 @@ const LIGHTING: &str = "Lighting";
 const REVEAL: &str = "Reveal";
 const SYSTEM_BACKDROPS: &str = "System backdrops";
 const ACRYLIC_MENUS: &str = "Acrylic menus";
-const CUSTOM_EFFECTS: &str = "Custom effects";
 
 /// The pages whose demos the smoke run of the desktop entry point shows one after the other
 /// (`smoke_show_section` and `smoke_run_section`), by index: the order of the sections of the
@@ -280,9 +279,4 @@ pub fn system_backdrops_page() -> Ref<ContentPage> {
 /// The page "Acrylic menus".
 pub fn acrylic_menus_page() -> Ref<ContentPage> {
     feature_page(ACRYLIC_MENUS, menu_section())
-}
-
-/// The page "Custom effects": the custom effects of the library on `Visual.Effect` (#455).
-pub fn custom_effects_page() -> Ref<ContentPage> {
-    feature_page(CUSTOM_EFFECTS, custom_effects_section())
 }

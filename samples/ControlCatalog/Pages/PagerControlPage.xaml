@@ -1,0 +1,45 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="PagerControl"
+             x:Class="ControlCatalog.Pages.PagerControlPage">
+  <!-- Not from upstream: WinUI's PagerControl (docs/porting/winui-controls.md, G2). Its template is
+       in the WinUI theme and the macOS and Material themes derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A PagerControl moves through the pages of paged content: buttons to the first, previous, next and last page around a combo box, a number box or a button for each page.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Options</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">DisplayMode:</TextBlock>
+      <ComboBox Grid.Row="0" Grid.Column="1" x:Name="Mode" SelectedIndex="0" Margin="2">
+        <PagerControlDisplayMode>Auto</PagerControlDisplayMode>
+        <PagerControlDisplayMode>ComboBox</PagerControlDisplayMode>
+        <PagerControlDisplayMode>NumberBox</PagerControlDisplayMode>
+        <PagerControlDisplayMode>ButtonPanel</PagerControlDisplayMode>
+      </ComboBox>
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">NumberOfPages:</TextBlock>
+      <NumericUpDown Grid.Row="1" Grid.Column="1" x:Name="Pages" Minimum="-1" Maximum="1000" Value="12" Increment="1" FormatString="0" Margin="2" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">Edge buttons:</TextBlock>
+      <ComboBox Grid.Row="2" Grid.Column="1" x:Name="Edges" SelectedIndex="0" Margin="2">
+        <PagerControlButtonVisibility>Visible</PagerControlButtonVisibility>
+        <PagerControlButtonVisibility>HiddenOnEdge</PagerControlButtonVisibility>
+        <PagerControlButtonVisibility>Hidden</PagerControlButtonVisibility>
+      </ComboBox>
+    </Grid>
+    <PagerControl x:Name="Configurable" Margin="2" HorizontalAlignment="Left"
+                  DisplayMode="{Binding #Mode.SelectedItem}"
+                  NumberOfPages="{Binding #Pages.Value}"
+                  FirstButtonVisibility="{Binding #Edges.SelectedItem}"
+                  PreviousButtonVisibility="{Binding #Edges.SelectedItem}"
+                  NextButtonVisibility="{Binding #Edges.SelectedItem}"
+                  LastButtonVisibility="{Binding #Edges.SelectedItem}" />
+    <TextBlock Margin="2" Text="{Binding #Configurable.SelectedPageIndex, StringFormat='Selected page index: {0}'}" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Button panel</TextBlock>
+    <PagerControl Margin="2" HorizontalAlignment="Left" DisplayMode="ButtonPanel" NumberOfPages="20" SelectedPageIndex="9" />
+    <PagerControl Margin="2" HorizontalAlignment="Left" DisplayMode="ButtonPanel" NumberOfPages="20" SelectedPageIndex="9"
+                  ButtonPanelAlwaysShowFirstLastPageIndex="False" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">An unknown number of pages</TextBlock>
+    <PagerControl Margin="2" HorizontalAlignment="Left" NumberOfPages="-1" PrefixText="Go to page" />
+  </StackPanel>
+</ContentPage>

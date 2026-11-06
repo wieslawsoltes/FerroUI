@@ -4,7 +4,8 @@
 //! The ordinal comparisons are complete and built in. The culture-sensitive
 //! comparisons belong to the culture: [`CultureInfo::compare_info`] gives the
 //! comparer of a culture, whose rules come from the culture data provider
-//! registered with the locator ([`ICultureDataProvider::get_compare_rules`]).
+//! registered with the locator
+//! ([`ICultureDataProvider::get_compare_rules_by_locale`](super::ICultureDataProvider::get_compare_rules_by_locale)).
 //! Without a provider, or for a culture the provider has no rules for, the
 //! built-in invariant rules are used. They are the ones the reference
 //! runtime uses in its invariant globalization mode: a culture-sensitive
@@ -15,8 +16,8 @@
 //!
 //! Positions and lengths are in UTF-16 code units, as in the reference.
 
-use super::{CultureInfo, ICultureDataProvider};
-use crate::{FerroLocator, LocatorExtensions};
+use super::i_culture_data_provider::find_culture_data;
+use super::CultureInfo;
 use bitflags::bitflags;
 use std::cmp::Ordering;
 use std::rc::Rc;
@@ -65,9 +66,9 @@ impl StringComparison {
     /// The comparer and the options this comparison stands for.
     fn resolve(self) -> (CompareInfo, CompareOptions) {
         match self {
-            StringComparison::CurrentCulture => (CultureInfo::current_culture().compare_info(), CompareOptions::NONE),
+            StringComparison::CurrentCulture => (CultureInfo::current_formatting().compare_info(), CompareOptions::NONE),
             StringComparison::CurrentCultureIgnoreCase => {
-                (CultureInfo::current_culture().compare_info(), CompareOptions::IGNORE_CASE)
+                (CultureInfo::current_formatting().compare_info(), CompareOptions::IGNORE_CASE)
             }
             StringComparison::InvariantCulture => (CompareInfo::invariant(), CompareOptions::NONE),
             StringComparison::InvariantCultureIgnoreCase => (CompareInfo::invariant(), CompareOptions::IGNORE_CASE),
@@ -277,17 +278,13 @@ impl CultureInfo {
     /// The comparer of the culture (C# `CompareInfo`): the rules the culture
     /// data provider has for the culture or for the nearest of its parents,
     /// and otherwise the built-in invariant rules.
+    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub fn compare_info(&self) -> CompareInfo {
-        let mut rules = None;
-        if !self.is_invariant() {
-            if let Some(provider) = FerroLocator::current().get_service::<dyn ICultureDataProvider>() {
-                let mut current = self.clone();
-                while rules.is_none() && !current.is_invariant() {
-                    rules = provider.get_compare_rules(current.name());
-                    current = current.parent();
-                }
-            }
-        }
+        let rules = find_culture_data(
+            self,
+            |provider, locale| provider.get_compare_rules_by_locale(locale),
+            |provider, name| provider.get_compare_rules(name),
+        );
         CompareInfo { name: Rc::from(self.name()), rules }
     }
 }
@@ -295,6 +292,8 @@ impl CultureInfo {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utilities::{locale, ICultureDataProvider, Locale};
+    use crate::FerroLocator;
 
     #[test]
     fn ordinal_compares_code_units() {
@@ -434,8 +433,8 @@ mod tests {
     struct Provider;
 
     impl ICultureDataProvider for Provider {
-        fn get_compare_rules(&self, culture_name: &str) -> Option<Rc<dyn ICompareRules>> {
-            (culture_name == "xx").then(|| Rc::new(EverythingIsEqual) as Rc<dyn ICompareRules>)
+        fn get_compare_rules_by_locale(&self, locale: &Locale) -> Option<Rc<dyn ICompareRules>> {
+            (*locale == locale!("xx")).then(|| Rc::new(EverythingIsEqual) as Rc<dyn ICompareRules>)
         }
     }
 

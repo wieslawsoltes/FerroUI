@@ -986,3 +986,410 @@ fn to_binding_binds_values_of_observable() {
 
     assert_eq!("second", target.get_value(property));
 }
+
+#[test]
+fn boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error() {
+    for fail in [false, true] {
+        let target = Class1::new();
+        let property = Class1::qux_property();
+        let disposed = Counter::new();
+        let changes = Recorder::new();
+        let log = changes.clone();
+        target.property_changed(move |change| log.push(change.get_new_value::<f64>()));
+        let count = disposed.clone();
+        let source = Observable::create(move |observer| {
+            observer.on_next(boxed(12.5));
+            if fail {
+                observer.on_error(Rc::new(std::io::Error::other("source failed")));
+            } else {
+                observer.on_completed();
+            }
+            let count = count.clone();
+            Disposable::create(move || count.increment())
+        });
+
+        let binding = target.bind_property_untyped(property, source, BindingPriority::Style);
+        assert_eq!(changes.get(), vec![12.5, 5.6]);
+        assert_eq!(target.get_value(property), 5.6);
+        assert_eq!(disposed.get(), 1);
+        binding.dispose();
+        assert_eq!(disposed.get(), 1);
+    }
+}
+
+#[test]
+fn boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal() {
+    let target = Class1::new();
+    let property = Class1::qux_property();
+    let source = Subject::behavior(boxed(8.5));
+    target.set_value(property, 15.0);
+    let binding = target.bind_property_untyped(property, source.observable(), BindingPriority::Style);
+    assert_eq!(source.subscriber_count(), 0);
+
+    target.clear_value(property);
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 8.5);
+    source.on_next(boxed(BindingValue::<f64>::data_validation_error(error("invalid"))));
+    assert_eq!(target.get_value(property), 8.5);
+    source.on_next(boxed(BindingValue::<f64>::binding_error_with_fallback(error("fallback"), Some(9.5))));
+    assert_eq!(target.get_value(property), 9.5);
+
+    binding.dispose();
+    assert_eq!(source.subscriber_count(), 0);
+    source.on_next(boxed(21.0));
+    assert_eq!(target.get_value(property), 5.6);
+}
+
+#[test]
+fn boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box() {
+    #[derive(PartialEq)]
+    struct Snapshot(Cell<i32>);
+
+    impl Clone for Snapshot {
+        fn clone(&self) -> Self {
+            Self(Cell::new(self.0.get()))
+        }
+    }
+
+    for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
+        let target = Class1::new();
+        let property = FerroProperty::register::<Class1, _>("BoxedSnapshot", Snapshot(Cell::new(0)));
+        let source = Subject::<BoxedValue>::new();
+        let binding = target.bind_untyped(property, source.observable(), priority);
+        let input = Rc::new(Snapshot(Cell::new(17)));
+
+        source.on_next(input.clone());
+        input.0.set(29);
+
+        assert_eq!(target.get_value(property).0.get(), 17);
+        assert_eq!(Rc::strong_count(&input), 1);
+        binding.dispose();
+    }
+}
+
+#[test]
+fn retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive() {
+    #[derive(Clone, PartialEq)]
+    struct Payload(Option<Rc<()>>);
+
+    for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
+        let target = Class1::new();
+        let property = FerroProperty::register::<Class1, _>("WeakBoxedObserver", Payload(None));
+        let retained = Rc::new(RefCell::new(None::<Rc<dyn IObserver<BoxedValue>>>));
+        let saved = retained.clone();
+        let source = Observable::create(move |observer| {
+            *saved.borrow_mut() = Some(observer);
+            Disposable::empty()
+        });
+        let binding = target.bind_untyped(property, source, priority);
+        let weak_binding = Rc::downgrade(&binding);
+        let token = Rc::new(());
+        let weak_token = Rc::downgrade(&token);
+        retained.borrow().as_ref().unwrap().on_next(boxed(Payload(Some(token))));
+        assert!(weak_token.upgrade().is_some());
+
+        binding.dispose();
+        drop(binding);
+        // A local binding leaves its last effective value in the store.
+        target.clear_value(property);
+
+        assert!(weak_binding.upgrade().is_none());
+        assert!(weak_token.upgrade().is_none());
+        assert!(retained.borrow().is_some());
+        retained.borrow().as_ref().unwrap().on_next(boxed(Payload(Some(Rc::new(())))));
+        assert!(target.get_value(property).0.is_none());
+    }
+}
+
+#[test]
+fn boxed_frame_keeps_its_first_fallback_across_unsubscribe_and_resubscribe() {
+    // The property is declared by Class1. Class2 initially inherits that
+    // metadata, so its first override below is a valid metadata transition.
+    let target = Class2::new();
+    let property = FerroProperty::register::<Class1, _>("CachedBoxedFallback", 11i32);
+    let source = Subject::behavior(FerroProperty::unset_value());
+    let binding = target.bind_untyped(property, source.observable(), BindingPriority::Style);
+    assert_eq!(target.get_value(property), 11);
+    assert_eq!(source.subscriber_count(), 1);
+
+    // A local value masks the effective value without replacing the style
+    // entry, so the original subscription remains active.
+    target.set_value(property, 29);
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 29);
+    target.clear_value(property);
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 11);
+
+    // A higher-priority frame replaces the active entry and actually
+    // unsubscribes it. Disposing that frame exercises the quiet restart.
+    let masking = target
+        .set_value_with_priority(property, 29, BindingPriority::Template)
+        .expect("a template value has a disposal handle");
+    assert_eq!(source.subscriber_count(), 0);
+    assert_eq!(target.get_value(property), 29);
+    property.override_metadata::<Class2>(StyledPropertyMetadata::new(Some(47)));
+    masking.dispose();
+
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 11);
+    binding.dispose();
+    assert_eq!(source.subscriber_count(), 0);
+    assert_eq!(target.get_value(property), 47);
+
+    let replacement = target.bind_untyped(property, source.observable(), BindingPriority::Style);
+    assert_eq!(target.get_value(property), 47);
+    replacement.dispose();
+}
+
+#[test]
+fn boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone() {
+    use crate::data::{BindingError, BindingErrorType, BindingNotification};
+    use std::fmt;
+
+    struct Payload {
+        number: i32,
+        on_clone: Option<Rc<dyn Fn()>>,
+        on_drop: Option<Rc<dyn Fn()>>,
+    }
+    impl Clone for Payload {
+        fn clone(&self) -> Self {
+            if let Some(on_clone) = &self.on_clone {
+                on_clone();
+            }
+            Self { number: self.number, on_clone: None, on_drop: None }
+        }
+    }
+    impl PartialEq for Payload {
+        fn eq(&self, other: &Self) -> bool {
+            self.number == other.number
+        }
+    }
+    impl Drop for Payload {
+        fn drop(&mut self) {
+            if let Some(on_drop) = self.on_drop.take() {
+                on_drop();
+            }
+        }
+    }
+    #[derive(Debug)]
+    struct ErrorProbe(Rc<RefCell<Vec<&'static str>>>);
+    impl fmt::Display for ErrorProbe {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.write_str("snapshot error")
+        }
+    }
+    impl std::error::Error for ErrorProbe {}
+    impl Drop for ErrorProbe {
+        fn drop(&mut self) {
+            self.0.borrow_mut().push("error drop");
+        }
+    }
+
+    for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let validation_log = log.clone();
+        let property = FerroProperty::register_with::<Class1, _>(
+            "NotificationSnapshotLifetime",
+            StyledPropertyOptions::new(Payload { number: 0, on_clone: None, on_drop: None }).validate(move |v| {
+                if v.number == 7 {
+                    assert_eq!(&validation_log.borrow()[..3], &["clone", "payload drop", "error drop"]);
+                    validation_log.borrow_mut().push("validate");
+                }
+                true
+            }),
+        );
+        let target = Class1::new();
+        let source = Subject::<BoxedValue>::new();
+        let binding = target.bind_untyped(property, source.observable(), priority);
+        let notification = Rc::new(BindingNotification::with_error(
+            BindingError::new(ErrorProbe(log.clone())),
+            BindingErrorType::Error,
+        ));
+        // The error still has to be snapshotted, although this notification
+        // will produce an ordinary value and release that snapshot locally.
+        notification.set_error_type(BindingErrorType::None);
+        let weak = Rc::downgrade(&notification);
+        let clone_log = log.clone();
+        let drop_log = log.clone();
+        notification.set_value(Some(boxed(Payload {
+            number: 7,
+            on_clone: Some(Rc::new(move || {
+                clone_log.borrow_mut().push("clone");
+                let notification = weak.upgrade().unwrap();
+                notification.set_value(None);
+                notification.set_error(None);
+                // Reentrant mutation must not release either original
+                // snapshot until copying the original payload completes.
+                assert_eq!(&*clone_log.borrow(), &["clone"]);
+            })),
+            on_drop: Some(Rc::new(move || drop_log.borrow_mut().push("payload drop"))),
+        })));
+
+        source.on_next(notification.clone());
+
+        assert_eq!(target.get_value(property).number, 7);
+        assert!(notification.value().is_none());
+        assert!(notification.error().is_none());
+        assert_eq!(&log.borrow()[..3], &["clone", "payload drop", "error drop"]);
+        assert!(log.borrow()[3..].contains(&"validate"));
+        binding.dispose();
+    }
+}
+
+#[test]
+fn boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwind() {
+    use crate::data::core::ValueTypes;
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    #[derive(PartialEq)]
+    struct Input;
+    struct Output {
+        number: i32,
+        temporary: bool,
+        panic_on_clone: bool,
+        dropped: Rc<Cell<bool>>,
+    }
+    impl Clone for Output {
+        fn clone(&self) -> Self {
+            assert!(!self.panic_on_clone, "converted value clone failed");
+            Self { number: self.number, temporary: false, panic_on_clone: false, dropped: self.dropped.clone() }
+        }
+    }
+    impl PartialEq for Output {
+        fn eq(&self, other: &Self) -> bool {
+            self.number == other.number
+        }
+    }
+    impl Drop for Output {
+        fn drop(&mut self) {
+            if self.temporary {
+                self.dropped.set(true);
+            }
+        }
+    }
+
+    for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
+        for panic_on_clone in [false, true] {
+            let dropped = Rc::new(Cell::new(false));
+            let validations = Rc::new(Cell::new(0));
+            let observed_validations = validations.clone();
+            let property = FerroProperty::register_with::<Class1, _>(
+                "BindingConversionTemporary",
+                StyledPropertyOptions::new(Output {
+                    number: 0,
+                    temporary: false,
+                    panic_on_clone: false,
+                    dropped: dropped.clone(),
+                }).validate(move |value| {
+                    if value.number == 23 {
+                        assert!(value.dropped.get(), "conversion temporary survived into validation");
+                        observed_validations.set(observed_validations.get() + 1);
+                    }
+                    true
+                }),
+            );
+            let conversion_dropped = dropped.clone();
+            ValueTypes::register_cast::<Input, Output>(move |_| Output {
+                number: 23,
+                temporary: true,
+                panic_on_clone,
+                dropped: conversion_dropped.clone(),
+            });
+            let target = Class1::new();
+            let retained = Rc::new(RefCell::new(None::<Rc<dyn IObserver<BoxedValue>>>));
+            let saved = retained.clone();
+            let source = Observable::create(move |observer| {
+                *saved.borrow_mut() = Some(observer);
+                Disposable::empty()
+            });
+            let binding = target.bind_untyped(property, source, priority);
+            let observer = retained.borrow().as_ref().unwrap().clone();
+
+            let result = catch_unwind(AssertUnwindSafe(|| observer.on_next(boxed(Input))));
+
+            assert_eq!(result.is_err(), panic_on_clone);
+            assert!(dropped.get());
+            assert_eq!(target.get_value(property).number, if panic_on_clone { 0 } else { 23 });
+            assert_eq!(validations.get() == 0, panic_on_clone);
+            binding.dispose();
+        }
+    }
+}
+
+#[test]
+fn boxed_input_drop_runs_after_the_delivery_releases_its_binding() {
+    use crate::data::core::ValueTypes;
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    struct Input {
+        reentrant: bool,
+        on_drop: Option<Rc<dyn Fn()>>,
+    }
+    impl PartialEq for Input {
+        fn eq(&self, other: &Self) -> bool {
+            self.reentrant == other.reentrant
+        }
+    }
+    impl Drop for Input {
+        fn drop(&mut self) {
+            if let Some(on_drop) = self.on_drop.take() {
+                on_drop();
+            }
+        }
+    }
+
+    for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
+        for panic_on_conversion in [false, true] {
+            let target = Class1::new();
+            let property = FerroProperty::register::<Class1, _>("InputDropBindingLifetime", 0i32);
+            let retained = Rc::new(RefCell::new(None::<Rc<dyn IObserver<BoxedValue>>>));
+            let saved = retained.clone();
+            let source = Observable::create(move |observer| {
+                *saved.borrow_mut() = Some(observer);
+                Disposable::empty()
+            });
+            let binding = target.bind_untyped(property, source, priority);
+            let weak_binding = Rc::downgrade(&binding);
+            let lease = Rc::new(RefCell::new(Some(binding)));
+            let conversion_lease = lease.clone();
+            let reentrant_conversions = Rc::new(Cell::new(0));
+            let conversions = reentrant_conversions.clone();
+            ValueTypes::register_cast::<Input, i32>(move |input| {
+                if input.reentrant {
+                    conversions.set(conversions.get() + 1);
+                } else {
+                    let binding = conversion_lease.borrow_mut().take().unwrap();
+                    binding.dispose();
+                    drop(binding);
+                    assert!(!panic_on_conversion, "input conversion failed");
+                }
+                23
+            });
+
+            let observer = retained.borrow().as_ref().unwrap().clone();
+            let reentrant_observer = observer.clone();
+            let input_dropped = Rc::new(Cell::new(false));
+            let dropped = input_dropped.clone();
+            let alive_at_input_drop = Rc::new(Cell::new(false));
+            let alive = alive_at_input_drop.clone();
+            let input = Input {
+                reentrant: false,
+                on_drop: Some(Rc::new(move || {
+                    dropped.set(true);
+                    alive.set(weak_binding.upgrade().is_some());
+                    // A source may retain its observer after disposal. The
+                    // outer delivery must release its last binding reference
+                    // before dropping this input, also while unwinding.
+                    reentrant_observer.on_next(boxed(Input { reentrant: true, on_drop: None }));
+                })),
+            };
+            let result = catch_unwind(AssertUnwindSafe(|| observer.on_next(boxed(input))));
+            assert_eq!(result.is_err(), panic_on_conversion);
+            assert!(lease.borrow().is_none());
+            assert!(input_dropped.get());
+            assert!(!alive_at_input_drop.get());
+            assert_eq!(reentrant_conversions.get(), 0);
+        }
+    }
+}

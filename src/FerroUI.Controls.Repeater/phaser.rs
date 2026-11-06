@@ -3,40 +3,29 @@
 
 use super::build_tree_scheduler::BuildTreeScheduler;
 use super::virtualization_info::VirtualizationInfo;
+use ferroui_controls::templates::XamlBindingHelper;
 use ferroui_controls::Control;
 use ferroui_base::layout::LayoutInformation;
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{
-    ferro_properties, ferro_static_type, AttachedProperty, BoxedValue, FerroProperty, Rect, Ref,
-};
+use ferroui_base::{ferro_static_type, AttachedProperty, BoxedValue, Rect, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Binding component attached by a template with phased bindings. Phase zero
-/// initializes the element; positive returned phases are deferred.
-pub trait IDataTemplateComponent {
-    fn process_bindings(
-        &self,
-        data: Option<BoxedValue>,
-        item_index: i32,
-        current_phase: i32,
-    ) -> i32;
-    fn recycle(&self);
-}
-impl PartialEq for dyn IDataTemplateComponent {
-    fn eq(&self, other: &Self) -> bool {
-        std::ptr::addr_eq(self as *const Self, other as *const Self)
-    }
-}
+/// The phasing contract of a template instance. It is declared in `ferroui-controls`, where the
+/// bindings of `{x:Bind}` implement it, and re-exported here, where the repeater drives it.
+pub use ferroui_controls::templates::IDataTemplateComponent;
 
-/// Native attached-property counterpart of the template-component binding hook.
+/// Native attached-property counterpart of the template-component binding hook. The property is
+/// WinUI's `XamlBindingHelper.DataTemplateComponent` of `ferroui-controls`, which the bindings of
+/// `{x:Bind}` set on the root of a template instance.
 pub struct RepeaterBindingHelper;
 ferro_static_type!(RepeaterBindingHelper);
-ferro_properties! {
-    impl RepeaterBindingHelper {
-        pub fn data_template_component_property() -> AttachedProperty<Option<Rc<dyn IDataTemplateComponent>>> {
-            FerroProperty::register_attached::<RepeaterBindingHelper, Control, _>("DataTemplateComponent", None)
-        }
+
+impl RepeaterBindingHelper {
+    /// The attached property of the template component: the one of
+    /// [`XamlBindingHelper`](ferroui_controls::templates::XamlBindingHelper).
+    pub fn data_template_component_property() -> &'static AttachedProperty<Option<Rc<dyn IDataTemplateComponent>>> {
+        XamlBindingHelper::data_template_component_property()
     }
 }
 

@@ -80,6 +80,10 @@ ferroui-controls-color-picker = { workspace = true }
 # network requests, and the article list of the demo shows that it cannot load.
 ferroui-controls-treedatagrid = { workspace = true }
 treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
+# The sections of the custom effects gallery, the pages of the section Custom effects (#455, not in
+# the original); without its default features, so that the catalog links neither the application of
+# the gallery nor its entry point.
+custom-effects = { path = "../CustomEffects", default-features = false }
 # The ItemsRepeater (the page ItemsRepeater, not in the original).
 ferroui-controls-repeater = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
@@ -120,6 +124,8 @@ ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
+# `url::Url`, the base URI of the recording asset loader of the tests (C5 of #423).
+url.workspace = true
 # The themes of the test applications (`tests/support.rs`): the Simple theme of the unit test
 # application and the Fluent theme of the compositor tests, with or without the feature
 # `classic-themes`.

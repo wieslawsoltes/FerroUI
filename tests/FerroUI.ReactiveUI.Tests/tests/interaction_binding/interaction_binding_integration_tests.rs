@@ -10,8 +10,8 @@
 use crate::mocks::*;
 use ferroui_reactive::linq::Observable;
 use ferroui_reactiveui::*;
-use ferroui_system::threading::tasks::{block_on, Task};
-use ferroui_system::{prop, IDisposable, IObservable};
+use ferroui_system::task::block_on;
+use ferroui_system::{prop, IDisposable, IObservable, ObservableError};
 use std::rc::{Rc, Weak};
 
 const INPUT: &str = "123";
@@ -33,19 +33,19 @@ fn observable_handler(input: Rc<dyn IInteractionContext<String, bool>>) -> Rc<dy
 }
 
 /// The task-based handler of the tests: it answers `true`.
-fn task_handler(input: Rc<dyn IInteractionContext<String, bool>>) -> Task<()> {
+fn task_handler(input: Rc<dyn IInteractionContext<String, bool>>) -> std::future::Ready<Result<(), ObservableError>> {
     input.set_output(true);
-    Task::from_result(())
+    std::future::ready(Ok(()))
 }
 
 /// Asks `interaction` and gives its answer.
 fn ask(interaction: &Interaction<String, bool>) -> bool {
-    block_on(interaction.handle(INPUT.to_owned())).expect("the question is handled")
+    block_on(interaction.handle(INPUT.to_owned()).flatten()).expect("the question is handled")
 }
 
 /// Whether asking `interaction` fails with an `UnhandledInteractionError`.
 fn is_unhandled(interaction: &Interaction<String, bool>) -> bool {
-    let error = block_on(interaction.handle(INPUT.to_owned())).expect_err("no handler is registered");
+    let error = block_on(interaction.handle(INPUT.to_owned()).flatten()).expect_err("no handler is registered");
     error.downcast_ref::<UnhandledInteractionError<String, bool>>().is_some()
 }
 

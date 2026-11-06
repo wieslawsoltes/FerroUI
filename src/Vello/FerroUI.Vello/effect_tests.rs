@@ -2610,13 +2610,20 @@ mod custom_effect_graphs {
         context.pop_render_options();
     }
 
+    /// A target of `SIZE` logical pixels at `scale` device pixels each.
+    fn target(scale: i32) -> Target {
+        let dpi = Vector::new(96.0 * f64::from(scale), 96.0 * f64::from(scale));
+        Target { bitmap: render_interface().create_render_target_bitmap(PixelSize::new(SIZE * scale, SIZE * scale), dpi) }
+    }
+
     /// The premultiplied RGBA pixels of the target.
     fn pixels(target: &Target) -> Vec<u8> {
         let framebuffer = target.bitmap.lock();
+        let size = framebuffer.size();
         let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
-        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
-        for y in 0..SIZE {
-            for x in 0..SIZE {
+        let mut rgba = Vec::with_capacity((size.width * size.height * 4) as usize);
+        for y in 0..size.height {
+            for x in 0..size.width {
                 let (r, g, b, a) = read_framebuffer_pixel(&*framebuffer, x, y);
                 let scale = |c: u8| if premultiplied { c } else { ((u32::from(c) * u32::from(a) + 127) / 255) as u8 };
                 rgba.extend_from_slice(&[scale(r), scale(g), scale(b), a]);
@@ -2638,24 +2645,52 @@ mod custom_effect_graphs {
     /// reference: within `largest` levels per channel, and within a mean of
     /// half a level.
     fn assert_matches_reference(effect: ImmutableCustomEffect, largest: u8) {
+        assert_matches_reference_at(effect, 1, largest);
+    }
+
+    /// [`assert_matches_reference`] at `scale` device pixels per device
+    /// independent pixel (#455, E9).
+    fn assert_matches_reference_at(effect: ImmutableCustomEffect, scale: i32, largest: u8) {
         assert!(effect.has_graph(), "{effect}");
-        let plain = Target::new();
+        let plain = target(scale);
         plain.draw(scene);
         let mut expected = pixels(&plain);
-        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+        let side = (SIZE * scale) as usize;
+        assert!(effect.cpu_reference(&mut expected, side, side, f64::from(scale)), "{effect}");
 
-        let target = Target::new();
-        target.draw(|context| {
+        let drawn = target(scale);
+        drawn.draw(|context| {
             let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
             assert!(push_custom_effect_graph(context, &effect, bounds));
             scene(context);
             assert!(pop_custom_effect_graph(context, &effect, bounds));
         });
-        let actual = pixels(&target);
+        let actual = pixels(&drawn);
         let (most, mean) = difference(&expected, &actual);
-        assert!(most <= largest && mean <= 0.5, "{effect}: largest difference {most}, mean {mean}");
+        assert!(most <= largest && mean <= 0.5, "{effect} at {scale}x: largest difference {most}, mean {mean}");
         let (changed, _) = difference(&pixels(&plain), &actual);
-        assert!(changed > 0, "{effect}: the content is changed");
+        assert!(changed > 0, "{effect} at {scale}x: the content is changed");
+    }
+
+    /// The graph effects of the library at 192 dots per inch in the CPU mode
+    /// (#455, E9), with the tolerances of 96 and of the tests of
+    /// `ferroui-skia`.
+    #[test]
+    fn the_graph_effects_match_their_cpu_references_at_twice_the_scale() {
+        let effects = [
+            (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2),
+            (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+            (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+            (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+            (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+            (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+            (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+            (ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }), 2),
+            (ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.0 }), 2),
+        ];
+        for (effect, largest) in effects {
+            assert_matches_reference_at(effect, 2, largest);
+        }
     }
 
     #[test]
@@ -2737,14 +2772,20 @@ mod custom_effect_graphs {
 /// the CPU renderer over the area of the effect and the CPU reference of the
 /// effect applied to it (decision 3 of the plan); the scenes and tolerances
 /// of the tests of `ferroui-skia`. An application's shader effect without a
-/// CPU reference draws its content unchanged, reported once. The pass of the
-/// hybrid and GPU modes is tested in `gpu/effect_pass_tests.rs`.
+/// CPU reference draws its content unchanged, reported once. The page
+/// transitions (E6) draw their CPU references from the pixels of their
+/// images. The pass of the hybrid and GPU modes is tested in
+/// `gpu/effect_pass_tests.rs`.
 mod custom_shader_effects {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
-    use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
+    use ferroui_base::media::effects::library::{
+        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+    };
+    use ferroui_base::media::effects::{
+        CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
+    };
     use ferroui_base::media::imaging::BitmapBlendingMode;
-    use ferroui_base::platform::AlphaFormat;
+    use ferroui_base::platform::{AlphaFormat, PixelFormat};
 
     /// The logical size of the targets.
     const SIZE: i32 = 100;
@@ -2921,6 +2962,72 @@ mod custom_shader_effects {
         }
     }
 
+    /// An image of `SIZE` by `SIZE` premultiplied RGBA pixels made by
+    /// `pixel`: an immutable bitmap of this backend, owned by the handle.
+    fn image(pixel: impl Fn(i32, i32) -> [u8; 4]) -> EffectImage {
+        let mut data = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                data.extend_from_slice(&pixel(x, y));
+            }
+        }
+        let bitmap = crate::immutable_bitmap::ImmutableBitmap::from_pixels(
+            PixelSize::new(SIZE, SIZE),
+            Vector::new(96.0, 96.0),
+            SIZE * 4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+        )
+        .expect("a bitmap");
+        EffectImage::from_impl(std::sync::Arc::new(bitmap))
+    }
+
+    /// The page transitions of the library sample the pixels of their
+    /// images in the CPU mode: the CPU reference of each, at 96 and 192 dots
+    /// per inch; at the start, the content unchanged.
+    #[test]
+    fn the_page_transitions_draw_their_cpu_references() {
+        let from = image(|x, y| [(x * 2) as u8, (y * 2) as u8, 200, 255]);
+        let to = image(|x, y| [40, (255 - x * 2) as u8, (y * 2) as u8, 255]);
+        let pattern = image(|x, y| {
+            let level = ((x * 37 + y * 91 + (x * y) % 17) % 256) as u8;
+            [level, level, level, 255]
+        });
+        let transitions = |progress: f64| {
+            [
+                ImmutableCustomEffect::new(DissolveTransitionEffect {
+                    from_page: from.clone(),
+                    to_page: to.clone(),
+                    pattern: pattern.clone(),
+                    progress,
+                    center_x: 0.3,
+                    center_y: 0.6,
+                    ..DissolveTransitionEffect::default()
+                }),
+                ImmutableCustomEffect::new(MaskTransitionEffect {
+                    to_page: to.clone(),
+                    mask: pattern.clone(),
+                    progress,
+                    softness: 0.2,
+                }),
+            ]
+        };
+        for scale in [1, 2] {
+            for effect in transitions(0.45) {
+                assert_matches_reference(effect, scale, 1);
+            }
+        }
+        for effect in transitions(0.0).into_iter().skip(1) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
+    }
+
     #[test]
     fn a_shader_effect_without_a_cpu_reference_draws_unchanged_and_reports_once() {
         let effect = ImmutableCustomEffect::new(WithoutReference { amount: 0.5 });
@@ -2939,5 +3046,71 @@ mod custom_shader_effects {
         }
         // Reported already: a later report is not logged.
         assert!(!effect.report_unhandled("Vello"));
+    }
+
+    // --- the interactive effects (E7) --------------------------------------------------
+
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, WaterRippleShaderEffect,
+    };
+    use ferroui_base::Point;
+
+    /// The interactive effects of the library at values that draw something: the pointer over
+    /// the area and pressed, a ripple spreading, the flame burning.
+    fn interactive_effects() -> Vec<ImmutableCustomEffect> {
+        let mut ripple =
+            WaterRippleShaderEffect { pointer_x: 0.5, pointer_y: 0.4, is_pointer_over: true, ..WaterRippleShaderEffect::default() };
+        ripple.spawn_ripple(Point::new(0.45, 0.55), 1.0);
+        ripple.ripples[0].age = 0.35;
+        vec![
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+                pointer_x: 0.45,
+                is_pointer_over: true,
+                is_pressed: true,
+                radius: 0.4,
+                ..PointerSpotlightShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+                is_pointer_over: true,
+                cell_size: 12.0,
+                strength: 0.8,
+                ..ReactiveGridShaderEffect::default()
+            }),
+            ImmutableCustomEffect::new(ripple),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect {
+                burn_amount: 0.9,
+                flame_phase: 1.4,
+                ignition_y: 0.6,
+                ..BurningFlameShaderEffect::default()
+            }),
+        ]
+    }
+
+    /// The CPU mode draws the interactive effects as their CPU references, at 96 and 192 DPI.
+    #[test]
+    fn the_interactive_effects_match_their_cpu_references() {
+        for scale in [1, 2] {
+            for effect in interactive_effects() {
+                assert_matches_reference(effect, scale, 3);
+            }
+        }
+    }
+
+    #[test]
+    fn a_neutral_interactive_effect_draws_the_content_unchanged() {
+        let neutral = interactive_effects().into_iter().map(|effect| effect.neutral().expect("a neutral value"));
+        let away = [
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
+        ];
+        for effect in neutral.chain(away) {
+            let plain = target(1);
+            plain.draw(scene);
+            let drawn = target(1);
+            draw_with(&drawn, &effect, scene);
+            let (most, _) = difference(&pixels(&plain), &pixels(&drawn));
+            assert!(most <= 1, "{effect}: largest difference {most}");
+        }
     }
 }

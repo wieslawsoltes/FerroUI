@@ -3,7 +3,7 @@ use ferroui_base::{
     data::{BindingOperations, BindingPriority},
     layout::Layoutable,
     threading::Dispatcher,
-    utilities::{Uri, UriKind},
+    utilities::UriRef,
     BoxedValue, Ref,
 };
 use ferroui_controls::{Border, ContentControl, Panel, StackPanel};
@@ -14,7 +14,7 @@ use ferroui_markup_xaml::{
 fn load(uri: &str, source: &str) -> BoxedValue {
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
         RuntimeXamlLoaderDocument::with_base_uri(
-            Some(Uri::try_create(uri, UriKind::Absolute).unwrap()),
+            Some(UriRef::parse_absolute(uri).unwrap()),
             source,
         ),
         None,

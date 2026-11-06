@@ -10,6 +10,23 @@ use ferroui_dependency_injection::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// The states of a disposal task that the tests assert (`Task.IsCompletedSuccessfully`,
+/// `Task.IsFaulted`), on the `Shared` of its result.
+trait DisposeTaskExt {
+    fn is_completed_successfully(&self) -> bool;
+    fn is_faulted(&self) -> bool;
+}
+
+impl DisposeTaskExt for DisposeTask {
+    fn is_completed_successfully(&self) -> bool {
+        matches!(self.result(), Some(Ok(())))
+    }
+
+    fn is_faulted(&self) -> bool {
+        matches!(self.result(), Some(Err(_)))
+    }
+}
+
 trait Service {
     fn value(&self) -> usize;
 }

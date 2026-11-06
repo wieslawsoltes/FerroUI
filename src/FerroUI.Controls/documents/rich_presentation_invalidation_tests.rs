@@ -5,7 +5,7 @@ use ferroui_base::media::{
     Brushes, FlowDirection, FontFeature, FontFeatureCollection, TextDecoration,
     TextDecorationCollection,
 };
-use ferroui_base::utilities::CultureInfo;
+use ferroui_base::utilities::locale;
 use ferroui_base::{Rect, Size};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -37,7 +37,7 @@ fn rich_inherited_font_language_and_flow_changes_rebuild_layout_without_model_ev
     assert!(!view.is_measure_valid());
     layout(&view);
     assert!(view.desired_size().height > old_height * 2.0);
-    view.set_language(CultureInfo::get_culture_info("tr-TR"));
+    view.set_language(locale!("tr-TR"));
     assert!(!view.is_measure_valid());
     layout(&view);
     view.set_flow_direction(FlowDirection::RightToLeft);
@@ -143,7 +143,7 @@ fn rich_inherited_presentation_preserves_undo_and_active_composition() {
     root.arrange(Rect::new(0.0, 0.0, 400.0, 300.0));
     editor.set_font_size(28.0);
     editor.set_foreground(Some(Brushes::blue()));
-    editor.set_language(CultureInfo::get_culture_info("ja-JP"));
+    editor.set_language(locale!("ja-JP"));
     editor.set_letter_spacing(2.0);
     editor.set_flow_direction(FlowDirection::RightToLeft);
     editor.set_text_decorations(Some(TextDecorationCollection::from_items([

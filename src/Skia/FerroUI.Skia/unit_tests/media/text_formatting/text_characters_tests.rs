@@ -17,7 +17,7 @@ use ferroui_base::media::{
     BaselineAlignment, FontFamily, FontManager, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use ferroui_base::platform::IFontManagerImpl;
-use ferroui_base::utilities::{CultureInfo, ReadOnlyMemory, Uri, UriKind};
+use ferroui_base::utilities::{locale, Locale, ReadOnlyMemory, UriRef};
 use ferroui_base::FerroLocator;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
 use std::rc::Rc;
@@ -261,8 +261,8 @@ fn get_shapeable_characters_does_not_pin_previous_region_font_across_a_culture_c
     let _scope = start(&[PRIMARY_FONT, NOTO_SANS_SC_FONT, NOTO_SANS_JP_FONT]);
 
     let font_manager = FontManager::current();
-    let ja = CultureInfo::get_culture_info("ja-JP");
-    let zh = CultureInfo::get_culture_info("zh-CN");
+    let ja = locale!("ja-JP");
+    let zh = locale!("zh-CN");
 
     // Previous run: the Simplified-Chinese font, resolved for a zh culture.
     let sc_typeface = Typeface::new(FontFamily::new("fonts:SystemFonts#Noto Sans SC"));
@@ -570,7 +570,7 @@ impl CuratedSystemFontCollection {
         for name in font_resource_names {
             FontCollectionBase::try_add_font_source(
                 &collection,
-                &Uri::new(&format!("resm:{name}?assembly={ASSEMBLY}"), UriKind::Absolute).unwrap(),
+                &UriRef::parse_absolute(&format!("resm:{name}?assembly={ASSEMBLY}")).unwrap(),
             );
         }
 
@@ -583,7 +583,7 @@ impl FontCollectionBaseImpl for CuratedSystemFontCollection {
         &this.base
     }
 
-    fn key(_this: &Self) -> Uri {
+    fn key(_this: &Self) -> url::Url {
         FontManager::system_fonts_key()
     }
 }
@@ -598,7 +598,7 @@ fn match_character(
     font_manager: &FontManager,
     codepoint: i32,
     font_family: Option<&FontFamily>,
-    culture: Option<&CultureInfo>,
+    culture: Option<&Locale>,
 ) -> Option<Typeface> {
     font_manager.try_match_character(
         codepoint,
@@ -616,7 +616,7 @@ fn from_utf32(codepoint: i32) -> String {
 }
 
 /// `new GenericTextRunProperties(typeface, cultureInfo: culture)`.
-fn run_properties_with_culture(typeface: Typeface, culture: Option<CultureInfo>) -> GenericTextRunProperties {
+fn run_properties_with_culture(typeface: Typeface, culture: Option<Locale>) -> GenericTextRunProperties {
     GenericTextRunProperties::with_all(
         typeface,
         GenericTextRunProperties::DEFAULT_FONT_RENDERING_EM_SIZE,

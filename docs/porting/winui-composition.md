@@ -498,6 +498,32 @@ are `PixelOperation`, with `apply_to_premultiplied_rgba8` as the CPU reference. 
 did not (Vello's CPU mode and WebGL2, the mock and test contexts, a context without runtime
 effects, more than `LightingParameters::MAX_LIGHTS` point and spot lights) the compositor draws the same on the CPU.
 
+### 5.4 WinUI's effect and render subsystems and the custom effects of FerroUI
+
+The custom effects of `Visual.Effect` ([custom-effects.md](custom-effects.md), #455) are built on
+the effect factory of section 5.3, and extend it where WinUI has no counterpart. How each part of
+WinUI's effect and render subsystems maps onto them:
+
+| WinUI (and Win2D) | FerroUI |
+|---|---|
+| `IGraphicsEffect`, `IGraphicsEffectSource`: an effect description, a graph of Direct2D effects known by GUID (`IGraphicsEffectD2D1Interop`: `GetEffectId`, `GetSource`, `GetProperty`, `GetNamedPropertyMapping`), written with the Win2D effect classes (`Microsoft.Graphics.Canvas.Effects`) or the Win2D-like classes of the controls (`controls/dev/Effects/microsoft.ui.private.composition.effects_impl.h`) | `GraphicsEffect` and `GraphicsEffectSource` (`rendering/composition/effects`), the same vocabulary (blur, shadow, colour matrix, saturation, tint, sepia, linear transfer, invert, grayscale, the composites and blends, opacity, arithmetic composite, convolve matrix). A custom effect type gives its description with `CustomEffect::graph()`, read once per type |
+| `GetNamedPropertyMapping`: a property named `EffectName.PropertyName` (`Blur.BlurAmount`), mapped to the index of a Direct2D property | the same names: a value of `CustomEffect::for_each_graph_value` named `Tint.Color` sets that member; a value without a dot sets the one property of its kind of the effect named after it (custom-effects.md, section 3.3) |
+| `CompositionEffectSourceParameter`, bound with `CompositionEffectBrush.SetSourceParameter` | the same for an effect brush; the graph of a custom effect has one source parameter, `content` (`CUSTOM_EFFECT_CONTENT`), bound by the render walk to the composed content of the visual |
+| `Compositor.CreateEffectFactory(effect, animatableProperties)`: the description read once and compiled into a GPU program, the animatable properties parameters of it; `LoadStatus` and `ExtendedError` | `Compositor::create_effect_factory_with_properties` loads an `EffectGraph`; a custom effect type is loaded by the same loader (`EffectGraph::load_with_members`) once per type, its members the names of its graph values. A graph that does not load is logged once and the effect drawn as one without a factory (the content unchanged), where WinUI throws or reports the load status |
+| `CompositionEffectFactory.CreateBrush`, `CompositionEffectBrush.Properties` (a property set: `InsertScalar`, `InsertColor`, an expression or key frame animation of a member) | `ServerCompositionEffectBrush` reads the members from the property set of the brush; for a custom effect the snapshot (`ImmutableCustomEffect`) is the property set: its values are the members of the frame. A change of a value (a property of an effect class, an `EffectTransition` or key frames of `Visual.Effect`, an interactive effect following the pointer) makes a new snapshot and changes uniforms and members only |
+| `XamlCompositionBrushBase`, the way an application plugs a `CompositionEffectBrush` into XAML (`rendering.md` of microsoft-ui-xaml: XAML itself creates no effect brush) | `XamlCompositionBrushBase` for brushes (winui-materials.md); an effect of a whole element is `Visual.Effect` (WinUI's `UIElement` has no effect property; the framework FerroUI was ported from has a blur and a drop shadow there), set from code, markup (`Effect="tint(color=#0F9D8E, strength=0.55)"`) and styles |
+| A custom pixel program: Win2D's `PixelShaderEffect` (compiled HLSL, its constants in `Properties`, up to eight sources `Source1` to `Source8`, `MaxSamplerOffset` and the coordinate mapping of each source), drawn by Win2D's drawing session; the composition engine takes only the effects it knows by GUID | `CustomEffect::shader()`, a `ShaderEffectDescription`: SkSL for Skia and WGSL for Vello (decision 1), the uniforms the parameters in order (checked once against the program: Skia's `runtime_effects.rs`, naga for Vello), the content as the child `content` or an overlay over it, up to eight images as children (`MAX_SHADER_CHILDREN`, `EffectParameterValue::Image`), the sample radius in place of `MaxSamplerOffset`. It is drawn inside the compositor like any effect, on every backend, and has a CPU reference |
+| The render subsystem: the core walk (`dxaml/xcp/core/hw`, `HWWalk.cpp`, `HWCompNode`, `DCompTreeHost`) mirrors the elements into composition visuals, and the composition engine draws them with the compiled programs on its own thread, the UI thread sending values in batches | `Visual` freezes its effect into the snapshot when it updates its composition visual, the batch stream carries the `Arc` of plain values to the server visual on the render thread, and the render walk (`server_composition_visual/render.rs`) pushes it around the content: a graph through the painter of the effect brushes (`push_custom_effect_graph`), a shader as an effect of the drawing context, whose backend draws it with the program it compiled once (per thread and type on Skia, per device and type on Vello) |
+| Pointer input to an effect: the application handles the element's pointer events and sets the brush's properties, or animates them against `ElementCompositionPreview.GetPointerPositionPropertySet` | `ElementCompositionPreview::get_pointer_position_property_set` for the composition API; an interactive effect class (`IEffectInputHandler`, `Effect::construct_interactive`) receives the pointer events of the element it is the effect of, with `EffectHostContext`, and changes its value (custom-effects.md, section 3.5) |
+| The compiled programs live with the factory and are made when it is created | the graphs and descriptions are loaded once per type and registered for the prewarm (`custom-effect:<NAME>`); a GPU render target of Skia draws them offscreen after the first frame of a composition target, so their programs and pipelines are made before a frame shows them (gpu-rendering.md, "Pipelines made ahead of their first draw"); Vello makes a shader effect's pipeline on the first frame that draws its type, once per device |
+
+What WinUI does that this does not: the nodes of a factory are not fused into one program (section
+5.3, and custom-effects.md, section 5), and the descriptions are compiled by each backend from two
+sources rather than from one effect language. What it does beyond WinUI: an application's effect
+can sample the content and images with a program of its own inside the composition tree, its
+parameters are values that animate with `Visual.Effect`, and every effect FerroUI ships is held to
+its CPU reference on every backend and mode (custom-effects.md, section 3.8, E9).
+
 ## 6. Status
 
 | Phase | State | Pull request |
@@ -510,6 +536,7 @@ effects, more than `LightingParameters::MAX_LIGHTS` point and spot lights) the c
 | 6 | implemented (scoped: blur, opacity, cross-fade, composite and colour source effect brushes, the layer visual effect; the backdrop brush draws nothing) | #304 |
 | 7 | implemented (the shadow of an alpha on Skia and Vello, `Offset.Z`, `GetAlphaMask`, `ThemeShadow` and its use in the WinUI theme, the zoom of `ScrollViewer` and the manipulation property set) | - |
 | GPU effects | the lights and the pixel operations evaluated on the GPU by Skia (section 5.3); Vello keeps the CPU path (gpu-rendering.md) | #456 |
+| Custom effects | the effect factory extended to `Visual.Effect`: graph effects, runtime shaders, images, interactive effects, the library and its samples, validated on every backend and mode (section 5.4, custom-effects.md) | #455 |
 
 ## 7. Deviations
 

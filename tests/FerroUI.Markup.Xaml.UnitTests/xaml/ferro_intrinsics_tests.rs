@@ -247,6 +247,52 @@ fn a_negative_time_span_literal_for_a_timer_property_of_the_controls_is_an_error
     }
 }
 
+// --- the two Rust forms of a culture ------------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md section 3.4): a property
+// that declares a `Locale` is a `System.Globalization.CultureInfo` property, as one that
+// declares a `CultureInfo`. `RichTextBlock.Language` (the `TextElement.Language` it owns) is
+// one of the framework. A text that is no BCP-47 tag is an error. The compiled forms of
+// these tests are in `emitter::differential_tests`.
+
+#[test]
+fn a_language_literal_sets_a_locale_property() {
+    use ferroui_base::utilities::{locale, Locale};
+    use ferroui_controls::RichTextBlock;
+
+    let _base = xaml_test_base();
+    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='ja-JP'/>");
+    assert_eq!(block.language(), locale!("ja-JP"));
+
+    // The case of the subtags is normalized.
+    let block = parse::<Ref<RichTextBlock>>("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-hant-tw'/>");
+    assert_eq!(block.language(), locale!("zh-Hant-TW"));
+
+    // A culture of the runtime library casts to its locale.
+    let block = parse::<Ref<RichTextBlock>>(
+        "<RichTextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' \
+         xmlns:g='using:System.Globalization' Language='{x:Static g:CultureInfo.InvariantCulture}'/>",
+    );
+    assert_eq!(block.language(), Locale::UNKNOWN);
+}
+
+#[test]
+fn an_invalid_language_tag_for_a_locale_property_is_an_error() {
+    use ferroui_controls::RichTextBlock;
+
+    let _base = xaml_test_base();
+    let error = |xaml: &str| match try_parse::<Ref<RichTextBlock>>(xaml) {
+        Ok(_) => panic!("the tag is not a locale: {xaml}"),
+        Err(error) => describe(&error),
+    };
+    // A text that is no BCP-47 tag, which no locale is parsed from (a private name, an old name):
+    // the error of the conversion of the culture (L2 of C5).
+    let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='x-private'/>");
+    assert!(described.contains("Culture IETF Name x-private is not a recognized IETF name."), "{described}");
+    let described = error("<RichTextBlock xmlns='https://github.com/ferroui' Language='zh-CHT'/>");
+    assert!(described.contains("Culture IETF Name zh-CHT is not a recognized IETF name."), "{described}");
+}
+
 // --- the Rust forms of a URI ----------------------------------------------------------------
 //
 // Not from upstream (C5 of #423, section 3.5 of docs/idiomatic-rust-signatures.md): a property
@@ -301,6 +347,30 @@ fn a_relative_uri_literal_for_a_url_property_is_an_error() {
     };
     let described = describe(&error);
     assert!(described.contains("The URI http://host:99999/ is not a valid Url: invalid port number."), "{described}");
+}
+
+/// `HyperlinkButton.NavigateUri` is a `UriRef` (decision O5 of
+/// docs/idiomatic-rust-signatures.md, step U4): markup sets a relative and an absolute
+/// reference from text, as it set the port `Uri`.
+#[test]
+fn hyperlink_button_navigate_uri_is_set_from_a_relative_and_an_absolute_text() {
+    use ferroui_base::utilities::UriRef;
+    use ferroui_controls::HyperlinkButton;
+
+    let _base = xaml_test_base();
+    let link = |navigate_uri: &str| {
+        parse::<Ref<HyperlinkButton>>(&format!(
+            "<HyperlinkButton xmlns='https://github.com/ferroui' NavigateUri='{navigate_uri}'/>"
+        ))
+    };
+    assert_eq!(link("docs/index.html").navigate_uri(), Some(UriRef::Relative("docs/index.html".into())));
+    // A leading `/` is relative, the rule of markup.
+    assert_eq!(link("/docs/index.html").navigate_uri(), Some(UriRef::Relative("/docs/index.html".into())));
+    let absolute = link("https://github.com/wieslawsoltes/FerroUI#readme").navigate_uri();
+    assert_eq!(
+        absolute.as_ref().and_then(UriRef::as_url).map(url::Url::as_str),
+        Some("https://github.com/wieslawsoltes/FerroUI#readme")
+    );
 }
 
 #[test]

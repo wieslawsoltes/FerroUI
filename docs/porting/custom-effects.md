@@ -305,10 +305,10 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   (`BitmapBlendingMode`, source over by default), the sample radius (how far from the pixel it
   colours the program samples the content, in device independent pixels) and the padding
   behaviour (`ShaderEffectPadding::Effect`, the padding of the effect alone, or `SampleRadius`,
-  which adds the sample radius to each side), and the names of further children, reserved for the
-  images of E6: a description with children is not supported yet, reported once and drawn
-  unchanged. It is made with `content_sampling(sksl, wgsl)` or `overlay(sksl, wgsl, blend_mode)`
-  and `with_sample_radius`, `with_padding`, `with_children`.
+  which adds the sample radius to each side), and the names of its children, the image parameters
+  the program samples (E6, section 3.6, "Secondary images as built"). It is made with
+  `content_sampling(sksl, wgsl)` or `overlay(sksl, wgsl, blend_mode)` and `with_sample_radius`,
+  `with_padding`, `with_children`.
 - *Precedence.* A type with both a graph and a shader is drawn as its graph; its shader is not read
   (`ImmutableCustomEffect::shader` is `None`), and a graph that does not load gives the no-op of
   E1, not the shader. Every backend draws graphs; shaders need a backend that runs programs.
@@ -330,7 +330,7 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   (the render walk pushes it as an effect of the drawing context, as it pushes an effect without a
   graph) as its program: compiled once per thread and type by the cache of `runtime_effects.rs`,
   its uniforms checked once (names, order, types, no arrays) and its children (one shader
-  `content` for a content-sampling program, none for an overlay). A content-sampling program is
+  `content` for a content-sampling program; for an overlay its images, E6, none before). A content-sampling program is
   the runtime shader image filter of a save layer (`image_filters::runtime_shader_with_options`,
   the sample radius in device pixels), the layer bound to `content`; an overlay is drawn over the
   content inside the save layer with its blend mode before the layer is composed. Skia evaluates a
@@ -340,9 +340,9 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   area, and the content drawn into it with its own transform: the layer has the resolution of the
   device (under a rotation, the area is scaled to the lengths of the axes and Skia transforms the
   result). The layer is composed with the opacity in effect. A program that does not compile,
-  does not match, or has children is reported once (an error in the log area `Skia`) and the
-  content drawn unchanged; nothing panics. This works on raster, Ganesh and Graphite surfaces and
-  in pictures.
+  does not match, or has children that are not images of an overlay (E6) is reported once (an
+  error in the log area `Skia`) and the content drawn unchanged; nothing panics. This works on
+  raster, Ganesh and Graphite surfaces and in pictures.
 - *Vello* draws a shader effect from E5 on (below); until then it drew it as E1 draws an effect
   without a factory.
 - *The library* (`media::effects::library`, E4): `pixelate` (`PixelateEffect`, content-sampling:
@@ -378,8 +378,8 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   (`gpu/effect_passes.rs`, `check_shader_module`): parsed and validated by naga 30 (the one of wgpu,
   through `wgpu::naga`, without optional capabilities, so that any device takes what it takes), its
   block `uniforms` compared with `ImmutableCustomEffect::shader_uniform_layout` (the number of
-  members, their names, order and types; no array or struct), and a description with children
-  refused (E6). The offsets of the members, and the size of the block, come from naga's layout of
+  members, their names, order and types; no array or struct), and a description whose children
+  are not images of an overlay refused (E6 binds the images of an overlay). The offsets of the members, and the size of the block, come from naga's layout of
   the struct, so the bytes of a frame are written where WGSL's layout puts them. A module that fails
   is reported once (an error in the log area `Vello`) and the effect drawn as an effect without a
   factory: its content unchanged, and nothing drawn on the processor.
@@ -422,6 +422,70 @@ the host's `InputElement` pointer events, holding `Subscription` guards
 the class; `raise_invalidated` makes the next snapshot, so the render thread sees only values (a
 pointer position is a `Point` parameter, a press time a `Float`).
 
+**Interactive effects as built (E7).**
+
+- *The input trait.* `IEffectInputHandler` (`media/effects/effect_input.rs`) has the members of
+  `ISkiaInputEffectHandler`, each with an empty default as in `SkiaInteractiveEffectBase`:
+  `on_attached`, `on_detached`, `on_host_bounds_changed`, `on_pointer_entered`, `on_pointer_exited`,
+  `on_pointer_moved`, `on_pointer_pressed`, `on_pointer_released`, `on_pointer_capture_lost` and
+  `on_pointer_wheel_changed`, and `handled_events_too` (default `false`). A class implements it
+  and constructs its base with `Effect::construct_interactive::<T>()` (a custom effect class whose
+  `Effect` also finds its handler: `is_interactive`, `input_handler`).
+- *The host context.* `EffectHostContext` is Effector's `SkiaEffectHostContext`: the effect, the
+  host (`InputElement`) and its visual, `bounds`, `size`, `input_bounds` (the host's own size),
+  `padding` and `effect_bounds` (the input bounds inflated by the padding of the effect: the area
+  the program is drawn over when the content lies within the host), `layer_scale` (the render
+  scaling times the mean of the lengths of the axes of the transform from the host to the root, as
+  the render thread computes it), `get_position` (in the host, through every render transform),
+  `get_normalized_position` and `normalize` (0 to 1 across the input bounds, clamped on request),
+  `get_effect_position` and `to_effect_space` (device pixels of the area of the effect: the
+  `coord` of the program), `capture_pointer`, `release_pointer_capture` and
+  `has_pointer_capture`, `invalidate` (`raise_invalidated`), and `request_animation_frame`, a frame
+  of the animation clock that runs only while the effect is still the host's.
+- *The routing* (`input/input_element_effects.rs`). One class handler of the changes of
+  `Visual::effect_property()`, registered with the class handlers of `InputElement`, attaches the
+  effect of an input element when it is an interactive class (`InputElement::interactive_effect`)
+  and detaches the one it attached when the effect changes: the old attachment is dropped (its
+  handlers removed), then `on_detached`; the new one adds its handlers, then `on_attached` and
+  `on_host_bounds_changed`. The attachment is a field of the element holding the effect and the
+  `Subscription` guards of seven handlers (`add_disposable_handler_with` on the direct and bubble
+  routes, handled events too) and of a subscription to the element's `Bounds`,
+  `RenderTransform` and `RenderTransformOrigin`; nothing outlives it. A handler delivers the event
+  to the effect after the tunnel route, the class handlers of the host (its `on_pointer_*`) and the
+  bubble handlers of its descendants, before its ancestors; a handled event only to an effect whose
+  `handled_events_too` is set. A pointer the host (or the effect, through the context) captured is
+  routed to the host wherever it is; the loss of the capture of the host or of a descendant (the
+  release of the implicit capture, another element capturing the pointer) is
+  `on_pointer_capture_lost`. No borrow of the host is held while the effect runs, so the effect
+  can capture the pointer or replace the effect of its host. Only an `InputElement` hosts an
+  interactive effect: a plain visual has no pointer input.
+- *Values only cross.* The class keeps its state (the pointer, the press, the ripples, the phase of
+  a flame) in a value of `CustomEffect` and raises `invalidated` when the value changes; the visual
+  takes the new snapshot, and the program, compiled once per backend, is given its uniforms. The
+  tests count the compilations (`runtime_effects::compilation_count` of Skia,
+  `effect_passes::shader_pipelines_created` of Vello): frames of an interaction compile nothing.
+- *The library* (`media::effects::library`, E7): `PointerSpotlightShaderEffect`
+  (`pointer-spotlight`, an overlay screened over the content) and `ReactiveGridShaderEffect`
+  (`reactive-grid`, an overlay drawn source over), the light and the halo under the normalized
+  pointer, brighter or wider while pressed; `WaterRippleShaderEffect` (`water-ripple`,
+  content-sampling, sample radius 20: three `RippleWave`s, each a point and two numbers, rings that
+  move the content outward and tint it); `BurningFlameShaderEffect` (`burning-flame`,
+  content-sampling, sample radius 20: a plume from an ignition point that moves, colours, lights
+  and smokes the content). Each has SkSL, WGSL, a CPU reference and a neutral value. The classes
+  `InteractivePointerSpotlightEffect`, `InteractiveReactiveGridEffect`,
+  `InteractiveWaterRippleEffect` and `InteractiveBurningFlameEffect` (with `value`, `set_value`
+  and `update`) follow Effector's: the overlays track the pointer and capture it while pressed,
+  the water ripple makes a ripple on a press, along a drag and on the release and ages them
+  (`advance`), the flame ignites on a press, follows a drag and burns down after the release
+  (`advance`); the last two advance on the frames of the animation clock while they move, where
+  Effector runs a `DispatcherTimer` of 16 ms. The flame takes handled events (its host, the
+  burn-away button, handles the press). The programs differ from Effector's in four ways: squares
+  are products (`pow` of a negative number is undefined), the moved content is sampled at the
+  centre of the texel under the moved coordinate (the same texel whatever the filtering of a
+  backend), colours are mixed in premultiplied form, and the phase of the flame wraps at 10 pi (a
+  period of its three waves). The catalog page "Custom effects" shows them in a section
+  "Interactive effects".
+
 ### 3.6 Secondary image handles
 
 An image a shader samples besides the content (the two pages of a transition) is a parameter kind,
@@ -433,6 +497,74 @@ texture keyed by the image's identity while it is in use (as the image brushes a
 gpu-rendering.md), so a frame that changes only uniforms uploads nothing. Capturing a page into
 such an image is `RenderTargetBitmap` (made by the application, not per frame).
 
+**Secondary images as built (E6).**
+
+- *The handle.* `EffectImage` (`media/effects/effect_image.rs`) is an `Option<Arc<..>>` of a
+  counted reference to the platform bitmap (`RefCounted<SharedBitmapImpl>`, so the bitmap lives
+  while a handle does; `EffectImage::new(&bitmap)` takes another count of a `Bitmap`,
+  `from_ref` of a counted reference, `from_impl` owns a platform bitmap), with an identity that is
+  never reused (`id`, 0 for the empty handle). It is `Send + Sync`, cheap to clone, compares and
+  hashes by identity, and its default is the empty handle, which programs sample as transparent.
+  `downgrade` gives an `EffectImageWeak` that tells whether the image still lives;
+  `EffectImage::release_generation` counts the handles released (the last clone dropped) in the
+  process, so a backend looks for dead entries only when it changed. `pixels` reads the
+  premultiplied RGBA of the bitmap once per version (`EffectImagePixels`, `None` for a bitmap
+  that is not readable on the processor), what the CPU references sample and Vello uploads.
+- *The parameter.* `EffectParameterValue::Image` (an addition to the `#[non_exhaustive]` enum)
+  is no uniform; it switches at half when interpolated, and an empty image takes the other side's
+  image, so a transition from no effect (through the neutral value, which has no images) keeps the
+  images of the effect it goes to. Markup cannot set an image: an effect string is parsed without
+  a resource context, so `parse_like` of an image fails (`mask-transition(mask=...)` is a parse
+  error), and the effect string of a snapshot leaves its images out (it parses back to the effect
+  with empty images). An image is set from code, on the value of the effect or in the snapshot of
+  a mutable effect class.
+- *The children convention.* The `children` of a `ShaderEffectDescription` name image
+  parameters, at most `MAX_SHADER_CHILDREN` (8), in the order the program declares them: in SkSL
+  `uniform shader <name>;` after the uniforms (`<name>` with every `-` written `_`), sampled with
+  `<name>.eval(coord)`; in WGSL `fn sample_<name>(coord: vec2<f32>) -> vec4<f32>` and the texture
+  `ferroui_child_<name>` at `SHADER_WGSL_CHILDREN_BINDING` (3) plus the index, which
+  `wgsl_module` adds. Both give the image stretched over the whole area of the effect
+  (`layer_size`), the texel under `coord * image_size / layer_size` (nearest, as the content is
+  sampled; `EffectImagePixels::sample_stretched` for the CPU references), premultiplied,
+  transparent beyond the area. Children are for overlays (the shape of Effector's transitions,
+  programs drawn over the content from images): a content-sampling program takes none, because
+  Skia draws it as a runtime shader image filter, which takes its other children from the builder
+  of the program, and skia-safe 0.153 binds no setter for them; both backends refuse it (once,
+  the content unchanged), so a program draws the same everywhere.
+  `ImmutableCustomEffect::check_shader_children` is the check both backends run once per type,
+  `for_each_shader_child` the visit of a frame (no allocation).
+- *Skia.* The program of an overlay is checked for its children (names and order) with its
+  uniforms; each frame binds image shaders of the Skia images of the images, stretched by a local
+  matrix and sampled by the nearest texel (decal beyond), the empty image a transparent shader.
+  An image is made a Skia image once per thread and version of its bitmap (the image of an
+  immutable bitmap as it is, a snapshot of a writeable bitmap or a surface, a raster image of the
+  pixels of another readable bitmap), kept by the identity of its handle with its weak handle; the
+  GPU context makes its texture once (Graphite through `drawable_image`, which keeps the texture
+  while the image is held; Ganesh by its cache of uploads by the identity of the image). When the
+  last handle is dropped, the next drawing context of the thread drops the Skia image (one atomic
+  read when nothing was released) and the context releases the texture with its flush.
+- *Vello.* The pass binds the textures of the children after the content; an image is uploaded
+  once per device into a texture (`create_image_texture`, its premultiplied pixels), kept in a
+  cache of the render thread by the identity of its handle with its weak handle (the empty image
+  a transparent texture of one pixel per device); the bind groups are kept by the identities of
+  the content and the image textures. The handles are dropped on the UI thread, the textures live
+  on the render thread: the next drawing context or pass of the render thread after the
+  generation of releases changed releases the textures of dead handles and the bind groups that
+  hold them. The CPU mode draws the CPU reference, which samples `EffectImage::pixels`.
+- *Graph effects* take no images: the graph of a custom effect has one source, the content
+  (section 3.3); its vocabulary has no image source of its own (a `CompositionSurfaceBrush` is a
+  source parameter bound by a brush, which a custom effect's graph does not have), so images are
+  for shader effects only, and an image parameter is no member of a graph.
+- *The library* (`media::effects::library`, E6): `dissolve-transition`
+  (`DissolveTransitionEffect`, Effector's compiz-style dissolve: from `from-page` to `to-page`
+  along a frontier that spreads from (`center-x`, `center-y`) through the luminance of `pattern`,
+  with a glow of `glow-color` along it; Effector hashes the position for the pattern, which does
+  not draw the same on every processor, so the pattern is an image) and `mask-transition`
+  (`MaskTransitionEffect`: `to-page` revealed over the content where the luminance of `mask` is
+  below `progress * (1 + softness)`). Both are overlays drawn source over the content, with SkSL,
+  WGSL and CPU references; their neutral values (a progress of 0 without images) leave the content
+  unchanged. The catalog page "Custom effects" shows them on photographs of its assets.
+
 ### 3.7 Samples
 
 `samples/CustomEffects` (a gallery application) and the control catalog, one page per effect
@@ -442,6 +574,49 @@ effects (scanline, grid, spotlight), interactive effects (pointer spotlight, rea
 ripple, burn-away button) and page transitions (the compiz-style set). Each shows code, markup
 (`Effect="tint(...)"`) and an animation, as Effector's gallery does. Effector's sample effects are
 ported as the reference set.
+
+**Samples as built (E8).**
+
+- *The gallery.* `samples/CustomEffects` (the crate `custom-effects`; `cargo run -p custom-effects`)
+  is the counterpart of `Effector.Sample.App` and `Effector.Compiz.Sample.App`: a header, a
+  section "Setting an effect" (a value set from code, the effect string
+  `tint(color=#0F9D8E, strength=0.55)` read by `Effect::parse`, the converter of `IEffect` that
+  markup's `Effect="..."` goes through, and key frames of `Visual.Effect` on a glow) and one
+  section per family (`Family`, in `Family::ALL`): colour effects, image effects, shader effects,
+  interactive effects and page transitions. Without its default feature `app` (the WinUI 3 theme
+  and the desktop entry point) the crate is the sections only, which the catalog depends on.
+- *The tiles.* A tile (`EffectTile`) holds a value of a library effect and sets its snapshot as
+  the `Effect` of its host: a slider per number and a button per colour (Effector's swatches)
+  change the value; the tile shows the code that makes the value, the effect string markup writes
+  for the current value (which `Effect::parse` reads back to the same snapshot), and two
+  animations of `Visual.Effect`: an `EffectTransition` of 300 ms on the host, so a change fades
+  in and turning the effect off fades it out through its neutral value, and key frames that sweep
+  the first number from the minimum of its slider to the maximum and back (the progress of a
+  transition forward only). The interactive tiles host the interactive classes of E7 and show the
+  effect string of the snapshot the pointer changes. The shader family has Effector's grid as the
+  reactive grid without the pointer (the library has no second grid program) and Effector's
+  nested sample, a spotlight over cards with tints of their own.
+- *The page transitions.* The images are a parameter of the sections (`TransitionImages`: two
+  pages and the pattern of the dissolve, also the mask of the mask transition). The gallery
+  captures two pages of its own and a pattern of grey cells once with `RenderTargetBitmap`
+  (`TransitionImages::render`); the catalog gives photographs of its assets. Besides a tile per
+  transition, the presenter (Effector's compiz sample) shows one page and, on a press or its
+  button, rests on the other page and plays the dissolve to it from the point pressed by key
+  frames of its progress. The compiz set of Effector beyond the dissolve (burn, cube, wobbly,
+  genie, magnetic) is not in the library: the library's transitions are the dissolve and the mask
+  of E6.
+- *The catalog.* The section "Custom effects", after "Composition", has a page per family
+  (Colour effects, Image effects, Shader effects, Interactive effects, Page transitions), each the
+  section of its family in a scroll viewer (`Pages/custom_effects_pages.rs`); it replaces the
+  single page "Custom effects" of the section "Composition" of E2 to E7.
+- *Tests.* The gallery (`samples/CustomEffects/tests.rs`, on the test application with the Skia
+  render interface of `sample-testing` and a global clock the tests tick): the tiles of each
+  family and the effects of their hosts, the effect strings parsed back, a slider, a colour, the
+  toggle, the key frames there and back and forward, the captured pages, the presenter going to
+  the other page and back, an interactive tile following its class, the ways of setting an
+  effect and the sections of the gallery. The catalog: the section and its pages
+  (`tests/view_models.rs`), each page showing its tiles in a window and the photographs of the
+  transitions (`tests/custom_effects_pages.rs`).
 
 ### 3.8 Tests
 
@@ -490,11 +665,108 @@ ported as the reference set.
   an application's effect without a reference unchanged, reported once (`effect_tests.rs`); the
   GLSL ES of the library's modules from `ferroui-build` (a smoke check of each stage) and the files
   it writes (`shader_effects.rs`).
-- Later steps: per effect and backend, the GPU output against the CPU reference
-  (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
-  (no new texture or program over frames that change only parameters, with the allocation
-  counters of the Vello pass pool and the Skia resource cache); the prewarm of registered effect
-  types; input routing with a test root.
+- E6: the handle (identity, `Send` and `Sync`, the lease of the bitmap across threads, the weak
+  handle and the generation of releases, the pixels read once, the sampling stretched over an
+  area), the image parameter (interpolation, text, parsing), the checks and the visit of the
+  children, the WGSL the pass adds for them, and the transitions of the library (their programs,
+  round trips without their images, registration and prewarm, neutral values, a transition from no
+  effect keeping the images, CPU references) (`media/effects/effect_image_tests.rs`); the checks
+  of the children of a program (`ferroui-skia/custom_shader_effects.rs`); the transitions on Skia
+  raster at 96 and 192 DPI and on Graphite against their CPU references, the Skia images made once
+  over steady frames and Graphite's upload count constant, the images and textures of dropped
+  transitions released, a content-sampling program with images refused (`tests.rs`,
+  `gpu/metal/tests.rs`); the modules of the transitions checked by naga, the transitions in the
+  hybrid and GPU modes against their CPU references at scales 1 and 2, no upload and no allocation
+  over steady frames, the textures of dropped images released and bounded over frames with new
+  images (`gpu/effect_pass_tests.rs`), the CPU mode (`effect_tests.rs`); the GLSL ES of the
+  transitions binding their images (`ferroui-build/shader_effects.rs`).
+- E7: the routing with the test root of the input tests (`input/effect_input_tests.rs`): the
+  effect attached and detached with the effect of its host, its handlers and its subscription
+  removed with it, the bounds and the render transform reaching it; the order of the routed events
+  (tunnel, the bubble handlers of the descendants, the effect, the handlers of the host added
+  after it, the ancestors), entered before moved, the release, the loss of the implicit capture,
+  the wheel and the exit; handled events reaching only an effect that asks for them; a captured
+  pointer reaching the effect outside its host, the loss of the capture on the release and to
+  another element; the positions in the host, normalized and in the coordinates of the program
+  with the padding, through a render transform of scale 2 (`layer_scale` 2); the spotlight
+  following the pointer and capturing it, the burn-away button taking its button's handled press
+  while a spotlight does not, the water ripple making ripples on a press, a drag and a release and
+  stopping when detached. The library values and classes (`media/effects/interactive_effect_tests.rs`):
+  the programs declare the uniforms of the convention, round trips, registration and prewarm,
+  neutral values, the CPU references, the ripples, the invalidation of a class only on a change,
+  and the advance of the water ripple and the flame. On Skia: the programs compile and match
+  (`custom_shader_effects.rs`), raster at 96 and 192 DPI against the CPU references (the programs
+  that move the content with at most 1% of the pixels further than 3 levels), neutral values, and
+  frames of an interaction compiling no program (`tests.rs`), Graphite (`gpu/metal/tests.rs`). On
+  Vello: the modules checked by naga, the hybrid and GPU modes against the CPU references, frames
+  of an interaction compiling no pipeline and allocating no texture (`gpu/effect_pass_tests.rs`),
+  the CPU mode (`effect_tests.rs`). The GLSL ES of the modules (`ferroui-build/shader_effects.rs`).
+- E8: the tiles of the gallery and the pages of the catalog (section 3.7, "Samples as built",
+  *Tests*): `samples/CustomEffects/tests.rs`, `samples/ControlCatalog/tests/view_models.rs` and
+  `tests/custom_effects_pages.rs` of the catalog.
+- E9: the validation of the whole library (section 3.9). Every effect at 96 and 192 DPI against
+  its CPU reference on Skia raster (`tests.rs`: the graph effects at 192 DPI added to the earlier
+  steps), Graphite at scales 1 and 2 (`gpu/metal/tests.rs`,
+  `graphite_draws_the_library_at_twice_the_scale_as_the_cpu_references`), and the CPU, hybrid and
+  GPU modes of Vello (`effect_tests.rs`, `gpu/effect_pass_tests.rs`: the graph effects at scale 2
+  added); the comparison scenes (`tests/FerroUI.RenderBackends.Comparison/custom_effect_scenes.rs`
+  and `custom_effect_tests.rs`): each effect through the contracts on Skia raster and every mode
+  of Vello at 96 and 192 DPI against its CPU reference, Skia against each mode of Vello, and the
+  neutral values; the steady state: frames of the whole library that change only parameters
+  compile no SkSL program and make no image on Skia raster
+  (`frames_of_the_library_compile_no_program_after_the_first`), and compile no pipeline, allocate
+  no texture and upload no image in the hybrid and GPU modes of Vello
+  (`frames_of_the_whole_library_compile_and_allocate_nothing_in_the_gpu_modes`); the prewarm: the
+  composition target draws every type of the library once offscreen after its first frame
+  (`a_target_prewarms_the_custom_effects_of_the_library_after_its_first_frame`,
+  `compositor_tests.rs`), the prewarm drawn as the target draws it compiles every program the first
+  frame of the library needs on Skia raster
+  (`the_prewarm_of_the_library_compiles_what_its_first_frame_draws`) and through a Graphite render
+  target (`a_graphite_render_target_prewarms_the_library_ahead_of_the_frame_that_shows_it`), and on
+  Vello, which does not prewarm, the first frame makes one pipeline per shader type and no frame
+  after it makes one (`the_first_frame_of_the_library_makes_one_pipeline_per_shader_type`).
+
+### 3.9 Validation as built (E9)
+
+- *Against the CPU reference, per backend and mode.* Every effect of the library (the nine graph
+  effects, the three runtime shaders, the two page transitions, the four interactive effects) is
+  drawn around a scene of opaque and translucent squares and compared with its CPU reference
+  applied to the same scene drawn plain by the same backend and mode, at one and two device pixels
+  per unit, on Skia raster, Graphite (macOS, a Metal device), and the CPU, hybrid and GPU modes of
+  Vello. The tolerances are those of the steps that added each effect, at both scales: 2 levels for
+  the colour matrices and convolutions, 12 for the glow (a blur against the reference's), 1 to 3
+  for the runtime shaders and the transitions, one or two more on Graphite (14 for the glow), and
+  for the programs that move the content (the water ripple, the flame) at most 1% of the pixels
+  further than 3 levels (4 on Graphite) with a mean within 1.5. Ganesh draws the same programs as
+  Graphite and raster; no pixel test of the custom effects runs on it (the GPU pixel tests of
+  `ferroui-skia` are Graphite's, on a Metal device). WebGL2 draws the CPU references until step 3
+  of the Vello route in gpu-rendering.md.
+- *Comparison scenes.* `tests/FerroUI.RenderBackends.Comparison` (the crate that links both
+  backends) draws each effect through the contracts only, as the render walk draws it, into render
+  target bitmaps of Skia raster and of every mode of Vello that is built, at 96 and 192 DPI, holds
+  each to the CPU reference, and compares Skia with each mode of Vello in the table form of the
+  other comparison scenes: the share of the pixels beyond the tolerance of the harness and the mean
+  difference, bounded by the two tolerances and by where the references of the two plain
+  renderings differ. A neutral value of each effect draws the content unchanged everywhere.
+- *Steady state.* Effect graphs are loaded once per type, programs compiled once per thread (Skia)
+  or device (Vello) and type, and a frame changes only uniforms and the members of graphs: the
+  tests draw the whole library over eight frames whose parameters change and hold the counters of
+  the programs (`runtime_effects::compilation_count`), the Skia images of effect images
+  (`custom_shader_effects::effect_images_made`), the pipelines
+  (`effect_passes::shader_pipelines_created`), the textures of the pool
+  (`effect_passes::texture_allocations`) and the uploads of images (`effect_passes::image_uploads`)
+  constant after the first frames.
+- *Prewarm.* The prewarm API is the one of #437 (gpu-rendering.md, "Pipelines made ahead of their
+  first draw"): each type registers its graph or its default value under `custom-effect:<NAME>`
+  when it is first loaded, and a composition target draws what was registered once offscreen after
+  its first frame, through `IRenderTarget::prewarm`. Skia's GPU render targets draw it (Graphite on
+  a recorder of its own); the tests show that this compiles every program the first frame of the
+  library needs. A graph is drawn at the values of its description, where some colour matrices are
+  the identity and are not drawn: a colour matrix layer is one program whatever its matrix, which
+  the other graphs prewarm. Vello's render targets do not prewarm (the default of the contract):
+  the pipeline of a shader effect type is made by the first frame that draws it, once per device,
+  which the tests bound; drawing the prewarm onto a scene of the device offscreen is the step that
+  would add it, not taken (its cost has not been measured).
 
 ## 4. Steps
 
@@ -508,10 +780,10 @@ Each step is one pull request from main.
 | E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes. **Done**: `ConvolveMatrix`, `push_convolve_matrix_layer`, the node, sharpen and edge detect; the route for the colour matrix, convolution, light multiply, pixel operation and luminance layers; WebGL2 keeps the CPU path (route step 3) | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples. **Done**: `shader`, `ShaderEffectDescription`, the uniform convention, the Skia programs, pixelate, scan lines and spotlight in the library and on the catalog page "Custom effects" (section 3.4, "Shader effects as built") | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3). **Done**: `ShaderEffectDescription::wgsl_module`, the pass of the hybrid and GPU modes, the CPU reference in the CPU mode, `ferroui_build::shader_effects` (the GLSL ES, not drawn by the browser yet) (section 3.4, "Shader effects on Vello as built") | addition | high: depends on E3 |
-| E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
-| E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples | addition | medium: event ordering and capture |
-| E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
-| E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI | none | low |
+| E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions. **Done**: `EffectImage`, `EffectImageWeak`, `EffectImagePixels`, the children convention (`SHADER_WGSL_CHILDREN_BINDING`, `MAX_SHADER_CHILDREN`, `check_shader_children`, `for_each_shader_child`), Skia's image shaders and Vello's textures uploaded once and released after the last handle, the dissolve and mask transitions in the library and on the catalog page (section 3.6, "Secondary images as built") | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
+| E7 | Interactive effects (section 3.5): the input trait, the host context, the routing through the host's pointer events; the interactive samples. **Done**: `IEffectInputHandler`, `EffectHostContext`, `Effect::construct_interactive`, `InputElement::interactive_effect`, the routing of `input_element_effects.rs`, the pointer spotlight, the reactive grid, the water ripple and the burning flame (values and interactive classes) in the library and on the catalog page (section 3.5, "Interactive effects as built") | addition | medium: event ordering and capture |
+| E8 | Samples and catalog pages (section 3.7). **Done**: `samples/CustomEffects` (the gallery application, crate `custom-effects`), the catalog section "Custom effects" with a page per family (section 3.7, "Samples as built") | none (samples) | low |
+| E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI. **Done**: every effect of the library at 96 and 192 DPI on Skia raster, Graphite and every mode of Vello against its CPU reference, the comparison scenes of `tests/FerroUI.RenderBackends.Comparison`, the steady state of the whole library on both backends, the prewarm by the composition target and a Graphite render target, the rows of gpu-rendering.md, winui-composition.md section 5.4 (section 3.9, "Validation as built") | none | low |
 
 Status: E0 and E1 are merged (#455): the model and the no-op. E2 is done: a custom effect whose
 type has a graph is drawn by the render walk as that graph around the content, through the painter
@@ -544,6 +816,56 @@ is reported once and draws the content unchanged. The CPU mode draws the CPU ref
 tests hold the three library shader effects to their references in every mode. `ferroui-build`
 translates the module to GLSL ES 3.0 at build time for WebGL2 (decision 2), which keeps the CPU
 reference until step 3 of the Vello route gives its renderer device textures.
+
+E6 is done: an image parameter (`EffectParameterValue::Image`, a handle `EffectImage` of a bitmap,
+compared by identity, `Send + Sync`) is a child of the program of an overlay, `uniform shader
+<name>;` in SkSL and `sample_<name>` in WGSL, the image stretched over the area of the effect and
+sampled by the nearest texel (section 3.6, "Secondary images as built"). Skia binds image shaders
+of images made once per thread, uploaded once by the GPU context; Vello uploads an image once per
+device into a texture bound in the pass; both release what they made after the last handle is
+dropped, on the thread that owns it, with the next frame. A content-sampling program takes no
+images (skia-safe binds no setter for the children of a runtime shader image filter's builder).
+The dissolve and mask transitions ship in the library with CPU references, and the render tests
+hold them to those references on Skia raster and Graphite and in every mode of Vello, with no
+upload over steady frames. Graph effects take no images.
+
+E7 is done: a mutable effect class that implements `IEffectInputHandler` and is constructed with
+`Effect::construct_interactive` receives the pointer input of the input element it is the effect
+of (section 3.5, "Interactive effects as built"). One class handler of the changes of
+`Visual.Effect` attaches it to its host and detaches it when the effect changes, the attachment
+holding the guards of its handlers; the events reach it in the order of the routed events (after
+the tunnel route, the host's own handling and its descendants' bubble handlers), handled ones only
+when it asks for them, a captured pointer wherever it is, and the loss of the capture. The
+`EffectHostContext` gives the position in the host, normalized to it and in the coordinates of the
+program at the layer's scale, the capture, the invalidation and the frames of the animation clock.
+The class changes its value and raises `invalidated`; only the snapshot crosses, so a frame of an
+interaction changes uniforms and compiles nothing, which the tests count on both backends. The
+pointer spotlight, the reactive grid, the water ripple and the burning flame of Effector's sample
+set ship in the library as shader effects with CPU references and as interactive classes, held to
+their references on Skia raster and Graphite and in every mode of Vello, and the catalog page
+"Custom effects" shows them with the burn-away button.
+
+E8 is done: the samples of section 3.7. `samples/CustomEffects` is the gallery application of the
+custom effects, Effector's gallery and compiz sample in one, with a section per family of the
+library: each effect in a tile with its code, its effect string, sliders and colours, the
+transition of the effect of its host and key frames of `Visual.Effect`; the page transitions
+sample pages the application captures once, and a presenter dissolves from one to the other where
+it is pressed (section 3.7, "Samples as built"). The ControlCatalog shows the same sections as one
+page per family in a section "Custom effects", in place of its single page; its transitions sample
+photographs of its assets. The effects are those of E2 to E7, so every tile draws on the GPU of
+Skia and Vello, and a slider, a colour or a frame of an animation changes only uniforms and the
+members of graphs.
+
+E9 is done, and with it #455: every effect FerroUI ships is held to its CPU reference on Skia raster,
+Graphite and the CPU, hybrid and GPU modes of Vello at one and two device pixels per unit, and
+compared between Skia and each mode of Vello in the comparison scenes; frames of the whole library
+that change only parameters compile no program, make no image, allocate no texture and upload
+nothing on either backend; the prewarm of a composition target draws every type of the library after
+its first frame, which on Skia compiles every program its first frame needs, and on Vello, which does
+not prewarm, each pipeline is made once per device and type (section 3.9, "Validation as built").
+gpu-rendering.md records the paths and their tests, and winui-composition.md (section 5.4) maps
+WinUI's effect factory, Win2D's effects and pixel shaders and its render walk onto the custom
+effects.
 
 ## 5. Not in scope
 

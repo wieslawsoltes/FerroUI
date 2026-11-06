@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::cell::{OnceCell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -15,14 +16,19 @@ use crate::media::{
     FontFallback, FontFamily, FontManagerOptions, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
 use crate::platform::IFontManagerImpl;
-use crate::utilities::{CultureInfo, Uri, UriExtensions, UriKind};
+use crate::utilities::{Locale, UriExtensions, UriRef};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The font manager is used to query the system's installed fonts and is
 /// responsible for caching loaded fonts. It is also responsible for the font
 /// fallback.
 pub struct FontManager {
-    font_collections: RefCell<HashMap<Uri, Rc<dyn IFontCollection>>>,
+    /// The collections by their key, a URL without its fragment (decision O5 of
+    /// docs/idiomatic-rust-signatures.md: `fonts:A#x` is the collection `fonts:A`, as it was
+    /// for the `Uri` of .NET).
+    font_collections: RefCell<HashMap<url::Url, Rc<dyn IFontCollection>>>,
+    /// The key of the system font collection, made once.
+    system_fonts_key: url::Url,
     font_fallbacks: Option<Vec<FontFallback>>,
     /// The configured family name mappings, sorted by name ignoring case.
     font_family_mappings: Option<Vec<(String, FontFamily)>>,
@@ -44,17 +50,15 @@ impl FontManager {
     pub const SYSTEM_FONT_SCHEME: &'static str = "systemfont";
     pub const COMPOSITE_FONT_SCHEME: &'static str = "compositefont";
 
+    /// The text of the key of the system font collection.
+    const SYSTEM_FONTS_KEY: &'static str = "fonts:SystemFonts";
+
     /// The key of the system font collection (`fonts:SystemFonts`).
     ///
     /// Internal upstream, where the Skia unit tests see it; public here so
     /// that the tests of the Skia crate reach it.
-    pub fn system_fonts_key() -> Uri {
-        crate::ferro_thread_local! {
-            static SYSTEM_FONTS_KEY: Uri = Uri::try_create("fonts:SystemFonts", UriKind::Absolute)
-                .expect("the system fonts key is an absolute uri");
-        }
-
-        SYSTEM_FONTS_KEY.with(Clone::clone)
+    pub fn system_fonts_key() -> url::Url {
+        url::Url::parse(Self::SYSTEM_FONTS_KEY).expect("the system fonts key is a URL")
     }
 
     /// Creates a font manager on top of a font backend. The
@@ -67,6 +71,7 @@ impl FontManager {
 
         let font_manager = FontManager {
             font_collections: RefCell::new(HashMap::new()),
+            system_fonts_key: Self::system_fonts_key(),
             font_fallbacks: options.as_ref().and_then(|options| options.font_fallbacks.clone()),
             font_family_mappings: Self::create_font_family_mappings(
                 options.as_ref().and_then(|options| options.font_family_mappings.as_ref()),
@@ -148,7 +153,7 @@ impl FontManager {
 
     /// Get all system fonts.
     pub fn system_fonts(&self) -> Rc<dyn IFontCollection> {
-        if let Some(font_collection) = self.try_get_font_collection(&Self::system_fonts_key()) {
+        if let Some(font_collection) = self.try_get_font_collection(&self.system_fonts_key) {
             return font_collection;
         }
 
@@ -187,7 +192,7 @@ impl FontManager {
                     if let Some(mapped_font_family) = self.try_get_font_family_mapping(family_name) {
                         key = match mapped_font_family.key() {
                             Some(mapped_key) => mapped_key.clone(),
-                            None => FontFamilyKey::new(Self::system_fonts_key()),
+                            None => FontFamilyKey::new(UriRef::from(self.system_fonts_key.clone())),
                         };
 
                         family_name = mapped_font_family.family_names().primary_family_name();
@@ -237,7 +242,7 @@ impl FontManager {
         &self,
         text: &[u16],
         typeface: &Typeface,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> FontFallbackMappingResult {
         if self.font_fallbacks.as_ref().is_some_and(|fallbacks| !fallbacks.is_empty()) {
             return FontFallbackMappingResult::Unavailable;
@@ -279,9 +284,9 @@ impl FontManager {
         key: &FontFamilyKey,
         family_name: &str,
     ) -> Option<Rc<GlyphTypeface>> {
-        let source = key.source().ensure_absolute(key.base_uri());
+        let source = Self::absolute_source(key);
 
-        let font_collection = self.try_get_font_collection(&source)?;
+        let font_collection = self.try_get_font_collection(source)?;
 
         if let Some(glyph_typeface) =
             font_collection.try_get_glyph_typeface(family_name, typeface.style(), typeface.weight(), typeface.stretch())
@@ -312,11 +317,13 @@ impl FontManager {
     ///
     /// Panics when the key of the collection does not follow the `fonts:` scheme.
     pub fn add_font_collection(&self, font_collection: Rc<dyn IFontCollection>) {
-        let key = font_collection.key();
+        let mut key = font_collection.key();
 
-        if !key.is_absolute_uri() || !UriExtensions::is_font_collection(&key) {
+        if !UriExtensions::is_font_collection(&key) {
             panic!("Font collection Key should follow the fonts: scheme.");
         }
+
+        key.set_fragment(None);
 
         let old_collection = self.font_collections.borrow_mut().insert(key, font_collection);
 
@@ -326,8 +333,8 @@ impl FontManager {
     }
 
     /// Removes the font collection that corresponds to specified key.
-    pub fn remove_font_collection(&self, key: &Uri) {
-        let font_collection = self.font_collections.borrow_mut().remove(key);
+    pub fn remove_font_collection(&self, key: &url::Url) {
+        let font_collection = self.font_collections.borrow_mut().remove(&*collection_key(key));
 
         if let Some(font_collection) = font_collection {
             font_collection.dispose();
@@ -348,7 +355,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         font_family: Option<&FontFamily>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
     ) -> Option<Typeface> {
         self.try_match_character_with_script(
             codepoint,
@@ -373,7 +380,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         font_family: Option<&FontFamily>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         if let Some(font_fallbacks) = &self.font_fallbacks {
@@ -399,13 +406,13 @@ impl FontManager {
                 if let Some(composite_keys) = CompositeFontFamilyKey::keys(font_family_key) {
                     for (i, key) in composite_keys.iter().enumerate() {
                         let mut family_name = &font_family.family_names()[i];
-                        let source = key.source().ensure_absolute(key.base_uri());
+                        let source = Self::absolute_source(key);
 
                         if family_name == FontFamily::DEFAULT_FONT_FAMILY_NAME {
                             family_name = self.default_font_family().name();
                         }
 
-                        let Some(font_collection) = self.try_get_font_collection(&source) else {
+                        let Some(font_collection) = self.try_get_font_collection(source) else {
                             continue;
                         };
 
@@ -438,10 +445,10 @@ impl FontManager {
                     }
                 }
 
-                let font_uri = font_family_key.source().ensure_absolute(font_family_key.base_uri());
+                let font_uri = Self::absolute_source(font_family_key);
 
-                if UriExtensions::is_font_collection(&font_uri) {
-                    if let Some(font_collection) = self.try_get_font_collection(&font_uri) {
+                if UriExtensions::is_font_collection(font_uri) {
+                    if let Some(font_collection) = self.try_get_font_collection(font_uri) {
                         if let Some(typeface) = Self::try_match_character_in_collection(
                             &*font_collection,
                             codepoint,
@@ -483,7 +490,7 @@ impl FontManager {
         font_weight: FontWeight,
         font_stretch: FontStretch,
         family_name: Option<&str>,
-        culture: Option<&CultureInfo>,
+        culture: Option<&Locale>,
         shaping_script: Script,
     ) -> Option<Typeface> {
         if let Some(font_collection_base) = font_collection.as_font_collection_base() {
@@ -510,9 +517,9 @@ impl FontManager {
         match font_family.key() {
             None => self.system_fonts().try_get_family_typefaces(font_family.name()),
             Some(key) => {
-                let source = key.source().ensure_absolute(key.base_uri());
+                let source = Self::absolute_source(key);
 
-                self.try_get_font_collection(&source)
+                self.try_get_font_collection(source)
                     .and_then(|font_collection| font_collection.try_get_family_typefaces(font_family.name()))
             }
         }
@@ -523,27 +530,27 @@ impl FontManager {
     /// collection (`systemfont:` or the system fonts key), a registered
     /// collection (`fonts:`) or the collection of embedded fonts at the
     /// source (`resm:`, `ferres:`), which is created on first use.
-    pub(crate) fn try_get_font_collection(&self, source: &Uri) -> Option<Rc<dyn IFontCollection>> {
-        debug_assert!(source.is_absolute_uri());
+    pub(crate) fn try_get_font_collection(&self, source: &url::Url) -> Option<Rc<dyn IFontCollection>> {
+        let source = collection_key(source);
 
         // Both the systemfont: scheme and the system fonts key (fonts:SystemFonts) map to the
         // system font collection. The key is checked before the generic font collection branch
         // so that the system font collection is created on demand regardless of which URI form
         // is used.
-        if source.scheme() == Self::SYSTEM_FONT_SCHEME || *source == Self::system_fonts_key() {
-            return Some(self.get_or_create_font_collection(&Self::system_fonts_key(), |_| {
+        if source.scheme() == Self::SYSTEM_FONT_SCHEME || source.as_str() == Self::SYSTEM_FONTS_KEY {
+            return Some(self.get_or_create_font_collection(&self.system_fonts_key, |_| {
                 Rc::new(SystemFontCollection::new(self.platform_impl.clone()))
             }));
         }
 
         // Other fonts: URIs are only returned when they have been explicitly registered
         // via `add_font_collection` - no implicit creation to avoid caching nothing for unknown keys.
-        if UriExtensions::is_font_collection(source) {
-            return self.font_collections.borrow().get(source).cloned();
+        if UriExtensions::is_font_collection(&source) {
+            return self.font_collections.borrow().get(&*source).cloned();
         }
 
-        if UriExtensions::is_absolute_resm(source) || UriExtensions::is_asset(source) {
-            return Some(self.get_or_create_font_collection(source, |key| {
+        if UriExtensions::is_resm(&source) || UriExtensions::is_asset(&source) {
+            return Some(self.get_or_create_font_collection(&source, |key| {
                 Rc::new(EmbeddedFontCollection::new(key.clone(), key.clone()))
             }));
         }
@@ -551,13 +558,21 @@ impl FontManager {
         None
     }
 
+    /// The URL of the source of a key (C# `key.Source.EnsureAbsolute(key.BaseUri)`), resolved
+    /// when the key was made.
+    ///
+    /// Panics for a relative source without a base URI (C# throws `ArgumentException`).
+    fn absolute_source(key: &FontFamilyKey) -> &url::Url {
+        key.absolute_source().unwrap_or_else(|| panic!("Relative uri {} without base url", key.source()))
+    }
+
     /// Returns the registered collection, or creates and registers one. A
     /// collection registered for the key while the factory ran wins, and the
     /// new one is disposed.
     fn get_or_create_font_collection(
         &self,
-        key: &Uri,
-        factory: impl FnOnce(&Uri) -> Rc<dyn IFontCollection>,
+        key: &url::Url,
+        factory: impl FnOnce(&url::Url) -> Rc<dyn IFontCollection>,
     ) -> Rc<dyn IFontCollection> {
         if let Some(existing) = self.font_collections.borrow().get(key) {
             return existing.clone();
@@ -614,4 +629,16 @@ impl FontManager {
 
         self.platform_impl.dispose();
     }
+}
+
+/// The key of a URL in the font collections: the URL without its fragment, borrowed when it has
+/// none (every source a font family makes).
+fn collection_key(url: &url::Url) -> Cow<'_, url::Url> {
+    if url.fragment().is_none() {
+        return Cow::Borrowed(url);
+    }
+
+    let mut key = url.clone();
+    key.set_fragment(None);
+    Cow::Owned(key)
 }

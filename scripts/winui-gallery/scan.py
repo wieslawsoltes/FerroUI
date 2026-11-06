@@ -10,7 +10,7 @@ It reads the pinned checkouts of microsoft-ui-xaml and WinUI-Gallery
 reviewed map `api-mappings.json` and the generated `summary.json` and `REPORT.md`
 are committed (docs/porting/winui-controls.md, O8); the inventories and the maps
 (`upstream-api.json` and the others) are written to `--output-dir`, which the
-workflow keeps as an artifact and `event_targets.py --check` reads.
+workflow keeps as an artifact.
 """
 
 from __future__ import annotations
@@ -860,7 +860,7 @@ def report(summary: dict, page_mapping: dict, lock: dict) -> str:
                   "## Gallery port state", "", "| Page state | Count |", "|---|---:|"])
     for state in ("pending", "partial", "ported", "verified"):
         lines.append(f"| {state} | {gallery['page_statuses'][state]} |")
-    lines.extend(["", "Partial pages exercise reviewed native subsets (`samples/WinUIGallery/port-status.json`).", "",
+    lines.extend(["", "Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.", "",
                   "| Page | Category | State | Catalog examples |", "|---|---|---|---:|"])
     for page in page_mapping["pages"]:
         lines.append(f"| {page['id']} | {page['category']} | {page['status']} | {page['examples_total']} |")

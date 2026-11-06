@@ -6,7 +6,7 @@ use crate::storage_provider_api::StorageProviderApi;
 use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
 use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::{HandlerList, Uri, UriKind};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::application_lifetimes::{
     ActivationKind, FileActivatedEventArgs, ProtocolActivatedEventArgs, ShutdownRequestedEventArgs,
@@ -96,9 +96,10 @@ impl IFrnApplicationEventsImpl for FerroNativeApplicationPlatform {
         crate::callback_base::guard((), || {
             if let (Some(lifetime), Some(storage_api)) = (activatable_lifetime(), storage_api()) {
                 let mut files: Vec<Rc<dyn IStorageItem>> = Vec::new();
-                let mut uris: Vec<Uri> = Vec::new();
+                let mut uris: Vec<url::Url> = Vec::new();
                 for url in urls.map(frn_string_array_to_vec).unwrap_or_default() {
-                    if let Some(uri) = Uri::try_create(&url, UriKind::RelativeOrAbsolute) {
+                    // A relative reference is no URL, and opens nothing.
+                    if let Ok(uri) = url::Url::parse(&url) {
                         if uri.scheme() == "file" {
                             if let Some(file) = storage_api.try_get_storage_item(Some(&uri), false) {
                                 files.push(file.into_item());

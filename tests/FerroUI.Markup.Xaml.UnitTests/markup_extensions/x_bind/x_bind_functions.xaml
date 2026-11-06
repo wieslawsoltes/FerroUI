@@ -1,0 +1,27 @@
+<local:XBindPage xmlns="https://github.com/ferroui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:local="clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests"
+                 Title="Ada">
+  <TextBlock x:Name="rootOnce" Text="{x:Bind Format(Title)}" />
+  <TextBlock x:Name="rootFunction" Text="{x:Bind Format(Title), Mode=OneWay}" />
+  <TextBlock x:Name="pathFunction" Text="{x:Bind Model.Greet(Title, 'Hello, world', 3), Mode=OneWay}" />
+  <TextBlock x:Name="modelArgument" Text="{x:Bind local:XBindHelpers.Join(Model.Name, '+', 2), Mode=OneWay}" />
+  <TextBlock x:Name="staticFunction" Text="{x:Bind local:XBindHelpers.Join(Title, '-', 2), Mode=OneWay}" />
+  <TextBlock x:Name="literals" Text='{x:Bind local:XBindHelpers.Describe("quoted, with comma", -2.5, x:True, x:Null)}' />
+  <TextBlock x:Name="notifying" Text="{x:Bind Model.Stamp(), Mode=OneWay}" />
+  <TextBlock x:Name="namedArgument" Text="{x:Bind Format(rootOnce.Text), Mode=OneWay}" />
+  <TextBox x:Name="bindBack" Text="{x:Bind Format(Title), Mode=TwoWay, BindBack=ParseTitle, UpdateSourceTrigger=PropertyChanged}" />
+  <TextBox x:Name="pathBindBack" Text="{x:Bind Model.Shout(Model.Name), Mode=TwoWay, BindBack=Model.Rename, UpdateSourceTrigger=PropertyChanged}" />
+  <TextBox x:Name="staticBindBack" Text="{x:Bind local:XBindHelpers.Join(Title, '', 1), Mode=TwoWay, BindBack=local:XBindHelpers.Store}" />
+  <TextBlock x:Name="staticMember" Text="{x:Bind local:XBindHelpers.Prefix}" />
+  <TextBlock x:Name="index" Text="{x:Bind Model.Items[1]}" />
+  <TextBlock x:Name="key" Text="{x:Bind Model.Map['second key']}" />
+  <TextBlock x:Name="interfaceMember" Text="{x:Bind Model.(local:IXBindNamed.DisplayName)}" />
+  <ContentControl x:Name="itemHost">
+    <ContentControl.ContentTemplate>
+      <DataTemplate x:DataType="local:XBindModel">
+        <TextBlock Text="{x:Bind Shout(Name), Mode=OneWay}" />
+      </DataTemplate>
+    </ContentControl.ContentTemplate>
+  </ContentControl>
+</local:XBindPage>

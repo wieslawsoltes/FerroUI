@@ -40,6 +40,8 @@ pub use binding_value::{BindingError, BindingValue, BindingValueType};
 pub use compiled_binding::CompiledBinding;
 pub use compiled_binding_path::{
     CompiledBindingPath, CompiledBindingPathBuilder, CompiledBindingPathElement, CompiledBindingPathElementKind,
+    PathBindBack, PathBindBackInvoke, PathEventHandler, PathEventHandlerInvoke, PathFunctionArgument,
+    PathFunctionInvoke,
 };
 pub use culture_info_ietf_language_tag_converter::CultureInfoIetfLanguageTagConverter;
 pub use data_validation_exception::{AggregateException, DataValidationError};

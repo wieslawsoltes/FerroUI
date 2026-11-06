@@ -24,6 +24,8 @@ ferroui-opengl.workspace = true
 # The one-shot channel the pickers and the launcher wait on.
 ferroui-system.workspace = true
 bitflags.workspace = true
+# The URLs of the launcher, the storage and the activation (C5 of #423).
+url.workspace = true
 
 # What the example shows its content with. Optional, behind the feature the example requires.
 ferroui-themes-simple = { workspace = true, optional = true }

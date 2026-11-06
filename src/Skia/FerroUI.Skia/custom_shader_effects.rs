@@ -25,21 +25,38 @@
 //! device and its pixels are those of the target; the content is drawn into
 //! it with its own transform.
 //!
+//! The images of an overlay (its children, #455, E6) are image shaders of the
+//! Skia images of their bitmaps, stretched over the area of the effect and
+//! sampled by the nearest texel. An image is made a Skia image once per
+//! thread (and version of its bitmap) and kept by the identity of its handle
+//! ([`effect_image`]); a GPU context makes the texture of that image once and
+//! keeps it while the image is held (Graphite through
+//! [`drawable_image`](crate::gpu::drawable_image), Ganesh through its cache of
+//! uploads by the identity of the image), so a frame that changes only
+//! uniforms uploads nothing. When the last handle of an image is dropped, on
+//! whatever thread, the next frame of this thread drops its Skia image
+//! ([`release_dropped_images`]), and the context releases the texture with
+//! its next flush.
+//!
 //! A program that does not compile, whose uniforms or children are not those
-//! of the convention, or a description with children besides the content
-//! (step E6), is reported once ([`report_failure`]) and the effect is drawn
-//! as an effect without a factory: its content unchanged.
+//! of the convention, or a description whose children are not image
+//! parameters of an overlay
+//! ([`ImmutableCustomEffect::check_shader_children`]), is reported once
+//! ([`report_failure`]) and the effect is drawn as an effect without a
+//! factory: its content unchanged.
 
+use crate::gpu::ISkiaGrContext;
 use crate::runtime_effects::{self, make_shader, ProgramKind, Uniforms};
 use crate::skia_sharp_extensions::to_sk_blend_mode;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::media::effects::{
-    ImmutableCustomEffect, ShaderEffectDescription, ShaderUniformType, ShaderUniformValue, CUSTOM_EFFECT_CONTENT,
+    shader_uniform_name, EffectImage, EffectImageWeak, ImmutableCustomEffect, ShaderEffectDescription,
+    ShaderUniformType, ShaderUniformValue, CUSTOM_EFFECT_CONTENT,
 };
 use skia_safe as sk;
-use skia_safe::runtime_effect::{uniform, ChildType, RuntimeShaderBuilder};
+use skia_safe::runtime_effect::{uniform, ChildPtr, ChildType, RuntimeShaderBuilder};
 use std::any::TypeId;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Mutex;
@@ -84,8 +101,8 @@ pub(crate) fn program(effect: &ImmutableCustomEffect) -> Option<Rc<ShaderEffectP
 
 fn build(effect: &ImmutableCustomEffect, description: &ShaderEffectDescription) -> Option<ShaderEffectProgram> {
     let name = effect.name();
-    if !description.children.is_empty() {
-        report_failure(name, "children besides the content are not supported yet");
+    if let Err(reason) = effect.check_shader_children() {
+        report_failure(name, &reason);
         return None;
     }
     let Some(compiled) = runtime_effects::compile_named(ProgramKind::Shader, &description.sksl, name) else {
@@ -93,7 +110,7 @@ fn build(effect: &ImmutableCustomEffect, description: &ShaderEffectDescription) 
         report_failure(name, "its SkSL program does not compile");
         return None;
     };
-    if let Err(reason) = check(&compiled, effect, description.samples_content()) {
+    if let Err(reason) = check(&compiled, effect, description) {
         report_failure(name, &reason);
         return None;
     }
@@ -118,11 +135,18 @@ fn type_matches(declared: uniform::Type, expected: ShaderUniformType) -> bool {
 }
 
 /// Checks the uniforms and the children `program` declares against the
-/// convention for `effect`: the uniforms of
+/// convention for `effect` and its `description`: the uniforms of
 /// [`ImmutableCustomEffect::shader_uniform_layout`], in order, with their
 /// names and types, none an array; the child `content` (a shader) for a
-/// content-sampling program, no child for an overlay.
-pub(crate) fn check(program: &sk::RuntimeEffect, effect: &ImmutableCustomEffect, samples_content: bool) -> Result<(), String> {
+/// content-sampling program, the children of the description (shaders named
+/// as their image parameters with every `-` written `_`, in order) for an
+/// overlay.
+pub(crate) fn check(
+    program: &sk::RuntimeEffect,
+    effect: &ImmutableCustomEffect,
+    description: &ShaderEffectDescription,
+) -> Result<(), String> {
+    let samples_content = description.samples_content();
     let layout = effect.shader_uniform_layout();
     let declared = program.uniforms();
     let expected = || {
@@ -153,8 +177,20 @@ pub(crate) fn check(program: &sk::RuntimeEffect, effect: &ImmutableCustomEffect,
         if !content {
             return Err(format!("a content-sampling program declares one child, uniform shader {CUSTOM_EFFECT_CONTENT}"));
         }
-    } else if !children.is_empty() {
-        return Err("an overlay declares no child".to_owned());
+    } else {
+        let expected: Vec<String> = description.children.iter().map(|child| shader_uniform_name(child)).collect();
+        let matches = children.len() == expected.len()
+            && children
+                .iter()
+                .zip(&expected)
+                .all(|(child, name)| child.name() == name.as_str() && matches!(child.ty(), ChildType::Shader));
+        if !matches {
+            if expected.is_empty() {
+                return Err("an overlay without images declares no child".to_owned());
+            }
+            let declared: Vec<String> = expected.iter().map(|name| format!("uniform shader {name}")).collect();
+            return Err(format!("the overlay declares the children of its images, in order: {}", declared.join(", ")));
+        }
     }
     Ok(())
 }
@@ -286,12 +322,14 @@ pub(crate) fn content_filter(
 }
 
 /// The shader of an overlay program for the snapshot `effect` in `layer`,
-/// with the uniforms of this frame. `None` when they do not match its
-/// program (reported once).
+/// with the uniforms of this frame and its images as children: the image
+/// shaders of [`child_shader`], for a canvas that draws with `gr_context`.
+/// `None` when they do not match its program (reported once).
 pub(crate) fn overlay_shader(
     program: &ShaderEffectProgram,
     effect: &ImmutableCustomEffect,
     layer: &ShaderLayer,
+    gr_context: Option<&dyn ISkiaGrContext>,
 ) -> Option<sk::Shader> {
     let mut uniforms = Uniforms::new(&program.effect);
     let declared = program.effect.uniforms();
@@ -309,18 +347,156 @@ pub(crate) fn overlay_shader(
         }
         index += 1;
     });
-    let shader = make_shader(&program.effect, &uniforms, &[], None);
+    let mut children: Vec<ChildPtr> = Vec::new();
+    effect.for_each_shader_child(&mut |_, image| children.push(ChildPtr::Shader(child_shader(image, layer, gr_context))));
+    let shader = make_shader(&program.effect, &uniforms, &children, None);
     if shader.is_none() {
-        report_failure(effect.name(), "Skia did not take its uniforms");
+        report_failure(effect.name(), "Skia did not take its uniforms or its images");
     }
     shader
+}
+
+// --- images (E6) ----------------------------------------------------------------
+
+/// The Skia image of an effect image, made on this thread.
+struct SkiaEffectImage {
+    /// Tells when the last handle of the image is dropped.
+    handle: EffectImageWeak,
+    /// The version of the bitmap the image was made at.
+    version: i32,
+    /// The image; `None` when the bitmap has none (reported once).
+    image: Option<sk::Image>,
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The Skia images of the effect images of this thread, by the identity
+    /// of the handle.
+    static EFFECT_IMAGES: RefCell<HashMap<u64, SkiaEffectImage>> = RefCell::new(HashMap::new());
+    /// The generation of releases of effect images this thread last looked
+    /// at its images for ([`EffectImage::release_generation`]).
+    static RELEASES_SEEN: Cell<u64> = const { Cell::new(0) };
+    /// How many Skia images this thread made of effect images.
+    static IMAGES_MADE: Cell<u64> = const { Cell::new(0) };
+}
+
+/// Drops the Skia images of the effect images whose last handle was dropped
+/// since this thread last looked (on any thread): one atomic read when none
+/// was. The GPU context releases the texture of such an image with its next
+/// flush. Called by the drawing contexts of this thread when they are
+/// created, so a dropped image is released by the next frame.
+pub(crate) fn release_dropped_images() {
+    let generation = EffectImage::release_generation();
+    if RELEASES_SEEN.with(|seen| seen.replace(generation)) == generation {
+        return;
+    }
+    EFFECT_IMAGES.with(|images| images.borrow_mut().retain(|_, entry| entry.handle.is_alive()));
+}
+
+/// How many Skia images this thread made of effect images: constant over
+/// frames that only change uniforms.
+#[cfg(test)]
+pub(crate) fn effect_images_made() -> u64 {
+    IMAGES_MADE.with(Cell::get)
+}
+
+/// How many effect images this thread keeps a Skia image for.
+#[cfg(test)]
+pub(crate) fn effect_images_kept() -> usize {
+    EFFECT_IMAGES.with(|images| images.borrow().len())
+}
+
+/// The Skia image of `image`, made the first time this thread draws the
+/// image (or a new version of its bitmap) and kept while a handle of the
+/// image lives; `None` for the empty image or a bitmap Skia cannot draw.
+pub(crate) fn effect_image(image: &EffectImage) -> Option<sk::Image> {
+    if image.is_empty() {
+        return None;
+    }
+    release_dropped_images();
+    let (id, version) = (image.id(), image.version());
+    EFFECT_IMAGES.with(|images| {
+        let mut images = images.borrow_mut();
+        if let Some(entry) = images.get(&id) {
+            if entry.version == version {
+                return entry.image.clone();
+            }
+        }
+        let made = skia_image_of(image);
+        IMAGES_MADE.with(|count| count.set(count.get() + 1));
+        if made.is_none() {
+            if let Some(logger) = Logger::try_get(LogEventLevel::Error, "Skia") {
+                let size = image.pixel_size();
+                logger.log(
+                    None,
+                    &format!(
+                        "An image of {}x{} pixels of a shader effect is not a bitmap Skia draws; it is drawn transparent.",
+                        size.width, size.height
+                    ),
+                );
+            }
+        }
+        images.insert(id, SkiaEffectImage { handle: image.downgrade(), version, image: made.clone() });
+        made
+    })
+}
+
+/// The Skia image of the bitmap of `image`: the image of an immutable
+/// bitmap as it is, a snapshot of a writeable bitmap or of a surface, or a
+/// raster image of the pixels of another readable bitmap.
+fn skia_image_of(image: &EffectImage) -> Option<sk::Image> {
+    use crate::immutable_bitmap::ImmutableBitmap;
+    use crate::surface_render_target::SurfaceRenderTarget;
+    use crate::writeable_bitmap_impl::WriteableBitmapImpl;
+
+    let bitmap = image.bitmap()?;
+    let any = bitmap.as_any();
+    if let Some(bitmap) = any.downcast_ref::<ImmutableBitmap>() {
+        return Some(bitmap.image());
+    }
+    if let Some(bitmap) = any.downcast_ref::<WriteableBitmapImpl>() {
+        return Some(bitmap.get_snapshot());
+    }
+    if let Some(bitmap) = any.downcast_ref::<SurfaceRenderTarget>() {
+        return Some(bitmap.snapshot_image());
+    }
+    let pixels = image.pixels()?;
+    let (width, height) = (i32::try_from(pixels.width()).ok()?, i32::try_from(pixels.height()).ok()?);
+    let info = sk::ImageInfo::new((width, height), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+    sk::images::raster_from_data(&info, sk::Data::new_copy(pixels.rgba()), pixels.width() * 4)
+}
+
+/// The child shader of `image` in `layer`: the image stretched over the
+/// area (a local matrix from the pixels of the image to those of the
+/// layer), sampled by the nearest texel, transparent beyond it (decal), in
+/// the form a canvas drawing with `gr_context` draws (a texture on Graphite);
+/// a transparent shader for the empty image.
+fn child_shader(image: &EffectImage, layer: &ShaderLayer, gr_context: Option<&dyn ISkiaGrContext>) -> sk::Shader {
+    let transparent = || sk::shaders::color(sk::Color::TRANSPARENT);
+    let Some(source) = effect_image(image) else {
+        return transparent();
+    };
+    let (width, height) = (source.width(), source.height());
+    if width < 1 || height < 1 {
+        return transparent();
+    }
+    let drawable = crate::gpu::drawable_image(gr_context, source, false);
+    let stretch = sk::Matrix::scale((layer.size[0] / width as f32, layer.size[1] / height as f32));
+    let sampling = sk::SamplingOptions::new(sk::FilterMode::Nearest, sk::MipmapMode::None);
+    drawable
+        .to_shader((sk::TileMode::Decal, sk::TileMode::Decal), sampling, &stretch)
+        .unwrap_or_else(transparent)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        WaterRippleShaderEffect,
+    };
     use ferroui_base::media::effects::{CustomEffect, EffectParameterValue};
+    use ferroui_base::media::imaging::BitmapBlendingMode;
 
     #[test]
     fn the_programs_of_the_library_compile_and_declare_their_parameters() {
@@ -328,12 +504,19 @@ mod tests {
             ImmutableCustomEffect::new(PixelateEffect::default()),
             ImmutableCustomEffect::new(ScanlineShaderEffect::default()),
             ImmutableCustomEffect::new(SpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(DissolveTransitionEffect::default()),
+            ImmutableCustomEffect::new(MaskTransitionEffect::default()),
+            // The interactive effects (E7).
+            ImmutableCustomEffect::new(PointerSpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(ReactiveGridShaderEffect::default()),
+            ImmutableCustomEffect::new(WaterRippleShaderEffect::default()),
+            ImmutableCustomEffect::new(BurningFlameShaderEffect::default()),
         ];
         for effect in effects {
             let description = effect.shader().expect("a shader effect");
             let compiled = runtime_effects::compile_named(ProgramKind::Shader, &description.sksl, effect.name())
                 .unwrap_or_else(|| panic!("{effect}: the SkSL compiles"));
-            assert_eq!(Ok(()), check(&compiled, &effect, description.samples_content()), "{effect}");
+            assert_eq!(Ok(()), check(&compiled, &effect, &description), "{effect}");
             let program = program(&effect).unwrap_or_else(|| panic!("{effect}: a program"));
             assert_eq!(description.samples_content(), program.samples_content, "{effect}");
             // Compiled once per thread and type.
@@ -343,7 +526,7 @@ mod tests {
             if program.samples_content {
                 assert!(content_filter(&program, &effect, &layer).is_some(), "{effect}");
             } else {
-                assert!(overlay_shader(&program, &effect, &layer).is_some(), "{effect}");
+                assert!(overlay_shader(&program, &effect, &layer, None).is_some(), "{effect}");
             }
         }
     }
@@ -371,25 +554,39 @@ mod tests {
     #[test]
     fn a_program_is_checked_against_the_convention() {
         let effect = ImmutableCustomEffect::new(Checked::default());
+        let as_overlay = ShaderEffectDescription::overlay("", "", BitmapBlendingMode::SourceOver);
+        let as_sampling = ShaderEffectDescription::content_sampling("", "");
         let compile = |source: &str| runtime_effects::compile(ProgramKind::Shader, source).expect("compiles");
         let head = "uniform float2 layer_size; uniform float layer_scale;";
         let body = "half4 main(float2 coord) { return half4(tint_color) * half(on); }";
         let overlay = compile(&format!("{head} uniform float4 tint_color; uniform int on; {body}"));
-        assert_eq!(Ok(()), check(&overlay, &effect, false));
+        assert_eq!(Ok(()), check(&overlay, &effect, &as_overlay));
         // An overlay is not a content-sampling program.
-        assert!(check(&overlay, &effect, true).is_err());
+        assert!(check(&overlay, &effect, &as_sampling).is_err());
         let sampling = compile(&format!(
             "{head} uniform float4 tint_color; uniform int on; uniform shader content;\n\
              half4 main(float2 coord) {{ return content.eval(coord) * half(on); }}"
         ));
-        assert_eq!(Ok(()), check(&sampling, &effect, true));
-        assert!(check(&sampling, &effect, false).is_err());
+        assert_eq!(Ok(()), check(&sampling, &effect, &as_sampling));
+        assert!(check(&sampling, &effect, &as_overlay).is_err());
         // A child of another name.
         let other = compile(&format!(
             "{head} uniform float4 tint_color; uniform int on; uniform shader image;\n\
              half4 main(float2 coord) {{ return image.eval(coord); }}"
         ));
-        assert!(check(&other, &effect, true).is_err());
+        assert!(check(&other, &effect, &as_sampling).is_err());
+        // The children of an overlay (E6): its images, by name and in order.
+        let with_image = as_overlay.clone().with_children(["image"]);
+        assert_eq!(Ok(()), check(&other, &effect, &with_image));
+        assert!(check(&other, &effect, &as_overlay).is_err(), "an overlay without images declares none");
+        assert!(check(&other, &effect, &as_overlay.clone().with_children(["page"])).is_err());
+        let two = compile(&format!(
+            "{head} uniform float4 tint_color; uniform int on; uniform shader to_page; uniform shader mask;\n\
+             half4 main(float2 coord) {{ return to_page.eval(coord) * mask.eval(coord).a; }}"
+        ));
+        assert_eq!(Ok(()), check(&two, &effect, &as_overlay.clone().with_children(["to-page", "mask"])));
+        assert!(check(&two, &effect, &as_overlay.clone().with_children(["mask", "to-page"])).is_err(), "in order");
+        assert!(check(&two, &effect, &as_overlay.clone().with_children(["to-page"])).is_err());
 
         // A uniform of the wrong type, out of order, missing, renamed or an
         // extra one.
@@ -405,14 +602,14 @@ mod tests {
             let program = compile(&format!(
                 "{head} {uniforms}\nhalf4 main(float2 coord) {{ return half4(0.0); }}"
             ));
-            assert!(check(&program, &effect, false).is_err(), "{uniforms}");
+            assert!(check(&program, &effect, &as_overlay).is_err(), "{uniforms}");
         }
         // The layer uniforms come first.
         let program = compile(&format!(
             "uniform float layer_scale; uniform float2 layer_size; uniform float4 tint_color; uniform int on;\n\
              half4 main(float2 coord) {{ return half4(0.0); }}"
         ));
-        assert!(check(&program, &effect, false).is_err());
+        assert!(check(&program, &effect, &as_overlay).is_err());
     }
 
     #[test]
