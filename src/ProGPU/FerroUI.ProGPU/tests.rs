@@ -92,3 +92,79 @@ fn a_retained_scene_renders_and_a_stable_frame_uploads_nothing() {
         wgpuTextureRelease(texture);
     }
 }
+
+/// The engine on a host's Metal device and queue renders into a host's Metal texture, wrapped for
+/// the frame: the path of a window whose platform presents its own drawables.
+#[cfg(target_os = "macos")]
+#[test]
+fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
+    use crate::scene::{SceneBuilder, NO_INDEX};
+    use objc2_metal::{
+        MTLCreateSystemDefaultDevice, MTLDevice, MTLPixelFormat, MTLStorageMode, MTLTextureDescriptor, MTLTextureUsage,
+    };
+    let Some(mtl_device) = MTLCreateSystemDefaultDevice() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    let mtl_queue = mtl_device.newCommandQueueWithMaxCommandBufferCount(4096).expect("a command queue");
+    let (width, height) = (24u32, 16u32);
+    // SAFETY: a descriptor of a two-dimensional texture, then the texture of the device.
+    let mtl_texture = unsafe {
+        let descriptor = MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
+            MTLPixelFormat::RGBA8Unorm,
+            width as usize,
+            height as usize,
+            false,
+        );
+        descriptor.setUsage(MTLTextureUsage::RenderTarget | MTLTextureUsage::ShaderRead);
+        descriptor.setStorageMode(MTLStorageMode::Private);
+        mtl_device.newTextureWithDescriptor(&descriptor).expect("a texture")
+    };
+    // SAFETY: the objects are alive for the test and retained by the device and the texture.
+    let device = unsafe {
+        ProGpuDevice::from_metal(
+            objc2::rc::Retained::as_ptr(&mtl_device) as *mut std::ffi::c_void,
+            objc2::rc::Retained::as_ptr(&mtl_queue) as *mut std::ffi::c_void,
+        )
+    }
+    .expect("the device on the Metal device");
+    // SAFETY: the texture is a texture of the device's Metal device of that size and format.
+    let (texture, view) = unsafe {
+        device.wrap_metal_texture(
+            objc2::rc::Retained::as_ptr(&mtl_texture) as *mut std::ffi::c_void,
+            width,
+            height,
+            WGPUTextureFormat_RGBA8Unorm,
+        )
+    }
+    .expect("the wrapped texture");
+    let mut builder = SceneBuilder::new();
+    builder.clear_target(progpu_native_color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 }).unwrap();
+    let brush = builder.add_solid_brush(progpu_native_color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }, 1.0).unwrap();
+    let primitive = progpu_native_analytic_primitive {
+        kind: PROGPU_NATIVE_PRIMITIVE_RECTANGLE as u32,
+        flags: 0,
+        x: 4.0,
+        y: 4.0,
+        width: 8.0,
+        height: 8.0,
+        corner_radius: 0.0,
+        stroke_thickness: 0.0,
+        color: progpu_native_color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 },
+        transform: SceneBuilder::identity_transform(),
+    };
+    let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 8.0, height: 8.0 };
+    builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
+    let (scene_id, generation) = (builder.scene_id(), builder.generation());
+    device.update_scene(builder.build().unwrap()).unwrap();
+    device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
+    let pixels = device.read_rgba8(texture, width, height);
+    let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
+    assert_eq!(vec![0, 0, 255, 255], pixel(1, 1), "the cleared host texture");
+    assert_eq!(vec![255, 0, 0, 255], pixel(8, 8), "the rectangle in the host texture");
+    // SAFETY: the handles are owned by the test.
+    unsafe {
+        wgpuTextureViewRelease(view);
+        wgpuTextureRelease(texture);
+    }
+}

@@ -117,31 +117,127 @@ impl ProGpuDevice {
                 return Err(ProGpuDeviceError::NoDevice);
             }
             let queue = wgpuDeviceGetQueue(device);
-            let options = progpu_native_dawn_engine_options {
-                struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
-                native_abi_version: PROGPU_NATIVE_ABI_VERSION,
-                adapter_abi_version: PROGPU_NATIVE_DAWN_ADAPTER_ABI_VERSION,
-                provider_abi_version: PROGPU_NATIVE_DAWN_REQUIRED_PROVIDER_ABI_VERSION,
-                target_format: PROGPU_NATIVE_TEXTURE_FORMAT_RGBA8_UNORM as u32,
-                reserved: 0,
-                resolver_context: progpu_native_sys::resolver_context(),
-                resolve_proc: Some(progpu_native_sys::resolve_webgpu_proc),
-                instance: instance as usize,
-                device: device as usize,
-                queue: queue as usize,
-                flags: 0,
-            };
-            let mut engine: *mut progpu_native_engine = ptr::null_mut();
-            let status = progpu_native_dawn_engine_create(&options, &mut engine);
-            if status != PROGPU_NATIVE_STATUS_SUCCESS {
-                wgpuQueueRelease(queue);
-                wgpuDeviceRelease(device);
-                wgpuAdapterRelease(adapter);
-                wgpuInstanceRelease(instance);
-                return Err(ProGpuDeviceError::Engine(status));
+            match Self::create_engine(instance, device, queue) {
+                Ok(engine) => Ok(Self { instance, adapter, device, queue, engine }),
+                Err(status) => {
+                    wgpuQueueRelease(queue);
+                    wgpuDeviceRelease(device);
+                    wgpuAdapterRelease(adapter);
+                    wgpuInstanceRelease(instance);
+                    Err(ProGpuDeviceError::Engine(status))
+                }
             }
-            Ok(Self { instance, adapter, device, queue, engine })
         }
+    }
+
+    /// Creates the device on a host's Metal device, with the host's command queue of it, and the
+    /// engine on it: the device of a window platform that presents its own frames (the drawables
+    /// of its layer, inside its window's Core Animation transaction), so a frame the engine
+    /// renders is committed to the queue before the host commits its presentation. The queue must
+    /// have room for the command buffers a frame leaves uncommitted until it is submitted
+    /// (`newCommandQueueWithMaxCommandBufferCount`, 4096 as wgpu gives its own queues).
+    ///
+    /// # Safety
+    /// `mtl_device` is a live `id<MTLDevice>` and `mtl_queue` a live `id<MTLCommandQueue>` of it;
+    /// both are retained by the device.
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    pub unsafe fn from_metal(mtl_device: *mut c_void, mtl_queue: *mut c_void) -> Result<Self, ProGpuDeviceError> {
+        if !progpu_native_sys::abi_matches() {
+            return Err(ProGpuDeviceError::AbiMismatch);
+        }
+        // SAFETY: the calls of the WebGPU C ABI with the handles they return; the host objects are
+        // valid (the contract of this function).
+        unsafe {
+            let instance = wgpuCreateInstance(ptr::null());
+            if instance.is_null() {
+                return Err(ProGpuDeviceError::NoAdapter);
+            }
+            let device = wgpuInstanceCreateDeviceFromMetal(instance, mtl_device, mtl_queue, ptr::null());
+            if device.is_null() {
+                wgpuInstanceRelease(instance);
+                return Err(ProGpuDeviceError::NoDevice);
+            }
+            let queue = wgpuDeviceGetQueue(device);
+            match Self::create_engine(instance, device, queue) {
+                Ok(engine) => Ok(Self { instance, adapter: ptr::null_mut(), device, queue, engine }),
+                Err(status) => {
+                    wgpuQueueRelease(queue);
+                    wgpuDeviceRelease(device);
+                    wgpuInstanceRelease(instance);
+                    Err(ProGpuDeviceError::Engine(status))
+                }
+            }
+        }
+    }
+
+    /// Wraps a host's two-dimensional `id<MTLTexture>` of the device's Metal device as a texture
+    /// of the device (`RGBA8Unorm` or `BGRA8Unorm`, one level and one sample, usable as a render
+    /// attachment, a copy source and a sampled texture), with a view the engine renders into: the
+    /// texture of a drawable, wrapped for the frame. Its content is treated as uninitialized.
+    ///
+    /// # Safety
+    /// `mtl_texture` is a live `id<MTLTexture>` of the device's Metal device of that size and
+    /// format, which its owner does not destroy while the texture is in use.
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    pub unsafe fn wrap_metal_texture(
+        &self,
+        mtl_texture: *mut c_void,
+        width: u32,
+        height: u32,
+        format: WGPUTextureFormat,
+    ) -> Option<(WGPUTexture, WGPUTextureView)> {
+        // SAFETY: the texture is valid (the contract of this function); the descriptor is borrowed.
+        unsafe {
+            let texture = wgpuDeviceCreateTextureFromMetal(
+                self.device,
+                mtl_texture,
+                &WGPUTextureDescriptor {
+                    nextInChain: ptr::null_mut(),
+                    label: no_label(),
+                    usage: WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc | WGPUTextureUsage_TextureBinding,
+                    dimension: WGPUTextureDimension_2D,
+                    size: WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
+                    format,
+                    mipLevelCount: 1,
+                    sampleCount: 1,
+                    viewFormatCount: 0,
+                    viewFormats: ptr::null(),
+                },
+            );
+            if texture.is_null() {
+                return None;
+            }
+            Some((texture, wgpuTextureCreateView(texture, ptr::null())))
+        }
+    }
+
+    /// The engine on `device`, resolving its procedures from the linked wgpu-native.
+    ///
+    /// # Safety
+    /// The handles are live handles of the linked implementation, `queue` the queue of `device`.
+    unsafe fn create_engine(
+        instance: WGPUInstance,
+        device: WGPUDevice,
+        queue: WGPUQueue,
+    ) -> Result<*mut progpu_native_engine, progpu_native_status> {
+        let options = progpu_native_dawn_engine_options {
+            struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
+            native_abi_version: PROGPU_NATIVE_ABI_VERSION,
+            adapter_abi_version: PROGPU_NATIVE_DAWN_ADAPTER_ABI_VERSION,
+            provider_abi_version: PROGPU_NATIVE_DAWN_REQUIRED_PROVIDER_ABI_VERSION,
+            target_format: PROGPU_NATIVE_TEXTURE_FORMAT_RGBA8_UNORM as u32,
+            reserved: 0,
+            resolver_context: progpu_native_sys::resolver_context(),
+            resolve_proc: Some(progpu_native_sys::resolve_webgpu_proc),
+            instance: instance as usize,
+            device: device as usize,
+            queue: queue as usize,
+            flags: 0,
+        };
+        let mut engine: *mut progpu_native_engine = ptr::null_mut();
+        // SAFETY: the options are borrowed for the call; the handles are valid (the contract).
+        let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS { Ok(engine) } else { Err(status) }
     }
 
     /// The engine.
@@ -317,7 +413,9 @@ impl Drop for ProGpuDevice {
             progpu_native_engine_destroy(self.engine);
             wgpuQueueRelease(self.queue);
             wgpuDeviceRelease(self.device);
-            wgpuAdapterRelease(self.adapter);
+            if !self.adapter.is_null() {
+                wgpuAdapterRelease(self.adapter);
+            }
             wgpuInstanceRelease(self.instance);
         }
     }
