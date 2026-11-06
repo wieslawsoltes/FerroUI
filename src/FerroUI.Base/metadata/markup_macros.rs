@@ -156,9 +156,7 @@ macro_rules! ferro_markup_type {
         $crate::ferro_markup_type!(@nullable_value $m, $this);
     };
     (@nullable_value $m:ident, $type_:ty) => {
-        $m.nullable = ::std::option::Option::Some(|| {
-            $crate::data::core::ValueType::of::<::std::option::Option<$type_>>()
-        });
+        $m.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
     };
 
     (@kind class) => { $crate::metadata::MarkupTypeKind::Class };
@@ -168,7 +166,7 @@ macro_rules! ferro_markup_type {
 
     (@this $kind:ident implied_dyn $m:ident, $this:ty) => {};
     (@this $kind:ident $form:ident $m:ident, $this:ty) => {
-        $m.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$this>());
+        $m.this = ::std::option::Option::Some($crate::data::core::ValueType::of::<$this>);
     };
 
     // The typed functions of the members, as associated functions of the type, and
@@ -198,7 +196,7 @@ macro_rules! ferro_markup_type {
         impl $type_ {
             /// The value type of the type (`MarkupType::value`).
             #[doc(hidden)]
-            pub const __MARKUP_VALUE: $crate::metadata::TypeOf = || $crate::data::core::ValueType::of::<$value>();
+            pub const __MARKUP_VALUE: $crate::metadata::TypeOf = $crate::data::core::ValueType::of::<$value>;
 
             $crate::__ferro_markup_fns!($this, $value; $($body)*);
         }
@@ -283,10 +281,8 @@ macro_rules! ferro_markup_enum {
                         $crate::metadata::MarkupTypeKind::Enum,
                         ::std::module_path!(),
                     );
-                    markup.handles = &[|| $crate::data::core::ValueType::of::<$type_>()];
-                    markup.nullable = ::std::option::Option::Some(|| {
-                        $crate::data::core::ValueType::of::<::std::option::Option<$type_>>()
-                    });
+                    markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
+                    markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
@@ -328,10 +324,8 @@ macro_rules! ferro_markup_enum {
                         ::std::module_path!(),
                     );
                     markup.is_flags = true;
-                    markup.handles = &[|| $crate::data::core::ValueType::of::<$type_>()];
-                    markup.nullable = ::std::option::Option::Some(|| {
-                        $crate::data::core::ValueType::of::<::std::option::Option<$type_>>()
-                    });
+                    markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
+                    markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
@@ -405,24 +399,24 @@ macro_rules! __ferro_markup_items {
     };
 
     ($m:ident, $this:ty; handles: [$($handle:ty),* $(,)?] $(, $($rest:tt)*)?) => {
-        $m.handles = &[$(|| $crate::data::core::ValueType::of::<$handle>()),*];
+        $m.handles = &[$($crate::data::core::ValueType::of::<$handle>),*];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
 
     ($m:ident, $this:ty; base: $base:ty $(, $($rest:tt)*)?) => {
-        $m.base = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$base>());
+        $m.base = ::std::option::Option::Some($crate::data::core::ValueType::of::<$base>);
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
 
     ($m:ident, $this:ty; interfaces: [$($interface:ty),* $(,)?] $(, $($rest:tt)*)?) => {
-        $m.interfaces = &[$(|| $crate::data::core::ValueType::of::<$interface>()),*];
+        $m.interfaces = &[$($crate::data::core::ValueType::of::<$interface>),*];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
 
     ($m:ident, $this:ty; generic: $definition:literal [$($argument:ty),* $(,)?] $(, $($rest:tt)*)?) => {
         $m.generic = ::std::option::Option::Some($crate::metadata::MarkupGeneric {
             definition: $definition,
-            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
         });
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
@@ -464,7 +458,7 @@ macro_rules! __ferro_markup_items {
         $m.properties = &[
             $($crate::metadata::MarkupProperty {
                 name: ::std::stringify!($name),
-                type_: || $crate::data::core::ValueType::of::<$type_>(),
+                type_: $crate::data::core::ValueType::of::<$type_>,
                 get: $crate::__ferro_markup_getter!($this, $type_; $($accessors)*),
                 set: $crate::__ferro_markup_setter!($this, $type_; $($accessors)*),
                 attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
@@ -521,7 +515,7 @@ macro_rules! __ferro_markup_items {
         $m.fields = &[
             $($crate::metadata::MarkupField {
                 name: ::std::stringify!($name),
-                type_: || $crate::data::core::ValueType::of::<$type_>(),
+                type_: $crate::data::core::ValueType::of::<$type_>,
                 get: || $crate::metadata::into_markup_value::<$type_>(($get)()),
                 attributes: &[],
                 emit: $crate::__ferro_compiler_metadata!(@value ::std::option::Option::Some($crate::metadata::MarkupEmit {
@@ -539,7 +533,7 @@ macro_rules! __ferro_markup_items {
         $m.static_properties = &[
             $($crate::metadata::MarkupProperty {
                 name: ::std::stringify!($name),
-                type_: || $crate::data::core::ValueType::of::<$type_>(),
+                type_: $crate::data::core::ValueType::of::<$type_>,
                 get: $crate::__ferro_markup_static_getter!($type_; $($accessors)*),
                 set: $crate::__ferro_markup_static_setter!($type_; $($accessors)*),
                 attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
@@ -568,24 +562,26 @@ macro_rules! __ferro_markup_events {
     ($this:ty; [$($done:expr,)*] $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
             name: ::std::stringify!($name),
-            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(($add)(&this, handler)))
+                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(($add)(this, handler)))
             },
         },] $($($rest)*)?)
     };
     ($this:ty; [$($done:expr,)*] try $name:ident ($($argument:ty),* $(,)?) => $add:expr $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_events!($this; [$($done,)* $crate::metadata::MarkupEvent {
             name: ::std::stringify!($name),
-            arguments: &[$(|| $crate::data::core::ValueType::of::<$argument>()),*],
+            arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
             add: |arguments| {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                let subscription = $crate::metadata::markup_result(($add)(&this, handler))?;
+                let subscription = $crate::metadata::markup_result(($add)(this, handler))?;
                 ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(subscription))
             },
         },] $($($rest)*)?)
@@ -621,7 +617,7 @@ macro_rules! __ferro_markup_constructors {
 macro_rules! __ferro_markup_constructor {
     ($index:ident $try_:tt ($new:expr) [$($parameter:ty,)*] [$($info:expr,)*]) => {
         $crate::metadata::MarkupConstructor {
-            parameters: &[$(|| $crate::data::core::ValueType::of::<$parameter>()),*],
+            parameters: &[$($crate::data::core::ValueType::of::<$parameter>),*],
             parameter_info: &[$($info),*],
             invoke: |arguments| {
                 #[allow(unused_mut, unused_variables)]
@@ -711,23 +707,54 @@ macro_rules! __ferro_markup_unit {
 
 #[doc(hidden)]
 #[macro_export]
+macro_rules! __ferro_markup_receiver {
+    ($this:ty, $arguments:ident) => {{
+        #[allow(unused_imports)]
+        use $crate::metadata::receiver::{OwnedMarkupReceiverFallback as _, SharedMarkupReceiver as _};
+        let probe = &&$crate::metadata::receiver::MarkupReceiverProbe::<$this>::new();
+        probe.markup_receiver(&mut $arguments)
+    }};
+}
+
+// Select the existing receiver policy at the concrete declaration. Getter
+// preparation returns its receiver to the original thunk's local scope;
+// setter callbacks retain their complete original expression statement.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_accessor {
+    ($this:ty, $operation:ident, $arguments:ident) => {{
+        #[allow(unused_imports)]
+        use $crate::metadata::accessor::{OwnedMarkupAccessorFallback as _, SharedMarkupAccessor as _};
+        let probe = &&$crate::metadata::receiver::MarkupReceiverProbe::<$this>::new();
+        probe.$operation($arguments)
+    }};
+    ($this:ty, $value:ty, $operation:ident, $arguments:ident, $call:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::metadata::accessor::{OwnedMarkupAccessorFallback as _, SharedMarkupAccessor as _};
+        let probe = &&$crate::metadata::receiver::MarkupReceiverProbe::<$this>::new();
+        probe.$operation::<$value>($arguments, $call)
+    }};
+}
+
+#[doc(hidden)]
+#[macro_export]
 macro_rules! __ferro_markup_getter {
     ($this:ty, $type_:ty;) => {
         ::std::option::Option::None
     };
     ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
-            let this = arguments.next::<$this>()?;
-            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(&this)))
+            let this = $crate::__ferro_markup_accessor!($this, prepare_getter, arguments)?;
+            let this: &$this = &this;
+            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(this)))
         })
     };
     ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_accessor!($this, prepare_getter, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                $crate::metadata::markup_result(($get)(&this))?,
+                $crate::metadata::markup_result(($get)(this))?,
             ))
         })
     };
@@ -747,20 +774,21 @@ macro_rules! __ferro_markup_setter {
     };
     ($this:ty, $type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-            let this = arguments.next::<$this>()?;
-            let value = arguments.next::<$type_>()?;
-            let _ = ($set)(&this, value);
-            ::std::result::Result::Ok(::std::option::Option::None)
+            $crate::__ferro_markup_accessor!(
+                $this, $type_, invoke_setter, arguments,
+                |this, value| { let _ = ($set)(this, value); }
+            )
         })
     };
     ($this:ty, $type_:ty; try_set: $set:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
-            let this = arguments.next::<$this>()?;
-            let value = arguments.next::<$type_>()?;
-            let _ = $crate::metadata::markup_result(($set)(&this, value))?;
-            ::std::result::Result::Ok(::std::option::Option::None)
+            $crate::__ferro_markup_accessor!(
+                $this, $type_, invoke_try_setter, arguments,
+                |this, value| {
+                    let _ = $crate::metadata::markup_result(($set)(this, value))?;
+                    ::std::result::Result::Ok(())
+                }
+            )
         })
     };
     ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
@@ -844,16 +872,18 @@ macro_rules! __ferro_markup_static_getter {
     };
     ($type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            $crate::metadata::MarkupArguments::new(arguments, 0)?;
-            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)()))
+            $crate::metadata::accessor::invoke_static_getter(arguments, || {
+                ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)()))
+            })
         })
     };
     ($type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            $crate::metadata::MarkupArguments::new(arguments, 0)?;
-            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                $crate::metadata::markup_result(($get)())?,
-            ))
+            $crate::metadata::accessor::invoke_static_getter(arguments, || {
+                ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
+                    $crate::metadata::markup_result(($get)())?,
+                ))
+            })
         })
     };
     ($type_:ty; set: $set:expr $(, $($rest:tt)*)?) => {
@@ -1531,16 +1561,17 @@ macro_rules! __ferro_markup_method {
         $crate::metadata::MarkupMethod {
             name: ::std::stringify!($name),
             is_static: false,
-            parameters: &[$(|| $crate::data::core::ValueType::of::<$parameter>()),*],
+            parameters: &[$($crate::data::core::ValueType::of::<$parameter>),*],
             return_type: $crate::__ferro_markup_return_type!($($return_)?),
             invoke: |arguments| {
                 let mut arguments = $crate::metadata::MarkupArguments::new(
                     arguments,
                     1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
                 )?;
-                let this = arguments.next::<$this>()?;
+                let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+                let this: &$this = &this;
                 $crate::__ferro_markup_method_result!(
-                    $try_ ($($return_)?) ($call)(&this $(, arguments.next::<$parameter>()?)*)
+                    $try_ ($($return_)?) ($call)(this $(, arguments.next::<$parameter>()?)*)
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
@@ -1554,7 +1585,7 @@ macro_rules! __ferro_markup_method {
         $crate::metadata::MarkupMethod {
             name: ::std::stringify!($name),
             is_static: true,
-            parameters: &[$(|| $crate::data::core::ValueType::of::<$parameter>()),*],
+            parameters: &[$($crate::data::core::ValueType::of::<$parameter>),*],
             return_type: $crate::__ferro_markup_return_type!($($return_)?),
             invoke: |arguments| {
                 #[allow(unused_mut, unused_variables)]
@@ -1582,7 +1613,7 @@ macro_rules! __ferro_markup_return_type {
         ::std::option::Option::None
     };
     ($return_:ty) => {
-        ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$return_>())
+        ::std::option::Option::Some($crate::data::core::ValueType::of::<$return_>)
     };
 }
 
@@ -1620,8 +1651,8 @@ macro_rules! __ferro_markup_indexers {
         ($($parameter:ty),* $(,)?) -> $type_:ty { $($accessors:tt)* } $([$($attributes:tt)*])? $(, $($rest:tt)*)?
     ) => {
         $crate::__ferro_markup_indexers!($this; [$($done,)* $crate::metadata::MarkupIndexer {
-            parameters: &[$(|| $crate::data::core::ValueType::of::<$parameter>()),*],
-            type_: || $crate::data::core::ValueType::of::<$type_>(),
+            parameters: &[$($crate::data::core::ValueType::of::<$parameter>),*],
+            type_: $crate::data::core::ValueType::of::<$type_>,
             get: $crate::__ferro_markup_indexer_getter!($this, ($($parameter),*), $type_; $($accessors)*),
             set: $crate::__ferro_markup_indexer_setter!($this, ($($parameter),*), $type_; $($accessors)*),
             attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
@@ -1641,9 +1672,10 @@ macro_rules! __ferro_markup_indexer_getter {
                 arguments,
                 1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                ($get)(&this $(, arguments.next::<$parameter>()?)*),
+                ($get)(this $(, arguments.next::<$parameter>()?)*),
             ))
         })
     };
@@ -1653,9 +1685,10 @@ macro_rules! __ferro_markup_indexer_getter {
                 arguments,
                 1 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(
-                $crate::metadata::markup_result(($get)(&this $(, arguments.next::<$parameter>()?)*))?,
+                $crate::metadata::markup_result(($get)(this $(, arguments.next::<$parameter>()?)*))?,
             ))
         })
     };
@@ -1679,8 +1712,9 @@ macro_rules! __ferro_markup_indexer_setter {
                 arguments,
                 2 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
-            let _ = ($set)(&this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?);
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
+            let _ = ($set)(this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?);
             ::std::result::Result::Ok(::std::option::Option::None)
         })
     };
@@ -1690,9 +1724,10 @@ macro_rules! __ferro_markup_indexer_setter {
                 arguments,
                 2 + <[()]>::len(&[$($crate::__ferro_markup_unit!($parameter)),*]),
             )?;
-            let this = arguments.next::<$this>()?;
+            let this = $crate::__ferro_markup_receiver!($this, arguments)?;
+            let this: &$this = &this;
             let _ = $crate::metadata::markup_result(
-                ($set)(&this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?),
+                ($set)(this $(, arguments.next::<$parameter>()?)*, arguments.next::<$type_>()?),
             )?;
             ::std::result::Result::Ok(::std::option::Option::None)
         })
@@ -1758,7 +1793,7 @@ macro_rules! __ferro_markup_attribute_arguments {
     };
     ([$($done:expr,)*] type($type_:ty) $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_attribute_arguments!([$($done,)*
-            $crate::metadata::MarkupAttributeValue::Type(|| $crate::data::core::ValueType::of::<$type_>()),
+            $crate::metadata::MarkupAttributeValue::Type($crate::data::core::ValueType::of::<$type_>),
         ] $($($rest)*)?)
     };
     ([$($done:expr,)*] null $(, $($rest:tt)*)?) => {
@@ -1783,7 +1818,7 @@ macro_rules! __ferro_markup_attribute_properties {
     ([$($done:expr,)*] $key:ident = type($type_:ty) $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_attribute_properties!([$($done,)* (
             ::std::stringify!($key),
-            $crate::metadata::MarkupAttributeValue::Type(|| $crate::data::core::ValueType::of::<$type_>()),
+            $crate::metadata::MarkupAttributeValue::Type($crate::data::core::ValueType::of::<$type_>),
         ),] $($($rest)*)?)
     };
     ([$($done:expr,)*] $key:ident = null $(, $($rest:tt)*)?) => {

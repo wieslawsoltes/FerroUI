@@ -300,6 +300,41 @@ which then shows addresses. On Windows the setting changes nothing: the executab
 symbols, the linker writes them into the PDB beside it. Build with the release profile for a
 backtrace with names. The release profile is unchanged.
 
+### 4.4 Property core
+
+The property system was compiled once per value type of a registered property: in the hello
+world, `ferroui_base` is 28.85 MB of 71 MB, and about twenty functions of the store exist 438 times
+each (#565). The typed facade (`StyledProperty<T>`, `DirectProperty<T>`, the typed reads and
+writes) and the typed storage are unchanged; what does not depend on the value type moved into
+shared code, and what only some properties need is linked only for them. The mechanisms are
+those of the unmerged #496 that need no binary markup, re-applied to the current sources:
+
+- **Shared state over typed frames.** The priorities, value entries and flags of an effective
+  value (`EffectiveValueState`), the subscription phase and validation state of a binding entry
+  (`BindingEntryState`) and of the local binding observers (`LocalBindingState`) are non-generic,
+  with their transitions; the typed parts keep the values, the caches and the typed observers.
+  Inherited-change traversal, unset notification and untyped value conversion are compiled once.
+- **Demand-rooted algorithms.** The two-value recoercion, the coercion of the default value and
+  at the end of a reevaluation, and the uncoerced-value fields are reached through one dispatch
+  pointer stored with a registered coercer (`Coercion<T>`, borrowed request variants); the
+  inherited-change notification through a callback stored on the property by an inheriting
+  registration. A value type whose properties never coerce or inherit does not retain them.
+- **Installation by overload.** Typed, binding-value and boxed sources choose their observer
+  where they are bound; boxed sources are installed by one non-generic `add_boxed_binding` that
+  still delivers through the original typed `BindingEntry<T>` cache and typed observer (a fully
+  shared observer measured 7 to 21 % slower boxed style delivery in #496 and was not taken).
+- **Cold construction.** Property identity, registration per owner type, direct property
+  construction, class vtable initialisation, metadata host lookup and the nullable operations of
+  the value type registry (one typed operation per nullable type) are shared non-generic paths.
+- **Metadata invokers.** Generated invokers share argument counting, receiver preparation (shared
+  handles are borrowed) and the slow tail of argument conversion.
+
+Behaviour is unchanged: precedence, notification and cleanup order, coercion and validation, and
+panic safety, which the regressions ported with the mechanisms check against the original
+algorithms under injected panics and reentrant reads and writes. One corner case changes: when
+the metadata of a type is unregistered, a derived type that had cached it now resolves its
+metadata again instead of keeping the stale entry.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
@@ -337,6 +372,7 @@ backtrace with names. The release profile is unchanged.
   crates (the `dist` profile), but the instances for distinct types remain. Making them smaller
   needs a type-erased property store, which `docs/porting/desktop-performance.md` (section 4.2,
   items 10 and 11) proposes; it is a redesign of the hot path, not a setting.
+  Section 4.4 moves the parts that do not depend on the value type out of these families.
 - **Embedded files.** The catalog embeds its pictures (23 MB, mostly JPEG photographs), as the
   upstream catalog embeds them as resources of its assembly, and the Inter fonts (1.9 MB). They
   are already compressed; the browser host of the catalog fetches them as files instead
