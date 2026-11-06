@@ -2,6 +2,7 @@ use crate::languages::{LanguageCatalog, LanguagePanelViewModel};
 #[cfg(target_os = "macos")]
 use ferroboard_core::text::locale_text::LocaleText;
 use ferroboard_core::{layouts::*, settings::KeyboardSettings, text::Utf16Text};
+#[cfg(target_os = "macos")]
 use ferroui_system::component_model::INotifyPropertyChanged;
 use serde_json::{Value, json};
 use std::{cell::RefCell, rc::Rc, sync::Arc};
@@ -14,6 +15,7 @@ fn text(v: &Value) -> Option<Utf16Text> {
         )
     })
 }
+#[cfg(target_os = "macos")]
 fn settings_list(v: &Value) -> ferroboard_core::settings::SubtypeList {
     Rc::new(RefCell::new(
         v.as_array()
@@ -23,6 +25,7 @@ fn settings_list(v: &Value) -> ferroboard_core::settings::SubtypeList {
             .collect(),
     ))
 }
+#[cfg(target_os = "macos")]
 fn list(settings: &KeyboardSettings) -> Value {
     json!(
         settings
@@ -33,6 +36,7 @@ fn list(settings: &KeyboardSettings) -> Value {
             .collect::<Vec<_>>()
     )
 }
+#[cfg(target_os = "macos")]
 fn rows(panel: &LanguagePanelViewModel) -> Value {
     json!(
         panel
