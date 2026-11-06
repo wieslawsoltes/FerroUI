@@ -242,6 +242,9 @@ fn poll_task(id: u64) -> bool {
                 Some(future) => {
                     let mut context = Context::from_waker(&task.waker);
                     let previous = CURRENT.try_with(|current| current.replace(Some(id))).ok().flatten();
+                    // Boundary (#567): the future is application code; its panic fails the task
+                    // (`JoinError::Panicked` for its handle), as an exception faults a task of the
+                    // reference, instead of unwinding through the poll loop.
                     let polled = catch_unwind(AssertUnwindSafe(|| future.as_mut().poll(&mut context)));
                     let _ = CURRENT.try_with(|current| current.set(previous));
                     Some(polled)
@@ -382,6 +385,8 @@ fn handle_failure<T: 'static>(cell: Arc<JoinCell<T>>) -> OnFailure {
         // A panic after the outcome was written (in what the completion ran) cannot fault the
         // task: it goes on from the call that polled it.
         if let Some(Err(JoinError::Panicked(payload))) = cell.complete(Err(failure.into())) {
+            // Boundary (#567): the panic of the poll that cannot fault the task is raised again
+            // to the caller of the poll (belongs to the catch of `poll_task`).
             std::panic::resume_unwind(payload);
         }
     })
@@ -498,6 +503,8 @@ impl<C, T: 'static> Start<C, T> {
             drop(self.cell.complete(Err(JoinError::Canceled)));
             return;
         }
+        // Boundary (#567): `create` is application code; its panic fails the task, as a panic of
+        // the future does.
         let future = match catch_unwind(AssertUnwindSafe(create)) {
             Ok(future) => future,
             Err(payload) => {
@@ -638,6 +645,8 @@ where
         if let Some(outcome) = handle.try_take() {
             return match outcome {
                 Ok(output) => output,
+                // Boundary (#567): the panic of the future is raised again to the caller, as
+                // `block_on` documents (belongs to the catch of `poll_task`).
                 Err(error) => error.resume_unwind(),
             };
         }
