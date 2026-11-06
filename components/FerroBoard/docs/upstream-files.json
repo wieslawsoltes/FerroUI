@@ -1,0 +1,1757 @@
+[
+  {
+    "source": ".editorconfig",
+    "sha256": "04199adad12f5fa2583c5369d11e7caba311b0a2431830735ea447ba984f7860",
+    "bytes": 5579
+  },
+  {
+    "source": ".gitattributes",
+    "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b",
+    "bytes": 66
+  },
+  {
+    "source": ".github/ISSUE_TEMPLATE/bug_report.yml",
+    "sha256": "ab2b5b230602fa3ec45bd30992c10ea860ee7ec0855ded767e0ae3e960cecee6",
+    "bytes": 980
+  },
+  {
+    "source": ".github/ISSUE_TEMPLATE/config.yml",
+    "sha256": "e841345a866a54194c1db33b7f74abd353aa6480a796516ef61526561af846a9",
+    "bytes": 178
+  },
+  {
+    "source": ".github/ISSUE_TEMPLATE/feature_request.yml",
+    "sha256": "d07ba39d227147325ab59c1fef0446a948ec2e128734603290ab0be3b9b458cc",
+    "bytes": 400
+  },
+  {
+    "source": ".github/dependabot.yml",
+    "sha256": "6c21e1ef937fa398839c414fc7ef95837479c378d36080f65767cdbed0479149",
+    "bytes": 300
+  },
+  {
+    "source": ".github/pull_request_template.md",
+    "sha256": "53934500d2707393f113327e1964b07c67c4b86818352ce80925e5b8564b6104",
+    "bytes": 251
+  },
+  {
+    "source": ".github/workflows/ci.yml",
+    "sha256": "4faf1057afdc884f2da162ec7fc3d4ab04e95fb16cbe3e164a33f93531ce4aee",
+    "bytes": 4444
+  },
+  {
+    "source": ".github/workflows/pages.yml",
+    "sha256": "6f625413c2a72291e5a69d02651176ba926a182b19fd54f5061b687b43d2395e",
+    "bytes": 1172
+  },
+  {
+    "source": ".github/workflows/release.yml",
+    "sha256": "8b87e63e3472b5ffda505c2c83b1ef9a439b362350e6e368d8782272673a3bcc",
+    "bytes": 5115
+  },
+  {
+    "source": ".gitignore",
+    "sha256": "a535074eda74a0bb6c151b5e3ddb45251db6db8c3560d27c5d9a7a2c98e73bde",
+    "bytes": 8236
+  },
+  {
+    "source": "CHANGELOG.md",
+    "sha256": "1156d2b8e7fbc988fc57b406407c05b9b738197c942d8caac72e47e27e3354f3",
+    "bytes": 1979
+  },
+  {
+    "source": "CODE_OF_CONDUCT.md",
+    "sha256": "54234ecef196adc4b05754f9cc59a72719f74ad353d0ee006c028b3b309c57a2",
+    "bytes": 683
+  },
+  {
+    "source": "CONTRIBUTING.md",
+    "sha256": "f395646e0363683d1719100b9e49ca9fc62564d7a7ad491e07a34c7029afcaae",
+    "bytes": 1861
+  },
+  {
+    "source": "Directory.Build.props",
+    "sha256": "b3067202cc0145a4a621646186fb11e2cfb0024c213fc852a83dea3d952fff30",
+    "bytes": 1936
+  },
+  {
+    "source": "Directory.Packages.props",
+    "sha256": "2ef34df17b43ef79125c94e968453eaab91d46b900a525001f2d4b1652dae7d7",
+    "bytes": 494
+  },
+  {
+    "source": "LICENSE",
+    "sha256": "ef12461367711fc4c32c42e810976c67495a244714d8dc59503504a3d29cfceb",
+    "bytes": 11363
+  },
+  {
+    "source": "NOTICE",
+    "sha256": "6dbfb88a08bf3ed7184db40730aa65327a1d48b9561fff4cbdfcbe1a760c5aa5",
+    "bytes": 1299
+  },
+  {
+    "source": "README.md",
+    "sha256": "f236d8bf7043db327f196ea3f2f9370c97b67b6e57c0e20c2861eca3774ac281",
+    "bytes": 9500
+  },
+  {
+    "source": "SECURITY.md",
+    "sha256": "66937202c7b837b76f896b715079dfa86d21d98194445488c991b1520ef3ccec",
+    "bytes": 1227
+  },
+  {
+    "source": "ScreenKeyboard.sln",
+    "sha256": "dde5991a53c5927814f1fa7d813499f0b2ba2718cfc2bb9bf74f94df0fed1d41",
+    "bytes": 5926
+  },
+  {
+    "source": "THIRD-PARTY-NOTICES.md",
+    "sha256": "7ef9ebc0c13924279198d94f6a83ff01e2633a90c5bebec64c80861b204fc4ee",
+    "bytes": 1085
+  },
+  {
+    "source": "build/icon.png",
+    "sha256": "fa67e9e2079879c4b3fd49cf47ec856bcb52f23e538d3938ba9f437869445bba",
+    "bytes": 23510
+  },
+  {
+    "source": "build/icon.svg",
+    "sha256": "8b65ad642d5d99f791995a885825222173d99a8f0d977401038888dead0a0053",
+    "bytes": 1218
+  },
+  {
+    "source": "build/scripts/generate_icons.py",
+    "sha256": "e32b054b09e56656b5a979d1f63d41312e6534748903e707862cfbdc05a1e5cb",
+    "bytes": 5175
+  },
+  {
+    "source": "build/scripts/generate_settings_docs.py",
+    "sha256": "e96e0f8f730e3c4b2e1a2d1269e4d778c568c0352c961d84293ba6d7424ddc04",
+    "bytes": 1851
+  },
+  {
+    "source": "docs/architecture.md",
+    "sha256": "fec55ae76c14aaced3e6e8425fb41becf4d20567d44739ea46aa67a0e99cff1d",
+    "bytes": 5427
+  },
+  {
+    "source": "docs/building.md",
+    "sha256": "e845c383bedfeab815fae5ac7a2787b435bdfe3e6ba895c24c062482c9f881d8",
+    "bytes": 4756
+  },
+  {
+    "source": "docs/configuration.md",
+    "sha256": "1bc050290071dbe29066dee766d4c9196051d6ff3e74c425d1826dc7e0b18cca",
+    "bytes": 9146
+  },
+  {
+    "source": "docs/emoji-and-clipboard.md",
+    "sha256": "802f55d5a3aa3aeac26e9520196ef88297ab97d86d1d6334bed9fab80cb3ea59",
+    "bytes": 3877
+  },
+  {
+    "source": "docs/gestures.md",
+    "sha256": "30438d604b3b47a822977da0e3df5e00f2efd8ca6bfe072a51fa67304f7bafce",
+    "bytes": 4460
+  },
+  {
+    "source": "docs/getting-started.md",
+    "sha256": "5883cda27ca5ca21c9445814b8ebc00dba5121d17e7c8018c394154f8b512e7e",
+    "bytes": 5320
+  },
+  {
+    "source": "docs/images/emoji.png",
+    "sha256": "3d971cc7a009cdeec3a56c366a388d1a9d5f927ef6aef433dd899a1de6300827",
+    "bytes": 129119
+  },
+  {
+    "source": "docs/images/floating.png",
+    "sha256": "4513c960786782dec303081fe3569ee2fc3fb976e999372a07f5930af2f0fb12",
+    "bytes": 58699
+  },
+  {
+    "source": "docs/images/glide.png",
+    "sha256": "57b4e765936b69e2d41228f8b960151181bc831ec811d9cef2dac569b98601ea",
+    "bytes": 22465
+  },
+  {
+    "source": "docs/images/keyboard-dark.png",
+    "sha256": "371953c6e6b151963afa7926bc4ddd04b34bf36ec89dd91d4f138ed6b44866c5",
+    "bytes": 22689
+  },
+  {
+    "source": "docs/images/keyboard-light.png",
+    "sha256": "2333c2f46a1520764d2c6af6ded994753efab2b5fad0ef854836f2df0849dbdd",
+    "bytes": 56518
+  },
+  {
+    "source": "docs/images/one-handed.png",
+    "sha256": "1197a5bb8c06fa7dd1063d944a00dddd2cd8bc6ae34f6f2bcc11ce7d9928017d",
+    "bytes": 21727
+  },
+  {
+    "source": "docs/images/phone.png",
+    "sha256": "1f92fb30fa27ec47df8e3a28a4d7bc9ca011afea652da95f67b27ff762022083",
+    "bytes": 15687
+  },
+  {
+    "source": "docs/images/popup.png",
+    "sha256": "c517fb0a73a67ed1f0de255c48a372c23e562f68d742482e77a50b37226ed559",
+    "bytes": 27773
+  },
+  {
+    "source": "docs/images/split.png",
+    "sha256": "6c48f861451001a691c5fb6679dfdd8f5233af02218650c40aec0e48a84f8d0e",
+    "bytes": 20622
+  },
+  {
+    "source": "docs/images/theme-xaml.png",
+    "sha256": "c3befc65b860ee27fc8653b9729d5f35627a9f30f13d9cba7e5eb0ed0f342ab9",
+    "bytes": 24175
+  },
+  {
+    "source": "docs/input-integration.md",
+    "sha256": "0cf1c48a089dd47c0b003391109f4c6aeefb9ff9c2855844fd2f5e3be7937925",
+    "bytes": 4921
+  },
+  {
+    "source": "docs/layouts.md",
+    "sha256": "7d3ba160417a6887a3ea12e15466bbf92046b32c325d12c5ea5b2ca4dc94a775",
+    "bytes": 8290
+  },
+  {
+    "source": "docs/suggestions.md",
+    "sha256": "92eee69ca438655fdd9718eae934f1e0acabdf0643599e0a914c265cbbe20f11",
+    "bytes": 4081
+  },
+  {
+    "source": "docs/theming.md",
+    "sha256": "351657a9bbb082ec6c89d28acbec3a7eee0221c5ad16499291812636c8bef58f",
+    "bytes": 5133
+  },
+  {
+    "source": "global.json",
+    "sha256": "6ff11bd3c5bb10669fbee249e234ade95c6280897f40bc4deb5c3ba7ea66e75f",
+    "bytes": 160
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/App.xaml",
+    "sha256": "4e61c10461584ca804bfdb5e4c99e4b54ce201ccc6ae8e30668b7e2ea7c64825",
+    "bytes": 2291
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/App.xaml.cs",
+    "sha256": "86043fa9f469d55655bc7c68453b3ea3be5c973626c6882b9e386a796cc22d61",
+    "bytes": 5649
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Assets/Icons/icon.svg",
+    "sha256": "54f9224c451ba43ba8fdebdd0ad8296ffc0365eb789efa3b088bc94387dfad17",
+    "bytes": 1156
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Assets/Icons/icon_foreground.svg",
+    "sha256": "77acd74e274275d8d83ded3df2431cca9d6f43ec2473ae04f0c1b9ce8a14aec7",
+    "bytes": 5668
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Assets/SharedAssets.md",
+    "sha256": "51cdddfd16bc8a390e03eb64e61f631cd1f63b45f2503d0a5be65aad7a9523c7",
+    "bytes": 995
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Assets/Splash/splash_screen.svg",
+    "sha256": "77acd74e274275d8d83ded3df2431cca9d6f43ec2473ae04f0c1b9ce8a14aec7",
+    "bytes": 5668
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/CustomLayouts.cs",
+    "sha256": "24849442729ab53387bb9e9add149ee15e616c07646ee089eee9b5ea1befb26d",
+    "bytes": 1386
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/GlobalUsings.cs",
+    "sha256": "5bb6501cf489c1ba69db94a8aa5592c94cbcfc15391f0c7e61e5bea965490864",
+    "bytes": 245
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/MainPage.xaml",
+    "sha256": "bf19d97d9274a369940b3246cabd20cd81b70f48f634a1d6449acadd093878d6",
+    "bytes": 4473
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/MainPage.xaml.cs",
+    "sha256": "9a8b2f312c24ae256dea648df04193a2d79db625a049662fd2332c5df2e015ce",
+    "bytes": 2149
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Package.appxmanifest",
+    "sha256": "f6b809e3187274b3d239ae270b767663c7c8761599821bec2c806c465b281a5d",
+    "bytes": 971
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/AndroidManifest.xml",
+    "sha256": "c041883a451191a8982e486676c95b85e00e4faf94ca712434e0a5522d660805",
+    "bytes": 205
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/Assets/AboutAssets.txt",
+    "sha256": "3fa3a408578e023c56da9ce8275beaef6e6c14c78b86ccbb6663feb3ee153092",
+    "bytes": 767
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/Main.Android.cs",
+    "sha256": "b929fef6c1453e84e66f655b0731b365b71ba78d7833f447a042901b13cfa7fb",
+    "bytes": 777
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/MainActivity.Android.cs",
+    "sha256": "585eb605878ae55495c20f316de3d7062d443d4f1e866c0202a4a2ea1814a0bf",
+    "bytes": 610
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/Resources/AboutResources.txt",
+    "sha256": "566d3c421c854e4aca6f27c2605b42ba343b2183e6fce9e36fbac0f0b0876646",
+    "bytes": 1853
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/Resources/values/Strings.xml",
+    "sha256": "21edb1b2daffaadacb09ce4dd85fdf9f908e71d80101e41f9d8ebd3b4490e308",
+    "bytes": 181
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/Resources/values/Styles.xml",
+    "sha256": "d2cb1db9d3329735f704dcc3951b015cff41261a645255af463a84a8518d8d06",
+    "bytes": 1067
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Android/environment.conf",
+    "sha256": "21abfdf53e678e3d84534efb5a916d1350dd568ee7c92844e792983bbd5ca10f",
+    "bytes": 187
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/Desktop/Program.cs",
+    "sha256": "06861df89fb0a3b82a53f0c2486b021d95b9059ff00a7753e40ddce5e17c688f",
+    "bytes": 422
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/LinkerConfig.xml",
+    "sha256": "d8bbcd4714fe45a4f78393f1fae708b28e7c604192d9b3913d8c44302cfeea69",
+    "bytes": 226
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/Program.cs",
+    "sha256": "14034f5ea1ce6b430fb37f048dd942bdb4151d146843e7b8f27134a64e26bec5",
+    "bytes": 345
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/WasmCSS/Fonts.css",
+    "sha256": "18bae15ee52609b1cfc1b8bed7a6939fad1397cf260edd6b4cc38cc44ea8fbc2",
+    "bytes": 898
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/WasmScripts/AppManifest.js",
+    "sha256": "8f8761d94cc3a8c06836620854476a1c70b4c80346a771c1a8c33a81d3e3a8fc",
+    "bytes": 66
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/manifest.webmanifest",
+    "sha256": "fe89f593ccb781ecb2e4b3f920bdd16b9b2cbfc2f2ed8f359de85f0b11d38983",
+    "bytes": 255
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/wwwroot/staticwebapp.config.json",
+    "sha256": "3faa1f10863baba4d7236a66c0c7b95b41ddebf759cf6b04d88328a70b2940ec",
+    "bytes": 557
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/WebAssembly/wwwroot/web.config",
+    "sha256": "5a5467db177a51ec6a3c744c6fdf99018482861f3e5611c69a1c70dc711ce720",
+    "bytes": 3314
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/iOS/Entitlements.plist",
+    "sha256": "665653ad4fcf1fddf6b87f6ea107263961980256ec3ef39984af6ea7ab0af8ca",
+    "bytes": 190
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/iOS/Info.plist",
+    "sha256": "7482004fabd51f2287b7912cbe63152c6d0ffe88361c37b6354fadee39b465da",
+    "bytes": 1303
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/iOS/Main.iOS.cs",
+    "sha256": "625657edce80126749b2481adce712b1021a1f1c10811121c4a2fffdca464805",
+    "bytes": 404
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/iOS/Media.xcassets/LaunchImages.launchimage/Contents.json",
+    "sha256": "d5edf0994672a8de8d54ba45fa40e2ea58f3e3924108aa2586b9d0ebeb28d3ed",
+    "bytes": 1237
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Platforms/iOS/PrivacyInfo.xcprivacy",
+    "sha256": "8a05dfe7526befed43ff2abef1a0b26a1336d451032494fafbac00b0bb9990fb",
+    "bytes": 1146
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Properties/PublishProfiles/win-arm64.pubxml",
+    "sha256": "de9980919170d8c6a897b6e44f7e89b488ede7e92c62140716b0ba771677d190",
+    "bytes": 886
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Properties/PublishProfiles/win-x64.pubxml",
+    "sha256": "823efd3d37208f2c88e5c17d0bd5c821634def729542623905dea6a84529b3d8",
+    "bytes": 879
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Properties/PublishProfiles/win-x86.pubxml",
+    "sha256": "ce7449ddf51e0cbd087a78271eaec6de73708663f949f71d8b917c5f50b09d38",
+    "bytes": 1075
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Properties/launchSettings.json",
+    "sha256": "905f08d6a922e5375ffacc8148d102f59935fdbaae0197620c33a446ea078363",
+    "bytes": 1402
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/SampleOptions.cs",
+    "sha256": "a937d623b71ca9b2edc4a6f10d226c848d79a6e526ccb8366d9a0a29f03f7a9b",
+    "bytes": 2257
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/SampleStorage.cs",
+    "sha256": "5356bb36f2d10bbd5c5c7013479514deea1b7f94f80259fedee9d1f9414a2f05",
+    "bytes": 2902
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/ScreenKeyboard.Sample.csproj",
+    "sha256": "545d5c6e10be65a063cde9efc99356e5c05c30b2e19b203f3b14dabc9e0d9c5d",
+    "bytes": 1123
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/SettingsPanel.cs",
+    "sha256": "5825badf62cbb3d8bb1d5613ef8dd080a3515b88df12db426b7a67b4685d0bc3",
+    "bytes": 11886
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/Strings/en/Resources.resw",
+    "sha256": "35b23d90f744231c1c783f0cc2949ed9f872b3f86b3d831aecbd01d30669b200",
+    "bytes": 5737
+  },
+  {
+    "source": "samples/ScreenKeyboard.Sample/app.manifest",
+    "sha256": "6682305d0ffa607136ef48ad81119a9f517b24802f1aa6c62baea6d7a82e3dd8",
+    "bytes": 1303
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Clipboard/ClipboardHistory.cs",
+    "sha256": "8227b2682acd510cf52b8efc433218f30e45a670e985e3b7564bcd7efd06b86c",
+    "bytes": 5749
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Editor/EditorController.cs",
+    "sha256": "9b3246b57098d3be608b8a8f8674db66b2a703ab9d33318e57163714b6a94d14",
+    "bytes": 16534
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Editor/ITextInputTarget.cs",
+    "sha256": "8c493efe266c2f670f809a2c3f32e3cf5cc7ed2caa279c987b4a7a20f8bfd990",
+    "bytes": 4537
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Editor/InputAttributes.cs",
+    "sha256": "3754028225d6473cdd8bd6e2812e7cec003c5eb39e8cfd2b002c19142c119b5b",
+    "bytes": 3547
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Emoji/EmojiCatalog.cs",
+    "sha256": "98efa4afe29397effbb6daf83e8b4a72411657382c642f8e21a6540ebd19adf1",
+    "bytes": 15634
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Engine/KeyboardEngine.Input.cs",
+    "sha256": "3e82abdb3780a117d9a32e25731cac8808cd0692600cbb97ecbc0bbd70ed78ea",
+    "bytes": 29400
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Engine/KeyboardEngine.Suggestions.cs",
+    "sha256": "689fbaffe4e80860939c8180a293637bc5974a103cd9a4b2f9042080c4089459",
+    "bytes": 14697
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Engine/KeyboardEngine.cs",
+    "sha256": "076cb40de0c92920be587d28797b7f7af3818a18e7fbc8e9086ae1d039b2d64a",
+    "bytes": 20406
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Engine/LanguageModels.cs",
+    "sha256": "d57b550103f8c2d4be22d6b613004f6cfa8cfbbc364e61566e10360383bb0523",
+    "bytes": 3494
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Glide/GlideTypingClassifier.cs",
+    "sha256": "f90c0d92dbe7fcc14284236dcab5fcbdbba55bf36abbabcb4e7233e12f1c5f6d",
+    "bytes": 18667
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Input/KeyboardTouchProcessor.cs",
+    "sha256": "712daa7e9c2aaf75aceb52b13c91dfb1fa3244f6093de21b242fb0af40b6a601",
+    "bytes": 22796
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Keys/Enums.cs",
+    "sha256": "496f99915f716ee7a06ce07cddea3dc8b169205564c8c108993a5ebf89a85a74",
+    "bytes": 2803
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Keys/KeyCode.cs",
+    "sha256": "0d79594eb4ad989a9c3ec21612b73e1c46d5981307f362a48a396bb099522907",
+    "bytes": 9624
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Keys/KeyIcon.cs",
+    "sha256": "e245e769d1201b810debe53a65b86ea49fe3c3ad3b81a9be95c2eaa74572e171",
+    "bytes": 1067
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/ComputedKeyboard.cs",
+    "sha256": "4aea0af27e2b5ddd11eaffa1d4975bb60dfac39721708761ac6f738c9a4f2501",
+    "bytes": 24890
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/KeyData.cs",
+    "sha256": "c88582e5d97de65fe999fd094713666afd397c5b8036c402ec79d9e8c751c3f7",
+    "bytes": 13724
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/KeyLabels.cs",
+    "sha256": "1bda4ef7effa46efbeb3a8584c8e362efcf3e510703087901c30c97a9b22939f",
+    "bytes": 7825
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/KeyboardResources.cs",
+    "sha256": "2181c5a66ca31f551777d3006517ac78d3d8e9c7dbdf7e47bd741daec279f067",
+    "bytes": 13371
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/LayoutComputer.cs",
+    "sha256": "2cd579414b57366b742d39cdc7221960ba80d0fbaa2e95f38faf014bf571c977",
+    "bytes": 7636
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/LayoutJson.cs",
+    "sha256": "c01bb5529d59b25910a4123181091c9ec9464f2f2ba775a1e28c7f92d58d90e3",
+    "bytes": 26931
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Layouts/LayoutModels.cs",
+    "sha256": "e355f8a1ecb50feee9de472bf7bce0c56d869607e86c5a98b918e9c8807f9681",
+    "bytes": 10528
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/EmbeddedResources.cs",
+    "sha256": "ff32dd408dc48c4b6d34220af4b9c809cb7fc0a1d0c200af30a99c0609c057ef",
+    "bytes": 2827
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/LICENSE",
+    "sha256": "ef12461367711fc4c32c42e810976c67495a244714d8dc59503504a3d29cfceb",
+    "bytes": 11363
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/dict/en.json.gz",
+    "sha256": "73d35912b36a5d8f580af0eb2970dbba55fc5052c389cffcd0eb3f2821c3a37b",
+    "bytes": 237552
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.composers/extension.json",
+    "sha256": "68354404d9f85d693c6208b815111df1604f4593c21a5e695d83d728a406af48",
+    "bytes": 55290
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.currencysets/extension.json",
+    "sha256": "580ed084f712c58f86402cb9fdb379ff3c2c7025b53cacd51d8f3ebec94ffead",
+    "bytes": 9414
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/extension.json",
+    "sha256": "ad29c919ca1e56fb7a853d8b13eb020833beea218101a58c6db5df1241c524dc",
+    "bytes": 21557
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/arabic.json",
+    "sha256": "cc285fa9ddefe6300c0ac2716763bac65735e30c1de0a8614acc6c614e92db53",
+    "bytes": 1243
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/armenian_alt_phonetic.json",
+    "sha256": "227b1b2fbe057b7d4ec56b181200196995a201764d2aa67f2eb930ebe910cf9c",
+    "bytes": 2373
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/azerbaijani.json",
+    "sha256": "53b72966cbeb9f1f41c6f7e728270526699eca5dc779c0ea61592a06387307f5",
+    "bytes": 2031
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/azerty.json",
+    "sha256": "af07472172cb607922c3d0ca8ae5f47363d075ac7d47aa3ea38abdb033e760db",
+    "bytes": 1826
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/bengali_unijoy.json",
+    "sha256": "a5dfe1e2e3dcea4bcc8a904c558e02a3e3a9ce3bca72c6ddcf47528d23437930",
+    "bytes": 3535
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/bepo.json",
+    "sha256": "ff944ea366a87e5f252833cf0f1a7a719fe3c7a2f613429d6232a2b4a6788482",
+    "bytes": 2085
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/bone.json",
+    "sha256": "e3de021dda98b07271b2f1c8cc23f5047806277c2b5c2bd76ffe0fb8b66a654d",
+    "bytes": 2075
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/bulgarian_bds.json",
+    "sha256": "7e2da311430a6e98c395e47ccbd7b2699cf887a5c13bbbfce8c91ed8feca3b75",
+    "bytes": 1915
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/bulgarian_phonetic.json",
+    "sha256": "7e5d52ee26b58524e388ec4ffac095f5b3ef14f9de7815c48cb1adabad2fcd59",
+    "bytes": 1797
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/canadian_french.json",
+    "sha256": "0b81b77f9cd2048c9f1a4d7ab15039499ec39c6749f50e1c8700daa976d2e1fc",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/catalan.json",
+    "sha256": "6699f9686680377207ad0053f8452b2b000b5ce0f6390472970708bb4e957dea",
+    "bytes": 1594
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/catalan_accents.json",
+    "sha256": "8732fabc038600a637f9c3b269ba21846d75b82fa6c13a1ccc5e0f06baeafc59",
+    "bytes": 1718
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/colemak.json",
+    "sha256": "dcf24eaf8cbec578713f20bdc1c549161a126a7c17a59c0fe7ac929c81f5c314",
+    "bytes": 1849
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/colemak_dh.json",
+    "sha256": "a6aea197cae9c8828f19b80fae884bd3f0c7d0e7195dc47531fc5e9f086042fa",
+    "bytes": 1849
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/colemak_dhm.json",
+    "sha256": "bc62fbcb5c70c484a4d40476567a1a74ca2c3bbf4af13fc524e412d5edca0b05",
+    "bytes": 1849
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/danish.json",
+    "sha256": "78e12066143857f122edbcc0b0c1db19347b53421c5027e28fc4bbf5ad07a75b",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/diktor.json",
+    "sha256": "872b509cdb727a6f81eec91446bf9bd8416b0543dc8625afefd89216d7234245",
+    "bytes": 2081
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/dvorak.json",
+    "sha256": "6a7686a3aa6986050e55ee08495fe828f53e1b67f5debdd209d254c4d5b15bfc",
+    "bytes": 2749
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/dvorak_de.json",
+    "sha256": "13378a956d366a84bb67ea2d7dee31f0f4c846f1989763b83c651e8fcf5ab4d2",
+    "bytes": 2589
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/dvorak_es.json",
+    "sha256": "53da0945aa4972e96ff754be11c4f0f2998dbe9d967875255d8d96bcd1399811",
+    "bytes": 2867
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/dvorak_se.json",
+    "sha256": "d1ed3b28801ded55bb03617ff7d4e529321abb3e5af6e52e7d90cdc6da38108f",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/eastern_armenian.json",
+    "sha256": "69063c80f576de4b796540109f60cc2dbb2b353e00a35321d981021c99103596",
+    "bytes": 2277
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/esperanto.json",
+    "sha256": "f5668d0a1fdd77fe27317a8a8c17674dbdf91fc4693110abdf0df883c21f722b",
+    "bytes": 1938
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/esperanto_with_hx.json",
+    "sha256": "5595cdaee5d2e4705589806553b9fa1488d9f7ca1eda930abaaf2f8bcdd4f45f",
+    "bytes": 1997
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/estonian.json",
+    "sha256": "8a48672d8ac1995aa6faa52cc7b307135ca9011c8d190a3c91fbc7438b06781a",
+    "bytes": 1771
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/faroese.json",
+    "sha256": "ea30e43292b9fe50be104104949bc514c8e7de4c027f3efb282127c912e8502b",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/georgian_standard.json",
+    "sha256": "5842347a93b3745af2459157b21c17e3600f685c5ed93f20dbea75b466d31dab",
+    "bytes": 1853
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/german.json",
+    "sha256": "4c95b89af9401e8b75607612def73e4d3ce6c05506dd550c870c24fb908e971d",
+    "bytes": 1843
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/german2.json",
+    "sha256": "1f6a302e43d0e9727a084dbe45828e0585673d8295caa63dead76c6e234c426c",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/greek.json",
+    "sha256": "0bf2f15b619d09722924545ca1a48556f564fad69d421696e77b0b8df90792a9",
+    "bytes": 1560
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/halmak.json",
+    "sha256": "8edee59580ac33a7e94af39898c14b9aedcc113a1b00c4915200f21504840dc9",
+    "bytes": 2477
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/hebrew.json",
+    "sha256": "85c769c8a366cc17aa20ee3f083c37a3649039381e8d12e1c6f3b397840b16a4",
+    "bytes": 2477
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/hindi_in.json",
+    "sha256": "c6231fba197dc72c0764f40f5b56e3de6e40107d8748921549f86eeb4914ac05",
+    "bytes": 3192
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/hungarian.json",
+    "sha256": "6ad849ba8f5aa3e3ff7041002b4677c3f73ea40aaa42894ee9a8292508409738",
+    "bytes": 1771
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/icelandic.json",
+    "sha256": "203df4f4d65f301148168deb37ef3c369def3e6a6ec107fc9d07766ef551c6fd",
+    "bytes": 1771
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/igbo.json",
+    "sha256": "04f1f7d864fbc2704d32816b554fa9a5b6322d6f4fe6847ae849c333fdf53dcd",
+    "bytes": 1947
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/ipa.json",
+    "sha256": "260df2d8aedd536c860507eea9bafebaf8eebcc0e2d5a8be45f07f927f07c45f",
+    "bytes": 9078
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/jcuken_interslavic.json",
+    "sha256": "e9b872fe97432ffa5b6cebe63eb53e7c2934fc01b691822a4f27a22e3b9039c6",
+    "bytes": 1767
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/jcuken_russian.json",
+    "sha256": "16c0471db02b1d0e1a0b50ff4962666bc328b96874d0ff891e3502561eff747e",
+    "bytes": 1887
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/jcuken_ukrainian.json",
+    "sha256": "61954dbde11bdfd86bddda603831bf46136427a06012845370e2f8746212fadc",
+    "bytes": 1887
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/jis.json",
+    "sha256": "f1b0fe418b4eb43a70efa61bf43c7f307df4f15e1c9431c7eb02bd5b52ad6d73",
+    "bytes": 11425
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/korean.json",
+    "sha256": "e329316989f25091c218db645cce1269ea93492ba44103a122043411e6b00a44",
+    "bytes": 2105
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/korean_phonetic.json",
+    "sha256": "a592b0edd9e86ae40798cd336c2a29b09629281363320d74d7ac2ac6bc9b579a",
+    "bytes": 2105
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/kurdish.json",
+    "sha256": "147a0b58e6af97910a06d271885ea8b21b8cfbc755dd5bd632455906b16fcb39",
+    "bytes": 1947
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/kurdish_kurmanci.json",
+    "sha256": "38b461d75d8739522db7031aaacc562206ddd799ddd6098626d21c93225b73bf",
+    "bytes": 1830
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/kurdish_standard.json",
+    "sha256": "6f3a4e166c99ebc3da2b9a12e990cf86c2fb4ecf031c0fe100e40d84d9015d9d",
+    "bytes": 2193
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/nalmy.json",
+    "sha256": "76a3e7c837f9d45b699ccba4d06162f58a2570c47a4e48686184a6662b2deb7c",
+    "bytes": 1535
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/neo2.json",
+    "sha256": "2ed8c246005142515151ee8e7da1eccea3314a63ba9809f97bc1bd487c7b3783",
+    "bytes": 2075
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/norwegian.json",
+    "sha256": "87ed829d26589241c3aeb796b7ea4ef8dcb635db5ce50cc04233c9929f622352",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/persian.json",
+    "sha256": "69338906b7964b104a2305eba7b63b9af6c34c6775446ff55a307050111c453d",
+    "bytes": 1205
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/persian2.json",
+    "sha256": "5f1177d0d9fce69a6169050c618e40963d2a56fd0bd6cf2d56b923ddb17d59e8",
+    "bytes": 1099
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/persian3.json",
+    "sha256": "69338906b7964b104a2305eba7b63b9af6c34c6775446ff55a307050111c453d",
+    "bytes": 1205
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/qwerty.json",
+    "sha256": "6ba8c93c7ad18e4de9d271200f9876f7dce4a3d40eb292f31f9b56af8bf5dabb",
+    "bytes": 1535
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/qwertz.json",
+    "sha256": "11913c6169a8e4c9ad694e7d7784a29e67cace9290857499169c7c24b3d5ca46",
+    "bytes": 1535
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/rusyn.json",
+    "sha256": "968f2a75bb9af3700af03d861954e5461e97de05f7e1825e321f493e01a1d809",
+    "bytes": 2215
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/rusyn_us.json",
+    "sha256": "30f3be0dcc5b493538a8c8962e36ccaf19f9d5fc1aa217de596d3a2917484b2e",
+    "bytes": 2214
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/sangaline.json",
+    "sha256": "3584424e9995f003b2335a7ab6e87fd1af473dda579a1b21967e93e7a859bbc3",
+    "bytes": 1535
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/serbian_cyrillic.json",
+    "sha256": "1b05862dbd2dffda1db3fddac8d0702832610fb1c123c5f86f53bff424cc0570",
+    "bytes": 1797
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/serbian_latin.json",
+    "sha256": "977d5235f5ecee4e6cda6d308bfdfd833481fb86c9bc6a46c4d4c47a0a370676",
+    "bytes": 1799
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/slovenian.json",
+    "sha256": "6181f2d25f04a7675dfd123c77b7b3f1d72ec7f6c9af9dc3c13de19c38cac412",
+    "bytes": 1683
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/spanish.json",
+    "sha256": "4b82d384d0bb3c50edb5ddecaba2d00bdb677917299040e07fd67e2088894302",
+    "bytes": 1594
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/swedish_finnish.json",
+    "sha256": "f336928127c942352a7b1f0757f35a6b69d21d2c99fafeeef90b3e84aaab34ee",
+    "bytes": 1712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/swiss_french.json",
+    "sha256": "7da06ab4d6c8f06e63f0529d034531d2c5dfb7c7f0afc0853536043594e8060e",
+    "bytes": 2036
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/swiss_german.json",
+    "sha256": "2422f7ce5ce478ae6166da25e9127ef0b848d0b10d39d95a7fd3764c6d8201b7",
+    "bytes": 2036
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/swiss_italian.json",
+    "sha256": "2422f7ce5ce478ae6166da25e9127ef0b848d0b10d39d95a7fd3764c6d8201b7",
+    "bytes": 2036
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/tamil.json",
+    "sha256": "26622fdf327a7f87ee08fde57d0c048ccc328aad154ee87fa2b4f3e1ebada896",
+    "bytes": 3160
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/thai_kedmanee.json",
+    "sha256": "d5f768306f622819e956f17805acdee4bf3580d60d87f173f5c9a67987a021bc",
+    "bytes": 6182
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/thai_manoonchai.json",
+    "sha256": "263af7ae76c65de54b2c59ac5dbf22523c04157175f674c78c822adbc173a88b",
+    "bytes": 4580
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/turkish_f.json",
+    "sha256": "48031d06a1567c01f8f3de518e5783c17624f9960fb6349d3a49ab83049035f3",
+    "bytes": 2030
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/turkish_q.json",
+    "sha256": "adba1410d003fbc74decc1849ee5cb771194b9082b44e8fd69bd06db2bbf8276",
+    "bytes": 2030
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/udmurt_compact.json",
+    "sha256": "16c0471db02b1d0e1a0b50ff4962666bc328b96874d0ff891e3502561eff747e",
+    "bytes": 1887
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/udmurt_extended.json",
+    "sha256": "3d2f018dcd4c5104561679bb53958c54de00d4d520646af8bb65afb4f47821e5",
+    "bytes": 2315
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/urdu_phonetic.json",
+    "sha256": "3e88abe707f47de50a93fa2608a4e9c7ebb63ff1c88e3d372af46a9dd4d81e05",
+    "bytes": 1015
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/warang_citi.json",
+    "sha256": "ba96aa1a1323ac761549468b4b990cff63645b3d36d14e58d5842bafc91e08a8",
+    "bytes": 2230
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/western_armenian.json",
+    "sha256": "3274aef98974525a6d5c1ca15ebab8adad1c31086d50f5791d33f4c1cb8c574d",
+    "bytes": 2278
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/characters/workman.json",
+    "sha256": "ee14bec56f0018c1ea0d40f9ffd10510c24d1f1f815eaf14ba88b749ad79f0b5",
+    "bytes": 1849
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/arabic.json",
+    "sha256": "25aa708e7e73db03f3e259acf60204b4bede6178d9272d42534d3a0b89c97bb3",
+    "bytes": 746
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/armenian.json",
+    "sha256": "b15a355b5f521b588c63a7d25a6bd65f661e5da25c9a9c759bc3d6572c57b4ea",
+    "bytes": 806
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/bengali_unijoy.json",
+    "sha256": "2e527d19945fc7ad2edf5b156fc15942d7dbcfbc3b37007c799d32aab782c5f8",
+    "bytes": 809
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/default.json",
+    "sha256": "19f60dc748bbf077547b87c1de7ebac2bfaf16e74be3b26a0a1f968c29621f0e",
+    "bytes": 805
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/diktor.json",
+    "sha256": "4d4840792389bf3dc4c1cee8faaaefbbb48c728abbd095b371f4f7b9b370059f",
+    "bytes": 672
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/dvorak.json",
+    "sha256": "cae5ea70dc5718664bad65b6f3ea61be7e335ab2dbce117ebdc44cfce339ce4f",
+    "bytes": 668
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/dvorak_de.json",
+    "sha256": "9b770167bac32150b4fe1c52c4d7af6b8bf4726c5a3ed71664b5b8a1e1e77560",
+    "bytes": 670
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/dvorak_se.json",
+    "sha256": "012f5c6bbceb781d82e3c49ddf84749c20fa3171c47ed746247bddfdef02ec8f",
+    "bytes": 638
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/hebrew.json",
+    "sha256": "5e1844256492d83b830b301ef82c275a64ef7d88767825de8c524531ef0ad696",
+    "bytes": 745
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/jis.json",
+    "sha256": "c21ec1f25926e65db6e41152d10d01830cd7fbbe2e9c16d7c5b33bfbfb72ecd2",
+    "bytes": 883
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/kurdish.json",
+    "sha256": "883683b31db15dc529e108e488ad2480c4505fff040209d29821939d800fba5c",
+    "bytes": 804
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/neo2.json",
+    "sha256": "0fcaffcb1836a08a6b74e512795b02e14236a2428871a96b09e5672c36aa0af6",
+    "bytes": 1499
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/persian.json",
+    "sha256": "b0fb08f9240dc52c1138635eeebf458da7e953857f9e8ef21dbea0b947ed2905",
+    "bytes": 791
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/persian2.json",
+    "sha256": "8778c7076fd5bd5620193b91fd35ae3e09885739b9868ae23b0267fbec1e90a4",
+    "bytes": 746
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/charactersMod/persian3.json",
+    "sha256": "25aa708e7e73db03f3e259acf60204b4bede6178d9272d42534d3a0b89c97bb3",
+    "bytes": 746
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numeric/western_arabic.json",
+    "sha256": "4980a6ecae6676741f54fd43e13dfbbad3153b41553cd5dd3428702a23faff4c",
+    "bytes": 927
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numeric/western_arabic_pc.json",
+    "sha256": "544a0df06306340c9f04002db7e2a0e31011abae0496132c5766d68cc1f9cbad",
+    "bytes": 927
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericAdvanced/bengali.json",
+    "sha256": "2002e2ce21150f5efcbb2790b1aedb6a4d4c28252ad6290702431ad37595258e",
+    "bytes": 1621
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericAdvanced/western_arabic.json",
+    "sha256": "373bc67a88dbbbb6839631b524182aa3c45e3a9cb25a13151852fc482c0f7f38",
+    "bytes": 1578
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericAdvanced/western_arabic_pc.json",
+    "sha256": "278a843d5dde53147bbb58d211815062ebb15b5a2a6ab6861a675d4fdc178ea4",
+    "bytes": 1578
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/bengali.json",
+    "sha256": "c29ee692fd78a848e200b68e3499bccffd6a0d5590b9e46e6d4b4ded9eddf9b5",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/cjk.json",
+    "sha256": "96bdda5b11b8793b77f05f3499ddff2bd54aa053835cbb2187185357db04f7f8",
+    "bytes": 3332
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/czech.json",
+    "sha256": "23de6010fd452de8089421fe6a9175630cd8ceca018e967d71b654ef7fcdfbda",
+    "bytes": 3342
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/devanagari.json",
+    "sha256": "001feade402d6d15e17ce0b130217805b4df37f671fe34546f154d249c9b90ef",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/eastern_arabic.json",
+    "sha256": "43d315a78bc39964d77a32e2681e639139dfd4dc179072ef81ab23e81782408f",
+    "bytes": 3237
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/gujarati.json",
+    "sha256": "7326ca8cc213c6f396453d4a184651bca25183dd678bc2326b17d6cfcddc24b6",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/gurmukhi.json",
+    "sha256": "1ba9ef3f8623f922e7e48b896fcefbac46ca168a635eac7409a688ea89931b17",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/kannada.json",
+    "sha256": "a94969f3acdbeec565690777cb7bd09bde25d4f56b23257ded649e9e4279ecdf",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/malayalam.json",
+    "sha256": "8684b3856f2d3edd753f85f0a96b2f35ddf5d1fa6ef3c03f0fc86ca0eda921c5",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/neo2.json",
+    "sha256": "5e6d75b32a9449ea22959c89f0140a4b0c8ccd0b79b2c5ba261b4282d1b40035",
+    "bytes": 2223
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/oriya.json",
+    "sha256": "0ff5b0afb61e85aae5a6dc1331ef2927a1d55dbb090b7db0d1981122a6f4127b",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/persian.json",
+    "sha256": "1b578eb4bb65d1484dd7cc05687bd41d057d524f9b966bf3d407979811f3781a",
+    "bytes": 3237
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/tamil.json",
+    "sha256": "e8e9ba8e5babcf92ec087fe917962f6441fb394549a909bead5d1beb0bcf1a90",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/telugu.json",
+    "sha256": "bd662ceed0fc1d0bd0f92cda73b346ae461d860e6f81f71013ac921c83a25ffb",
+    "bytes": 3247
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/thai.json",
+    "sha256": "e8d0d8db5377393b026a6d54284e5c9dedfd28bcdc02cd58282302aa06f16f7c",
+    "bytes": 2857
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/warang_citi.json",
+    "sha256": "a3ae365d07e6248498b06e4a0ebae062ca8a2e768859a5d2ebfea53a191c5774",
+    "bytes": 3267
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/numericRow/western_arabic.json",
+    "sha256": "d56b6d6589206679ac6c38076bf4007504a2ab9a9998dcf39f76c954f753b84c",
+    "bytes": 6852
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/phone/telpad.json",
+    "sha256": "5ced26405c80f256a504ad0b666a6091d8ccba0552d2f2594d5d7da4eaa27e41",
+    "bytes": 959
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/phone2/telpad.json",
+    "sha256": "0664d396d352042dd0bc5a6193dac57d51917ead08e7731798252599f79345c5",
+    "bytes": 956
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/armenian.json",
+    "sha256": "3f8b306f500c877f36999fc125cf4970ffb1ae62d6c47fc7c34fa4162b4db923",
+    "bytes": 2821
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/cjk.json",
+    "sha256": "a6a9a7ffe0e74e6320f98dc3e586e6f5dd89e4e8de98a2f38ba51088c4435f5b",
+    "bytes": 8569
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/eastern.json",
+    "sha256": "0916addaec80c285d14c9f6dc94645b2c4781ee71b9de619182bfa1d69291063",
+    "bytes": 3619
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/ipa.json",
+    "sha256": "cde6cbccb0cfe41108d0e210185047d6e79e216f77c021d3b33fd8b0624c6197",
+    "bytes": 2784
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/neo2.json",
+    "sha256": "17ed15087ebf2eb5b4fc6d8e7b8b6dc0bd21553d6873fd70874ab94cc4ffe12c",
+    "bytes": 1911
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/persian.json",
+    "sha256": "9e06f9ec5c15626bc559bc4b1d0f54f51e3f2a3b810cb9e8465896df2075627b",
+    "bytes": 3614
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/western.json",
+    "sha256": "3532ce0f49120ffa3889cd804f9d394bcca110d0bc7b7dd6d904508a6326b65f",
+    "bytes": 3452
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/western_additional_symbols.json",
+    "sha256": "7b21b65e6604b8ae2516806fb3b5a0071abebeaa8013b8007f5b208c9cf4afff",
+    "bytes": 3672
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols/western_samsung.json",
+    "sha256": "24e61cd3d821a297d7e35561124fa5aab645185154d806c986b58e2d5060f2d5",
+    "bytes": 2598
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/cjk.json",
+    "sha256": "4f15bd0e1a6c5489cbd292e607faf414d44cd55b5fd0219cb0d4ba073cf24e95",
+    "bytes": 6745
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/eastern.json",
+    "sha256": "c0f729ea7d2d240c1bf6894a20df961539136678a43db9205b2f357c2067e12a",
+    "bytes": 2895
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/ipa.json",
+    "sha256": "2ba1f5d671cf5f4e3763d4b30e95536d451577c402d467df0a5868049d6f947d",
+    "bytes": 3523
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/persian.json",
+    "sha256": "c0f729ea7d2d240c1bf6894a20df961539136678a43db9205b2f357c2067e12a",
+    "bytes": 2895
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/western.json",
+    "sha256": "c0f729ea7d2d240c1bf6894a20df961539136678a43db9205b2f357c2067e12a",
+    "bytes": 2895
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2/western_samsung.json",
+    "sha256": "fed8627bb85ea60af1d4d8bc54e1f9fdb528d8a3c895b49503368fff2036809a",
+    "bytes": 1424
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2Mod/cjk.json",
+    "sha256": "fa5d8269bec37373ad0ef62fb1f230dc14028ee666ffaa00032241be28b137be",
+    "bytes": 2336
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbols2Mod/default.json",
+    "sha256": "299da5ecd03022dd46d0236cae6397b42fd480d208375cadc5558d827ecd5e53",
+    "bytes": 1644
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbolsMod/armenian.json",
+    "sha256": "669771bf63208d18c14bfa8017021e73fd3ffe5459ddcd5b9e29344945e73975",
+    "bytes": 603
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbolsMod/cjk.json",
+    "sha256": "6b31a1b91ef5d7aa74ef5a0fcb13d48f1f3921af7ff822f62bf335b01bfd9aaf",
+    "bytes": 1775
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbolsMod/default.json",
+    "sha256": "61e1b47d026f9322d2f32745b4698e6d16fea082b38e488fec939d9cca6a4d00",
+    "bytes": 606
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.layouts/layouts/symbolsMod/neo2.json",
+    "sha256": "f1c9213fe51dabd51bc954c04ac6d19e9107bb5d283f483b3740c36bb015d7c1",
+    "bytes": 542
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/extension.json",
+    "sha256": "504743d228e40f3888b716a5a1b0ec5ad17131913bf67c2ae95c28d00059e301",
+    "bytes": 27858
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ar.json",
+    "sha256": "4a077c8cc321a66d6fed5ae18ea9a8471e01d6bdbd1c85f085cf5ad2d299b857",
+    "bytes": 2512
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ast.json",
+    "sha256": "246d29fa6f6bfa85183b44d6c6ed7d50319c44391ecebe2d339480e5b9759bbf",
+    "bytes": 4206
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/bg.json",
+    "sha256": "07d75fe07b099b5c2e6dd764ff5d9ec0042105aea06c4e7b3f138c80736160a9",
+    "bytes": 1333
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/bn-unijoy.json",
+    "sha256": "6bc3c077d082913020c815f60a7fc8b778bde13001e32b224f6b76f41921b9a8",
+    "bytes": 3499
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ca.json",
+    "sha256": "fbd7950f8b985b391336de57cbdc340c85b7d40f2b682ac0434ca90a0317dbf1",
+    "bytes": 4414
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/cjk.json",
+    "sha256": "035cf4f18f110fde9e2765442f14292039036a03ba5a3f03206d93e7e0cb85c6",
+    "bytes": 4357
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ckb.json",
+    "sha256": "058e2fe9c5576fe44002bae34ee8085ce52298e2903733105e37ff9b096d6dc8",
+    "bytes": 3638
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/cs.json",
+    "sha256": "86316360a2d2df549c5a2b31f24db97d932a2933d12cee4f6fe68108189d1acb",
+    "bytes": 2987
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/da.json",
+    "sha256": "8871ba618af12e7a794c469bb9c12a07d9afe666d2969d39ae648da9caa4f0f3",
+    "bytes": 4600
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/de-DE-neobone.json",
+    "sha256": "36ed99243cb92ca63006e265f1d674b8c1a21fb668020f31069188ec9c5f750e",
+    "bytes": 286
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/de.json",
+    "sha256": "93494c1cb4434586da00625980d0ddd430925e71c9dea48ae64aa4b6d8488382",
+    "bytes": 4015
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/default.json",
+    "sha256": "5e975af258bb0000e09c6e55be73bf9c80429264244521cba1f06c1a2a466264",
+    "bytes": 602
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/el.json",
+    "sha256": "442b12c8d9be6866fc104ebeed9d23345ca49c0501f36bd63d16b564847882c4",
+    "bytes": 3285
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/en.json",
+    "sha256": "da8f13828a42f5a835aa4436eb1118812885cb0e3a87b46bbd1718e663dbae06",
+    "bytes": 3790
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/eo.json",
+    "sha256": "9ae6198c622ce61cdd79758b7ac40ca9c66065ab93c09f59c8b4be8ac6beef19",
+    "bytes": 2305
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/es.json",
+    "sha256": "c0caac1315921ddfece59e03ac335598a3f0ff2a709c18e482e385e2e458eb8b",
+    "bytes": 4326
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/et.json",
+    "sha256": "f9be08f4da2c217a1d976bede6f6f7b9f8fbf002e8f6a2b7140e6d4a5193b59d",
+    "bytes": 4320
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fa.json",
+    "sha256": "27127dc6c72463c4c748b759d5ebfd8a5b4d620f2472c6c95632d226f30e48c6",
+    "bytes": 1957
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fa2.json",
+    "sha256": "dc2d14aeb06c750a36ad97f442e731081942bfac01e1d19d1a709811a4c4020d",
+    "bytes": 2348
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fa3.json",
+    "sha256": "fb02e44af6e139446ef5ce62d00a37564e7589c7fde6657a449eef9dd72fd221",
+    "bytes": 1595
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fi.json",
+    "sha256": "4251493eb7e912e73e8aca8c89a04572a60d586aae62b39df43f442b89dd2b63",
+    "bytes": 4278
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fo.json",
+    "sha256": "f5f8f1c1de9dc5e447ba5a382b2c899ce034b70dc3e474f01272ca6a9789a2d8",
+    "bytes": 4738
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/fr.json",
+    "sha256": "51071aecd98af1510e228087547c77311414df93548fde110b328e9ec0c58146",
+    "bytes": 4501
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/hi-IN.json",
+    "sha256": "f171ae3c4723a8fc300f4063b19edc1626553d8e7a257c7c965cdec4f0e115ab",
+    "bytes": 6700
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/hr.json",
+    "sha256": "37562d9edbb3577201b01ff146d8badd6d22585f9de03c2560f400682edc217b",
+    "bytes": 1718
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/hu.json",
+    "sha256": "c084d35bed9bea50042de8a71194e965a4d0a1b6327ef5bf6b2499c2390193ea",
+    "bytes": 2205
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/hy-am.json",
+    "sha256": "cd62bdb998e812edd70ebb7f80a23dd42756fc276ee861d3d4421666c7ba6d4c",
+    "bytes": 1402
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/hy.json",
+    "sha256": "4d22951d2450588524353e0a2048b87edf7cb3eca88116d09b62f14affcf3d8a",
+    "bytes": 1216
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/id.json",
+    "sha256": "f0e62af3d85e3837a706f35d005bb56adcbffbddb8ae616d566515a9fa2fe5e4",
+    "bytes": 1503
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/is.json",
+    "sha256": "508c1be5d0848908a7a5387a519b62145d839a2c27cc7e7ec6ffa05c6079abe5",
+    "bytes": 3979
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/it.json",
+    "sha256": "18572361448e742dc5d2de9dcc34169cb26997fb7d1b2ef6781088e5840899b7",
+    "bytes": 4030
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/iw.json",
+    "sha256": "9d710cb27653e111453113a329f6a30052cacdf39c27529b838b1c4c0f0e2d59",
+    "bytes": 1316
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ja-JP-jis.json",
+    "sha256": "bb270d4ca10e457c277a6e2c16e17b4f5aeb079288f6ef3029cad521ccb543d1",
+    "bytes": 7226
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ka-std.json",
+    "sha256": "81e28d09b459619a3d0733a6753e5ba06890eb45caa8f0d2711175319b98e0c2",
+    "bytes": 1719
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/kab.json",
+    "sha256": "90f3042f65b41695ebd52bc8e97f5b6b70ea4e6c83ae7151ca6a56f7a5c1d60f",
+    "bytes": 4371
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ko.json",
+    "sha256": "dbe33e880723b098310db88bb872a1fb5f29cddd4d0a13743bb18be052b0dfca",
+    "bytes": 2009
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ku.json",
+    "sha256": "5bb7a4e483f1c4459ab733cfbeb78fbd5963d1adf40f48da7b53fa54138ab8a7",
+    "bytes": 4560
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/lt.json",
+    "sha256": "deebd8c7fa080ee69de6bb862d0a0f800f8b53fbdedfa3f52881b434f290d498",
+    "bytes": 6205
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/lv.json",
+    "sha256": "8e16759b29a5661ceeca841e7f834137ff9b3ae5a9b5cf805f93614676811808",
+    "bytes": 2960
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/nb.json",
+    "sha256": "2409271dbcdab87e6c61472d0065319d15143843fab5d007491a1ca8bf43ad33",
+    "bytes": 3495
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/nn.json",
+    "sha256": "51127c35c527232d0fa558c6b990f74df5cd5c0fcf5494f13b703a22a369e90c",
+    "bytes": 3712
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/pl.json",
+    "sha256": "74b470703ef08d146c063ed4ac006e5f57ef833a51b6fdcfe6d058f07997a475",
+    "bytes": 2365
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/pt-BR.json",
+    "sha256": "c312d3f762023963dffd349c99f792f21074ed3cd5e5e87a84ba410f56ee69b4",
+    "bytes": 4102
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/pt.json",
+    "sha256": "0f6ed2ce473c031cd4b16306ff4d43f84bf8130988e233b50d3a02ae228118e6",
+    "bytes": 4102
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ro.json",
+    "sha256": "3861829c85d48cf25ca996c9de53b5fc27da08169d74a10215dc9c076287c98d",
+    "bytes": 2105
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ru.json",
+    "sha256": "f7038098cffdbfb300a63444bc0cbc4f17dbcd19e1987710ef74a7c53124d5e0",
+    "bytes": 1444
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/rue.json",
+    "sha256": "957ec917a2bd4b241be1e034b7c3a15dbcc4581775ebe7c498ac53b1f7c03f54",
+    "bytes": 2234
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/sk.json",
+    "sha256": "7918da57ca54b9b7ece18f81ddfce5afef7676b92748b15bf90c2fe9401e92e9",
+    "bytes": 3050
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/sl-SI.json",
+    "sha256": "a365d71b685bec668e0d8b77b5f3a981162cbc807fd2216702f4f68f66a261d7",
+    "bytes": 1547
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/sr.json",
+    "sha256": "94802ab00f5dbdc34f3c7070ae98d67a113a883039ac3a6780f7ac7eb83c179f",
+    "bytes": 1696
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/sv.json",
+    "sha256": "410da07fc92d165a5bb9170b181441bf9c7d0c2eacfc471a576a9d39f7d4576d",
+    "bytes": 5475
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/tr.json",
+    "sha256": "89b23133b33098ebe64c2d7c87275bf18dd754d620c125caceb094b59827ca8f",
+    "bytes": 2391
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/udm.json",
+    "sha256": "d74373952856712428761a782bc20be14b39055a0f9df4032297e85176b5ddee",
+    "bytes": 1791
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/uk-cyr-ext.json",
+    "sha256": "c0b428de69823c325393515d83752b7ff5a724d520f5f146cff93b3c55c60c60",
+    "bytes": 2094
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/uk.json",
+    "sha256": "f16da1e3d5b63ef38c4bfc994b40dc3435341d53693c829e08fa2d424c99ff66",
+    "bytes": 1682
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/ur-PK.json",
+    "sha256": "5ebb8d976fbebdf7e5f2b6336cc103009e911384ca44cf35d50d11cd0997cff6",
+    "bytes": 4430
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/keyboard/org.florisboard.localization/popupMappings/vi-VN.json",
+    "sha256": "6eb0804c0e240bfca3257a0bdae6f69ed972081dac5099a0bac630d86f2f3c66",
+    "bytes": 1885
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/de.txt.gz",
+    "sha256": "7835fb317a55a36209ea47a867f408237fa890a7d82e3becb5f9920be021e5e7",
+    "bytes": 57942
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/en.txt.gz",
+    "sha256": "c647c65253890a882a4671c78300e895bef4691dc9dbce7cc68809eec4fb4233",
+    "bytes": 57868
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/es.txt.gz",
+    "sha256": "cb155e888c25032cbdec2543ce7639d3cffb3826bcba182e7b73c9db49dc4b09",
+    "bytes": 56013
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/fr.txt.gz",
+    "sha256": "fd7bfc37e833c758e25e647f4c6a573f6ff03ba0831231260f5d58d71e1bb99b",
+    "bytes": 70303
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/it.txt.gz",
+    "sha256": "76f33afb6d0ffe4e19d2646c3765710aec3d46c25aba3b02d374f35387b98f2b",
+    "bytes": 69705
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/pt.txt.gz",
+    "sha256": "7d63f0f4aae6f9ffc97681e29c53ac5c6265ef683e8992bba9f11d0fa7cbf209",
+    "bytes": 65967
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoji/root.txt.gz",
+    "sha256": "c130dd1b0000a2a195768304d66296c007d22a7cce2ed243e4fbe69ba8a8567c",
+    "bytes": 12174
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Resources/florisboard/media/emoticon/emoticons.json",
+    "sha256": "e9ec1e39e5146fb5be6b444fb78421df4db094c73202b6fadf292c20524fe7ac",
+    "bytes": 1333
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/ScreenKeyboard.Core.csproj",
+    "sha256": "0fb3704483cf713da2085b056e8afe9df3d510a714cea33794f070c78355816a",
+    "bytes": 1574
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Settings/KeyboardSettings.cs",
+    "sha256": "995e2d7e6d6568da34d0251f78afad45a3ebebeed3f5dc1959112cfee20f3970",
+    "bytes": 17964
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Settings/SettingsEnums.cs",
+    "sha256": "d8650ca3f93f3e7e76b0157c249350f3feda693da21883ca470c0bc399b9b67a",
+    "bytes": 2895
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Text/Composers.cs",
+    "sha256": "906b4629d05f64679b5a95520fcce468356a9e28b696cfdd4c81e74c819000d3",
+    "bytes": 10839
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Text/Suggestions.cs",
+    "sha256": "a65ac5c94ced387b06d5c01a7b63d462378276eafe02bd513c4c2096ad660c1d",
+    "bytes": 17560
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Text/TextUtils.cs",
+    "sha256": "aad1947a9a15913807372122bdca4e154dd47b78c1409e16526f8c0bb867bf6c",
+    "bytes": 6449
+  },
+  {
+    "source": "src/ScreenKeyboard.Core/Text/WordDictionary.cs",
+    "sha256": "1da1ecba7882c6b33c5d62ab4f9eb95f96f161457c816a06d9640f947323b3f9",
+    "bytes": 13034
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Icons/IconData.g.cs",
+    "sha256": "b54acb9beb004da04a7d49afd60cedaf6fb908972f851cfc3b21e55a8377d4f3",
+    "bytes": 112479
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Icons/IconFactory.cs",
+    "sha256": "684c2f828f431153c050bbfca79601ba16b03734ab5142f344e11a3b34764feb",
+    "bytes": 4719
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Input/ScreenKeyboardInput.cs",
+    "sha256": "59f43feaeb5d465bd9f6355d58f82a3ebee2b59ad15aad0e465d38a2b6ce37b9",
+    "bytes": 5901
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Input/TextBoxInputTarget.cs",
+    "sha256": "14c8b1a5581e5e6851f53dbc276e6af340d0eca3f0c32970d7adffa28ff3922d",
+    "bytes": 11002
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/KeyboardStrings.cs",
+    "sha256": "7f36707c1b14257897fc0490d5f2546a2b5ecb35bbba45ba60c9d2d823cc39d2",
+    "bytes": 7281
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/OnScreenKeyboard.cs",
+    "sha256": "8ede0cf821109a37a315f71cc5e488b877c71b065314bc85f089c6b209448f9b",
+    "bytes": 36402
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Primitives/FocusNeutral.cs",
+    "sha256": "2f14f2e00aadb9ccbbd050ae5f1707593a03746b05a70863520edc3552ceb66e",
+    "bytes": 1791
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Primitives/TouchButton.cs",
+    "sha256": "26f6621585c526f75baaaa5b9d517aa8838f145924f2bcf703e129c3b6cc2ab9",
+    "bytes": 6705
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Primitives/UniformWrapPanel.cs",
+    "sha256": "420bc598db82ab8148fc0a3e319b630c82afacbb2415e43f99650420ffdd4a7a",
+    "bytes": 2053
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/ScreenKeyboard.Uno.csproj",
+    "sha256": "b7e0c7581f469e4f2a723c4c3a7883a49d342a3511c52f1f5d052207e8432569",
+    "bytes": 1829
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/ScreenKeyboardHost.cs",
+    "sha256": "e8ffec3e9d85165bdcde393c0c427edf2d4bbdbf05a48b8f405288e193df4266",
+    "bytes": 15697
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Services/EmojiFontFallback.cs",
+    "sha256": "843d3105c12c1d4f78c706d7ae00aa3159a55978c7dd2db01c33cbd62d6c25cb",
+    "bytes": 4664
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Services/PlatformServices.cs",
+    "sha256": "b15fbd98d035b09c6b6d68f2a56c281a6f02af8421ead84b548985e06a248546",
+    "bytes": 3283
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Themes/KeyboardTheme.cs",
+    "sha256": "6ddb3706dbe7a88cb9081c4020e08f7a60b89f308d341a76fce5fdc7e35959da",
+    "bytes": 15956
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Themes/KeyboardThemes.cs",
+    "sha256": "2ef5cf93b8e48a39e5577094aada235058f39886495709533bb639fb0f51d93a",
+    "bytes": 9692
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Views/EmojiPanelView.cs",
+    "sha256": "b82121ad7217ee9e91b7cf60c7b144185c207b48a030753323a692957cecc728",
+    "bytes": 16170
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Views/KeyView.cs",
+    "sha256": "837cae0be6da63138fc7505c472f114ce019f3d2101d48fdfd8ce21b195ddae7",
+    "bytes": 9566
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Views/KeysView.cs",
+    "sha256": "20c367839a5c51b2f60866abfec0c2cb32f8c38da239cda53f0d5d32c2471e1e",
+    "bytes": 8543
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Views/PanelViews.cs",
+    "sha256": "155e1eef9bc81d16e06505df0b3dad0c2a9083f2db9172d02ac44ac7b4d3a27e",
+    "bytes": 17255
+  },
+  {
+    "source": "src/ScreenKeyboard.Uno/Views/SmartbarView.cs",
+    "sha256": "4f498a7a6feb1bc1cbb37f949ec5c97fe25df18890ac0becf2c4b07c3270212b",
+    "bytes": 15804
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+    "sha256": "9d8a401d01d1f81adaf9082b5624c147d06d74c65d801b39d1c8fb39cfbfe66f",
+    "bytes": 15869
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+    "sha256": "fdf6e85f9e8e549c8be01ac7506b89dad35913433185d0ea832c567bc65b1d7f",
+    "bytes": 10702
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/ScreenKeyboard.Core.Tests.csproj",
+    "sha256": "d09e380e211cc85c99313b209197d05a72f282ae3d0251a289f2a8f9446685fc",
+    "bytes": 630
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/TestHelpers.cs",
+    "sha256": "36d4ca6eb452e81f60c556e27f956ab06445abe0e68fc90d3ade3b250893f00e",
+    "bytes": 2844
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+    "sha256": "8300a398a10dbdc6c13c5821a7f5750def12f5659a9a55637a878303041f150e",
+    "bytes": 8485
+  },
+  {
+    "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+    "sha256": "9f0b814726c3d0edb9d72030dfc0b60557dff546a21f69091e1a90b2ed84fb48",
+    "bytes": 6848
+  }
+]

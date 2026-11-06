@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="5.0">
+    <id>Uno.WinUI</id>
+    <version>6.7.135</version>
+    <title>Uno.WinUI</title>
+    <authors>Uno Platform</authors>
+    <owners>unoplatform</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
+    <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
+    <icon>uno.png</icon>
+    <projectUrl>https://platform.uno/</projectUrl>
+    <description>Build Mobile, Desktop and WebAssembly apps with C# and XAML. Today. Open source and professionally supported.</description>
+    <copyright>Copyright (C) 2015-2025 Uno Platform Inc. - all rights reserved</copyright>
+    <repository type="git" url="https://github.com/unoplatform/uno.git" branch="refs/heads/release/stable/6.7" commit="da217df2312e9e39676880f9cb4b8d519cc297e0" />
+    <dependencies>
+      <group targetFramework=".NETFramework9.0-windows10.0.19041.0">
+        <dependency id="Microsoft.WindowsAppSDK" version="1.0.0" />
+        <dependency id="Microsoft.Windows.SDK.BuildTools" version="10.0.22000.196" />
+      </group>
+      <group targetFramework=".NETFramework10.0-windows10.0.19041.0">
+        <dependency id="Microsoft.WindowsAppSDK" version="1.0.0" />
+        <dependency id="Microsoft.Windows.SDK.BuildTools" version="10.0.22000.196" />
+      </group>
+      <group targetFramework=".NETFramework10.0-android36.0">
+        <dependency id="Xamarin.AndroidX.AppCompat" version="1.7.0.7" />
+        <dependency id="Xamarin.AndroidX.RecyclerView" version="1.4.0.2" />
+        <dependency id="Xamarin.AndroidX.Activity" version="1.10.1.2" />
+        <dependency id="Xamarin.AndroidX.Browser" version="1.8.0.10" />
+        <dependency id="Xamarin.AndroidX.SwipeRefreshLayout" version="1.1.0.28" />
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework10.0-ios26.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework10.0-tvos26.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework10.0-maccatalyst26.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework9.0-android30.0">
+        <dependency id="Xamarin.AndroidX.AppCompat" version="1.7.0.1" />
+        <dependency id="Xamarin.AndroidX.RecyclerView" version="1.2.1.3" />
+        <dependency id="Xamarin.AndroidX.Activity" version="1.9.0.4" />
+        <dependency id="Xamarin.AndroidX.Browser" version="1.0.0" />
+        <dependency id="Xamarin.AndroidX.SwipeRefreshLayout" version="1.1.0.10" />
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework9.0-ios18.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework9.0-tvos18.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework9.0-maccatalyst18.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework10.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+      <group targetFramework=".NETFramework9.0">
+        <dependency id="Uno.Foundation.Logging" version="6.7.135" />
+        <dependency id="System.Numerics.Vectors" version="4.5.0" />
+        <dependency id="System.Runtime.InteropServices.WindowsRuntime" version="4.3.0" />
+        <dependency id="System.Memory" version="4.5.2" />
+        <dependency id="Uno.Diagnostics.Eventing" version="2.0.1" />
+        <dependency id="System.Collections.Immutable" version="1.3.1" />
+        <dependency id="Uno.Fonts.Fluent" version="2.6.1" />
+        <dependency id="Uno.WinRT" version="6.7.135" />
+      </group>
+    </dependencies>
+    <references>
+      <group targetFramework=".NETFramework9.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework10.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework9.0-ios18.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework9.0-tvos18.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework9.0-maccatalyst18.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework9.0-android30.0">
+        <reference file="Uno.UI.BindingHelper.Android.dll" />
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework10.0-ios26.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework10.0-tvos26.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework10.0-maccatalyst26.0">
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework=".NETFramework10.0-android36.0">
+        <reference file="Uno.UI.BindingHelper.Android.dll" />
+        <reference file="Uno.Xaml.dll" />
+        <reference file="Uno.UI.dll" />
+        <reference file="Uno.UI.Composition.dll" />
+        <reference file="Uno.UI.Toolkit.dll" />
+        <reference file="Uno.UI.FluentTheme.dll" />
+        <reference file="Uno.UI.FluentTheme.v1.dll" />
+        <reference file="Uno.UI.FluentTheme.v2.dll" />
+      </group>
+      <group targetFramework="UAP10.0.19041">
+        <reference file="Uno.UI.Toolkit.dll" />
+      </group>
+    </references>
+  </metadata>
+</package>

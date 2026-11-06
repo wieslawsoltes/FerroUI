@@ -568,7 +568,9 @@ pub struct MarkupProperty {
     /// forms from the accessors; the hook returns `None` (and the caller
     /// uses the untyped element) unless the instance type of the declaration
     /// is a shared reference type `Rc<S>` (notifying or not). `None` for a static
-    /// property and for a property with a fallible setter. See
+    /// property, for a property with a fallible setter and for a declaration
+    /// whose instance type cannot be such a handle (a class of the object
+    /// model, a `struct` or a contract without `this:`). See
     /// [`typed_path`](super::typed_path).
     pub typed_path_element: Option<super::typed_path::TypedPathElement>,
     /// The typed accessor functions the declaration generated for the
@@ -805,16 +807,27 @@ impl IntoMarkupSubscription for Option<Rc<dyn IDisposable>> {
 #[derive(Clone, Copy)]
 pub struct MarkupEnumMember {
     pub name: &'static str,
-    /// The numeric value (the bits, for a flags enumeration).
+    /// The numeric value (the bits, for a flags enumeration). The member as a
+    /// value of the enumeration type is [`get`](Self::get): the conversion
+    /// of this value ([`MarkupType::enum_from_value`]), so that a member
+    /// costs no code of its own.
     pub value: i64,
-    /// The member as a value of the enumeration type.
-    pub get: fn() -> BoxedValue,
     /// The identifier of the Rust variant of a plain enumeration (the member
     /// name unless the declaration renames it), for the emitter of Rust
     /// source: the member is `<public path of the type>::<rust_variant>`.
     /// `None` for the members of a set of flags (their constants are
     /// arbitrary expressions).
     pub rust_variant: Option<&'static str>,
+}
+
+impl MarkupEnumMember {
+    /// The member as a value of the enumeration type `markup` (the
+    /// enumeration that lists it): the value of the enumeration with the
+    /// numeric value of the member. `None` only for metadata without
+    /// [`MarkupType::enum_from_value`].
+    pub fn get(&self, markup: &MarkupType) -> Option<BoxedValue> {
+        (markup.enum_from_value?)(self.value)
+    }
 }
 
 /// States that a type is an instantiation of a generic type
@@ -1098,6 +1111,19 @@ impl MarkupType {
         self.enum_members
             .iter()
             .find(|m| if ignore_case { m.name.eq_ignore_ascii_case(name) } else { m.name == name })
+    }
+
+    /// The first enumeration member that `value` (a value of the enumeration
+    /// type) is: the member with its numeric value. `None` for a value of
+    /// another type and for a combination of flags that is no member.
+    pub fn find_enum_member_of(&self, value: &dyn crate::AnyValue) -> Option<&'static MarkupEnumMember> {
+        match self.enum_to_value {
+            Some(to_value) => {
+                let number = to_value(value)?;
+                self.enum_members.iter().find(|m| m.value == number)
+            }
+            None => self.enum_members.iter().find(|m| m.get(self).is_some_and(|member| (*member).value_eq(value))),
+        }
     }
 
     /// Adds a type to the process-wide table of types with markup metadata,

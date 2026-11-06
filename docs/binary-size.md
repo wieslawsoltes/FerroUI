@@ -456,6 +456,24 @@ its own table.
 | `release` (with symbols) | 73.56 MB | 72.21 MB (-1.35 MB) |
 | `dist` | 45.28 MB | 43.03 MB (**-2.25 MB, -5.0 %**) |
 
+### 4.9 Fewer closures in the metadata of types (#569)
+
+The declaration macros generated closures per type and per member, each a function in the
+executable (1.72 MB of closure bodies in hello world, most of them in markup metadata):
+- an enumeration member was a closure that made its value; it is now its numeric value, made by
+  the `enum_from_value` of its type (`MarkupEnumMember::get`), and found by
+  `MarkupType::find_enum_member_of`;
+- a cast and a reference type registered a closure per form of the value; they register one typed
+  function, which a shared adapter calls;
+- a property whose typed path hook could only give nothing has none;
+- the untyped routes of properties copy a value through one function per value type instead of
+  three closures.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
+|---|---:|
+| class tables as constants (4.8) | 43.03 MB |
+| and fewer closures | 41.95 MB (**-1.07 MB**) |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

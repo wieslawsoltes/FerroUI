@@ -1,6 +1,7 @@
 use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
 use crate::ferro_property::{
-    convert_property_value, copy_converted_property_value, FerroPropertyInit, NotifyingCallback, PropertyRoutes,
+    convert_property_value, copy_converted_property_value, FerroPropertyInit, NotifyingCallback, PayloadSlot,
+    PropertyRoutes,
 };
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
@@ -212,11 +213,8 @@ impl<T: PropertyValue> StyledProperty<T> {
         } else if let Some(v) = value.downcast_ref::<BindingValue<T>>() {
             v.clone()
         } else {
-            let mut typed = None;
-            let (kind, error) = resolve_untyped_binding(&self.base, value, &mut |value| {
-                typed = value.downcast_ref::<T>().cloned();
-                typed.is_some()
-            });
+            let mut typed = None::<T>;
+            let (kind, error) = resolve_untyped_binding(&self.base, value, &mut typed);
             BindingValue::from_notification_parts(kind, typed, error)
         }
     }
@@ -229,7 +227,7 @@ impl<T: PropertyValue> StyledProperty<T> {
 fn resolve_untyped_binding(
     property: &FerroProperty,
     value: &dyn Any,
-    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+    copy_value: &mut dyn PayloadSlot,
 ) -> (BindingValueType, Option<BindingError>) {
     if value.is::<UnsetValueType>() {
         return (BindingValueType::UNSET_VALUE, None);

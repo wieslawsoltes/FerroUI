@@ -1,0 +1,50 @@
+{
+  "source": "https://github.com/emscripten-core/emscripten",
+  "revision": "d6c521a7f05449857c76bd99e396895583cf2083",
+  "version": "6.0.10",
+  "emsdk_revision": "a2b92777574c2feda07994cd4f1079a3dfc151f8",
+  "emscripten_release_revision": "666337b525e673e769121856d175f6f52b8ead64",
+  "files": [
+    {
+      "source_path": "LICENSE",
+      "path": "reference/emscripten-6.0.10/LICENSE",
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    {
+      "source_path": "system/lib/compiler-rt/LICENSE.TXT",
+      "path": "reference/emscripten-6.0.10/system/lib/compiler-rt/LICENSE.TXT",
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+    },
+    {
+      "source_path": "system/lib/libcxx/LICENSE.TXT",
+      "path": "reference/emscripten-6.0.10/system/lib/libcxx/LICENSE.TXT",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    {
+      "source_path": "system/lib/libcxxabi/LICENSE.TXT",
+      "path": "reference/emscripten-6.0.10/system/lib/libcxxabi/LICENSE.TXT",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+    },
+    {
+      "source_path": "system/lib/libunwind/LICENSE.TXT",
+      "path": "reference/emscripten-6.0.10/system/lib/libunwind/LICENSE.TXT",
+      "sha256": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d"
+    },
+    {
+      "source_path": "system/lib/libc/musl/COPYRIGHT",
+      "path": "reference/emscripten-6.0.10/system/lib/libc/musl/COPYRIGHT",
+      "sha256": "b870108ec5e7790e9f9919064f1b9421d62d5f9b0e6c230c6adf7ea2da62e97b"
+    },
+    {
+      "source_path": "system/lib/llvm-libc/LICENSE.TXT",
+      "path": "reference/emscripten-6.0.10/system/lib/llvm-libc/LICENSE.TXT",
+      "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47"
+    },
+    {
+      "source_path": "system/lib/mimalloc/LICENSE",
+      "path": "reference/emscripten-6.0.10/system/lib/mimalloc/LICENSE",
+      "sha256": "82ade5d7d9b029044b5fbbc326207fc47c2d44ee4dd71e8a559c36d728217de9"
+    }
+  ],
+  "scope": "Native WebAssembly runtime license references; toolchain binaries are not vendored into the product."
+}

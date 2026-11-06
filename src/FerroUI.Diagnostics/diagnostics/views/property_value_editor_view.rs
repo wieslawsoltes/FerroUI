@@ -454,9 +454,11 @@ impl PropertyValueEditorView {
             // `init`: `Enum.GetValues(propertyType)`, listed again only for another enumeration.
             if self.enum_type.get() != Some(property_type.id()) {
                 self.enum_type.set(Some(property_type.id()));
-                let members =
-                    MarkupType::find_by_handle(property_type.id()).map(|markup| markup.enum_members).unwrap_or(&[]);
-                c.set_items_source(Some(ItemsSource::from_items(members.iter().map(|member| Some((member.get)())))));
+                let markup = MarkupType::find_by_handle(property_type.id());
+                let members = markup.map(|markup| markup.enum_members).unwrap_or(&[]);
+                c.set_items_source(Some(ItemsSource::from_items(
+                    members.iter().map(move |member| markup.and_then(|markup| member.get(markup))),
+                )));
             }
             self.create_control(
                 &property,

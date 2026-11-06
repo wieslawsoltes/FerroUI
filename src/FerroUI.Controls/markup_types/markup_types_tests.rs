@@ -270,7 +270,7 @@ fn enumeration_members_are_found_by_name() {
         for member in type_.enum_members {
             let found = type_.find_enum_member(&member.name.to_lowercase(), true).unwrap();
             assert_eq!(found.value, type_.find_enum_member(member.name, false).unwrap().value);
-            let value = (member.get)();
+            let value = member.get(type_).unwrap();
             assert_eq!(Some(ValueType::of_value(&*value)), type_.handle(), "{type_:?}.{}", member.name);
             // The numeric value converts back to the member.
             let from_value = (type_.enum_from_value.unwrap())(member.value).unwrap();
@@ -282,7 +282,7 @@ fn enumeration_members_are_found_by_name() {
     assert_eq!(dock.full_name(), "FerroUI.Controls.Dock");
     let members: Vec<&str> = dock.enum_members.iter().map(|m| m.name).collect();
     assert_eq!(members, ["Left", "Bottom", "Right", "Top"]);
-    assert_eq!(unbox::<Option<Dock>>(&Some((dock.find_enum_member("top", true).unwrap().get)())), Some(Dock::Top));
+    assert_eq!(unbox::<Option<Dock>>(&Some(dock.find_enum_member("top", true).unwrap().get(dock).unwrap())), Some(Dock::Top));
 
     let size_to_content = <SizeToContent as MarkupTyped>::MARKUP;
     assert!(size_to_content.is_flags);

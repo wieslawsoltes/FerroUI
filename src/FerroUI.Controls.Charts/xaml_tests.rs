@@ -231,11 +231,10 @@ fn xaml_metadata_enum_types_create_from_string() {
             .find_enum_member(&value.to_lowercase(), false)
             .is_none());
     }
-    let circle = <MarkerShape as MarkupTyped>::MARKUP
-        .find_enum_member("Circle", false)
-        .unwrap();
+    let marker_shape = <MarkerShape as MarkupTyped>::MARKUP;
+    let circle = marker_shape.find_enum_member("Circle", false).unwrap();
     assert_eq!(
-        (circle.get)().downcast_ref::<MarkerShape>(),
+        circle.get(marker_shape).unwrap().downcast_ref::<MarkerShape>(),
         Some(&MarkerShape::Circle)
     );
 }

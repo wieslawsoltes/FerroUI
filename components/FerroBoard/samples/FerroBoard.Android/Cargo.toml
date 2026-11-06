@@ -1,0 +1,23 @@
+[package]
+name = "ferroboard-android"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[workspace]
+
+[lib]
+path = "lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ferroboard-sample = { path = "../FerroBoard.Sample", default-features = false }
+ferroboard-core = { path = "../../src/FerroBoard.Core" }
+ferroboard-controls = { path = "../../src/FerroBoard.Controls" }
+ferroui-base = { path = "../../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../../src/FerroUI.Controls" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android = { path = "../../../../src/Android/FerroUI.Android" }
+jni-sys = "=0.4.1"

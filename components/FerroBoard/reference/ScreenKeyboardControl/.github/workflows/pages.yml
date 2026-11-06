@@ -1,0 +1,46 @@
+name: Deploy sample to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Install wasm-tools
+        run: dotnet workload install wasm-tools
+      - name: Publish WebAssembly sample
+        run: >
+          dotnet publish samples/ScreenKeyboard.Sample -c Release
+          -f net10.0-browserwasm -p:SkTargetFrameworks=net10.0-browserwasm
+          -p:WasmShellWebAppBasePath=/${{ github.event.repository.name }}/
+          -o artifacts/wasm
+      - name: Add .nojekyll
+        run: touch artifacts/wasm/wwwroot/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/wasm/wwwroot
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

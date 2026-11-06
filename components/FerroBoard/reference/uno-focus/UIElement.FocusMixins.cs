@@ -1,0 +1,204 @@
+﻿using Uno.UI.Xaml;
+using Uno.UI.Xaml.Core;
+using Uno.UI.Xaml.Rendering;
+using Microsoft.UI.Xaml.Controls;
+
+#nullable enable
+
+namespace Microsoft.UI.Xaml
+{
+	// This file contains focus-related mixins that belong either in UIElement or in Control depending whether
+	// targeting UWP or WinUI. When WinUI becomes the "standard", we can move this in UIElement directly.
+
+	public partial class UIElement
+	{
+		public FocusState FocusState
+		{
+			get => GetFocusStateValue();
+			set => SetFocusStateValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = default(FocusState))]
+		public static DependencyProperty FocusStateProperty { get; } = CreateFocusStateProperty();
+
+		public bool IsTabStop
+		{
+			get => (bool)GetValue(IsTabStopProperty);
+			set => SetValue(IsTabStopProperty, value);
+		}
+
+		public static DependencyProperty IsTabStopProperty { get; } =
+			DependencyProperty.Register(
+				nameof(IsTabStop),
+				typeof(bool),
+				typeof(UIElement),
+				new FrameworkPropertyMetadata(
+					(bool)false, // This is true for Control descendants (handled by overriding the default in the Control constructor
+					(s, e) => ((UIElement)s)?.OnIsTabStopChanged((bool)e.OldValue, (bool)e.NewValue)
+				)
+			);
+
+		private protected virtual void OnIsTabStopChanged(bool oldValue, bool newValue) { }
+
+		public int TabIndex
+		{
+			get => GetTabIndexValue();
+			set => SetTabIndexValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = int.MaxValue)]
+		public static DependencyProperty TabIndexProperty { get; } = CreateTabIndexProperty();
+
+		public DependencyObject XYFocusUp
+		{
+			get => GetXYFocusUpValue();
+			set => SetXYFocusUpValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = default(DependencyObject))]
+		public static DependencyProperty XYFocusUpProperty { get; } = CreateXYFocusUpProperty();
+
+		public DependencyObject XYFocusDown
+		{
+			get => GetXYFocusDownValue();
+			set => SetXYFocusDownValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = default(DependencyObject))]
+		public static DependencyProperty XYFocusDownProperty { get; } = CreateXYFocusDownProperty();
+
+		public DependencyObject XYFocusLeft
+		{
+			get => GetXYFocusLeftValue();
+			set => SetXYFocusLeftValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = default(DependencyObject))]
+		public static DependencyProperty XYFocusLeftProperty { get; } = CreateXYFocusLeftProperty();
+
+		public DependencyObject XYFocusRight
+		{
+			get => GetXYFocusRightValue();
+			set => SetXYFocusRightValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = default(DependencyObject))]
+		public static DependencyProperty XYFocusRightProperty { get; } = CreateXYFocusRightProperty();
+
+		public bool UseSystemFocusVisuals
+		{
+			get => GetUseSystemFocusVisualsValue();
+			set => SetUseSystemFocusVisualsValue(value);
+		}
+
+		[GeneratedDependencyProperty(DefaultValue = false)]
+		public static DependencyProperty UseSystemFocusVisualsProperty { get; } = CreateUseSystemFocusVisualsProperty();
+
+		internal virtual void UpdateFocusState(FocusState focusState)
+		{
+			if (focusState != FocusState)
+			{
+				SetValue(FocusStateProperty, focusState);
+
+				//If the keyboard is used to navigate to the element, then the focus rectangle should be displayed.
+				//Conversely, the user shouldn't need to use the keyboard to remove the focus, so any act that would remove focus is acceptable.
+				if (focusState == FocusState.Keyboard || focusState == FocusState.Unfocused)
+				{
+					//Check if the SystemFocusVisuals are enabled
+					if (UseSystemFocusVisuals)
+					{
+						var thisElement = this;
+						UIElement? focusTargetDescendant = null;
+
+						if (thisElement is Control control)
+						{
+							focusTargetDescendant = control.FocusTargetDescendant as UIElement;
+						}
+
+						if (focusTargetDescendant != null)
+						{
+							var focusManager = VisualTree.GetFocusManagerForElement(this);
+							NWSetContentDirty(focusTargetDescendant, DirtyFlags.Render);
+							if (focusState == FocusState.Unfocused)
+							{
+								focusManager?.SetFocusRectangleUIElement(null);
+							}
+
+							else
+							{
+								focusManager?.SetFocusRectangleUIElement(focusTargetDescendant);
+							}
+						}
+						else
+						{
+							NWSetContentDirty(this, DirtyFlags.Render);
+						}
+					}
+				}
+			}
+		}
+
+		internal virtual bool IsFocusable =>
+#if __CROSSRUNTIME__
+					// WinUI: CUIElement::IsFocusable requires IsActive() (the element is in the live tree),
+					// so focusing a detached element fails and focus-candidate searches skip detached subtrees.
+					IsActiveOrAttachedUnderActiveAncestor() &&
+#endif
+					IsVisible() &&
+					(IsEnabled() || ((this as FrameworkElement)?.AllowFocusWhenDisabled == true)) &&
+					(IsTabStop || IsFocusableForFocusEngagement()) &&
+					AreAllAncestorsVisible();
+
+#if __CROSSRUNTIME__
+		// WinUI's IsActive() equivalent for focusability. Uno's enhanced lifecycle activates freshly attached
+		// children one lifecycle step after they get a live parent (WinUI enters them synchronously during the
+		// same call), so an element attached under an active ancestor must count as active to keep same-tick
+		// focus working (e.g. ComboBox focusing its item container right when the dropdown opens). Only visual
+		// parents count here; a logical parent alone does not make an element part of the live tree.
+		internal bool IsActiveOrAttachedUnderActiveAncestor()
+		{
+			if (IsActiveInVisualTree)
+			{
+				return true;
+			}
+
+			var parent = this.GetVisualTreeParent();
+			while (parent is not null)
+			{
+				if (parent.IsActiveInVisualTree)
+				{
+					return true;
+				}
+
+				parent = parent.GetVisualTreeParent();
+			}
+
+			return false;
+		}
+#endif
+
+		internal virtual bool IsFocusableForFocusEngagement() => false;
+
+		internal protected bool IsVisible() => Visibility == Visibility.Visible;
+
+		private bool IsEnabled()
+		{
+			if (this is Control control)
+			{
+				return control.IsEnabled;
+			}
+
+			return true;
+		}
+
+		internal bool IsEnabledInternal() => IsEnabled();
+
+		internal
+#if __ANDROID__
+			new
+#endif
+			bool IsFocused => FocusState != FocusState.Unfocused;
+
+		internal bool IsKeyboardFocused => FocusState == FocusState.Keyboard;
+	}
+}

@@ -1,0 +1,13 @@
+{
+  "sharedDefault": true,
+  "layoutShared": true,
+  "keyboardInvalidated": true,
+  "trace": [
+    "engine0:add:worker",
+    "engine1:add:worker",
+    "resources:add:worker",
+    "engine1:after-dispose:worker",
+    "resources:after-dispose:worker"
+  ],
+  "scope": "source-only; default registry and cross-thread engine callbacks not yet ported"
+}

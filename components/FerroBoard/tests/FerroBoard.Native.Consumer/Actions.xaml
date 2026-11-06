@@ -1,0 +1,12 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core">
+ <TextBox Height="36" Text="α😀"/>
+ <k:OnScreenKeyboard Width="720" Height="300" AutoAttach="False">
+  <k:OnScreenKeyboard.Settings>
+   <s:KeyboardSettings SmartbarLayout="ActionsOnly" AutoCapitalization="False"
+    ShowSuggestions="False" GlideTyping="False" LearnWords="False" EmojiSuggestions="False"
+    ClipboardSuggestion="False" ClipboardHistoryEnabled="False" EmojiHistoryEnabled="False"/>
+  </k:OnScreenKeyboard.Settings>
+ </k:OnScreenKeyboard>
+</StackPanel>

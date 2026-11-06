@@ -1,0 +1,17 @@
+<c:Consumer xmlns="https://github.com/ferroui"
+ xmlns:c="using:FerroBoard.Native.Consumer"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ xmlns:t="clr-namespace:FerroBoard.Controls.Themes;assembly=FerroBoard.Controls">
+ <c:Consumer.Keyboard>
+  <k:OnScreenKeyboard AutoAttach="False" EnterActionRequested="OnEnter">
+   <k:OnScreenKeyboard.Settings>
+    <s:KeyboardSettings KeyHeight="61.25" AutoCapitalization="False" GlideTyping="False"
+     ShowSuggestions="False" LearnWords="False" ClipboardHistoryEnabled="False" EmojiHistoryEnabled="False"/>
+   </k:OnScreenKeyboard.Settings>
+   <k:OnScreenKeyboard.Theme>
+    <t:KeyboardTheme Id="native-consumer" Name="Downstream theme" Background="#FF102030" KeyCornerRadius="9.5"/>
+   </k:OnScreenKeyboard.Theme>
+  </k:OnScreenKeyboard>
+ </c:Consumer.Keyboard>
+</c:Consumer>

@@ -1,0 +1,10 @@
+{"text":[],"length":0,"shared":true,"valid":true,"bytes":[],"equalCopy":true}
+{"text":[97,115,99,105,105],"length":5,"shared":true,"valid":true,"bytes":[97,115,99,105,105],"equalCopy":true}
+{"text":[233,28450,23383],"length":3,"shared":true,"valid":true,"bytes":[195,169,230,188,162,229,173,151],"equalCopy":true}
+{"text":[55357,56832],"length":2,"shared":true,"valid":true,"bytes":[240,159,152,128],"equalCopy":true}
+{"text":[101,769],"length":2,"shared":true,"valid":true,"bytes":[101,204,129],"equalCopy":true}
+{"text":[55296],"length":1,"shared":true,"valid":false,"bytes":null,"equalCopy":true}
+{"text":[57343],"length":1,"shared":true,"valid":false,"bytes":null,"equalCopy":true}
+{"text":[97,55296,55357,56832,57343],"length":5,"shared":true,"valid":false,"bytes":null,"equalCopy":true}
+{"text":[13,10,13,10],"length":4,"shared":true,"valid":true,"bytes":[13,10,13,10],"equalCopy":true}
+{"text":[55357,56425,55356,57341,8205,55357,56507],"length":7,"shared":true,"valid":true,"bytes":[240,159,145,169,240,159,143,189,226,128,141,240,159,146,187],"equalCopy":true}

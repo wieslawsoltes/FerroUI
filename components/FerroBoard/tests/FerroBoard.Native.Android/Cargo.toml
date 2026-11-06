@@ -1,0 +1,35 @@
+[package]
+name = "ferroboard-native-android"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+[workspace]
+[lib]
+path = "lib.rs"
+crate-type = ["cdylib"]
+[dependencies]
+ferroboard-core = { path = "../../src/FerroBoard.Core" }
+ferroboard-controls = { path = "../../src/FerroBoard.Controls" }
+ferroboard-native-consumer = { path = "../FerroBoard.Native.Consumer" }
+ferroui-base = { path = "../../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../../src/FerroUI.Controls" }
+ferroui-themes-winui = { path = "../../../../src/FerroUI.Themes.WinUI" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android = { path = "../../../../src/Android/FerroUI.Android" }
+
+[features]
+# Test-only native password-control/OS privacy fixture; normal pointer app is unchanged.
+native-password-checks = []
+# Test-only real emoji panel/search input and external target restoration.
+native-emoji-panel-checks = []
+# Test-only real clipboard panel and native target behavior.
+native-clipboard-panel-checks = []
+# Test-only native host removal, release and Android activity transitions.
+native-lifecycle-checks = []
+# Test-only actual batched/unbatched native glide paths and suggestions.
+native-glide-checks = []
+
+# Test-only real native range notifications, reentrancy and inactive target editing.
+native-selection-checks = []

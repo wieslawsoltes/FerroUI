@@ -1,0 +1,36 @@
+{"tag":[101,110,45,85,83],"operation":"activate","error":null,"display":null,"upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"i","transitionEvents":[]}
+{"tag":[101,110,45,85,83],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[101,110,45,85,83],"operation":"display","error":null,"display":"English (United States)","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[101,110,45,85,83],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[116,114,45,84,82],"operation":"activate","error":null,"display":null,"upper":"\u0130","culture":"tr-TR","active":[116,114,45,84,82],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[116,114,45,84,82],"operation":"set-subtypes","error":null,"display":null,"upper":"\u0130","culture":"tr-TR","active":[116,114,45,84,82],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[116,114,45,84,82],"operation":"display","error":null,"display":"T\u00fcrk\u00e7e (T\u00fcrkiye)","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[116,114,45,84,82],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[100,101,45,68,69],"operation":"activate","error":null,"display":null,"upper":"I","culture":"de-DE","active":[100,101,45,68,69],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[100,101,45,68,69],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"de-DE","active":[100,101,45,68,69],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[100,101,45,68,69],"operation":"display","error":null,"display":"Deutsch (Deutschland)","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[100,101,45,68,69],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[],"operation":"activate","error":null,"display":null,"upper":"I","culture":"","active":[],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"","active":[],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[],"operation":"display","error":null,"display":"","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[105,110,118,97,108,105,100,95,116,97,103,33],"operation":"activate","error":null,"display":null,"upper":"I","culture":"","active":[105,110,118,97,108,105,100,95,116,97,103,33],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[105,110,118,97,108,105,100,95,116,97,103,33],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"","active":[105,110,118,97,108,105,100,95,116,97,103,33],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[105,110,118,97,108,105,100,95,116,97,103,33],"operation":"display","error":null,"display":"invalid_tag!","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[105,110,118,97,108,105,100,95,116,97,103,33],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[110,111,116,32,97,32,108,111,99,97,108,101],"operation":"activate","error":null,"display":null,"upper":"I","culture":"","active":[110,111,116,32,97,32,108,111,99,97,108,101],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[110,111,116,32,97,32,108,111,99,97,108,101],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"","active":[110,111,116,32,97,32,108,111,99,97,108,101],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[110,111,116,32,97,32,108,111,99,97,108,101],"operation":"display","error":null,"display":"not a locale","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[110,111,116,32,97,32,108,111,99,97,108,101],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[101,110,47,85,83],"operation":"activate","error":null,"display":null,"upper":"I","culture":"","active":[101,110,47,85,83],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[101,110,47,85,83],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"","active":[101,110,47,85,83],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[101,110,47,85,83],"operation":"display","error":null,"display":"en/US","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[101,110,47,85,83],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":null,"operation":"activate","error":"ArgumentNullException","display":null,"upper":"I","culture":"en-US","active":null,"text":"","transitionEvents":[]}
+{"tag":null,"operation":"set-subtypes","error":"ArgumentNullException","display":null,"upper":"I","culture":"en-US","active":null,"text":"","transitionEvents":[]}
+{"tag":null,"operation":"display","error":"ArgumentNullException","display":null,"upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":null,"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[55296],"operation":"activate","error":null,"display":null,"upper":"I","culture":"","active":[55296],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[55296],"operation":"set-subtypes","error":null,"display":null,"upper":"I","culture":"","active":[55296],"text":"i","transitionEvents":["keyboard","state"]}
+{"tag":[55296],"operation":"display","error":null,"display":"\ufffd","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}
+{"tag":[55296],"operation":"override","error":null,"display":"Custom language","upper":"I","culture":"en-US","active":[101,110,45,85,83],"text":"","transitionEvents":[]}

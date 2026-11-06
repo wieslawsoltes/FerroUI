@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:t="clr-namespace:FerroBoard.Text;assembly=FerroBoard.Core"
+ x:DataType="t:DictionarySuggestionProvider">
+ <TextBlock Text="{CompiledBinding Dictionary.LanguageTag}"/>
+ <TextBlock Text="{CompiledBinding Dictionary.Count}"/>
+ <TextBlock Text="{CompiledBinding UserDictionary.LearnThreshold}"/>
+</StackPanel>

@@ -1,0 +1,4 @@
+{"tag":"delegate","sameReference":false,"aliasReference":true,"same":true,"different":false,"result":"41eb001bffe00000","display":"System.Func\u00603[System.Char,System.Char,System.Double]"}
+{"tag":"failure","type":"ApplicationException","message":"key-proximity-failure"}
+{"tag":"engine","factoryFailure":false,"error":false,"text":[97],"suggestions":0}
+{"tag":"engine","factoryFailure":true,"error":true,"text":[],"suggestions":0}

@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
-exclude = ["external/rust-skia-bindings"]
+# Detachable native keyboard workspace, consumed through ordinary path dependencies; the
+# patched skia-bindings (external/rust-skia-bindings) is not a member either.
+exclude = ["components/FerroBoard", "external/rust-skia-bindings"]
 members = [
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",

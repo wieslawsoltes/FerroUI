@@ -1,0 +1,32 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net10.0-desktop;net10.0-browserwasm;net10.0-android;net10.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.26100</TargetFrameworks>
+    <!-- Allow fast local builds: dotnet build -p:SkTargetFrameworks=net10.0-desktop -->
+    <TargetFrameworks Condition="'$(SkTargetFrameworks)' != ''">$(SkTargetFrameworks)</TargetFrameworks>
+    <UnoSingleProject>true</UnoSingleProject>
+    <OutputType>Library</OutputType>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <RootNamespace>ScreenKeyboard.Controls</RootNamespace>
+    <!-- Uno Platform 6 renders with Skia on every target; libraries must use the same renderer as apps (UNOB0017). -->
+    <UnoFeatures>
+      SkiaRenderer;
+    </UnoFeatures>
+
+    <PackageId>ScreenKeyboard.Uno</PackageId>
+    <Description>A professional, themable on-screen keyboard control for Uno Platform (WinUI): FlorisBoard-compatible layouts for 70+ languages, glide (swipe) typing, swipe gestures, key popups, emoji panel with search and skin tones, clipboard history, text editing panel, smart suggestions and autocorrect, one-handed and split modes.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;Uno0001</NoWarn>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScreenKeyboard.Core\ScreenKeyboard.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="..\..\build\icon.png" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+</Project>

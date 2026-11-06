@@ -153,3 +153,10 @@ licensed under MIT. The source project credits Cheng Lou's original
 [pretext](https://github.com/chenglou/pretext). Each Pretext crate includes the
 full source MIT notice in its own `NOTICE.md`. Source mappings, native service
 adaptations and validation are documented in `docs/porting/pretext.md`.
+
+## FerroBoard on-screen keyboard
+
+`components/FerroBoard` derives from Wieslaw Soltes's ScreenKeyboardControl at
+`3694995fabbebc45a801a455880e3d31888367f1`, under Apache-2.0. The component retains
+its own LICENSE, NOTICE, THIRD-PARTY-NOTICES.md, FlorisBoard/Unicode attribution
+and resource licenses; the framework's MIT license does not replace them.

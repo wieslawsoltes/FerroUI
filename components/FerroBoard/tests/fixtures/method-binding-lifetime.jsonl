@@ -1,0 +1,3 @@
+{"tag":"retained","clockAlive":true,"sourceAlive":true,"targetAlive":true}
+{"tag":"afterCall","clockAlive":true,"sourceAlive":true}
+{"tag":"released","clockAlive":false,"sourceAlive":false}

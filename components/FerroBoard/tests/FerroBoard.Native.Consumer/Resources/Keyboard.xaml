@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:t="clr-namespace:FerroBoard.Controls.Themes;assembly=FerroBoard.Controls">
+ <ResourceDictionary.MergedDictionaries><ResourceInclude Source="Defaults.xaml"/></ResourceDictionary.MergedDictionaries>
+ <t:KeyboardTheme x:Key="SharedTheme" Id="external-consumer" Name="External resource theme"
+  Background="#FF102030" KeyCornerRadius="9.5">
+  <t:KeyboardTheme.KeyRules><t:KeyStyleRules>
+   <t:KeyStyleRule FontSize="31" CornerRadius="12" Foreground="#FF334455">
+    <t:KeyStyleRule.Codes><t:KeyCodes><x:Int32>97</x:Int32><x:Int32>98</x:Int32></t:KeyCodes></t:KeyStyleRule.Codes>
+   </t:KeyStyleRule>
+  </t:KeyStyleRules></t:KeyboardTheme.KeyRules>
+ </t:KeyboardTheme>
+</ResourceDictionary>

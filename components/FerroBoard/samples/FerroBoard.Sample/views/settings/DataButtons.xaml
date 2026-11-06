@@ -1,0 +1,3 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Orientation="Horizontal" Spacing="8">
+ <Button x:Name="Reset" Content="Reset settings"/><Button x:Name="Forget" Content="Clear learned words"/>
+</StackPanel>

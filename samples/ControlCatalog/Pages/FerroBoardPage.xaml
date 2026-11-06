@@ -1,0 +1,32 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+             xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+             x:Class="ControlCatalog.Pages.FerroBoardPage"
+             Theme="{StaticResource ScrollPage}" Header="FerroBoard">
+  <StackPanel Spacing="16" MaxWidth="1100">
+    <TextBlock Text="Tap a field to open the on-screen keyboard. Try suggestions, long press, glide typing, space-bar cursor movement, emoji and the editing panel." TextWrapping="Wrap" />
+    <TextBlock Text="This demonstration uses private in-memory input: learning, clipboard history and emoji history are disabled." TextWrapping="Wrap" />
+    <k:ScreenKeyboardHost Name="KeyboardHost" VisibilityMode="Auto" IsAnimated="False" Height="620">
+      <x:Arguments>
+        <k:OnScreenKeyboard>
+          <k:OnScreenKeyboard.Settings>
+            <s:KeyboardSettings IncognitoMode="True" LearnWords="False" ClipboardHistoryEnabled="False" EmojiHistoryEnabled="False" />
+          </k:OnScreenKeyboard.Settings>
+        </k:OnScreenKeyboard>
+      </x:Arguments>
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10" Margin="8">
+          <TextBlock Text="Message" />
+          <TextBox Name="KeyboardMessage" AutomationProperties.Name="FerroBoard message" AcceptsReturn="True" MinHeight="90" TextWrapping="Wrap" PlaceholderText="Type a message…" />
+          <TextBlock Text="Email" />
+          <TextBox Name="KeyboardEmail" AutomationProperties.Name="FerroBoard email" PlaceholderText="name@example.com" k:ScreenKeyboardInput.InputKind="Email" k:ScreenKeyboardInput.EnterAction="Next" />
+          <TextBlock Text="Amount" />
+          <TextBox Name="KeyboardAmount" AutomationProperties.Name="FerroBoard amount" PlaceholderText="Numeric keyboard" k:ScreenKeyboardInput.InputKind="Number" k:ScreenKeyboardInput.EnterAction="Next" />
+          <TextBlock Text="Password" />
+          <k:ProtectedPasswordTextBox Name="KeyboardPassword" AutomationProperties.Name="FerroBoard password" PlaceholderText="Nothing is learned here" k:ScreenKeyboardInput.EnterAction="Done" />
+        </StackPanel>
+      </ScrollViewer>
+    </k:ScreenKeyboardHost>
+  </StackPanel>
+</ContentPage>

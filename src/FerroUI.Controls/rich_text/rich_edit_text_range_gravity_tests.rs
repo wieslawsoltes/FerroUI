@@ -175,7 +175,7 @@ fn rich_range_gravity_retains_native_enum_values_and_checked_conversion() {
     ]) {
         assert_eq!(member.name, name);
         assert_eq!(member.value, i64::from(value));
-        let boxed = (member.get)();
+        let boxed = member.get(metadata).unwrap();
         assert_eq!(*boxed.downcast_ref::<RangeGravity>().unwrap() as i32, value);
         assert_eq!(
             (metadata.enum_to_value.unwrap())(boxed.as_ref()),
