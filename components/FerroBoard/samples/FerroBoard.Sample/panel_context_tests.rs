@@ -8,8 +8,11 @@ use ferroboard_core::{
     settings::{KeyboardSettings, ThemeMode},
 };
 use ferroui_reactiveui::ICommand;
+#[cfg(target_os = "macos")]
 use serde_json::{Value, json};
-use std::{cell::RefCell, rc::Rc, sync::Arc};
+use std::{cell::RefCell, rc::Rc};
+#[cfg(target_os = "macos")]
+use std::sync::Arc;
 #[cfg(target_os = "macos")]
 fn snapshot(settings: &KeyboardSettings, models: &Arc<LanguageModels>) -> Value {
     json!({"numberRow":settings.number_row(),"keyHeight":settings.key_height(),"theme":settings.theme_mode().0,"subtypes":settings.subtypes().borrow().iter().map(|s|s.as_deref().map(|s|s.encode_utf16().collect::<Vec<_>>())).collect::<Vec<_>>(),"words":models.get_user_dictionary(&"en".into()).get_count(&"keepword".into())})
