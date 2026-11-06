@@ -576,6 +576,12 @@ pub struct MarkupProperty {
     /// that is not declared.
     pub emit_get: CompilerMetadata<Option<MarkupEmit>>,
     pub emit_set: CompilerMetadata<Option<MarkupEmit>>,
+    /// The metadata of the value type of the property, when it has metadata
+    /// ([`MarkupTyped`]: `T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>`). With the tables of
+    /// types trimmed (`trim-type-tables`), registering a type registers the metadata of
+    /// the value types of its properties, which a binding through the property finds by
+    /// handle. The declaration forms generate it; `|| None` otherwise.
+    pub value_markup: fn() -> Option<&'static MarkupType>,
 }
 
 /// What only the emitter of Rust source reads (the typed functions of
@@ -1238,6 +1244,61 @@ pub trait MarkupTyped {
     const MARKUP: &'static MarkupType;
 }
 
+/// The metadata of a type, if it has metadata ([`MarkupProperty::value_markup`]): chosen
+/// where the type is named, by the method that a reference to a reference to the probe
+/// resolves to. The implementations for a type with metadata (on `&Probe`) take that receiver
+/// as it is and are found first; the one of every type (on `Probe`) after one dereference.
+#[doc(hidden)]
+pub struct __TypeMarkupProbe<T: ?Sized>(std::marker::PhantomData<fn() -> *const T>);
+
+impl<T: ?Sized> __TypeMarkupProbe<T> {
+    #[doc(hidden)]
+    pub const NEW: Self = Self(std::marker::PhantomData);
+}
+
+#[doc(hidden)]
+pub trait __TypeMarkup {
+    fn __type_markup(&self) -> Option<&'static MarkupType>;
+}
+
+impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<T> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<T>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<std::rc::Rc<T>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<std::rc::Rc<T>>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoTypeMarkup {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        None
+    }
+}
+
+impl<T: ?Sized> __NoTypeMarkup for __TypeMarkupProbe<T> {}
+
 #[derive(Default)]
 struct MarkupRegistry {
     types: Vec<&'static MarkupType>,
@@ -1263,6 +1324,14 @@ impl MarkupRegistry {
         }
         if let Some(nullable) = type_.nullable {
             self.by_nullable_handle.entry(nullable().id()).or_insert(type_);
+        }
+        // Trimmed, the metadata of the value types of the properties is not in a table: it
+        // is registered with the type, as a binding through a property finds it by handle.
+        #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+        for property in type_.properties.iter().chain(type_.static_properties) {
+            if let Some(value) = (property.value_markup)() {
+                self.insert(value);
+            }
         }
     }
 }

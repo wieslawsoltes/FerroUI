@@ -467,6 +467,11 @@ macro_rules! __ferro_markup_items {
                 ),
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*)),
+                value_markup: || {
+                    #[allow(unused_imports)]
+                    use $crate::metadata::{__NoTypeMarkup as _, __TypeMarkup as _};
+                    (&&$crate::metadata::__TypeMarkupProbe::<$type_>::NEW).__type_markup()
+                },
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -540,6 +545,11 @@ macro_rules! __ferro_markup_items {
                 typed_path_element: ::std::option::Option::None,
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*)),
+                value_markup: || {
+                    #[allow(unused_imports)]
+                    use $crate::metadata::{__NoTypeMarkup as _, __TypeMarkup as _};
+                    (&&$crate::metadata::__TypeMarkupProbe::<$type_>::NEW).__type_markup()
+                },
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
