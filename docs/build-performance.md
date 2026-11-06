@@ -290,9 +290,15 @@ purpose acknowledges it with the label `build-output-changes`. With the label:
 - `catalog-freshness.py`, `sample-freshness.py`, `compare.py` (source mode) and `scanner.py`
   (source mode) run with `--accept-output-changes`. They compare the outputs of each revision
   with its own first sample, which keeps every build deterministic. They still compare the
-  dependency graph, features and profiles across revisions, and the runtime results of the
+  dependency graph, features (but see below) and profiles across revisions, and the runtime results of the
   sample fixture with the baseline's. The generated files that differ from the baseline are
   listed in the summary of the job instead of failing it.
+- `compare.py` and `sample-freshness.py` also accept a change of features: a pull request that
+  enables a feature of a crate on purpose (for example the feature `type-tables` of
+  `ferroui-base`, docs/binary-size.md section 4.6) builds the same units with the same profiles,
+  some with other features. Every other field of a unit, the set of units and each revision's
+  repetition of its own graph are still required; the units built with other features are
+  listed in the summary of the job.
 - The optimized-build-tools legs of `compare.py` and `scanner.py` compare the candidate built
   with optimized build tools with the candidate built from source (both checkouts are the head
   of the pull request), strictly. The equivalence of the two modes is checked as before; the
