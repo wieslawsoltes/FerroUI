@@ -163,6 +163,24 @@ def comparable_units(items: list[dict], allow_build_tool_optimization: bool) -> 
     return sorted(result, key=lambda item: json.dumps(item, sort_keys=True))
 
 
+def without_features(items: list[dict]) -> list[dict]:
+    """The units with their features left out: what an acknowledged change of features keeps."""
+    return sorted(({key: value for key, value in item.items() if key != "features"} for item in items),
+                  key=lambda item: json.dumps(item, sort_keys=True))
+
+
+def changed_features(first: list[dict], second: list[dict]) -> list[str]:
+    """The units (package, target and kind) whose features differ between two builds."""
+    def features(items):
+        found = {}
+        for item in items:
+            key = f"{item.get('package')} {item.get('name')} {','.join(item.get('kind', []))}"
+            found.setdefault(key, []).append(item.get("features", []))
+        return {key: sorted(value) for key, value in found.items()}
+    first, second = features(first), features(second)
+    return sorted(key for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+
+
 def changed_outputs(first: dict, second: dict) -> list[str]:
     """The generated outputs whose hashes differ between two builds."""
     return sorted(str(key) for key in first.keys() | second.keys() if first.get(key) != second.get(key))
@@ -185,6 +203,15 @@ def summarize(records: list[dict], allow_build_tool_optimization: bool = False) 
         "same_units_features_and_allowed_profiles": all(
             comparable_units(row["units"], allow_build_tool_optimization) == comparable_units(reference_units, allow_build_tool_optimization)
             for row in records),
+        # An acknowledged change of features (label build-output-changes): the units and their
+        # profiles are the baseline's, the features of some differ, and each revision repeats its own.
+        "same_units_and_allowed_profiles": all(
+            without_features(comparable_units(row["units"], allow_build_tool_optimization))
+            == without_features(comparable_units(reference_units, allow_build_tool_optimization))
+            for row in records),
+        "units_deterministic_per_revision": all(row["units"] == rows[0]["units"]
+                                                for rows in (baseline, candidate) for row in rows),
+        "changed_unit_features": changed_features(reference_units, candidate[0]["units"]),
         "build_tool_optimization_experiment": allow_build_tool_optimization,
         "same_generated_rust_and_metadata": all(row["generated"] == reference_generated for row in records),
         # Each revision repeats its own generated output (what an acknowledged output change still needs).
@@ -270,6 +297,14 @@ def main() -> int:
                      f"{len(changed)} generated outputs differ from the baseline:\n\n"
                      + "".join(f"- `{name}`\n" for name in changed[:50])
                      + (f"- ... {len(changed) - 50} more\n" if len(changed) > 50 else ""))
+        if args.accept_output_changes and summary["changed_unit_features"]:
+            changed = summary["changed_unit_features"]
+            text += ("\n### Feature changes acknowledged (`build-output-changes`)\n\n"
+                     f"Same units and profiles: **{summary['same_units_and_allowed_profiles']}**. "
+                     f"Each revision repeats its own units: **{summary['units_deterministic_per_revision']}**. "
+                     f"{len(changed)} units are built with other features than the baseline's:\n\n"
+                     + "".join(f"- `{name}`\n" for name in changed[:50])
+                     + (f"- ... {len(changed) - 50} more\n" if len(changed) > 50 else ""))
         (args.output / "summary.md").write_text(text)
         print(text)
         if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -277,7 +312,10 @@ def main() -> int:
                 handle.write(text)
         same_outputs = summary["same_generated_rust_and_metadata"] or (
             args.accept_output_changes and summary["generated_deterministic_per_revision"])
-        valid = summary["same_units_features_and_allowed_profiles"] and same_outputs and summary["all_units_cold"]
+        same_units = summary["same_units_features_and_allowed_profiles"] or (
+            args.accept_output_changes and summary["same_units_and_allowed_profiles"]
+            and summary["units_deterministic_per_revision"])
+        valid = same_units and same_outputs and summary["all_units_cold"]
         if not valid:
             raise RuntimeError("comparison changed compilation units, features, profiles or generated outputs")
         if summary["speedup"] < args.minimum_speedup:

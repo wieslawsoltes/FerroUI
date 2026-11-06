@@ -45,7 +45,7 @@ reactiveui = ["dep:ferroui-reactiveui-controls", "dep:ferroui-reactiveui"]
 hot-reload = ["dep:proc-macro2", "dep:syn"]
 
 [dependencies]
-ferroui-base = { workspace = true }
+ferroui-base = { workspace = true, features = ["type-tables"] }
 ferroui-controls = { workspace = true }
 # The parser of selectors of `style("Button.accent")`.
 ferroui-markup = { workspace = true }

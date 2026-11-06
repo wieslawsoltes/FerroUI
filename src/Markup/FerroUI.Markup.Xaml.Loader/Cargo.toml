@@ -40,7 +40,7 @@ testing = []
 xamlx = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
 # Compile-time value parsers (`Thickness::parse`, `Color::try_parse`, `TimeSpan`, `Uri`, ...).
-ferroui-base = { workspace = true }
+ferroui-base = { workspace = true, features = ["type-tables"] }
 # `url::Url`, a Rust form of `System.Uri` (C5 of #423): a handle of the run-time type system and a type
 # the emitter names.
 url = { workspace = true }

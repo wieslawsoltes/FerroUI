@@ -1107,7 +1107,21 @@ impl MarkupType {
     }
 
     /// Registers several types; see [`register`](Self::register).
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
     pub fn register_all(types: &[&'static MarkupType]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
+    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    #[inline(always)]
+    pub fn register_all(types: &[&'static MarkupType]) {
+        let _ = types;
+    }
+
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    fn register_all_tables(types: &[&'static MarkupType]) {
         let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
         for type_ in types {
             registry.insert(type_);

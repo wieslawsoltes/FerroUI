@@ -17,7 +17,7 @@ group = "tools"
 
 [dependencies]
 serde_json = "1"
-ferroui-base = { workspace = true, features = ["hot-reload"] }
+ferroui-base = { workspace = true, features = ["type-tables", "hot-reload"] }
 ferroui-controls.workspace = true
 ferroui-markup-xaml = { workspace = true, features = ["hot-reload"] }
 ferroui-markup-xaml-loader = { workspace = true, features = ["hot-reload"] }

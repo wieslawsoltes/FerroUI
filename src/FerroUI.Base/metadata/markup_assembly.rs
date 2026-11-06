@@ -68,7 +68,21 @@ impl MarkupAssembly {
 
     /// Adds an assembly to the process-wide table of assemblies.
     /// Registering an assembly again does nothing.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
     pub fn register(assembly: &'static MarkupAssembly) {
+        Self::register_tables(assembly);
+    }
+
+    /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
+    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    #[inline(always)]
+    pub fn register(assembly: &'static MarkupAssembly) {
+        let _ = assembly;
+    }
+
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    fn register_tables(assembly: &'static MarkupAssembly) {
         let mut assemblies = assemblies().write().unwrap_or_else(|e| e.into_inner());
         if !assemblies.iter().any(|a| std::ptr::eq(*a, assembly)) {
             assemblies.push(assembly);

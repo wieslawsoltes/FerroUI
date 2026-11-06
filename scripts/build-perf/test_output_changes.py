@@ -35,6 +35,22 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(compare.summarize(records)["generated_deterministic_per_revision"])
 
 
+    def test_changed_features_keep_the_units_and_profiles(self):
+        featured = [dict(UNITS[0], features=["type-tables"])]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=featured),
+                   dict(row("candidate", {}), units=featured), row("baseline", {})]
+        summary = compare.summarize(records)
+        self.assertFalse(summary["same_units_features_profiles"])
+        self.assertTrue(summary["same_units_and_allowed_profiles"])
+        self.assertTrue(summary["units_deterministic_per_revision"])
+        self.assertEqual(summary["changed_unit_features"], ["p p lib"])
+
+    def test_another_unit_or_profile_is_not_a_change_of_features(self):
+        other = [dict(UNITS[0], profile={"opt_level": "3"}, features=["type-tables"])]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=other)]
+        self.assertFalse(compare.summarize(records)["same_units_and_allowed_profiles"])
+
+
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])

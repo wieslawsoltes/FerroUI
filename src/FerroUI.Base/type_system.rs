@@ -312,7 +312,21 @@ impl TypeInfo {
     /// that value untyped (a binding, markup) must see null. The run-time
     /// XAML loader initialises a class when it reads it, which hid the
     /// difference; compiled markup names a class without initialising it.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
     pub fn register_all(types: &[&'static TypeInfo]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
+    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    #[inline(always)]
+    pub fn register_all(types: &[&'static TypeInfo]) {
+        let _ = types;
+    }
+
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    fn register_all_tables(types: &[&'static TypeInfo]) {
         {
             let mut registry = write_registry();
             for type_ in types {
