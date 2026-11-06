@@ -517,23 +517,6 @@ impl ValueStore {
         }
     }
 
-    pub fn with_value<T: PropertyValue, R>(
-        &self,
-        owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-        read: impl FnOnce(&T) -> R,
-    ) -> R {
-        // Release the store lookup borrow before calling user code. The selected
-        // effective value is retained independently for the duration of the read.
-        let value = self.get_effective_value(property.as_property()).or_else(|| {
-            property.inherits().then(|| self.try_get_inherited_value(property)).flatten()
-        });
-        match value {
-            Some(value) => cast_effective_value::<T>(&*value).with_value(read),
-            None => read(property.get_metadata_for(owner).default_value()),
-        }
-    }
-
     pub fn is_animating(&self, property: &FerroProperty) -> bool {
         self.get_effective_value(property).is_some_and(|v| v.priority() <= BindingPriority::Animation)
     }
