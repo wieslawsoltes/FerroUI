@@ -80,6 +80,26 @@ fn identical_lexical_scopes_share_guards_and_deferred_namespace_tables() {
         "the deferred factory uses the same interned lexical table after its declaring guard ends");
 }
 
+/// Not from upstream (#566): the type a reflection-binding path names is resolved by the
+/// compiler and written into the entry of the namespace table it is found through, so that the
+/// type resolver of the document finds it without the process-wide tables of types. The other
+/// entries of the table name no type.
+#[test]
+fn a_reflection_binding_path_names_its_type_in_the_matching_namespace_entry() {
+    let _app = xaml_test_base();
+    let document = (
+        "reflection_path_type.xaml",
+        "<StackPanel xmlns='https://github.com/ferroui'><TextBlock Text='{ReflectionBinding $parent[TextBox].Text}'/></StackPanel>",
+    );
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    let source = generated.source;
+    let typed = "(\"FerroUI.Controls\", \"FerroUI.Controls\", &[(\"TextBox\", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))])";
+    assert_eq!(source.matches(typed).count(), 1, "{source}");
+    assert_eq!(source.matches("(\"TextBox\", ||").count(), 1, "{source}");
+    assert!(source.contains("(\"FerroUI.Controls\", \"FerroUI.Base\", &[])"), "{source}");
+}
+
 #[test]
 fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     let _app = xaml_test_base();

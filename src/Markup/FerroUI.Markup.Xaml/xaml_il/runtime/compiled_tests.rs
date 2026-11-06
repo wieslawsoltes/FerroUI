@@ -15,7 +15,7 @@ use crate::test_support::{boxed, TestServiceProvider};
 use crate::{IRootObjectProvider, IUriContext};
 
 const NAMESPACES: XmlNamespaceTable =
-    &[("", &[("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Base")]), ("x", &[])];
+    &[("", &[("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Base", &[])]), ("x", &[])];
 
 fn values(list: &[BoxedValue]) -> Vec<i32> {
     list.iter().map(|value| *value.downcast_ref::<i32>().expect("an i32")).collect()
@@ -56,15 +56,42 @@ fn the_namespace_information_is_the_table_of_the_document() {
 }
 
 #[test]
+fn the_namespace_information_has_the_types_the_compiler_resolved() {
+    use ferroui_base::data::core::expression_nodes::CastTarget;
+    use ferroui_base::StaticType;
+    const TYPED: XmlNamespaceTable = &[(
+        "",
+        &[
+            ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || CastTarget::Class(<ferroui_controls::TextBox as StaticType>::TYPE))]),
+            ("FerroUI.Media", "FerroUI.Base", &[]),
+        ],
+    )];
+    let context = create_context(None, None, TYPED);
+    let provider: Rc<dyn IServiceProvider> = context;
+    let info = provider
+        .get_service_of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>()
+        .expect("the namespace information");
+    let namespaces = info.xml_namespaces();
+    let controls = &namespaces[""][0];
+    assert_eq!(controls.types().iter().map(|(name, _)| *name).collect::<Vec<_>>(), ["TextBox"]);
+    match controls.find_type("TextBox") {
+        Some(CastTarget::Class(class)) => assert!(std::ptr::eq(class, <ferroui_controls::TextBox as StaticType>::TYPE)),
+        _ => panic!("the class of the entry was expected"),
+    }
+    assert!(controls.find_type("Button").is_none());
+    assert!(namespaces[""][1].types().is_empty());
+}
+
+#[test]
 fn compiled_namespace_scopes_shadow_restore_and_keep_captured_tables_stable() {
     use super::compiled::push_namespace_scope;
     let context = create_context(None, None, NAMESPACES);
     let provider: Rc<dyn IServiceProvider> = context.clone();
     let namespaces = || provider.get_service_of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>().unwrap().xml_namespaces();
-    let outer = push_namespace_scope(&context, &[("p", &[("Outer.Views", "App")])]);
+    let outer = push_namespace_scope(&context, &[("p", &[("Outer.Views", "App", &[])])]);
     let captured = namespaces();
     assert_eq!(captured["p"][0].clr_namespace(), "Outer.Views");
-    let inner = push_namespace_scope(&context, &[("p", &[("Inner.Views", "App")])]);
+    let inner = push_namespace_scope(&context, &[("p", &[("Inner.Views", "App", &[])])]);
     assert_eq!(namespaces()["p"][0].clr_namespace(), "Inner.Views");
     // Out-of-order cleanup must not expose a dropped outer scope underneath the active one.
     drop(outer);
@@ -74,7 +101,7 @@ fn compiled_namespace_scopes_shadow_restore_and_keep_captured_tables_stable() {
     assert!(namespaces().contains_key(""));
     assert_eq!(captured["p"][0].clr_namespace(), "Outer.Views");
     let failed = (|| -> Result<(), ()> {
-        let _guard = push_namespace_scope(&context, &[("p", &[("Failed.Views", "App")])]);
+        let _guard = push_namespace_scope(&context, &[("p", &[("Failed.Views", "App", &[])])]);
         Err(())
     })();
     assert!(failed.is_err());
@@ -85,7 +112,7 @@ fn compiled_namespace_scopes_shadow_restore_and_keep_captured_tables_stable() {
 fn emitted_deferred_context_uses_declaration_namespaces_after_parent_scope_ends() {
     use super::compiled::{deferred_context, push_namespace_scope};
     let context = create_context(None, None, NAMESPACES);
-    let declaration: XmlNamespaceTable = &[("local", &[("Inner.Views", "App")])];
+    let declaration: XmlNamespaceTable = &[("local", &[("Inner.Views", "App", &[])])];
     let guard = push_namespace_scope(&context, declaration);
     let provider: Rc<dyn IServiceProvider> = context;
     drop(guard);

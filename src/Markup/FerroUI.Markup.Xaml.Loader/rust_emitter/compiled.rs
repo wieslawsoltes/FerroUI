@@ -36,7 +36,7 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
-use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
+use super::emitter::{emit_function, reflection_path_types, root_value_handle_of, DocumentFunctions};
 use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
@@ -208,10 +208,11 @@ pub fn compile_documents_with(
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
                 let functions = functions_of_group();
                 let document = &mut compiled[*index];
-                let Some(table) = transformed.namespaces.clone() else {
+                let Some(namespaces) = &transformed.namespaces else {
                     document.source = Err("the document has no namespace information".to_string());
                     continue;
                 };
+                let table = namespaces.source(&reflection_path_types(types, &transformed.configuration, &transformed.root));
                 let table_index = match tables.iter().position(|known| *known == table) {
                     Some(known) => known,
                     None => {
@@ -791,7 +792,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         }
         emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
-        let table = transformed.namespaces.clone().ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        let namespaces = transformed.namespaces.as_ref().ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        let table = namespaces.source(&reflection_path_types(types, &transformed.configuration, &transformed.root));
         let table_index = match tables.iter().position(|known| *known == table) {
             Some(known) => known,
             None => {

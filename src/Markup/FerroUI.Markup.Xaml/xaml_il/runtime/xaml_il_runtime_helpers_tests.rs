@@ -416,6 +416,41 @@ fn inner_service_provider_resolves_types_with_the_namespaces_of_the_document() {
 }
 
 #[test]
+fn the_types_the_compiler_resolved_for_an_entry_are_found_without_the_tables_of_types() {
+    register_types();
+    // An assembly no table of types knows: only the types of the entry resolve.
+    const VIEWS: XmlNamespaceTypes = &[("Widget", || CastTarget::Class(<Border as StaticType>::TYPE))];
+    const CONTROLS: XmlNamespaceTypes = &[("TextBlock", || CastTarget::Class(<TextBlock as StaticType>::TYPE))];
+    let mut map = HashMap::new();
+    map.insert(
+        "local".to_string(),
+        vec![FerroXamlIlXmlNamespaceInfo::with_types("Compiled.Views", "Compiled.App", VIEWS)],
+    );
+    map.insert(
+        String::new(),
+        vec![FerroXamlIlXmlNamespaceInfo::with_types("FerroUI.Controls", "FerroUI.Controls", CONTROLS)],
+    );
+    let compiled = TestServiceProvider::new().with_namespaces(Rc::new(map)).sp();
+    let inner = XamlIlRuntimeHelpers::create_inner_service_provider_v1(compiled);
+    let resolver = inner.get_required_service::<Rc<dyn IXamlTypeResolver>>();
+
+    match resolver.resolve("local:Widget").ok().unwrap() {
+        CastTarget::Class(class) => assert!(std::ptr::eq(class, <Border as StaticType>::TYPE)),
+        CastTarget::Value(_) => panic!("a class was expected"),
+    }
+    assert!(resolver.resolve("local:Other").is_err());
+    match resolver.resolve("TextBlock").ok().unwrap() {
+        CastTarget::Class(class) => assert!(std::ptr::eq(class, <TextBlock as StaticType>::TYPE)),
+        CastTarget::Value(_) => panic!("a class was expected"),
+    }
+    // A name the compiler did not resolve for the entry falls back to the tables of types.
+    match resolver.resolve("Button").ok().unwrap() {
+        CastTarget::Class(class) => assert!(std::ptr::eq(class, <Button as StaticType>::TYPE)),
+        CastTarget::Value(_) => panic!("a class was expected"),
+    }
+}
+
+#[test]
 fn a_binding_that_does_not_match_the_property_type_is_bound() {
     let border = Border::new();
     border.resources().add("tag", Some(boxed("bound".to_string())));
