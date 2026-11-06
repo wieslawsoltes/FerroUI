@@ -84,6 +84,8 @@ fn run_in_session(
     session: Rc<dyn IFeatureUsageTrackingSession>,
     action: impl FnOnce(&dyn IFeatureUsageTrackingSession),
 ) {
+    // Boundary (#567): the action is application code; its panic is recorded on the session,
+    // which is disposed of before the panic is raised again (the catch/finally of the reference).
     let result = catch_unwind(AssertUnwindSafe(|| action(&*session)));
     if let Err(payload) = result {
         session.on_exception(&ActionPanicked(panic_message(payload.as_ref())));

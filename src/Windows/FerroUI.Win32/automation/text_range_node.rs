@@ -191,6 +191,8 @@ impl TextRangeNode {
         let id = self.id;
         let owner = self.owner;
         let run = move || {
+            // Boundary (#567): a call of a UI Automation client into a text range provider,
+            // which may be application code; its errors are values, a panic is `E_FAIL`.
             catch_unwind(AssertUnwindSafe(|| {
                 AutomationNode::peer_of(owner).ok_or(ELEMENT_NOT_AVAILABLE)?;
                 let range = Self::range(id)?;

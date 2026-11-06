@@ -227,6 +227,7 @@ impl ManagedContextDropBehavior {
                     let sender = boxed_object(&target);
                     let target_context = self.target_context(&target);
                     // The reference treats a failing validation as invalid.
+                    // Boundary (#567): the drop handler is application code.
                     handler.is_some_and(|handler| {
                         std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                             handler.validate(

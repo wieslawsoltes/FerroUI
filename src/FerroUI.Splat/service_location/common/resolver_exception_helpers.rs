@@ -7,6 +7,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 /// hook has reported the panic already, as `Debug.WriteLine` does upstream.
 // Deviation (DEVIATIONS.md, Splat): an exception is a panic, caught with `catch_unwind`.
 pub(crate) fn run_swallowing_exceptions(action: impl FnOnce()) {
+    // Boundary (#567): the callbacks and disposals are application code, and one that fails must
+    // not stop the others, as in the reference.
     let _ = catch_unwind(AssertUnwindSafe(action));
 }
 

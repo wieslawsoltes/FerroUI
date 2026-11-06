@@ -362,6 +362,10 @@ impl NativeAnimations {
     }
 }
 fn pulse(runs: &[NativeRun], seconds: f64) -> Result<(), String> {
+    // Boundary (#567): a frame runs the interpolation of the animators and the property
+    // changed handlers of the previewed application; the animators validate on apply, and a
+    // timing error of a frame is an observable error, not a panic. Isolating the application
+    // needs a build that unwinds (`dev` or `release-unwind` profile).
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         for run in runs {
             run.clock.subject.on_next(SignedDuration::from_seconds(seconds));

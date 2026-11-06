@@ -651,6 +651,8 @@ impl VncServerSession {
         let _lock = self.framebuffer_update_request_lock().lock();
         if self.framebuffer_update_request().is_some() {
             if let Some(fb_source) = self.fb_source() {
+                // Boundary (#567): the framebuffer source is supplied by the host (the headless
+                // source captures on the UI thread); its failure is logged, as the reference does.
                 match catch_unwind(AssertUnwindSafe(|| fb_source.capture())) {
                     Ok(Some(new_framebuffer)) => {
                         let changed = self
@@ -1083,6 +1085,9 @@ impl VncServerSession {
         let requester = Arc::new(PeriodicThread::new());
         *lock(&self.requester) = Some(requester.clone());
 
+        // Boundary (#567): the top of the session thread, which also runs the event handlers of
+        // the host; protocol and I/O errors are `VncError` values, a panic is logged and the
+        // session closes, as the reference does with any exception.
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<(), VncError> {
             self.init_framebuffer_encoder();
 

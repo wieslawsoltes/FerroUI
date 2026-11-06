@@ -221,6 +221,8 @@ impl<T: 'static> IObservable<T> for FerroPropertySignal<T> {
     /// count is restored when subscribing panics (`Subscribe`).
     fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
         self.observer_count.set(self.observer_count.get() + 1);
+        // Boundary (#567): subscribing runs the observer of the caller; the count is restored
+        // before its panic is raised again (the try/catch of the reference).
         let subscribed = panic::catch_unwind(AssertUnwindSafe(|| self.observable.subscribe(observer)));
         let subscription = match subscribed {
             Ok(subscription) => subscription,

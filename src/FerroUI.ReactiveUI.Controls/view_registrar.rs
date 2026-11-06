@@ -149,6 +149,8 @@ impl ViewRegistrar {
     /// Resolves a view of type `V` from the service locator, or creates it with `activator`
     /// (`CreateView`). A failure of the locator is logged and falls back to the constructor.
     pub fn create_view<V: 'static>(activator: fn() -> Rc<V>) -> Rc<V> {
+        // Boundary (#567): the locator runs the factories the application registered; as in the
+        // reference, a failure is logged and the view is made with its constructor.
         match catch_unwind(AssertUnwindSafe(|| AppLocator::get_service::<V>())) {
             Ok(Some(resolved)) => resolved,
             Ok(None) => Self::create_view_with_activator(activator),

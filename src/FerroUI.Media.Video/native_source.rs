@@ -124,6 +124,8 @@ fn worker<T: Send + 'static>(
             .name("FerroUI.Media.Source".into())
             .spawn(move || {
                 let _permit = permit;
+                // Boundary (#567): the top of the worker thread; the errors of the work are
+                // values, only a bug panics, and the future must not wait for ever.
                 let result =
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| work(&canceled)))
                         .unwrap_or_else(|_| {

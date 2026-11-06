@@ -88,6 +88,8 @@ impl From<io::Error> for Error {
 /// Runs a handler and turns a panic of it into [`Error::Handler`]: the `try`
 /// and `catch` around a delegate invocation in the upstream code.
 pub(crate) fn catch_handler(f: impl FnOnce()) -> Result<(), Error> {
+    // Boundary (#567): the handlers of a message are application code; the reference catches
+    // their exception and ends the reader loop or passes it to the exception handler.
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_err(|payload| {
         let message = if let Some(text) = payload.downcast_ref::<&str>() {
             (*text).to_string()

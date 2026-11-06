@@ -23,6 +23,8 @@ const CLIP_DATA_ITEM: &str = "android/content/ClipData$Item";
 fn completed<T: 'static>(
     operation: impl FnOnce() -> Result<T, ClipboardError>,
 ) -> LocalBoxFuture<Result<T, ClipboardError>> {
+    // Boundary (#567): a catch that raises the same panic again when the future is awaited,
+    // not an error flow: the errors of the clipboard are values.
     match catch_unwind(AssertUnwindSafe(operation)) {
         Ok(value) => Box::pin(std::future::ready(value)),
         Err(payload) => Box::pin(async move { resume_unwind(payload) }),

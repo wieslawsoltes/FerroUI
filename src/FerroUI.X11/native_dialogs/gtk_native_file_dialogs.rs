@@ -278,6 +278,8 @@ fn run_dialog(request: GtkDialogRequest) -> impl std::future::Future<Output = st
             0,
             Box::new(move || {
                 let failed = tcs.clone();
+                // Boundary (#567): a GLib timeout callback (`RunOnGlibThread` of the reference,
+                // which sets the exception on the task); a panic fails the dialog task.
                 let shown = catch_unwind(AssertUnwindSafe(move || {
                     match Gtk::current() {
                         Some(gtk) => show_dialog(gtk, request, tcs),

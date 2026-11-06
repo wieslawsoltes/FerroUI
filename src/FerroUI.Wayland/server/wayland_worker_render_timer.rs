@@ -251,6 +251,8 @@ impl WaylandRenderTimer {
         // The reference catches every exception of a tick, logs it and asks for another
         // tick; a panic of a task is the counterpart.
         let render_loop = self.render_loop.clone();
+        // Boundary (#567): the top of the render loop on the worker thread. A panic of a
+        // render loop task is logged and another tick is asked for, as the reference does.
         if let Err(payload) = catch_unwind(AssertUnwindSafe(move || render_loop.do_tick())) {
             self.any_thread_wakeup_render_loop();
             let message = payload
