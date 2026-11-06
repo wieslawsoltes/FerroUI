@@ -1000,6 +1000,34 @@ impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __Re
     }
 }
 
+// A nullable value type (`Option<T>`) is found by its metadata too (the nullable form of the type).
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
 #[doc(hidden)]
 pub trait __NoValueMarkup {
     #[inline(always)]
