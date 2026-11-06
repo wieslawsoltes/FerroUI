@@ -1174,8 +1174,9 @@ impl IXamlProperty for RuntimeProperty {
 pub enum RuntimeFieldValue {
     /// The field declared in metadata (read with its getter).
     Declared(&'static ferroui_base::metadata::MarkupField),
-    /// The member of an enumeration, as a value of the enumeration.
-    EnumMember(fn() -> BoxedValue),
+    /// The member of an enumeration (of the enumeration that lists it), as a
+    /// value of the enumeration.
+    EnumMember(&'static MarkupType, &'static ferroui_base::metadata::MarkupEnumMember),
     /// The definition of a registered property.
     Property(&'static FerroProperty),
     /// The field has no value at run time.
@@ -1199,7 +1200,13 @@ impl RuntimeField {
     pub fn get(&self) -> Result<MarkupValue, MarkupInvokeError> {
         match &self.value {
             RuntimeFieldValue::Declared(field) => Ok(normalize_result(&self.system, (field.get)())),
-            RuntimeFieldValue::EnumMember(get) => Ok(Some(get())),
+            RuntimeFieldValue::EnumMember(markup, member) => member.get(markup).map(Some).ok_or_else(|| {
+                MarkupInvokeError::Failed(format!(
+                    "Field {}.{} has no value at run time",
+                    declaring(&self.declaring_type).full_name(),
+                    self.name
+                ))
+            }),
             RuntimeFieldValue::Property(property) => Ok(Some(Rc::new(*property))),
             RuntimeFieldValue::None => Err(MarkupInvokeError::Failed(format!(
                 "Field {}.{} has no value at run time",

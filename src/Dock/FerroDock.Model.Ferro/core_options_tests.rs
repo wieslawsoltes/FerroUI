@@ -81,7 +81,7 @@ fn core_owns_policy_options_evaluation_window_and_value_source_descriptors() {
     ]) {
         assert_eq!(member.value, i64::from(value as i32));
         assert_eq!(
-            (member.get)().downcast_ref::<DockCapabilityValueSource>(),
+            member.get(metadata).unwrap().downcast_ref::<DockCapabilityValueSource>(),
             Some(&value)
         );
     }

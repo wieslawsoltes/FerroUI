@@ -287,21 +287,22 @@ macro_rules! ferro_markup_enum {
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
                             value: $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?) as i64,
-                            get: || ::std::rc::Rc::new($crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?)),
                             rust_variant: ::std::option::Option::Some(
                                 $crate::__ferro_markup_enum_variant_name!($member $(, $variant)?),
                             ),
                         },)*
                     ];
+                    // The one function that makes values of the type: a member is its
+                    // numeric value (`MarkupEnumMember::get`).
                     markup.enum_from_value = ::std::option::Option::Some(|value| {
-                        $(
+                        let member: $type_ = $(
                             if value == $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?) as i64 {
-                                return ::std::option::Option::Some(::std::rc::Rc::new(
-                                    $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?),
-                                ) as $crate::BoxedValue);
-                            }
-                        )*
-                        ::std::option::Option::None
+                                $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?)
+                            } else
+                        )* {
+                            return ::std::option::Option::None;
+                        };
+                        ::std::option::Option::Some(::std::rc::Rc::new(member) as $crate::BoxedValue)
                     });
                     markup.enum_to_value = ::std::option::Option::Some(|value| {
                         value.downcast_ref::<$type_>().map(|value| ::std::clone::Clone::clone(value) as i64)
@@ -330,7 +331,6 @@ macro_rules! ferro_markup_enum {
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
                             value: $value.bits() as i64,
-                            get: || ::std::rc::Rc::new($value),
                             rust_variant: ::std::option::Option::None,
                         },)*
                     ];

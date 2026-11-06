@@ -59,7 +59,7 @@ pub(crate) fn convert_text(element_type: &Rc<dyn IXamlType>, text: &str) -> Opti
         // `Enum.IsDefined(type, text)`: the exact name of a member.
         let markup = element_type.as_any().downcast_ref::<RuntimeType>().and_then(RuntimeType::markup)?;
         let member = markup.enum_members.iter().find(|member| member.name == text)?;
-        return Some(Some((member.get)()));
+        return member.get(markup).map(Some);
     }
     if element_type.namespace().as_deref() != Some("System") {
         return None;

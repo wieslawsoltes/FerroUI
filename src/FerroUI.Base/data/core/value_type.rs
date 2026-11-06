@@ -781,7 +781,7 @@ impl ValueTypes {
         }
         let markup = crate::metadata::MarkupType::find_by_handle(id)?;
         if markup.kind == crate::metadata::MarkupTypeKind::Enum {
-            if let Some(member) = markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(value)) {
+            if let Some(member) = markup.find_enum_member_of(value) {
                 return Some(member.name.to_string());
             }
         }
@@ -1140,7 +1140,7 @@ impl ValueTypes {
                 number_kind(target_id)?;
                 let number = match markup.enum_to_value {
                     Some(to_value) => to_value(&**value)?,
-                    None => markup.enum_members.iter().find(|member| (member.get)().any_value_eq(&**value))?.value,
+                    None => markup.find_enum_member_of(&**value)?.value,
                 };
                 let number: BoxedValue = Rc::new(i32::try_from(number).ok()?);
                 Self::try_convert(Some(&number), target)?
@@ -1512,7 +1512,7 @@ impl ValueTypes {
         let markup = crate::metadata::MarkupType::find_by_handle(id)?;
         match markup.enum_to_value {
             Some(to_value) => to_value(&**value),
-            None => markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(&**value)).map(|member| member.value),
+            None => markup.find_enum_member_of(&**value).map(|member| member.value),
         }
     }
 }
