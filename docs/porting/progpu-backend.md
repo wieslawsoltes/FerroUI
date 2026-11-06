@@ -52,23 +52,59 @@ separate state record. `DAMAGE_RECT` with `PRESERVE_TARGET` limits a frame to a 
 
 ### 2.2 The device and the surfaces
 
-ProGPU takes its device from a C WebGPU library of a matching ABI: the `wgpu` crate of the Vello
-backend cannot be handed over. Headless rendering and offscreen targets use the wgpu-native runtime
-(the pinned May-2024 ABI), which the engine's source build links.
+**The WebGPU implementation is wgpu 30, linked statically.** The engine is built from the ProGPU
+sources as its standard-WebGPU target (`progpu_native_dawn`). It calls WebGPU only through a
+dispatch table of procedures resolved at engine creation (`resolve_proc`), never through link-time
+symbols. FerroUI resolves them from wgpu-native compiled as a Rust dependency: the fork
+`wieslawsoltes/wgpu-native`, branch `progpu/wgpu-30` (wgpu-core 30.0.1, the same wgpu as the
+`wgpu` crate of the Vello backend). The fork adds what the engine needs:
+- real futures with `wgpuInstanceWaitAny`, which the engine uses to poll its submissions without
+  waiting;
+- a complete `wgpuGetProcAddress` and `wgpuBufferGetMapState`;
+- native-object interop on Metal: `wgpuInstanceCreateDeviceFromMetal(instance, device, queue,
+  descriptor)` and `wgpuDeviceCreateTextureFromMetal(device, texture, descriptor)`.
 
-Window surfaces must keep FerroUI's cooperative resize (no stretched or stale frame while a window
-is resized): the platform presents its own frames, inside the window's Core Animation transaction on
-macOS, and the backend draws into them. wgpu-native's C ABI can neither import a platform texture
-nor present inside a transaction (its Metal presentation option is internal to wgpu-hal), so the
-window path is the engine's **Dawn target**, as in ProGPU's own macOS host
-(`DawnMetalRenderTarget`): each frame's `CAMetalDrawable` texture is IOSurface-backed and is
-imported once per swapchain IOSurface as Dawn shared texture memory; the engine renders into it
-between `BeginAccess` and `EndAccess` (synchronized with a Metal shared event), and the platform's
-render session presents it. The native Metal surface of FerroUI (`ferroui-native`, `metal.rs`:
-`IMetalPlatformSurface`, drawables of its own `CAMetalLayer`) already has that shape. Windows uses
-the same pattern with Dawn's D3D12 shared textures and the platform's swap chain, Linux Dawn's
-Vulkan path (step P8). The Dawn runtime is the provider package ProGPU's Dawn backend resolves
-(`progpu_native_dawn_engine_create` with a host resolver); its size is measured with the others.
+`progpu-native-sys` links the engine archives and wgpu-native; nothing is loaded or downloaded at
+run time. Its tests render retained scenes, analytic shadows and path measures on that device.
+
+**Window surfaces** keep FerroUI's cooperative resize, with no stretched or stale frame while a
+window is resized: the platform presents its own frames, and the backend draws into them, as the
+Vello backend does (`src/Vello/FerroUI.Vello/gpu/metal.rs`). On macOS:
+- the device is made on the platform's `MTLDevice` with `wgpuInstanceCreateDeviceFromMetal`;
+- each frame's drawable texture is wrapped with `wgpuDeviceCreateTextureFromMetal`, and the engine
+  renders into its view;
+- the platform presents the drawable.
+
+The queue is the one difference from Vello: with the platform's queue created with room for 4096
+command buffers instead of Metal's default 64, the device is created on the platform's own queue.
+The presentation is then committed after the frame on the same queue, with no shared event (Vello
+needs one because it renders on a second queue). Windows (D3D12) and Linux (Vulkan) get
+interop functions of the same shape in the fork (step P8).
+
+**Dawn instead of wgpu.** The same engine archive runs on Dawn: the two `webgpu.h` revisions differ
+only by three enum values the engine does not use, and the engine resolves its procedures at run
+time. A host that already has a Dawn device, such as WebScene (whose GPU provider ABI 2 hands out
+its instance, a procedure lookup and canvas textures), creates the engine on that device with
+Dawn's procedures. Two things are still to do before both can live in one process:
+- the fork's C functions must stop being exported globally, so that they cannot interpose Dawn's
+  functions of the same names (a risk on Linux);
+- with Dawn on macOS, presenting through the platform's layer needs a shared event, as Dawn cannot
+  adopt the platform's device and queue.
+
+**Sharing GPU content without fences.** Content shared on one device and one queue needs no fence:
+the queue orders the producer's submission before the consumer's, and the implementation tracks
+resource usage between them. The engine draws such textures directly, without a copy
+(`progpu_native_engine_bind_scene_external_images`). The owner of a borrowed texture recycles it
+once `progpu_native_engine_poll_submission` reports, without waiting, that the reading submission
+completed.
+- WebScene on ProGPU is fence-free when the engine runs on WebScene's Dawn device.
+- With FerroUI on wgpu and WebScene on Dawn, the two share zero-copy textures, and the GPU orders
+  them with shared events (`MTLSharedEvent`, D3D12 fences, Vulkan semaphores). The GPU waits; the
+  CPU never does.
+- Vello and ProGPU on one wgpu device would need the `wgpu` crate's core device and texture
+  identifiers, which the crate does not expose. They share textures through the Metal interop
+  instead.
+
 ### 2.3 Retained GPU mode
 
 The compositor of FerroUI already keeps a backend fragment of the content of every draw-list visual
@@ -175,21 +211,20 @@ the Rust writer as it lands, keeping the shim as the differential reference.
 
 ### 3.1 The WebGPU implementation
 
-The engine takes a device of a C WebGPU implementation of its pinned ABI. The `wgpu` crate of the
-Vello backend exposes no `webgpu.h` handles, so it cannot be handed over; the two that fit are:
+The engine runs on any WebGPU implementation of the standard `webgpu.h` whose procedures the host
+resolves (`progpu_native_dawn_engine_create`); it links no WebGPU library.
 
-- **Dawn** (the implementation of Chrome): the Dawn build of the engine links no WebGPU library and
-  resolves every procedure through the resolver the host gives
-  (`progpu_native_dawn_engine_create`), so FerroUI supplies the Dawn of the pinned revision
-  (Dawn `710c330`, `webgpu-headers` `01addc4b`). It is the same API family as the browser path and
-  has the most mature Direct3D 12, Metal and Vulkan backends; it is the target of the desktop
-  backend.
-- **wgpu-native** (May-2024 ABI): the default build of the engine is linked against it; the
-  runtime is the pinned package (`Silk.NET.WebGPU.Native.WGPU` 2.23.0), or built from the pinned
-  commit. The first steps run on it, and it stays a supported implementation.
+- **wgpu 30 (the default).** wgpu-native of the fork `wieslawsoltes/wgpu-native`, branch
+  `progpu/wgpu-30` (webgpu-headers `673658bc`), compiled as a Rust dependency of
+  `progpu-native-sys` and linked statically. It shares wgpu-core 30 with the Vello backend, and the
+  linker keeps only what the program reaches. Section 2.2 lists what the fork adds.
+- **Dawn (optional).** The engine archive is unchanged; the host resolves Dawn's procedures and
+  hands it a Dawn device. Dawn's headers (`01addc4b`) differ from the fork's by three enum values
+  the engine does not use. This is the way to share a device with a host that has its own Dawn,
+  such as WebScene (section 2.2).
 
-Both are measured (section 4) for speed, features and size before the default is chosen per
-platform. In the browser the implementation is the browser's (`navigator.gpu`); nothing is shipped.
+In the browser the implementation is the browser's (`navigator.gpu`); nothing is shipped. Speed,
+features and size are measured with wgpu first (section 4).
 
 ### 3.2 Binary size
 

@@ -5,7 +5,6 @@
 //! the path measure (lengths, points, tangents and pieces of the first contour, with the contour
 //! semantics of the other backends).
 
-use crate::runtime::runtime;
 use ferroui_base::media::{
     FillRule, GeometryCombineMode, GeometryPath, GeometryPathData, GeometryPathSegment, IPen, IntersectionResult,
     PenLineCap, PenLineJoin, SweepDirection,
@@ -339,12 +338,11 @@ impl PathData {
 
     /// The tight bounds of the geometry (every figure's start point included).
     pub fn bounds(&self) -> Rect {
-        let Ok(runtime) = runtime() else { return Rect::default() };
         let mut bounds = progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 };
         let mut has = 0u32;
         // SAFETY: the spans are borrowed for the call; the outputs are written by it.
         let status = unsafe {
-            runtime.progpu.progpu_native_geometry_bounds(
+            progpu_native_geometry_bounds(
                 self.figures.as_ptr(),
                 self.figures.len() as u32,
                 self.segments.as_ptr(),
@@ -364,14 +362,13 @@ impl PathData {
     /// The stroke query of the engine: the bounds of the stroke (`point` none) or whether the
     /// stroke contains a point.
     fn stroke_query(&self, pen: &dyn IPen, point_query: Option<Point>) -> (Option<Rect>, bool) {
-        let Ok(runtime) = runtime() else { return (None, false) };
         let (native_pen, dashes) = native_pen(pen);
         let mut bounds = progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 };
         let (mut has, mut contains) = (0u32, 0u32);
         let query = point_query.map(point);
         // SAFETY: the spans are borrowed for the call; the outputs are written by it.
         let status = unsafe {
-            runtime.progpu.progpu_native_geometry_stroke_query(
+            progpu_native_geometry_stroke_query(
                 self.figures.as_ptr(),
                 self.figures.len() as u32,
                 self.segments.as_ptr(),
@@ -397,13 +394,12 @@ impl PathData {
 
     /// Whether the fill contains a point.
     pub fn fill_contains(&self, value: Point) -> bool {
-        let Ok(runtime) = runtime() else { return false };
         let filled = self.filled_segments();
         let query = point(value);
         let mut contains = 0u32;
         // SAFETY: the spans are borrowed for the call; the output is written by it.
         let status = unsafe {
-            runtime.progpu.progpu_native_geometry_fill_contains(
+            progpu_native_geometry_fill_contains(
                 filled.as_ptr(),
                 filled.len() as u32,
                 self.native_fill_rule(),
@@ -417,12 +413,11 @@ impl PathData {
 
     /// The relation of this fill to another.
     pub fn relation(&self, other: &PathData) -> IntersectionResult {
-        let Ok(runtime) = runtime() else { return IntersectionResult::NotCalculated };
         let (first, second) = (self.filled_segments(), other.filled_segments());
         let mut relation = 0u32;
         // SAFETY: the spans are borrowed for the call; the output is written by it.
         let status = unsafe {
-            runtime.progpu.progpu_native_geometry_compare_fill(
+            progpu_native_geometry_compare_fill(
                 first.as_ptr(),
                 first.len() as u32,
                 self.native_fill_rule(),
@@ -447,7 +442,6 @@ impl PathData {
 
     /// The Boolean combination of two fills.
     pub fn combine(&self, other: &PathData, mode: GeometryCombineMode) -> Option<PathData> {
-        let runtime = runtime().ok()?;
         let (first, second) = (self.filled_segments(), other.filled_segments());
         let mut outline: *mut progpu_native_geometry_outline = ptr::null_mut();
         let mut points: *const progpu_native_point = ptr::null();
@@ -455,7 +449,7 @@ impl PathData {
         let (mut point_count, mut contour_count) = (0u32, 0u32);
         // SAFETY: the spans are borrowed for the call; the views live until the outline is destroyed.
         unsafe {
-            let status = runtime.progpu.progpu_native_geometry_combine(
+            let status = progpu_native_geometry_combine(
                 first.as_ptr(),
                 first.len() as u32,
                 self.native_fill_rule(),
@@ -477,21 +471,20 @@ impl PathData {
                 std::slice::from_raw_parts(points, point_count as usize),
                 std::slice::from_raw_parts(offsets, contour_count as usize + 1),
             );
-            runtime.progpu.progpu_native_geometry_outline_destroy(outline);
+            progpu_native_geometry_outline_destroy(outline);
             Some(result)
         }
     }
 
     /// The area a pen covers, as filled contours.
     pub fn widen(&self, pen: &dyn IPen) -> PathData {
-        let Ok(runtime) = runtime() else { return PathData::default() };
         let (native_pen, dashes) = native_pen(pen);
         let mut path: *mut progpu_native_geometry_path = ptr::null_mut();
         let mut outline: *const progpu_native_path_segment = ptr::null();
         let (mut count, mut fill_rule) = (0u32, 0u32);
         // SAFETY: the spans are borrowed for the call; the view lives until the path is destroyed.
         unsafe {
-            let status = runtime.progpu.progpu_native_geometry_widen(
+            let status = progpu_native_geometry_widen(
                 self.figures.as_ptr(),
                 self.figures.len() as u32,
                 self.segments.as_ptr(),
@@ -511,7 +504,7 @@ impl PathData {
                 return PathData::default();
             }
             let result = PathData::contours(std::slice::from_raw_parts(outline, count as usize), fill_rule);
-            runtime.progpu.progpu_native_geometry_path_destroy(path);
+            progpu_native_geometry_path_destroy(path);
             result
         }
     }
@@ -722,11 +715,10 @@ unsafe impl Sync for Measure {}
 
 impl Measure {
     fn new(data: &PathData) -> Option<Measure> {
-        let runtime = runtime().ok()?;
         let mut raw = ptr::null_mut();
         // SAFETY: the spans are borrowed for the call.
         let status = unsafe {
-            runtime.progpu.progpu_native_path_measure_create(
+            progpu_native_path_measure_create(
                 data.figures.as_ptr(),
                 data.figures.len() as u32,
                 data.segments.as_ptr(),
@@ -740,10 +732,9 @@ impl Measure {
     }
 
     fn length(&self) -> f64 {
-        let Ok(runtime) = runtime() else { return 0.0 };
         let mut length = 0.0f32;
         // SAFETY: the measure is alive.
-        let status = unsafe { runtime.progpu.progpu_native_path_measure_contour(self.0, 0, &mut length, ptr::null_mut()) };
+        let status = unsafe { progpu_native_path_measure_contour(self.0, 0, &mut length, ptr::null_mut()) };
         if status == PROGPU_NATIVE_STATUS_SUCCESS {
             length as f64
         } else {
@@ -752,11 +743,10 @@ impl Measure {
     }
 
     fn position_tangent(&self, distance: f64) -> Option<(Point, Point)> {
-        let runtime = runtime().ok()?;
         let (mut position, mut tangent) = (progpu_native_point { x: 0.0, y: 0.0 }, progpu_native_point { x: 0.0, y: 0.0 });
         // SAFETY: the measure is alive.
         let status = unsafe {
-            runtime.progpu.progpu_native_path_measure_position_tangent(self.0, 0, distance as f32, &mut position, &mut tangent)
+            progpu_native_path_measure_position_tangent(self.0, 0, distance as f32, &mut position, &mut tangent)
         };
         (status == PROGPU_NATIVE_STATUS_SUCCESS).then(|| {
             (Point::new(position.x as f64, position.y as f64), Point::new(tangent.x as f64, tangent.y as f64))
@@ -764,11 +754,10 @@ impl Measure {
     }
 
     fn segment(&self, start: f64, stop: f64) -> Option<PathData> {
-        let runtime = runtime().ok()?;
         let mut count = 0u32;
         // SAFETY: the measure is alive; the buffer has the capacity the first call reported.
         unsafe {
-            if runtime.progpu.progpu_native_path_measure_segment(self.0, 0, start as f32, stop as f32, ptr::null_mut(), 0, &mut count)
+            if progpu_native_path_measure_segment(self.0, 0, start as f32, stop as f32, ptr::null_mut(), 0, &mut count)
                 != PROGPU_NATIVE_STATUS_SUCCESS
                 || count == 0
             {
@@ -776,7 +765,7 @@ impl Measure {
             }
             let zero = progpu_native_point { x: 0.0, y: 0.0 };
             let mut pieces = vec![segment(PROGPU_NATIVE_PATH_SEGMENT_LINE as u32, zero, zero); count as usize];
-            if runtime.progpu.progpu_native_path_measure_segment(self.0, 0, start as f32, stop as f32, pieces.as_mut_ptr(), count, &mut count)
+            if progpu_native_path_measure_segment(self.0, 0, start as f32, stop as f32, pieces.as_mut_ptr(), count, &mut count)
                 != PROGPU_NATIVE_STATUS_SUCCESS
             {
                 return None;
@@ -792,10 +781,8 @@ impl Measure {
 
 impl Drop for Measure {
     fn drop(&mut self) {
-        if let Ok(runtime) = runtime() {
-            // SAFETY: the measure is owned here.
-            unsafe { runtime.progpu.progpu_native_path_measure_destroy(self.0) };
-        }
+        // SAFETY: the measure is owned here.
+        unsafe { progpu_native_path_measure_destroy(self.0) };
     }
 }
 

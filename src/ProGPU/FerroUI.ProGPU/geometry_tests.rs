@@ -2,7 +2,6 @@
 //! combination, widening, transforms and the path measure.
 
 use crate::geometry::{PathBuilder, PathData, ProGpuGeometry, ProGpuStreamGeometryBuilder};
-use crate::runtime;
 use ferroui_base::media::immutable::ImmutablePen;
 use ferroui_base::media::{GeometryCombineMode, GeometryPathSegment, IntersectionResult, PenLineCap, PenLineJoin, SweepDirection};
 use ferroui_base::platform::{IGeometryContext, IGeometryImpl, IStreamGeometryBuilder};
@@ -12,14 +11,9 @@ fn pen(thickness: f64, cap: PenLineCap) -> ImmutablePen {
     ImmutablePen::new(None, thickness, None, cap, PenLineJoin::Miter, 10.0)
 }
 
+/// The engine is linked statically: its geometry queries are always available.
 fn available() -> bool {
-    match runtime() {
-        Ok(_) => true,
-        Err(error) => {
-            eprintln!("skipped: {error}");
-            false
-        }
-    }
+    progpu_native_sys::abi_matches()
 }
 
 fn near(value: f64, expected: f64, tolerance: f64) -> bool {

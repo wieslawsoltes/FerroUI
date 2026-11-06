@@ -4,13 +4,11 @@
 mod device;
 mod drawing_context;
 mod geometry;
-mod runtime;
 mod scene;
 
 pub use device::{ProGpuDevice, ProGpuDeviceError};
 pub use drawing_context::ProGpuDrawingContext;
 pub use geometry::{path_data_of, PathBuilder, PathData, ProGpuGeometry, ProGpuStreamGeometryBuilder, ProGpuTransformedGeometry};
-pub use runtime::runtime;
 pub use scene::{SceneBuildError, SceneBuilder};
 
 #[cfg(test)]
