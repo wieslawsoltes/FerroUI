@@ -1,5 +1,6 @@
 [workspace]
 resolver = "2"
+exclude = ["external/rust-skia-bindings"]
 members = [
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
@@ -415,7 +416,7 @@ wayland-protocols-misc = { version = "=0.3.12", features = ["client"] }
 jni-sys = { version = "=0.4.1" }
 paste = "1"
 cc = "1"
-skia-safe = { version = "0.153" }
+skia-safe = { version = "=0.153.3" }
 # The Vello render backend (docs/porting/vello-backend.md, section 2): exact versions, because the
 # renderers of the Vello project change their interfaces between minor releases. `vello_cpu` without
 # its default features: its thread pool is added by the backend on targets with threads (the
@@ -577,3 +578,7 @@ opt-level = 3
 
 [profile.browser.package.read-fonts]
 opt-level = 3
+
+[patch.crates-io]
+# Pinned source hotfix for Graphite Metal's retained Objective-C objects.
+skia-bindings = { path = "external/rust-skia-bindings" }
