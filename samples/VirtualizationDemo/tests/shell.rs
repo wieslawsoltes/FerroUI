@@ -168,7 +168,13 @@ fn the_playground_realizes_what_is_in_view_and_recycles_its_containers() {
     // of the view is scheduled (the clock of the dispatcher does not advance in a test, so
     // the test fires it).
     let item_count = view.get_control::<TextBlock>("itemCount");
-    assert_eq!(None, item_count.text());
+    // Empty until the timer first fires; on a slow machine a frame of the test may have run
+    // it already, and then the text is a count.
+    let initial = item_count.text();
+    assert!(
+        initial.as_deref().is_none_or(|text| text.starts_with("Realized ")),
+        "the count before the timer fires: {initial:?}"
+    );
     let timer = Dispatcher::timers_for_unit_tests()
         .into_iter()
         .find(|timer| timer.interval() == Duration::from_millis(500))
