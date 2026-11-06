@@ -72,9 +72,12 @@ unsafe impl ObjectType for FerroObject {
     type Parent = FerroObject;
     type VTable = FerroObjectVTable;
 
+    const CLASS_VTABLE: FerroObjectVTable = <FerroObject as Subclassable<FerroObject>>::VTABLE;
+
+    #[inline]
     fn vtable() -> &'static FerroObjectVTable {
-        static VTABLE: std::sync::OnceLock<FerroObjectVTable> = std::sync::OnceLock::new();
-        VTABLE.get_or_init(<FerroObject as Subclassable<FerroObject>>::build_vtable)
+        static VTABLE: FerroObjectVTable = <FerroObject as ObjectType>::CLASS_VTABLE;
+        &VTABLE
     }
 
     #[inline]
@@ -160,52 +163,52 @@ pub trait FerroObjectImplExt: FerroObjectImpl {
 impl<T: FerroObjectImpl> FerroObjectImplExt for T {}
 
 impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
-    fn build_vtable() -> FerroObjectVTable {
-        // SAFETY (all casts): the table is only attached to objects whose
-        // most-derived class is `T`.
-        let mut table = FerroObjectVTable {
-            type_info: T::TYPE,
-            constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
-            on_property_changed_core: |this, change| {
-                T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            on_property_changed: |this, change| {
-                T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            update_data_validation: |this, property, state, error| {
+    // A member `T` states it does not override is the default, which calls
+    // the same slot of the parent table and does nothing else: the slot itself
+    // is taken, so that a call reaches the implementation without a
+    // forwarding function of every class in between. A change of a property
+    // goes through two of these members.
+    //
+    // SAFETY (all casts): the table is only attached to objects whose
+    // most-derived class is `T`. SAFETY (the parent's slots): the parent of
+    // `T` derives from `FerroObject` (`__forwards_to_parent` checked it), so
+    // its table starts with this one.
+    const VTABLE: FerroObjectVTable = FerroObjectVTable {
+        type_info: T::TYPE,
+        constructed: if __forwards_to_parent::<T, FerroObjectVTable>(<T as FerroObjectImpl>::__OVERRIDES, "constructed") {
+            unsafe { crate::type_system::__parent_vtable_part::<T, FerroObjectVTable>() }.constructed
+        } else {
+            |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) })
+        },
+        on_property_changed_core: if __forwards_to_parent::<T, FerroObjectVTable>(
+            <T as FerroObjectImpl>::__OVERRIDES,
+            "on_property_changed_core",
+        ) {
+            unsafe { crate::type_system::__parent_vtable_part::<T, FerroObjectVTable>() }.on_property_changed_core
+        } else {
+            |this, change| T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        on_property_changed: if __forwards_to_parent::<T, FerroObjectVTable>(
+            <T as FerroObjectImpl>::__OVERRIDES,
+            "on_property_changed",
+        ) {
+            unsafe { crate::type_system::__parent_vtable_part::<T, FerroObjectVTable>() }.on_property_changed
+        } else {
+            |this, change| T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        update_data_validation: if __forwards_to_parent::<T, FerroObjectVTable>(
+            <T as FerroObjectImpl>::__OVERRIDES,
+            "update_data_validation",
+        ) {
+            unsafe { crate::type_system::__parent_vtable_part::<T, FerroObjectVTable>() }.update_data_validation
+        } else {
+            |this, property, state, error| {
                 T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
-            },
-        };
-
-        // A member `T` states it does not override is the default, which
-        // calls the same slot of the parent table and does nothing else: the
-        // slot itself is taken, so that a call reaches the implementation
-        // without a forwarding function of every class in between. A change
-        // of a property goes through two of these members.
-        let forwards: [bool; 4] = const {
-            let overrides = <T as FerroObjectImpl>::__OVERRIDES;
-            [
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
-            ]
-        };
-        if forwards[0] {
-            table.constructed = parent_vtable::<T, FerroObjectVTable>().constructed;
-        }
-        if forwards[1] {
-            table.on_property_changed_core = parent_vtable::<T, FerroObjectVTable>().on_property_changed_core;
-        }
-        if forwards[2] {
-            table.on_property_changed = parent_vtable::<T, FerroObjectVTable>().on_property_changed;
-        }
-        if forwards[3] {
-            table.update_data_validation = parent_vtable::<T, FerroObjectVTable>().update_data_validation;
-        }
-        table
-    }
+            }
+        },
+    };
 }
+
 
 impl FerroObjectImpl for FerroObject {
     fn constructed(_this: &Self) {}
