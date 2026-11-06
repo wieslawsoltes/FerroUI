@@ -28,7 +28,7 @@ struct Probe {
     phase: String,
     _subscriptions: Vec<MediaSubscription>,
 }
-thread_local! {static PROBE:RefCell<Option<Probe>>=const {RefCell::new(None)};}
+ferroui_base::ferro_thread_local! {static PROBE:RefCell<Option<Probe>>=const {RefCell::new(None)};}
 fn phase(value: impl Into<String>) {
     PROBE.with(|p| {
         if let Some(p) = p.borrow_mut().as_mut() {

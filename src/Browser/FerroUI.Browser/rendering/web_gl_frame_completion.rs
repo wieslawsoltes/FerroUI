@@ -10,7 +10,7 @@ extern "C" {
     #[wasm_bindgen(catch,js_namespace=SharedGlFrames,js_name=complete)]
     fn complete(context: i32, callback: &JsValue) -> Result<bool, JsValue>;
 }
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static NEXT:Cell<u64>=const {Cell::new(0)};
     static CALLBACKS:RefCell<HashMap<u64,Closure<dyn FnMut(i32)>>>=RefCell::new(HashMap::new());
 }

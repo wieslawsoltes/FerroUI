@@ -9,7 +9,7 @@ use ferroui_media_controls::RendererHost;
 use std::{cell::RefCell, sync::Arc, time::Duration};
 #[path = "../PortableMedia.Mobile/scene.rs"]
 mod scene;
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static BUDGETS: RefCell<Vec<(WeakRef<RendererHost>, FrameBudget)>> = const { RefCell::new(Vec::new()) };
 }
 static PROBES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);

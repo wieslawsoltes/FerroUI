@@ -199,7 +199,7 @@ pub async fn read_texture(
     RgbaImage::from_raw(m.width, m.height, pixels).ok_or("Invalid Metal output".into())
 }
 #[derive(Clone, Copy, Debug)]
-pub struct Memory {
+pub struct MemoryUsage {
     pub footprint: u64,
     pub resident: u64,
     pub metal: u64,
@@ -208,12 +208,12 @@ pub struct Memory {
     pub malloc_bytes: u64,
     pub malloc_blocks: u64,
 }
-pub fn memory() -> Result<Memory, String> {
+pub fn memory() -> Result<MemoryUsage, String> {
     let mut v = [0u64; 7];
     if unsafe { ferro_media_memory(v.as_mut_ptr()) } == 0 {
         return Err("Native memory probe failed".into());
     }
-    Ok(Memory {
+    Ok(MemoryUsage {
         footprint: v[0],
         resident: v[1],
         metal: v[2],

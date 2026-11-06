@@ -27,7 +27,7 @@ struct Demo {
     poll: Option<Rc<dyn IDisposable>>,
     subscriptions: Vec<MediaSubscription>,
 }
-thread_local! {static DEMO:RefCell<Demo>=RefCell::new(Demo::default());}
+ferroui_base::ferro_thread_local! {static DEMO:RefCell<Demo>=RefCell::new(Demo::default());}
 pub fn clear() {
     let mut old = DEMO.with(|d| {
         let mut current = d.borrow_mut();

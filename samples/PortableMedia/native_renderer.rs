@@ -9,7 +9,7 @@ use ferroui_media_controls::RendererHost;
 use std::{cell::RefCell, sync::Arc, time::Duration};
 #[path = "gl_scene.rs"]
 mod scene;
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static BUDGETS: RefCell<Vec<(WeakRef<RendererHost>,FrameBudget)>> = const {RefCell::new(Vec::new())};
 }
 pub fn retained() -> bool {

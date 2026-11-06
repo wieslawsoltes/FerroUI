@@ -53,8 +53,8 @@ pub struct MediaSampleProviders {
     pub camera: Rc<CameraProviderBinding>,
     pub qr: Option<Rc<QrRecognizer>>,
 }
-thread_local! { static LAST_PAGE: RefCell<Weak<State>> = const { RefCell::new(Weak::new()) }; }
-thread_local! { static PROVIDERS: RefCell<Option<MediaSampleProviders>> = const { RefCell::new(None) }; }
+ferroui_base::ferro_thread_local! { static LAST_PAGE: RefCell<Weak<State>> = const { RefCell::new(Weak::new()) }; }
+ferroui_base::ferro_thread_local! { static PROVIDERS: RefCell<Option<MediaSampleProviders>> = const { RefCell::new(None) }; }
 /// Install on the host UI thread before opening pages. Missing providers are
 /// displayed as unavailable; the offline QR fixture remains usable everywhere.
 pub fn install(providers: MediaSampleProviders) {

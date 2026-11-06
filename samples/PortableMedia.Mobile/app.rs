@@ -60,9 +60,9 @@ impl ApplicationImpl for App {
     }
 }
 #[cfg(target_os = "ios")]
-pub struct Delegate;
+pub struct AppDelegate;
 #[cfg(target_os = "ios")]
-impl ferroui_ios::FerroApplicationDelegate for Delegate {
+impl ferroui_ios::FerroApplicationDelegate for AppDelegate {
     fn create_app_builder(&self, delegate: Rc<dyn ferroui_ios::IFerroAppDelegate>) -> AppBuilder {
         use ferroui_ios::IosApplicationExtensions;
         AppBuilder::configure::<App>().use_ios_with_delegate(delegate)
