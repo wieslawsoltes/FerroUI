@@ -1128,6 +1128,23 @@ impl MarkupType {
         }
     }
 
+    /// Registers the metadata of a type that is used: the value type of a property, when the
+    /// property is registered ([`ferro_property!`](crate::ferro_property)). What finds metadata
+    /// by handle (the text of an enumeration member, the parsing of text) then knows the type
+    /// with the tables of types trimmed. Without `trim-type-tables` the tables already hold
+    /// every type, and this does nothing.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
+    pub fn register_used(type_: &'static MarkupType) {
+        let _ = type_;
+    }
+
+    /// Trimmed (`trim-type-tables` without `type-tables`): see the other definition.
+    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    pub fn register_used(type_: &'static MarkupType) {
+        registry().write().unwrap_or_else(|e| e.into_inner()).insert(type_);
+    }
+
     /// Registers the Rust type `H` as one more handle of the registered type `type_`: a
     /// type of another crate whose values are values of `type_` (a wrapper a property
     /// holds the value in), next to the [`handles`](Self::handles) the declaration lists.

@@ -917,6 +917,7 @@ macro_rules! ferro_property {
                         ::std::option::Option::None => {
                             let property: &'static $ty = $body;
                             CELL.set(::std::option::Option::Some(property));
+                            $crate::__register_value_markup!(property);
                             $crate::__record_property_accessor!($owner, $vis, $name, property);
                             property
                         }
@@ -939,12 +940,72 @@ macro_rules! ferro_property {
                 ::std::option::Option::None => {
                     let property: &'static $ty = $body;
                     CELL.set(::std::option::Option::Some(property));
+                    $crate::__register_value_markup!(property);
                     property
                 }
             }
         }
     };
 }
+
+/// Registers the markup metadata of the value type of a property that is registered
+/// ([`MarkupType::register_used`](crate::metadata::MarkupType::register_used)), when the value
+/// type has metadata ([`MarkupTyped`](crate::metadata::MarkupTyped)); nothing otherwise. The
+/// choice is made where the property is declared, by the method the probe resolves to: the
+/// implementation for a value type with metadata is found on the reference, before the one of
+/// every type on the probe itself.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __register_value_markup {
+    ($property:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::{__NoValueMarkup as _, __RegisterValueMarkup as _};
+        (&$crate::__ValueMarkupProbe($property)).__register_value_markup();
+    }};
+}
+
+#[doc(hidden)]
+pub struct __ValueMarkupProbe<'a, P: ?Sized>(pub &'a P);
+
+#[doc(hidden)]
+pub trait __RegisterValueMarkup {
+    fn __register_value_markup(&self);
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoValueMarkup {
+    #[inline(always)]
+    fn __register_value_markup(&self) {}
+}
+
+impl<P: ?Sized> __NoValueMarkup for __ValueMarkupProbe<'_, P> {}
 
 /// Declares the property definitions of a type: the accessors, as
 /// [`ferro_property!`] declares them one by one, and their registration as
