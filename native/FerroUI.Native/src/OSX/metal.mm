@@ -281,6 +281,12 @@ public:
 - (MetalRenderTarget *)initWithDevice:(IFrnMetalDevice *)device {
     _device = dynamic_cast<FrnMetalDevice*>(device);
     _layer = [CAMetalLayer new];
+    // Skia's untagged SDR render targets contain sRGB values. Leaving the
+    // layer untagged makes WindowServer interpret them in the monitor's
+    // device profile, so native presentation differs from offscreen pixels.
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    _layer.colorspace = colorSpace;
+    CGColorSpaceRelease(colorSpace);
     _layer.opaque = false;
     _layer.device = _device->device;
     _target.setNoAddRef(new FrnMetalRenderTarget(_layer, _device));
