@@ -1,0 +1,12 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:s="clr-namespace:FerroBoard.Text;assembly=FerroBoard.Core"
+ x:DataType="s:Suggestion">
+ <StackPanel.DataContext>
+  <s:Suggestion Text="café 😀" Kind="Correction" Confidence="0.75"
+    IsAutoCommit="True" Description="custom provider" IsRemovable="True"/>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding Text}"/>
+ <ContentControl Content="{CompiledBinding Confidence}"/>
+ <ContentControl Content="{Binding}"/>
+</StackPanel>

@@ -1,0 +1,17 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:app="clr-namespace:FerroBoard.Native.Consumer;assembly=FerroBoard.Native.Consumer"
+ xmlns:g="clr-namespace:FerroBoard.Layouts;assembly=FerroBoard.Core"
+ x:DataType="g:KeyboardGeometryOptions">
+ <StackPanel.DataContext>
+  <g:KeyboardGeometryOptions KeySpacingHorizontal="2.5" KeySpacingVertical="3.75"
+    SplitGap="12.25" UnitsPerRow="13.5"/>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding UnitsPerRow}"/>
+ <ContentControl>
+  <ContentControl.Content>
+   <x:Static Member="app:Consumer.Rectangle"/>
+  </ContentControl.Content>
+ </ContentControl>
+ <ContentControl Content="{Binding}"/>
+</StackPanel>

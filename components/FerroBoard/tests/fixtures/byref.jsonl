@@ -1,0 +1,350 @@
+{"tag":"type","element":"System.Boolean","type":"System.Boolean\u0026","name":"Boolean\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Boolean","source":"System.Boolean","reference":true,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Boolean","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Char","type":"System.Char\u0026","name":"Char\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Char","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Char","reference":true,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Char","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.SByte","type":"System.SByte\u0026","name":"SByte\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.SByte","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.SByte","reference":true,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Byte","reference":true,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.SByte","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Byte","type":"System.Byte\u0026","name":"Byte\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Byte","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.SByte","reference":true,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Byte","reference":true,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Byte","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Int16","type":"System.Int16\u0026","name":"Int16\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Int16","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Int16","reference":true,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.UInt16","reference":true,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Int16","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.UInt16","type":"System.UInt16\u0026","name":"UInt16\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.UInt16","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Int16","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.UInt16","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt16","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Int32","type":"System.Int32\u0026","name":"Int32\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Int32","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Int32","reference":true,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.UInt32","reference":true,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"ScreenKeyboard.Text.SuggestionKind","reference":true,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Int32","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.UInt32","type":"System.UInt32\u0026","name":"UInt32\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.UInt32","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Int32","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.UInt32","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"ScreenKeyboard.Text.SuggestionKind","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt32","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Int64","type":"System.Int64\u0026","name":"Int64\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Int64","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Int64","reference":true,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.UInt64","reference":true,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Int64","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.UInt64","type":"System.UInt64\u0026","name":"UInt64\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.UInt64","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Int64","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.UInt64","reference":true,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.UInt64","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Single","type":"System.Single\u0026","name":"Single\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Single","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Single","reference":true,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Single","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Double","type":"System.Double\u0026","name":"Double\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Double","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Double","reference":true,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Double","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.String","type":"System.String\u0026","name":"String\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.String","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.String","reference":true,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.String","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Object","type":"System.Object\u0026","name":"Object\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Object","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.String","reference":true,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Object","reference":true,"value":false}
+{"tag":"assign","target":"System.Object","source":"ScreenKeyboard.Text.Suggestion","reference":true,"value":false}
+{"tag":"assign","target":"System.Object","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":true,"value":false}
+{"tag":"assign","target":"System.Object","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"ScreenKeyboard.Text.Suggestion","type":"ScreenKeyboard.Text.Suggestion\u0026","name":"Suggestion\u0026","ns":"ScreenKeyboard.Text","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"ScreenKeyboard.Text.Suggestion","reference":true,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.Suggestion","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"ScreenKeyboard.Text.SuggestionKind","type":"ScreenKeyboard.Text.SuggestionKind\u0026","name":"SuggestionKind\u0026","ns":"ScreenKeyboard.Text","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Int32","reference":true,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.UInt32","reference":true,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"ScreenKeyboard.Text.SuggestionKind","reference":true,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"ScreenKeyboard.Text.SuggestionKind","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","type":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]\u0026","name":"IEquatable\u00601\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":1,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"ScreenKeyboard.Text.Suggestion","reference":true,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":true,"value":false}
+{"tag":"assign","target":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","source":"System.Void","reference":false,"value":false}
+{"tag":"type","element":"System.Void","type":"System.Void\u0026","name":"Void\u0026","ns":"System","byref":true,"value":false,"interfaceType":false,"array":false,"enumType":false,"baseType":null,"publicType":true,"nestedPrivate":false,"methods":0,"constructors":0,"fields":0,"properties":0,"events":0,"interfaces":[],"genericArgs":0,"elementSame":true,"same":true,"equal":true,"hashEqual":true,"refAgain":"System.TypeLoadException","arrayAgain":"System.TypeLoadException","genericAgain":"System.InvalidOperationException"}
+{"tag":"assign","target":"System.Void","source":"System.Boolean","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Char","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.SByte","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Byte","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Int16","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.UInt16","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Int32","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.UInt32","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Int64","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.UInt64","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Single","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Double","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.String","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Object","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"ScreenKeyboard.Text.Suggestion","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"ScreenKeyboard.Text.SuggestionKind","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.IEquatable\u00601[[ScreenKeyboard.Text.Suggestion, ScreenKeyboard.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]","reference":false,"value":false}
+{"tag":"assign","target":"System.Void","source":"System.Void","reference":true,"value":false}
+{"tag":"parameter","method":"Deconstruct","name":"Text","position":0,"type":"System.String\u0026","element":"System.String","input":false,"output":true,"optional":false,"attributes":["System.Runtime.InteropServices.OutAttribute"]}
+{"tag":"parameter","method":"Deconstruct","name":"Kind","position":1,"type":"ScreenKeyboard.Text.SuggestionKind\u0026","element":"ScreenKeyboard.Text.SuggestionKind","input":false,"output":true,"optional":false,"attributes":["System.Runtime.InteropServices.OutAttribute"]}
+{"tag":"parameter","method":"Deconstruct","name":"Confidence","position":2,"type":"System.Double\u0026","element":"System.Double","input":false,"output":true,"optional":false,"attributes":["System.Runtime.InteropServices.OutAttribute"]}
+{"tag":"parameter","method":"Deconstruct","name":"IsAutoCommit","position":3,"type":"System.Boolean\u0026","element":"System.Boolean","input":false,"output":true,"optional":false,"attributes":["System.Runtime.InteropServices.OutAttribute"]}
+{"tag":"parameter","method":"Mutate","name":"count","position":0,"type":"System.Int32\u0026","element":"System.Int32","input":false,"output":false,"optional":false,"attributes":[]}
+{"tag":"parameter","method":"Mutate","name":"flag","position":1,"type":"System.Boolean\u0026","element":"System.Boolean","input":false,"output":true,"optional":false,"attributes":["System.Runtime.InteropServices.OutAttribute"]}
+{"tag":"parameter","method":"Mutate","name":"amount","position":2,"type":"System.Double\u0026","element":"System.Double","input":true,"output":false,"optional":false,"attributes":["System.Runtime.InteropServices.InAttribute","System.Runtime.CompilerServices.IsReadOnlyAttribute"]}
+{"tag":"parameter","method":"Mutate","name":"text","position":3,"type":"System.String","element":null,"input":false,"output":false,"optional":false,"attributes":[]}

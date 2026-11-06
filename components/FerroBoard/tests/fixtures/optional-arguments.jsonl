@@ -1,0 +1,10 @@
+{"tag":"word","mode":"omitted","language":[101,110],"Count":0,"MaxFrequency":1}
+{"tag":"word","mode":"null","language":null,"Count":0,"MaxFrequency":1}
+{"tag":"word","mode":"empty","language":[],"Count":0,"MaxFrequency":1}
+{"tag":"provider","mode":"omitted","dictionaryNull":true,"userPresent":true,"threshold":2,"max":5000,"predictions":[[73],[84,104,101],[84,104,97,110,107,115]]}
+{"tag":"provider","mode":"null","dictionaryNull":true,"userPresent":true,"threshold":2,"max":5000,"predictions":[[73],[84,104,101],[84,104,97,110,107,115]]}
+{"tag":"suggestion","mode":"both","text":[115,101,101,100],"kind":0,"bits":"0000000000000000","auto":false}
+{"tag":"suggestion","mode":"auto","text":[115,101,101,100],"kind":0,"bits":"3fd0000000000000","auto":false}
+{"tag":"suggestion","mode":"explicit","text":null,"kind":0,"bits":"8000000000000000","auto":true}
+{"tag":"method","name":"FromText","parameters":[{"name":"text","type":"System.String","optional":false,"value":null},{"name":"languageTag","type":"System.String","optional":true,"value":"en"}]}
+{"tag":"method","name":"FromJson","parameters":[{"name":"json","type":"System.String","optional":false,"value":null},{"name":"languageTag","type":"System.String","optional":true,"value":"en"}]}

@@ -574,7 +574,9 @@ fn text(value: &str) -> String {
 /// and takes the selection.
 #[test]
 fn the_pane_opens_the_sections_and_their_pages() {
-    // Tall enough for the Text section open with all its pages and every section below it.
+    // The window cannot be taller than the screen of the test platform (1280 by 1024): the
+    // section that is opened is the one with the fewest pages, so it shows all its pages and
+    // every section below it.
     let shell = Shell::start(1400.0, 1000.0);
     let navigation = shell.navigation_view();
     assert_eq!(NavigationViewDisplayMode::Expanded, navigation.display_mode());
@@ -588,16 +590,19 @@ fn the_pane_opens_the_sections_and_their_pages() {
     assert_eq!(vec![text("Home")], selected_entries(&shell), "the home item is selected");
     assert!(sections.iter().all(|section| !section.is_expanded()), "no section is open");
 
-    // The second section: its item opens the page of the section and the list of its pages.
-    let section = &sections[1];
+    // A section after the first: its item opens the page of the section and the list of its
+    // pages.
+    let index = (1..sections.len()).min_by_key(|&index| items(&sections[index]).len()).unwrap();
+    let section = &sections[index];
     shell.click(&pane_entry(&shell, &section.title()));
     assert!(shell.is_current(&section.page_item()), "the item of the section opens its page");
     assert!(shell.page().cast::<SectionPage>().is_some());
     assert!(section.is_expanded(), "the section is open");
     let section_items = items(section);
-    let mut expected_open = vec![text("Home"), sections[0].title(), section.title()];
+    let mut expected_open = vec![text("Home")];
+    expected_open.extend(sections[..=index].iter().map(|section| section.title()));
     expected_open.extend(section_items.iter().map(|item| item.header()));
-    expected_open.extend(sections[2..].iter().map(|section| section.title()));
+    expected_open.extend(sections[index + 1..].iter().map(|section| section.title()));
     expected_open.push(text("Settings"));
     assert_eq!(expected_open, pane_texts(&shell), "the open section lists its pages");
     assert_eq!(vec![section.title()], selected_entries(&shell), "the section carries the selection for its own page");
@@ -866,7 +871,7 @@ fn the_macos_settings_apply_to_the_live_catalog_theme() {
     use ferroui_controls::CheckBox;
     use ferroui_themes_macos::ControlSize;
 
-    let shell = Shell::start(1400.0, 1100.0);
+    let shell = Shell::start(1400.0, 1200.0);
     let primary_label_color = || from_markup_value::<Color>(&Application::current().unwrap()
         .try_get_resource(&ResourceKey::from("TextFillColorPrimary"), Some(&ThemeVariant::light())).flatten())
         .expect("the current theme's label color");

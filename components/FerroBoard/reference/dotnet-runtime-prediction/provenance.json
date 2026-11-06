@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/dotnet/runtime",
+  "revision": "60629d14374c56f1cb51819049ad1fa529307f8d",
+  "version": "v10.0.0",
+  "runtime_fixture": ".NET10.0.13; exact servicing source unavailable at recorded runtime commit (HTTP404)",
+  "license": "MIT",
+  "files": [
+    {
+      "path": "reference/dotnet-runtime-prediction/Take.cs",
+      "source": "src/libraries/System.Linq/src/System/Linq/Take.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Linq/src/System/Linq/Take.cs",
+      "sha256": "6e70fdaa4a47ad3d870ae93420dd19dacca3b5fddea8c8890fd9b35de5da5444",
+      "bytes": 10715
+    },
+    {
+      "path": "reference/dotnet-runtime-prediction/SkipTake.SpeedOpt.cs",
+      "source": "src/libraries/System.Linq/src/System/Linq/SkipTake.SpeedOpt.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/src/libraries/System.Linq/src/System/Linq/SkipTake.SpeedOpt.cs",
+      "sha256": "b8266917685f9640567ee91de9e09ca8e01dba2b470592de9da314bc61aa9a15",
+      "bytes": 23519
+    },
+    {
+      "path": "reference/dotnet-runtime-prediction/LICENSE.TXT",
+      "source": "LICENSE.TXT",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/60629d14374c56f1cb51819049ad1fa529307f8d/LICENSE.TXT",
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "bytes": 1116
+    }
+  ]
+}

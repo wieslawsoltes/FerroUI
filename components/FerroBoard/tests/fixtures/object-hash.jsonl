@@ -1,0 +1,17 @@
+{"tag":"method","name":"GetHashCode","staticMethod":false,"virtualMethod":true,"finalMethod":false,"returnType":"Int32","parameters":0}
+{"tag":"case","kind":"plain","value":0,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":null}
+{"tag":"case","kind":"plain","value":-1,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":null}
+{"tag":"case","kind":"plain","value":-2147483648,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":null}
+{"tag":"case","kind":"plain","value":2147483647,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":null}
+{"tag":"case","kind":"virtual","value":0,"sameHash":true,"result":0,"identityMatch":null,"boundSame":true,"targetSame":true,"declaring":"VirtualHash","calls":4,"named":null}
+{"tag":"case","kind":"virtual","value":-1,"sameHash":true,"result":-1,"identityMatch":null,"boundSame":true,"targetSame":true,"declaring":"VirtualHash","calls":4,"named":null}
+{"tag":"case","kind":"virtual","value":-2147483648,"sameHash":true,"result":-2147483648,"identityMatch":null,"boundSame":true,"targetSame":true,"declaring":"VirtualHash","calls":4,"named":null}
+{"tag":"case","kind":"virtual","value":2147483647,"sameHash":true,"result":2147483647,"identityMatch":null,"boundSame":true,"targetSame":true,"declaring":"VirtualHash","calls":4,"named":null}
+{"tag":"case","kind":"hidden","value":0,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":0}
+{"tag":"case","kind":"hidden","value":-1,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":-1}
+{"tag":"case","kind":"hidden","value":-2147483648,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":-2147483648}
+{"tag":"case","kind":"hidden","value":2147483647,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":2147483647}
+{"tag":"case","kind":"hidden-virtual","value":0,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":0}
+{"tag":"case","kind":"hidden-virtual","value":-1,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":-1}
+{"tag":"case","kind":"hidden-virtual","value":-2147483648,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":-2147483648}
+{"tag":"case","kind":"hidden-virtual","value":2147483647,"sameHash":true,"result":null,"identityMatch":true,"boundSame":true,"targetSame":true,"declaring":"Object","calls":0,"named":2147483647}

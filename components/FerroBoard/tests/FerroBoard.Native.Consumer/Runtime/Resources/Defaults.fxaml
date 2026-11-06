@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ xmlns:t="clr-namespace:FerroBoard.Controls.Themes;assembly=FerroBoard.Controls">
+ <s:KeyboardSettings x:Key="SharedSettings" KeyHeight="57.5" AutoCapitalization="False"
+  GlideTyping="False" ShowSuggestions="False" LearnWords="False"
+  ClipboardHistoryEnabled="False" EmojiHistoryEnabled="False"/>
+ <t:KeyboardTheme x:Key="SharedTheme" Id="base-theme" Name="Overridden by nearer dictionary"/>
+</ResourceDictionary>

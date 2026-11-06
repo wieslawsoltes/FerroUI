@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core"
+ x:DataType="s:KeyboardSettings">
+ <StackPanel.DataContext><s:KeyboardSettings KeyHeight="54.25" NumberRow="False"/></StackPanel.DataContext>
+ <TextBlock Text="{CompiledBinding KeyHeight}"/>
+ <CheckBox IsChecked="{CompiledBinding NumberRow, Mode=TwoWay}"/>
+</StackPanel>
