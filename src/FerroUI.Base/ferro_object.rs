@@ -793,7 +793,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_untyped)
+        self.values.add_direct_boxed_binding(self, property.as_property(), source)
     }
 
     fn writable_direct<T: PropertyValue>(
