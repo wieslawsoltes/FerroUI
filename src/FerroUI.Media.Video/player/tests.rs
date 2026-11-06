@@ -507,3 +507,24 @@ fn recovery_commands_and_source_replacement_supersede_saved_state() {
     assert!(player.source().is_none());
     assert!(player.frames().latest().is_none());
 }
+
+#[test]
+fn a_dropped_stop_does_not_leave_the_player_resetting() {
+    let (player, native, _) = player();
+    ready(player.set_source(source())).unwrap();
+    // The future of the stop is dropped without being awaited: its seek to the start is
+    // cancelled, and the player takes frames again instead of waiting for it forever.
+    drop(player.stop());
+    assert_eq!(player.requested_state(), PlaybackIntent::Stop);
+    player.poll().unwrap();
+    assert_eq!(native.frame_reads.get(), 1);
+}
+
+#[test]
+fn a_dropped_seek_is_cancelled_for_its_waiters() {
+    let (player, _, _) = player();
+    ready(player.set_source(source())).unwrap();
+    let seek = player.seek(Duration::from_secs(3));
+    drop(seek);
+    assert!(player.0.pending_seek.borrow().is_none());
+}

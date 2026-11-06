@@ -156,6 +156,31 @@ impl SeekRequest {
         }
     }
 }
+/// Cancels a seek whose future is dropped before it completes while nothing else will run it:
+/// the request is no longer the pending seek of the player, and whoever waits for it is told it
+/// was cancelled. A seek dropped during preparation stays queued, as the preparation applies the
+/// latest pending seek itself (the restoration seeks of `prepare_source` and of a lost device).
+struct CancelSeekOnDrop {
+    player: std::rc::Weak<PlayerInner>,
+    request: Rc<SeekRequest>,
+}
+impl Drop for CancelSeekOnDrop {
+    fn drop(&mut self) {
+        if self.request.completed.get() {
+            return;
+        }
+        if let Some(inner) = self.player.upgrade() {
+            if inner.preparing.get() {
+                return;
+            }
+            let mut pending = inner.pending_seek.borrow_mut();
+            if pending.as_ref().is_some_and(|pending| Rc::ptr_eq(pending, &self.request)) {
+                pending.take();
+            }
+        }
+        self.request.finish(Err(MediaError::cancelled()));
+    }
+}
 /// Caller-owned playback can feed multiple views/texture consumers. Cloning a
 /// player never opens another decoder. Futures hold weak player ownership.
 #[derive(Clone)]
@@ -595,7 +620,12 @@ impl MediaPlayer {
         });
         *self.0.pending_seek.borrow_mut() = Some(request.clone());
         let weak = Rc::downgrade(&self.0);
+        // Once the source is prepared a seek runs while its future is polled: dropping the
+        // future before it completes cancels the seek, so the request does not stay pending (a
+        // player that is stopping with a pending seek takes no frames until the seek completes).
+        let cancel_on_drop = CancelSeekOnDrop { player: weak.clone(), request: request.clone() };
         Box::pin(async move {
+            let _cancel_on_drop = cancel_on_drop;
             let awaited = request.clone();
             let waiting = weak.clone();
             let result = std::future::poll_fn(move |cx| {

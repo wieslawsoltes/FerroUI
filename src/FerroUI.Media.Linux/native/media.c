@@ -202,7 +202,6 @@ static gpointer worker(gpointer data) {
         } else {
             g_object_set(source, "device", s->source, "io-mode", 4, "do-timestamp", TRUE, NULL); /* explicit DMABUF */
         }
-        gst_object_ref(s->sink);
         gst_bin_add_many(GST_BIN(s->pipeline), source, s->sink, NULL);
         if (!gst_element_link(source, s->sink)) { fail(s, 1, "No direct DMA-BUF camera route"); goto done; }
     }

@@ -42,9 +42,12 @@ struct RendererWake {
 }
 impl RendererWake {
     fn signal(self: &Arc<Self>) {
-        self.serial.fetch_add(1, Ordering::AcqRel);
+        // Sequentially consistent with the stop of the timer (`start`): each side writes one of
+        // `serial` and `running` and then reads the other, so with acquire/release alone both
+        // could read the old value and the publication would be lost.
+        self.serial.fetch_add(1, Ordering::SeqCst);
         if !self.enabled.load(Ordering::Acquire)
-            || self.running.load(Ordering::Acquire)
+            || self.running.load(Ordering::SeqCst)
             || self.queued.swap(true, Ordering::AcqRel)
         {
             return;
@@ -462,10 +465,11 @@ impl RendererHost {
                 let keep = view.wants_timer();
                 if !keep {
                     view.timer.borrow_mut().take();
-                    wake.running.store(false, Ordering::Release);
+                    wake.running.store(false, Ordering::SeqCst);
                     // A producer racing the final tick either observes stopped
-                    // or changes this serial, so its publication cannot be lost.
-                    if wake.serial.load(Ordering::Acquire) != before {
+                    // or changes this serial (both sequentially consistent, see
+                    // `RendererWake::signal`), so its publication cannot be lost.
+                    if wake.serial.load(Ordering::SeqCst) != before {
                         wake.signal();
                     }
                 }

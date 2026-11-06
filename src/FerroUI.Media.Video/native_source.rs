@@ -40,17 +40,18 @@ pub struct PreparedMediaSource {
     pub location: NativeMediaLocation,
     pub temporary: Option<TemporaryMediaFile>,
 }
+/// The most sources materialized at once; a preparation beyond it waits for a slot.
+const PREPARATION_SLOTS: usize = 4;
 static PREPARING: AtomicUsize = AtomicUsize::new(0);
+/// The preparations waiting for a slot, woken when one frees.
+static WAITING: Mutex<Vec<Waker>> = Mutex::new(Vec::new());
 struct Permit;
 impl Permit {
-    fn acquire() -> Result<Self, MediaError> {
+    fn try_acquire() -> Option<Self> {
         let mut count = PREPARING.load(Ordering::Acquire);
         loop {
-            if count >= 4 {
-                return Err(MediaError::new(
-                    MediaErrorKind::NativeFailure,
-                    "Native source preparation slots are saturated",
-                ));
+            if count >= PREPARATION_SLOTS {
+                return None;
             }
             match PREPARING.compare_exchange_weak(
                 count,
@@ -58,15 +59,35 @@ impl Permit {
                 Ordering::AcqRel,
                 Ordering::Acquire,
             ) {
-                Ok(_) => return Ok(Self),
+                Ok(_) => return Some(Self),
                 Err(current) => count = current,
             }
         }
+    }
+    /// A slot of the preparations: at once when one is free, otherwise when a running
+    /// preparation finishes (a sixth player opening at once waits, it does not fail).
+    async fn acquire() -> Self {
+        std::future::poll_fn(|cx| {
+            if let Some(permit) = Self::try_acquire() {
+                return Poll::Ready(permit);
+            }
+            WAITING.lock().unwrap_or_else(|e| e.into_inner()).push(cx.waker().clone());
+            // A slot freed between the attempt and the registration woke nobody: try again.
+            match Self::try_acquire() {
+                Some(permit) => Poll::Ready(permit),
+                None => Poll::Pending,
+            }
+        })
+        .await
     }
 }
 impl Drop for Permit {
     fn drop(&mut self) {
         PREPARING.fetch_sub(1, Ordering::AcqRel);
+        let waiting = std::mem::take(&mut *WAITING.lock().unwrap_or_else(|e| e.into_inner()));
+        for waker in waiting {
+            waker.wake();
+        }
     }
 }
 struct State<T> {
@@ -88,7 +109,7 @@ fn worker<T: Send + 'static>(
     work: impl FnOnce(&AtomicBool) -> Result<T, MediaError> + Send + 'static,
 ) -> MediaFuture<T> {
     Box::pin(async move {
-        let permit = Permit::acquire()?;
+        let permit = Permit::acquire().await;
         let state = Arc::new(Mutex::new(State {
             result: None,
             waker: None,
@@ -143,7 +164,7 @@ impl MediaSource {
     /// Resolve supported native URLs/files or write an encoded resource to a
     /// scoped private file. Pass Android's application cache directory there;
     /// other hosts may use their OS temporary directory. At most four writes
-    /// run concurrently across providers. Abandoning preparation cancels between
+    /// run concurrently across providers; a further preparation waits for one to finish. Abandoning preparation cancels between
     /// bounded chunks and retires a file produced after the future was dropped.
     pub fn prepare_native(
         self,
@@ -232,6 +253,30 @@ impl MediaSource {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn a_preparation_beyond_the_slots_waits_and_is_woken_when_one_frees() {
+        use std::sync::atomic::AtomicBool;
+        use std::task::{Context, Wake, Waker};
+        struct Flag(AtomicBool);
+        impl Wake for Flag {
+            fn wake(self: Arc<Self>) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        let _serial = SERIAL.lock().unwrap();
+        idle();
+        let mut held = Vec::new();
+        while let Some(permit) = Permit::try_acquire() {
+            held.push(permit);
+        }
+        let flag = Arc::new(Flag(AtomicBool::new(false)));
+        let waker = Waker::from(flag.clone());
+        assert_eq!(held.len(), PREPARATION_SLOTS);
+        let mut waiting = Box::pin(Permit::acquire());
+        assert!(waiting.as_mut().poll(&mut Context::from_waker(&waker)).is_pending(), "no slot is free");
+        drop(held.pop());
+        assert!(flag.0.load(Ordering::SeqCst), "a freed slot wakes the waiting preparation");
+    }
     use super::*;
     use std::{
         future::Future,
@@ -394,11 +439,15 @@ mod tests {
             begun.recv_timeout(Duration::from_secs(5)).unwrap();
         }
         drop(futures);
+        // The abandoned workers still hold their slots: a fifth preparation waits for one
+        // instead of starting another worker.
         let mut fifth = worker(|_| Ok(()));
-        assert!(matches!(poll(&mut fifth), Poll::Ready(Err(_))));
+        assert!(poll(&mut fifth).is_pending());
+        assert_eq!(PREPARING.load(Ordering::Acquire), 4);
         for exit in exits {
             exit.send(()).unwrap();
         }
+        finish(fifth).unwrap();
         let deadline = std::time::Instant::now() + Duration::from_secs(5);
         while PREPARING.load(Ordering::Acquire) != 0 {
             assert!(std::time::Instant::now() < deadline);
