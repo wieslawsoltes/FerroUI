@@ -8,7 +8,6 @@ use ferroui_base::{
     },
     platform::IFontManagerImpl,
 };
-use url::Url;
 use std::{
     io::{self, Cursor, Read},
     rc::Rc,
@@ -17,6 +16,7 @@ use std::{
         atomic::{AtomicU64, Ordering},
     },
 };
+use url::Url;
 
 // Keep the upstream emoji classifier and the native fallback filter in one place.
 pub(super) const EMOJI_RANGES: &[(i32, i32)] = &[
