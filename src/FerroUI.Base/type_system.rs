@@ -323,19 +323,19 @@ impl TypeInfo {
 
     /// Registers the table of types of a crate of the framework, at start-up
     /// from the crate's `register_types()` function; as
-    /// [`register_all`](Self::register_all). With `trim-type-tables` (without
-    /// `type-tables`) the table is trimmed: this does nothing, and what only
+    /// [`register_all`](Self::register_all). Without the feature
+    /// `type-tables` the table is trimmed: this does nothing, and what only
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register_all`](Self::register_all), which always
     /// registers.
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[cfg(feature = "type-tables")]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         Self::register_all_tables(types);
     }
 
-    /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
-    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    /// Trimmed (without `type-tables`): the table is not kept.
+    #[cfg(not(feature = "type-tables"))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         let _ = types;

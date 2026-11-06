@@ -79,19 +79,19 @@ impl MarkupAssembly {
 
     /// Registers the assembly of a crate of the framework, at start-up from
     /// the crate's `register_types()` function; as
-    /// [`register`](Self::register). With `trim-type-tables` (without
-    /// `type-tables`) the table is trimmed: this does nothing, and what only
+    /// [`register`](Self::register). Without the feature
+    /// `type-tables` the table is trimmed: this does nothing, and what only
     /// the table reaches is left out of the binary. An application registers
     /// its own assembly with [`register`](Self::register), which always
     /// registers.
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[cfg(feature = "type-tables")]
     #[inline(always)]
     pub fn register_table(assembly: &'static MarkupAssembly) {
         Self::register_tables(assembly);
     }
 
-    /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
-    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    /// Trimmed (without `type-tables`): the table is not kept.
+    #[cfg(not(feature = "type-tables"))]
     #[inline(always)]
     pub fn register_table(assembly: &'static MarkupAssembly) {
         let _ = assembly;
