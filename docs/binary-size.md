@@ -351,6 +351,48 @@ found and refused exactly as before.
 The rest of #566 makes the tables of types that every crate registers at start-up (6.5 MB of hello
 world, measured by building it without them) registered only by what looks types up by name.
 
+### 4.6 Trimming the tables of types (#566, part 2, opt-in)
+
+Every crate's `register_types()` registers its table of classes, its markup assembly and its markup
+types at start-up. The tables reference every class with its constructor, properties and markup
+accessors, so the linker keeps all of them. An application that loads only compiled markup does
+not look types up by name, and can opt out of the tables with the `ferroui-base` feature
+`trim-type-tables`:
+
+```toml
+ferroui-base = { workspace = true, features = ["trim-type-tables"] }
+```
+
+`TypeInfo::register_all`, `MarkupAssembly::register` and `MarkupType::register_all` are then
+inlined no-ops, and link-time optimisation drops what only the tables reach. A type is still
+registered when it is first used: a class when it is initialised, with its markup metadata
+(`TypeInfo::markup`).
+
+What looks types up by name enables the feature `type-tables`, which keeps the tables whatever an
+application says. These are:
+- the run-time XAML loader, the designer and `ferroui-designer-support`;
+- diagnostics, DevTools, hot reload and Inspect;
+- the declarative View API, which parses selector strings;
+- the behaviors' member lookup.
+
+Feature unification gives the tables to every application that links one of them.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size | Start-up (median of 9) |
+|---|---:|---:|
+| main | 50.78 MB | 214 ms |
+| `trim-type-tables` | 44.36 MB (**-6.42 MB, -12.6 %**) | 215 ms |
+
+The feature is opt-in for now. Without the tables, a compiled-markup application differs in three
+edge cases:
+- setting null through untyped code on a property whose value is the handle of a class that was
+  never initialised;
+- conversions of text or numbers to an enumeration in run-time bindings, which use the enumeration's
+  markup metadata;
+- looking up by name a type that was never used.
+
+Once a test run of the compiled samples without the tables covers these cases and they are fixed,
+trimming becomes the default. Hello world opts in as the example.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

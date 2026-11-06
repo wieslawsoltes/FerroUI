@@ -27,7 +27,8 @@ path = "program.rs"
 # the WinUI theme and the desktop entry point.
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
-ferroui-base = { workspace = true, features = ["markup-functions"] }
+# Compiled markup only: the tables of types are not registered at start-up (#566, opt-in).
+ferroui-base = { workspace = true, features = ["markup-functions", "trim-type-tables"] }
 ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
