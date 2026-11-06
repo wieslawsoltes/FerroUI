@@ -76,6 +76,9 @@ impl Dispatcher {
         };
 
         self.lock().frames.push(frame.clone());
+        // Boundary (#567): the try/finally of the reference around a frame of the loop. The
+        // frame runs application jobs; the frame stack and the shutdown are settled before
+        // their panic is raised again.
         let result = catch_unwind(AssertUnwindSafe(|| {
             if let Some(controlled) = impl_.as_controlled() {
                 let _restore = self.enter_job(DispatcherPriority::NORMAL);
@@ -114,6 +117,8 @@ impl Dispatcher {
         let frame = DispatcherFrame::with_dispatcher(&self.to_arc(), true);
         let to_stop = frame.clone();
         let registration = cancellation_token.register(move || to_stop.set_continue(false));
+        // Boundary (#567): the top of the dispatcher loop. The registration of the token is
+        // disposed of before a panic of a job is raised again.
         let result = catch_unwind(AssertUnwindSafe(|| self.push_frame(&frame)));
         // The frame is done; a long-lived token must not keep it alive.
         registration.dispose();

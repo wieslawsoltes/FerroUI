@@ -562,6 +562,15 @@ lto = "fat"
 codegen-units = 1
 strip = "symbols"
 
+# The shipped build without unwinding (opt-in, docs/binary-size.md, section 4.7, #567): every panic
+# ends the process. The unwind tables and the landing pads are left out: hello world's dist build
+# is 21 % smaller. What catches a panic to carry on no longer can: the dispatcher's isolation of a
+# panicking job or handler, the render loop's guard, the error scope of the WinUI importer. For an
+# application that treats any panic as fatal; not for tests, which rely on unwinding.
+[profile.dist-abort]
+inherits = "dist"
+panic = "abort"
+
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
 # The crates of the run-time XAML loader stay optimised for speed: at "z" the start-up of a themed

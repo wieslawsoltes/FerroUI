@@ -247,6 +247,8 @@ impl<T: PropertyValue> Drop for LocalBindingReload<T> {
     fn drop(&mut self) {
         // Property observers are application code and may panic. Do not double
         // panic while unwinding a failed commit; the session reports that failure.
+        // Boundary (#567): application callbacks run from a destructor, where a second panic
+        // during unwinding would abort the process.
         let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| self.rollback()));
     }
 }

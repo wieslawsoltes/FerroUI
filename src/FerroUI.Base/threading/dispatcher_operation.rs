@@ -329,6 +329,9 @@ impl OperationCore {
             local.executing_depth.set(local.executing_depth.get() + 1);
         }
 
+        // Boundary (#567): the job of the operation and its completed handlers are application
+        // code. As in the reference, the handlers run whatever the job did (finally), the
+        // executing depth is restored, and the first panic is raised again on the dispatcher.
         let outcome = catch_unwind(AssertUnwindSafe(|| {
             // The current context tells asynchronous code started by the
             // callback to continue at the priority of this operation.
@@ -367,6 +370,9 @@ impl OperationCore {
             Missing,
         }
 
+        // Boundary (#567): the callback of the operation is application code. Its panic is the
+        // exception of the operation of the reference: filtered on the dispatcher, or kept in
+        // the operation and raised again to whoever observes it.
         let result = if self.is_local {
             let job = local.and_then(|local| local.jobs.borrow_mut().remove(&self.id));
             match job {
@@ -468,6 +474,8 @@ impl OperationCore {
             let completed = self.add_completed(finished_handler.clone());
             let aborted = self.add_aborted(finished_handler);
 
+            // Boundary (#567): the try/finally of the reference around the jobs this wait runs;
+            // the handlers are removed before a panic of a job is raised again.
             let result = catch_unwind(AssertUnwindSafe(|| {
                 while self.status() == DispatcherOperationStatus::Pending {
                     let remaining = match deadline {
@@ -584,6 +592,8 @@ impl OperationCore {
             frame.set_continue(false);
         }
 
+        // Boundary (#567): the try/finally of the reference around the nested frame; the timer
+        // and the handlers go before a panic of a job is raised again.
         let result = catch_unwind(AssertUnwindSafe(|| self.dispatcher.push_frame(&frame)));
         if let Some(wait_timer) = wait_timer {
             wait_timer.stop();
@@ -607,6 +617,9 @@ impl OperationCore {
             let mut inner = self.lock();
             (inner.panic.take(), inner.result.take())
         };
+        // Boundary (#567): the panic of the callback, kept by the operation, is raised again to
+        // the code that takes the result, as the reference rethrows the exception of an
+        // operation.
         if let Some(payload) = panic {
             resume_unwind(payload);
         }
@@ -758,6 +771,8 @@ impl<R: 'static> DispatcherOperation<R> {
             return Err(Canceled);
         }
         let panic = self.core.lock().panic.take();
+        // Boundary (#567): the panic of the callback is raised again to the waiter, as the
+        // reference rethrows the exception of the operation.
         if let Some(payload) = panic {
             resume_unwind(payload);
         }
