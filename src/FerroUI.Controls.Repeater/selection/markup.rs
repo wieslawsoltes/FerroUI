@@ -119,7 +119,7 @@ const TYPES: &[&MarkupType] = &[
 ];
 
 pub fn register_markup_types() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
     ValueTypes::register_global(register_value_types);
     super::selected_items_markup::register_markup_types();
 }

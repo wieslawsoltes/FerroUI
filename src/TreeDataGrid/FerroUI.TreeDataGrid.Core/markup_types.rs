@@ -20,7 +20,7 @@ const TYPES: &[&MarkupType] = &[<ListSortDirection as MarkupTyped>::MARKUP, <Row
 /// `register_types`.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
-    ONCE.call_once(|| MarkupType::register_all(TYPES));
+    ONCE.call_once(|| MarkupType::register_table(TYPES));
     ValueTypes::register_global(|| {
         ValueTypes::register_nullable::<ListSortDirection>();
         ValueTypes::register_nullable::<RowDropPosition>();

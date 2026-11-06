@@ -49,7 +49,7 @@ fn notifier(value: &dyn AnyValue) -> Option<&dyn INotifyPropertyChanged> {
         .as_notify_property_changed()
 }
 pub(crate) fn register() {
-    MarkupType::register(&METADATA);
+    MarkupType::register_table(&[&METADATA]);
     // The notifier descriptor is the registered identity; emitted members still
     // belong to the original public declaration carrier.
     ferroui_base::__ferro_compiler_metadata! {

@@ -274,11 +274,11 @@ const MARKUP_TYPE_LISTS: &[&[&MarkupType]] =
     &[input_element::INPUT_ELEMENT_MARKUP_TYPES, validation::VALIDATION_MARKUP_TYPES];
 
 /// Registers the Rust paths (`ferroui_base::ferro_rust_paths!`) and the markup types
-/// (`MarkupType::register_all`) of this part. Called once by `register_types`.
+/// (`MarkupType::register_table`) of this part. Called once by `register_types`.
 pub(crate) fn register() {
     rust_paths::register_rust_paths();
     for types in MARKUP_TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
     ValueTypes::register_global(register_value_types);
 }

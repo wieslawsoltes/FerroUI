@@ -79,7 +79,7 @@ ferroui_base::ferro_markup_type!(class SplitViewDockReference as "SplitViewDock"
  methods: [fn OpenPane() => (|this: &SplitViewDockReference| this.model.open_pane()),fn ClosePane() => (|this: &SplitViewDockReference| this.model.close_pane()),fn TogglePane() => (|this: &SplitViewDockReference| this.model.toggle_pane())],
 });
 pub(crate) fn register() {
-    MarkupType::register(SplitViewDockReference::MARKUP);
+    MarkupType::register_table(&[SplitViewDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn ISplitViewDock>>();
     ValueTypes::register_cast::<Rc<dyn ISplitViewDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn ISplitViewDock>, Rc<dyn IDock>>(|model| model.clone());

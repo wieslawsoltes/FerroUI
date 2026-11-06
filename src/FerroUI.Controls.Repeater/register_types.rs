@@ -68,11 +68,11 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         #[cfg(any(test, feature = "testing"))]
         TypeInfo::register_all(TEST_HOOK_TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
         crate::markup::register_types();
         crate::layouts::layouts_markup::register_types();
         crate::services_markup::register_types();

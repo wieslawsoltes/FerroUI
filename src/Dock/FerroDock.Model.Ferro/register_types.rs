@@ -124,7 +124,7 @@ pub fn register_types() {
             (SplitViewPanePlacementMetadata::MARKUP, "::ferrodock_model_ferro::SplitViewPanePlacementMetadata", false),
         ]);
     }
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         DockCapabilityValueSourceMetadata::MARKUP,
         DockTrackingChangeReasonMetadata::MARKUP,
         AlignmentMetadata::MARKUP,
@@ -149,7 +149,7 @@ pub fn register_types() {
         SplitViewDisplayModeMetadata::MARKUP,
         SplitViewPanePlacementMetadata::MARKUP,
     ]);
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }
 
 mod factory_paths {

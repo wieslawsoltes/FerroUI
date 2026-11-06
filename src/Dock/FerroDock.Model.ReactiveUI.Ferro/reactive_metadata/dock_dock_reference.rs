@@ -70,7 +70,7 @@ ferroui_base::ferro_markup_type!(class DockDockReference as "DockDock" {
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(DockDockReference::MARKUP);
+    MarkupType::register_table(&[DockDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IDockDock>>();
     ValueTypes::register_cast::<Rc<dyn IDockDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IDockDock>, Rc<dyn IDock>>(|model| model.clone());

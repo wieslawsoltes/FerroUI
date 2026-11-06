@@ -28,17 +28,17 @@ pub fn register_types() {
         std::rc::Rc<DeferredContentPresentationTimeline>,
     >();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         <DeferredContentControl as StaticType>::TYPE,
         <DeferredContentPresenter as StaticType>::TYPE,
         <DeferredContentScheduling as StaticType>::TYPE,
     ]);
     register_rust_paths();
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         <crate::DeferredContentPresentationSettings as MarkupTyped>::MARKUP,
         <dyn crate::IDeferredContentPresentation as MarkupTyped>::MARKUP,
         <DeferredContentPresentationBudgetMode as MarkupTyped>::MARKUP,
         <DeferredContentPresentationTimeline as MarkupTyped>::MARKUP,
     ]);
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

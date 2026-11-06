@@ -22,9 +22,9 @@ pub fn register_types() {
     ferrodock_model_ferro::register_types();
     ferroui_controls::register_types();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[<DockProperties as StaticType>::TYPE]);
+    TypeInfo::register_table(&[<DockProperties as StaticType>::TYPE]);
     register_rust_paths();
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         DockSettings::MARKUP,
         DockSettingsOptions::MARKUP,
         DockFloatingWindowOwnerPolicy::MARKUP,
@@ -32,5 +32,5 @@ pub fn register_types() {
         DockCommandBarMergingScope::MARKUP,
         WindowDragDockScope::MARKUP,
     ]);
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

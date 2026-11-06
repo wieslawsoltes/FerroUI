@@ -1099,28 +1099,46 @@ impl MarkupType {
     /// [`find_by_handle`](Self::find_by_handle). Registering a type again
     /// does nothing.
     ///
-    /// A crate registers its types from its `register_types()` function.
-    /// The metadata of a class of the object model needs no registration to
-    /// be reachable from its runtime type ([`TypeInfo::markup`]).
+    /// Always registers. An application registers its own types with this
+    /// function; a crate of the framework registers its table of types from
+    /// its `register_types()` function with
+    /// [`register_table`](Self::register_table). The metadata of a class of
+    /// the object model needs no registration to be reachable from its
+    /// runtime type ([`TypeInfo::markup`]).
     pub fn register(type_: &'static MarkupType) {
         Self::register_all(&[type_]);
     }
 
     /// Registers several types; see [`register`](Self::register).
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    ///
+    /// Always registers. An application registers its own types with this
+    /// function or [`register`](Self::register); a crate of the framework
+    /// registers its table of types with [`register_table`](Self::register_table).
     #[inline(always)]
     pub fn register_all(types: &[&'static MarkupType]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Registers the table of types of a crate of the framework, at start-up
+    /// from the crate's `register_types()` function; as
+    /// [`register_all`](Self::register_all). With `trim-type-tables` (without
+    /// `type-tables`) the table is trimmed: this does nothing, and what only
+    /// the table reaches is left out of the binary. An application registers
+    /// its own types with [`register`](Self::register) or
+    /// [`register_all`](Self::register_all), which always register.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
+    pub fn register_table(types: &[&'static MarkupType]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
     #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
     #[inline(always)]
-    pub fn register_all(types: &[&'static MarkupType]) {
+    pub fn register_table(types: &[&'static MarkupType]) {
         let _ = types;
     }
 
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
     fn register_all_tables(types: &[&'static MarkupType]) {
         let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
         for type_ in types {

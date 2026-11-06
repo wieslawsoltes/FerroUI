@@ -22,10 +22,10 @@ const TYPE_LISTS: &[&[&MarkupType]] = &[converters::TYPES, enums::TYPES];
 /// once by `register_types()`.
 pub(crate) fn register() {
     for types in TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
     #[cfg(feature = "file-system")]
-    MarkupType::register_all(crate::file_system::MARKUP_TYPES);
+    MarkupType::register_table(crate::file_system::MARKUP_TYPES);
     ValueTypes::register_global(register_value_types);
 }
 

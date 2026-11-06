@@ -14,7 +14,7 @@ use std::rc::Rc;
 pub trait ILocalTargetMetadata {}
 ferroui_base::ferro_markup_type!(interface dyn ILocalTargetMetadata as "ILocalTarget"{namespace:"FerroDock.Model.Core",handles:[Rc<dyn ILocalTarget>,Option<Rc<dyn ILocalTarget>>]});
 pub(crate) fn register() {
-    MarkupType::register(<dyn ILocalTargetMetadata as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<dyn ILocalTargetMetadata as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn ILocalTarget>>();
     ValueTypes::register_reference_identity::<Rc<dyn ILocalTarget>>(|value| {
         Rc::as_ptr(value).cast::<()>()

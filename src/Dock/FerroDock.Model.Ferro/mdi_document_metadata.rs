@@ -38,7 +38,7 @@ fn notifier(value: &dyn AnyValue) -> Option<&dyn INotifyPropertyChanged> {
         .as_notify_property_changed()
 }
 pub(crate) fn register() {
-    MarkupType::register(&METADATA);
+    MarkupType::register_table(&[&METADATA]);
     ValueTypes::register_nullable::<Rc<dyn IMdiDocument>>();
     ValueTypes::register_cast::<Rc<dyn IMdiDocument>, Rc<dyn ferrodock_model::controls::IDocument>>(
         |model| model.clone(),

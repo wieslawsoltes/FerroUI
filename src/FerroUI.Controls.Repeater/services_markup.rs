@@ -239,7 +239,7 @@ const TYPES: &[&MarkupType] = &[
 ];
 
 pub(crate) fn register_types() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
     #[cfg(any(test, feature = "testing"))]
     MarkupType::register_all(&[<RepeaterTestHooks as MarkupTyped>::MARKUP]);
     ValueTypes::register_global(register_value_types);

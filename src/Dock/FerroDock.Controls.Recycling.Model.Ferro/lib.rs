@@ -21,8 +21,8 @@ ferroui_base::ferro_rust_paths! {classes:[],types:[],contracts:[crate::IControlR
 pub fn register_types() {
     ferroui_base::register_types();
     register_rust_paths();
-    MarkupAssembly::register(&ASSEMBLY);
-    MarkupType::register_all(&[
+    MarkupAssembly::register_table(&ASSEMBLY);
+    MarkupType::register_table(&[
         <dyn IControlRecyclingMetadata>::MARKUP,
         <dyn IControlRecyclingIdProviderMetadata>::MARKUP,
     ]);

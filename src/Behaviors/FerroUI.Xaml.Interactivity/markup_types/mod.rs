@@ -31,7 +31,7 @@ const TYPE_LISTS: &[&[&MarkupType]] = &[collections::TYPES, enums::TYPES, intera
 /// once by `register_types()`.
 pub(crate) fn register() {
     for types in TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
     ValueTypes::register_global(register_value_types);
 }

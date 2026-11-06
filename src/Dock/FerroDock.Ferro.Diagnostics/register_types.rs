@@ -40,28 +40,28 @@ pub fn register_types() {
     >();
 
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[crate::controls::RootDockDebugExtensions::TYPE]);
-    ferroui_base::metadata::MarkupType::register(
+    TypeInfo::register_table(&[crate::controls::RootDockDebugExtensions::TYPE]);
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::controls::RootDockDebugExtensions as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
 
     crate::behaviors::root_dock_debug_behavior::register_items();
     crate::behaviors::RootDockDebugBehavior::TYPE.ensure_class_init();
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::behaviors::RootDockDebugBehavior as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
 
-    ferroui_base::metadata::MarkupAssembly::register(&ASSEMBLY);
-    ferroui_base::metadata::MarkupType::register(
+    ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
+    ferroui_base::metadata::MarkupType::register_table(&[
         <crate::DockDebugOverlayExtensions as ferroui_base::metadata::MarkupTyped>::MARKUP,
-    );
+    ]);
     TypeInfo::register_namespaces(&[(
         "ferrodock_ferro_diagnostics::dock_debug_overlay_extensions",
         "FerroDock.Ferro.Diagnostics",
     )]);
-    TypeInfo::register_all(&[crate::DockDebugOverlayExtensions::TYPE]);
+    TypeInfo::register_table(&[crate::DockDebugOverlayExtensions::TYPE]);
     crate::compiled_markup::register();
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         crate::controls::RootDockDebug::TYPE,
         crate::controls::DockableDebugView::TYPE,
         crate::controls::DockDebugView::TYPE,
@@ -91,7 +91,7 @@ pub fn register_types() {
         "ferrodock_ferro_diagnostics::controls::debug_overlay_adorner",
         "FerroDock.Ferro.Diagnostics.Controls",
     )]);
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         crate::controls::SelectionOverlayAdorner::TYPE,
         crate::controls::DebugOverlayAdorner::TYPE,
     ]);

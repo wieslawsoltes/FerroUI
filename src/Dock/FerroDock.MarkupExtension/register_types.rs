@@ -18,6 +18,6 @@ ferroui_base::ferro_rust_paths! {classes:[],types:[crate::LoadExtension,crate::R
 pub fn register_types() {
     ferroui_markup_xaml::register_types();
     register_rust_paths();
-    MarkupType::register_all(&[LoadExtension::MARKUP, ReferenceExtension::MARKUP]);
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupType::register_table(&[LoadExtension::MARKUP, ReferenceExtension::MARKUP]);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

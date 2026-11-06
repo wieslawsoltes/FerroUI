@@ -257,10 +257,10 @@ mod rust_paths {
 }
 
 /// Registers the Rust paths (`ferroui_base::ferro_rust_paths!`) and the markup types
-/// (`MarkupType::register_all`) of this part. Called once by `register_types`.
+/// (`MarkupType::register_table`) of this part. Called once by `register_types`.
 pub(crate) fn register() {
     rust_paths::register_rust_paths();
-    MarkupType::register_all(MARKUP_TYPES);
+    MarkupType::register_table(MARKUP_TYPES);
     ValueTypes::register_global(register_value_types);
 }
 
