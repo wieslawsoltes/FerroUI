@@ -443,8 +443,15 @@ jobs:
         run: |
           echo "raster=false" >> "$GITHUB_OUTPUT"
           cargo fetch --locked --target x86_64-pc-windows-msvc
-          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
-          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          if [ -f external/rust-skia-bindings/.cargo_vcs_info.json ]; then
+            # The workspace patches skia-bindings with a copy of the published crate (the Graphite
+            # Metal fix): its revision and version are the published crate's.
+            info=external/rust-skia-bindings/.cargo_vcs_info.json
+            version="$(sed -n 's/^version = "\(.*\)"$/\1/p' external/rust-skia-bindings/Cargo.toml | head -n 1)"
+          else
+            info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+            version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          fi
           hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
           echo "skia-bindings $version, commit $hash"
           published() {
@@ -804,8 +811,15 @@ jobs:
       - name: Skia binaries published for Linux
         run: |
           cargo fetch --locked --target x86_64-unknown-linux-gnu
-          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
-          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          if [ -f external/rust-skia-bindings/.cargo_vcs_info.json ]; then
+            # The workspace patches skia-bindings with a copy of the published crate (the Graphite
+            # Metal fix): its revision and version are the published crate's.
+            info=external/rust-skia-bindings/.cargo_vcs_info.json
+            version="$(sed -n 's/^version = "\(.*\)"$/\1/p' external/rust-skia-bindings/Cargo.toml | head -n 1)"
+          else
+            info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+            version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          fi
           hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
           echo "skia-bindings $version, commit $hash"
           missing=0
