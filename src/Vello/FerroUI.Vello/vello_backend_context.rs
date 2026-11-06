@@ -73,12 +73,28 @@ impl VelloContext {
 }
 
 impl IOptionalFeatureProvider for VelloContext {
-    fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    /// The features of the GPU of the context (the import of images of other devices).
+    fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            return gpu.try_get_feature(feature_type);
+        }
+        let _ = feature_type;
         None
     }
 }
 
 impl IPlatformRenderInterfaceContext for VelloContext {
+    /// Advances the release of the frames of producers the device reads, without waiting:
+    /// whether some are still read.
+    fn poll_pending_gpu_work(&self) -> bool {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            return gpu.device().poll_frame_reads();
+        }
+        false
+    }
+
     fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(gpu) = &self.gpu {

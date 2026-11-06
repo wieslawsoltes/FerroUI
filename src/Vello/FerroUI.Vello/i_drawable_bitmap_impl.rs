@@ -39,6 +39,10 @@ pub fn try_get_drawable_bitmap(bitmap: &dyn IBitmapImpl) -> Option<&dyn IDrawabl
     if let Some(bitmap) = any.downcast_ref::<crate::gpu::DeviceSurfaceRenderTarget>() {
         return Some(bitmap);
     }
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    if let Some(bitmap) = any.downcast_ref::<crate::gpu::VelloSharedFrameBitmap>() {
+        return Some(bitmap);
+    }
 
     None
 }

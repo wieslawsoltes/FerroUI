@@ -529,6 +529,51 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
 }
 "#;
 
+/// A frame of a producer (a video or a camera) as premultiplied RGBA of the canvas
+/// (`FrameConversion`): read in whatever format its storage has (BGRA or RGBA), turned upright when
+/// its first row is the bottom one, made opaque when the frame is, and, for full-range Rec. 709
+/// video, the BT.1886 reference curve turned into sRGB values (the curve of the Skia backend's
+/// colour filter, `leased_gpu_bitmap.rs`).
+const FRAME_CONVERSION_WGSL: &str = r#"
+struct Params {
+    // x: 1 for full-range Rec. 709, y: 1 when the first row is the bottom one, z: 1 when the
+    // frame is opaque.
+    mode: vec4<f32>,
+    // x, y: the size of the frame in pixels.
+    size: vec4<f32>,
+}
+
+@group(0) @binding(0) var<uniform> params: Params;
+@group(0) @binding(1) var frame: texture_2d<f32>;
+
+fn rec709_to_srgb(c: vec3<f32>) -> vec3<f32> {
+    let v = pow(max(c, vec3<f32>(0.0)), vec3<f32>(2.4));
+    let low = 12.92 * v;
+    let high = 1.055 * pow(v, vec3<f32>(1.0 / 2.4)) - 0.055;
+    return select(high, low, v < vec3<f32>(0.0031308));
+}
+
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let pixel = vec2<i32>(floor(fragment.xy));
+    if (f32(pixel.x) >= params.size.x || f32(pixel.y) >= params.size.y) {
+        return vec4<f32>(0.0);
+    }
+    var source = pixel;
+    if (params.mode.y > 0.5) {
+        source.y = i32(params.size.y) - 1 - pixel.y;
+    }
+    var c = textureLoad(frame, source, 0);
+    if (params.mode.z > 0.5) {
+        c.a = 1.0;
+    }
+    if (params.mode.x > 0.5) {
+        c = vec4<f32>(rec709_to_srgb(c.rgb), c.a);
+    }
+    return c;
+}
+"#;
+
 /// The pixel operations of two sources (`PixelOperation`): the formulas of
 /// `blend_pixels`, `arithmetic_pixels` and `mask_invert_pixels` of the
 /// compositor, the next source (`source`) combined into what the sources
@@ -779,6 +824,7 @@ enum LayerProgram {
     LightMultiply,
     PixelOperation,
     Convolution,
+    FrameConversion,
 }
 
 impl LayerProgram {
@@ -788,6 +834,7 @@ impl LayerProgram {
             LayerProgram::LightMultiply => "FerroUI light multiply",
             LayerProgram::PixelOperation => "FerroUI pixel operation",
             LayerProgram::Convolution => "FerroUI convolution",
+            LayerProgram::FrameConversion => "FerroUI frame conversion",
         }
     }
 
@@ -798,6 +845,7 @@ impl LayerProgram {
             LayerProgram::LightMultiply => format!("{LIGHT_COMMON_WGSL}{LIGHT_MULTIPLY_FRAGMENT_WGSL}"),
             LayerProgram::PixelOperation => format!("{LAYER_VERTEX_WGSL}{PIXEL_OPERATION_WGSL}"),
             LayerProgram::Convolution => format!("{LAYER_VERTEX_WGSL}{CONVOLUTION_WGSL}"),
+            LayerProgram::FrameConversion => format!("{LAYER_VERTEX_WGSL}{FRAME_CONVERSION_WGSL}"),
         }
     }
 
@@ -815,6 +863,7 @@ impl LayerProgram {
             LayerProgram::ColorMatrix => 6 * 4,
             LayerProgram::LightMultiply => HEAD_FLOATS + LIGHT_FLOATS * MAX_LIGHTS,
             LayerProgram::PixelOperation => 6 * 4,
+            LayerProgram::FrameConversion => 2 * 4,
             LayerProgram::Convolution => 10 * 4,
         }
     }
@@ -1056,6 +1105,11 @@ fn run_layer_pass(
             pass.draw(0..3, 0..1);
         }
         device.queue().submit(Some(encoder.finish()));
+        if program == LayerProgram::FrameConversion {
+            // Each frame of a producer is converted once: its bind group would only keep the
+            // frame's storage alive.
+            pipeline.bind_groups.remove(index);
+        }
     });
     Some(output)
 }
@@ -1066,6 +1120,21 @@ fn run_layer_pass(
 pub(crate) struct LayerArea {
     pub(crate) width: u32,
     pub(crate) height: u32,
+}
+
+/// `frame` (a texture wrapping a producer's storage) as a texture of the pool of its size, in
+/// premultiplied RGBA: see [`FRAME_CONVERSION_WGSL`]. The pass is submitted: once the queue has
+/// done it, the producer's storage is no longer read.
+pub(crate) fn frame_conversion_texture(
+    device: &Arc<VelloWgpuDevice>,
+    frame: &Arc<VelloDeviceTexture>,
+    rec709: bool,
+    bottom_up: bool,
+    opaque: bool,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let flag = |value: bool| if value { 1.0 } else { 0.0 };
+    let floats = [flag(rec709), flag(bottom_up), flag(opaque), 0.0, frame.width() as f32, frame.height() as f32, 0.0, 0.0];
+    run_layer_pass(device, LayerProgram::FrameConversion, &floats, &[frame])
 }
 
 /// `content` through `matrix` in `alpha_mode`.

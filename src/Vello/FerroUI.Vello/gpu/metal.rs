@@ -95,6 +95,9 @@ pub struct VelloMetalGpu {
     /// platform waits for, and the value it was signaled with last.
     event: Option<Retained<ProtocolObject<dyn MTLSharedEvent>>>,
     signaled: Cell<u64>,
+    /// The import of images and shared events of other devices, when the platform's Metal device
+    /// can import them.
+    external_objects: Option<Rc<crate::gpu::external_objects::VelloExternalObjectsFeature>>,
 }
 
 impl VelloMetalGpu {
@@ -171,7 +174,24 @@ impl VelloMetalGpu {
         // Layers and bitmaps of the GPU modes are drawn on this device too.
         device.prefer();
 
-        Ok(Rc::new(Self { metal, device, queue: own_queue, platform_queue, event, signaled: Cell::new(0) }))
+        // The generation of the graphics resources of this device: frames made for an earlier
+        // device are refused.
+        static GENERATIONS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let generation = GENERATIONS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &*metal;
+        let external_objects = features.try_get::<dyn ferroui_metal::IMetalExternalObjectsFeature>().map(|inner| {
+            Rc::new(crate::gpu::external_objects::VelloExternalObjectsFeature::new(device.clone(), generation, inner))
+        });
+
+        Ok(Rc::new(Self {
+            metal,
+            device,
+            queue: own_queue,
+            platform_queue,
+            event,
+            signaled: Cell::new(0),
+            external_objects,
+        }))
     }
 
     /// Orders what the platform commits to its queue from now on (the
@@ -288,9 +308,81 @@ impl VelloMetalGpu {
     }
 }
 
+/// Wraps an `id<MTLTexture>` made outside of the backend (a frame of a video or a camera that
+/// the platform imported) as a texture of `device` that is sampled: two dimensions, one layer and
+/// one level, `BGRA8Unorm` or `RGBA8Unorm`. The wrapped texture retains the object.
+///
+/// # Errors
+/// When the pointer is null or the texture is of another kind or format.
+pub(crate) fn wrap_external_texture(device: &Arc<VelloWgpuDevice>, raw_texture: *mut c_void) -> Result<wgpu::Texture, String> {
+    // SAFETY: the platform's imported texture hands out a valid `id<MTLTexture>` (or null) that it
+    // keeps alive while it is imported; `retain` takes a reference of its own, which the wrapped
+    // texture releases when `wgpu` drops it.
+    let texture: Retained<ProtocolObject<dyn MTLTexture>> =
+        unsafe { Retained::retain(raw_texture.cast()) }.ok_or("the imported image has no texture")?;
+    if texture.textureType() != MTLTextureType::Type2D || texture.mipmapLevelCount() != 1 || texture.sampleCount() != 1 {
+        return Err("the imported texture is not a two-dimensional texture of one level and one sample".into());
+    }
+    let format = match texture.pixelFormat() {
+        MTLPixelFormat::BGRA8Unorm => wgpu::TextureFormat::Bgra8Unorm,
+        MTLPixelFormat::RGBA8Unorm => wgpu::TextureFormat::Rgba8Unorm,
+        other => return Err(format!("the imported texture has the pixel format {other:?}")),
+    };
+    let size = wgpu::Extent3d { width: texture.width() as u32, height: texture.height() as u32, depth_or_array_layers: 1 };
+    // SAFETY: the object is a texture of two dimensions with one layer, one level and one sample,
+    // in the format and of the size it was just asked for.
+    let hal_texture = unsafe {
+        hal::metal::Device::texture_from_raw(
+            texture,
+            format,
+            MTLTextureType::Type2D,
+            1,
+            1,
+            hal::CopyExtent { width: size.width, height: size.height, depth: 1 },
+            None,
+        )
+    };
+    let descriptor = wgpu::TextureDescriptor {
+        label: Some("FerroUI Vello imported frame"),
+        size,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING,
+        view_formats: &[],
+    };
+    // SAFETY: the texture is a texture of the Metal device this `wgpu` device was made over (the
+    // platform imports images into the device it hands out), it matches the descriptor, and its
+    // content is the producer's frame, which was complete when it was handed over: it is read as
+    // initialized memory.
+    Ok(unsafe {
+        device.device().create_texture_from_hal::<hal::api::Metal>(hal_texture, &descriptor, wgpu::TextureUses::RESOURCE)
+    })
+}
+
 impl IVelloGpu for VelloMetalGpu {
     fn device(&self) -> &Arc<VelloWgpuDevice> {
         &self.device
+    }
+
+    /// The platform's Metal device, the handle wrapping feature of the device, and the external
+    /// objects feature of the GPU when the device can import images.
+    fn try_get_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+        use ferroui_base::platform::{
+            IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
+        };
+        if feature_type == std::any::TypeId::of::<dyn IMetalDevice>() {
+            return Some(Rc::new(self.metal.clone()));
+        }
+        if feature_type == std::any::TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
+            return self.metal.try_get_feature(feature_type);
+        }
+        if feature_type == std::any::TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
+            return Some(Rc::new(feature));
+        }
+        None
     }
 
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
