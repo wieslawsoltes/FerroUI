@@ -393,6 +393,42 @@ edge cases:
 Once a test run of the compiled samples without the tables covers these cases and they are fixed,
 trimming becomes the default. Hello world opts in as the example.
 
+### 4.7 Unwinding (#567)
+
+Every function that owns a value with a destructor has a landing pad and unwind records, so a panic
+can run the destructors on its way up. In hello world's `dist` build these are 6.63 MB of unwind
+sections (`__eh_frame` 3.67 MB, `__gcc_except_tab` 2.23 MB, `__unwind_info` 0.73 MB) and about
+3.1 MB of landing-pad code in `__text`.
+
+Panics used as exceptions are not what keeps them. `ferroui-base` has 30 sites of
+`catch_unwind`, `resume_unwind` and `panic_any` outside tests, and every one is a boundary:
+the dispatcher loop and its jobs, the render loop, the isolation of user handlers, or the rethrow
+of a caught panic after cleanup (the try/finally of the original). The classification is in
+[porting/panics-as-exceptions.md](porting/panics-as-exceptions.md). Turning panics into `Result`
+removes few of these records. The cost comes from unwinding itself.
+
+An application that treats any panic as fatal can build without unwinding, with the opt-in
+profile `dist-abort` (`cargo build --profile dist-abort`, `panic = "abort"` over `dist`):
+
+| `samples/HelloWorld`, macOS ARM64, tables of types trimmed | `dist` | `dist-abort` |
+|---|---:|---:|
+| executable | 45.28 MB | 35.71 MB (**-9.57 MB, -21 %**) |
+| `__text` | 34.48 MB | 31.35 MB |
+| unwind sections | 6.63 MB | 0.26 MB |
+
+What changes with `dist-abort`: a panic ends the process at once, without running destructors.
+- The dispatcher no longer isolates a panicking job or event handler. With unwinding, the panic is
+  caught, the frame is cleaned up and the panic is raised again on the dispatcher, the way the
+  original rethrows an exception of a handler.
+- The render loop no longer survives a panicking frame.
+- Compiled markup throws a markup error as a panic (`ferroui_markup_xaml::throw`). That is already
+  fatal outside an error scope. The error scope of the WinUI importer (`with_xaml_errors`) can no
+  longer turn such a throw into `Err`.
+- The Designer reports invalid animations by catching their panics, so it is not built with this
+  profile.
+
+The default stays `dist`, with unwinding.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
