@@ -7,7 +7,9 @@
 //! path built at run time from metadata gets it from
 //! [`MarkupProperty::typed_path_element`](super::MarkupProperty::typed_path_element),
 //! which the declaration macros generate for every `properties:` entry from
-//! its accessors.
+//! its accessors (none where the instance type cannot be a shared handle: a
+//! class of the object model, a value type declared as `struct` without
+//! `this:`, a contract without `this:`).
 //!
 //! The hook produces the typed element when the instance type of the
 //! declaration (`this:`) is `Rc<S>` with `S: PartialEq` (a shared reference

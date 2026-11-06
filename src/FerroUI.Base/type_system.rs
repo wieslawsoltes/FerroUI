@@ -1465,7 +1465,8 @@ macro_rules! ferro_class_info {
                         markup.this = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                         markup.value = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                     );
-                    $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
+                    // A class handle is no shared handle: its properties have no typed path hook.
+                    $crate::__ferro_markup_items!(markup, $crate::Ref<$name>, untyped; $($body)*);
                     markup
                 };
                 ::std::option::Option::Some(&MARKUP)

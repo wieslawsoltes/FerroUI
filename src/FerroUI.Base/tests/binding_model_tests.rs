@@ -889,12 +889,9 @@ mod metadata_typed_path {
 
     #[test]
     fn other_declarations_have_no_typed_path_element() {
-        let builder = CompiledBindingPathBuilder::new();
-        // A value type: no shared handle.
+        // A value type: no shared handle, so no hook either.
         let plain = <HookPlain as MarkupTyped>::MARKUP.find_property("Value").unwrap();
-        assert!((plain.typed_path_element.expect("the hook"))(&builder, false).is_none());
-        // Nothing was added to the path.
-        assert_eq!(builder.build().elements().count(), 0);
+        assert!(plain.typed_path_element.is_none());
     }
 
     /// A property of the untyped value type (`object`) holds a value of any type: what a

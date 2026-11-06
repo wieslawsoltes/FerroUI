@@ -568,7 +568,9 @@ pub struct MarkupProperty {
     /// forms from the accessors; the hook returns `None` (and the caller
     /// uses the untyped element) unless the instance type of the declaration
     /// is a shared reference type `Rc<S>` (notifying or not). `None` for a static
-    /// property and for a property with a fallible setter. See
+    /// property, for a property with a fallible setter and for a declaration
+    /// whose instance type cannot be such a handle (a class of the object
+    /// model, a `struct` or a contract without `this:`). See
     /// [`typed_path`](super::typed_path).
     pub typed_path_element: Option<super::typed_path::TypedPathElement>,
     /// The typed accessor functions the declaration generated for the
