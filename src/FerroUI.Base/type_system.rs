@@ -633,6 +633,12 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
     /// The virtual table of the class.
     type VTable: Copy + 'static;
 
+    /// The virtual table of the class: [`Subclassable::VTABLE`] of the class
+    /// for itself, a constant. What [`vtable`](Self::vtable) returns is a
+    /// static holding it.
+    #[doc(hidden)]
+    const CLASS_VTABLE: Self::VTable;
+
     /// The virtual table used by instances whose most-derived class is `Self`.
     fn vtable() -> &'static Self::VTable;
 
@@ -658,23 +664,52 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
 }
 
 /// Implemented by a class `C` for every class `T` that can derive from it:
-/// builds `C`'s part of the virtual table with `T`'s overrides.
+/// `C`'s part of the virtual table with `T`'s overrides.
+///
+/// The table is a constant: every slot is known when the program is compiled
+/// (the function of `T`, or the slot of the parent table that a member `T`
+/// does not override forwards to), so a class's table is data in the
+/// executable, not code that builds it at run time (#569).
 pub trait Subclassable<T>: ObjectType {
     #[doc(hidden)]
-    fn build_vtable() -> Self::VTable;
+    const VTABLE: Self::VTable;
 }
 
-/// Initialises a class table through the common callback type for its layout.
+/// Reads the table `V` at the start of the table `P` of a derived class: the
+/// tables are `#[repr(C)]` and start with the tables of all their ancestors
+/// ([`ObjectType`]), so `V` is a prefix of `P`. Used where a constant table
+/// takes a slot of its parent's table.
 ///
-/// The accessor keeps its initialized read inline. This slow path specializes
-/// on the table type, rather than on each class's distinct builder function
-/// item. `OnceLock` retains its synchronization and retry-after-panic behavior.
+/// # Safety
+///
+/// `V` must be the table of `P`'s class or of one of its ancestors.
 #[doc(hidden)]
-#[cold]
-#[inline(never)]
-pub fn __init_vtable<V: 'static>(cell: &'static std::sync::OnceLock<V>, initialize: fn() -> V) -> &'static V {
-    cell.get_or_init(initialize)
+pub const unsafe fn __vtable_prefix<P: Copy, V: Copy>(table: P) -> V {
+    #[repr(C)]
+    union Prefix<P: Copy, V: Copy> {
+        whole: P,
+        prefix: V,
+    }
+    assert!(std::mem::size_of::<V>() <= std::mem::size_of::<P>(), "virtual member has no base implementation");
+    // SAFETY: by the contract `V` is a prefix of `P`, whose bytes are all
+    // initialised (tables hold only pointers).
+    unsafe { Prefix::<P, V> { whole: table }.prefix }
 }
+
+/// The table `V` at the start of the table of `T`'s parent class: the slots a
+/// constant table takes from its parent. A function, so that a table names
+/// its parent's table only where a slot forwards (the root class is its own
+/// parent).
+///
+/// # Safety
+///
+/// `V` must be the table of `T`'s parent class or of one of its ancestors.
+#[doc(hidden)]
+pub const unsafe fn __parent_vtable_part<T: ObjectType, V: Copy>() -> V {
+    // SAFETY: as the caller guarantees.
+    unsafe { __vtable_prefix::<<T::Parent as ObjectType>::VTable, V>(<T::Parent as ObjectType>::CLASS_VTABLE) }
+}
+
 
 /// Reinterprets a reference to base class data as a reference to the derived
 /// class `T`.
@@ -1194,16 +1229,12 @@ macro_rules! ferro_class {
             type Parent = $base;
             type VTable = <$base as $crate::ObjectType>::VTable;
 
+            const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+
+            #[inline]
             fn vtable() -> &'static Self::VTable {
-                static VTABLE: ::std::sync::OnceLock<<$base as $crate::ObjectType>::VTable> =
-                    ::std::sync::OnceLock::new();
-                match VTABLE.get() {
-                    ::std::option::Option::Some(table) => table,
-                    ::std::option::Option::None => $crate::__init_vtable(
-                        &VTABLE,
-                        <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
-                    ),
-                }
+                static VTABLE: <$base as $crate::ObjectType>::VTable = <$name as $crate::ObjectType>::CLASS_VTABLE;
+                &VTABLE
             }
 
             $crate::ferro_class!(@register_class $name: $base);
@@ -1213,10 +1244,7 @@ macro_rules! ferro_class {
         where
             $base: $crate::Subclassable<T>,
         {
-            #[inline]
-            fn build_vtable() -> Self::VTable {
-                <$base as $crate::Subclassable<T>>::build_vtable()
-            }
+            const VTABLE: Self::VTable = <$base as $crate::Subclassable<T>>::VTABLE;
         }
     };
 
@@ -1246,15 +1274,12 @@ macro_rules! ferro_class {
                 type Parent = $base;
                 type VTable = [<$name VTable>];
 
+                const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+
+                #[inline]
                 fn vtable() -> &'static Self::VTable {
-                    static VTABLE: ::std::sync::OnceLock<[<$name VTable>]> = ::std::sync::OnceLock::new();
-                    match VTABLE.get() {
-                        ::std::option::Option::Some(table) => table,
-                        ::std::option::Option::None => $crate::__init_vtable(
-                            &VTABLE,
-                            <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
-                        ),
-                    }
+                    static VTABLE: [<$name VTable>] = <$name as $crate::ObjectType>::CLASS_VTABLE;
+                    &VTABLE
                 }
 
                 $crate::ferro_class!(@register_class $name: $base);
@@ -1297,33 +1322,27 @@ macro_rules! ferro_class {
             where
                 $base: $crate::Subclassable<T>,
             {
-                fn build_vtable() -> [<$name VTable>] {
-                    [<$name VTable>] {
-                        base: <$base as $crate::Subclassable<T>>::build_vtable(),
-                        $(
-                            $method: {
-                                // SAFETY: this table is only attached to objects
-                                // whose most-derived class is `T`.
-                                let own: fn(&$name $(, $arg_ty)*) $(-> $ret)? =
-                                    |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*);
-                                // A member `T` states it does not override is
-                                // the default, which calls this slot of the
-                                // parent table: the slot itself is taken.
-                                let forwards: bool = const {
-                                    $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                                        <T as $impl_trait>::__OVERRIDES,
-                                        ::std::stringify!($method),
-                                    )
-                                };
-                                if forwards {
-                                    $crate::parent_vtable::<T, [<$name VTable>]>().$method
-                                } else {
-                                    own
-                                }
-                            },
-                        )*
-                    }
-                }
+                const VTABLE: [<$name VTable>] = [<$name VTable>] {
+                    base: <$base as $crate::Subclassable<T>>::VTABLE,
+                    $(
+                        // A member `T` states it does not override is the
+                        // default, which calls this slot of the parent
+                        // table: the slot itself is taken.
+                        $method: if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                            <T as $impl_trait>::__OVERRIDES,
+                            ::std::stringify!($method),
+                        ) {
+                            // SAFETY: the parent of `T` is `$name` or derives
+                            // from it (`__forwards_to_parent` checked it), so
+                            // its table starts with this one.
+                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method
+                        } else {
+                            // SAFETY: this table is only attached to objects
+                            // whose most-derived class is `T`.
+                            |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*)
+                        },
+                    )*
+                };
             }
 
             impl $name {
