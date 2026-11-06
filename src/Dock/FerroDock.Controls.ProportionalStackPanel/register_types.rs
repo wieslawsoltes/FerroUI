@@ -23,11 +23,11 @@ pub fn register_types() {
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[
+    TypeInfo::register_table(&[
         <ProportionalStackPanel as StaticType>::TYPE,
         <ProportionalStackPanelSplitter as StaticType>::TYPE,
     ]);
     register_rust_paths();
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
     crate::compiled_markup::register();
 }

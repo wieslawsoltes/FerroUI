@@ -363,10 +363,16 @@ not look types up by name, and can opt out of the tables with the `ferroui-base`
 ferroui-base = { workspace = true, features = ["trim-type-tables"] }
 ```
 
-`TypeInfo::register_all`, `MarkupAssembly::register` and `MarkupType::register_all` are then
-inlined no-ops, and link-time optimisation drops what only the tables reach. A type is still
-registered when it is first used: a class when it is initialised, with its markup metadata
-(`TypeInfo::markup`).
+A crate of the framework registers its tables with the trimmable forms `TypeInfo::register_table`,
+`MarkupType::register_table` and `MarkupAssembly::register_table`. These are then inlined no-ops,
+and link-time optimisation drops what only the tables reach. A type is still registered when it is
+first used: a class when it is initialised, with its markup metadata (`TypeInfo::markup`).
+
+The plain functions `TypeInfo::register_all`, `MarkupType::register`, `MarkupType::register_all`
+and `MarkupAssembly::register` always register, whatever the features say. An application
+registers its own types (its view models, its assembly) with them from its `register_types()`, so
+its reflection bindings find its own properties with the tables trimmed, and it needs no change
+when trimming becomes the default.
 
 What looks types up by name enables the feature `type-tables`, which keeps the tables whatever an
 application says. These are:

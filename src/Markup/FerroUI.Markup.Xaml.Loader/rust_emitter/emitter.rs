@@ -49,6 +49,7 @@ use crate::compiler_extensions::{
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
 
+use super::transform::PathType;
 use super::emit_types::{
     DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
 };
@@ -709,6 +710,10 @@ struct Emitter<'a> {
     /// Scoped tables are shared by the document's guards and deferred factories. A merged
     /// dictionary can contribute thousands of values with the same lexical declaration.
     namespace_tables: Vec<ScopedNamespaceTable>,
+    /// The types the reflection-binding paths of the document name
+    /// ([`reflection_path_types`]): every namespace table of the document gives each to the
+    /// entry it is found through.
+    path_types: Vec<PathType>,
     /// The locals that hold a time span literal ([`time_span_literal`]), with its ticks:
     /// a member that declares a `Duration` takes the literal only when it is not negative
     /// ([`Emitter::coerce_time_span_literal`]).
@@ -835,7 +840,7 @@ impl<'a> Emitter<'a> {
         self.namespace_tables.push(ScopedNamespaceTable {
             aliases: aliases.clone(),
             name: name.clone(),
-            source: super::transform::namespace_table_for_aliases(self.configuration, aliases),
+            source: super::transform::namespace_table_for_aliases(self.configuration, aliases, &self.path_types),
         });
         name
     }
@@ -4280,6 +4285,179 @@ pub fn emit_document(
     emit_function(types, root, configuration, base_uri, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
 }
 
+/// The full names of the types whose objects are reflection bindings: a path of one of them
+/// names its types by text, which the type resolver of the document resolves at run time.
+const REFLECTION_BINDING_TYPES: [&str; 2] =
+    ["FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension", "FerroUI.Data.ReflectionBinding"];
+
+/// The types the reflection-binding paths of the document of `root` name, as the type
+/// resolver of a compiled document resolves them at run time (`XamlTypeResolver` of the
+/// runtime helpers): the prefix of a name by the namespace declarations in scope at the
+/// binding, then the first entry of the prefix with an assembly that declares a type of
+/// the name. A path is the text of the first constructor argument of a reflection binding or
+/// the text assigned to its `Path`. Only a class of the object model with a public Rust path
+/// is kept, as the function that yields it as a cast target; a name that resolves to
+/// anything else, or to nothing, is left to the tables of types the resolver falls back to.
+/// The types are in the order the paths name them, each once.
+pub(crate) fn reflection_path_types(
+    types: &dyn EmitTypes,
+    configuration: &TransformerConfiguration,
+    root: &Rc<dyn IXamlAstNode>,
+) -> Vec<PathType> {
+    let reflection_types: Vec<Rc<dyn IXamlType>> =
+        REFLECTION_BINDING_TYPES.iter().filter_map(|name| configuration.type_system.find_type(name)).collect();
+    if reflection_types.is_empty() {
+        return Vec::new();
+    }
+    let root_scope = root
+        .namespace_scope()
+        .or_else(|| root.as_value_with_manipulation_node().and_then(|group| group.value().as_node().namespace_scope()));
+    let mut paths = ReflectionPaths {
+        types,
+        configuration,
+        reflection_types,
+        root_scope,
+        scopes: Vec::new(),
+        objects: Vec::new(),
+        found: Vec::new(),
+    };
+    // The collection never fails a document: a node it cannot read is skipped.
+    let _ = visit_node(root, &mut paths);
+    paths.found
+}
+
+/// The visitor of [`reflection_path_types`]: for every node on the path from the root, the
+/// namespace scope it carries and whether it is an object of a reflection binding.
+struct ReflectionPaths<'t> {
+    types: &'t dyn EmitTypes,
+    configuration: &'t TransformerConfiguration,
+    reflection_types: Vec<Rc<dyn IXamlType>>,
+    root_scope: Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>,
+    scopes: Vec<Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>>,
+    objects: Vec<Option<bool>>,
+    found: Vec<PathType>,
+}
+
+impl ReflectionPaths<'_> {
+    fn is_reflection_binding(&self, type_: &dyn IXamlType) -> bool {
+        self.reflection_types.iter().any(|reflection| reflection.is_assignable_from(type_))
+    }
+
+    /// The namespace declarations in scope at `node`.
+    fn aliases_at(&self, node: &Rc<dyn IXamlAstNode>) -> HashMap<String, String> {
+        node.namespace_scope()
+            .or_else(|| self.scopes.iter().rev().find_map(Clone::clone))
+            .or_else(|| self.root_scope.clone())
+            .map(|scope| scope.aliases().clone())
+            .unwrap_or_default()
+    }
+
+    /// The types named by the path `text`, resolved with `aliases`.
+    fn collect(&mut self, text: &str, aliases: &HashMap<String, String>) {
+        use ferroui_base::data::core::parsers::{BindingExpressionGrammar, Node};
+        let Ok((nodes, _)) = BindingExpressionGrammar::parse(text) else {
+            return;
+        };
+        for node in nodes {
+            let (prefix, name) = match node {
+                Node::AttachedPropertyName { namespace, type_name, .. } => (namespace, type_name),
+                Node::Ancestor { namespace, type_name: Some(type_name), .. } => (namespace.unwrap_or_default(), type_name),
+                Node::TypeCast { namespace, type_name } => (namespace, type_name),
+                _ => continue,
+            };
+            if let Some(path_type) = self.resolve(aliases, &prefix, &name) {
+                if !self.found.contains(&path_type) {
+                    self.found.push(path_type);
+                }
+            }
+        }
+    }
+
+    /// `prefix:name` as the class it names, through the first entry of the prefix with an
+    /// assembly that declares a type of the name.
+    fn resolve(&self, aliases: &HashMap<String, String>, prefix: &str, name: &str) -> Option<PathType> {
+        let xmlns = aliases.get(prefix)?;
+        let resolved = xamlx::transform::NamespaceInfoHelper::try_resolve(self.configuration, Some(xmlns.as_str()))?;
+        for info in resolved {
+            let assembly = info.assembly_name.clone().or_else(|| info.assembly.as_ref().map(|assembly| assembly.name())).unwrap_or_default();
+            if assembly.is_empty() {
+                continue;
+            }
+            let full_name = format!("{}.{name}", info.clr_namespace);
+            let found = match &info.assembly {
+                Some(declaring) => declaring.find_type(&full_name),
+                None => self.configuration.type_system.find_type_in_assembly(&full_name, &assembly),
+            };
+            let Some(found) = found else {
+                continue;
+            };
+            let path = self.types.class_of(&*found)?.rust_path()?;
+            return Some(PathType {
+                clr_namespace: info.clr_namespace,
+                assembly,
+                name: name.to_string(),
+                target: format!(
+                    "|| ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<{} as ::ferroui_base::StaticType>::TYPE)",
+                    absolute(path)
+                ),
+            });
+        }
+        None
+    }
+}
+
+/// The text `node` is: a text node, or a constant of text.
+fn text_of(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+    if let Some(text) = node.cast::<XamlAstTextNode>() {
+        return Some(text.text());
+    }
+    match &node.cast::<XamlConstantNode>()?.constant {
+        XamlValue::String(text) => Some(text.clone()),
+        _ => None,
+    }
+}
+
+impl IXamlAstVisitor for ReflectionPaths<'_> {
+    fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        if let Some(object) = node.cast::<XamlAstNewClrObjectNode>() {
+            let created = object.type_.borrow().get_clr_type().ok();
+            if created.is_some_and(|created| self.is_reflection_binding(&*created)) {
+                let first = object.arguments.borrow().first().and_then(|argument| text_of(&argument.as_node()));
+                if let Some(text) = first {
+                    let aliases = self.aliases_at(&node);
+                    self.collect(&text, &aliases);
+                }
+            }
+        } else if let Some(assignment) = node.cast::<XamlPropertyAssignmentNode>() {
+            let in_binding = self.objects.iter().rev().find_map(|object| *object) == Some(true)
+                || self.is_reflection_binding(&**assignment.property.declaring_type.borrow());
+            if in_binding && assignment.property.name() == "Path" {
+                let values = assignment.values.borrow().clone();
+                for value in values {
+                    if let Some(text) = text_of(&value.as_node()) {
+                        let aliases = self.aliases_at(&node);
+                        self.collect(&text, &aliases);
+                    }
+                }
+            }
+        }
+        Ok(node)
+    }
+
+    fn push(&mut self, node: Rc<dyn IXamlAstNode>) {
+        self.scopes.push(node.namespace_scope());
+        let object = node.as_value_with_manipulation_node().map(|group| {
+            group.value().type_().get_clr_type().is_ok_and(|created| self.is_reflection_binding(&*created))
+        });
+        self.objects.push(object);
+    }
+
+    fn pop(&mut self) {
+        self.scopes.pop();
+        self.objects.pop();
+    }
+}
+
 /// The actual constructed handle of a root, including a plain model reference.
 pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn IXamlAstNode>) -> Option<TypeKey<'a>> {
     let group = root.as_value_with_manipulation_node()?;
@@ -4390,6 +4568,7 @@ pub fn emit_function<'a>(
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         namespace_tables: Vec::new(),
+        path_types: reflection_path_types(types, configuration, root),
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
         culture_literals: HashMap::new(),

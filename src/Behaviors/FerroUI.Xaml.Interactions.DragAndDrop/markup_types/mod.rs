@@ -25,7 +25,7 @@ const MARKUP_TYPES: &[&MarkupType] = &[<dyn IDropHandler as MarkupTyped>::MARKUP
 /// Registers the markup types and the value types of this crate. Called once by
 /// `register_types()`.
 pub(crate) fn register() {
-    MarkupType::register_all(MARKUP_TYPES);
+    MarkupType::register_table(MARKUP_TYPES);
     ValueTypes::register_global(register_value_types);
 }
 

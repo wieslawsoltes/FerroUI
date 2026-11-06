@@ -576,6 +576,12 @@ pub struct MarkupProperty {
     /// that is not declared.
     pub emit_get: CompilerMetadata<Option<MarkupEmit>>,
     pub emit_set: CompilerMetadata<Option<MarkupEmit>>,
+    /// The metadata of the value type of the property, when it has metadata
+    /// ([`MarkupTyped`]: `T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>`). With the tables of
+    /// types trimmed (`trim-type-tables`), registering a type registers the metadata of
+    /// the value types of its properties, which a binding through the property finds by
+    /// handle. The declaration forms generate it; `|| None` otherwise.
+    pub value_markup: fn() -> Option<&'static MarkupType>,
 }
 
 /// What only the emitter of Rust source reads (the typed functions of
@@ -1099,33 +1105,68 @@ impl MarkupType {
     /// [`find_by_handle`](Self::find_by_handle). Registering a type again
     /// does nothing.
     ///
-    /// A crate registers its types from its `register_types()` function.
-    /// The metadata of a class of the object model needs no registration to
-    /// be reachable from its runtime type ([`TypeInfo::markup`]).
+    /// Always registers. An application registers its own types with this
+    /// function; a crate of the framework registers its table of types from
+    /// its `register_types()` function with
+    /// [`register_table`](Self::register_table). The metadata of a class of
+    /// the object model needs no registration to be reachable from its
+    /// runtime type ([`TypeInfo::markup`]).
     pub fn register(type_: &'static MarkupType) {
         Self::register_all(&[type_]);
     }
 
     /// Registers several types; see [`register`](Self::register).
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    ///
+    /// Always registers. An application registers its own types with this
+    /// function or [`register`](Self::register); a crate of the framework
+    /// registers its table of types with [`register_table`](Self::register_table).
     #[inline(always)]
     pub fn register_all(types: &[&'static MarkupType]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Registers the table of types of a crate of the framework, at start-up
+    /// from the crate's `register_types()` function; as
+    /// [`register_all`](Self::register_all). With `trim-type-tables` (without
+    /// `type-tables`) the table is trimmed: this does nothing, and what only
+    /// the table reaches is left out of the binary. An application registers
+    /// its own types with [`register`](Self::register) or
+    /// [`register_all`](Self::register_all), which always register.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
+    pub fn register_table(types: &[&'static MarkupType]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
     #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
     #[inline(always)]
-    pub fn register_all(types: &[&'static MarkupType]) {
+    pub fn register_table(types: &[&'static MarkupType]) {
         let _ = types;
     }
 
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
     fn register_all_tables(types: &[&'static MarkupType]) {
         let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
         for type_ in types {
             registry.insert(type_);
         }
+    }
+
+    /// Registers the metadata of a type that is used: the value type of a property, when the
+    /// property is registered ([`ferro_property!`](crate::ferro_property)). What finds metadata
+    /// by handle (the text of an enumeration member, the parsing of text) then knows the type
+    /// with the tables of types trimmed. Without `trim-type-tables` the tables already hold
+    /// every type, and this does nothing.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
+    pub fn register_used(type_: &'static MarkupType) {
+        let _ = type_;
+    }
+
+    /// Trimmed (`trim-type-tables` without `type-tables`): see the other definition.
+    #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+    pub fn register_used(type_: &'static MarkupType) {
+        registry().write().unwrap_or_else(|e| e.into_inner()).insert(type_);
     }
 
     /// Registers the Rust type `H` as one more handle of the registered type `type_`: a
@@ -1203,6 +1244,61 @@ pub trait MarkupTyped {
     const MARKUP: &'static MarkupType;
 }
 
+/// The metadata of a type, if it has metadata ([`MarkupProperty::value_markup`]): chosen
+/// where the type is named, by the method that a reference to a reference to the probe
+/// resolves to. The implementations for a type with metadata (on `&Probe`) take that receiver
+/// as it is and are found first; the one of every type (on `Probe`) after one dereference.
+#[doc(hidden)]
+pub struct __TypeMarkupProbe<T: ?Sized>(std::marker::PhantomData<fn() -> *const T>);
+
+impl<T: ?Sized> __TypeMarkupProbe<T> {
+    #[doc(hidden)]
+    pub const NEW: Self = Self(std::marker::PhantomData);
+}
+
+#[doc(hidden)]
+pub trait __TypeMarkup {
+    fn __type_markup(&self) -> Option<&'static MarkupType>;
+}
+
+impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<T> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<T>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<std::rc::Rc<T>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+impl<T: ?Sized + MarkupTyped> __TypeMarkup for &__TypeMarkupProbe<Option<std::rc::Rc<T>>> {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        Some(T::MARKUP)
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoTypeMarkup {
+    #[inline(always)]
+    fn __type_markup(&self) -> Option<&'static MarkupType> {
+        None
+    }
+}
+
+impl<T: ?Sized> __NoTypeMarkup for __TypeMarkupProbe<T> {}
+
 #[derive(Default)]
 struct MarkupRegistry {
     types: Vec<&'static MarkupType>,
@@ -1228,6 +1324,14 @@ impl MarkupRegistry {
         }
         if let Some(nullable) = type_.nullable {
             self.by_nullable_handle.entry(nullable().id()).or_insert(type_);
+        }
+        // Trimmed, the metadata of the value types of the properties is not in a table: it
+        // is registered with the type, as a binding through a property finds it by handle.
+        #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
+        for property in type_.properties.iter().chain(type_.static_properties) {
+            if let Some(value) = (property.value_markup)() {
+                self.insert(value);
+            }
         }
     }
 }

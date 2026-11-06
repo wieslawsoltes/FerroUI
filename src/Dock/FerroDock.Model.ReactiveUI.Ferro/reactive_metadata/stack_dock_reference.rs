@@ -72,7 +72,7 @@ ferroui_base::ferro_markup_type!(class StackDockReference as "StackDock" {
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(StackDockReference::MARKUP);
+    MarkupType::register_table(&[StackDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IStackDock>>();
     ValueTypes::register_cast::<Rc<dyn IStackDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IStackDock>, Rc<dyn IDock>>(|model| model.clone());

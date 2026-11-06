@@ -663,7 +663,7 @@ pub struct TypeModel {
     /// `ferro_class_info!`): its runtime type has metadata, whatever the part lists.
     pub class_markup: bool,
     /// The crate has a list of the classes it registers (`const TYPES: &[&TypeInfo]`, which
-    /// its `register_types()` hands to `TypeInfo::register_all`) and the type is not in
+    /// its `register_types()` hands to `TypeInfo::register_table`) and the type is not in
     /// it: the type is not known by its name or by its handle until an instance of it is
     /// created. Never set for a crate without such a list, and never for a type that is
     /// not of the object model.

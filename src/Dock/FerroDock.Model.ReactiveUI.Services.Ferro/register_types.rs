@@ -24,7 +24,7 @@ ferroui_base::ferro_rust_paths! {
 pub fn register_types() {
     ferroui_reactiveui_controls::register_types();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[<DockReactiveUserControlBase as StaticType>::TYPE]);
+    TypeInfo::register_table(&[<DockReactiveUserControlBase as StaticType>::TYPE]);
     register_rust_paths();
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

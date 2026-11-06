@@ -48,7 +48,7 @@ pub(crate) fn register() {
         std::rc::Rc<dyn ferrodock_model::core::IDockable>,
         super::ToolReference,
     >(super::model_probe::project::<super::ToolReference>);
-    MarkupType::register(<ReactiveObjectReference as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<ReactiveObjectReference as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<ReactiveObjectReference>();
     super::reactive_base_reference::register();
     super::dockable_base_reference::register();

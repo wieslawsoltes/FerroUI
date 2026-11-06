@@ -72,7 +72,7 @@ pub(crate) fn register() {
             (||std::any::TypeId::of::<Rc<DockCapabilityEvaluation>>(),"std::rc::Rc<ferrodock_model::core::DockCapabilityEvaluation>"),
         ]);
     }
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         <dyn DockWindowOptionsMetadata>::MARKUP,
         <dyn DockCapabilityEvaluationMetadata>::MARKUP,
         DockCapabilityResolverMetadata::MARKUP,

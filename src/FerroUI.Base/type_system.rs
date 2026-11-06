@@ -312,20 +312,35 @@ impl TypeInfo {
     /// that value untyped (a binding, markup) must see null. The run-time
     /// XAML loader initialises a class when it reads it, which hid the
     /// difference; compiled markup names a class without initialising it.
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    ///
+    /// Always registers. An application registers its own types with this
+    /// function; a crate of the framework registers its table of types with
+    /// [`register_table`](Self::register_table).
     #[inline(always)]
     pub fn register_all(types: &[&'static TypeInfo]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Registers the table of types of a crate of the framework, at start-up
+    /// from the crate's `register_types()` function; as
+    /// [`register_all`](Self::register_all). With `trim-type-tables` (without
+    /// `type-tables`) the table is trimmed: this does nothing, and what only
+    /// the table reaches is left out of the binary. An application registers
+    /// its own types with [`register_all`](Self::register_all), which always
+    /// registers.
+    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
+    #[inline(always)]
+    pub fn register_table(types: &[&'static TypeInfo]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (`trim-type-tables` without `type-tables`): the table is not kept.
     #[cfg(all(feature = "trim-type-tables", not(feature = "type-tables")))]
     #[inline(always)]
-    pub fn register_all(types: &[&'static TypeInfo]) {
+    pub fn register_table(types: &[&'static TypeInfo]) {
         let _ = types;
     }
 
-    #[cfg(any(not(feature = "trim-type-tables"), feature = "type-tables"))]
     fn register_all_tables(types: &[&'static TypeInfo]) {
         {
             let mut registry = write_registry();

@@ -46,7 +46,7 @@ pub(crate) fn register() {
     ferroui_base::data::core::ValueTypes::register_reference_identity::<
         ListHandle<Option<Rc<dyn IDockWindow>>>,
     >(|list| list.identity() as *const ());
-    MarkupType::register(&METADATA);
+    MarkupType::register_table(&[&METADATA]);
     // The notifier descriptor is the registered identity; emitted members still
     // belong to the original public declaration carrier.
     ferroui_base::__ferro_compiler_metadata! {

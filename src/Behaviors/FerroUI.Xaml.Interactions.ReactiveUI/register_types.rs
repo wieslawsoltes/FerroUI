@@ -47,10 +47,10 @@ pub fn register_types() {
         // The behaviors object model, and with it the controls and the base crate.
         ferroui_xaml_interactivity::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
         crate::markup_types::register();
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
     });
 }
 

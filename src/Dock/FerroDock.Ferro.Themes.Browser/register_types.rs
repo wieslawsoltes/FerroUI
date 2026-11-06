@@ -30,7 +30,7 @@ pub fn register_types() {
     ferrodock_ferro::register_types();
     ferrodock_ferro_themes_fluent::register_types();
     TypeInfo::register_namespaces(NAMESPACES);
-    TypeInfo::register_all(&[BrowserTabTheme::TYPE]);
+    TypeInfo::register_table(&[BrowserTabTheme::TYPE]);
     register_rust_paths();
     use ferroui_base::{
         data::core::ValueTypes,
@@ -39,7 +39,7 @@ pub fn register_types() {
     type NativePlatform =
         ferroui_markup_xaml::markup_extensions::OnPlatformExtensionOf<ferroui_base::Thickness>;
     ValueTypes::register_reference::<NativePlatform>();
-    MarkupType::register_all(&[
+    MarkupType::register_table(&[
         crate::OnPlatformThicknessMetadata::MARKUP,
         crate::OnPlatformDoubleMetadata::MARKUP,
     ]);
@@ -50,6 +50,6 @@ pub fn register_types() {
         ferroui_base::metadata::register_type_rust_paths(&[(||std::any::TypeId::of::<std::rc::Rc<NativePlatform>>(),"::std::rc::Rc<::ferroui_markup_xaml::markup_extensions::OnPlatformExtensionOf<::ferroui_base::Thickness>>"),(||std::any::TypeId::of::<std::rc::Rc<ferroui_markup_xaml::markup_extensions::OnPlatformExtensionOf<f64>>>(),"::std::rc::Rc<::ferroui_markup_xaml::markup_extensions::OnPlatformExtensionOf<f64>>")]);
     }
 
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
     crate::compiled_markup::register();
 }

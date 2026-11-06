@@ -37,7 +37,7 @@ use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, T
 use super::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
     IFerroXamlIlXmlNamespaceInfoProvider, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext,
-    XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaces,
+    XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaceTypes, XmlNamespaces,
 };
 use crate::converters::ITypeDescriptorContext;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
@@ -955,8 +955,10 @@ fn clear_target_property(context: &Rc<XamlIlContext>) {
 /// The XML namespaces of a document as the compiler resolved them: for each
 /// prefix (empty for the default namespace) the dotted namespaces and
 /// assemblies it maps to (the namespace information the run-time loader
-/// computes from the parsed document).
-pub type XmlNamespaceTable = &'static [(&'static str, &'static [(&'static str, &'static str)])];
+/// computes from the parsed document), each with the types of the namespace
+/// that the reflection-binding paths of the document name, as the compiler
+/// resolved them ([`XmlNamespaceTypes`]).
+pub type XmlNamespaceTable = &'static [(&'static str, &'static [(&'static str, &'static str, XmlNamespaceTypes)])];
 
 /// The definition of the context of the framework language: every service
 /// of the context is mapped (the transformer configuration of the language
@@ -991,7 +993,9 @@ impl IFerroXamlIlXmlNamespaceInfoProvider for CompiledXmlNamespaceInfo {
         for (prefix, infos) in self.table {
             let infos = infos
                 .iter()
-                .map(|(clr_namespace, clr_assembly_name)| FerroXamlIlXmlNamespaceInfo::with(clr_namespace, clr_assembly_name))
+                .map(|&(clr_namespace, clr_assembly_name, types)| {
+                    FerroXamlIlXmlNamespaceInfo::with_types(clr_namespace, clr_assembly_name, types)
+                })
                 .collect();
             namespaces.insert(prefix.to_string(), infos);
         }

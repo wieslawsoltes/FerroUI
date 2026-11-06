@@ -42,7 +42,7 @@ const TYPES: &[&MarkupType] = &[
 /// Adds the types of this crate to the process-wide table of types with markup metadata. Called
 /// once by `register_types()`.
 pub(crate) fn register() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
     ValueTypes::register_global(register_value_types);
 }
 

@@ -84,9 +84,9 @@ pub fn register_types() {
         ferroui_controls::register_types();
         ferroui_livecharts::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
-        MarkupAssembly::register(&ASSEMBLY);
-        MarkupType::register_all(&[
+        TypeInfo::register_table(TYPES);
+        MarkupAssembly::register_table(&ASSEMBLY);
+        MarkupType::register_table(&[
             <crate::ChartKind as MarkupTyped>::MARKUP,
             <crate::LegendPosition as MarkupTyped>::MARKUP,
             <crate::TooltipPosition as MarkupTyped>::MARKUP,

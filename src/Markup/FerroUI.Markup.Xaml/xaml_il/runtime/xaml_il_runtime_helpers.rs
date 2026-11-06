@@ -719,7 +719,14 @@ struct XamlTypeResolver {
 impl XamlTypeResolver {
     /// `Assembly.Load(name).GetType(namespace + "." + name)`: the type
     /// named `name` in `namespace` that the assembly declares.
+    ///
+    /// The types the compiler resolved for the entry come first: a compiled
+    /// document names the types of its reflection-binding paths, which are found
+    /// without the process-wide tables of types (which a build may leave empty).
     fn find(entry: &FerroXamlIlXmlNamespaceInfo, name: &str) -> Option<CastTarget> {
+        if let Some(resolved) = entry.find_type(name) {
+            return Some(resolved);
+        }
         let assembly = MarkupAssembly::find(&entry.clr_assembly_name())?;
         let namespace = entry.clr_namespace();
         let in_assembly =

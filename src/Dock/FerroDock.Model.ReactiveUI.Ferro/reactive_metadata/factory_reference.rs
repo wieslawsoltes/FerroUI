@@ -82,7 +82,7 @@ ferroui_base::ferro_markup_type!(class FactoryReference as "Factory" {
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(FactoryReference::MARKUP);
+    MarkupType::register_table(&[FactoryReference::MARKUP]);
     ValueTypes::register_nullable::<FactoryReference>();
     ValueTypes::register_reference_identity::<FactoryReference>(|v| {
         Rc::as_ptr(&v.model) as *const ()

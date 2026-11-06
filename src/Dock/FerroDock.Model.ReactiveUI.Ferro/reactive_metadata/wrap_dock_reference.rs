@@ -71,7 +71,7 @@ ferroui_base::ferro_markup_type!(class WrapDockReference as "WrapDock" {
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(WrapDockReference::MARKUP);
+    MarkupType::register_table(&[WrapDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IWrapDock>>();
     ValueTypes::register_cast::<Rc<dyn IWrapDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IWrapDock>, Rc<dyn IDock>>(|model| model.clone());

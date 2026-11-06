@@ -20,7 +20,7 @@ const TYPE_LISTS: &[&[&MarkupType]] = &[enums::TYPES, classes::TYPES, converters
 /// types with markup metadata. Called once by `register_types()`.
 pub(crate) fn register() {
     for types in TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
     ValueTypes::register_global(register_value_types);
     palettes::PaletteColorList::register();

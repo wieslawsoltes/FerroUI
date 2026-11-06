@@ -94,7 +94,7 @@ pub(crate) fn register() {
     });
     ValueTypes::register_cast::<RootDockReference, Rc<dyn IDockable>>(|value| value.model());
 
-    MarkupType::register(<RootDockReference as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<RootDockReference as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<RootDockReference>();
     ValueTypes::register_cast::<RootDockReference, DockBaseReference>(|value| value.base());
     ValueTypes::register_cast::<RootDockReference, Rc<dyn IRootDock>>(|value| value.model());

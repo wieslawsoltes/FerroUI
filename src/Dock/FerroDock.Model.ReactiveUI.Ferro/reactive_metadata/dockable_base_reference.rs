@@ -139,7 +139,7 @@ pub(crate) fn register() {
     ValueTypes::register_cast::<DockableBaseReference, super::ReactiveObjectReference>(|value| {
         value.base().base()
     });
-    MarkupType::register(<DockableBaseReference as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<DockableBaseReference as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<DockableBaseReference>();
     ValueTypes::register_cast::<DockableBaseReference, ReactiveBaseReference>(|value| value.base());
     ValueTypes::register_cast::<DockableBaseReference, Rc<dyn IDockable>>(|value| value.model());

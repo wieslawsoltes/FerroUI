@@ -71,7 +71,7 @@ ferroui_base::ferro_markup_type!(class GridDockReference as "GridDock" {
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(GridDockReference::MARKUP);
+    MarkupType::register_table(&[GridDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IGridDock>>();
     ValueTypes::register_cast::<Rc<dyn IGridDock>, Rc<dyn IDockable>>(|model| model.clone());
     ValueTypes::register_cast::<Rc<dyn IGridDock>, Rc<dyn IDock>>(|model| model.clone());
