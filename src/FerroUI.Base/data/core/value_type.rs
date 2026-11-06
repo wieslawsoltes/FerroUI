@@ -433,7 +433,7 @@ fn insert_interface(interface: TypeId, class: &'static TypeInfo, convert: Interf
 /// One of the casts between a reference (model) type `T`, its handle `Rc<T>`
 /// and its nullable handle `Option<Rc<T>>` ([`ValueTypes::register_reference`]).
 #[derive(Clone, Copy)]
-enum ReferenceCast {
+enum ReferenceCastKind {
     ObjectToNullable,
     ObjectToHandle,
     HandleToObject,
@@ -447,7 +447,7 @@ struct ReferenceEntry {
     handle: TypeId,
     nullable: TypeId,
     nullable_operation: NullableOperation,
-    cast: fn(ReferenceCast, &BoxedValue) -> Option<BoxedValue>,
+    cast: fn(ReferenceCastKind, &BoxedValue) -> Option<BoxedValue>,
     identity: fn(&dyn AnyValue) -> Option<*const ()>,
 }
 
@@ -466,10 +466,10 @@ fn insert_reference(entry: ReferenceEntry) {
         r.reference_handles.insert(handle, object.id());
         r.reference_objects.insert(object.id(), handle);
         for (key, kind) in [
-            ((object.id(), nullable), ReferenceCast::ObjectToNullable),
-            ((object.id(), handle), ReferenceCast::ObjectToHandle),
-            ((handle, object.id()), ReferenceCast::HandleToObject),
-            ((handle, nullable), ReferenceCast::HandleToNullable),
+            ((object.id(), nullable), ReferenceCastKind::ObjectToNullable),
+            ((object.id(), handle), ReferenceCastKind::ObjectToHandle),
+            ((handle, object.id()), ReferenceCastKind::HandleToObject),
+            ((handle, nullable), ReferenceCastKind::HandleToNullable),
         ] {
             let f: ConvertFn = Rc::new(move |v: &BoxedValue| cast(kind, v));
             r.conversions.insert(key, f.clone());
@@ -1008,12 +1008,12 @@ impl ValueTypes {
         // The object, its handle and its nullable handle are the same
         // reference: these conversions are assignability casts. One typed
         // function performs the four, the registry adapts it to each.
-        fn cast<T: PartialEq + 'static>(kind: ReferenceCast, v: &BoxedValue) -> Option<BoxedValue> {
+        fn cast<T: PartialEq + 'static>(kind: ReferenceCastKind, v: &BoxedValue) -> Option<BoxedValue> {
             match kind {
-                ReferenceCast::ObjectToNullable => to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue),
-                ReferenceCast::ObjectToHandle => to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue),
-                ReferenceCast::HandleToObject => v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue),
-                ReferenceCast::HandleToNullable => {
+                ReferenceCastKind::ObjectToNullable => to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue),
+                ReferenceCastKind::ObjectToHandle => to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue),
+                ReferenceCastKind::HandleToObject => v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue),
+                ReferenceCastKind::HandleToNullable => {
                     v.downcast_ref::<Rc<T>>().map(|v| Rc::new(Some(v.clone())) as BoxedValue)
                 }
             }
