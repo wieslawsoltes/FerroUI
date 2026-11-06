@@ -355,7 +355,7 @@ fn append_enum(
     }
     writeln!(code,"impl ::ferroui_base::metadata::MarkupTyped for {name}Metadata {{\nconst MARKUP: &'static ::ferroui_base::metadata::MarkupType = {{\nstatic MARKUP: ::ferroui_base::metadata::MarkupType = {{\nlet mut m = ::ferroui_base::metadata::MarkupType::new(\"{name}\", ::ferroui_base::metadata::MarkupTypeKind::Enum, module_path!());\nm.explicit_namespace=Some(\"{namespace}\");\nm.handles=&[::ferroui_base::data::core::ValueType::of::<{original}>];\nm.nullable=Some(::ferroui_base::data::core::ValueType::of::<Option<{original}>>);\nm.enum_members=&[").unwrap();
     for (name, value) in &members {
-        writeln!(code,"::ferroui_base::metadata::MarkupEnumMember {{name:\"{name}\",value:{value},get:||::std::rc::Rc::new({original}::{name}),rust_variant:Some(\"{name}\")}},").unwrap();
+        writeln!(code,"::ferroui_base::metadata::MarkupEnumMember {{name:\"{name}\",value:{value},rust_variant:Some(\"{name}\")}},").unwrap();
     }
     code.push_str("];\n");
     if open_numeric {

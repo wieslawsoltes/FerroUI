@@ -29,7 +29,7 @@ fn runtime_enum_metadata_retains_original_values_and_rejects_unknown_numbers() {
     assert_eq!(metadata.enum_members.len(), expected.len());
     for (member, expected) in metadata.enum_members.iter().zip(expected) {
         assert_eq!(member.value, expected as i64);
-        let value = (member.get)();
+        let value = member.get(metadata).unwrap();
         assert_eq!(value.downcast_ref::<DockOperation>(), Some(&expected));
         assert_eq!(
             (metadata.enum_to_value.unwrap())(&*value),

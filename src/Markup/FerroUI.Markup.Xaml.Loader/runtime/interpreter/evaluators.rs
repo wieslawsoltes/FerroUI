@@ -493,13 +493,7 @@ pub fn constant_value(
     if type_.is_enum() {
         // The constant is the numeric value: of a member, or of a combination of flags.
         let markup = type_.as_any().downcast_ref::<RuntimeType>().and_then(RuntimeType::markup);
-        let value = i64::try_from(integer).ok().and_then(|value| {
-            let markup = markup?;
-            match markup.enum_from_value {
-                Some(from_value) => from_value(value),
-                None => markup.enum_members.iter().find(|m| m.value == value).map(|m| (m.get)()),
-            }
-        });
+        let value = i64::try_from(integer).ok().and_then(|value| (markup?.enum_from_value?)(value));
         return match value {
             Some(value) => Ok(Some(value)),
             None => Err(XamlError::load_exception(

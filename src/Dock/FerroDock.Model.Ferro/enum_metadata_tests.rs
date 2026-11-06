@@ -118,7 +118,7 @@ fn docking_state_flags_export_original_names_storage_and_runtime_conversion() {
         assert_eq!((member.name, member.value), (name, bits));
         assert_eq!((export.name.as_str(), export.value), (name, Some(bits)));
         assert_eq!(
-            (member.get)().downcast_ref::<State>().unwrap().bits(),
+            member.get(metadata).unwrap().downcast_ref::<State>().unwrap().bits(),
             bits as i32
         );
         assert!(member.rust_variant.is_none());
@@ -236,7 +236,7 @@ fn command_bar_foreign_enum_metadata_uses_original_domain_handles_and_exported_n
             assert_eq!(member.value, index as i64);
             assert_eq!(exported.enum_members[index].name, name);
             assert_eq!(
-                (metadata.enum_to_value.unwrap())(&*(member.get)()),
+                (metadata.enum_to_value.unwrap())(&*member.get(metadata).unwrap()),
                 Some(index as i64)
             );
         }

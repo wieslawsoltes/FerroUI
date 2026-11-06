@@ -351,6 +351,18 @@ fn insert_cast(key: (TypeId, TypeId), cast: ConvertFn) {
     });
 }
 
+/// Registers the cast `key` from its form for a borrowed value: the cast of a
+/// boxed value is the cast of the value it holds, through the one adapter
+/// below for every cast (a typed cast is compiled once, not once per form).
+#[inline(never)]
+fn insert_any_cast(key: (TypeId, TypeId), cast: AnyConvertFn) {
+    let borrowed = cast.clone();
+    insert_cast(key, Rc::new(move |v: &BoxedValue| borrowed(v.as_any())));
+    with_registry(|r| {
+        r.any_conversions.insert(key, cast);
+    });
+}
+
 fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
     with_registry(|r| {
         r.conversions.insert(key, convert);
@@ -418,6 +430,54 @@ fn insert_interface(interface: TypeId, class: &'static TypeInfo, convert: Interf
     });
 }
 
+/// One of the casts between a reference (model) type `T`, its handle `Rc<T>`
+/// and its nullable handle `Option<Rc<T>>` ([`ValueTypes::register_reference`]).
+#[derive(Clone, Copy)]
+enum ReferenceCastKind {
+    ObjectToNullable,
+    ObjectToHandle,
+    HandleToObject,
+    HandleToNullable,
+}
+
+/// What [`ValueTypes::register_reference`] registers of a reference type: its
+/// types and the typed functions, which the registry adapts to its entries.
+struct ReferenceEntry {
+    object: ValueType,
+    handle: TypeId,
+    nullable: TypeId,
+    nullable_operation: NullableOperation,
+    cast: fn(ReferenceCastKind, &BoxedValue) -> Option<BoxedValue>,
+    identity: fn(&dyn AnyValue) -> Option<*const ()>,
+}
+
+#[inline(never)]
+fn insert_reference(entry: ReferenceEntry) {
+    let ReferenceEntry { object, handle, nullable, nullable_operation, cast, identity } = entry;
+    let registered = with_registry(|r| r.references.insert(object.id(), ()).is_some());
+    if registered {
+        return;
+    }
+    let identity: ReferenceIdentityFn = Rc::new(move |value: &dyn AnyValue| identity(value));
+    with_registry(|r| {
+        r.reference_identities.insert(handle, identity);
+        r.nullable.insert(nullable, nullable_operation);
+        r.nullable_inner.insert(nullable, object);
+        r.reference_handles.insert(handle, object.id());
+        r.reference_objects.insert(object.id(), handle);
+        for (key, kind) in [
+            ((object.id(), nullable), ReferenceCastKind::ObjectToNullable),
+            ((object.id(), handle), ReferenceCastKind::ObjectToHandle),
+            ((handle, object.id()), ReferenceCastKind::HandleToObject),
+            ((handle, nullable), ReferenceCastKind::HandleToNullable),
+        ] {
+            let f: ConvertFn = Rc::new(move |v: &BoxedValue| cast(kind, v));
+            r.conversions.insert(key, f.clone());
+            r.casts.insert(key, f);
+        }
+    });
+}
+
 fn insert_ordering(id: TypeId, compare: OrderingFn) {
     with_registry(|r| {
         r.orderings.insert(id, compare);
@@ -477,18 +537,12 @@ impl ValueTypes {
     /// `TTo` (the same value, seen as a wider type), as opposed to values
     /// that can merely be converted to it. A cast is also a conversion.
     pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
-        let cast = Rc::new(cast);
-        let boxed = cast.clone();
-        let convert: ConvertFn =
-            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().map(|v| Rc::new(boxed(v)) as BoxedValue));
-        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert);
-        // The same cast for a value that is only borrowed: the untyped
-        // property routes are handed `&dyn Any` (see `try_convert_implicit`).
+        // The cast of a value that is only borrowed (the untyped property routes are
+        // handed `&dyn Any`, see `try_convert_implicit`); the cast of a boxed value
+        // is derived from it.
         let convert_any: AnyConvertFn =
             Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        with_registry(|r| {
-            r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
-        });
+        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
     }
 
     /// Registers an assignability cast that holds for some values of `TFrom`
@@ -504,18 +558,13 @@ impl ValueTypes {
     pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> Result<TTo, String> + 'static) {
         let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
         let cast = Rc::new(cast);
-        let boxed = cast.clone();
-        let convert: ConvertFn = Rc::new(move |v: &BoxedValue| {
-            v.downcast_ref::<TFrom>().and_then(|v| boxed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
-        });
-        insert_cast(key, convert);
         let borrowed = cast.clone();
         let convert_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| {
             v.downcast_ref::<TFrom>().and_then(|v| borrowed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
         });
+        insert_any_cast(key, convert_any);
         let error: CastErrorFn = Rc::new(move |v: &dyn AnyValue| cast(v.downcast_ref::<TFrom>()?).err());
         with_registry(|r| {
-            r.any_conversions.insert(key, convert_any);
             r.cast_errors.insert(key, error);
         });
     }
@@ -781,7 +830,7 @@ impl ValueTypes {
         }
         let markup = crate::metadata::MarkupType::find_by_handle(id)?;
         if markup.kind == crate::metadata::MarkupTypeKind::Enum {
-            if let Some(member) = markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(value)) {
+            if let Some(member) = markup.find_enum_member_of(value) {
                 return Some(member.name.to_string());
             }
         }
@@ -956,38 +1005,30 @@ impl ValueTypes {
             let any: Rc<dyn std::any::Any> = value.clone();
             any.downcast::<T>().ok()
         }
-        let registered = with_registry(|r| r.references.insert(TypeId::of::<T>(), ()).is_some());
-        if registered {
-            return;
+        // The object, its handle and its nullable handle are the same
+        // reference: these conversions are assignability casts. One typed
+        // function performs the four, the registry adapts it to each.
+        fn cast<T: PartialEq + 'static>(kind: ReferenceCastKind, v: &BoxedValue) -> Option<BoxedValue> {
+            match kind {
+                ReferenceCastKind::ObjectToNullable => to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue),
+                ReferenceCastKind::ObjectToHandle => to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue),
+                ReferenceCastKind::HandleToObject => v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue),
+                ReferenceCastKind::HandleToNullable => {
+                    v.downcast_ref::<Rc<T>>().map(|v| Rc::new(Some(v.clone())) as BoxedValue)
+                }
+            }
         }
-        Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
-        with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), nullable::<T>);
-            r.nullable_inner.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<T>());
-            r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
-            r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
-            // The object, its handle and its nullable handle are the same
-            // reference: these conversions are assignability casts.
-            let mut cast = |key: (TypeId, TypeId), f: ConvertFn| {
-                r.conversions.insert(key, f.clone());
-                r.casts.insert(key, f);
-            };
-            cast(
-                (TypeId::of::<T>(), TypeId::of::<Option<Rc<T>>>()),
-                Rc::new(|v: &BoxedValue| to_rc::<T>(v).map(|v| Rc::new(Some(v)) as BoxedValue)),
-            );
-            cast(
-                (TypeId::of::<T>(), TypeId::of::<Rc<T>>()),
-                Rc::new(|v: &BoxedValue| to_rc::<T>(v).map(|v| Rc::new(v) as BoxedValue)),
-            );
-            cast(
-                (TypeId::of::<Rc<T>>(), TypeId::of::<T>()),
-                Rc::new(|v: &BoxedValue| v.downcast_ref::<Rc<T>>().map(|v| v.clone() as BoxedValue)),
-            );
-            cast(
-                (TypeId::of::<Rc<T>>(), TypeId::of::<Option<Rc<T>>>()),
-                Rc::new(|v: &BoxedValue| v.downcast_ref::<Rc<T>>().map(|v| Rc::new(Some(v.clone())) as BoxedValue)),
-            );
+        // The identity of a handle is the object it shares.
+        fn identity<T: 'static>(value: &dyn AnyValue) -> Option<*const ()> {
+            value.downcast_ref::<Rc<T>>().map(|value| Rc::as_ptr(value) as *const ())
+        }
+        insert_reference(ReferenceEntry {
+            object: ValueType::of::<T>(),
+            handle: TypeId::of::<Rc<T>>(),
+            nullable: TypeId::of::<Option<Rc<T>>>(),
+            nullable_operation: nullable::<T>,
+            cast: cast::<T>,
+            identity: identity::<T>,
         });
     }
 
@@ -1140,7 +1181,7 @@ impl ValueTypes {
                 number_kind(target_id)?;
                 let number = match markup.enum_to_value {
                     Some(to_value) => to_value(&**value)?,
-                    None => markup.enum_members.iter().find(|member| (member.get)().any_value_eq(&**value))?.value,
+                    None => markup.find_enum_member_of(&**value)?.value,
                 };
                 let number: BoxedValue = Rc::new(i32::try_from(number).ok()?);
                 Self::try_convert(Some(&number), target)?
@@ -1512,7 +1553,7 @@ impl ValueTypes {
         let markup = crate::metadata::MarkupType::find_by_handle(id)?;
         match markup.enum_to_value {
             Some(to_value) => to_value(&**value),
-            None => markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(&**value)).map(|member| member.value),
+            None => markup.find_enum_member_of(&**value).map(|member| member.value),
         }
     }
 }

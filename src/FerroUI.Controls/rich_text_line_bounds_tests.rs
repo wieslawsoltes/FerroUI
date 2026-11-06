@@ -127,7 +127,7 @@ fn rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes() 
     ] {
         let member = value_type.find_enum_member(name, false).unwrap();
         assert_eq!(member.value, expected as i64);
-        let parsed = Some((member.get)());
+        let parsed = Some(member.get(value_type).unwrap());
         (property.set.unwrap())(&[into_markup_value(view.clone()), parsed]).unwrap();
         let value = (property.get.unwrap())(&[into_markup_value(view.clone())]).unwrap();
         assert_eq!(from_markup_value::<TextLineBounds>(&value), Some(expected));

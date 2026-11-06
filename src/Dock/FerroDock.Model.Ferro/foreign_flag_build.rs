@@ -91,7 +91,7 @@ pub(crate) fn docking_window_state(model: &mut AssemblyModel, code: &mut String)
     }
     code.push_str("impl ::ferroui_base::metadata::MarkupTyped for DockingWindowStateMetadata {\nconst MARKUP: &'static ::ferroui_base::metadata::MarkupType = {\nstatic MARKUP: ::ferroui_base::metadata::MarkupType = {\nlet mut m = ::ferroui_base::metadata::MarkupType::new(\"DockingWindowState\", ::ferroui_base::metadata::MarkupTypeKind::Enum, module_path!());\nm.explicit_namespace = Some(\"FerroDock.Model.Core\");\nm.is_flags = true;\nm.handles = &[::ferroui_base::data::core::ValueType::of::<::ferrodock_model::core::DockingWindowState>];\nm.nullable = Some(::ferroui_base::data::core::ValueType::of::<Option<::ferrodock_model::core::DockingWindowState>>);\nm.enum_members = &[\n");
     for member in &type_.enum_members {
-        writeln!(code,"::ferroui_base::metadata::MarkupEnumMember {{ name: \"{}\", value: {}, get: || ::std::rc::Rc::new(DockingWindowStateMetadata::{}), rust_variant: None }},", member.name,member.value.unwrap(),member.name).unwrap();
+        writeln!(code,"::ferroui_base::metadata::MarkupEnumMember {{ name: \"{}\", value: {}, rust_variant: None }},", member.name,member.value.unwrap()).unwrap();
     }
     writeln!(code,"];\nm.enum_from_value = Some(|value| i32::try_from(value).ok().map(|bits| ::std::rc::Rc::new({original}::from_bits_retain(bits)) as ::ferroui_base::BoxedValue));\nm.enum_to_value = Some(|value| value.downcast_ref::<{original}>().map(|value| i64::from(value.bits())));\nm\n}}; &MARKUP\n}};\n}}").unwrap();
     model.types.push(type_);

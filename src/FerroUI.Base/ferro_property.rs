@@ -189,24 +189,38 @@ pub(crate) type InheritedValueChanged = fn(
 /// of the property, see
 /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
 pub(crate) fn convert_property_value<T: PropertyValue>(property: &FerroProperty, value: &dyn Any) -> Option<T> {
-    let mut typed = None;
-    copy_converted_property_value(property, value, &mut |value| {
-        typed = value.downcast_ref::<T>().cloned();
-        typed.is_some()
-    });
+    let mut typed = None::<T>;
+    copy_converted_property_value(property, value, &mut typed);
     typed
+}
+
+/// The typed destination of an untyped value: `Option<T>`, which takes a copy of
+/// the payload when it is a `T`. The one typed operation of the untyped routes
+/// of a property (conversion, binding values, notifications), shared by all of
+/// them: one implementation per value type.
+pub(crate) trait PayloadSlot {
+    /// Stores a copy of `value` if it is of the type of the slot (and nothing
+    /// otherwise); whether it was.
+    fn copy_payload(&mut self, value: &dyn Any) -> bool;
+}
+
+impl<T: Clone + 'static> PayloadSlot for Option<T> {
+    fn copy_payload(&mut self, value: &dyn Any) -> bool {
+        *self = value.downcast_ref::<T>().cloned();
+        self.is_some()
+    }
 }
 
 #[inline(never)]
 pub(crate) fn copy_converted_property_value(
     property: &FerroProperty,
     value: &dyn Any,
-    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+    copy_value: &mut dyn PayloadSlot,
 ) -> bool {
     let Some(converted) = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type()) else {
         return false;
     };
-    let copied = copy_value(converted.as_any());
+    let copied = copy_value.copy_payload(converted.as_any());
     // A converter's temporary may have an observable destructor. Release it
     // before validation, coercion or publication; it also drops if Clone panics.
     drop(converted);

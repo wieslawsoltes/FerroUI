@@ -487,7 +487,7 @@ impl EmitTypes for RuntimeEmitTypes {
                 emit: declared.emit.map(emit_function),
                 type_: TypeKey::Id((declared.type_)().id()),
             },
-            RuntimeFieldValue::EnumMember(_) => FieldValue::EnumMember,
+            RuntimeFieldValue::EnumMember(..) => FieldValue::EnumMember,
             _ => FieldValue::Other,
         };
         Some(FieldInfo {
