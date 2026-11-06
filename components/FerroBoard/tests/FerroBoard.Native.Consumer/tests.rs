@@ -716,10 +716,7 @@ fn independent_rendered_quick_action_pointer_and_automation_preserve_native_focu
 fn independent_resource_dictionaries_preserve_settings_copies_theme_identity_and_edits() {
     run(|mode| {
         use ferroboard_controls::OnScreenKeyboard;
-        use ferroui_base::{
-            media::Color,
-            utilities::{Uri, UriKind},
-        };
+        use ferroui_base::{media::Color, utilities::UriRef};
         let value = match mode {
             LoadMode::Compiled => crate::compiled_xaml::try_load(
                 None,
@@ -731,13 +728,10 @@ fn independent_resource_dictionaries_preserve_settings_copies_theme_identity_and
             .unwrap()
             .expect("compiled external-resource view"),
             LoadMode::Runtime => {
-                let uri = Uri::new(
-                    &format!(
-                        "{}Runtime/Views/ResourceKeyboard.fxaml",
-                        crate::compiled_xaml::ROOT_URI
-                    ),
-                    UriKind::Absolute,
-                )
+                let uri = UriRef::parse(&format!(
+                    "{}Runtime/Views/ResourceKeyboard.fxaml",
+                    crate::compiled_xaml::ROOT_URI
+                ))
                 .unwrap();
                 for path in [
                     "Views/ResourceKeyboard",
@@ -866,19 +860,13 @@ fn independent_runtime_resource_errors_remain_visible_and_failed_include_can_ret
         if matches!(mode, LoadMode::Compiled) {
             return;
         }
-        use ferroui_base::{
-            controls::ResourceKey,
-            utilities::{Uri, UriKind},
-        };
+        use ferroui_base::{controls::ResourceKey, utilities::UriRef};
         use ferroui_markup_xaml::styling::ResourceInclude;
         ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
-        let base = Uri::new(
-            &format!(
-                "{}Runtime/Views/ResourceKeyboard.fxaml",
-                crate::compiled_xaml::ROOT_URI
-            ),
-            UriKind::Absolute,
-        )
+        let base = UriRef::parse_absolute(&format!(
+            "{}Runtime/Views/ResourceKeyboard.fxaml",
+            crate::compiled_xaml::ROOT_URI
+        ))
         .unwrap();
         let include = ResourceInclude::new(Some(base.clone()));
         let error = include
@@ -886,18 +874,14 @@ fn independent_runtime_resource_errors_remain_visible_and_failed_include_can_ret
             .err()
             .expect("unset include Source must fail");
         assert!(error.to_string().contains("Source"));
-        include.set_source(Some(
-            Uri::new("../Resources/Absent.fxaml", UriKind::Relative).unwrap(),
-        ));
+        include.set_source(Some(UriRef::parse("../Resources/Absent.fxaml").unwrap()));
         let error = include
             .try_loaded()
             .err()
             .expect("missing embedded resource must fail");
         eprintln!("missing resource diagnostic: {error}");
         assert!(error.to_string().contains("Absent.fxaml"));
-        include.set_source(Some(
-            Uri::new("../Resources/Keyboard.fxaml", UriKind::Relative).unwrap(),
-        ));
+        include.set_source(Some(UriRef::parse("../Resources/Keyboard.fxaml").unwrap()));
         let loaded = include
             .try_loaded()
             .expect("failed include must release its loading guard and permit retry");
@@ -907,16 +891,13 @@ fn independent_runtime_resource_errors_remain_visible_and_failed_include_can_ret
                 .is_some()
         );
         assert!(Rc::ptr_eq(&loaded, &include.try_loaded().unwrap()));
-        let invalid = Uri::new(
-            &format!(
-                "{}Runtime/Resources/Invalid.fxaml",
-                crate::compiled_xaml::ROOT_URI
-            ),
-            UriKind::Absolute,
-        )
+        let invalid = UriRef::parse(&format!(
+            "{}Runtime/Resources/Invalid.fxaml",
+            crate::compiled_xaml::ROOT_URI
+        ))
         .unwrap();
         assert!(
-            crate::compiled_xaml::try_load(None, invalid.absolute_uri())
+            crate::compiled_xaml::try_load(None, invalid.to_string().as_str())
                 .unwrap()
                 .is_none()
         );
