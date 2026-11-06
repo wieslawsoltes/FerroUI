@@ -3,21 +3,23 @@ use crate::gpu::ISkiaGrContext;
 use crate::immutable_bitmap::ImmutableBitmap;
 use crate::metal::{IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalSharedEvent};
 use ferroui_base::platform::{
-    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle, IPlatformRenderInterfaceImportedImage,
-    IPlatformRenderInterfaceImportedObject, IPlatformRenderInterfaceImportedSemaphore,
-    PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties, SharedBitmapImpl,
+    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle,
+    IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedObject,
+    IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsExternalImageFormat,
+    PlatformGraphicsExternalImageProperties, SharedBitmapImpl,
 };
 use ferroui_base::rendering::composition::{
-    CompositionGpuImportedImageSynchronizationCapabilities, ICompositionImportableSharedGpuContextImage,
+    CompositionGpuImportedImageSynchronizationCapabilities,
+    ICompositionImportableSharedGpuContextImage,
 };
-#[cfg(ferro_skia_apple_ganesh)]
-use skia_safe::gpu::{backend_render_targets, mtl, surfaces, SurfaceOrigin};
 #[cfg(not(ferro_skia_apple_ganesh))]
 use skia_safe::gpu::graphite::mtl::backend_textures;
 #[cfg(not(ferro_skia_apple_ganesh))]
 use skia_safe::gpu::graphite::{surfaces, Recorder};
 #[cfg(not(ferro_skia_apple_ganesh))]
 use skia_safe::gpu::Mipmapped;
+#[cfg(ferro_skia_apple_ganesh)]
+use skia_safe::gpu::{backend_render_targets, mtl, surfaces, SurfaceOrigin};
 use skia_safe::ColorType;
 #[cfg(not(ferro_skia_apple_ganesh))]
 use skia_safe::{BlendMode, Image, Paint, SamplingOptions};
@@ -71,7 +73,9 @@ impl IPlatformRenderInterfaceImportedSemaphore for ImportedSemaphore {
 }
 
 /// The imported semaphore behind the contract (the cast of the original).
-fn imported_semaphore(semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>) -> &ImportedSemaphore {
+fn imported_semaphore(
+    semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+) -> &ImportedSemaphore {
     semaphore
         .as_any()
         .downcast_ref::<ImportedSemaphore>()
@@ -95,19 +99,28 @@ impl ImportedImage {
     /// # Panics
     /// Panics when the GPU has been disposed.
     fn gr_context(&self) -> Rc<MetalGrContext> {
-        self.context.borrow().clone().expect("SkiaMetalGpu has been disposed")
+        self.context
+            .borrow()
+            .clone()
+            .expect("SkiaMetalGpu has been disposed")
     }
 
     /// A copy of `image` with its rows in the opposite order.
     #[cfg(not(ferro_skia_apple_ganesh))]
     fn flip_vertically(recorder: &mut Recorder, image: &Image) -> Option<Image> {
-        let mut surface = surfaces::render_target(recorder, image.image_info(), Mipmapped::No, None, None)?;
+        let mut surface =
+            surfaces::render_target(recorder, image.image_info(), Mipmapped::No, None, None)?;
         let mut paint = Paint::default();
         paint.set_blend_mode(BlendMode::Src);
         let canvas = surface.canvas();
         canvas.translate((0.0, image.height() as f32));
         canvas.scale((1.0, -1.0));
-        canvas.draw_image_with_sampling_options(image, (0.0, 0.0), SamplingOptions::default(), Some(&paint));
+        canvas.draw_image_with_sampling_options(
+            image,
+            (0.0, 0.0),
+            SamplingOptions::default(),
+            Some(&paint),
+        );
         surfaces::as_image_copy(&surface, None, Mipmapped::No)
     }
 }
@@ -119,9 +132,84 @@ impl IPlatformRenderInterfaceImportedObject for ImportedImage {
 }
 
 impl IPlatformRenderInterfaceImportedImage for ImportedImage {
+    #[cfg(not(ferro_skia_apple_ganesh))]
+    fn acquire_shared_bitmap(
+        &self,
+        frame: ferroui_base::rendering::composition::frames::FrameLease,
+    ) -> Result<Arc<SharedBitmapImpl>, ferroui_base::rendering::composition::frames::FrameError>
+    {
+        use ferroui_base::rendering::composition::frames::{
+            DeviceIdentity, FrameAlpha, FrameColor, FrameError, FrameFormat,
+        };
+        let m = frame.metadata();
+        m.validate(8192)?;
+        let gr = self
+            .context
+            .borrow()
+            .clone()
+            .ok_or(FrameError::StaleGeneration)?;
+        if !frame.is_current() || Some(m.device_generation) != gr.frame_context_id() {
+            return Err(FrameError::StaleGeneration);
+        }
+        if !m.top_left_origin
+            || m.width != self.texture.width() as u32
+            || m.height != self.texture.height() as u32
+        {
+            return Err(FrameError::InvalidDimensions);
+        }
+        if m.device != self.feature.device_luid().map(DeviceIdentity::Luid) || m.device.is_none() {
+            return Err(FrameError::DeviceMismatch);
+        }
+        crate::leased_gpu_bitmap::frame_color_filter(m.color)?;
+        if m.color == FrameColor::Rec709Full && m.alpha != FrameAlpha::Opaque {
+            return Err(FrameError::UnsupportedColor);
+        }
+        if !matches!(
+            (m.format, self.color_type),
+            (FrameFormat::Bgra8, ColorType::BGRA8888) | (FrameFormat::Rgba8, ColorType::RGBA8888)
+        ) {
+            return Err(FrameError::UnsupportedFormat);
+        }
+        let alpha = match m.alpha {
+            FrameAlpha::Opaque => skia_safe::AlphaType::Opaque,
+            FrameAlpha::Premultiplied => skia_safe::AlphaType::Premul,
+            FrameAlpha::Straight => return Err(FrameError::UnsupportedFormat),
+        };
+        let backend = unsafe {
+            backend_textures::make_metal(
+                (self.texture.width(), self.texture.height()),
+                self.texture.handle(),
+            )
+        };
+        // Wrap, never snapshot: the frame owns producer storage and each draw
+        // registers it with the context's native GPU completion handler.
+        let image = gr
+            .with_recorder(|recorder| {
+                skia_safe::gpu::graphite::images::wrap_texture(
+                    recorder,
+                    &backend,
+                    self.color_type,
+                    alpha,
+                    None,
+                )
+            })
+            .ok_or(FrameError::MissingImporter)?;
+        let id = gr
+            .frame_context_id()
+            .ok_or(FrameError::MissingSynchronization)?;
+        frame.counters().gpu_import();
+        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(
+            image, frame, id,
+        )))
+    }
+
     /// # Panics
     /// Always: Metal has no keyed mutexes.
-    fn snapshot_with_keyed_mutex(&self, _acquire_index: u32, _release_index: u32) -> Arc<SharedBitmapImpl> {
+    fn snapshot_with_keyed_mutex(
+        &self,
+        _acquire_index: u32,
+        _release_index: u32,
+    ) -> Arc<SharedBitmapImpl> {
         panic!("Specified method is not supported.");
     }
 
@@ -150,14 +238,21 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         let gr_context = self.gr_context();
 
         gr_context.flush();
-        self.feature.submit_wait(&**imported_semaphore(wait_for_semaphore).event(), wait_for_value);
+        self.feature.submit_wait(
+            &**imported_semaphore(wait_for_semaphore).event(),
+            wait_for_value,
+        );
 
         // SAFETY: the imported texture keeps the `id<MTLTexture>` it hands
         // out alive until it is disposed; the surface that wraps the texture
         // is released before this function returns, and the recording that
         // copies from it holds the texture by itself.
-        let backend_texture =
-            unsafe { backend_textures::make_metal((self.texture.width(), self.texture.height()), self.texture.handle()) };
+        let backend_texture = unsafe {
+            backend_textures::make_metal(
+                (self.texture.width(), self.texture.height()),
+                self.texture.handle(),
+            )
+        };
 
         // Deviation (DEVIATIONS.md, Skia backend): upstream wraps the
         // texture as a Ganesh render target with the origin of the image
@@ -166,7 +261,13 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         // as it is for an image whose first row is the top one, and with its
         // rows reversed otherwise.
         let image = gr_context.with_recorder(|recorder| {
-            let surface = surfaces::wrap_backend_texture(recorder, &backend_texture, self.color_type, None, None)?;
+            let surface = surfaces::wrap_backend_texture(
+                recorder,
+                &backend_texture,
+                self.color_type,
+                None,
+                None,
+            )?;
             let image = surfaces::as_image_copy(&surface, None, Mipmapped::No)?;
             if self.top_left_origin {
                 Some(image)
@@ -180,7 +281,10 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
 
         let rv = ImmutableBitmap::from_image(image, None);
         gr_context.flush();
-        self.feature.submit_signal(&**imported_semaphore(signal_semaphore).event(), signal_value);
+        self.feature.submit_signal(
+            &**imported_semaphore(signal_semaphore).event(),
+            signal_value,
+        );
         Arc::new(rv)
     }
 
@@ -199,7 +303,10 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
 
         // `Flush(true, false)` of the original: submitted, not waited for.
         gr_context.flush();
-        self.feature.submit_wait(&**imported_semaphore(wait_for_semaphore).event(), wait_for_value);
+        self.feature.submit_wait(
+            &**imported_semaphore(wait_for_semaphore).event(),
+            wait_for_value,
+        );
 
         // SAFETY: the imported texture keeps the `id<MTLTexture>` it hands
         // out alive until it is disposed; the render target and the surface
@@ -207,11 +314,24 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         // and the snapshot is a copy of its own (the surface wraps a render
         // target, which an image cannot share).
         let texture_info = unsafe { mtl::TextureInfo::new(self.texture.handle() as _) };
-        let backend_target =
-            backend_render_targets::make_mtl((self.texture.width(), self.texture.height()), &texture_info);
-        let origin = if self.top_left_origin { SurfaceOrigin::TopLeft } else { SurfaceOrigin::BottomLeft };
+        let backend_target = backend_render_targets::make_mtl(
+            (self.texture.width(), self.texture.height()),
+            &texture_info,
+        );
+        let origin = if self.top_left_origin {
+            SurfaceOrigin::TopLeft
+        } else {
+            SurfaceOrigin::BottomLeft
+        };
         let surface = gr_context.with_context(|context| {
-            surfaces::wrap_backend_render_target(context, &backend_target, origin, self.color_type, None, None)
+            surfaces::wrap_backend_render_target(
+                context,
+                &backend_target,
+                origin,
+                self.color_type,
+                None,
+                None,
+            )
         });
         let Some(mut surface) = surface else {
             panic!("Unable to create a Skia surface for the Metal texture.");
@@ -220,7 +340,10 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         drop(surface);
         drop(backend_target);
         gr_context.flush();
-        self.feature.submit_signal(&**imported_semaphore(signal_semaphore).event(), signal_value);
+        self.feature.submit_signal(
+            &**imported_semaphore(signal_semaphore).event(),
+            signal_value,
+        );
         Arc::new(rv)
     }
 
@@ -232,6 +355,13 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
 }
 
 impl IExternalObjectsRenderInterfaceContextFeature for SkiaMetalExternalObjectsFeature {
+    fn shared_context_generation(&self) -> u64 {
+        self.context
+            .borrow()
+            .as_ref()
+            .and_then(|gr| gr.frame_context_id())
+            .unwrap_or(0)
+    }
     fn supported_image_handle_types(&self) -> Vec<String> {
         self.inner.supported_image_handle_types()
     }
@@ -271,15 +401,21 @@ impl IExternalObjectsRenderInterfaceContextFeature for SkiaMetalExternalObjectsF
         panic!("Specified method is not supported.");
     }
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> {
-        Rc::new(ImportedSemaphore { ev: self.inner.import_shared_event(handle) })
+    fn import_semaphore(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+    ) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> {
+        Rc::new(ImportedSemaphore {
+            ev: self.inner.import_shared_event(handle),
+        })
     }
 
     fn get_synchronization_capabilities(
         &self,
         image_handle_type: &str,
     ) -> CompositionGpuImportedImageSynchronizationCapabilities {
-        self.inner.get_synchronization_capabilities(image_handle_type)
+        self.inner
+            .get_synchronization_capabilities(image_handle_type)
     }
 
     fn device_uuid(&self) -> Option<Vec<u8>> {
@@ -290,3 +426,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for SkiaMetalExternalObjectsF
         self.inner.device_luid()
     }
 }
+
+#[cfg(all(test, feature = "native-frame-tests", not(ferro_skia_apple_ganesh)))]
+#[path = "shared_frame_tests.rs"]
+mod shared_frame_tests;

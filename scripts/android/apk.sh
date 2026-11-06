@@ -30,6 +30,7 @@
 #   --label LABEL            the label of the application (default: the package)
 #   --application-id ID      the application id (default: org.ferroui.<package with - as .>)
 #   --permission NAME        a permission of the manifest (repeatable)
+#   --java-source-dir DIR    Java sources of an optional framework crate (repeatable)
 #
 # Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; see scripts/android/env.sh for
 # the pinned versions of the NDK, the build tools and the platform. The native library is built with
@@ -53,6 +54,7 @@ host_package=""
 package_label=""
 package_id=""
 package_permissions=()
+extra_java_sources=()
 while [ $# -gt 0 ]; do
     case "$1" in
         smoke|catalog|safearea|sandbox) app="$1" ;;
@@ -61,6 +63,7 @@ while [ $# -gt 0 ]; do
         --label) package_label="${2:?--label needs a value}"; shift ;;
         --application-id) package_id="${2:?--application-id needs a value}"; shift ;;
         --permission) package_permissions+=("${2:?--permission needs a value}"); shift ;;
+        --java-source-dir) extra_java_sources+=("${2:?--java-source-dir needs a value}"); shift ;;
         --release) profile="release" ;;
         --abi) abi="${2:?--abi needs a value}"; shift ;;
         --out) out="${2:?--out needs a value}"; shift ;;
@@ -223,6 +226,10 @@ java_sources=()
 while IFS= read -r file; do
     java_sources+=("$file")
 done < <(find "$repo/src/Android/FerroUI.Android/java" -name '*.java' | sort)
+for source_dir in ${extra_java_sources[@]+"${extra_java_sources[@]}"}; do
+    if [ ! -d "$source_dir" ]; then echo "missing Java source directory: $source_dir" >&2; exit 1; fi
+    while IFS= read -r file; do java_sources+=("$file"); done < <(find "$source_dir" -name '*.java' | sort)
+done
 javac -source 11 -target 11 -Xlint:all -Xlint:-options -Werror -classpath "$FERROUI_ANDROID_JAR" -d "$work/classes" "${java_sources[@]}"
 class_files=()
 while IFS= read -r file; do

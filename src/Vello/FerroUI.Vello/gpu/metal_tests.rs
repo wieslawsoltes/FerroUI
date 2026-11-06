@@ -30,6 +30,8 @@ struct TestMetalDevice {
     weak_self: std::rc::Weak<TestMetalDevice>,
     device: Retained<ProtocolObject<dyn MTLDevice>>,
     queue: Retained<ProtocolObject<dyn MTLCommandQueue>>,
+    /// The external objects feature of the device, when a test gives it one.
+    external: RefCell<Option<Rc<dyn ferroui_metal::IMetalExternalObjectsFeature>>>,
 }
 
 impl TestMetalDevice {
@@ -39,7 +41,7 @@ impl TestMetalDevice {
             return None;
         };
         let queue = device.newCommandQueue()?;
-        Some(Rc::new_cyclic(|weak_self| Self { weak_self: weak_self.clone(), device, queue }))
+        Some(Rc::new_cyclic(|weak_self| Self { weak_self: weak_self.clone(), device, queue, external: RefCell::new(None) }))
     }
 }
 
@@ -54,6 +56,10 @@ impl IOptionalFeatureProvider for TestMetalDevice {
         if feature_type == TypeId::of::<dyn IMetalDevice>() {
             let this: Rc<dyn IMetalDevice> = self.weak_self.upgrade()?;
             return Some(Rc::new(this));
+        }
+        if feature_type == TypeId::of::<dyn ferroui_metal::IMetalExternalObjectsFeature>() {
+            let feature = self.external.borrow().clone()?;
+            return Some(Rc::new(feature));
         }
         None
     }
@@ -617,5 +623,236 @@ fn the_frame_of_the_window_is_retained_and_a_dirty_rectangle_is_drawn_into_it() 
         assert_eq!([0, 0, 0, 0], pixel(size, &pixels, 30, 30), "{mode:?}");
 
         println!("{test}: {mode:?}: drawn");
+    }
+}
+
+/// The external objects of a test: every image imported is the one texture of the test.
+struct TestExternalObjects {
+    texture: Retained<ProtocolObject<dyn MTLTexture>>,
+}
+
+struct TestExternalTexture(Retained<ProtocolObject<dyn MTLTexture>>);
+
+impl ferroui_metal::IMetalExternalTexture for TestExternalTexture {
+    fn width(&self) -> i32 {
+        self.0.width() as i32
+    }
+    fn height(&self) -> i32 {
+        self.0.height() as i32
+    }
+    fn samples(&self) -> i32 {
+        1
+    }
+    fn handle(&self) -> *mut c_void {
+        Retained::as_ptr(&self.0).cast_mut().cast()
+    }
+    fn dispose(&self) {}
+}
+
+const TEST_LUID: [u8; 8] = [7, 0, 0, 0, 0, 0, 0, 0];
+
+impl ferroui_metal::IMetalExternalObjectsFeature for TestExternalObjects {
+    fn supported_image_handle_types(&self) -> Vec<String> {
+        vec!["IOSurfaceRef".into()]
+    }
+    fn supported_semaphore_types(&self) -> Vec<String> {
+        vec![]
+    }
+    fn device_luid(&self) -> Option<Vec<u8>> {
+        Some(TEST_LUID.to_vec())
+    }
+    fn get_synchronization_capabilities(
+        &self,
+        _: &str,
+    ) -> ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities {
+        ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities::AUTOMATIC
+    }
+    fn import_image(
+        &self,
+        _: Rc<dyn ferroui_base::platform::IPlatformHandle>,
+        _: ferroui_base::platform::PlatformGraphicsExternalImageProperties,
+    ) -> Rc<dyn ferroui_metal::IMetalExternalTexture> {
+        Rc::new(TestExternalTexture(self.texture.clone()))
+    }
+    fn import_shared_event(&self, _: Rc<dyn ferroui_base::platform::IPlatformHandle>) -> Rc<dyn ferroui_metal::IMetalSharedEvent> {
+        unreachable!("the tests import no shared events")
+    }
+    fn submit_wait(&self, _: &dyn ferroui_metal::IMetalSharedEvent, _: u64) {
+        unreachable!("the tests import no shared events")
+    }
+    fn submit_signal(&self, _: &dyn ferroui_metal::IMetalSharedEvent, _: u64) {
+        unreachable!("the tests import no shared events")
+    }
+}
+
+struct TestHandle;
+
+impl ferroui_base::platform::IPlatformHandle for TestHandle {
+    fn handle(&self) -> isize {
+        0
+    }
+    fn handle_descriptor(&self) -> Option<&str> {
+        Some("IOSurfaceRef")
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+/// The producer's storage of a frame: counts how often it is given back.
+struct FrameStorage(Arc<std::sync::atomic::AtomicUsize>);
+
+impl Drop for FrameStorage {
+    fn drop(&mut self) {
+        self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
+/// An 8 by 8 texture of the device in `BGRA8Unorm`, every pixel `bgra`, as a producer's frame.
+fn bgra_frame_texture(device: &TestMetalDevice, bgra: [u8; 4]) -> Retained<ProtocolObject<dyn MTLTexture>> {
+    use objc2_metal::{MTLOrigin, MTLRegion, MTLSize};
+    // SAFETY: a descriptor of a two-dimensional texture, the texture of the device, and the
+    // upload of 8 by 8 pixels of 4 bytes from a buffer of that size.
+    unsafe {
+        let descriptor = MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
+            MTLPixelFormat::BGRA8Unorm,
+            8,
+            8,
+            false,
+        );
+        descriptor.setUsage(MTLTextureUsage::ShaderRead);
+        descriptor.setStorageMode(MTLStorageMode::Shared);
+        let texture = device.device.newTextureWithDescriptor(&descriptor).expect("a texture of the frame");
+        let pixels: Vec<u8> = std::iter::repeat_n(bgra, 64).flatten().collect();
+        texture.replaceRegion_mipmapLevel_withBytes_bytesPerRow(
+            MTLRegion { origin: MTLOrigin { x: 0, y: 0, z: 0 }, size: MTLSize { width: 8, height: 8, depth: 1 } },
+            0,
+            std::ptr::NonNull::new(pixels.as_ptr().cast_mut().cast()).unwrap(),
+            8 * 4,
+        );
+        texture
+    }
+}
+
+/// The value full-range Rec. 709 video `value` has on the canvas: the curve of the conversion.
+fn rec709_on_canvas(value: u8) -> f64 {
+    let v = (f64::from(value) / 255.0).powf(2.4);
+    let srgb = if v < 0.0031308 { 12.92 * v } else { 1.055 * v.powf(1.0 / 2.4) - 0.055 };
+    srgb * 255.0
+}
+
+#[test]
+fn a_shared_frame_is_converted_once_on_the_device_and_its_storage_given_back_after_the_gpu() {
+    use ferroui_base::platform::{
+        IExternalObjectsRenderInterfaceContextFeature, PlatformGraphicsExternalImageFormat,
+        PlatformGraphicsExternalImageProperties,
+    };
+    use ferroui_base::rendering::composition::frames::*;
+    let Some(device) = TestMetalDevice::new("a_shared_frame_is_converted_once_on_the_device") else {
+        return;
+    };
+    let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    let bgra = [200u8, 100, 50, 255];
+    *device.external.borrow_mut() = Some(Rc::new(TestExternalObjects { texture: bgra_frame_texture(&device, bgra) }));
+    let probe = VelloMetalGpu::new(device.clone()).unwrap();
+    let modes: Vec<VelloRenderingMode> =
+        window_modes(probe.device()).into_iter().filter(|mode| *mode != VelloRenderingMode::Cpu).collect();
+    assert!(!modes.is_empty(), "a GPU mode");
+
+    for mode in modes {
+        for color in [FrameColor::Srgb, FrameColor::Rec709Full] {
+            let window = Window::new(&device, mode, PixelSize::new(32, 32), 1.0);
+            let feature = window
+                .gpu
+                .try_get_feature(TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())
+                .and_then(|feature| feature.downcast::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>().ok())
+                .map(|feature| (*feature).clone())
+                .expect("the external objects feature of the GPU");
+            let imported = feature.import_image(
+                Rc::new(TestHandle),
+                PlatformGraphicsExternalImageProperties {
+                    width: 8,
+                    height: 8,
+                    format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
+                    memory_size: 256,
+                    memory_offset: 0,
+                    top_left_origin: true,
+                    vulkan_properties: None,
+                    dma_buf_properties: None,
+                },
+            );
+            let drops = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+            let budget = FrameBudget::new(FrameBudgetLimits::default());
+            let metadata = FrameMetadata {
+                identity: FrameIdentity { source: 1, generation: 1, sequence: 1 },
+                width: 8,
+                height: 8,
+                visible: FrameRegion { x: 0, y: 0, width: 8, height: 8 },
+                format: FrameFormat::Bgra8,
+                color,
+                alpha: FrameAlpha::Opaque,
+                rotation: FrameRotation::None,
+                mirrored: false,
+                top_left_origin: true,
+                timestamp: std::time::Duration::ZERO,
+                device: Some(DeviceIdentity::Luid(TEST_LUID.to_vec())),
+                device_generation: feature.shared_context_generation(),
+                planes: vec![FramePlane { offset: 0, stride: 32, length: 256 }],
+                retained_bytes: 256,
+            };
+
+            // A frame made for an earlier device, or for another device, is refused.
+            let mut stale = metadata.clone();
+            stale.device_generation += 1;
+            let stale = budget.lease(stale, ()).unwrap();
+            assert_eq!(Some(FrameError::StaleGeneration), imported.acquire_shared_bitmap(stale).err());
+            let mut other = metadata.clone();
+            other.device = Some(DeviceIdentity::Luid(vec![9; 8]));
+            let other = budget.lease(other, ()).unwrap();
+            assert_eq!(Some(FrameError::DeviceMismatch), imported.acquire_shared_bitmap(other).err());
+
+            let frame = budget.lease(metadata, FrameStorage(drops.clone())).unwrap();
+            let counters = frame.counters();
+            let bitmap = imported.acquire_shared_bitmap(frame).expect("the shared bitmap");
+
+            // Two frames draw the bitmap: it is converted once, on the device.
+            for _ in 0..2 {
+                let scene_info = RenderTargetSceneInfo::new(PixelSize::new(32, 32), 1.0, CompositionTransparencyLevel::None);
+                let (mut context, _) = window.render_target.create_drawing_context(&scene_info);
+                context.clear(Colors::WHITE);
+                context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 8.0, 8.0), Rect::new(0.0, 0.0, 16.0, 16.0));
+                context.dispose();
+            }
+            let (size, pixels) = window.read_back();
+            let drawn = pixel(size, &pixels, 6, 6);
+            let expected: [f64; 3] = match color {
+                FrameColor::Rec709Full => [rec709_on_canvas(bgra[2]), rec709_on_canvas(bgra[1]), rec709_on_canvas(bgra[0])],
+                _ => [f64::from(bgra[2]), f64::from(bgra[1]), f64::from(bgra[0])],
+            };
+            for channel in 0..3 {
+                assert!(
+                    (f64::from(drawn[channel]) - expected[channel]).abs() <= 1.5,
+                    "{mode:?} {color:?}: the frame on the canvas {drawn:?}, expected {expected:?}"
+                );
+            }
+            assert_eq!(255, drawn[3], "{mode:?} {color:?}: an opaque frame");
+            assert_eq!([255, 255, 255, 255], pixel(size, &pixels, 24, 24), "{mode:?} {color:?}: the canvas around it");
+
+            let counts = counters.snapshot();
+            assert_eq!(1, counts.gpu_imports, "{mode:?} {color:?}");
+            assert_eq!(1, counts.gpu_conversions, "{mode:?} {color:?}: one conversion for both frames");
+            assert_eq!(0, counts.preview.attempts, "{mode:?} {color:?}: nothing through memory");
+
+            // The storage is given back once the device has read it, without waiting.
+            bitmap.dispose();
+            drop(bitmap);
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+            while window.gpu.device().poll_frame_reads() {
+                assert!(std::time::Instant::now() < deadline, "{mode:?} {color:?}: the device reads the frame no longer");
+                std::thread::yield_now();
+            }
+            assert_eq!(1, drops.load(std::sync::atomic::Ordering::SeqCst), "{mode:?} {color:?}: the storage is given back once");
+            assert_eq!(0, budget.usage().frames, "{mode:?} {color:?}: the budget is free again");
+        }
     }
 }

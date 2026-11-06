@@ -4,6 +4,35 @@ resolver = "2"
 # patched skia-bindings (external/rust-skia-bindings) is not a member either.
 exclude = ["components/FerroBoard", "external/rust-skia-bindings"]
 members = [
+    "src/FerroUI.Media.Camera.Windows",
+    "src/FerroUI.Media.Video.Windows",
+    "src/FerroUI.Media.Windows",
+    "src/FerroUI.Media.Linux",
+    "src/FerroUI.Media.Video.Linux",
+    "src/FerroUI.Media.Camera.Linux",
+    "src/FerroUI.Media.OpenGL",
+    "src/FerroUI.Media.Metal",
+    "src/FerroUI.Media.Android",
+    "src/FerroUI.Media.Video.Android",
+    "src/FerroUI.Media.Camera.Android",
+    "src/FerroUI.Media.Camera.Controls",
+    "src/FerroUI.Media.Qr.Apple",
+    "src/FerroUI.Media.Qr.Android",
+    "src/FerroUI.Media",
+    "src/FerroUI.Media.Video",
+    "src/FerroUI.Media.Camera",
+    "src/FerroUI.Media.Qr",
+    "src/FerroUI.Media.Controls",
+    "src/FerroUI.Media.Video.Controls",
+    "src/FerroUI.Media.Apple",
+    "src/FerroUI.Media.Video.Apple",
+    "src/FerroUI.Media.Camera.Apple",
+    "src/FerroUI.Media.Browser",
+    "src/FerroUI.Media.Video.Browser",
+    "src/FerroUI.Media.Camera.Browser",
+    "samples/PortableMedia",
+    "samples/PortableMedia.Mobile",
+    "samples/PortableMedia.Browser",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
     "src/FerroUI.Designer.Tools",
@@ -238,6 +267,32 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-media-camera-windows = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Windows" }
+ferroui-media-video-windows = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Windows" }
+ferroui-media-windows = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Windows" }
+ferroui-media-camera-linux = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Linux" }
+ferroui-media-video-linux = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Linux" }
+ferroui-media-linux = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Linux" }
+ferroui-media-video = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video" }
+ferroui-media-camera = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera" }
+ferroui-media-video-controls = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Controls" }
+ferroui-media-video-apple = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Apple" }
+ferroui-media-camera-apple = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Apple" }
+ferroui-media-controls = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Controls" }
+ferroui-media-apple = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Apple" }
+ferroui-media-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Browser" }
+ferroui-media-video-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Browser" }
+ferroui-media-camera-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Browser" }
+ferroui-media = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media" }
+ferroui-media-metal = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Metal" }
+ferroui-media-opengl = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.OpenGL" }
+ferroui-media-android = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Android" }
+ferroui-media-video-android = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Android" }
+ferroui-media-camera-android = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Android" }
+ferroui-media-camera-controls = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Controls" }
+ferroui-media-qr = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Qr", default-features = false }
+ferroui-media-qr-android = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Qr.Android" }
+ferroui-media-qr-apple = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Qr.Apple" }
 # The Dock port (docs/porting/dock): its crates and the dependencies only it has.
 ferrodock-controls-recycling-model = { version = "=0.5.0-preview.1", path = "src/Dock/FerroDock.Controls.Recycling.Model" }
 ferrodock-controls-recycling-model-ferro = { version = "=0.5.0-preview.1", path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }

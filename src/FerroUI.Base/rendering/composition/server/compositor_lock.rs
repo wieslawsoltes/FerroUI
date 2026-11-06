@@ -16,6 +16,13 @@ use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex, OnceLock};
 use std::thread::{self, ThreadId};
 
+// Moves an owned, thread-confined value without touching its contents. Only the
+// owning render thread destroys it. If that thread has already stopped, the
+// ManuallyDrop deliberately retains it rather than running a destructor elsewhere.
+struct DeferredDrop(ManuallyDrop<Box<dyn std::any::Any>>);
+// SAFETY: this wrapper is opaque off the owner thread; the queue only moves it.
+unsafe impl Send for DeferredDrop {}
+
 /// A lock that the thread holding it may enter again (`lock` in C#).
 #[derive(Default)]
 pub struct CompositorLock {
@@ -79,6 +86,8 @@ pub struct LockedServerCompositor {
     /// known: see [`confine_to_current_thread`](Self::confine_to_current_thread).
     /// Never set where both threads render.
     confined_to: OnceLock<ThreadId>,
+    deferred_drops: Mutex<Vec<DeferredDrop>>,
+    release_wakeup: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
 }
 
 // SAFETY: the server compositor and every object reachable from it are only
@@ -130,6 +139,8 @@ impl LockedServerCompositor {
             lock: CompositorLock::new(),
             server: std::cell::UnsafeCell::new(Some(server)),
             confined_to: OnceLock::new(),
+            deferred_drops: Mutex::new(Vec::new()),
+            release_wakeup: Mutex::new(None),
         }
     }
 
@@ -141,9 +152,8 @@ impl LockedServerCompositor {
     /// The lock still orders every access. What this adds is for the objects
     /// that belong to one thread whatever lock is held (a graphics context
     /// that only exists in the thread that created it): the graph is
-    /// released by this thread, and a thread that is left with the last
-    /// handle to it leaks it instead of dropping it (see the `Drop` impls of
-    /// this type and of [`LockBound`]).
+    /// released by this thread. Lock-bound values dropped elsewhere are queued
+    /// back to it; a graph abandoned after that thread stops is retained safely.
     ///
     /// # Panics
     ///
@@ -178,6 +188,7 @@ impl LockedServerCompositor {
     /// compositor has released it.
     pub fn try_with<R>(&self, f: impl FnOnce(&Rc<ServerCompositor>) -> R) -> Option<R> {
         let _guard = self.lock.enter();
+        self.drain_deferred_drops();
         // SAFETY: the cell is only read and written under the lock, which
         // this thread holds. The handle taken here keeps the server
         // compositor alive for the call if `f` releases it, and is dropped
@@ -202,6 +213,20 @@ impl LockedServerCompositor {
         f()
     }
 
+    pub(crate) fn set_release_wakeup(&self, wake: Arc<dyn Fn() + Send + Sync>) {
+        *self.release_wakeup.lock().unwrap() = Some(wake);
+    }
+
+    fn drain_deferred_drops(&self) {
+        if self.is_confined_to_another_thread() { return; }
+        let pending = std::mem::take(&mut *self.deferred_drops.lock().unwrap());
+        for mut value in pending {
+            // SAFETY: on the owner thread, under the compositor lock or during
+            // exclusive final destruction of this holder (no other Arc remains).
+            unsafe { ManuallyDrop::drop(&mut value.0) };
+        }
+    }
+
     /// Releases the server compositor, under the lock, on the calling
     /// thread. The compositor does this when it is dropped: the graph holds
     /// a handle that it shares with the UI thread and whose count is not
@@ -213,6 +238,7 @@ impl LockedServerCompositor {
     /// the render thread calls this, as its last job.
     pub(crate) fn release(&self) {
         let _guard = self.lock.enter();
+        self.drain_deferred_drops();
         // SAFETY: as in `try_with`.
         let server = unsafe { (*self.server.get()).take() };
         drop(server);
@@ -233,6 +259,7 @@ impl LockedServerCompositor {
 
 impl Drop for LockedServerCompositor {
     fn drop(&mut self) {
+        if !self.is_confined_to_another_thread() { self.drain_deferred_drops(); }
         // The last handle to a graph that is confined to the render thread
         // and was never released there (the render loop stopped ticking
         // before the compositor was dropped): it holds objects that may only
@@ -264,8 +291,10 @@ impl Drop for LockedServerCompositor {
 /// ([`LockedServerCompositor::confine_to_current_thread`]) the value is
 /// still reached by both threads under the lock, for what upstream reads
 /// from the UI thread, but only the render thread drops it: dropped by
-/// another thread it is leaked.
-pub struct LockBound<T> {
+/// another thread it is queued for destruction on the render thread. If that
+/// thread has already stopped, the value is retained rather than destroyed on
+/// a thread that cannot safely touch it.
+pub struct LockBound<T: 'static> {
     value: ManuallyDrop<T>,
     server: Arc<LockedServerCompositor>,
 }
@@ -284,10 +313,10 @@ pub struct LockBound<T> {
 // of the same compositor or in the graph of the server compositor. A caller
 // must not keep such a clone outside, clone one out of `get`, or bind a
 // value that still shares an `Rc` with an object of its own thread.
-unsafe impl<T> Send for LockBound<T> {}
-unsafe impl<T> Sync for LockBound<T> {}
+unsafe impl<T: 'static> Send for LockBound<T> {}
+unsafe impl<T: 'static> Sync for LockBound<T> {}
 
-impl<T> LockBound<T> {
+impl<T: 'static> LockBound<T> {
     /// Binds `value` to the lock of `locked`. `server` is the proof that the
     /// caller is inside the lock, where the value has to be put together
     /// when it clones handles of the server side.
@@ -329,12 +358,18 @@ impl<T> LockBound<T> {
     }
 }
 
-impl<T> Drop for LockBound<T> {
+impl<T: 'static> Drop for LockBound<T> {
     fn drop(&mut self) {
         // An object of the render interface is dropped by the thread it
-        // belongs to or not at all: its disposal is a job of the render
-        // thread, and what is leaked here is what that job left of it.
+        // belongs to. Returning interop/features to the UI thread must not turn
+        // their ordinary final drop into a permanent native-device reference.
         if self.server.is_confined_to_another_thread() {
+            // SAFETY: move exactly once, with no destructor or Rc count change
+            // on this thread. T is 'static and its owner thread drains the box.
+            let value = unsafe { ManuallyDrop::take(&mut self.value) };
+            self.server.deferred_drops.lock().unwrap().push(DeferredDrop(ManuallyDrop::new(Box::new(value))));
+            let wake = self.server.release_wakeup.lock().unwrap().clone();
+            if let Some(wake) = wake { wake(); }
             return;
         }
         // The last handle may be dropped by either thread, outside a job:

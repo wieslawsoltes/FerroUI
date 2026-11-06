@@ -139,6 +139,9 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/WrapPanelPage.xaml", "WrapPanel", Icons::LAYOUT, "Wrap children onto multiple lines");
         }),
         section("Media & Graphics", Icons::MEDIA, &mut unavailable, |s| {
+            s.add_page(crate::media_samples::video_page, "Video", Icons::MEDIA, "Playback, seeking, volume and shared texture presentation");
+            s.add_page(crate::media_samples::camera_page, "Camera", Icons::IMAGE, "Camera discovery, consent, preview and still photos");
+            s.add_page(crate::media_samples::qr_page, "QR codes", Icons::TARGET, "Offline QR images and optional live camera recognition");
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");

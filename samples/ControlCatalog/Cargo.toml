@@ -65,6 +65,14 @@ runtime-markup = [
 ferroboard-core = { path = "../../components/FerroBoard/src/FerroBoard.Core" }
 ferroboard-core-ferro = { path = "../../components/FerroBoard/src/FerroBoard.Core.Ferro" }
 ferroboard-controls = { path = "../../components/FerroBoard/src/FerroBoard.Controls" }
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-camera-controls.workspace = true
+ferroui-media-qr = { workspace = true, features = ["rust-decoder"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
 ferroui-hot-reload = { workspace = true, optional = true }
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }

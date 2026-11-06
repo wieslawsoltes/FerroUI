@@ -55,6 +55,17 @@ fn main() {
         return;
     }
 
+    println!("cargo:rerun-if-changed=gpu/metal/frame_completion.m");
+    let mut frame_build = cc::Build::new();
+    if env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
+        frame_build.define("FERROUI_NATIVE_FRAME_TESTS", None);
+    }
+    frame_build.file("gpu/metal/frame_completion.m")
+        .flag("-fobjc-arc").flag("-fblocks").compile("ferroui_frame_completion");
+    println!("cargo:rustc-link-lib=framework=Metal");
+    println!("cargo:rustc-link-lib=framework=IOSurface");
+    println!("cargo:rustc-link-lib=framework=Foundation");
+
     // The runtime of the iOS simulator is a library of its own: the one of
     // the devices has no slice for it, and the linker refuses the archive.
     let simulator = env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("sim")

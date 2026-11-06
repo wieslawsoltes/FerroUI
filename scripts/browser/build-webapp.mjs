@@ -380,7 +380,9 @@ function runNpm(args, directory) {
     if (result.status !== 0) throw new Error(`npm ${args.join(" ")} failed (${result.signal ?? result.status})`);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
+// Node canonicalizes import.meta.url. macOS temporary directories (and linked
+// workspaces) can name the same entry point through a symlink in argv[1].
+if (process.argv[1] && fs.existsSync(process.argv[1]) && fs.realpathSync(process.argv[1]) === fs.realpathSync(scriptPath)) {
     try {
         if (process.argv.length !== 3 || !["build", "verify"].includes(process.argv[2])) {
             throw new Error("usage: node scripts/browser/build-webapp.mjs <build|verify>");

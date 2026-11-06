@@ -15,6 +15,10 @@ interface EmscriptenGL {
 function getGL(): EmscriptenGL {
     return FerroExports.runtime?.GL as EmscriptenGL;
 }
+export interface FrameGlContext {
+    context: WebGLRenderingContext;
+    generation: number;
+}
 
 export class WebGlRenderTarget extends WebRenderTarget {
     public contextHandle?: number;
@@ -24,6 +28,7 @@ export class WebGlRenderTarget extends WebRenderTarget {
     public sample?: number;
     public depth?: number;
     private static _gl: EmscriptenGL | null = null;
+    private static readonly frameContexts = new Map<number, FrameGlContext>();
 
     constructor(public canvas: HTMLCanvasElement | OffscreenCanvas, mode: BrowserRenderingMode) {
         // Skia only understands WebGL context wrapped in Emscripten.
@@ -59,6 +64,10 @@ export class WebGlRenderTarget extends WebRenderTarget {
         const handle = WebGlRenderTarget._gl.registerContext(context, attrs);
         (context as any).gl_handle = handle;
         super(canvas, "webgl");
+        const frameContext = { context, generation: 1 };
+        WebGlRenderTarget.frameContexts.set(handle, frameContext);
+        canvas.addEventListener("webglcontextlost", event => event.preventDefault());
+        canvas.addEventListener("webglcontextrestored", () => { frameContext.generation++; });
 
         this.contextHandle = handle;
         this.fboId = context.getParameter(context.FRAMEBUFFER_BINDING)?.id ?? 0;
@@ -76,6 +85,7 @@ export class WebGlRenderTarget extends WebRenderTarget {
         super.release();
         const handle = this.contextHandle;
         this.contextHandle = undefined;
+        if (handle != null) { WebGlRenderTarget.frameContexts.delete(handle); }
         if (handle != null) { WebGlRenderTarget._gl?.deleteContext?.(handle); }
     }
 
@@ -87,5 +97,19 @@ export class WebGlRenderTarget extends WebRenderTarget {
         if (WebGlRenderTarget._gl == null) { return false; }
         const ret = WebGlRenderTarget._gl.makeContextCurrent(handle);
         return handle === 0 || ret;
+    }
+
+    public static frameContext(handle: number): FrameGlContext | undefined {
+        // Media bridges to workers are explicitly unavailable in this profile.
+        return typeof document === "undefined" ? undefined : WebGlRenderTarget.frameContexts.get(handle);
+    }
+
+    public static frameGeneration(handle: number): number {
+        return WebGlRenderTarget.frameContext(handle)?.generation ?? 0;
+    }
+
+    public static contextLost(handle: number): boolean {
+        const context = WebGlRenderTarget.frameContexts.get(handle)?.context;
+        return !context || context.isContextLost();
     }
 }

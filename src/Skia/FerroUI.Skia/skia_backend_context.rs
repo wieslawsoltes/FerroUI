@@ -63,6 +63,9 @@ impl IOptionalFeatureProvider for SkiaContext {
 }
 
 impl IPlatformRenderInterfaceContext for SkiaContext {
+    fn poll_pending_gpu_work(&self) -> bool {
+        self.gpu().is_some_and(|gpu| gpu.poll_pending_gpu_work())
+    }
     fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         // The text rendering parameters of the platform are read from the
         // surfaces of the top-level every frame (docs/porting/text-rendering.md).

@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-media-qr-android"
+description = "Optional bundled offline Android QR analysis of CameraX images"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-qr = {workspace=true,default-features=false}
+ferroui-media-camera.workspace = true
+ferroui-media-camera-android.workspace = true
+serde_json.workspace = true
+base64 = "0.22"
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android.workspace = true
+[package.metadata.release]
+group = "platforms"

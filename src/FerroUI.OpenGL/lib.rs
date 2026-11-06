@@ -29,6 +29,8 @@ mod i_platform_graphics_open_gl_context_factory;
 mod open_gl_exception;
 mod register_types;
 mod rust_paths;
+mod shared_frame_texture;
+pub use shared_frame_texture::{SharedFrameTexture, SharedGlTextureOwner, SharedGlTextureRetirementQueue};
 
 pub use entry_points::GetProcAddress;
 pub use gl_basic_info_interface::GlBasicInfoInterface;
@@ -38,8 +40,8 @@ pub use gl_interface::{GlContextInfo, GlInterface};
 pub use gl_version::{GlProfileType, GlVersion};
 pub use i_gl_context::{IGlContext, IGlPlatformSurfaceRenderTargetFactory};
 pub use i_gl_context_external_objects_feature::{
-    IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture, IGlExportableExternalSemaphore,
-    IGlExternalImageTexture, IGlExternalSemaphore,
+    IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture,
+    IGlExportableExternalSemaphore, IGlExternalImageTexture, IGlExternalSemaphore,
 };
 pub use i_open_gl_texture_sharing_render_interface_context_feature::{
     ICompositionImportableOpenGlSharedTexture, IOpenGlTextureSharingRenderInterfaceContextFeature,

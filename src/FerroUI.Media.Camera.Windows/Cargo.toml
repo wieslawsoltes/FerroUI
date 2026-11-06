@@ -1,0 +1,26 @@
+[package]
+name = "ferroui-media-camera-windows"
+description = "Explicit Media Foundation camera acquisition and JPEG snapshots"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-windows.workspace = true
+ferroui-media-opengl.workspace = true
+jpeg-encoder.workspace = true
+serde_json.workspace = true
+[features]
+synthetic-camera = ["ferroui-media-windows/synthetic-camera"]
+controls = ["ferroui-media-opengl/controls"]
+[package.metadata.release]
+group = "platforms"

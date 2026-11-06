@@ -27,6 +27,7 @@ pub struct PlatformRenderInterfaceContextManager {
     graphics: RefCell<Option<Arc<dyn IPlatformGraphics>>>,
     backend: RefCell<Option<Rc<dyn IPlatformRenderInterfaceContext>>>,
     gpu_context: RefCell<Option<OwnedDisposable<dyn IPlatformGraphicsContext>>>,
+    retired_gpu_contexts: RefCell<Vec<OwnedDisposable<dyn IPlatformGraphicsContext>>>,
     ready_state_feature: RefCell<Option<Arc<dyn IPlatformGraphicsReadyStateFeature>>>,
     /// The render interface of the platform, looked up where the manager is
     /// created: the service locator belongs to a thread, and the context may
@@ -57,6 +58,7 @@ impl PlatformRenderInterfaceContextManager {
             graphics: RefCell::new(graphics),
             backend: RefCell::new(None),
             gpu_context: RefCell::new(None),
+            retired_gpu_contexts: RefCell::new(Vec::new()),
             ready_state_feature: RefCell::new(ready_state_feature),
             render_interface: RefCell::new(FerroLocator::current().get_service::<dyn IPlatformRenderInterface>()),
             context_disposed: HandlerList::new(),
@@ -104,7 +106,8 @@ impl PlatformRenderInterfaceContextManager {
         drop((graphics, ready_state_feature, render_interface));
     }
 
-    /// Raised after a lost graphics context has been released. Dropping the
+    /// Raised after a graphics context stops being active. Healthy native
+    /// resources may still be draining on its retirement path. Dropping the
     /// returned guard removes the handler; [`Subscription::detach`] keeps it
     /// for the life of the manager.
     pub fn context_disposed(&self, handler: impl Fn() + 'static) -> Subscription {
@@ -161,7 +164,12 @@ impl PlatformRenderInterfaceContextManager {
 
             let gpu_context = self.gpu_context.borrow_mut().take();
             if let Some(mut gpu_context) = gpu_context {
-                gpu_context.dispose();
+                let context = gpu_context.value();
+                if !context.is_lost() && context.has_pending_resource_retirement() {
+                    self.retired_gpu_contexts.borrow_mut().push(gpu_context);
+                } else {
+                    gpu_context.dispose();
+                }
                 for (_, handler) in self.context_disposed.snapshot().iter() {
                     handler();
                 }
@@ -212,6 +220,27 @@ impl PlatformRenderInterfaceContextManager {
         self.gpu_context.borrow().as_ref().map(|context| context.value())
     }
 
+    /// Polls the active backend and healthy retired contexts without waiting.
+    /// Old contexts stay alive through external leases and actual GPU/native
+    /// cleanup. Quiet leases rely on their retirement wakeup instead of spinning.
+    pub fn poll_pending_gpu_work(&self) -> bool {
+        let mut pending = self.existing_backend_context().is_some_and(|context| context.poll_pending_gpu_work());
+        let retired = std::mem::take(&mut *self.retired_gpu_contexts.borrow_mut());
+        let mut retained = Vec::new();
+        for mut owner in retired {
+            let context = owner.value();
+            let work = context.poll_pending_gpu_work();
+            if context.is_lost() || !context.has_pending_resource_retirement() {
+                owner.dispose();
+            } else {
+                pending |= work;
+                retained.push(owner);
+            }
+        }
+        self.retired_gpu_contexts.borrow_mut().extend(retained);
+        pending
+    }
+
     /// Makes the graphics context current. Disposing the result restores the
     /// previously current context.
     pub fn ensure_current(&self) -> Rc<dyn IDisposable> {
@@ -240,6 +269,14 @@ impl PlatformRenderInterfaceContextManager {
         if let Some(backend) = backend {
             backend.dispose();
         }
+    }
+}
+
+impl Drop for PlatformRenderInterfaceContextManager {
+    fn drop(&mut self) {
+        // Final shutdown cannot keep a retirement loop. Platform disposal must
+        // quarantine any completion or storage whose retirement is unknown.
+        for mut context in self.retired_gpu_contexts.get_mut().drain(..) { context.dispose(); }
     }
 }
 
@@ -274,6 +311,8 @@ mod tests {
         id: i32,
         log: Log,
         is_lost: Cell<bool>,
+        retained_storage: Cell<bool>,
+        gpu_work: Cell<bool>,
     }
 
     impl IOptionalFeatureProvider for GraphicsContext {
@@ -283,6 +322,8 @@ mod tests {
     }
 
     impl IPlatformGraphicsContext for GraphicsContext {
+        fn has_pending_resource_retirement(&self) -> bool { self.retained_storage.get() }
+        fn poll_pending_gpu_work(&self) -> bool { self.gpu_work.get() }
         fn is_lost(&self) -> bool {
             self.is_lost.get()
         }
@@ -347,7 +388,7 @@ mod tests {
                 state: ThreadBound::new(GraphicsState {
                     log: log.clone(),
                     uses_shared_context,
-                    shared: Rc::new(GraphicsContext { id: 0, log: log.clone(), is_lost: Cell::new(false) }),
+                    shared: Rc::new(GraphicsContext { id: 0, log: log.clone(), is_lost: Cell::new(false), retained_storage: Cell::new(false), gpu_work: Cell::new(false) }),
                     created: RefCell::new(Vec::new()),
                 }),
                 ready_state,
@@ -375,6 +416,8 @@ mod tests {
                 id: self.created.borrow().len() as i32 + 1,
                 log: self.log.clone(),
                 is_lost: Cell::new(false),
+                retained_storage: Cell::new(false),
+                gpu_work: Cell::new(false),
             });
             record(&self.log, format!("graphics.create_context -> gpu{}", context.id));
             self.created.borrow_mut().push(context.clone());
@@ -798,6 +841,47 @@ mod tests {
         );
     }
 
+    #[test]
+    fn healthy_replacement_keeps_old_context_until_leases_and_native_work_retire() {
+        let fixture = Fixture::new();
+        let graphics = Graphics::new(&fixture.log, false, None);
+        let manager = fixture.manager(Some(graphics.clone()));
+        manager.value();
+        let old = graphics.created.borrow()[0].clone();
+        old.retained_storage.set(true);
+        take(&fixture.log);
+        manager.reset();
+        manager.value();
+        assert!(!take(&fixture.log).iter().any(|v| v == "gpu1.dispose"));
+        assert_eq!(manager.retired_gpu_contexts.borrow().len(), 1);
+        assert!(!manager.poll_pending_gpu_work(), "quiet leases must not spin a clock");
+        old.gpu_work.set(true);
+        assert!(manager.poll_pending_gpu_work(), "submitted work needs nonblocking polling");
+        old.gpu_work.set(false);
+        old.retained_storage.set(false);
+        assert!(!manager.poll_pending_gpu_work());
+        assert_eq!(take(&fixture.log), ["gpu1.dispose"]);
+        assert!(manager.retired_gpu_contexts.borrow().is_empty());
+        assert!(!manager.poll_pending_gpu_work());
+        assert!(take(&fixture.log).is_empty());
+    }
+    #[test]
+    fn a_retired_context_that_becomes_lost_uses_platform_quarantine_disposal() {
+        let fixture = Fixture::new();
+        let graphics = Graphics::new(&fixture.log, false, None);
+        let manager = fixture.manager(Some(graphics.clone()));
+        manager.value();
+        let old = graphics.created.borrow()[0].clone();
+        old.retained_storage.set(true);
+        manager.reset();
+        manager.value();
+        take(&fixture.log);
+        old.is_lost.set(true);
+        manager.poll_pending_gpu_work();
+        assert_eq!(take(&fixture.log), ["gpu1.dispose"]);
+        assert!(manager.retired_gpu_contexts.borrow().is_empty());
+        assert!(old.retained_storage.get(), "loss is not a completion proof");
+    }
     #[test]
     fn create_render_target_uses_the_backend() {
         let fixture = Fixture::new();

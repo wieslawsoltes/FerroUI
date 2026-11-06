@@ -7,7 +7,7 @@ use crate::animation::easings::{IEasing, SplineEasing};
 use crate::animation::KeySpline;
 use crate::media::imaging::Bitmap;
 use crate::platform::IPlatformGraphics;
-use crate::reactive::{Disposable, Subscription};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
@@ -37,6 +37,12 @@ crate::ferro_thread_local! {
 fn find_compositor(key: u64) -> Option<Rc<Compositor>> {
     COMPOSITORS.with(|compositors| compositors.borrow().get(&key).and_then(Weak::upgrade))
 }
+
+/// Lifecycle of the active render-interface context. Notifications are delivered
+/// in order on the owning compositor dispatcher after the native event. A lost
+/// context's GPU work is not thereby declared complete.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RenderContextState { Lost, Created }
 
 /// The compositor: manages the composition objects of the UI thread and
 /// commits their changes to the server compositor in batches.
@@ -85,6 +91,7 @@ pub struct Compositor {
     scheduler: Weak<dyn ICompositorScheduler>,
     dispatcher: Arc<Dispatcher>,
     after_commit: HandlerList<dyn Fn()>,
+    render_context_changed: HandlerList<dyn Fn(RenderContextState)>,
     default_easing: Rc<dyn IEasing>,
     /// The open scoped batches and the batch of the current frame (WinUI
     /// `CompositionScopedBatch` and `CompositionCommitBatch`).
@@ -259,6 +266,10 @@ impl Compositor {
         // never renders (`UseUiThreadForSynchronousCommits: false`,
         // `Loop.RunsInBackground: true`).
         let confined = !use_ui_thread_for_synchronous_commits && render_loop.runs_in_background();
+        let release_loop = Arc::downgrade(&render_loop);
+        server.set_release_wakeup(Arc::new(move || {
+            if let Some(render_loop) = release_loop.upgrade() { render_loop.wakeup(); }
+        }));
         let task = Arc::new_cyclic(|this| RenderThreadLoopTask {
             this: this.clone(),
             server: server.clone(),
@@ -417,6 +428,7 @@ impl Compositor {
             scheduler: Rc::downgrade(scheduler),
             dispatcher,
             after_commit: HandlerList::new(),
+            render_context_changed: HandlerList::new(),
             default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
             animation_batches: super::composition_batch::CompositorBatches::new(),
         });
@@ -424,6 +436,18 @@ impl Compositor {
             let mut compositors = compositors.borrow_mut();
             compositors.retain(|_, c| c.strong_count() > 0);
             compositors.insert(key, Rc::downgrade(&compositor));
+        });
+        let dispatcher = compositor.dispatcher.clone();
+        compositor.with_server(|server| {
+            server.set_context_change_handler(Arc::new(move |state| {
+                dispatcher.post(move || {
+                    if let Some(compositor) = find_compositor(key) {
+                        for (_, handler) in compositor.render_context_changed.snapshot().iter() {
+                            handler(state);
+                        }
+                    }
+                }, DispatcherPriority::SEND);
+            }));
         });
         render_loop.add(loop_task);
         compositor
@@ -484,7 +508,7 @@ impl Compositor {
     /// that this thread asks for and jobs of the render thread use (see
     /// [`LockBound`](super::server::LockBound)). `server` is what
     /// [`with_server`](Self::with_server) or a job hands out.
-    pub(crate) fn bind_to_lock<T>(&self, server: &ServerCompositor, value: T) -> super::server::LockBound<T> {
+    pub(crate) fn bind_to_lock<T: 'static>(&self, server: &ServerCompositor, value: T) -> super::server::LockBound<T> {
         super::server::LockBound::new(&self.server, server, value)
     }
 
@@ -1136,6 +1160,21 @@ impl Compositor {
             let part = parts.await.flatten()?;
             let interop: Rc<dyn super::ICompositionGpuInterop> = super::CompositionInterop::from_server_part(&this, part);
             Some(interop)
+        })
+    }
+
+    /// Subscribe to graphics context loss/recreation without a polling clock.
+    /// Dispose the subscription on this compositor's dispatcher. Handlers may
+    /// unsubscribe or request new interop; the old context is never reused.
+    pub fn render_context_changed(&self, handler: impl Fn(RenderContextState) + 'static) -> Rc<dyn IDisposable> {
+        self.dispatcher.verify_access();
+        let token = self.render_context_changed.add(Rc::new(handler));
+        let weak = self.this.clone();
+        Disposable::create(move || {
+            if let Some(compositor) = weak.upgrade() {
+                compositor.dispatcher.verify_access();
+                compositor.render_context_changed.remove(token);
+            }
         })
     }
 

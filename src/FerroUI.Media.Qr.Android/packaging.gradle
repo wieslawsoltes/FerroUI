@@ -1,0 +1,5 @@
+// Optional: apply after Camera.Android/packaging.gradle. Model packaged in APK;
+// deliberately excludes the unbundled Play Services barcode-scanning artifact.
+def ferroRoot = file(providers.gradleProperty('ferroUiRoot').get())
+android.sourceSets.main.java.srcDirs += new File(ferroRoot, 'src/FerroUI.Media.Qr.Android/java')
+dependencies { implementation 'com.google.mlkit:barcode-scanning:17.3.0' }

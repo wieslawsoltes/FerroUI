@@ -733,6 +733,8 @@ fn the_first_request_for_the_gpu_interop_of_a_confined_compositor_is_answered() 
     wait_until("the task of the compositor has left the loop", || render_loop.task_count() == 0);
     drop(render_thread);
     // Nothing else of the render thread was touched by this thread.
+    assert!(log.saw("the backend context is dropped"));
+    assert!(log.saw("the graphics context is dropped"));
     for violation in log.violations() {
         assert!(
             violation.starts_with("the backend context is asked for a feature on")
@@ -740,6 +742,43 @@ fn the_first_request_for_the_gpu_interop_of_a_confined_compositor_is_answered() 
             "{violation}"
         );
     }
+}
+
+#[test]
+fn confined_values_dropped_elsewhere_are_released_by_the_render_thread() {
+    struct Probe { owner: ThreadId, dropped: Arc<AtomicUsize> }
+    impl Drop for Probe {
+        fn drop(&mut self) {
+            assert_eq!(thread::current().id(), self.owner);
+            self.dropped.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let fixture = ConfinedCompositor::new(&render_interface);
+    let render_thread = RenderThread::start(&fixture.render_loop);
+    let (target, root) = fixture.show();
+    let dropped = Arc::new(AtomicUsize::new(0));
+    for third_thread in [false, true] {
+        let locked = fixture.compositor.locked_server();
+        let observed = dropped.clone();
+        let task = fixture.compositor.invoke_server_job_async(move |server| {
+            Ok(super::server::LockBound::new(&locked, server, Probe {
+                owner: thread::current().id(), dropped: observed,
+            }))
+        }, false);
+        wait_until("the confined value is created", || task.is_completed());
+        let value = task.take_result().unwrap().unwrap();
+        if third_thread { thread::spawn(move || drop(value)).join().unwrap(); }
+        else { drop(value); }
+        let expected = if third_thread {2} else {1};
+        wait_until("the owner thread releases the value", || dropped.load(Ordering::SeqCst) == expected);
+    }
+    fixture.dispose(target, root);
+    let (render_loop, log) = fixture.drop_compositor();
+    wait_until("the owner task exits", || render_loop.task_count() == 0);
+    drop(render_thread);
+    assert!(log.violations().is_empty());
 }
 
 /// The compositor of the reference catches the two exceptions a render
@@ -1311,4 +1350,43 @@ fn the_platform_graphics_of_a_confined_compositor_are_asked_by_the_render_thread
     assert_eq!(1, world.graphics_dropped.load(Ordering::SeqCst));
     world.assert_every_feature_is_dropped();
     drop(render_thread);
+}
+
+#[test]
+fn render_context_notifications_return_to_ui_in_order_and_can_unsubscribe() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let fixture = ConfinedCompositor::new(&render_interface);
+    let _thread = RenderThread::start(&fixture.render_loop);
+    let ui_thread = thread::current().id();
+    let notices = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let observed = notices.clone();
+    let subscription = fixture.compositor.render_context_changed(move |state| {
+        assert_eq!(thread::current().id(), ui_thread);
+        observed.borrow_mut().push(state);
+    });
+    let (target, root) = fixture.show();
+    wait_until("first context notification", || !notices.borrow().is_empty());
+    notices.borrow_mut().clear();
+    let reset = fixture.compositor.invoke_server_job_async(|server| {
+        server.reset_all_gpu_resources();
+        server.render_interface().value();
+        Ok(())
+    }, false);
+    wait_until("reset notifications", || reset.is_completed() && notices.borrow().len() == 2);
+    assert_eq!(&*notices.borrow(), &[super::RenderContextState::Lost, super::RenderContextState::Created]);
+    subscription.dispose();
+    notices.borrow_mut().clear();
+    let reset = fixture.compositor.invoke_server_job_async(|server| {
+        server.reset_all_gpu_resources();
+        server.render_interface().value();
+        Ok(())
+    }, false);
+    wait_until("second reset", || reset.is_completed());
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(notices.borrow().is_empty());
+    fixture.dispose(target, root);
+    let (render_loop, log) = fixture.drop_compositor();
+    wait_until("render graph released", || render_loop.task_count() == 0);
+    assert!(log.violations().is_empty());
 }

@@ -96,6 +96,7 @@ objc2-quartz-core = { version = "=0.3.2", default-features = false, features = [
 objc2-metal = { version = "=0.3.2", default-features = false, features = [
     "std",
     "MTLBlitCommandEncoder",
+    "MTLAllocation",
     "MTLCommandBuffer",
     "MTLCommandEncoder",
     "MTLCommandQueue",
@@ -105,7 +106,9 @@ objc2-metal = { version = "=0.3.2", default-features = false, features = [
     "MTLResource",
     "MTLTexture",
     "MTLTypes",
+    "objc2-io-surface",
 ] }
+objc2-io-surface = { version = "=0.3.2", default-features = false, features = ["std", "IOSurfaceRef"] }
 # OpenGL ES over EAGL (docs/porting/ios-platform.md, section 7): the context, its share group, the
 # drawable protocol of the layer and the storage and presentation of its renderbuffer.
 objc2-open-gl-es = { version = "=0.3.2", default-features = false, features = [

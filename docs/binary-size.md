@@ -384,6 +384,35 @@ metadata again instead of keeping the stale entry.
   is not used (no PDF back end is linked; the JPEG and PNG encoders are, because bitmaps can be
   saved).
 
+### 5.4 Hello world by mechanism (macOS, release, after #565)
+
+Machine code of `samples/HelloWorld` (the WinUI theme, compiled markup), 43.2 MB, from the
+symbol table. Sizes are the distance to the next symbol; instances are the functions of each
+family. These are the .NET mechanisms whose instances add up. The porting guide turns each into
+a rule ([PORTING-GUIDE.md](porting/PORTING-GUIDE.md), "Binary size: what a port costs").
+
+| Mechanism | Size | Instances | Where | Ticket |
+|---|---:|---:|---|---|
+| Compiled markup of the WinUI theme | 7.28 MB | 4,851 | `ferroui_themes_winui` | #568 |
+| Closures: `FnOnce::call_once` bodies and their shims | 2.69 MB | 20,368 | registrations, callbacks, `Disposable::create` | #569 |
+| Drop glue (`drop_in_place`) | 2.86 MB | 14,754 | cells, binding expressions, entries, `Rc` | #569 |
+| `IObserver<T>` per value type (`UntypedObserver`, `Observer`, `DirectUntyped`, animation observers) | 1.43 MB | 2,477 | property store, bindings, animations | #576 |
+| Class vtables per class and subclass (`Subclassable::build_vtable`) | 1.39 MB | 1,146 | `Control`, `StyledElement`, `Visual`, `Layoutable` | #569 |
+| Property routes per value type (`PropertyRoutes` of `StyledProperty<T>`, `DirectProperty<T>`) | 1.08 MB | 5,511 | property core | #576 |
+| Value entries per value type (`EffectiveValueDyn`, `IValueEntry`) | 0.76 MB | 4,025 | property store | #576 |
+| `AnyValue` per value type | 0.58 MB | 12,063 | every property value type | #576 |
+| Nullable operations, conversions, casts and object handles registered per type | 1.70 MB | 4,700 | value type registry | #566 |
+| Change notification by name (`INotifyPropertyChanged`) | 0.47 MB | 752 | view models, controls | |
+| Markup metadata closures | 0.40 MB | 1,489 | `MarkupType` members | #566 |
+| Class registration and static constructors | 0.38 MB | 1,326 | `register_class` | #566 |
+| `IDisposable` adapters and subscriptions | 0.34 MB | 1,451 | `AnonymousDisposable`, guards | #569 |
+| CLR-style property info (`TypedClrPropertyInfo`) | 0.27 MB | 822 | binding paths | #576 |
+| Routed events | 0.25 MB | 930 | `Interactive` | |
+| Rx operators | 0.19 MB | 426 | `ObservableExt` | #576 |
+
+Unwind tables and landing pads (`__eh_frame`, `__gcc_except_tab`, `__unwind_info`) are 10.3 MB on
+top of the machine code (#567).
+
 ## 6. The settings applications should use
 
 - `cargo run --profile fast-release -p <application>` to try an application with optimised code:
