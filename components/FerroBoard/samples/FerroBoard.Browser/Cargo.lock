@@ -217,6 +217,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-system",
  "indexmap",
+ "url",
 ]
 
 [[package]]
@@ -274,9 +275,11 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-vulkan",
  "jni-sys",
  "libc",
+ "url",
 ]
 
 [[package]]
@@ -305,6 +308,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "url",
  "wasm-bindgen",
 ]
 
@@ -339,6 +343,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-system",
  "rustc-hash",
+ "url",
 ]
 
 [[package]]
@@ -349,6 +354,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-system",
  "sysinfo",
 ]
 
@@ -358,6 +364,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "url",
 ]
 
 [[package]]
@@ -384,6 +391,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
+ "url",
 ]
 
 [[package]]
@@ -393,6 +401,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "url",
  "xamlx",
 ]
 
@@ -436,6 +445,7 @@ dependencies = [
 name = "ferroui-remote-protocol"
 version = "0.5.0-preview.1"
 dependencies = [
+ "ferroui-system",
  "uuid",
 ]
 

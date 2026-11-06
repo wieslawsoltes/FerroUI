@@ -222,6 +222,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-system",
  "indexmap",
+ "url",
 ]
 
 [[package]]
@@ -292,9 +293,11 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-vulkan",
  "jni-sys",
  "libc",
+ "url",
 ]
 
 [[package]]
@@ -345,6 +348,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-system",
  "rustc-hash",
+ "url",
 ]
 
 [[package]]
@@ -355,6 +359,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-system",
  "sysinfo",
 ]
 
@@ -379,14 +384,17 @@ dependencies = [
  "ferroui-metal",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "libc",
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
+ "objc2-io-surface",
  "objc2-metal",
  "objc2-open-gl-es",
  "objc2-quartz-core",
  "objc2-ui-kit",
+ "url",
 ]
 
 [[package]]
@@ -404,6 +412,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
+ "url",
 ]
 
 [[package]]
@@ -413,6 +422,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "url",
  "xamlx",
 ]
 
@@ -456,6 +466,7 @@ dependencies = [
 name = "ferroui-remote-protocol"
 version = "0.5.0-preview.1"
 dependencies = [
+ "ferroui-system",
  "uuid",
 ]
 
@@ -958,6 +969,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "objc2-io-surface"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "180788110936d59bab6bd83b6060ffdfffb3b922ba1396b312ae795e1de9d81d"
+dependencies = [
+ "bitflags 2.13.2",
+ "objc2",
+ "objc2-core-foundation",
+]
+
+[[package]]
 name = "objc2-metal"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -966,6 +988,7 @@ dependencies = [
  "bitflags 2.13.2",
  "objc2",
  "objc2-foundation",
+ "objc2-io-surface",
 ]
 
 [[package]]
