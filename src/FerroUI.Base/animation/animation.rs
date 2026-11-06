@@ -408,6 +408,10 @@ impl Animation {
             .add_range(self.children().snapshot().iter().cloned());
         let values = Rc::new(CompositeDisposable::new());
         *preview.preview_values.borrow_mut() = Some(values.clone());
+        // Boundary (#567): a catch that cleans up and raises the same panic again, not an error
+        // flow. The setup runs animators and application observers; disposing of the steps
+        // after the catch, not in a drop guard, keeps a panic of a disposable from aborting
+        // the process while the first one unwinds.
         let applied = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             // The application transform animator currently returns an empty subscription
             // for CSS operation lists. A designer must surface that capability boundary
