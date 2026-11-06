@@ -243,10 +243,13 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 # files; the runtime result (checked against its expected value above) and the graph
                 # still have to be the baseline's.
                 if not (accept_output_changes and equivalence["runtime"] == reference["runtime"]
-                        and equivalence["units"] == reference["units"]):
+                        and without_features(equivalence["units"]) == without_features(reference["units"])):
                     raise RuntimeError(f"fixture {phase}: baseline/candidate generated output, runtime or graph differs")
                 report.setdefault("fixture_output_changes", {})[phase] = changed_outputs(
                     reference["generated"], equivalence["generated"])
+                if equivalence["units"] != reference["units"]:
+                    report.setdefault("fixture_feature_changes", {})[phase] = changed_features(
+                        reference["units"], equivalence["units"])
             previous_generated = record["generated"]
             report["fixture"].append(record)
             save()
@@ -362,6 +365,7 @@ def main() -> int:
                              "graph_output_changes": report.get("graph_output_changes", []),
                              "graph_feature_changes": report.get("graph_feature_changes", []),
                              "fixture_output_changes": report.get("fixture_output_changes", {}),
+                             "fixture_feature_changes": report.get("fixture_feature_changes", {}),
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
                              "fixture_runtime_and_generated_outputs_equal": True}
@@ -390,7 +394,9 @@ def main() -> int:
                      "files of its revision; these generated files differ from the baseline's:\n\n"
                      + "".join(f"- `{name}`\n" for name in changes[:50])
                      + "".join(f"- fixture {phase}: {len(names)} files\n" for phase, names in fixture_changes.items()))
-        feature_changes = report["summary"]["graph_feature_changes"]
+        feature_changes = report["summary"]["graph_feature_changes"] + [
+            f"fixture {phase}: {name}" for phase, names in report["summary"]["fixture_feature_changes"].items()
+            for name in names]
         if feature_changes:
             text += ("\n### Feature changes acknowledged (`build-output-changes`)\n\n"
                      "The units and profiles of the graph are the baseline's and every repeat builds the graph of its "
