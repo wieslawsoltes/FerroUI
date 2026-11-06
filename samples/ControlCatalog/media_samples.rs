@@ -126,7 +126,7 @@ impl State {
         let view = self.video.downgrade();
         let budget = self.budget.clone();
         self.status("Preparing bundled video. Playback starts with Play.");
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = async {
                 let view = view.upgrade().ok_or_else(MediaError::cancelled)?;
                 let visual = ElementComposition::get_element_visual(&view)
@@ -174,7 +174,7 @@ impl State {
         } else {
             "Waiting for camera permission and capture."
         });
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = async {
                 let s = weak
                     .upgrade()
@@ -268,7 +268,7 @@ impl State {
                 if let Ok(analysis) = s.gate.begin(frame, s.clock.elapsed()) {
                     let pending = recognize(analysis);
                     let weak = weak.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         let result = pending.await;
                         if let Some(s) = weak.upgrade().filter(|s| s.active(epoch)) {
                             match result {
@@ -301,7 +301,7 @@ impl State {
         let pending = session.photo();
         let weak = Rc::downgrade(self);
         let epoch = self.epoch.get();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             if let Some(s) = weak.upgrade() {
                 s.photo_pending.set(false);
@@ -753,7 +753,7 @@ pub fn smoke_action(action: &str) -> bool {
                 let mut options = player.options();
                 options.muted = true;
                 let _ = player.set_options(options);
-                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                Dispatcher::ui_thread().spawn_local(async move {
                     let _ = player.play().await;
                 });
             }

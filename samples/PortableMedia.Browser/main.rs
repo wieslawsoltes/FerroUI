@@ -136,7 +136,7 @@ fn create() -> Ref<Control> {
             let compositor = visual.compositor().clone();
             let budget = budget.clone();
             let mailbox = mailbox.clone();
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 let result = async {
                     let interop = compositor
                         .try_get_composition_gpu_interop()

@@ -301,7 +301,7 @@ impl MediaPlayerElement {
             };
             self.source_waiting_for_context.set(false);
             let pending = player.set_source(source);
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 if let Err(error) = pending.await {
                     if error.kind != MediaErrorKind::Cancelled {
                         if let Some(view) =
@@ -340,7 +340,7 @@ impl MediaPlayerElement {
         };
         let compositor = visual.compositor().clone();
         let factory = factory.unwrap();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let interop = compositor.try_get_composition_gpu_interop().await;
             let Some(view) = weak
                 .upgrade()
@@ -597,7 +597,7 @@ impl MediaPlayerElement {
         let weak_player = player.downgrade();
         let weak = self.to_ref().downgrade();
         self.device_suspended.set(false);
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let interop = compositor.try_get_composition_gpu_interop().await;
             let Some(view) = weak.upgrade().filter(|v| {
                 v.recovery_generation.get() == generation && v.is_attached_to_visual_tree()
@@ -725,7 +725,7 @@ impl MediaPlayerElement {
                 match player.poll() {
                     Ok(Some(task)) => {
                         let weak = view.to_ref().downgrade();
-                        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                        Dispatcher::ui_thread().spawn_local(async move {
                             if let Err(error) = task.await {
                                 if let Some(view) = weak.upgrade() {
                                     view.errors.emit(&error);

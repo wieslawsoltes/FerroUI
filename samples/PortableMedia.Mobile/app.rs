@@ -238,7 +238,7 @@ fn create() -> Ref<Control> {
             let weak_root = weak_root.clone();
             let phase = phase.clone();
             phase.set(1);
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 let Some(interop) = compositor.try_get_composition_gpu_interop().await else {
                     phase.set(0);
                     return;
@@ -514,7 +514,7 @@ fn camera_actions(
     };
     let capture = CameraCapture::new(provider, budget.clone());
     let devices = capture.devices();
-    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+    Dispatcher::ui_thread().spawn_local(async move {
         match devices.await {
             Ok(devices) => report(&format!(
                 "CAMERA_DISCOVERY devices={} no acquisition or prompt",
@@ -593,7 +593,7 @@ fn camera_actions(
             frames_per_second: 30.,
         });
         let pending = camera.start(capture.clone(), options, importer.clone());
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             match pending.await {
                 Ok(()) => report("CAMERA_STARTED"),
                 Err(error) => report(&format!("CAMERA_START_ERROR {:?} {error}", error.kind)),
@@ -615,7 +615,7 @@ fn camera_actions(
             return;
         };
         let pending = session.photo();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             match pending.await {
                 Ok(photo) => match image::load_from_memory_with_format(
                     &photo.encoded,
@@ -905,7 +905,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                     changed.set(Instant::now());
                     let stage = stage.clone();
                     let seek = player.seek(Duration::from_millis(750));
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         match seek.await {
                             Ok(value) => {
                                 report(&format!("SEEK_COMPLETED {value:?}"));
@@ -926,7 +926,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                     }
                     stage.set(4);
                     let play = player.play();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         if let Err(e) = play.await {
                             report(&format!("RESULT: FAIL play {e}"));
                         }
@@ -935,7 +935,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 4 if state.position > Duration::from_millis(1000) => {
                     stage.set(5);
                     let stop = player.stop();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         if let Err(e) = stop.await {
                             report(&format!("RESULT: FAIL stop {e}"));
                         }
@@ -1136,7 +1136,7 @@ fn qr_action(
                     active.set(Some((id.source, id.generation)));
                 }
                 if let Ok(analysis) = gate.begin(frame, started.elapsed()) {
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         match ferroui_media_qr_apple::recognize(analysis).await {
                             Ok(values) if !values.is_empty() => {
                                 report(&format!("QR_SYMBOLS {values:?}"))
@@ -1331,7 +1331,7 @@ fn renderer_action(
                     }
                     #[cfg(target_os = "android")]
                     if let Some(producer) = probe_producer.borrow().clone() {
-                        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                        Dispatcher::ui_thread().spawn_local(async move {
                             match scene::probe(frame, producer, geometry_smoke()).await {
                                 Ok(()) => {
                                     report("RENDERER_PIXELS_PASS transparent projection coverage")

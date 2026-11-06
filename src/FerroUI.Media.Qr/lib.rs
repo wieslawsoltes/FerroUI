@@ -22,6 +22,20 @@ pub enum QrError {
     DecodeFailure,
     StaleFrame,
 }
+impl std::fmt::Display for QrError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::InvalidPlane => "the frame has no luminance plane the decoder can read",
+            Self::InputTooLarge => "the frame is larger than the decoder accepts",
+            Self::Busy => "a decode is already running",
+            Self::Throttled => "decodes are throttled; try again later",
+            Self::Cancelled => "the decode was cancelled",
+            Self::DecodeFailure => "no QR code was decoded",
+            Self::StaleFrame => "the frame was replaced before it was decoded",
+        })
+    }
+}
+impl std::error::Error for QrError {}
 #[derive(Clone, Copy, Debug)]
 pub struct QrOptions {
     pub max_width: u32,

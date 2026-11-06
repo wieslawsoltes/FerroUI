@@ -127,7 +127,7 @@ impl ApplicationImpl for App {
                     let weak = view.downgrade();
                     let weak_window = weak_window.clone();
                     let weak_root = weak_root.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         let Some(interop) = compositor.try_get_composition_gpu_interop().await
                         else {
                             FAILED.store(true, Ordering::Relaxed);
@@ -352,7 +352,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     stage.set(9);
                     let pending = player.play();
                     let stage = stage.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         match pending.await {
                             Ok(()) => {
                                 println!("ENDED_RESTART_COMPLETED");
@@ -486,7 +486,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     stage.set(2);
                     let seek = player.seek(Duration::from_millis(500));
                     let stage = stage.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         match seek.await {
                             Ok(achieved) => {
                                 println!("SEEK_COMPLETED {achieved:?}");
@@ -502,7 +502,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                 3 => {
                     stage.set(4);
                     let play = view.play();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         if play.await.is_err() {
                             FAILED.store(true, Ordering::Relaxed);
                         }
@@ -514,7 +514,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     stage.set(5);
                     let stopped = player.stop();
                     let stage = stage.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    Dispatcher::ui_thread().spawn_local(async move {
                         match stopped.await {
                             Ok(achieved) => {
                                 println!("STOP_COMPLETED {achieved:?}");

@@ -72,7 +72,7 @@ pub fn reject_cpu_upload(source: JsValue) {
         return;
     };
     let compositor = visual.compositor().clone();
-    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+    Dispatcher::ui_thread().spawn_local(async move {
         let Some(interop) = compositor.try_get_composition_gpu_interop().await else {
             return;
         };
@@ -158,7 +158,7 @@ fn open(source: MediaSource) {
             let budget = budget.clone();
             let source = source.borrow_mut().take().unwrap();
             let weak = weak.clone();
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 let result: Result<(), String> = async {
                     let interop = compositor
                         .try_get_composition_gpu_interop()
@@ -206,7 +206,7 @@ pub fn play_video() {
     });
     if let Some(view) = view {
         let pending = view.play();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             if !current(generation) {
                 return;
@@ -231,7 +231,7 @@ pub fn seek_video(milliseconds: u32) {
     let generation = DEMO.with(|d| d.borrow().generation);
     if let Some(p) = player() {
         let pending = p.seek(Duration::from_millis(milliseconds.into()));
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             if !current(generation) {
                 return;
@@ -249,7 +249,7 @@ pub fn stop_video() {
     let generation = DEMO.with(|d| d.borrow().generation);
     if let Some(p) = player() {
         let pending = p.stop();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             if !current(generation) {
                 return;
@@ -266,7 +266,7 @@ pub fn discover_cameras() {
     let provider = BrowserCameraProvider::discovery();
     let before = provider.permission();
     let pending = provider.devices();
-    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+    Dispatcher::ui_thread().spawn_local(async move {
         match pending.await {
             Ok(devices) => phase(format!(
                 "discovery:{}:{before:?}:{:?}",
@@ -321,7 +321,7 @@ pub fn start_camera() {
             let compositor = visual.compositor().clone();
             let weak = weak.clone();
             let budget = budget.clone();
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 let result: Result<(), String> = async {
                     let interop = compositor
                         .try_get_composition_gpu_interop()
@@ -404,7 +404,7 @@ pub fn capture_photo() {
     });
     if let Some(session) = session {
         let pending = session.photo();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             if !current(generation) {
                 return;

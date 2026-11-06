@@ -114,7 +114,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
         let generation = controller.generation.get();
         let pending = capture.start(Default::default());
         let weak = Rc::downgrade(&controller);
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             match pending.await {
                 Ok(session) => {
                     let Some(state) = weak.upgrade().filter(|s| s.generation.get() == generation)
@@ -170,7 +170,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
         };
         let weak = Rc::downgrade(&controller);
         let generation = controller.generation.get();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = pending.await;
             let Some(state) = weak.upgrade().filter(|s| s.generation.get() == generation) else {
                 return;
@@ -225,7 +225,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                 let weak = weak.clone();
                 let weak_window = weak_window.clone();
                 state.initializing.set(true);
-                Dispatcher::ui_thread().invoke_async_task_local(move||async move{
+                Dispatcher::ui_thread().spawn_local(async move{
                 let Some(interop)=compositor.try_get_composition_gpu_interop().await else{return;};
                 let Some(state)=weak.upgrade() else{return;};
                 let budget=FrameBudget::new(Default::default());

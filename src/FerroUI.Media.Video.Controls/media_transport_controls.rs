@@ -464,7 +464,7 @@ impl MediaTransportControls {
         let generation = self.command_generation.get().wrapping_add(1);
         self.command_generation.set(generation);
         let weak = self.to_ref().downgrade();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let result = task.await;
             if let Some(view) = weak
                 .upgrade()

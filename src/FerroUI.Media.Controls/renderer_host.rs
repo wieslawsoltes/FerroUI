@@ -333,7 +333,7 @@ impl RendererHost {
         let epoch = self.device_epoch.get();
         let weak = self.to_ref().downgrade();
         self.device_suspended.set(false);
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let interop = compositor.try_get_composition_gpu_interop().await;
             let Some(view) = weak
                 .upgrade()
@@ -557,7 +557,7 @@ impl RendererHost {
         if let Some(pending) = host.render(inputs) {
             let weak = self.to_ref().downgrade();
             let generation = self.generation.get();
-            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            Dispatcher::ui_thread().spawn_local(async move {
                 let result = pending.await;
                 if let Some(view) = weak.upgrade().filter(|v| v.generation.get() == generation) {
                     if let Err(error) = result {

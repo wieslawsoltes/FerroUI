@@ -141,7 +141,7 @@ impl TexturePresenter {
         let compositor = element.compositor().clone();
         let generation = self.generation.get();
         let weak = self.to_ref().downgrade();
-        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+        Dispatcher::ui_thread().spawn_local(async move {
             let interop = compositor.try_get_composition_gpu_interop().await;
             let Some(view) = weak
                 .upgrade()

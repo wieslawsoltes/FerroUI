@@ -23,6 +23,8 @@ impl<T> Default for MediaEvent<T> {
         }))
     }
 }
+/// Dropping it removes the handler.
+#[must_use = "dropping the subscription removes its handler at once"]
 pub struct MediaSubscription {
     unsubscribe: Option<Box<dyn FnOnce()>>,
 }
