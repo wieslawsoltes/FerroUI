@@ -28,7 +28,7 @@ path = "program.rs"
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
 # Compiled markup only: the tables of types are not registered at start-up (#566, opt-in).
-ferroui-base = { workspace = true, features = ["markup-functions", "trim-type-tables"] }
+ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
