@@ -42,6 +42,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       # Algorithms, bindings, compiled and runtime XAML, input and lifecycle, and the snapshot
       # scenarios of the sample measuring their data.
@@ -56,6 +58,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           targets: wasm32-unknown-emscripten
@@ -72,6 +76,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       # The reference images of the upstream snapshot suite, at the pin of
       # docs/porting/livecharts2/sources.lock.json.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -117,6 +123,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: rustfmt
@@ -129,6 +137,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       # The pin of docs/porting/livecharts2/sources.lock.json; the scanner reads its Git objects.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:

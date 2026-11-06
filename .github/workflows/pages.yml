@@ -76,6 +76,8 @@ jobs:
             echo "$message" >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
         if: steps.pages.outputs.enabled == 'true'
       - uses: ./.github/actions/browser-toolchain
         if: steps.pages.outputs.enabled == 'true'

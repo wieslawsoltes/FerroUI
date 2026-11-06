@@ -44,6 +44,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       # The scripts read the original Dock beside this checkout (../Dock), at the revision the
       # inventory records (docs/porting/dock/upstream-files.json).
       - name: The original sources at the recorded revision
@@ -68,6 +70,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:

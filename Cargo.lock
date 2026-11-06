@@ -1816,7 +1816,7 @@ dependencies = [
  "ferroui-designer-core",
  "serde",
  "serde_json",
- "sha2",
+ "sha2 0.11.1",
 ]
 
 [[package]]
@@ -1829,7 +1829,7 @@ dependencies = [
  "getrandom 0.4.3",
  "serde",
  "serde_json",
- "sha2",
+ "sha2 0.11.1",
  "ureq",
  "url",
 ]
@@ -2583,6 +2583,16 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-pretext",
+]
+
+[[package]]
+name = "ferroui-progpu"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "objc2",
+ "objc2-metal",
+ "progpu-native-sys",
 ]
 
 [[package]]
@@ -4793,7 +4803,9 @@ checksum = "a0125f776a10d00af4152d74616409f0d4a2053a6f57fa5b7d6aa2854ac04794"
 dependencies = [
  "bitflags",
  "block2",
+ "dispatch2",
  "objc2",
+ "objc2-core-foundation",
  "objc2-foundation",
  "objc2-io-surface",
 ]
@@ -5195,6 +5207,15 @@ name = "profiling"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5"
+
+[[package]]
+name = "progpu-native-sys"
+version = "0.1.0-preview.70"
+dependencies = [
+ "cc",
+ "sha2 0.10.9",
+ "wgpu-native",
+]
 
 [[package]]
 name = "pxfm"
@@ -6034,6 +6055,17 @@ name = "sha1"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.2.17",
+ "digest 0.10.7",
+]
+
+[[package]]
+name = "sha2"
+version = "0.10.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures 0.2.17",
@@ -7267,6 +7299,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2f62e73117bb7a62bfd9c5a5841438a823f6566c6442a808ee269d2d055c081"
 dependencies = [
  "naga",
+ "wgpu-types",
+]
+
+[[package]]
+name = "wgpu-native"
+version = "0.0.0"
+source = "git+https://github.com/wieslawsoltes/wgpu-native?rev=309bf22#309bf22fac7e5505b1024ceda0bbdc9aabc6e586"
+dependencies = [
+ "bindgen",
+ "bitflags",
+ "log",
+ "objc2",
+ "objc2-metal",
+ "parking_lot",
+ "paste",
+ "raw-window-handle",
+ "smallvec",
+ "thiserror 2.0.21",
+ "wgpu-core",
+ "wgpu-hal",
  "wgpu-types",
 ]
 

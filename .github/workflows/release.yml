@@ -56,6 +56,8 @@ jobs:
       publish: ${{ steps.version.outputs.publish }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       # The tag or the input has to name the version the manifests state: the version is set by a
@@ -142,6 +144,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       # In dependency order, a version that is on crates.io already skipped, so a run that stopped
       # is run again. Not built again here: `verify` built every crate from the same packages.

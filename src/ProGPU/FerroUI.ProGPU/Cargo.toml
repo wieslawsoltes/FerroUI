@@ -1,0 +1,26 @@
+[package]
+name = "ferroui-progpu"
+description = "The ProGPU render backend: the render contracts of the base library on the native engine of ProGPU (WebGPU, its WGSL shaders and its text stack)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# Until the bindings are published (wieslawsoltes/ProGPU#436).
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+progpu-native-sys.workspace = true
+
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+# The Metal device, queue and texture of a host, for the tests of the Metal interop.
+objc2 = "0.6.3"
+objc2-metal = { version = "0.3.2", default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLAllocation"] }
