@@ -31,29 +31,21 @@ impl MarkupTyped for UtilityKeyActionMetadata {
                 MarkupEnumMember {
                     name: "Emoji",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::UtilityKeyAction::Emoji),
                     rust_variant: Some("Emoji"),
                 },
                 MarkupEnumMember {
                     name: "LanguageSwitch",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::UtilityKeyAction::LanguageSwitch,
-                        )
-                    },
                     rust_variant: Some("LanguageSwitch"),
                 },
                 MarkupEnumMember {
                     name: "Dynamic",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::UtilityKeyAction::Dynamic),
                     rust_variant: Some("Dynamic"),
                 },
                 MarkupEnumMember {
                     name: "Hidden",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::UtilityKeyAction::Hidden),
                     rust_variant: Some("Hidden"),
                 },
             ];
@@ -97,21 +89,16 @@ impl MarkupTyped for SpaceBarModeMetadata {
                 MarkupEnumMember {
                     name: "Nothing",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SpaceBarMode::Nothing),
                     rust_variant: Some("Nothing"),
                 },
                 MarkupEnumMember {
                     name: "CurrentLanguage",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SpaceBarMode::CurrentLanguage)
-                    },
                     rust_variant: Some("CurrentLanguage"),
                 },
                 MarkupEnumMember {
                     name: "SpaceBarKey",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SpaceBarMode::SpaceBarKey),
                     rust_variant: Some("SpaceBarKey"),
                 },
             ];
@@ -155,21 +142,16 @@ impl MarkupTyped for KeyHintModeMetadata {
                 MarkupEnumMember {
                     name: "Disabled",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::KeyHintMode::Disabled),
                     rust_variant: Some("Disabled"),
                 },
                 MarkupEnumMember {
                     name: "AccentPriority",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::KeyHintMode::AccentPriority)
-                    },
                     rust_variant: Some("AccentPriority"),
                 },
                 MarkupEnumMember {
                     name: "HintPriority",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::KeyHintMode::HintPriority),
                     rust_variant: Some("HintPriority"),
                 },
             ];
@@ -213,19 +195,16 @@ impl MarkupTyped for OneHandedModeMetadata {
                 MarkupEnumMember {
                     name: "Off",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::OneHandedMode::Off),
                     rust_variant: Some("Off"),
                 },
                 MarkupEnumMember {
                     name: "Left",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::OneHandedMode::Left),
                     rust_variant: Some("Left"),
                 },
                 MarkupEnumMember {
                     name: "Right",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::OneHandedMode::Right),
                     rust_variant: Some("Right"),
                 },
             ];
@@ -269,19 +248,16 @@ impl MarkupTyped for ThemeModeMetadata {
                 MarkupEnumMember {
                     name: "FollowSystem",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::ThemeMode::FollowSystem),
                     rust_variant: Some("FollowSystem"),
                 },
                 MarkupEnumMember {
                     name: "Light",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::ThemeMode::Light),
                     rust_variant: Some("Light"),
                 },
                 MarkupEnumMember {
                     name: "Dark",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::ThemeMode::Dark),
                     rust_variant: Some("Dark"),
                 },
             ];
@@ -406,259 +382,151 @@ impl MarkupTyped for SwipeActionMetadata {
                 MarkupEnumMember {
                     name: "NoAction",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::NoAction),
                     rust_variant: Some("NoAction"),
                 },
                 MarkupEnumMember {
                     name: "CycleToPreviousKeyboardMode",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::CycleToPreviousKeyboardMode,
-                        )
-                    },
                     rust_variant: Some("CycleToPreviousKeyboardMode"),
                 },
                 MarkupEnumMember {
                     name: "CycleToNextKeyboardMode",
                     value: 2,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::CycleToNextKeyboardMode,
-                        )
-                    },
                     rust_variant: Some("CycleToNextKeyboardMode"),
                 },
                 MarkupEnumMember {
                     name: "DeleteCharacter",
                     value: 3,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SwipeAction::DeleteCharacter)
-                    },
                     rust_variant: Some("DeleteCharacter"),
                 },
                 MarkupEnumMember {
                     name: "DeleteCharactersPrecisely",
                     value: 4,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::DeleteCharactersPrecisely,
-                        )
-                    },
                     rust_variant: Some("DeleteCharactersPrecisely"),
                 },
                 MarkupEnumMember {
                     name: "DeleteWord",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::DeleteWord),
                     rust_variant: Some("DeleteWord"),
                 },
                 MarkupEnumMember {
                     name: "DeleteWordsPrecisely",
                     value: 6,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::DeleteWordsPrecisely,
-                        )
-                    },
                     rust_variant: Some("DeleteWordsPrecisely"),
                 },
                 MarkupEnumMember {
                     name: "HideKeyboard",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::HideKeyboard),
                     rust_variant: Some("HideKeyboard"),
                 },
                 MarkupEnumMember {
                     name: "InsertSpace",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::InsertSpace),
                     rust_variant: Some("InsertSpace"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorUp",
                     value: 9,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::MoveCursorUp),
                     rust_variant: Some("MoveCursorUp"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorDown",
                     value: 10,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SwipeAction::MoveCursorDown)
-                    },
                     rust_variant: Some("MoveCursorDown"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorLeft",
                     value: 11,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SwipeAction::MoveCursorLeft)
-                    },
                     rust_variant: Some("MoveCursorLeft"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorRight",
                     value: 12,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SwipeAction::MoveCursorRight)
-                    },
                     rust_variant: Some("MoveCursorRight"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorStartOfLine",
                     value: 13,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::MoveCursorStartOfLine,
-                        )
-                    },
                     rust_variant: Some("MoveCursorStartOfLine"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorEndOfLine",
                     value: 14,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::MoveCursorEndOfLine,
-                        )
-                    },
                     rust_variant: Some("MoveCursorEndOfLine"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorStartOfPage",
                     value: 15,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::MoveCursorStartOfPage,
-                        )
-                    },
                     rust_variant: Some("MoveCursorStartOfPage"),
                 },
                 MarkupEnumMember {
                     name: "MoveCursorEndOfPage",
                     value: 16,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::MoveCursorEndOfPage,
-                        )
-                    },
                     rust_variant: Some("MoveCursorEndOfPage"),
                 },
                 MarkupEnumMember {
                     name: "Redo",
                     value: 17,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::Redo),
                     rust_variant: Some("Redo"),
                 },
                 MarkupEnumMember {
                     name: "SelectCharactersPrecisely",
                     value: 18,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SelectCharactersPrecisely,
-                        )
-                    },
                     rust_variant: Some("SelectCharactersPrecisely"),
                 },
                 MarkupEnumMember {
                     name: "SelectWordsPrecisely",
                     value: 19,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SelectWordsPrecisely,
-                        )
-                    },
                     rust_variant: Some("SelectWordsPrecisely"),
                 },
                 MarkupEnumMember {
                     name: "Shift",
                     value: 20,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::Shift),
                     rust_variant: Some("Shift"),
                 },
                 MarkupEnumMember {
                     name: "ShowSubtypePicker",
                     value: 21,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SwipeAction::ShowSubtypePicker)
-                    },
                     rust_variant: Some("ShowSubtypePicker"),
                 },
                 MarkupEnumMember {
                     name: "SwitchToPrevSubtype",
                     value: 22,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SwitchToPrevSubtype,
-                        )
-                    },
                     rust_variant: Some("SwitchToPrevSubtype"),
                 },
                 MarkupEnumMember {
                     name: "SwitchToNextSubtype",
                     value: 23,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SwitchToNextSubtype,
-                        )
-                    },
                     rust_variant: Some("SwitchToNextSubtype"),
                 },
                 MarkupEnumMember {
                     name: "SwitchToClipboardContext",
                     value: 24,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SwitchToClipboardContext,
-                        )
-                    },
                     rust_variant: Some("SwitchToClipboardContext"),
                 },
                 MarkupEnumMember {
                     name: "SwitchToMediaContext",
                     value: 25,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SwitchToMediaContext,
-                        )
-                    },
                     rust_variant: Some("SwitchToMediaContext"),
                 },
                 MarkupEnumMember {
                     name: "SwitchToEditingContext",
                     value: 26,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::SwitchToEditingContext,
-                        )
-                    },
                     rust_variant: Some("SwitchToEditingContext"),
                 },
                 MarkupEnumMember {
                     name: "ToggleOneHandedMode",
                     value: 27,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::ToggleOneHandedMode,
-                        )
-                    },
                     rust_variant: Some("ToggleOneHandedMode"),
                 },
                 MarkupEnumMember {
                     name: "ToggleSmartbarVisibility",
                     value: 28,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SwipeAction::ToggleSmartbarVisibility,
-                        )
-                    },
                     rust_variant: Some("ToggleSmartbarVisibility"),
                 },
                 MarkupEnumMember {
                     name: "Undo",
                     value: 29,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeAction::Undo),
                     rust_variant: Some("Undo"),
                 },
             ];
@@ -720,55 +588,46 @@ impl MarkupTyped for SwipeDirectionMetadata {
                 MarkupEnumMember {
                     name: "None",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::None),
                     rust_variant: Some("None"),
                 },
                 MarkupEnumMember {
                     name: "Up",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::Up),
                     rust_variant: Some("Up"),
                 },
                 MarkupEnumMember {
                     name: "Down",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::Down),
                     rust_variant: Some("Down"),
                 },
                 MarkupEnumMember {
                     name: "Left",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::Left),
                     rust_variant: Some("Left"),
                 },
                 MarkupEnumMember {
                     name: "Right",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::Right),
                     rust_variant: Some("Right"),
                 },
                 MarkupEnumMember {
                     name: "UpLeft",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::UpLeft),
                     rust_variant: Some("UpLeft"),
                 },
                 MarkupEnumMember {
                     name: "UpRight",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::UpRight),
                     rust_variant: Some("UpRight"),
                 },
                 MarkupEnumMember {
                     name: "DownLeft",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::DownLeft),
                     rust_variant: Some("DownLeft"),
                 },
                 MarkupEnumMember {
                     name: "DownRight",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::SwipeDirection::DownRight),
                     rust_variant: Some("DownRight"),
                 },
             ];
@@ -827,57 +686,41 @@ impl MarkupTyped for FeedbackKindMetadata {
                 MarkupEnumMember {
                     name: "KeyPress",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyPress),
                     rust_variant: Some("KeyPress"),
                 },
                 MarkupEnumMember {
                     name: "KeyPressDelete",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyPressDelete)
-                    },
                     rust_variant: Some("KeyPressDelete"),
                 },
                 MarkupEnumMember {
                     name: "KeyPressSpace",
                     value: 2,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyPressSpace)
-                    },
                     rust_variant: Some("KeyPressSpace"),
                 },
                 MarkupEnumMember {
                     name: "KeyPressEnter",
                     value: 3,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyPressEnter)
-                    },
                     rust_variant: Some("KeyPressEnter"),
                 },
                 MarkupEnumMember {
                     name: "KeyPressFunction",
                     value: 4,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyPressFunction)
-                    },
                     rust_variant: Some("KeyPressFunction"),
                 },
                 MarkupEnumMember {
                     name: "LongPress",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::LongPress),
                     rust_variant: Some("LongPress"),
                 },
                 MarkupEnumMember {
                     name: "KeyRepeat",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::KeyRepeat),
                     rust_variant: Some("KeyRepeat"),
                 },
                 MarkupEnumMember {
                     name: "GestureStep",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::settings::FeedbackKind::GestureStep),
                     rust_variant: Some("GestureStep"),
                 },
             ];
@@ -921,27 +764,16 @@ impl MarkupTyped for SmartbarLayoutMetadata {
                 MarkupEnumMember {
                     name: "SuggestionsWithActions",
                     value: 0,
-                    get: || {
-                        std::rc::Rc::new(
-                            ferroboard_core::settings::SmartbarLayout::SuggestionsWithActions,
-                        )
-                    },
                     rust_variant: Some("SuggestionsWithActions"),
                 },
                 MarkupEnumMember {
                     name: "SuggestionsOnly",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SmartbarLayout::SuggestionsOnly)
-                    },
                     rust_variant: Some("SuggestionsOnly"),
                 },
                 MarkupEnumMember {
                     name: "ActionsOnly",
                     value: 2,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::settings::SmartbarLayout::ActionsOnly)
-                    },
                     rust_variant: Some("ActionsOnly"),
                 },
             ];
@@ -994,37 +826,31 @@ impl MarkupTyped for EmojiSkinToneMetadata {
                 MarkupEnumMember {
                     name: "Default",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::Default),
                     rust_variant: Some("Default"),
                 },
                 MarkupEnumMember {
                     name: "Light",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::Light),
                     rust_variant: Some("Light"),
                 },
                 MarkupEnumMember {
                     name: "MediumLight",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::MediumLight),
                     rust_variant: Some("MediumLight"),
                 },
                 MarkupEnumMember {
                     name: "Medium",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::Medium),
                     rust_variant: Some("Medium"),
                 },
                 MarkupEnumMember {
                     name: "MediumDark",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::MediumDark),
                     rust_variant: Some("MediumDark"),
                 },
                 MarkupEnumMember {
                     name: "Dark",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::emoji::EmojiSkinTone::Dark),
                     rust_variant: Some("Dark"),
                 },
             ];
@@ -1087,67 +913,56 @@ impl MarkupTyped for InputKindMetadata {
                 MarkupEnumMember {
                     name: "Text",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Text),
                     rust_variant: Some("Text"),
                 },
                 MarkupEnumMember {
                     name: "Number",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Number),
                     rust_variant: Some("Number"),
                 },
                 MarkupEnumMember {
                     name: "Decimal",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Decimal),
                     rust_variant: Some("Decimal"),
                 },
                 MarkupEnumMember {
                     name: "Phone",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Phone),
                     rust_variant: Some("Phone"),
                 },
                 MarkupEnumMember {
                     name: "DateTime",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::DateTime),
                     rust_variant: Some("DateTime"),
                 },
                 MarkupEnumMember {
                     name: "Email",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Email),
                     rust_variant: Some("Email"),
                 },
                 MarkupEnumMember {
                     name: "Uri",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Uri),
                     rust_variant: Some("Uri"),
                 },
                 MarkupEnumMember {
                     name: "Password",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Password),
                     rust_variant: Some("Password"),
                 },
                 MarkupEnumMember {
                     name: "NumericPassword",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::NumericPassword),
                     rust_variant: Some("NumericPassword"),
                 },
                 MarkupEnumMember {
                     name: "Search",
                     value: 9,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Search),
                     rust_variant: Some("Search"),
                 },
                 MarkupEnumMember {
                     name: "Chat",
                     value: 10,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::InputKind::Chat),
                     rust_variant: Some("Chat"),
                 },
             ];
@@ -1205,49 +1020,41 @@ impl MarkupTyped for EnterActionMetadata {
                 MarkupEnumMember {
                     name: "Default",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Default),
                     rust_variant: Some("Default"),
                 },
                 MarkupEnumMember {
                     name: "NewLine",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::NewLine),
                     rust_variant: Some("NewLine"),
                 },
                 MarkupEnumMember {
                     name: "Go",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Go),
                     rust_variant: Some("Go"),
                 },
                 MarkupEnumMember {
                     name: "Search",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Search),
                     rust_variant: Some("Search"),
                 },
                 MarkupEnumMember {
                     name: "Send",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Send),
                     rust_variant: Some("Send"),
                 },
                 MarkupEnumMember {
                     name: "Next",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Next),
                     rust_variant: Some("Next"),
                 },
                 MarkupEnumMember {
                     name: "Previous",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Previous),
                     rust_variant: Some("Previous"),
                 },
                 MarkupEnumMember {
                     name: "Done",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::EnterAction::Done),
                     rust_variant: Some("Done"),
                 },
             ];
@@ -1294,29 +1101,21 @@ impl MarkupTyped for CapitalizationModeMetadata {
                 MarkupEnumMember {
                     name: "None",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::CapitalizationMode::None),
                     rust_variant: Some("None"),
                 },
                 MarkupEnumMember {
                     name: "Characters",
                     value: 1,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::editor::CapitalizationMode::Characters)
-                    },
                     rust_variant: Some("Characters"),
                 },
                 MarkupEnumMember {
                     name: "Words",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::editor::CapitalizationMode::Words),
                     rust_variant: Some("Words"),
                 },
                 MarkupEnumMember {
                     name: "Sentences",
                     value: 3,
-                    get: || {
-                        std::rc::Rc::new(ferroboard_core::editor::CapitalizationMode::Sentences)
-                    },
                     rust_variant: Some("Sentences"),
                 },
             ];
@@ -1375,61 +1174,51 @@ impl MarkupTyped for KeyTypeMetadata {
                 MarkupEnumMember {
                     name: "Character",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Character),
                     rust_variant: Some("Character"),
                 },
                 MarkupEnumMember {
                     name: "EnterEditing",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::EnterEditing),
                     rust_variant: Some("EnterEditing"),
                 },
                 MarkupEnumMember {
                     name: "Function",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Function),
                     rust_variant: Some("Function"),
                 },
                 MarkupEnumMember {
                     name: "Lock",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Lock),
                     rust_variant: Some("Lock"),
                 },
                 MarkupEnumMember {
                     name: "Modifier",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Modifier),
                     rust_variant: Some("Modifier"),
                 },
                 MarkupEnumMember {
                     name: "Navigation",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Navigation),
                     rust_variant: Some("Navigation"),
                 },
                 MarkupEnumMember {
                     name: "SystemGui",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::SystemGui),
                     rust_variant: Some("SystemGui"),
                 },
                 MarkupEnumMember {
                     name: "Numeric",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Numeric),
                     rust_variant: Some("Numeric"),
                 },
                 MarkupEnumMember {
                     name: "Placeholder",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Placeholder),
                     rust_variant: Some("Placeholder"),
                 },
                 MarkupEnumMember {
                     name: "Unspecified",
                     value: 9,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyType::Unspecified),
                     rust_variant: Some("Unspecified"),
                 },
             ];
@@ -1484,43 +1273,36 @@ impl MarkupTyped for KeyboardModeMetadata {
                 MarkupEnumMember {
                     name: "Characters",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Characters),
                     rust_variant: Some("Characters"),
                 },
                 MarkupEnumMember {
                     name: "Symbols",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Symbols),
                     rust_variant: Some("Symbols"),
                 },
                 MarkupEnumMember {
                     name: "Symbols2",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Symbols2),
                     rust_variant: Some("Symbols2"),
                 },
                 MarkupEnumMember {
                     name: "Numeric",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Numeric),
                     rust_variant: Some("Numeric"),
                 },
                 MarkupEnumMember {
                     name: "NumericAdvanced",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::NumericAdvanced),
                     rust_variant: Some("NumericAdvanced"),
                 },
                 MarkupEnumMember {
                     name: "Phone",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Phone),
                     rust_variant: Some("Phone"),
                 },
                 MarkupEnumMember {
                     name: "Phone2",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardMode::Phone2),
                     rust_variant: Some("Phone2"),
                 },
             ];
@@ -1568,31 +1350,26 @@ impl MarkupTyped for KeyVariationMetadata {
                 MarkupEnumMember {
                     name: "All",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyVariation::All),
                     rust_variant: Some("All"),
                 },
                 MarkupEnumMember {
                     name: "Normal",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyVariation::Normal),
                     rust_variant: Some("Normal"),
                 },
                 MarkupEnumMember {
                     name: "EmailAddress",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyVariation::EmailAddress),
                     rust_variant: Some("EmailAddress"),
                 },
                 MarkupEnumMember {
                     name: "Uri",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyVariation::Uri),
                     rust_variant: Some("Uri"),
                 },
                 MarkupEnumMember {
                     name: "Password",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyVariation::Password),
                     rust_variant: Some("Password"),
                 },
             ];
@@ -1639,25 +1416,21 @@ impl MarkupTyped for ShiftStateMetadata {
                 MarkupEnumMember {
                     name: "Unshifted",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::ShiftState::Unshifted),
                     rust_variant: Some("Unshifted"),
                 },
                 MarkupEnumMember {
                     name: "ShiftedManual",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::ShiftState::ShiftedManual),
                     rust_variant: Some("ShiftedManual"),
                 },
                 MarkupEnumMember {
                     name: "ShiftedAutomatic",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::ShiftState::ShiftedAutomatic),
                     rust_variant: Some("ShiftedAutomatic"),
                 },
                 MarkupEnumMember {
                     name: "CapsLock",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::ShiftState::CapsLock),
                     rust_variant: Some("CapsLock"),
                 },
             ];
@@ -1698,13 +1471,11 @@ impl MarkupTyped for LayoutDirectionMetadata {
                 MarkupEnumMember {
                     name: "Ltr",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::LayoutDirection::Ltr),
                     rust_variant: Some("Ltr"),
                 },
                 MarkupEnumMember {
                     name: "Rtl",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::LayoutDirection::Rtl),
                     rust_variant: Some("Rtl"),
                 },
             ];
@@ -1751,25 +1522,21 @@ impl MarkupTyped for KeyboardUiModeMetadata {
                 MarkupEnumMember {
                     name: "Text",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardUiMode::Text),
                     rust_variant: Some("Text"),
                 },
                 MarkupEnumMember {
                     name: "Media",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardUiMode::Media),
                     rust_variant: Some("Media"),
                 },
                 MarkupEnumMember {
                     name: "Clipboard",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardUiMode::Clipboard),
                     rust_variant: Some("Clipboard"),
                 },
                 MarkupEnumMember {
                     name: "Editing",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyboardUiMode::Editing),
                     rust_variant: Some("Editing"),
                 },
             ];
@@ -1958,409 +1725,341 @@ impl MarkupTyped for KeyIconMetadata {
                 MarkupEnumMember {
                     name: "None",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::None),
                     rust_variant: Some("None"),
                 },
                 MarkupEnumMember {
                     name: "Backspace",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Backspace),
                     rust_variant: Some("Backspace"),
                 },
                 MarkupEnumMember {
                     name: "Shift",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Shift),
                     rust_variant: Some("Shift"),
                 },
                 MarkupEnumMember {
                     name: "ShiftActive",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ShiftActive),
                     rust_variant: Some("ShiftActive"),
                 },
                 MarkupEnumMember {
                     name: "CapsLock",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::CapsLock),
                     rust_variant: Some("CapsLock"),
                 },
                 MarkupEnumMember {
                     name: "Enter",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Enter),
                     rust_variant: Some("Enter"),
                 },
                 MarkupEnumMember {
                     name: "Search",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Search),
                     rust_variant: Some("Search"),
                 },
                 MarkupEnumMember {
                     name: "Send",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Send),
                     rust_variant: Some("Send"),
                 },
                 MarkupEnumMember {
                     name: "Go",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Go),
                     rust_variant: Some("Go"),
                 },
                 MarkupEnumMember {
                     name: "Next",
                     value: 9,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Next),
                     rust_variant: Some("Next"),
                 },
                 MarkupEnumMember {
                     name: "Previous",
                     value: 10,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Previous),
                     rust_variant: Some("Previous"),
                 },
                 MarkupEnumMember {
                     name: "Done",
                     value: 11,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Done),
                     rust_variant: Some("Done"),
                 },
                 MarkupEnumMember {
                     name: "Space",
                     value: 12,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Space),
                     rust_variant: Some("Space"),
                 },
                 MarkupEnumMember {
                     name: "Language",
                     value: 13,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Language),
                     rust_variant: Some("Language"),
                 },
                 MarkupEnumMember {
                     name: "Emoji",
                     value: 14,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Emoji),
                     rust_variant: Some("Emoji"),
                 },
                 MarkupEnumMember {
                     name: "Clipboard",
                     value: 15,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Clipboard),
                     rust_variant: Some("Clipboard"),
                 },
                 MarkupEnumMember {
                     name: "Settings",
                     value: 16,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Settings),
                     rust_variant: Some("Settings"),
                 },
                 MarkupEnumMember {
                     name: "HideKeyboard",
                     value: 17,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::HideKeyboard),
                     rust_variant: Some("HideKeyboard"),
                 },
                 MarkupEnumMember {
                     name: "ArrowLeft",
                     value: 18,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ArrowLeft),
                     rust_variant: Some("ArrowLeft"),
                 },
                 MarkupEnumMember {
                     name: "ArrowRight",
                     value: 19,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ArrowRight),
                     rust_variant: Some("ArrowRight"),
                 },
                 MarkupEnumMember {
                     name: "ArrowUp",
                     value: 20,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ArrowUp),
                     rust_variant: Some("ArrowUp"),
                 },
                 MarkupEnumMember {
                     name: "ArrowDown",
                     value: 21,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ArrowDown),
                     rust_variant: Some("ArrowDown"),
                 },
                 MarkupEnumMember {
                     name: "Undo",
                     value: 22,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Undo),
                     rust_variant: Some("Undo"),
                 },
                 MarkupEnumMember {
                     name: "Redo",
                     value: 23,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Redo),
                     rust_variant: Some("Redo"),
                 },
                 MarkupEnumMember {
                     name: "Copy",
                     value: 24,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Copy),
                     rust_variant: Some("Copy"),
                 },
                 MarkupEnumMember {
                     name: "Cut",
                     value: 25,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Cut),
                     rust_variant: Some("Cut"),
                 },
                 MarkupEnumMember {
                     name: "Paste",
                     value: 26,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Paste),
                     rust_variant: Some("Paste"),
                 },
                 MarkupEnumMember {
                     name: "SelectAll",
                     value: 27,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::SelectAll),
                     rust_variant: Some("SelectAll"),
                 },
                 MarkupEnumMember {
                     name: "Select",
                     value: 28,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Select),
                     rust_variant: Some("Select"),
                 },
                 MarkupEnumMember {
                     name: "Microphone",
                     value: 29,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Microphone),
                     rust_variant: Some("Microphone"),
                 },
                 MarkupEnumMember {
                     name: "OneHandedLeft",
                     value: 30,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::OneHandedLeft),
                     rust_variant: Some("OneHandedLeft"),
                 },
                 MarkupEnumMember {
                     name: "OneHandedRight",
                     value: 31,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::OneHandedRight),
                     rust_variant: Some("OneHandedRight"),
                 },
                 MarkupEnumMember {
                     name: "Keyboard",
                     value: 32,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Keyboard),
                     rust_variant: Some("Keyboard"),
                 },
                 MarkupEnumMember {
                     name: "Tab",
                     value: 33,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Tab),
                     rust_variant: Some("Tab"),
                 },
                 MarkupEnumMember {
                     name: "Incognito",
                     value: 34,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Incognito),
                     rust_variant: Some("Incognito"),
                 },
                 MarkupEnumMember {
                     name: "TextEditing",
                     value: 35,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::TextEditing),
                     rust_variant: Some("TextEditing"),
                 },
                 MarkupEnumMember {
                     name: "Home",
                     value: 36,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Home),
                     rust_variant: Some("Home"),
                 },
                 MarkupEnumMember {
                     name: "End",
                     value: 37,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::End),
                     rust_variant: Some("End"),
                 },
                 MarkupEnumMember {
                     name: "DeleteForward",
                     value: 38,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::DeleteForward),
                     rust_variant: Some("DeleteForward"),
                 },
                 MarkupEnumMember {
                     name: "SplitKeyboard",
                     value: 39,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::SplitKeyboard),
                     rust_variant: Some("SplitKeyboard"),
                 },
                 MarkupEnumMember {
                     name: "Close",
                     value: 40,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Close),
                     rust_variant: Some("Close"),
                 },
                 MarkupEnumMember {
                     name: "Pin",
                     value: 41,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Pin),
                     rust_variant: Some("Pin"),
                 },
                 MarkupEnumMember {
                     name: "Unpin",
                     value: 42,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Unpin),
                     rust_variant: Some("Unpin"),
                 },
                 MarkupEnumMember {
                     name: "Delete",
                     value: 43,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Delete),
                     rust_variant: Some("Delete"),
                 },
                 MarkupEnumMember {
                     name: "Recent",
                     value: 44,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Recent),
                     rust_variant: Some("Recent"),
                 },
                 MarkupEnumMember {
                     name: "Smiley",
                     value: 45,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Smiley),
                     rust_variant: Some("Smiley"),
                 },
                 MarkupEnumMember {
                     name: "Person",
                     value: 46,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Person),
                     rust_variant: Some("Person"),
                 },
                 MarkupEnumMember {
                     name: "Nature",
                     value: 47,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Nature),
                     rust_variant: Some("Nature"),
                 },
                 MarkupEnumMember {
                     name: "Food",
                     value: 48,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Food),
                     rust_variant: Some("Food"),
                 },
                 MarkupEnumMember {
                     name: "Travel",
                     value: 49,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Travel),
                     rust_variant: Some("Travel"),
                 },
                 MarkupEnumMember {
                     name: "Activity",
                     value: 50,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Activity),
                     rust_variant: Some("Activity"),
                 },
                 MarkupEnumMember {
                     name: "Objects",
                     value: 51,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Objects),
                     rust_variant: Some("Objects"),
                 },
                 MarkupEnumMember {
                     name: "Symbols",
                     value: 52,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Symbols),
                     rust_variant: Some("Symbols"),
                 },
                 MarkupEnumMember {
                     name: "Flag",
                     value: 53,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Flag),
                     rust_variant: Some("Flag"),
                 },
                 MarkupEnumMember {
                     name: "Emoticon",
                     value: 54,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Emoticon),
                     rust_variant: Some("Emoticon"),
                 },
                 MarkupEnumMember {
                     name: "ChevronLeft",
                     value: 55,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ChevronLeft),
                     rust_variant: Some("ChevronLeft"),
                 },
                 MarkupEnumMember {
                     name: "ChevronRight",
                     value: 56,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ChevronRight),
                     rust_variant: Some("ChevronRight"),
                 },
                 MarkupEnumMember {
                     name: "ChevronUp",
                     value: 57,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ChevronUp),
                     rust_variant: Some("ChevronUp"),
                 },
                 MarkupEnumMember {
                     name: "ChevronDown",
                     value: 58,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ChevronDown),
                     rust_variant: Some("ChevronDown"),
                 },
                 MarkupEnumMember {
                     name: "MoreHorizontal",
                     value: 59,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::MoreHorizontal),
                     rust_variant: Some("MoreHorizontal"),
                 },
                 MarkupEnumMember {
                     name: "Resize",
                     value: 60,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Resize),
                     rust_variant: Some("Resize"),
                 },
                 MarkupEnumMember {
                     name: "Autocorrect",
                     value: 61,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Autocorrect),
                     rust_variant: Some("Autocorrect"),
                 },
                 MarkupEnumMember {
                     name: "Numpad",
                     value: 62,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Numpad),
                     rust_variant: Some("Numpad"),
                 },
                 MarkupEnumMember {
                     name: "DocumentStart",
                     value: 63,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::DocumentStart),
                     rust_variant: Some("DocumentStart"),
                 },
                 MarkupEnumMember {
                     name: "DocumentEnd",
                     value: 64,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::DocumentEnd),
                     rust_variant: Some("DocumentEnd"),
                 },
                 MarkupEnumMember {
                     name: "ResizeHeight",
                     value: 65,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::ResizeHeight),
                     rust_variant: Some("ResizeHeight"),
                 },
                 MarkupEnumMember {
                     name: "Floating",
                     value: 66,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::Floating),
                     rust_variant: Some("Floating"),
                 },
                 MarkupEnumMember {
                     name: "DragHandle",
                     value: 67,
-                    get: || std::rc::Rc::new(ferroboard_core::keys::KeyIcon::DragHandle),
                     rust_variant: Some("DragHandle"),
                 },
             ];
@@ -2430,73 +2129,61 @@ impl MarkupTyped for LayoutTypeMetadata {
                 MarkupEnumMember {
                     name: "Characters",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Characters),
                     rust_variant: Some("Characters"),
                 },
                 MarkupEnumMember {
                     name: "CharactersMod",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::CharactersMod),
                     rust_variant: Some("CharactersMod"),
                 },
                 MarkupEnumMember {
                     name: "Extension",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Extension),
                     rust_variant: Some("Extension"),
                 },
                 MarkupEnumMember {
                     name: "Numeric",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Numeric),
                     rust_variant: Some("Numeric"),
                 },
                 MarkupEnumMember {
                     name: "NumericAdvanced",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::NumericAdvanced),
                     rust_variant: Some("NumericAdvanced"),
                 },
                 MarkupEnumMember {
                     name: "NumericRow",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::NumericRow),
                     rust_variant: Some("NumericRow"),
                 },
                 MarkupEnumMember {
                     name: "Phone",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Phone),
                     rust_variant: Some("Phone"),
                 },
                 MarkupEnumMember {
                     name: "Phone2",
                     value: 7,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Phone2),
                     rust_variant: Some("Phone2"),
                 },
                 MarkupEnumMember {
                     name: "Symbols",
                     value: 8,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Symbols),
                     rust_variant: Some("Symbols"),
                 },
                 MarkupEnumMember {
                     name: "SymbolsMod",
                     value: 9,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::SymbolsMod),
                     rust_variant: Some("SymbolsMod"),
                 },
                 MarkupEnumMember {
                     name: "Symbols2",
                     value: 10,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Symbols2),
                     rust_variant: Some("Symbols2"),
                 },
                 MarkupEnumMember {
                     name: "Symbols2Mod",
                     value: 11,
-                    get: || std::rc::Rc::new(ferroboard_core::layouts::LayoutType::Symbols2Mod),
                     rust_variant: Some("Symbols2Mod"),
                 },
             ];
@@ -2552,43 +2239,36 @@ impl MarkupTyped for SuggestionKindMetadata {
                 MarkupEnumMember {
                     name: "Typed",
                     value: 0,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Typed),
                     rust_variant: Some("Typed"),
                 },
                 MarkupEnumMember {
                     name: "Completion",
                     value: 1,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Completion),
                     rust_variant: Some("Completion"),
                 },
                 MarkupEnumMember {
                     name: "Correction",
                     value: 2,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Correction),
                     rust_variant: Some("Correction"),
                 },
                 MarkupEnumMember {
                     name: "Prediction",
                     value: 3,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Prediction),
                     rust_variant: Some("Prediction"),
                 },
                 MarkupEnumMember {
                     name: "Emoji",
                     value: 4,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Emoji),
                     rust_variant: Some("Emoji"),
                 },
                 MarkupEnumMember {
                     name: "Glide",
                     value: 5,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Glide),
                     rust_variant: Some("Glide"),
                 },
                 MarkupEnumMember {
                     name: "Clipboard",
                     value: 6,
-                    get: || std::rc::Rc::new(ferroboard_core::text::SuggestionKind::Clipboard),
                     rust_variant: Some("Clipboard"),
                 },
             ];
