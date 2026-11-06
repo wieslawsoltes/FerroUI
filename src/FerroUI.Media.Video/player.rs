@@ -563,6 +563,18 @@ impl MediaPlayer {
         } else {
             self.0.native.borrow().as_ref().map(Rc::downgrade)
         };
+        // Neither open nor being prepared (no source, or a source that failed): nothing will
+        // play, so the command fails instead of succeeding without effect. A preparation (a
+        // source opening, or a lost device awaiting its new provider) applies the intent.
+        let unavailable = (!self.0.preparing.get() && native.is_none()).then(|| {
+            let session = self.playback_session();
+            match session.state {
+                MediaPlaybackState::Failed => session.error.unwrap_or_else(|| {
+                    MediaError::new(MediaErrorKind::NativeFailure, "Media failed")
+                }),
+                _ => MediaError::new(MediaErrorKind::InvalidSource, "No media source is open"),
+            }
+        });
         let weak = Rc::downgrade(&self.0);
         Box::pin(async move {
             if !weak
@@ -570,6 +582,9 @@ impl MediaPlayer {
                 .is_some_and(|i| i.generation.get() == generation && i.command.get() == command)
             {
                 return Err(MediaError::cancelled());
+            }
+            if let Some(error) = unavailable {
+                return Err(error);
             }
             if let Some(native) = native.and_then(|native| native.upgrade()) {
                 let inner = weak.upgrade().ok_or_else(MediaError::cancelled)?;

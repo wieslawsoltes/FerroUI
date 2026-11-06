@@ -266,6 +266,9 @@ impl TexturePresenter {
                 *view.current.borrow_mut() = Some(metadata.clone());
                 view.layout_frame();
                 view.presented.emit(&metadata);
+                // A frame published while this one was imported was skipped (the presenter was
+                // busy): present it now. Nothing is submitted when the latest is this frame.
+                view.present_latest();
             }
         });
     }

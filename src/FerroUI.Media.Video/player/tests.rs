@@ -528,3 +528,17 @@ fn a_dropped_seek_is_cancelled_for_its_waiters() {
     drop(seek);
     assert!(player.0.pending_seek.borrow().is_none());
 }
+
+#[test]
+fn play_without_an_open_source_fails() {
+    let (player, native, _) = player();
+    assert_eq!(ready(player.play()).unwrap_err().kind, MediaErrorKind::InvalidSource);
+    ready(player.set_source(source())).unwrap();
+    *native.play_error.borrow_mut() = Some(MediaError::new(MediaErrorKind::NativeFailure, "decoder"));
+    assert_eq!(ready(player.play()).unwrap_err().kind, MediaErrorKind::NativeFailure);
+    assert_eq!(player.playback_session().state, MediaPlaybackState::Failed);
+    // The failed source is gone: another Play reports the failure, it does not succeed.
+    let again = ready(player.play()).unwrap_err();
+    assert_eq!(again.kind, MediaErrorKind::NativeFailure);
+    assert_eq!(native.plays.get(), 1);
+}

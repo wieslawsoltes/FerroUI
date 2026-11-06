@@ -80,10 +80,17 @@ impl FerroObjectImpl for MediaPlayerElement {
         *this.presentation_subscription.borrow_mut() =
             Some(presenter.errors().subscribe(move |error| {
                 if let Some(view) = weak.upgrade() {
+                    // A lost device suspends the player, whose failed state carries the error and
+                    // is reported by the player's state change: it is not reported twice.
+                    let mut reported = false;
                     if view.owns_player.get() {
                         if let Some(player) = view.media_player() {
                             if error.kind == MediaErrorKind::DeviceLost {
                                 view.suspend_device();
+                                reported = player
+                                    .playback_session()
+                                    .error
+                                    .is_some_and(|e| e.kind == MediaErrorKind::DeviceLost);
                             } else {
                                 player.clear_source();
                             }
@@ -93,7 +100,9 @@ impl FerroObjectImpl for MediaPlayerElement {
                         placeholder.set_text(Some("Media preview is unavailable"));
                     }
                     view.show_placeholder(true);
-                    view.errors.emit(error);
+                    if !reported {
+                        view.errors.emit(error);
+                    }
                 }
             }));
         let weak = this.to_ref().downgrade();

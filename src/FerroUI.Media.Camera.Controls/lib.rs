@@ -105,7 +105,15 @@ impl VisualImpl for CameraPreview {
         this.start_polling();
     }
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
-        this.stop();
+        if this.owned.borrow().is_some() || this.capture.borrow().is_some() {
+            // An owned session (or its pending start) ends with the view.
+            this.stop();
+        } else if let Some(timer) = this.timer.borrow_mut().take() {
+            // A caller-owned session stays borrowed: the view only stops polling it (the
+            // presenter releases its own leases when it detaches) and shows it again when
+            // it is attached again.
+            timer.dispose();
+        }
         if let Some(subscription) = this.context_subscription.borrow_mut().take() {
             subscription.dispose();
         }
@@ -519,5 +527,30 @@ mod recovery_tests {
         assert!(view.session().is_none());
         session.stop();
         assert_eq!(stops.get(), 1);
+    }
+    #[test]
+    fn a_borrowed_session_is_shown_again_after_the_view_is_reattached() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let stops = Rc::new(Cell::new(0));
+        let capture = CameraCapture::new(
+            Rc::new(Provider(stops.clone())),
+            FrameBudget::new(Default::default()),
+        );
+        let session = ready(capture.start(Default::default())).unwrap();
+        let view = CameraPreview::new();
+        view.set_session(Some(&session), Some(Rc::new(Importer)));
+        let window = ferroui_controls::Window::new();
+        window.set_content(Some(ferroui_controls::Control::boxed(view.clone())));
+        window.show();
+        window.set_content(None);
+        // Detached: the caller's session is neither stopped nor forgotten.
+        assert!(!session.is_stopped());
+        assert!(view.session().is_some());
+        assert!(view.timer.borrow().is_none());
+        window.set_content(Some(ferroui_controls::Control::boxed(view.clone())));
+        assert!(view.session().is_some());
+        assert!(view.timer.borrow().is_some(), "polling resumes when attached again");
+        assert_eq!(stops.get(), 0);
+        session.stop();
     }
 }

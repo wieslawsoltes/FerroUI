@@ -22,7 +22,7 @@ use ferroui_controls::{
     automation::AutomationProperties,
 };
 use ferroui_media_video::{
-    MediaErrorKind, MediaFuture, MediaPlaybackState, MediaPlayer, MediaSubscription,
+    MediaErrorKind, MediaFuture, MediaPlaybackState, MediaPlayer, MediaSubscription, PlaybackIntent,
     WeakMediaPlayer,
 };
 use std::{
@@ -338,7 +338,9 @@ impl FerroObjectImpl for MediaTransportControls {
             if let Some(view) = weak.upgrade() {
                 let player = view.player.borrow().as_ref().and_then(|p| p.upgrade());
                 if let Some(player) = player {
-                    if player.playback_session().state == MediaPlaybackState::Playing {
+                    // The requested transport state, not the native one: a player that is
+                    // buffering (or opening) towards playback is paused by this button.
+                    if is_playing(&player) {
                         if let Err(e) = player.pause() {
                             view.show_error(&e.to_string());
                         }
@@ -501,12 +503,8 @@ impl MediaTransportControls {
             MediaPlaybackState::Closed | MediaPlaybackState::Failed | MediaPlaybackState::Opening
         );
         if let Some(play) = self.play.borrow().as_ref() {
-            let label = if state.state == MediaPlaybackState::Playing {
-                "Pause"
-            } else {
-                "Play"
-            };
-            let playing = state.state == MediaPlaybackState::Playing;
+            let playing = player.as_ref().is_some_and(is_playing);
+            let label = if playing { "Pause" } else { "Play" };
             if self.playing_icon.replace(playing) != playing {
                 set_icon(play, if playing { PAUSE } else { PLAY });
                 ToolTip::set_tip(play, Some(Rc::new(label.to_owned())));
@@ -526,7 +524,11 @@ impl MediaTransportControls {
                     .as_secs_f64()
                     .max(1.),
             );
-            seek.set_range_value(state.position.as_secs_f64());
+            // The position is not written back while the user drags the thumb: the drag
+            // owns the value, and each change of it seeks.
+            if !seek.is_dragging() {
+                seek.set_range_value(state.position.as_secs_f64());
+            }
         }
         if let Some(player) = player {
             let options = player.options();
@@ -572,4 +574,14 @@ impl MediaTransportControls {
         }
         self.updating.set(false);
     }
+}
+
+/// Whether the transport is playing or on its way to playing: Play is the requested state and
+/// the media has neither ended nor failed.
+fn is_playing(player: &MediaPlayer) -> bool {
+    player.requested_state() == PlaybackIntent::Play
+        && !matches!(
+            player.playback_session().state,
+            MediaPlaybackState::Ended | MediaPlaybackState::Failed | MediaPlaybackState::Closed
+        )
 }
