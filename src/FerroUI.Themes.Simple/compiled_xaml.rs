@@ -12,12 +12,6 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
-/// The XML namespaces of documents of this file, as the compiler resolved them.
-const XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
-    ("x", &[]),
-];
-
 /// Populates `root` from the document of the class (`populate_simpletheme_xaml`) with every unit of the theme
 /// (`populate_with_parts` with the table of all units).
 pub fn populate(
@@ -524,44 +518,134 @@ fn populate_simpletheme_xaml_deferred_61(
 
 /// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
 const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
-    ("sys", &[("System", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
 const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
-    ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
 const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
-    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("sys", &[("System", "", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
 const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_5: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("sys", &[("System", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_11: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
     ("conv", &[("FerroUI.Controls.Converters", "", &[])]),
     ("sys", &[("System", "", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
-const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Expander", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("SelectableTextBlock", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[("ScrollBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("MenuItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("conv", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("sys", &[("System", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("sys", &[("System", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
     ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
     ("dialogs", &[("FerroUI.Dialogs", "", &[])]),
     ("internal", &[("FerroUI.Dialogs.Internal", "", &[])]),
     ("x", &[]),
 ];
 
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TabItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/SimpleControls.xaml`.
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.Simple", "FerroUI.Themes.Simple", &[])]),
+    ("x", &[]),
+];
+
 /// The base URI and the XML namespaces of `Controls/SimpleControls.xaml`.
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.simple/Controls/SimpleControls.xaml"), namespaces: XML_NAMESPACES_1 };
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.simple/Controls/SimpleControls.xaml"), namespaces: XML_NAMESPACES_0 };
 
 /// Generated from `Controls/SimpleControls.xaml`.
 pub fn build_controls_simplecontrols_xaml(
@@ -620,7 +704,7 @@ pub fn build_controls_simplecontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
     rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_0)?;
@@ -635,34 +719,35 @@ pub fn build_controls_simplecontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 5, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 18, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 23, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
     rt::apply_theme_unit(active_theme_units(), 29, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7);
     rt::apply_theme_unit(active_theme_units(), 30, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
-    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
-    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
+    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_11);
     rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
     rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
-    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
+    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15);
     rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
-    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
+    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7);
     rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
+    let unit_namespace_scope_71 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
     // Controls/SimpleControls.xaml(8,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
@@ -703,6 +788,7 @@ pub fn build_controls_simplecontrols_xaml(
     rt::invoked(menu_item_0.try_end_init(), 9, 6)?;
     context.pop_parent();
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 8, 4)?, rt::string_object("SelectableTextBlockContextFlyout"), rt::to_object(::core::clone::Clone::clone(&menu_flyout_0))), 8, 4)?;
+    ::core::mem::drop(unit_namespace_scope_71);
     rt::apply_theme_unit(active_theme_units(), 0, 6, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
@@ -727,9 +813,11 @@ fn build_controls_simplecontrols_xaml_unit_0(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_0, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_0);
     ::core::result::Result::Ok(())
 }
 
@@ -883,9 +971,11 @@ fn build_controls_simplecontrols_xaml_unit_12(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_12 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_26, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_12) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_1);
     ::core::result::Result::Ok(())
 }
 
@@ -922,9 +1012,11 @@ fn build_controls_simplecontrols_xaml_unit_15(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_15 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_32, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_15) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_2);
     ::core::result::Result::Ok(())
 }
 
@@ -1091,12 +1183,16 @@ fn build_controls_simplecontrols_xaml_unit_28(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_28 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_63, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_28) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_3);
+    let unit_namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_65, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_4);
     ::core::result::Result::Ok(())
 }
 
@@ -1120,9 +1216,11 @@ fn build_controls_simplecontrols_xaml_unit_30(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_31 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_71, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_31) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_5);
     ::core::result::Result::Ok(())
 }
 
@@ -1289,12 +1387,16 @@ fn build_controls_simplecontrols_xaml_unit_43(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_44 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_99, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_44) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_6);
+    let unit_namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     let deferred_45 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_102, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_45) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_7);
     ::core::result::Result::Ok(())
 }
 
@@ -1344,19 +1446,31 @@ fn build_controls_simplecontrols_xaml_unit_47(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(48,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_109, 48, 4)?;
+    ::core::mem::drop(unit_namespace_scope_8);
+    let unit_namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(84,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonUpTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_111, 84, 4)?;
+    ::core::mem::drop(unit_namespace_scope_9);
+    let unit_namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(93,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonDownTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_112, 93, 4)?;
+    ::core::mem::drop(unit_namespace_scope_10);
+    let unit_namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(102,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonLeftTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_113, 102, 4)?;
+    ::core::mem::drop(unit_namespace_scope_11);
+    let unit_namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(111,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonRightTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_114, 111, 4)?;
+    ::core::mem::drop(unit_namespace_scope_12);
+    let unit_namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/SimpleControls.xaml(121,4) Content (resource)
     let deferred_54 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_115, 121, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_54) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 121, 4)?;
+    ::core::mem::drop(unit_namespace_scope_13);
     ::core::result::Result::Ok(())
 }
 
@@ -1405,18 +1519,36 @@ fn build_controls_simplecontrols_xaml_unit_50(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(5,40) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 40)?, rt::string_object("CaptionButtonWidth"), rt::to_object(45.0_f64)), 5, 40)?;
+    ::core::mem::drop(unit_namespace_scope_14);
+    let unit_namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    // Controls/SimpleControls.xaml(6,41) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 6, 41)?, rt::string_object("CaptionButtonHeight"), rt::to_object(30.0_f64)), 6, 41)?;
+    ::core::mem::drop(unit_namespace_scope_15);
+    let unit_namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(7,67) Content (resource)
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
+    ::core::mem::drop(unit_namespace_scope_16);
+    let unit_namespace_scope_17 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1)?;
+    ::core::mem::drop(unit_namespace_scope_17);
+    let unit_namespace_scope_18 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
+    // Controls/SimpleControls.xaml(9,4) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
+    ::core::mem::drop(unit_namespace_scope_18);
+    let unit_namespace_scope_19 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(11,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_127, 11, 4)?;
+    ::core::mem::drop(unit_namespace_scope_19);
+    let unit_namespace_scope_20 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(36,4) Content (resource)
     let deferred_61 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_129, 36, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_61) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
+    ::core::mem::drop(unit_namespace_scope_20);
     ::core::result::Result::Ok(())
 }
 
@@ -1427,21 +1559,35 @@ fn build_controls_simplecontrols_xaml_unit_51(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_21 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(4,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxClearButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_131, 4, 50)?;
+    ::core::mem::drop(unit_namespace_scope_21);
+    let unit_namespace_scope_22 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(5,55) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_132, 5, 55)?;
+    ::core::mem::drop(unit_namespace_scope_22);
+    let unit_namespace_scope_23 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(6,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxHideButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_133, 6, 53)?;
+    ::core::mem::drop(unit_namespace_scope_23);
+    let unit_namespace_scope_24 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_134, 8, 4)?;
+    ::core::mem::drop(unit_namespace_scope_24);
+    let unit_namespace_scope_25 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxClearButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_135, 17, 4)?;
+    ::core::mem::drop(unit_namespace_scope_25);
+    let unit_namespace_scope_26 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(41,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimplePasswordBoxRevealButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_137, 41, 4)?;
+    ::core::mem::drop(unit_namespace_scope_26);
+    let unit_namespace_scope_27 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/SimpleControls.xaml(82,4) Content (resource)
     let deferred_68 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_139, 82, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_68) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 82, 4)?;
+    ::core::mem::drop(unit_namespace_scope_27);
     ::core::result::Result::Ok(())
 }
 
@@ -1467,13 +1613,19 @@ fn build_controls_simplecontrols_xaml_unit_53(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_28 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/SimpleControls.xaml(4,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleVerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_146, 4, 4)?;
+    ::core::mem::drop(unit_namespace_scope_28);
+    let unit_namespace_scope_29 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleHorizontalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_147, 17, 4)?;
+    ::core::mem::drop(unit_namespace_scope_29);
+    let unit_namespace_scope_30 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/SimpleControls.xaml(30,4) Content (resource)
     let deferred_73 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_148, 30, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_73) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 30, 4)?;
+    ::core::mem::drop(unit_namespace_scope_30);
     ::core::result::Result::Ok(())
 }
 
@@ -1484,11 +1636,15 @@ fn build_controls_simplecontrols_xaml_unit_54(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_31 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8);
     // Controls/SimpleControls.xaml(5,4) Content (resource)
     let deferred_74 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_153, 5, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_74) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
+    ::core::mem::drop(unit_namespace_scope_31);
+    let unit_namespace_scope_32 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8);
     // Controls/SimpleControls.xaml(43,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleMenuScrollViewer", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_155, 43, 4)?;
+    ::core::mem::drop(unit_namespace_scope_32);
     ::core::result::Result::Ok(())
 }
 
@@ -1516,11 +1672,15 @@ fn build_controls_simplecontrols_xaml_unit_56(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_33 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_161, 17, 4)?;
+    ::core::mem::drop(unit_namespace_scope_33);
+    let unit_namespace_scope_34 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9);
     // Controls/SimpleControls.xaml(19,4) Content (resource)
     let deferred_79 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_162, 19, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_79) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    ::core::mem::drop(unit_namespace_scope_34);
     ::core::result::Result::Ok(())
 }
 
@@ -1531,11 +1691,15 @@ fn build_controls_simplecontrols_xaml_unit_57(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_35 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10);
     // Controls/SimpleControls.xaml(6,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTopLevelMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_164, 6, 4)?;
+    ::core::mem::drop(unit_namespace_scope_35);
+    let unit_namespace_scope_36 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10);
     // Controls/SimpleControls.xaml(64,4) Content (resource)
     let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_167, 64, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 64, 4)?;
+    ::core::mem::drop(unit_namespace_scope_36);
     ::core::result::Result::Ok(())
 }
 
@@ -1546,11 +1710,15 @@ fn build_controls_simplecontrols_xaml_unit_58(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_37 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/SimpleControls.xaml(6,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_169, 6, 4)?;
+    ::core::mem::drop(unit_namespace_scope_37);
+    let unit_namespace_scope_38 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
     let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_170, 8, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    ::core::mem::drop(unit_namespace_scope_38);
     ::core::result::Result::Ok(())
 }
 
@@ -1576,16 +1744,34 @@ fn build_controls_simplecontrols_xaml_unit_60(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_39 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/SimpleControls.xaml(24,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 58)?, rt::string_object("DateTimeFlyoutButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 24, 58)?;
+    ::core::mem::drop(unit_namespace_scope_39);
+    let unit_namespace_scope_40 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
+    // Controls/SimpleControls.xaml(25,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 52)?, rt::string_object("DateTimeFlyoutBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 25, 52)?;
+    ::core::mem::drop(unit_namespace_scope_40);
+    let unit_namespace_scope_41 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
+    // Controls/SimpleControls.xaml(26,50) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 26, 50)?, rt::string_object("DateTimeFlyoutBorderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 26, 50)?;
+    ::core::mem::drop(unit_namespace_scope_41);
+    let unit_namespace_scope_42 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/SimpleControls.xaml(29,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_183, 29, 4)?;
+    ::core::mem::drop(unit_namespace_scope_42);
+    let unit_namespace_scope_43 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/SimpleControls.xaml(53,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_184, 53, 4)?;
+    ::core::mem::drop(unit_namespace_scope_43);
+    let unit_namespace_scope_44 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/SimpleControls.xaml(97,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_186, 97, 4)?;
+    ::core::mem::drop(unit_namespace_scope_44);
+    let unit_namespace_scope_45 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/SimpleControls.xaml(120,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_188, 120, 4)?;
+    ::core::mem::drop(unit_namespace_scope_45);
     ::core::result::Result::Ok(())
 }
 
@@ -1596,20 +1782,60 @@ fn build_controls_simplecontrols_xaml_unit_61(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_46 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(33,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 62)?, rt::string_object("DatePickerFlyoutPresenterHighlightHeight"), rt::to_object(40.0_f64)), 33, 62)?;
+    ::core::mem::drop(unit_namespace_scope_46);
+    let unit_namespace_scope_47 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(34,57) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 57)?, rt::string_object("DatePickerFlyoutPresenterItemHeight"), rt::to_object(40.0_f64)), 34, 57)?;
+    ::core::mem::drop(unit_namespace_scope_47);
+    let unit_namespace_scope_48 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(35,74) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 74)?, rt::string_object("DatePickerFlyoutPresenterAcceptDismissHostGridHeight"), rt::to_object(41.0_f64)), 35, 74)?;
+    ::core::mem::drop(unit_namespace_scope_48);
+    let unit_namespace_scope_49 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(36,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 45)?, rt::string_object("DatePickerThemeMinWidth"), rt::to_object(296.0_f64)), 36, 45)?;
+    ::core::mem::drop(unit_namespace_scope_49);
+    let unit_namespace_scope_50 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(37,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 45)?, rt::string_object("DatePickerThemeMaxWidth"), rt::to_object(456.0_f64)), 37, 45)?;
+    ::core::mem::drop(unit_namespace_scope_50);
+    let unit_namespace_scope_51 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(38,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 59)?, rt::string_object("DatePickerFlyoutPresenterItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 38, 59)?;
+    ::core::mem::drop(unit_namespace_scope_51);
+    let unit_namespace_scope_52 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(39,60) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 60)?, rt::string_object("DatePickerFlyoutPresenterMonthPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 39, 60)?;
+    ::core::mem::drop(unit_namespace_scope_52);
+    let unit_namespace_scope_53 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(40,44) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 44)?, rt::string_object("DatePickerHostPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 40, 44)?;
+    ::core::mem::drop(unit_namespace_scope_53);
+    let unit_namespace_scope_54 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(41,49) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 49)?, rt::string_object("DatePickerHostMonthPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 41, 49)?;
+    ::core::mem::drop(unit_namespace_scope_54);
+    let unit_namespace_scope_55 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(42,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 42, 48)?;
+    ::core::mem::drop(unit_namespace_scope_55);
+    let unit_namespace_scope_56 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(44,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDatePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_190, 44, 4)?;
+    ::core::mem::drop(unit_namespace_scope_56);
+    let unit_namespace_scope_57 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(80,4) Content (resource)
     let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_192, 80, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
+    ::core::mem::drop(unit_namespace_scope_57);
+    let unit_namespace_scope_58 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(172,4) Content (resource)
     let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_194, 172, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 172, 4)?;
+    ::core::mem::drop(unit_namespace_scope_58);
     ::core::result::Result::Ok(())
 }
 
@@ -1620,22 +1846,56 @@ fn build_controls_simplecontrols_xaml_unit_62(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_59 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(33,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 57)?, rt::string_object("TimePickerFlyoutPresenterItemHeight"), rt::to_object(40.0_f64)), 33, 57)?;
+    ::core::mem::drop(unit_namespace_scope_59);
+    let unit_namespace_scope_60 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(34,48) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 48)?, rt::string_object("TimePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 34, 48)?;
+    ::core::mem::drop(unit_namespace_scope_60);
+    let unit_namespace_scope_61 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(35,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 53)?;
+    ::core::mem::drop(unit_namespace_scope_61);
+    let unit_namespace_scope_62 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(36,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 62)?, rt::string_object("TimePickerFlyoutPresenterHighlightHeight"), rt::to_object(40.0_f64)), 36, 62)?;
+    ::core::mem::drop(unit_namespace_scope_62);
+    let unit_namespace_scope_63 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(37,74) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 74)?, rt::string_object("TimePickerFlyoutPresenterAcceptDismissHostGridHeight"), rt::to_object(41.0_f64)), 37, 74)?;
+    ::core::mem::drop(unit_namespace_scope_63);
+    let unit_namespace_scope_64 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(38,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 45)?, rt::string_object("TimePickerThemeMinWidth"), rt::to_object(242.0_f64)), 38, 45)?;
+    ::core::mem::drop(unit_namespace_scope_64);
+    let unit_namespace_scope_65 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(39,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 45)?, rt::string_object("TimePickerThemeMaxWidth"), rt::to_object(456.0_f64)), 39, 45)?;
+    ::core::mem::drop(unit_namespace_scope_65);
+    let unit_namespace_scope_66 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(40,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 59)?, rt::string_object("TimePickerFlyoutPresenterItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 40, 59)?;
+    ::core::mem::drop(unit_namespace_scope_66);
+    let unit_namespace_scope_67 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
+    // Controls/SimpleControls.xaml(41,44) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 44)?, rt::string_object("TimePickerHostPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 41, 44)?;
+    ::core::mem::drop(unit_namespace_scope_67);
+    let unit_namespace_scope_68 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(43,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_196, 43, 4)?;
+    ::core::mem::drop(unit_namespace_scope_68);
+    let unit_namespace_scope_69 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(79,4) Content (resource)
     let deferred_94 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_198, 79, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_94) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
+    ::core::mem::drop(unit_namespace_scope_69);
+    let unit_namespace_scope_70 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/SimpleControls.xaml(205,4) Content (resource)
     let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_200, 205, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 205, 4)?;
+    ::core::mem::drop(unit_namespace_scope_70);
     ::core::result::Result::Ok(())
 }
 
@@ -1647,7 +1907,7 @@ fn build_controls_simplecontrols_xaml_unit_63(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(19,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
     // Controls/SimpleControls.xaml(21,60) Content (resource)
     let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 60)?, rt::string_object("SplitViewPaneAnimationOpenDuration"), rt::to_object(::core::clone::Clone::clone(&value_1))), 21, 60)?;
@@ -1692,7 +1952,7 @@ fn build_controls_simplecontrols_xaml_unit_65(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(14,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
     // Controls/SimpleControls.xaml(18,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 18, 54)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 54)?;
     // Controls/SimpleControls.xaml(20,4) Content (resource)
@@ -1724,9 +1984,11 @@ fn build_controls_simplecontrols_xaml_unit_66(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_72 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(13,4) Content (resource)
     let deferred_112 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_228, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_112) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::mem::drop(unit_namespace_scope_72);
     ::core::result::Result::Ok(())
 }
 
@@ -1799,17 +2061,31 @@ fn build_controls_simplecontrols_xaml_unit_70(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_73 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/SimpleControls.xaml(10,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_248, 10, 50)?;
+    ::core::mem::drop(unit_namespace_scope_73);
+    let unit_namespace_scope_74 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/SimpleControls.xaml(12,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_249, 12, 50)?;
+    ::core::mem::drop(unit_namespace_scope_74);
+    let unit_namespace_scope_75 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/SimpleControls.xaml(14,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
+    ::core::mem::drop(unit_namespace_scope_75);
+    let unit_namespace_scope_76 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
+    // Controls/SimpleControls.xaml(15,4) Content (resource)
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6)?;
+    ::core::mem::drop(unit_namespace_scope_76);
+    let unit_namespace_scope_77 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_252, 17, 4)?;
+    ::core::mem::drop(unit_namespace_scope_77);
+    let unit_namespace_scope_78 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/SimpleControls.xaml(22,4) Content (resource)
     let deferred_129 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_253, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_129) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::mem::drop(unit_namespace_scope_78);
     ::core::result::Result::Ok(())
 }
 
@@ -1820,47 +2096,127 @@ fn build_controls_simplecontrols_xaml_unit_71(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_79 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
+    ::core::mem::drop(unit_namespace_scope_79);
+    let unit_namespace_scope_80 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(18,4) Content (resource)
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
+    ::core::mem::drop(unit_namespace_scope_80);
+    let unit_namespace_scope_81 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(19,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9)?;
+    ::core::mem::drop(unit_namespace_scope_81);
+    let unit_namespace_scope_82 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(20,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
+    ::core::mem::drop(unit_namespace_scope_82);
+    let unit_namespace_scope_83 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(21,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11)?;
+    ::core::mem::drop(unit_namespace_scope_83);
+    let unit_namespace_scope_84 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(22,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
+    ::core::mem::drop(unit_namespace_scope_84);
+    let unit_namespace_scope_85 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(23,4) Content (resource)
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13)?;
+    ::core::mem::drop(unit_namespace_scope_85);
+    let unit_namespace_scope_86 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(26,4) Content (resource)
-    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14)?;
+    ::core::mem::drop(unit_namespace_scope_86);
+    let unit_namespace_scope_87 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(27,4) Content (resource)
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15)?;
+    ::core::mem::drop(unit_namespace_scope_87);
+    let unit_namespace_scope_88 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(28,4) Content (resource)
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16)?;
+    ::core::mem::drop(unit_namespace_scope_88);
+    let unit_namespace_scope_89 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(30,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 30, 54)?, rt::string_object("TabbedPageTabItemHeaderMinHeight"), rt::to_object(48.0_f64)), 30, 54)?;
+    ::core::mem::drop(unit_namespace_scope_89);
+    let unit_namespace_scope_90 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(31,63) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 31, 63)?, rt::string_object("TabbedPageTabItemHeaderVerticalPipeHeight"), rt::to_object(18.0_f64)), 31, 63)?;
+    ::core::mem::drop(unit_namespace_scope_90);
+    let unit_namespace_scope_91 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(32,58) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 32, 58)?, rt::string_object("TabbedPageTabItemHeaderPipeThickness"), rt::to_object(2.0_f64)), 32, 58)?;
+    ::core::mem::drop(unit_namespace_scope_91);
+    let unit_namespace_scope_92 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(34,70) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 70)?, rt::string_object("TabbedPageTabItemHeaderIndicatorCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 70)?;
+    ::core::mem::drop(unit_namespace_scope_92);
+    let unit_namespace_scope_93 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(35,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 61)?, rt::string_object("TabbedPageTabItemHeaderIndicatorMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 35, 61)?;
+    ::core::mem::drop(unit_namespace_scope_93);
+    let unit_namespace_scope_94 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(38,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 61)?, rt::string_object("TabbedPageTabItemHeaderCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 38, 61)?;
+    ::core::mem::drop(unit_namespace_scope_94);
+    let unit_namespace_scope_95 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(39,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 53)?, rt::string_object("TabbedPageTabItemHeaderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 8.0_f64, 12.0_f64, 8.0_f64))), 39, 53)?;
+    ::core::mem::drop(unit_namespace_scope_95);
+    let unit_namespace_scope_96 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(40,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 52)?, rt::string_object("TabbedPageTabItemHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 40, 52)?;
+    ::core::mem::drop(unit_namespace_scope_96);
+    let unit_namespace_scope_97 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(43,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 43, 53)?, rt::string_object("TabbedPageTabItemHeaderIconSize"), rt::to_object(20.0_f64)), 43, 53)?;
+    ::core::mem::drop(unit_namespace_scope_97);
+    let unit_namespace_scope_98 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(44,53) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 44, 53)?, rt::string_object("TabbedPageTabItemHeaderFontSize"), rt::to_object(12.0_f64)), 44, 53)?;
+    ::core::mem::drop(unit_namespace_scope_98);
+    let unit_namespace_scope_99 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(45,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 45, 52)?, rt::string_object("TabbedPageTabItemHeaderSpacing"), rt::to_object(4.0_f64)), 45, 52)?;
+    ::core::mem::drop(unit_namespace_scope_99);
+    let unit_namespace_scope_100 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(48,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17)?;
+    ::core::mem::drop(unit_namespace_scope_100);
+    let unit_namespace_scope_101 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(49,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 49, 56)?, rt::string_object("TabbedPageTabStripCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 49, 56)?;
+    ::core::mem::drop(unit_namespace_scope_101);
+    let unit_namespace_scope_102 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(50,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 50, 56)?, rt::string_object("TabbedPageTabStripBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 50, 56)?;
+    ::core::mem::drop(unit_namespace_scope_102);
+    let unit_namespace_scope_103 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(51,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18)?;
+    ::core::mem::drop(unit_namespace_scope_103);
+    let unit_namespace_scope_104 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(52,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 47)?, rt::string_object("TabbedPageTabStripMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 52, 47)?;
+    ::core::mem::drop(unit_namespace_scope_104);
+    let unit_namespace_scope_105 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/SimpleControls.xaml(53,48) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 48)?, rt::string_object("TabbedPageTabStripPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 53, 48)?;
+    ::core::mem::drop(unit_namespace_scope_105);
+    let unit_namespace_scope_106 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(56,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_267, 56, 4)?;
+    ::core::mem::drop(unit_namespace_scope_106);
+    let unit_namespace_scope_107 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(102,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_270, 102, 4)?;
+    ::core::mem::drop(unit_namespace_scope_107);
+    let unit_namespace_scope_108 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/SimpleControls.xaml(246,4) Content (resource)
     let deferred_144 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_275, 246, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_144) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 246, 4)?;
+    ::core::mem::drop(unit_namespace_scope_108);
     ::core::result::Result::Ok(())
 }
 
@@ -1871,11 +2227,15 @@ fn build_controls_simplecontrols_xaml_unit_72(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_109 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_277, 17, 4)?;
+    ::core::mem::drop(unit_namespace_scope_109);
+    let unit_namespace_scope_110 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/SimpleControls.xaml(65,4) Content (resource)
     let deferred_146 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_279, 65, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_146) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 65, 4)?;
+    ::core::mem::drop(unit_namespace_scope_110);
     ::core::result::Result::Ok(())
 }
 
@@ -1934,70 +2294,24 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 39, position: 61 },
 ];
 
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CaptionButtonWidth", value: 45.0_f64, line: 5, position: 40 },
-    rt::ValueRow { key: "CaptionButtonHeight", value: 30.0_f64, line: 6, position: 41 },
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "CaptionButtonCloseBackground", color: 4293398819_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0), line: 8, position: 4 },
 ];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBackground", color: 4293398819_u32, namespaces: ::core::option::Option::None, line: 8, position: 4 },
-    rt::LiteralBrushRow { key: "CaptionButtonCloseBorderBrush", color: 4294013050_u32, namespaces: ::core::option::Option::None, line: 9, position: 4 },
-];
-
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 24, position: 58 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 25, position: 52 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderPadding", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 26, position: 50 },
+    rt::LiteralBrushRow { key: "CaptionButtonCloseBorderBrush", color: 4294013050_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0), line: 9, position: 4 },
 ];
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 33, position: 62 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 34, position: 57 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 35, position: 74 },
-    rt::ValueRow { key: "DatePickerThemeMinWidth", value: 296.0_f64, line: 36, position: 45 },
-    rt::ValueRow { key: "DatePickerThemeMaxWidth", value: 456.0_f64, line: 37, position: 45 },
-];
-
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 38, position: 59 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 39, position: 60 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 49 },
-];
-
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 33, position: 57 },
-    rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 34, position: 48 },
-];
-
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 36, position: 62 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 37, position: 74 },
-    rt::ValueRow { key: "TimePickerThemeMinWidth", value: 242.0_f64, line: 38, position: 45 },
-    rt::ValueRow { key: "TimePickerThemeMaxWidth", value: 456.0_f64, line: 39, position: 45 },
-];
-
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 59 },
-    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 44 },
-];
-
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewOpenPaneThemeLength", value: 320.0_f64, line: 19, position: 50 },
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 20, position: 53 },
 ];
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::ValueRow<f64>] = &[
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitButtonPrimaryButtonSize", value: 24.0_f64, line: 14, position: 50 },
     rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 24.0_f64, line: 15, position: 52 },
     rt::ValueRow { key: "SplitButtonSeparatorWidth", value: 1.0_f64, line: 16, position: 47 },
@@ -2005,79 +2319,73 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "NavigationBarBackground", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16), line: 14, position: 4, value_line: 14, value_position: 52 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "NavigationBarForeground", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16), line: 15, position: 4, value_line: 15, value_position: 52 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselected", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 17, position: 4 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 18, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 19, position: 4, value_line: 19, value_position: 83 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 20, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "NavigationBarBackground", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 14, position: 4, value_line: 14, value_position: 52 },
-    rt::DynamicBrushRow { key: "NavigationBarForeground", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::None, line: 15, position: 4, value_line: 15, value_position: 52 },
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPressed", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 21, position: 4, value_line: 21, value_position: 79 },
 ];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 17, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 18, position: 4 },
-];
-
-/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 19, position: 4, value_line: 19, value_position: 83 },
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPressed", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 22, position: 4 },
 ];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 20, position: 4 },
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 23, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundUnselected", color_key: "ThemeForegroundMidColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 26, position: 4, value_line: 26, value_position: 72 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPressed", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::None, line: 21, position: 4, value_line: 21, value_position: 79 },
-];
-
-/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 22, position: 4 },
-    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 23, position: 4 },
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundSelected", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 27, position: 4, value_line: 27, value_position: 70 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: &[rt::DynamicBrushRow] = &[
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundUnselected", color_key: "ThemeForegroundMidColor", namespaces: ::core::option::Option::None, line: 26, position: 4, value_line: 26, value_position: 72 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundSelected", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::None, line: 27, position: 4, value_line: 27, value_position: 70 },
-    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundDisabled", color_key: "ThemeDisabledColor", namespaces: ::core::option::Option::None, line: 28, position: 4, value_line: 28, value_position: 70 },
-];
-
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TabbedPageTabItemHeaderMinHeight", value: 48.0_f64, line: 30, position: 54 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderVerticalPipeHeight", value: 18.0_f64, line: 31, position: 63 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderPipeThickness", value: 2.0_f64, line: 32, position: 58 },
-];
-
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabItemHeaderPadding", value: [12.0_f64, 8.0_f64, 12.0_f64, 8.0_f64], line: 39, position: 53 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 52 },
-];
-
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TabbedPageTabItemHeaderIconSize", value: 20.0_f64, line: 43, position: 53 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderFontSize", value: 12.0_f64, line: 44, position: 53 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderSpacing", value: 4.0_f64, line: 45, position: 52 },
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundDisabled", color_key: "ThemeDisabledColor", namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 28, position: 4, value_line: 28, value_position: 70 },
 ];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 48, position: 4 },
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabStripBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 48, position: 4 },
 ];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: &[rt::LiteralBrushRow] = &[
-    rt::LiteralBrushRow { key: "TabbedPageTabStripBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 51, position: 4 },
-];
-
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabStripMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 52, position: 47 },
-    rt::ValueRow { key: "TabbedPageTabStripPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 48 },
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabStripBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17), line: 51, position: 4 },
 ];
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
@@ -12941,7 +13249,7 @@ fn build_controls_simplecontrols_xaml_deferred_286_value_0() -> ::ferroui_base::
 fn build_controls_simplecontrols_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_0_THEME)
 }
@@ -12950,7 +13258,7 @@ fn build_controls_simplecontrols_xaml_deferred_0(
 fn build_controls_simplecontrols_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(7,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
     context.set_intermediate_root_object(rt::to_value(rectangle_0.clone()));
@@ -14034,7 +14342,7 @@ fn build_controls_simplecontrols_xaml_deferred_25(
 fn build_controls_simplecontrols_xaml_deferred_26(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_26_THEME)
 }
@@ -14043,7 +14351,7 @@ fn build_controls_simplecontrols_xaml_deferred_26(
 fn build_controls_simplecontrols_xaml_deferred_27(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -14311,7 +14619,7 @@ fn build_controls_simplecontrols_xaml_deferred_31(
 fn build_controls_simplecontrols_xaml_deferred_32(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_32_THEME)
 }
@@ -14320,7 +14628,7 @@ fn build_controls_simplecontrols_xaml_deferred_32(
 fn build_controls_simplecontrols_xaml_deferred_33(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(8,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -14401,7 +14709,7 @@ fn build_controls_simplecontrols_xaml_deferred_33(
 fn build_controls_simplecontrols_xaml_deferred_34(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/SimpleControls.xaml(28,10) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
     context.set_intermediate_root_object(rt::to_value(canvas_0.clone()));
@@ -15442,7 +15750,7 @@ fn build_controls_simplecontrols_xaml_deferred_62(
 fn build_controls_simplecontrols_xaml_deferred_63(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_63_THEME)
 }
@@ -15451,7 +15759,7 @@ fn build_controls_simplecontrols_xaml_deferred_63(
 fn build_controls_simplecontrols_xaml_deferred_64(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(16,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -15519,7 +15827,7 @@ fn build_controls_simplecontrols_xaml_deferred_64(
 fn build_controls_simplecontrols_xaml_deferred_65(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_65_THEME)
 }
@@ -15528,7 +15836,7 @@ fn build_controls_simplecontrols_xaml_deferred_65(
 fn build_controls_simplecontrols_xaml_deferred_66(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -15708,7 +16016,7 @@ fn build_controls_simplecontrols_xaml_deferred_70(
 fn build_controls_simplecontrols_xaml_deferred_71(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_71_THEME)
 }
@@ -15717,7 +16025,7 @@ fn build_controls_simplecontrols_xaml_deferred_71(
 fn build_controls_simplecontrols_xaml_deferred_72(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -17060,7 +17368,7 @@ fn build_controls_simplecontrols_xaml_deferred_89(
 fn build_controls_simplecontrols_xaml_deferred_90(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(12,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_90_THEME)
 }
@@ -17069,7 +17377,7 @@ fn build_controls_simplecontrols_xaml_deferred_90(
 fn build_controls_simplecontrols_xaml_deferred_91(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(22,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -17265,7 +17573,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
 fn build_controls_simplecontrols_xaml_deferred_92(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(29,20) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -18056,7 +18364,7 @@ fn build_controls_simplecontrols_xaml_deferred_98(
 fn build_controls_simplecontrols_xaml_deferred_99(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_99_THEME)
 }
@@ -18065,7 +18373,7 @@ fn build_controls_simplecontrols_xaml_deferred_99(
 fn build_controls_simplecontrols_xaml_deferred_100(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(18,10) PathIcon
     let path_icon_0 = ::ferroui_controls::PathIcon::new();
@@ -18092,7 +18400,7 @@ fn build_controls_simplecontrols_xaml_deferred_100(
 fn build_controls_simplecontrols_xaml_deferred_101(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(27,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -18114,7 +18422,7 @@ fn build_controls_simplecontrols_xaml_deferred_101(
 fn build_controls_simplecontrols_xaml_deferred_102(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_102_THEME)
 }
@@ -18335,7 +18643,7 @@ fn build_controls_simplecontrols_xaml_deferred_108(
 fn build_controls_simplecontrols_xaml_deferred_109(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(48,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_109_THEME)
 }
@@ -18344,7 +18652,7 @@ fn build_controls_simplecontrols_xaml_deferred_109(
 fn build_controls_simplecontrols_xaml_deferred_110(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(54,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -18466,7 +18774,7 @@ fn build_controls_simplecontrols_xaml_deferred_110(
 fn build_controls_simplecontrols_xaml_deferred_111(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(84,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_111_THEME)
 }
@@ -18475,7 +18783,7 @@ fn build_controls_simplecontrols_xaml_deferred_111(
 fn build_controls_simplecontrols_xaml_deferred_112(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(93,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_112_THEME)
 }
@@ -18484,7 +18792,7 @@ fn build_controls_simplecontrols_xaml_deferred_112(
 fn build_controls_simplecontrols_xaml_deferred_113(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(102,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_113_THEME)
 }
@@ -18493,7 +18801,7 @@ fn build_controls_simplecontrols_xaml_deferred_113(
 fn build_controls_simplecontrols_xaml_deferred_114(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(111,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_114_THEME)
 }
@@ -18502,7 +18810,7 @@ fn build_controls_simplecontrols_xaml_deferred_114(
 fn build_controls_simplecontrols_xaml_deferred_115(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(121,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_115_THEME)
 }
@@ -18511,7 +18819,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
 fn build_controls_simplecontrols_xaml_deferred_116(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(131,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -18613,7 +18921,7 @@ fn build_controls_simplecontrols_xaml_deferred_116(
 fn build_controls_simplecontrols_xaml_deferred_117(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(163,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -18715,7 +19023,7 @@ fn build_controls_simplecontrols_xaml_deferred_117(
 fn build_controls_simplecontrols_xaml_deferred_118(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(195,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -18817,7 +19125,7 @@ fn build_controls_simplecontrols_xaml_deferred_118(
 fn build_controls_simplecontrols_xaml_deferred_119(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(227,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -19495,7 +19803,7 @@ fn build_controls_simplecontrols_xaml_deferred_124(
 fn build_controls_simplecontrols_xaml_deferred_127(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(11,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_127_THEME)
 }
@@ -19504,7 +19812,7 @@ fn build_controls_simplecontrols_xaml_deferred_127(
 fn build_controls_simplecontrols_xaml_deferred_128(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(21,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -19534,7 +19842,7 @@ fn build_controls_simplecontrols_xaml_deferred_128(
 fn build_controls_simplecontrols_xaml_deferred_129(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(36,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_129_THEME)
 }
@@ -19543,7 +19851,7 @@ fn build_controls_simplecontrols_xaml_deferred_129(
 fn build_controls_simplecontrols_xaml_deferred_130(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(42,10) WindowDrawnDecorationsContent
     let window_drawn_decorations_content_0 = ::ferroui_controls::chrome::WindowDrawnDecorationsContent::new();
@@ -20107,7 +20415,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
 fn build_controls_simplecontrols_xaml_deferred_131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 11.416016,10 20,1.4160156 18.583984,0 10,8.5839846 1.4160156,0 0,1.4160156 8.5839844,10 0,18.583985 1.4160156,20 10,11.416015 18.583984,20 20,18.583985 Z")), 4, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -20116,7 +20424,7 @@ fn build_controls_simplecontrols_xaml_deferred_131(
 fn build_controls_simplecontrols_xaml_deferred_132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("m10.051 7.0032c2.215 0 4.0105 1.7901 4.0105 3.9984s-1.7956 3.9984-4.0105 3.9984c-2.215 0-4.0105-1.7901-4.0105-3.9984s1.7956-3.9984 4.0105-3.9984zm0 1.4994c-1.3844 0-2.5066 1.1188-2.5066 2.499s1.1222 2.499 2.5066 2.499 2.5066-1.1188 2.5066-2.499-1.1222-2.499-2.5066-2.499zm0-5.0026c4.6257 0 8.6188 3.1487 9.7267 7.5613 0.10085 0.40165-0.14399 0.80877-0.54686 0.90931-0.40288 0.10054-0.81122-0.14355-0.91208-0.54521-0.94136-3.7492-4.3361-6.4261-8.2678-6.4261-3.9334 0-7.3292 2.6792-8.2689 6.4306-0.10063 0.40171-0.50884 0.64603-0.91177 0.54571s-0.648-0.5073-0.54737-0.90901c1.106-4.4152 5.1003-7.5667 9.728-7.5667z")), 5, 55)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -20125,7 +20433,7 @@ fn build_controls_simplecontrols_xaml_deferred_132(
 fn build_controls_simplecontrols_xaml_deferred_133(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("m0.21967 0.21965c-0.26627 0.26627-0.29047 0.68293-0.07262 0.97654l0.07262 0.08412 4.0346 4.0346c-1.922 1.3495-3.3585 3.365-3.9554 5.7495-0.10058 0.4018 0.14362 0.8091 0.54543 0.9097 0.40182 0.1005 0.80909-0.1436 0.90968-0.5455 0.52947-2.1151 1.8371-3.8891 3.5802-5.0341l1.8096 1.8098c-0.70751 0.7215-1.1438 1.71-1.1438 2.8003 0 2.2092 1.7909 4 4 4 1.0904 0 2.0788-0.4363 2.8004-1.1438l5.9193 5.9195c0.2929 0.2929 0.7677 0.2929 1.0606 0 0.2663-0.2662 0.2905-0.6829 0.0726-0.9765l-0.0726-0.0841-6.1135-6.1142 0.0012-0.0015-1.2001-1.1979-2.8699-2.8693 2e-3 -8e-4 -2.8812-2.8782 0.0012-0.0018-1.1333-1.1305-4.3064-4.3058c-0.29289-0.29289-0.76777-0.29289-1.0607 0zm7.9844 9.0458 3.5351 3.5351c-0.45 0.4358-1.0633 0.704-1.7392 0.704-1.3807 0-2.5-1.1193-2.5-2.5 0-0.6759 0.26824-1.2892 0.7041-1.7391zm1.7959-5.7655c-1.0003 0-1.9709 0.14807-2.8889 0.425l1.237 1.2362c0.5358-0.10587 1.0883-0.16119 1.6519-0.16119 3.9231 0 7.3099 2.6803 8.2471 6.4332 0.1004 0.4018 0.5075 0.6462 0.9094 0.5459 0.4019-0.1004 0.6463-0.5075 0.5459-0.9094-1.103-4.417-5.0869-7.5697-9.7024-7.5697zm0.1947 3.5093 3.8013 3.8007c-0.1018-2.0569-1.7488-3.7024-3.8013-3.8007z")), 6, 53)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -20134,7 +20442,7 @@ fn build_controls_simplecontrols_xaml_deferred_133(
 fn build_controls_simplecontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(8,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -20250,7 +20558,7 @@ fn build_controls_simplecontrols_xaml_deferred_134(
 fn build_controls_simplecontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(17,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_135_THEME)
 }
@@ -20259,7 +20567,7 @@ fn build_controls_simplecontrols_xaml_deferred_135(
 fn build_controls_simplecontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(24,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -20317,7 +20625,7 @@ fn build_controls_simplecontrols_xaml_deferred_136(
 fn build_controls_simplecontrols_xaml_deferred_137(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(41,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_137_THEME)
 }
@@ -20326,7 +20634,7 @@ fn build_controls_simplecontrols_xaml_deferred_137(
 fn build_controls_simplecontrols_xaml_deferred_138(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(48,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -20421,7 +20729,7 @@ fn build_controls_simplecontrols_xaml_deferred_138(
 fn build_controls_simplecontrols_xaml_deferred_139(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(82,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_139_THEME)
 }
@@ -20430,7 +20738,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
 fn build_controls_simplecontrols_xaml_deferred_140(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(97,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -20709,7 +21017,7 @@ fn build_controls_simplecontrols_xaml_deferred_140(
 fn build_controls_simplecontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(208,12) Button
     let button_0 = ::ferroui_controls::Button::new();
     context.set_intermediate_root_object(rt::to_value(button_0.clone()));
@@ -20740,7 +21048,7 @@ fn build_controls_simplecontrols_xaml_deferred_141(
 fn build_controls_simplecontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(219,12) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
@@ -20810,7 +21118,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
 fn build_controls_simplecontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_5 });
     let border_gap_mask_converter_0 = ::ferroui_controls::converters::BorderGapMaskConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(border_gap_mask_converter_0))
 }
@@ -20819,7 +21127,7 @@ fn build_controls_simplecontrols_xaml_deferred_143(
 fn build_controls_simplecontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/SimpleControls.xaml(12,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_144_THEME)
 }
@@ -20828,7 +21136,7 @@ fn build_controls_simplecontrols_xaml_deferred_144(
 fn build_controls_simplecontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(19,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -21050,7 +21358,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
 fn build_controls_simplecontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/SimpleControls.xaml(4,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -21251,7 +21559,7 @@ fn build_controls_simplecontrols_xaml_deferred_146(
 fn build_controls_simplecontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/SimpleControls.xaml(17,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -21452,7 +21760,7 @@ fn build_controls_simplecontrols_xaml_deferred_147(
 fn build_controls_simplecontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/SimpleControls.xaml(30,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_148_THEME)
 }
@@ -21461,7 +21769,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
 fn build_controls_simplecontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(39,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -21658,7 +21966,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
 fn build_controls_simplecontrols_xaml_deferred_150(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(96,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -21855,7 +22163,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
 fn build_controls_simplecontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/SimpleControls.xaml(153,14) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -21870,7 +22178,7 @@ fn build_controls_simplecontrols_xaml_deferred_151(
 fn build_controls_simplecontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/SimpleControls.xaml(179,12) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -21885,7 +22193,7 @@ fn build_controls_simplecontrols_xaml_deferred_152(
 fn build_controls_simplecontrols_xaml_deferred_153(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8 });
     // Controls/SimpleControls.xaml(5,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_153_THEME)
 }
@@ -21894,7 +22202,7 @@ fn build_controls_simplecontrols_xaml_deferred_153(
 fn build_controls_simplecontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(10,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -22038,7 +22346,7 @@ fn build_controls_simplecontrols_xaml_deferred_154(
 fn build_controls_simplecontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8 });
     // Controls/SimpleControls.xaml(43,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_155_THEME)
 }
@@ -22047,7 +22355,7 @@ fn build_controls_simplecontrols_xaml_deferred_155(
 fn build_controls_simplecontrols_xaml_deferred_156(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_8 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(49,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -22275,7 +22583,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
 fn build_controls_simplecontrols_xaml_deferred_157(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/SimpleControls.xaml(7,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_157_THEME)
 }
@@ -22284,7 +22592,7 @@ fn build_controls_simplecontrols_xaml_deferred_157(
 fn build_controls_simplecontrols_xaml_deferred_158(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/SimpleControls.xaml(11,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -22334,7 +22642,7 @@ fn build_controls_simplecontrols_xaml_deferred_158(
 fn build_controls_simplecontrols_xaml_deferred_159(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/SimpleControls.xaml(31,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_159_THEME)
 }
@@ -22343,7 +22651,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
 fn build_controls_simplecontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(37,10) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -22503,7 +22811,7 @@ fn build_controls_simplecontrols_xaml_deferred_160(
 fn build_controls_simplecontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9 });
     let string_format_converter_0 = ::ferroui_controls::converters::StringFormatConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(string_format_converter_0))
 }
@@ -22512,7 +22820,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
 fn build_controls_simplecontrols_xaml_deferred_162(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9 });
     // Controls/SimpleControls.xaml(19,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -22790,7 +23098,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
 fn build_controls_simplecontrols_xaml_deferred_163(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_9 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(25,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -22961,7 +23269,7 @@ fn build_controls_simplecontrols_xaml_deferred_163(
 fn build_controls_simplecontrols_xaml_deferred_164(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/SimpleControls.xaml(6,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_164_THEME)
 }
@@ -22970,7 +23278,7 @@ fn build_controls_simplecontrols_xaml_deferred_164(
 fn build_controls_simplecontrols_xaml_deferred_165(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -23109,7 +23417,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
 fn build_controls_simplecontrols_xaml_deferred_166(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/SimpleControls.xaml(25,20) AccessText
     let access_text_0 = ::ferroui_controls::primitives::AccessText::new();
     context.set_intermediate_root_object(rt::to_value(access_text_0.clone()));
@@ -23128,7 +23436,7 @@ fn build_controls_simplecontrols_xaml_deferred_166(
 fn build_controls_simplecontrols_xaml_deferred_167(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/SimpleControls.xaml(64,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_167_THEME)
 }
@@ -23137,7 +23445,7 @@ fn build_controls_simplecontrols_xaml_deferred_167(
 fn build_controls_simplecontrols_xaml_deferred_168(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_10 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(69,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -23167,7 +23475,7 @@ fn build_controls_simplecontrols_xaml_deferred_168(
 fn build_controls_simplecontrols_xaml_deferred_169(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     let platform_key_gesture_converter_0 = ::ferroui_controls::converters::PlatformKeyGestureConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(platform_key_gesture_converter_0))
 }
@@ -23176,7 +23484,7 @@ fn build_controls_simplecontrols_xaml_deferred_169(
 fn build_controls_simplecontrols_xaml_deferred_170(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/SimpleControls.xaml(8,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_170_THEME)
 }
@@ -23185,7 +23493,7 @@ fn build_controls_simplecontrols_xaml_deferred_170(
 fn build_controls_simplecontrols_xaml_deferred_171(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -23487,7 +23795,7 @@ fn build_controls_simplecontrols_xaml_deferred_171(
 fn build_controls_simplecontrols_xaml_deferred_172(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/SimpleControls.xaml(51,20) AccessText
     let access_text_0 = ::ferroui_controls::primitives::AccessText::new();
     context.set_intermediate_root_object(rt::to_value(access_text_0.clone()));
@@ -23506,7 +23814,7 @@ fn build_controls_simplecontrols_xaml_deferred_172(
 fn build_controls_simplecontrols_xaml_deferred_173(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/SimpleControls.xaml(90,12) Separator
     let separator_0 = ::ferroui_controls::Separator::new();
     context.set_intermediate_root_object(rt::to_value(separator_0.clone()));
@@ -23519,7 +23827,7 @@ fn build_controls_simplecontrols_xaml_deferred_173(
 fn build_controls_simplecontrols_xaml_deferred_174(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/SimpleControls.xaml(117,12) Path
     let path_0 = ::ferroui_controls::shapes::Path::new();
     context.set_intermediate_root_object(rt::to_value(path_0.clone()));
@@ -23545,7 +23853,7 @@ fn build_controls_simplecontrols_xaml_deferred_174(
 fn build_controls_simplecontrols_xaml_deferred_175(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/SimpleControls.xaml(126,12) Ellipse
     let ellipse_0 = ::ferroui_controls::shapes::Ellipse::new();
     context.set_intermediate_root_object(rt::to_value(ellipse_0.clone()));
@@ -23967,7 +24275,7 @@ fn build_controls_simplecontrols_xaml_deferred_182(
 fn build_controls_simplecontrols_xaml_deferred_183(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(29,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_183_THEME)
 }
@@ -23976,7 +24284,7 @@ fn build_controls_simplecontrols_xaml_deferred_183(
 fn build_controls_simplecontrols_xaml_deferred_184(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(53,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_184_THEME)
 }
@@ -23985,7 +24293,7 @@ fn build_controls_simplecontrols_xaml_deferred_184(
 fn build_controls_simplecontrols_xaml_deferred_185(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(66,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -24034,7 +24342,7 @@ fn build_controls_simplecontrols_xaml_deferred_185(
 fn build_controls_simplecontrols_xaml_deferred_186(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(97,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_186_THEME)
 }
@@ -24043,7 +24351,7 @@ fn build_controls_simplecontrols_xaml_deferred_186(
 fn build_controls_simplecontrols_xaml_deferred_187(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(108,10) Viewbox
     let viewbox_0 = ::ferroui_controls::Viewbox::new();
     context.set_intermediate_root_object(rt::to_value(viewbox_0.clone()));
@@ -24089,7 +24397,7 @@ fn build_controls_simplecontrols_xaml_deferred_187(
 fn build_controls_simplecontrols_xaml_deferred_188(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(120,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_188_THEME)
 }
@@ -24098,7 +24406,7 @@ fn build_controls_simplecontrols_xaml_deferred_188(
 fn build_controls_simplecontrols_xaml_deferred_189(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/SimpleControls.xaml(131,10) Viewbox
     let viewbox_0 = ::ferroui_controls::Viewbox::new();
     context.set_intermediate_root_object(rt::to_value(viewbox_0.clone()));
@@ -24144,7 +24452,7 @@ fn build_controls_simplecontrols_xaml_deferred_189(
 fn build_controls_simplecontrols_xaml_deferred_190(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(44,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_190_THEME)
 }
@@ -24153,7 +24461,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
 fn build_controls_simplecontrols_xaml_deferred_191(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(49,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -24190,7 +24498,7 @@ fn build_controls_simplecontrols_xaml_deferred_191(
 fn build_controls_simplecontrols_xaml_deferred_192(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(80,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_192_THEME)
 }
@@ -24199,7 +24507,7 @@ fn build_controls_simplecontrols_xaml_deferred_192(
 fn build_controls_simplecontrols_xaml_deferred_193(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(91,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -24432,7 +24740,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
 fn build_controls_simplecontrols_xaml_deferred_194(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(172,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_194_THEME)
 }
@@ -24441,7 +24749,7 @@ fn build_controls_simplecontrols_xaml_deferred_194(
 fn build_controls_simplecontrols_xaml_deferred_195(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(184,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -24995,7 +25303,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
 fn build_controls_simplecontrols_xaml_deferred_196(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(43,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_196_THEME)
 }
@@ -25004,7 +25312,7 @@ fn build_controls_simplecontrols_xaml_deferred_196(
 fn build_controls_simplecontrols_xaml_deferred_197(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(48,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -25041,7 +25349,7 @@ fn build_controls_simplecontrols_xaml_deferred_197(
 fn build_controls_simplecontrols_xaml_deferred_198(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(79,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_198_THEME)
 }
@@ -25050,7 +25358,7 @@ fn build_controls_simplecontrols_xaml_deferred_198(
 fn build_controls_simplecontrols_xaml_deferred_199(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(90,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -25380,7 +25688,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
 fn build_controls_simplecontrols_xaml_deferred_200(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/SimpleControls.xaml(205,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_200_THEME)
 }
@@ -25389,7 +25697,7 @@ fn build_controls_simplecontrols_xaml_deferred_200(
 fn build_controls_simplecontrols_xaml_deferred_201(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(216,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -26059,7 +26367,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
 fn build_controls_simplecontrols_xaml_deferred_202(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let value_0 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 23, 48)?;
     ::core::result::Result::Ok(rt::to_value(value_0))
 }
@@ -26068,7 +26376,7 @@ fn build_controls_simplecontrols_xaml_deferred_202(
 fn build_controls_simplecontrols_xaml_deferred_203(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(27,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_203_THEME)
 }
@@ -26077,7 +26385,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
 fn build_controls_simplecontrols_xaml_deferred_204(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(37,12) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -26235,7 +26543,7 @@ fn build_controls_simplecontrols_xaml_deferred_204(
 fn build_controls_simplecontrols_xaml_deferred_205(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(118,12) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -26393,7 +26701,7 @@ fn build_controls_simplecontrols_xaml_deferred_205(
 fn build_controls_simplecontrols_xaml_deferred_206(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(199,12) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -26551,7 +26859,7 @@ fn build_controls_simplecontrols_xaml_deferred_206(
 fn build_controls_simplecontrols_xaml_deferred_207(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(282,12) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -26709,7 +27017,7 @@ fn build_controls_simplecontrols_xaml_deferred_207(
 fn build_controls_simplecontrols_xaml_deferred_208(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(7,4) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
     // Controls/SimpleControls.xaml(8,6) Children
@@ -26769,7 +27077,7 @@ fn build_controls_simplecontrols_xaml_deferred_208(
 fn build_controls_simplecontrols_xaml_deferred_209(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(16,4) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
     // Controls/SimpleControls.xaml(17,6) Children
@@ -26799,7 +27107,7 @@ fn build_controls_simplecontrols_xaml_deferred_209(
 fn build_controls_simplecontrols_xaml_deferred_210(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(22,4) ResourceSelectorConverter
     let resource_selector_converter_0 = ::ferroui_dialogs::internal::ResourceSelectorConverter::new();
     // Controls/SimpleControls.xaml(23,6) Content
@@ -26941,7 +27249,7 @@ fn build_controls_simplecontrols_xaml_deferred_210(
 fn build_controls_simplecontrols_xaml_deferred_211(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(50,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_211_THEME)
 }
@@ -26950,7 +27258,7 @@ fn build_controls_simplecontrols_xaml_deferred_211(
 fn build_controls_simplecontrols_xaml_deferred_212(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(55,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -27749,7 +28057,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
 fn build_controls_simplecontrols_xaml_deferred_213(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(130,20) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -27817,7 +28125,7 @@ fn build_controls_simplecontrols_xaml_deferred_213(
 fn build_controls_simplecontrols_xaml_deferred_214(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(203,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
@@ -28013,7 +28321,7 @@ fn build_controls_simplecontrols_xaml_deferred_214(
 fn build_controls_simplecontrols_xaml_deferred_215(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(246,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_215_THEME)
 }
@@ -28022,7 +28330,7 @@ fn build_controls_simplecontrols_xaml_deferred_215(
 fn build_controls_simplecontrols_xaml_deferred_216(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/SimpleControls.xaml(251,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -28187,7 +28495,7 @@ fn build_controls_simplecontrols_xaml_deferred_216(
 fn build_controls_simplecontrols_xaml_deferred_217(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(20,4) Left
     ::ferroui_controls::converters::MarginMultiplierConverter::__markup_set_Left(&margin_multiplier_converter_0, ::core::clone::Clone::clone(&true));
@@ -28204,7 +28512,7 @@ fn build_controls_simplecontrols_xaml_deferred_217(
 fn build_controls_simplecontrols_xaml_deferred_218(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(22,4) Right
     ::ferroui_controls::converters::MarginMultiplierConverter::__markup_set_Right(&margin_multiplier_converter_0, ::core::clone::Clone::clone(&true));
@@ -28221,7 +28529,7 @@ fn build_controls_simplecontrols_xaml_deferred_218(
 fn build_controls_simplecontrols_xaml_deferred_219(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(24,4) Top
     ::ferroui_controls::converters::MarginMultiplierConverter::__markup_set_Top(&margin_multiplier_converter_0, ::core::clone::Clone::clone(&true));
@@ -28236,7 +28544,7 @@ fn build_controls_simplecontrols_xaml_deferred_219(
 fn build_controls_simplecontrols_xaml_deferred_220(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(25,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(3_i64));
@@ -28247,7 +28555,7 @@ fn build_controls_simplecontrols_xaml_deferred_220(
 fn build_controls_simplecontrols_xaml_deferred_221(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(26,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(10_i64));
@@ -28258,7 +28566,7 @@ fn build_controls_simplecontrols_xaml_deferred_221(
 fn build_controls_simplecontrols_xaml_deferred_222(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(27,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(12_i64));
@@ -28269,7 +28577,7 @@ fn build_controls_simplecontrols_xaml_deferred_222(
 fn build_controls_simplecontrols_xaml_deferred_223(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(28,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(5_i64));
@@ -28280,7 +28588,7 @@ fn build_controls_simplecontrols_xaml_deferred_223(
 fn build_controls_simplecontrols_xaml_deferred_224(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/SimpleControls.xaml(30,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_224_THEME)
 }
@@ -28289,7 +28597,7 @@ fn build_controls_simplecontrols_xaml_deferred_224(
 fn build_controls_simplecontrols_xaml_deferred_225(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(33,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -28320,7 +28628,7 @@ fn build_controls_simplecontrols_xaml_deferred_225(
 fn build_controls_simplecontrols_xaml_deferred_226(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/SimpleControls.xaml(116,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_226_THEME)
 }
@@ -28329,7 +28637,7 @@ fn build_controls_simplecontrols_xaml_deferred_226(
 fn build_controls_simplecontrols_xaml_deferred_227(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(131,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -28568,7 +28876,7 @@ fn build_controls_simplecontrols_xaml_deferred_227(
 fn build_controls_simplecontrols_xaml_deferred_228(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(13,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_228_THEME)
 }
@@ -30030,7 +30338,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
 fn build_controls_simplecontrols_xaml_deferred_248(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M3 17h18a1 1 0 0 1 .117 1.993L21 19H3a1 1 0 0 1-.117-1.993L3 17h18H3Zm0-6 18-.002a1 1 0 0 1 .117 1.993l-.117.007L3 13a1 1 0 0 1-.117-1.993L3 11l18-.002L3 11Zm0-6h18a1 1 0 0 1 .117 1.993L21 7H3a1 1 0 0 1-.117-1.993L3 5h18H3Z")), 10, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -30039,7 +30347,7 @@ fn build_controls_simplecontrols_xaml_deferred_248(
 fn build_controls_simplecontrols_xaml_deferred_249(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M12.7347,4.20949 C13.0332,3.92233 13.508,3.93153 13.7952,4.23005 C14.0823,4.52857 14.0731,5.00335 13.7746,5.29051 L5.50039,13.25 L24.2532,13.25 C24.6674,13.25 25.0032,13.5858 25.0032,13.9999982 C25.0032,14.4142 24.6674,14.75 24.2532,14.75 L5.50137,14.75 L13.7746,22.7085 C14.0731,22.9957 14.0823,23.4705 13.7952,23.769 C13.508,24.0675 13.0332,24.0767 12.7347,23.7896 L3.30673,14.7202 C2.89776,14.3268 2.89776,13.6723 3.30673,13.2788 L12.7347,4.20949 Z")), 12, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -30048,7 +30356,7 @@ fn build_controls_simplecontrols_xaml_deferred_249(
 fn build_controls_simplecontrols_xaml_deferred_252(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/SimpleControls.xaml(17,4) LinearGradientBrush
     let linear_gradient_brush_0 = ::ferroui_base::media::LinearGradientBrush::new();
     // Controls/SimpleControls.xaml(17,4) StartPoint
@@ -30082,7 +30390,7 @@ fn build_controls_simplecontrols_xaml_deferred_252(
 fn build_controls_simplecontrols_xaml_deferred_253(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/SimpleControls.xaml(22,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_253_THEME)
 }
@@ -30091,7 +30399,7 @@ fn build_controls_simplecontrols_xaml_deferred_253(
 fn build_controls_simplecontrols_xaml_deferred_254(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(50,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -30694,7 +31002,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
 fn build_controls_simplecontrols_xaml_deferred_267(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(56,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_267_THEME)
 }
@@ -30703,7 +31011,7 @@ fn build_controls_simplecontrols_xaml_deferred_267(
 fn build_controls_simplecontrols_xaml_deferred_268(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(64,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -30798,7 +31106,7 @@ fn build_controls_simplecontrols_xaml_deferred_268(
 fn build_controls_simplecontrols_xaml_deferred_269(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(76,20) UniformGrid
     let uniform_grid_0 = ::ferroui_controls::primitives::UniformGrid::new();
     context.set_intermediate_root_object(rt::to_value(uniform_grid_0.clone()));
@@ -30814,7 +31122,7 @@ fn build_controls_simplecontrols_xaml_deferred_269(
 fn build_controls_simplecontrols_xaml_deferred_270(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(102,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_270_THEME)
 }
@@ -30823,7 +31131,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
 fn build_controls_simplecontrols_xaml_deferred_271(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(115,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -30850,7 +31158,7 @@ fn build_controls_simplecontrols_xaml_deferred_271(
 fn build_controls_simplecontrols_xaml_deferred_272(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(124,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -31004,7 +31312,7 @@ fn build_controls_simplecontrols_xaml_deferred_272(
 fn build_controls_simplecontrols_xaml_deferred_273(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(185,12) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -31031,7 +31339,7 @@ fn build_controls_simplecontrols_xaml_deferred_273(
 fn build_controls_simplecontrols_xaml_deferred_274(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(200,12) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -31058,7 +31366,7 @@ fn build_controls_simplecontrols_xaml_deferred_274(
 fn build_controls_simplecontrols_xaml_deferred_275(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/SimpleControls.xaml(246,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_275_THEME)
 }
@@ -31067,7 +31375,7 @@ fn build_controls_simplecontrols_xaml_deferred_275(
 fn build_controls_simplecontrols_xaml_deferred_276(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(250,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -31115,7 +31423,7 @@ fn build_controls_simplecontrols_xaml_deferred_276(
 fn build_controls_simplecontrols_xaml_deferred_277(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/SimpleControls.xaml(17,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_277_THEME)
 }
@@ -31124,7 +31432,7 @@ fn build_controls_simplecontrols_xaml_deferred_277(
 fn build_controls_simplecontrols_xaml_deferred_278(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(21,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -31310,7 +31618,7 @@ fn build_controls_simplecontrols_xaml_deferred_278(
 fn build_controls_simplecontrols_xaml_deferred_279(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/SimpleControls.xaml(65,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_279_THEME)
 }
@@ -31319,7 +31627,7 @@ fn build_controls_simplecontrols_xaml_deferred_279(
 fn build_controls_simplecontrols_xaml_deferred_280(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(77,10) Border
     let border_0 = ::ferroui_controls::Border::new();
