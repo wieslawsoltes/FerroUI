@@ -7,7 +7,11 @@ ambient colour of the material, Lambert diffuse, the Blinn-Phong specular term, 
 range of point and spot lights and the falloff of a spot light between its cones) and the layout of
 its light records are a port of `ComputeWpfLighting` and `GpuLight3DRecord` of the 3D shaders of
 ProGPU (<https://github.com/wieslawsoltes/ProGPU>, `src/ProGPU.Scene/Shaders/Mesh3DSolid.wgsl`),
-MIT License:
+MIT License. The shader of the GPU executors (`shaders/scene3d.wgsl`: the vertex stage, the light
+loop and the turn of the normal of a back face) is a port of the same file, rewritten to uniform
+buffers, and the pipelines made on first demand and the uploads of meshes only for a new version
+(`wgpu_executor.rs`) follow ProGPU's `src/ProGPU.Scene/Extensions/Mesh3DExtensionPipeline.cs` and
+`docs/retained-3d-pipeline-demand.md`:
 
 ```
 MIT License

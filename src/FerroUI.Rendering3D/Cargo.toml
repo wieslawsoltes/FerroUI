@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-render3d"
-description = "The renderer of FerroUI's 3D scenes: the CPU reference rasterizer, the shared uniform layouts and the output cache of Viewport3D"
+description = "The renderer of FerroUI's 3D scenes: the CPU reference rasterizer, the shader and the wgpu executor, the shared uniform layouts and the output cache of Viewport3D"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -24,6 +24,17 @@ path = "lib.rs"
 # The base library: the compiled form of a scene (`rendering::scene3d`), the numerics, the
 # brushes of the material layers and the logger.
 ferroui-base.workspace = true
+# The executor of the GPU modes of the Vello backend (feature `wgpu`, step D4).
+wgpu = { workspace = true, optional = true }
+
+[features]
+default = []
+# The wgpu executor (`wgpu_executor`): `ferroui-vello` turns it on with its GPU modes and `media3d`.
+wgpu = ["dep:wgpu"]
+
+[dev-dependencies]
+# The validation of `shaders/scene3d.wgsl` and its translation to GLSL ES 3.00 for WebGL2.
+naga = { workspace = true, features = ["wgsl-in", "glsl-out"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

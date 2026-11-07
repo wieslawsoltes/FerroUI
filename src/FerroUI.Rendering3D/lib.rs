@@ -13,9 +13,13 @@
 //!   `ComputeWpfLighting`.
 //! - [`output_cache`]: the output of a scene kept while the scene, the size and the scale are
 //!   unchanged.
+//! - [`shader`]: `scene3d.wgsl`, the one shader of the GPU executors, restricted to what WebGL2
+//!   and OpenGL ES 3.0 run.
+//! - `wgpu_executor` (feature `wgpu`): the executor of the GPU modes of the Vello backend, which
+//!   draws a scene with wgpu into a texture of the device (step D4).
 //!
-//! The crate depends on the base library and std only; its GPU executors come with their steps
-//! (D4: wgpu, D5: Metal, D8: GL, D9: Vulkan) as features.
+//! The crate depends on the base library and std only, and on wgpu with its feature `wgpu`; its
+//! other GPU executors come with their steps (D5: Metal, D8: GL, D9: Vulkan) as features.
 
 #![forbid(unsafe_code)]
 
@@ -23,7 +27,10 @@ pub mod cpu;
 pub mod lighting;
 mod math;
 pub mod output_cache;
+pub mod shader;
 pub mod uniforms;
+#[cfg(feature = "wgpu")]
+pub mod wgpu_executor;
 
 #[cfg(test)]
 mod test_scenes;
@@ -66,7 +73,8 @@ pub fn report_scene_drawn_on_cpu(backend: &str) {
             None,
             &format!(
                 "A 3D scene (Viewport3D) is drawn by the CPU reference on a GPU surface of {backend}: the backend has no \
-                 GPU executor for 3D scenes yet (docs/porting/media3d.md, docs/porting/gpu-rendering.md)."
+                 GPU executor for 3D scenes there yet, or its executor failed (docs/porting/media3d.md, \
+                 docs/porting/gpu-rendering.md)."
             ),
         );
     }
