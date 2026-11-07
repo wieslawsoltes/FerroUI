@@ -240,7 +240,60 @@ virtualizing tables on all targets.
 
 ## Results
 
-No numbers are recorded yet. The table below has the layout of the table the run prints.
+Measured on 2026-11-07 on an Apple M3 Pro (macOS), Rust 1.99.0, the release profile, one test thread, with
+`FERROUI_BENCH_ITERATIONS=5 FERROUI_BENCH_WARMUP=1 FERROUI_BENCH_MIN_ITERATION_MS=200` (the full
+166 benchmarks take 85 minutes at these settings; the default 15 iterations take several hours,
+because a GPUI operation is a whole frame and the operation counts are the TreeDataGrid
+benchmarks'). Times are per operation. The ratios divide the GPUI time by the FerroUI layout and
+render time, so a ratio above 1 means FerroUI is faster.
+
+- **gpui-component's `DataTable`:** the FerroUI TreeDataGrid is faster in every scenario both can run. First layouts are 1.3 to 3.4 times faster, sorting with a frame 3.8 to 5.2, detach and reattach 5.2 to 8.5, expand and collapse with frames 4.0 to 4.7, and scrolls and collection edits 14 to 90.
+- **The hand-built `uniform_list` table:** this table has no column model, no resizing, no selection and no templates. With synthetic text it builds and lays out its first frame faster than the TreeDataGrid (0.62 to 0.71 of its time). With platform text it is 2.0 to 2.3 times slower. In every other scenario it is 1.3 to 44 times slower.
+- **Why scrolls differ so much:** the TreeDataGrid is retained. A scroll re-arranges and re-records only what moved, and recycles the realized rows. A GPUI scroll lays out and paints the whole visible window again.
 
 | Scenario | Parameters | FerroUI TDG layout | FerroUI TDG layout+render | gpui-component | gpui uniform_list | gpui-component / FerroUI | uniform_list / FerroUI |
-|----------|------------|-------------------:|--------------------------:|---------------:|------------------:|-------------------------:|-----------------------:|
+| ----------------------------------------- | -------------------------------------------------- | -----------------: | ------------------------: | -------------: | ----------------: | -----------------------: | ---------------------: |
+| create_and_layout_grid | Rows=1000, Columns=12, Text=Synthetic | 888.106 us | 874.537 us | 1.431 ms | 620.628 us | 1.64 | 0.71 |
+| create_and_layout_grid | Rows=1000, Columns=12, Text=Platform | 897.101 us | 935.737 us | 3.183 ms | 2.113 ms | 3.40 | 2.26 |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Fixed, Text=Synthetic | 774.594 us | 790.079 us | 1.044 ms | 556.722 us | 1.32 | 0.70 |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Fixed, Text=Platform | 812.834 us | 866.698 us | 2.338 ms | 1.743 ms | 2.70 | 2.01 |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Auto, Text=Synthetic | 832.099 us | 842.009 us | n/a | n/a | n/a | n/a |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Auto, Text=Platform | 846.819 us | 900.591 us | n/a | n/a | n/a | n/a |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Star, Text=Synthetic | 848.109 us | 863.705 us | n/a | 532.326 us | n/a | 0.62 |
+| create_and_first_layout | Rows=1000, Columns=6, Layout=Star, Text=Platform | 861.107 us | 880.353 us | n/a | 1.722 ms | n/a | 1.96 |
+| vertical_small_scrolls | Rows=10000, Columns=12, Text=Synthetic | 14.885 us | 34.086 us | 2.976 ms | 1.078 ms | 87.30 | 31.62 |
+| vertical_small_scrolls | Rows=10000, Columns=12, Text=Platform | 15.029 us | 34.284 us | 2.681 ms | 1.321 ms | 78.20 | 38.52 |
+| vertical_small_scrolls | Rows=100000, Columns=12, Text=Synthetic | 14.672 us | 34.058 us | 2.348 ms | 1.042 ms | 68.94 | 30.59 |
+| vertical_small_scrolls | Rows=100000, Columns=12, Text=Platform | 14.481 us | 33.692 us | 2.605 ms | 1.290 ms | 77.32 | 38.28 |
+| vertical_row_scrolls | Rows=10000, Columns=12, Text=Synthetic | 24.685 us | 42.432 us | 2.295 ms | 1.016 ms | 54.09 | 23.93 |
+| vertical_row_scrolls | Rows=10000, Columns=12, Text=Platform | 23.917 us | 42.436 us | 2.644 ms | 1.358 ms | 62.29 | 32.00 |
+| vertical_row_scrolls | Rows=100000, Columns=12, Text=Synthetic | 24.071 us | 42.543 us | 2.324 ms | 1.013 ms | 54.63 | 23.81 |
+| vertical_row_scrolls | Rows=100000, Columns=12, Text=Platform | 23.877 us | 42.502 us | 2.656 ms | 1.353 ms | 62.49 | 31.83 |
+| vertical_jitter_scrolls | Rows=10000, Columns=12, Text=Synthetic | 83.359 us | 102.777 us | 2.336 ms | 1.009 ms | 22.73 | 9.81 |
+| vertical_jitter_scrolls | Rows=10000, Columns=12, Text=Platform | 84.446 us | 103.240 us | 2.807 ms | 1.468 ms | 27.19 | 14.22 |
+| vertical_jitter_scrolls | Rows=100000, Columns=12, Text=Synthetic | 84.149 us | 103.045 us | 2.332 ms | 1.010 ms | 22.63 | 9.80 |
+| vertical_jitter_scrolls | Rows=100000, Columns=12, Text=Platform | 84.461 us | 103.135 us | 2.815 ms | 1.432 ms | 27.30 | 13.88 |
+| forced_stationary_vertical_layouts | Rows=10000, Columns=12, Text=Synthetic | 1.625 us | 19.396 us | 1.144 ms | 495.331 us | 59.01 | 25.54 |
+| forced_stationary_vertical_layouts | Rows=10000, Columns=12, Text=Platform | 1.636 us | 19.435 us | 1.250 ms | 605.206 us | 64.29 | 31.14 |
+| horizontal_small_scrolls | Rows=1000, Columns=200, Text=Synthetic | 14.532 us | 33.546 us | 2.282 ms | 1.012 ms | 68.02 | 30.18 |
+| horizontal_small_scrolls | Rows=1000, Columns=200, Text=Platform | 14.837 us | 34.860 us | 2.563 ms | 1.263 ms | 73.51 | 36.23 |
+| horizontal_column_scrolls | Rows=1000, Columns=200, Text=Synthetic | 142.653 us | 163.154 us | 2.307 ms | 1.007 ms | 14.14 | 6.17 |
+| horizontal_column_scrolls | Rows=1000, Columns=200, Text=Platform | 144.230 us | 163.963 us | 2.709 ms | 1.404 ms | 16.52 | 8.56 |
+| horizontal_far_column_scrolls | Rows=1000, Columns=1000, Text=Synthetic | 130.829 us | 149.594 us | 2.392 ms | 1.026 ms | 15.99 | 6.86 |
+| horizontal_far_column_scrolls | Rows=1000, Columns=1000, Text=Platform | 131.243 us | 149.262 us | 2.861 ms | 1.468 ms | 19.17 | 9.84 |
+| sort_thousand_rows_with_frame | Rows=1000, Columns=2, Text=Synthetic | 207.866 us | 216.583 us | 825.911 us | 299.902 us | 3.81 | 1.38 |
+| sort_thousand_rows_with_frame | Rows=1000, Columns=2, Text=Platform | 214.314 us | 222.874 us | 1.157 ms | 596.525 us | 5.19 | 2.68 |
+| sort_thousand_rows | Rows=1000, Columns=2, Text=Synthetic | 38.955 us | n/a | 415.590 us | n/a | 10.67 | n/a |
+| collection_insert_remove_burst | Rows=10000, Columns=12, Text=Synthetic | 43.017 us | 80.435 us | 4.576 ms | 2.017 ms | 56.89 | 25.08 |
+| collection_insert_remove_burst | Rows=10000, Columns=12, Text=Platform | 43.432 us | 80.367 us | 5.197 ms | 2.554 ms | 64.66 | 31.78 |
+| collection_insert_remove_burst | Rows=100000, Columns=12, Text=Synthetic | 67.300 us | 104.901 us | 4.670 ms | 2.089 ms | 44.52 | 19.92 |
+| collection_insert_remove_burst | Rows=100000, Columns=12, Text=Platform | 69.248 us | 105.779 us | 5.273 ms | 2.681 ms | 49.85 | 25.34 |
+| collection_move_burst | Rows=10000, Columns=12, Text=Synthetic | 18.612 us | 55.921 us | 4.601 ms | 2.006 ms | 82.28 | 35.87 |
+| collection_move_burst | Rows=10000, Columns=12, Text=Platform | 18.599 us | 56.053 us | 5.057 ms | 2.464 ms | 90.21 | 43.96 |
+| collection_move_burst | Rows=100000, Columns=12, Text=Synthetic | 73.280 us | 106.154 us | 4.992 ms | 2.206 ms | 47.02 | 20.79 |
+| collection_move_burst | Rows=100000, Columns=12, Text=Platform | 68.540 us | 105.306 us | 5.252 ms | 2.630 ms | 49.87 | 24.97 |
+| detach_reattach | Rows=10000, Columns=50, Text=Synthetic | 441.490 us | 455.314 us | 2.355 ms | 1.104 ms | 5.17 | 2.43 |
+| detach_reattach | Rows=10000, Columns=50, Text=Platform | 456.703 us | 479.139 us | 4.073 ms | 2.486 ms | 8.50 | 5.19 |
+| expand_collapse_thousand_rows | Rows=1000, Columns=2, Text=Synthetic | 6.362 us | n/a | 389.920 us | n/a | 61.29 | n/a |
+| expand_collapse_thousand_rows_with_frames | Rows=1000, Columns=2, Text=Synthetic | 175.392 us | 184.906 us | 743.271 us | 241.016 us | 4.02 | 1.30 |
+| expand_collapse_thousand_rows_with_frames | Rows=1000, Columns=2, Text=Platform | 181.818 us | 192.928 us | 902.068 us | 539.580 us | 4.68 | 2.80 |
