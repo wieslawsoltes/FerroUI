@@ -768,7 +768,7 @@ impl Scene3DWgpuExecutor {
                 vertex: wgpu::VertexState {
                     module: &self.module,
                     entry_point: Some(VERTEX_ENTRY),
-                    buffers: &[vertex_layout],
+                    buffers: &[Some(vertex_layout)],
                     compilation_options: wgpu::PipelineCompilationOptions::default(),
                 },
                 primitive: wgpu::PrimitiveState {
