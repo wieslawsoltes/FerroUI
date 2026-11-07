@@ -199,24 +199,22 @@ fn the_pictures_of_the_catalog_are_decoded_alike() {
     let (mut files, mut worst_share, mut worst_mean, mut worst_largest) = (0, 0.0f64, 0.0f64, 0u8);
     header();
 
-    for folder in ["CurvedHeader", "ModernApp"] {
-        let mut paths: Vec<_> = std::fs::read_dir(directory.join(folder))
-            .expect("the assets of the catalog")
-            .map(|entry| entry.unwrap().path())
-            .filter(|path| path.extension().is_some_and(|extension| extension == "jpg"))
-            .collect();
-        paths.sort();
+    let mut paths: Vec<_> = std::fs::read_dir(&directory)
+        .expect("the assets of the catalog")
+        .map(|entry| entry.unwrap().path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "jpg"))
+        .collect();
+    paths.sort();
 
-        for path in paths {
-            let data = std::fs::read(&path).unwrap();
-            let difference = decoded_by_both(&data).unwrap_or_else(|| panic!("{} is decoded by both", path.display()));
-            row(&format!("`{folder}/{}`", path.file_name().unwrap().to_string_lossy()), difference);
+    for path in paths {
+        let data = std::fs::read(&path).unwrap();
+        let difference = decoded_by_both(&data).unwrap_or_else(|| panic!("{} is decoded by both", path.display()));
+        row(&format!("`{}`", path.file_name().unwrap().to_string_lossy()), difference);
 
-            files += 1;
-            worst_share = worst_share.max(difference.share);
-            worst_mean = worst_mean.max(difference.mean);
-            worst_largest = worst_largest.max(difference.largest);
-        }
+        files += 1;
+        worst_share = worst_share.max(difference.share);
+        worst_mean = worst_mean.max(difference.mean);
+        worst_largest = worst_largest.max(difference.largest);
     }
 
     println!("| the worst of {files} files | {worst_share:.3} % | {worst_largest} | {worst_mean:.3} |");
@@ -394,7 +392,7 @@ fn formats_outside_the_list_fail_to_load() {
 #[test]
 fn a_bitmap_is_decoded_to_a_size_and_resized_alike() {
     let (skia, vello) = backends();
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../samples/ControlCatalog/Assets/ModernApp/dest_alps.jpg");
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../samples/ControlCatalog/Assets/delicate-arch-896885_640.jpg");
     let data = std::fs::read(path).unwrap();
     header();
 

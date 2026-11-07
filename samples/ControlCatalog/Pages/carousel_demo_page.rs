@@ -3,11 +3,10 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    CareCompanionAppPage, CarouselCustomizationPage, CarouselDataBindingPage, CarouselGalleryAppPage,
-    CarouselGesturesPage, CarouselGettingStartedPage, CarouselMultiItemPage, CarouselPageCustomizationPage,
-    CarouselPageDataTemplatePage, CarouselPageEventsPage, CarouselPageFirstLookPage, CarouselPageGesturePage,
-    CarouselPagePerformancePage, CarouselPageSelectionPage, CarouselPageTransitionsPage, CarouselTransitionsPage,
-    CarouselVerticalPage, SanctuaryShowcasePage,
+    CarouselCustomizationPage, CarouselDataBindingPage, CarouselGesturesPage, CarouselGettingStartedPage,
+    CarouselMultiItemPage, CarouselPageCustomizationPage, CarouselPageDataTemplatePage, CarouselPageEventsPage,
+    CarouselPageFirstLookPage, CarouselPageGesturePage, CarouselPagePerformancePage, CarouselPageSelectionPage,
+    CarouselPageTransitionsPage, CarouselTransitionsPage, CarouselVerticalPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -73,19 +72,6 @@ const DEMOS: &[Demo] = &[
         "Track page count and live page instances. Observe how pages are released after removing them.",
         || CarouselPagePerformancePage::new().upcast(),
     ),
-    // Showcases
-    (
-        "Showcases",
-        "Sanctuary",
-        "Travel discovery app with 3 full-screen immersive pages. Each page has a real background photo, gradient overlay, and themed content. Built as a 1:1 replica of a Stitch design.",
-        || SanctuaryShowcasePage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Care Companion",
-        "Healthcare onboarding with CarouselPage (3 pages), then a TabbedPage patient dashboard. Skip or complete onboarding to navigate to the dashboard via RemovePage.",
-        || CareCompanionAppPage::new().upcast(),
-    ),
     // Carousel (ItemsControl) demos
     (
         "Carousel",
@@ -128,12 +114,6 @@ const DEMOS: &[Demo] = &[
         "Data Binding",
         "Bind Carousel to an ObservableCollection and add, remove, or shuffle items at runtime.",
         || CarouselDataBindingPage::new().upcast(),
-    ),
-    (
-        "Carousel",
-        "Curated Gallery",
-        "Editorial art gallery app with DrawerPage navigation, hero Carousel with PipsPager dots, and a horizontal peek carousel for collection highlights.",
-        || CarouselGalleryAppPage::new().upcast(),
     ),
 ];
 

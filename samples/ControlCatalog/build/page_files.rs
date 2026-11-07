@@ -16,7 +16,7 @@
 //!   (`/Assets/Fonts/SourceSansPro-*.ttf`); a directory as the source of a
 //!   font collection (`/Assets/Fonts#Family`, which loads every font of the
 //!   directory and its subdirectories into one collection); a directory
-//!   joined with a file name at run time (`format!(".../Assets/Movies/{name}")`),
+//!   joined with a file name at run time (`format!(".../Assets/<directory>/{name}")`),
 //!   which names the files of the directory whose names are string literals
 //!   of the same source, or the whole directory when none is;
 //! * the classes and other types they use (an identifier that a `struct`,

@@ -126,7 +126,7 @@ fn the_start_up_files_are_only_what_the_start_up_needs() {
     for asset in ["/Assets/icon.ico", "/Assets/banner-bg.png", "/Assets/logo1.png"] {
         assert!(STARTUP_ASSETS.contains(&asset), "{asset} is not a start-up file");
     }
-    for asset in ["/Assets/Fonts/WenQuanYiMicroHei-01.ttf", "/Assets/image1.jpg", "/Assets/Sanctuary/main_hero.jpg"] {
+    for asset in ["/Assets/Fonts/WenQuanYiMicroHei-01.ttf", "/Assets/image1.jpg", "/Assets/hirsch-899118_640.jpg"] {
         assert!(!STARTUP_ASSETS.contains(&asset), "{asset} is a start-up file");
     }
     let pages_of = |asset: &str| -> Vec<&str> {

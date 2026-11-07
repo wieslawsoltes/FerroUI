@@ -152,9 +152,7 @@ text is above (section Source Sans Pro). The Noto fonts declare no Reserved Font
 
 ## Images
 
-The images under `Assets/` (the photographs of the demo applications in `Assets/CurvedHeader`,
-`Assets/ModernApp`, `Assets/Movies`, `Assets/Pulse`, `Assets/Restaurant`, `Assets/RetroGaming`,
-`Assets/Sanctuary`, and the pictures and logos directly under `Assets/`) are part of the upstream
+The images under `Assets/` (the pictures and logos directly under `Assets/`) are part of the upstream
 repository, which records no separate origin or licence for them; they are redistributed here as
 part of the upstream sample under the upstream licence. Three of the pictures
 (`delicate-arch-896885_640.jpg`, `hirsch-899118_640.jpg`, `maple-leaf-888807_640.jpg`) carry

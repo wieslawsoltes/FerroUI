@@ -5,10 +5,8 @@ use crate::markup::XamlClass;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::TypeInfo;
 
-mod care_companion_app_page;
 mod carousel_customization_page;
 mod carousel_data_binding_page;
-mod carousel_gallery_app_page;
 mod carousel_gestures_page;
 mod carousel_getting_started_page;
 mod carousel_multi_item_page;
@@ -22,13 +20,9 @@ mod carousel_page_selection_page;
 mod carousel_page_transitions_page;
 mod carousel_transitions_page;
 mod carousel_vertical_page;
-mod sanctuary_main_page;
-mod sanctuary_showcase_page;
 
-pub use care_companion_app_page::CareCompanionAppPage;
 pub use carousel_customization_page::CarouselCustomizationPage;
 pub use carousel_data_binding_page::{CarouselCardItem, CarouselDataBindingPage};
-pub use carousel_gallery_app_page::CarouselGalleryAppPage;
 pub use carousel_gestures_page::CarouselGesturesPage;
 pub use carousel_getting_started_page::CarouselGettingStartedPage;
 pub use carousel_multi_item_page::CarouselMultiItemPage;
@@ -42,14 +36,10 @@ pub use carousel_page_selection_page::CarouselPageSelectionPage;
 pub use carousel_page_transitions_page::CarouselPageTransitionsPage;
 pub use carousel_transitions_page::CarouselTransitionsPage;
 pub use carousel_vertical_page::CarouselVerticalPage;
-pub use sanctuary_main_page::SanctuaryMainPage;
-pub use sanctuary_showcase_page::SanctuaryShowcasePage;
 
 pub(crate) const TYPES: &[&TypeInfo] = &[
-    CareCompanionAppPage::TYPE,
     CarouselCustomizationPage::TYPE,
     CarouselDataBindingPage::TYPE,
-    CarouselGalleryAppPage::TYPE,
     CarouselGesturesPage::TYPE,
     CarouselGettingStartedPage::TYPE,
     CarouselMultiItemPage::TYPE,
@@ -63,15 +53,11 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     CarouselPageTransitionsPage::TYPE,
     CarouselTransitionsPage::TYPE,
     CarouselVerticalPage::TYPE,
-    SanctuaryMainPage::TYPE,
-    SanctuaryShowcasePage::TYPE,
 ];
 
 pub(crate) const CLASSES: &[&XamlClass] = &[
-    &CareCompanionAppPage::XAML_CLASS,
     &CarouselCustomizationPage::XAML_CLASS,
     &CarouselDataBindingPage::XAML_CLASS,
-    &CarouselGalleryAppPage::XAML_CLASS,
     &CarouselGesturesPage::XAML_CLASS,
     &CarouselGettingStartedPage::XAML_CLASS,
     &CarouselMultiItemPage::XAML_CLASS,
@@ -85,8 +71,6 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &CarouselPageTransitionsPage::XAML_CLASS,
     &CarouselTransitionsPage::XAML_CLASS,
     &CarouselVerticalPage::XAML_CLASS,
-    &SanctuaryMainPage::XAML_CLASS,
-    &SanctuaryShowcasePage::XAML_CLASS,
 ];
 
 pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
