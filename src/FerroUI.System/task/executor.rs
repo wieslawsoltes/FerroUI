@@ -242,6 +242,9 @@ fn poll_task(id: u64) -> bool {
                 Some(future) => {
                     let mut context = Context::from_waker(&task.waker);
                     let previous = CURRENT.try_with(|current| current.replace(Some(id))).ok().flatten();
+                    // Boundary (#567): the future is application code; its panic fails the task
+                    // (`JoinError::Panicked` for its handle), as an exception faults a task of the
+                    // reference, instead of unwinding through the poll loop.
                     let polled = catch_unwind(AssertUnwindSafe(|| future.as_mut().poll(&mut context)));
                     let _ = CURRENT.try_with(|current| current.set(previous));
                     Some(polled)
@@ -363,12 +366,27 @@ where
     })
 }
 
+/// The future of a task whose outcome its future gives: the output of `future`, an error
+/// included, is written to `cell` ([`spawn_local_on_result`]).
+fn result_future<F, T>(future: F, cell: Arc<JoinCell<T>>) -> LocalFuture
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    Box::pin(async move {
+        let outcome = future.await;
+        drop(cell.complete(outcome));
+    })
+}
+
 /// What a task with a handle does when it fails: writes the failure to `cell`.
 fn handle_failure<T: 'static>(cell: Arc<JoinCell<T>>) -> OnFailure {
     Box::new(move |failure: Failure| {
         // A panic after the outcome was written (in what the completion ran) cannot fault the
         // task: it goes on from the call that polled it.
         if let Some(Err(JoinError::Panicked(payload))) = cell.complete(Err(failure.into())) {
+            // Boundary (#567): the panic of the poll that cannot fault the task is raised again
+            // to the caller of the poll (belongs to the catch of `poll_task`).
             std::panic::resume_unwind(payload);
         }
     })
@@ -413,6 +431,29 @@ where
     F::Output: 'static,
 {
     spawn_with_handle(future, Route::Schedule(schedule), first_poll)
+}
+
+/// Runs `future` as a task of the current thread whose polls run on `schedule`, as
+/// [`spawn_local_on`], and gives a handle whose outcome is the output of the future: `Ok(value)`
+/// is the value of the task, and `Err(error)` ends the task with `error`, as if it had been
+/// aborted ([`JoinError::Canceled`]) or had panicked ([`JoinError::Panicked`], whose payload
+/// the future makes). A future reports the failure of its task this way without unwinding, so
+/// that the failure reaches the observers of the handle with `panic = "abort"` too (#567). A
+/// panic of the future still fails the task as with [`spawn_local_on`], and an abort still
+/// cancels it.
+pub fn spawn_local_on_result<F, T>(future: F, schedule: Arc<dyn Schedule>, first_poll: FirstPoll) -> JoinHandle<T>
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    let cell = Arc::new(JoinCell::new());
+    let header = spawn_routed(
+        result_future(future, cell.clone()),
+        Route::Schedule(schedule),
+        first_poll,
+        handle_failure(cell.clone()),
+    );
+    JoinHandle::new(header, cell)
 }
 
 /// Runs the future that `create` makes as a task of the thread of `schedule`, and gives its
@@ -462,6 +503,8 @@ impl<C, T: 'static> Start<C, T> {
             drop(self.cell.complete(Err(JoinError::Canceled)));
             return;
         }
+        // Boundary (#567): `create` is application code; its panic fails the task, as a panic of
+        // the future does.
         let future = match catch_unwind(AssertUnwindSafe(create)) {
             Ok(future) => future,
             Err(payload) => {
@@ -602,6 +645,8 @@ where
         if let Some(outcome) = handle.try_take() {
             return match outcome {
                 Ok(output) => output,
+                // Boundary (#567): the panic of the future is raised again to the caller, as
+                // `block_on` documents (belongs to the catch of `poll_task`).
                 Err(error) => error.resume_unwind(),
             };
         }

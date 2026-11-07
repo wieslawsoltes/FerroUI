@@ -812,6 +812,24 @@ impl<'a> EvalContext<'a> {
     }
 
     fn evaluate_node(&mut self, node: &Rc<dyn IXamlAstNode>) -> XamlResult<EvalResult> {
+        let result = self.evaluate_node_core(node)?;
+        // A member without an error channel that failed inside an error scope of the load
+        // reported its error there and returned what it has for nothing (#567): the load has
+        // failed, and stops here rather than going on with that. The scope returns the error the
+        // member reported, not this one.
+        if ferroui_markup_xaml::xaml_error_scope::has_error() {
+            return Err(XamlError::load_exception(
+                format!(
+                    "Evaluation of node {} failed: an error was reported to the error scope of the load",
+                    node.to_node_string()
+                ),
+                Some(&**node),
+            ));
+        }
+        Ok(result)
+    }
+
+    fn evaluate_node_core(&mut self, node: &Rc<dyn IXamlAstNode>) -> XamlResult<EvalResult> {
         let interpreter = self.interpreter;
         for evaluator in &interpreter.node_evaluators {
             if let Some(result) = evaluator.evaluate(node, self) {

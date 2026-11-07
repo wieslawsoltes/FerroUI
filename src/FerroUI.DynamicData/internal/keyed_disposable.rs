@@ -98,6 +98,8 @@ impl<K: Eq + Hash + Clone> KeyedDisposable<K> {
         };
         let mut errors = 0usize;
         for disposable in snapshot {
+            // Boundary (#567): the disposables are application subscriptions; as in the
+            // reference, every one is disposed and their failures are raised once at the end.
             if panic::catch_unwind(AssertUnwindSafe(|| disposable.dispose())).is_err() {
                 errors += 1;
             }

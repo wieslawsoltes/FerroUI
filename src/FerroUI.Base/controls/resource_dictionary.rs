@@ -478,7 +478,11 @@ impl ResourceDictionary {
 
         *self.last_deferred_item_key.borrow_mut() = Some(key.clone());
         let _reset = Reset(&self.last_deferred_item_key);
-        let value = deferred.build(None);
+        // A build that failed reported its error itself (to the error scope of a load, #567):
+        // the resource is then not found here, and stays deferred.
+        let Ok(value) = deferred.try_build(None) else {
+            return None;
+        };
         if shared {
             self.inner.borrow_mut().insert(key.clone(), ResourceItem::Value(value.clone()));
         }

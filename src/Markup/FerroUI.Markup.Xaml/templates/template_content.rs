@@ -27,11 +27,15 @@ impl TemplateContent {
     /// create ([`DeferredContent`]). The delegate form of the managed
     /// original has no counterpart: a function is not an untyped value.
     ///
+    /// Inside an error scope of a load
+    /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
+    /// failure is the error of the scope and the template builds nothing.
+    ///
     /// # Panics
-    /// Panics if the content is anything else, or if what it built is not a
-    /// `T`.
+    /// Outside an error scope, panics if the content is anything else, or if
+    /// what it built is not a `T`.
     pub fn load_as<T: Clone + 'static>(template_content: Option<&BoxedValue>) -> Option<TemplateResult<T>> {
-        crate::throw(Self::try_load_as(template_content))
+        crate::throw_or(Self::try_load_as(template_content), || None)
     }
 
     /// [`load_as`](Self::load_as) without panics: unexpected content and a

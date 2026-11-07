@@ -102,6 +102,8 @@ impl DockableQueryEnumerator {
             return false;
         }
         let _moving = CursorMoveScope(&self.moving);
+        // Boundary (#567): the iterator runs the predicates of the application; its state is
+        // finished before their panic is raised again (the try/finally of the reference).
         match catch_unwind(AssertUnwindSafe(|| self.state.next())) {
             Ok(Some(value)) => {
                 self.current.replace(value);

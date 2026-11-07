@@ -533,6 +533,9 @@ impl IDockManager for DockManager {
                 }
                 let scope =
                     observer.begin_dock_operation(source.clone(), target.clone(), operation);
+                // Boundary (#567): the try/finally of the reference; the operation runs factory
+                // and application code, and the observer scope is disposed of before a panic is
+                // raised again.
                 let result = catch_unwind(AssertUnwindSafe(|| {
                     let result = self.validate_core(source, target, action, operation, true);
                     if result {

@@ -68,6 +68,9 @@ impl FerroWaylandPlatformExtensions for AppBuilder {
                         // that fails as well (no X server either) would leave its own failure
                         // as the only thing said, so the reason Wayland was refused is put
                         // beside it before the failure goes on.
+                        // Boundary (#567): a catch that adds a line and raises the same panic
+                        // again, not an error flow. With `panic = "abort"` the line is not
+                        // printed; the warning above still names the reason.
                         if let Err(payload) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fallback())) {
                             eprintln!(
                                 "The fallback windowing backend failed after the Wayland backend could not be \

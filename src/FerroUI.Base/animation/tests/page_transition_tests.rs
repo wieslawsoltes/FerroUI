@@ -209,7 +209,7 @@ fn transition_whose_animation_cannot_run_fails() {
     animation.set_iteration_count(IterationCount::INFINITE);
     let run = animation.run_async(&from, CancellationToken::none());
     let mut task = crate::animation::start_page_transition(async move {
-        crate::animation::when_all_animations(vec![run]).await;
+        crate::animation::when_all_animations(vec![run]).await
     });
     assert!(matches!(outcome(&mut task), Some(Err(JoinError::Panicked(_)))));
 }

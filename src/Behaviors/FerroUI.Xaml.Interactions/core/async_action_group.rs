@@ -131,6 +131,8 @@ fn task_of(result: Option<&BoxedValue>) -> Option<ActionTask> {
 /// of a faulted task again; a canceled task ends the wait.
 async fn await_action(task: ActionTask) {
     if let Err(JoinError::Panicked(payload)) = task.await {
+        // Boundary (#567): the panic of an action, kept by its task, fails the group, as `await`
+        // of the reference rethrows the exception of a faulted task.
         std::panic::resume_unwind(payload);
     }
 }

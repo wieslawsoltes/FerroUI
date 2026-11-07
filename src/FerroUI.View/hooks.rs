@@ -94,6 +94,9 @@ pub(crate) fn render_catching<R>(
         frames.len()
     });
     let scope = crate::reactive::Scope::save();
+    // Boundary (#567): the error boundary of a component: a panic of the function of the
+    // component, application code, is reported to the nearest boundary, which shows its
+    // fallback. With `panic = "abort"` the panic aborts and no fallback is shown.
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(render));
     // A panic leaves the frames of the runs it went through.
     let frame = FRAMES.with(|frames| {

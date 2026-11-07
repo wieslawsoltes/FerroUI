@@ -4,7 +4,7 @@
 
 use crate::task::{
     block_on, current_schedule, is_current_schedule, poll_now, run_pending, set_current_schedule, set_thread_schedule, spawn_local, spawn_local_on,
-    spawn_on, thread_schedule, try_id, AbortHandle, FirstPoll, JoinError, JoinHandle, Schedule,
+    spawn_local_on_result, spawn_on, thread_schedule, try_id, AbortHandle, FirstPoll, JoinError, JoinHandle, Schedule,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -459,6 +459,37 @@ fn first_poll_now_polls_inside_the_spawning_call() {
     schedule.run_all();
     assert_eq!(steps.get(), 2);
     assert!(handle.is_finished());
+}
+
+#[test]
+fn a_task_on_a_schedule_takes_its_outcome_from_the_result_of_its_future_without_a_panic() {
+    // #567: a future ends its task with a `JoinError` value, which the handle gives as if the
+    // task had panicked or been aborted, and nothing unwinds.
+    let schedule = Arc::new(QueueSchedule::default());
+    let ok = spawn_local_on_result(async { Ok::<_, JoinError>(5) }, schedule.clone(), FirstPoll::Now);
+    assert_eq!(now_or_never(ok).unwrap().unwrap(), 5);
+
+    let gate = Gate::default();
+    let g = gate.clone();
+    let failed = spawn_local_on_result(
+        async move {
+            g.wait().await;
+            Err::<(), _>(JoinError::Panicked(Box::new("an animation could not be run".to_string())))
+        },
+        schedule.clone(),
+        FirstPoll::Now,
+    );
+    assert!(!failed.is_finished());
+    gate.open();
+    schedule.run_all();
+    assert!(failed.is_finished());
+    let error = now_or_never(failed).unwrap().unwrap_err();
+    assert!(error.is_panic());
+    assert_eq!(error.into_panic().downcast_ref::<String>().unwrap(), "an animation could not be run");
+
+    let canceled = spawn_local_on_result(async { Err::<(), _>(JoinError::Canceled) }, schedule.clone(), FirstPoll::Now);
+    assert!(now_or_never(canceled).unwrap().unwrap_err().is_canceled());
+    assert_eq!(schedule.len(), 0);
 }
 
 #[test]
