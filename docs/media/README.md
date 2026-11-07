@@ -295,8 +295,13 @@ covers RGBA8 storage payload, while driver padding/cache overhead remains opaque
 allocation count and dimensions are bounded. Native image-to-GL transfers have
 an explicit reason and counter, distinct from CPU preview transfers.
 
-The browser profile requires a single-threaded, page-owned WebGL2 Skia context.
-Workers, WebGL1, Vello and WebGPU do not advertise this route. Software adapters
+The browser profile requires a WebGL2 Skia context. A context on the page's
+thread samples the media element directly; a context on the render worker of
+the module with threads receives each frame as a transferred WebCodecs
+`VideoFrame`, uploaded into a texture of its own when the compositor imports
+it and copied into a texture of Skia for presentation (#601). Neither route
+reads pixels back to the CPU. WebGL1, Vello and WebGPU do not advertise these
+routes. Software adapters
 are rejected; there is no declared CPU preview fallback in this profile. Native
 frame output requires requestVideoFrameCallback for decoded-frame timestamps.
 Pixel-aspect conversions whose decoded and upload dimensions differ are rejected;

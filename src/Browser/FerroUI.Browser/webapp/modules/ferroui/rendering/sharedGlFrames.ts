@@ -1,11 +1,17 @@
 import { FerroExports } from "../ferroExports";
 import { FrameGlContext, WebGlRenderTarget } from "./webGlRenderTarget";
+import { WebRenderTargetRegistry } from "./webRenderTargetRegistry";
 
 interface FrameTexture { texture: WebGLTexture; context: WebGL2RenderingContext; generation: number }
 /** Shared immutable GL storage, not a media decoder or DOM presentation layer. */
 export class SharedGlFrames {
     private static readonly textures = new Map<number, FrameTexture>();
     private static readonly freeNames: number[] = [];
+    // #601. On the render worker: the media frames the page transferred, by their number, until
+    // the compositor imports them (`importTransferred`) or the page discards them. On the page:
+    // the next number.
+    private static readonly transferred = new Map<number, VideoFrame>();
+    private static nextTransfer = 1;
 
     public static graphics(handle: number): number {
         const gl = WebGlRenderTarget.frameContext(handle)?.context;
@@ -84,36 +90,114 @@ export class SharedGlFrames {
     public static upload(name: number, source: HTMLVideoElement, width: number, height: number): void {
         if (!(source instanceof HTMLVideoElement)) { throw new Error("Only a native video source is admitted"); }
         if (source.videoWidth !== width || source.videoHeight !== height) { throw new Error("Native source dimensions changed or require an unsupported pixel-aspect transform"); }
-        SharedGlFrames.write(name, gl => {
-            const flip = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
-            const premultiplied = gl.getParameter(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
-            const conversion = gl.getParameter(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL);
-            const buffer = gl.getParameter(gl.PIXEL_UNPACK_BUFFER_BINDING);
-            const rowLength = gl.getParameter(gl.UNPACK_ROW_LENGTH);
-            const skipRows = gl.getParameter(gl.UNPACK_SKIP_ROWS);
-            const skipPixels = gl.getParameter(gl.UNPACK_SKIP_PIXELS);
-            const unpackColorSpace = (gl as any).unpackColorSpace;
-            try {
-                gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
-                gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
-                gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
-                gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
-                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
-                gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
-                if (unpackColorSpace != null) { (gl as any).unpackColorSpace = "srgb"; }
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, source);
-            } finally {
-                gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, buffer);
-                gl.pixelStorei(gl.UNPACK_ROW_LENGTH, rowLength);
-                gl.pixelStorei(gl.UNPACK_SKIP_ROWS, skipRows);
-                gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, skipPixels);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
-                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplied);
-                gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, conversion);
-                if (unpackColorSpace != null) { (gl as any).unpackColorSpace = unpackColorSpace; }
+        SharedGlFrames.write(name, gl => SharedGlFrames.writeImage(gl, source));
+    }
+
+    /** Page (#601): whether media frames can go to the render worker (WebCodecs and a started worker). */
+    public static canTransfer(): boolean {
+        return typeof VideoFrame === "function" && WebRenderTargetRegistry.renderWorker() !== undefined;
+    }
+
+    /**
+     * Page (#601): wraps the current image of the media element as a WebCodecs `VideoFrame` and
+     * transfers it to the render worker, whose context samples it; returns the number of the
+     * transfer. The frame stays GPU-backed; no pixel array is made.
+     */
+    public static transfer(source: HTMLVideoElement, width: number, height: number): number {
+        if (!(source instanceof HTMLVideoElement)) { throw new Error("Only a native video source is admitted"); }
+        if (typeof VideoFrame !== "function") {
+            throw new Error("Media frames on the render worker need WebCodecs VideoFrame, which this browser lacks");
+        }
+        if (source.videoWidth !== width || source.videoHeight !== height) { throw new Error("Native source dimensions changed or require an unsupported pixel-aspect transform"); }
+        const worker = WebRenderTargetRegistry.renderWorker();
+        if (!worker) { throw new Error("The render worker has not started"); }
+        const frame = new VideoFrame(source, { timestamp: Math.round(source.currentTime * 1e6) });
+        const id = SharedGlFrames.nextTransfer;
+        SharedGlFrames.nextTransfer = id >= 0x7fffffff ? 1 : id + 1;
+        try {
+            worker.postMessage({ ferrouiCmd: "mediaFrame", id, frame }, [frame as unknown as Transferable]);
+        } catch (error) {
+            frame.close();
+            throw error;
+        }
+        return id;
+    }
+
+    /** Render worker (#601): keeps a frame the page transferred until it is imported or discarded. */
+    public static receive(id: number, frame: VideoFrame): void {
+        SharedGlFrames.transferred.get(id)?.close();
+        SharedGlFrames.transferred.set(id, frame);
+    }
+
+    /**
+     * Either side (#601): the frame `id` is not needed. On the render worker it is closed; on the
+     * page the worker is told. A frame that was imported already is gone, and nothing happens.
+     */
+    public static discard(id: number): void {
+        const frame = SharedGlFrames.transferred.get(id);
+        if (frame) {
+            SharedGlFrames.transferred.delete(id);
+            frame.close();
+            return;
+        }
+        WebRenderTargetRegistry.renderWorker()?.postMessage({ ferrouiCmd: "discardMediaFrame", id });
+    }
+
+    /**
+     * Render worker (#601): uploads the transferred frame `id` into a new texture of the context
+     * `handle` and closes the frame; returns the name of the texture, which `release` deletes.
+     */
+    public static importTransferred(handle: number, generation: number, id: number, width: number, height: number): number {
+        const frame = SharedGlFrames.transferred.get(id);
+        if (!frame) { throw new Error("The transferred media frame is not on the render worker (retired, or not arrived)"); }
+        SharedGlFrames.transferred.delete(id);
+        try {
+            if (frame.displayWidth !== width || frame.displayHeight !== height) {
+                throw new Error("The transferred media frame has other dimensions than its metadata");
             }
-        });
+            const name = SharedGlFrames.create(handle, generation);
+            try {
+                SharedGlFrames.write(name, gl => SharedGlFrames.writeImage(gl, frame));
+            } catch (error) {
+                SharedGlFrames.release(name);
+                throw error;
+            }
+            return name;
+        } finally {
+            frame.close();
+        }
+    }
+
+    /** Uploads a native image as RGBA8, with the unpack state of the context restored after. */
+    private static writeImage(gl: WebGL2RenderingContext, source: TexImageSource): void {
+        const flip = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+        const premultiplied = gl.getParameter(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
+        const conversion = gl.getParameter(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL);
+        const buffer = gl.getParameter(gl.PIXEL_UNPACK_BUFFER_BINDING);
+        const rowLength = gl.getParameter(gl.UNPACK_ROW_LENGTH);
+        const skipRows = gl.getParameter(gl.UNPACK_SKIP_ROWS);
+        const skipPixels = gl.getParameter(gl.UNPACK_SKIP_PIXELS);
+        const unpackColorSpace = (gl as any).unpackColorSpace;
+        try {
+            gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
+            gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
+            gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
+            gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
+            if (unpackColorSpace != null) { (gl as any).unpackColorSpace = "srgb"; }
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, source);
+        } finally {
+            gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, buffer);
+            gl.pixelStorei(gl.UNPACK_ROW_LENGTH, rowLength);
+            gl.pixelStorei(gl.UNPACK_SKIP_ROWS, skipRows);
+            gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, skipPixels);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplied);
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, conversion);
+            if (unpackColorSpace != null) { (gl as any).unpackColorSpace = unpackColorSpace; }
+        }
     }
 
     /** Independent GPU producer: four known quadrants, no CPU pixel upload. */
