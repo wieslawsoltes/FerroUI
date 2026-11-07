@@ -59,7 +59,7 @@ const PAGE_LIST: &str = "ViewModels/main_window_view_model_page_list.rs";
 const ASSET_URI_PREFIX: &str = "ferres://ControlCatalog/";
 
 /// Directories of the crate without sources of the application.
-const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "Assets", "PlaceholderAssets"];
+const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "Assets"];
 
 /// A document or a Rust file of the crate.
 struct Unit {

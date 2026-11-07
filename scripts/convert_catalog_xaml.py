@@ -23,7 +23,8 @@ the converted text, and `REMOVALS` the lines it takes out of them (the Fluent an
 which the catalog has with its feature `classic-themes` only, in `ClassicThemes.xaml`), each with
 the reason; the conversion applies the additions and then the removals, so `--check` compares a
 document with its conversion and its changes, and fails when an anchor or a removed line is
-gone; `REPLACEMENTS` are lines replaced, each an addition and a removal. `LEFT_OUT_DOCUMENTS` lists
+gone; `REPLACEMENTS` are lines replaced, each an addition and a removal, and `REPLACED_GEOMETRIES`
+the path data of geometry resources (the mark of this project in place of the upstream logo). `LEFT_OUT_DOCUMENTS` lists
 the upstream markup files the catalog does not have (the sample applications of the NavigationPage,
 CarouselPage and DrawerPage galleries), which are not converted and which `--check` does not report
 as missing. `PORT_DOCUMENTS` lists the markup files of the catalog that are the port's own, which
@@ -193,6 +194,17 @@ REMOVALS = [
 
 REMOVALS += [(path, line, why) for path, line, _replacement, why in REPLACEMENTS]
 
+# The path data of `StreamGeometry` resources this project replaces in converted documents: (path
+# relative to the sample, the key of the resource, the path data, why).
+REPLACED_GEOMETRIES = [
+    (
+        "App.xaml",
+        "AppIcon",
+        b"M11.25 0H36.75A11.25 11.25 0 0 1 48 11.25V36.75A11.25 11.25 0 0 1 36.75 48H11.25A11.25 11.25 0 0 1 0 36.75V11.25A11.25 11.25 0 0 1 11.25 0ZM13.5 12A1.5 1.5 0 0 1 15 10.5H35.625L31.875 17.25H20.25V21.75H30.375L27 27.75H20.25V36A1.5 1.5 0 0 1 18.75 37.5H15A1.5 1.5 0 0 1 13.5 36ZM35.25 24.75Q35.925 29.325 40.5 30Q35.925 30.675 35.25 35.25Q34.575 30.675 30 30Q34.575 29.325 35.25 24.75Z",
+        "the logo of the navigation pane is the mark of this project, not the logo of the upstream project",
+    ),
+]
+
 # The control themes this project removes from converted documents: (path relative to the sample,
 # the key of the control theme, why). The theme is removed from the line before its `<ControlTheme`
 # (a blank line) to its `</ControlTheme>`.
@@ -285,6 +297,15 @@ def add(relative: str, data: bytes) -> bytes:
         if data.count(lines_text) != 1:
             raise SystemExit(f"the lines of a removal from {relative} are not in its conversion once: {lines!r}")
         data = data.replace(lines_text, b"")
+    for path, key, geometry, _why in REPLACED_GEOMETRIES:
+        if path != relative:
+            continue
+        start_tag = f'<StreamGeometry x:Key="{key}">'.encode()
+        start = data.find(start_tag)
+        end = data.find(b"</StreamGeometry>", start) if start >= 0 else -1
+        if data.count(start_tag) != 1 or end < 0:
+            raise SystemExit(f"the geometry {key} is not in the conversion of {relative} once")
+        data = data[: start + len(start_tag)] + geometry + data[end:]
     for path, key, _why in REMOVED_CONTROL_THEMES:
         if path != relative:
             continue

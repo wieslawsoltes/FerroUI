@@ -45,7 +45,7 @@ if [ -n "$COMMIT" ]; then
     }
     EXTRACTED="$(mktemp -d "${TMPDIR:-/tmp}/sync-control-catalog.XXXXXX")"
     trap 'rm -rf "$EXTRACTED"' EXIT
-    git -C "$UPSTREAM" archive --format=tar "$REVISION" samples/ControlCatalog build/Assets |
+    git -C "$UPSTREAM" archive --format=tar "$REVISION" samples/ControlCatalog |
         tar -x -f - -C "$EXTRACTED"
     echo "reading the upstream files of $REVISION"
     UPSTREAM="$EXTRACTED"
@@ -54,15 +54,19 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SOURCE="$UPSTREAM/samples/ControlCatalog"
 TARGET="$ROOT/samples/ControlCatalog"
 
-# The assets of the upstream project file: `Assets/**`, the shared application icons linked
-# into `Assets/`, and the embedded resource `Pages/teapot.bin`.
+# The assets of the upstream project file: `Assets/**` and the embedded resource
+# `Pages/teapot.bin`.
 #
 # The upstream assets the catalog leaves out, as names of a file or a directory below `Assets/`:
 # the photographs of the sample applications of the NavigationPage, CarouselPage and DrawerPage
 # galleries, which the catalog does not have (LEFT_OUT_DOCUMENTS of scripts/convert_catalog_xaml.py),
-# and the whole CJK font, of which the catalog ships a subset (Assets/FallbackFonts,
-# scripts/fonts/catalog_fallback_fonts.py).
-LEFT_OUT="Pulse Movies Sanctuary RetroGaming CurvedHeader ModernApp Restaurant WenQuanYiMicroHei-01.ttf"
+# the whole CJK font, of which the catalog ships a subset (Assets/FallbackFonts,
+# scripts/fonts/catalog_fallback_fonts.py), and the brand assets of the upstream project, whose
+# files in the catalog are the artwork of this project (scripts/browser/render-placeholder-assets.mjs;
+# the application icons of the upstream project, `build/Assets/icon.ico` and `icon-32.png`, are not
+# read either).
+LEFT_OUT="Pulse Movies Sanctuary RetroGaming CurvedHeader ModernApp Restaurant WenQuanYiMicroHei-01.ttf
+icon.ico icon-32.png banner-bg.png banner-logo.png logo1.png logo2.png logo3.png logo4.png"
 left_out() {
     for name in $LEFT_OUT; do
         case "/$1/" in
@@ -82,9 +86,7 @@ if [ -n "$CHECK" ]; then
     # FerroUICatalogSymbols.ttf is the port's own (scripts/winui-controls/catalog_symbol_font.py),
     # and so is FallbackFonts (scripts/fonts/catalog_fallback_fonts.py).
     # shellcheck disable=SC2086 # EXCLUDED is a list of options.
-    diff -r -x icon.ico -x icon-32.png -x FerroUICatalogSymbols.ttf -x FallbackFonts $EXCLUDED "$SOURCE/Assets" "$TARGET/Assets" || status=1
-    cmp "$UPSTREAM/build/Assets/icon.ico" "$TARGET/Assets/icon.ico" || status=1
-    cmp "$UPSTREAM/build/Assets/icon-32.png" "$TARGET/Assets/icon-32.png" || status=1
+    diff -r -x FerroUICatalogSymbols.ttf -x FallbackFonts $EXCLUDED "$SOURCE/Assets" "$TARGET/Assets" || status=1
     cmp "$SOURCE/Pages/teapot.bin" "$TARGET/Pages/teapot.bin" || status=1
     if [ "$status" -eq 0 ]; then
         echo "markup and assets checked"
@@ -102,7 +104,6 @@ else
             cp "$SOURCE/Assets/$file" "$TARGET/Assets/$file"
         fi
     done
-    cp "$UPSTREAM/build/Assets/icon.ico" "$UPSTREAM/build/Assets/icon-32.png" "$TARGET/Assets/"
     cp "$SOURCE/Pages/teapot.bin" "$TARGET/Pages/teapot.bin"
     echo "assets copied"
 fi

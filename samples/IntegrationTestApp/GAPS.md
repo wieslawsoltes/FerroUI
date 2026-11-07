@@ -40,7 +40,7 @@ The 24 documents of the sample are converted from the upstream documents by `scr
 
 ## Assets
 
-`Assets/icon.ico`, the icon of the tray icon of `App.xaml`, is the artwork of this project (`samples/ControlCatalog/PlaceholderAssets/icon.ico`): the upstream sample links the icon of the upstream project, which carries its brand.
+`Assets/icon.ico`, the icon of the tray icon of `App.xaml`, is the artwork of this project (`samples/ControlCatalog/Assets/icon.ico`): the upstream sample links the icon of the upstream project, which carries its brand.
 
 ## State after the first build
 

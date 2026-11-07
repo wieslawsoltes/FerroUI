@@ -138,8 +138,9 @@ def external_configurations(source: Path, env: dict) -> dict:
             if (path := directory / name).is_file()}
 
 
-def definitions(record: dict) -> list[dict]:
-    return sorted(({key: value for key, value in unit.items() if key != "fresh"}
+def definitions(record: dict, features: bool = True) -> list[dict]:
+    """The units of a build without their freshness (and without their features when `features` is false)."""
+    return sorted(({key: value for key, value in unit.items() if key != "fresh" and (features or key != "features")}
                    for unit in record["units"]), key=lambda value: json.dumps(value, sort_keys=True))
 
 
@@ -154,8 +155,8 @@ def catalog_library(record: dict, package_id: str) -> dict:
 def freshness_checks(record: dict, package_id: str, label: str, phase: str,
                      require_baseline_self_input: bool = False) -> dict:
     catalog = catalog_library(record, package_id)
-    if "placeholder-branding" not in catalog["features"] or "runtime-markup" in catalog["features"]:
-        raise RuntimeError("benchmark must use the real compiled catalog with default placeholder branding")
+    if "runtime-markup" in catalog["features"]:
+        raise RuntimeError("benchmark must use the real compiled catalog with its default features")
     other_dirty = [unit for unit in record["units"] if unit["package"] != package_id and not unit["fresh"]]
     result = {"catalog_library_fresh": catalog["fresh"],
               "all_artifacts_fresh": bool(record["units"]) and all(unit["fresh"] for unit in record["units"]),
@@ -286,8 +287,6 @@ def snapshot_outputs(messages: list[dict], source: Path, target: Path, destinati
     if catalog_directory is None:
         raise RuntimeError("Cargo provided no catalog OUT_DIR")
     catalog_manifest = [entry for entry in manifest if entry["package"] == catalog_id]
-    if not any(entry["relative_path"] == "placeholder/App.xaml" for entry in catalog_manifest):
-        raise RuntimeError("default catalog generated no placeholder/App.xaml evidence")
     if not any(entry["relative_path"].endswith(".xamlmeta") for entry in catalog_manifest):
         raise RuntimeError("compiled catalog generated no .xamlmeta evidence")
     result = {"generated_rust_and_metadata": generated,
@@ -411,9 +410,18 @@ def compare_evidence(reference: dict, candidate: dict, outputs_reference: dict |
     """The equivalence of a pair to the first pair: the graph always, the outputs to `outputs_reference`
     (the first pair of the same revision when output changes are acknowledged), else to `reference`."""
     outputs = outputs_reference or reference
+    phases = ("population", "repeat")
+    if outputs_reference is None:
+        same_units = all(definitions(candidate[phase]) == definitions(reference["population"]) for phase in phases)
+    else:
+        # An acknowledged change (label build-output-changes) may build units with other features, as
+        # a pull request that adds or removes a feature of the catalog does: the units and their
+        # profiles are the baseline's, and each revision repeats its own graph.
+        same_units = all(definitions(candidate[phase], features=False) == definitions(reference["population"], features=False)
+                         and definitions(candidate[phase]) == definitions(outputs_reference["population"])
+                         for phase in phases)
     result = {
-        "same_units_features_profiles": all(definitions(candidate[phase]) == definitions(reference["population"])
-                                            for phase in ("population", "repeat")),
+        "same_units_features_profiles": same_units,
         "same_generated_rust_and_metadata": candidate["outputs"]["generated_rust_and_metadata"] == outputs["outputs"]["generated_rust_and_metadata"],
         "same_first_party_semantic_files": candidate["outputs"]["first_party_semantic_files"] == outputs["outputs"]["first_party_semantic_files"],
         "same_asset_table_bytes": filecmp.cmp(outputs["asset_probe"]["binary_file"], candidate["asset_probe"]["binary_file"], shallow=False),
