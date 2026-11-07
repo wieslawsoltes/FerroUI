@@ -1721,6 +1721,15 @@ impl<'a> Emitter<'a> {
         let (from, expr) = match value.kind {
             Kind::Exact { id, .. } => (id, owned(&value.expr)),
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
+            // A class named with `x:Type` as another handle of `System.Type` that a crate declares
+            // with a cast from the class reference (the `PageType` of a frame, B3 of #612): the
+            // cast of the run-time loader (`RuntimeTypeValue::to_handle`).
+            Kind::SystemType { class: Some(class), .. }
+                if self.types.markup_by_handle(target).is_some_and(|markup| markup.full_name() == "System.Type") =>
+            (
+                self.types.known(Known::Class),
+                format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(class.rust_path()?)),
+            ),
             Kind::Null | Kind::SystemType { .. } => return None,
         };
         self.types

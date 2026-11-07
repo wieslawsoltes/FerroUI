@@ -51,6 +51,12 @@ pub(crate) fn register() {
     let binding = <dyn ferroui_base::data::BindingBase as ferroui_base::metadata::MarkupTyped>::MARKUP;
     MarkupType::register_handle::<AssignedBinding>(binding);
     MarkupType::register_handle::<Option<AssignedBinding>>(binding);
+    // A page type is one more handle of `System.Type`: a property or a parameter of type
+    // `PageType` (`Frame.SourcePageType`, `Frame.Navigate`) takes `{x:Type local:Page}`, which the
+    // registered cast from `&'static TypeInfo` converts (B3 of #612).
+    let page_type = <ferroui_base::TypeInfo as ferroui_base::metadata::MarkupTyped>::MARKUP;
+    MarkupType::register_handle::<crate::PageType>(page_type);
+    MarkupType::register_handle::<Option<crate::PageType>>(page_type);
     ValueTypes::register_global(register_value_types);
     lists::PipsList::register();
 }

@@ -41,6 +41,9 @@ macro_rules! connected_page {
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl,
             FramePageImpl);
         impl $name {
+            /// The page type of the page, created by the page factory the sample registers.
+            pub(crate) const PAGE_TYPE: ferroui_controls::PageType = ferroui_controls::PageType::for_factory::<$name>();
+
             fn with_content(content: Ref<Control>) -> Ref<FramePage> {
                 let page = instantiate(Self { base: FramePage::construct() });
                 page.set_content(Some(Control::boxed(content)));
@@ -300,7 +303,7 @@ impl CollectionState {
         }
         let animation = service(source).prepare_to_animate("ForwardConnectedAnimation", source);
         self.animation.replace(animation);
-        if let Err(error) = frame.navigate(ConnectedDetailPage::TYPE, Some(Rc::new(index))) {
+        if let Err(error) = frame.navigate(ConnectedDetailPage::PAGE_TYPE, Some(Rc::new(index))) {
             self.animation.clear();
             self.report(&format!("Could not open item: {error}"));
         }
@@ -410,9 +413,9 @@ fn wire_collection(
     });
     frame.set_cache_size(1)?;
     let source_type = if tiles {
-        ConnectedRepeaterPage::TYPE
+        ConnectedRepeaterPage::PAGE_TYPE
     } else {
-        ConnectedListPage::TYPE
+        ConnectedListPage::PAGE_TYPE
     };
     let factory_state = state.clone();
     frame.register_page_factory(
@@ -421,7 +424,7 @@ fn wire_collection(
     )?;
     let factory_state = state.clone();
     frame.register_page_factory(
-        ConnectedDetailPage::TYPE,
+        ConnectedDetailPage::PAGE_TYPE,
         Rc::new(move || detail_page(&factory_state)),
     )?;
     let weak_state = Rc::downgrade(&state);
@@ -438,7 +441,7 @@ fn wire_collection(
         let Some(index) = state.selected.get() else {
             return;
         };
-        if event.source_page_type() == ConnectedDetailPage::TYPE {
+        if event.source_page_type() == ConnectedDetailPage::PAGE_TYPE {
             if let Some(animation) = state.animation.current() {
                 let image = current.get_control::<Image>("DetailedImage");
                 let panel = current.get_control::<StackPanel>("CoordinatedPanel");
@@ -481,7 +484,7 @@ fn wire_collection(
 fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
     let frame = root.get_control::<Frame>("ConnectedContentFrame");
     frame.register_page_factory(
-        ConnectedFirstPage::TYPE,
+        ConnectedFirstPage::PAGE_TYPE,
         Rc::new(|| {
             Ok(ConnectedFirstPage::with_content(parse(include_str!(
                 "Pages/NavigationSample1.xaml"
@@ -489,7 +492,7 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
         }),
     )?;
     frame.register_page_factory(
-        ConnectedSecondPage::TYPE,
+        ConnectedSecondPage::PAGE_TYPE,
         Rc::new(|| {
             Ok(ConnectedSecondPage::with_content(parse(include_str!(
                 "Pages/NavigationSample2.xaml"
@@ -518,7 +521,7 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
                 return;
             };
             current_animation.clear();
-            let forward = frame.current_source_page_type() == Some(ConnectedFirstPage::TYPE);
+            let forward = frame.current_source_page_type() == Some(ConnectedFirstPage::PAGE_TYPE);
             let source = current.get_control::<Grid>(if forward {
                 "SourceElement"
             } else {
@@ -542,9 +545,9 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
             next.set_configuration(configuration);
             current_animation.replace(next.clone());
             let target = if forward {
-                ConnectedSecondPage::TYPE
+                ConnectedSecondPage::PAGE_TYPE
             } else {
-                ConnectedFirstPage::TYPE
+                ConnectedFirstPage::PAGE_TYPE
             };
             match frame.navigate(target, None) {
                 Ok(_) => {
@@ -567,14 +570,14 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
     root.detached_from_visual_tree(move |_| {
         animation.clear();
     }).detach();
-    frame.navigate(ConnectedFirstPage::TYPE, None)?;
+    frame.navigate(ConnectedFirstPage::PAGE_TYPE, None)?;
     Ok(())
 }
 
 fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
     let frame = root.get_control::<Frame>("ConnectedCardFrame");
     frame.register_page_factory(
-        ConnectedCardPage::TYPE,
+        ConnectedCardPage::PAGE_TYPE,
         Rc::new(|| {
             let cards = parse(include_str!("Pages/ConnectedCards.xaml"))?;
             let items = Rc::new(data(13));
@@ -672,7 +675,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
             Ok(ConnectedCardPage::with_content(cards))
         }),
     )?;
-    frame.navigate(ConnectedCardPage::TYPE, None)?;
+    frame.navigate(ConnectedCardPage::PAGE_TYPE, None)?;
     Ok(())
 }
 

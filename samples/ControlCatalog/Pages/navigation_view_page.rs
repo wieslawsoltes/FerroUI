@@ -9,7 +9,7 @@ use ferroui_base::{ferro_class_info, instantiate, Ref, Thickness};
 use ferroui_controls::navigation::NavigationMode;
 use ferroui_controls::{
     box_item, unbox_item, ContentPage, Control, Frame, FramePage, NavigationView, NavigationViewItem,
-    NavigationViewSelectionChangedEventArgs, StackPanel, TextBlock,
+    NavigationViewSelectionChangedEventArgs, PageType, StackPanel, TextBlock,
 };
 use std::cell::Cell;
 
@@ -123,7 +123,7 @@ impl NavigationViewPage {
                 return;
             }
             if let Some(header) = selected_header(args) {
-                let _ = frame.navigate(FramePage::TYPE, box_item(&header));
+                let _ = frame.navigate(PageType::of::<FramePage>(), box_item(&header));
             }
         }).detach();
         let weak_frame = frame.downgrade();
@@ -132,7 +132,7 @@ impl NavigationViewPage {
                 let _ = frame.go_back();
             }
         }).detach();
-        let _ = frame.navigate(FramePage::TYPE, box_item(&"Home".to_string()));
+        let _ = frame.navigate(PageType::of::<FramePage>(), box_item(&"Home".to_string()));
     }
 
     /// Selects the item of the left navigation view for `header` without navigating again.

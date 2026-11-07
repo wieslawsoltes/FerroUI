@@ -4,7 +4,7 @@
 
 use crate::navigation::{NavigatingCancelEventArgs, NavigationCacheMode, NavigationEventArgs};
 use crate::primitives::TemplatedControlImpl;
-use crate::Frame;
+use crate::{Frame, PageType};
 use crate::{ContentControlImpl, ControlImpl, UserControl};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElementImpl;
@@ -32,7 +32,7 @@ use std::cell::{Cell, RefCell};
 pub struct FramePage {
     base: UserControl,
     frame: RefCell<Option<WeakRef<Frame>>>,
-    cache_key: Cell<Option<&'static TypeInfo>>,
+    cache_key: Cell<Option<PageType>>,
 }
 
 ferro_class! {
@@ -120,7 +120,7 @@ impl FramePage {
         self.frame.borrow().as_ref().and_then(WeakRef::upgrade)
     }
 
-    pub(crate) fn prepare(&self, frame: &Ref<Frame>, source_page_type: &'static TypeInfo) {
+    pub(crate) fn prepare(&self, frame: &Ref<Frame>, source_page_type: PageType) {
         self.cache_key.set(Some(source_page_type));
         let old = self.frame();
         if old.as_ref() != Some(frame) {

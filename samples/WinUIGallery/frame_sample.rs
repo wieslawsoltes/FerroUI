@@ -28,6 +28,9 @@ macro_rules! sample_page {
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl,
             FramePageImpl);
         impl $name {
+            /// The page type of the page, created by the page factory the sample registers.
+            pub(crate) const PAGE_TYPE: ferroui_controls::PageType = ferroui_controls::PageType::for_factory::<$name>();
+
             fn create() -> Result<Ref<FramePage>, NavigationError> {
                 let content = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(include_str!($source), None)
                     .map_err(|error| NavigationError::FactoryFailed(error.to_string()))?;
@@ -51,16 +54,16 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     };
     let status = root.get_control::<TextBlock>("NavigationStatus");
     frame
-        .register_page_factory(FirstSamplePage::TYPE, Rc::new(FirstSamplePage::create))
+        .register_page_factory(FirstSamplePage::PAGE_TYPE, Rc::new(FirstSamplePage::create))
         .map_err(load_error)?;
     frame
-        .register_page_factory(SecondSamplePage::TYPE, Rc::new(SecondSamplePage::create))
+        .register_page_factory(SecondSamplePage::PAGE_TYPE, Rc::new(SecondSamplePage::create))
         .map_err(load_error)?;
     let weak_frame = frame.downgrade();
     let weak_status = status.downgrade();
     frame.navigated(move |event| {
         if let (Some(frame), Some(status)) = (weak_frame.upgrade(), weak_status.upgrade()) {
-            let page = if event.source_page_type() == FirstSamplePage::TYPE {
+            let page = if event.source_page_type() == FirstSamplePage::PAGE_TYPE {
                 "First"
             } else {
                 "Second"
@@ -83,9 +86,9 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
                     _ => {
                         // The source sample alternates page types using its BackStackDepth.
                         let next = if frame.back_stack_depth() % 2 == 1 {
-                            FirstSamplePage::TYPE
+                            FirstSamplePage::PAGE_TYPE
                         } else {
-                            SecondSamplePage::TYPE
+                            SecondSamplePage::PAGE_TYPE
                         };
                         frame.navigate(next, None).map(|_| ())
                     }
@@ -97,7 +100,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
         });
     }
     frame
-        .navigate(FirstSamplePage::TYPE, None)
+        .navigate(FirstSamplePage::PAGE_TYPE, None)
         .map_err(load_error)?;
     Ok(())
 }

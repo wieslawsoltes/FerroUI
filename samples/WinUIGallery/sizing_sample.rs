@@ -28,6 +28,9 @@ macro_rules! sizing_page {
         ferro_impl_classes!($name: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl, FramePageImpl);
         impl $name {
+            /// The page type of the page, created by the page factory the sample registers.
+            pub(crate) const PAGE_TYPE: ferroui_controls::PageType = ferroui_controls::PageType::for_factory::<$name>();
+
             fn create() -> Result<Ref<FramePage>, NavigationError> {
                 let form = FerroRuntimeXamlLoader::parse_as::<Ref<StackPanel>>(include_str!("Pages/SizingForm.xaml"), None)
                     .map_err(|error| NavigationError::FactoryFailed(error.to_string()))?;
@@ -63,9 +66,9 @@ pub(crate) fn form(frame: &Frame) -> Option<Ref<Control>> {
 fn switch(frame: &Frame, compact: bool) -> Result<(), NavigationError> {
     let previous = form(frame);
     let target = if compact {
-        CompactSizingPage::TYPE
+        CompactSizingPage::PAGE_TYPE
     } else {
-        StandardSizingPage::TYPE
+        StandardSizingPage::PAGE_TYPE
     };
     if frame.current_source_page_type() == Some(target) {
         return Ok(());
@@ -98,12 +101,12 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
         |error| XamlLoadError::with_inner("Could not initialize the sizing example.", error);
     frame
         .register_page_factory(
-            StandardSizingPage::TYPE,
+            StandardSizingPage::PAGE_TYPE,
             Rc::new(StandardSizingPage::create),
         )
         .map_err(convert_error)?;
     frame
-        .register_page_factory(CompactSizingPage::TYPE, Rc::new(CompactSizingPage::create))
+        .register_page_factory(CompactSizingPage::PAGE_TYPE, Rc::new(CompactSizingPage::create))
         .map_err(convert_error)?;
     switch(&frame, false).map_err(convert_error)?;
     let options = root.get_control::<RadioButtons>("SizingMode");

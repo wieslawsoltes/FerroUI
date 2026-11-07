@@ -20,7 +20,7 @@ use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     box_item, unbox_item, Application, AutoSuggestBox, AutoSuggestionBoxTextChangeReason, ContentPage, Control,
     ControlImpl, Frame, FramePage, IconElement, ItemsSource, NavigationPage, NavigationView, NavigationViewDisplayMode,
-    NavigationViewBackButtonVisible, NavigationViewItem, Page, PageImpl, PathIcon, TitleBar, TopLevel, Window,
+    NavigationViewBackButtonVisible, NavigationViewItem, Page, PageImpl, PageType, PathIcon, TitleBar, TopLevel, Window,
     WindowState,
 };
 use ferroui_controls::chrome::TitleBarDecorations;
@@ -481,7 +481,7 @@ impl MainView {
         view_model.set_page_host(Some(Rc::new(move |item: &Rc<PageItem>, page: Ref<Page>| {
             let Some(this) = weak.upgrade() else { return };
             *this.pending.borrow_mut() = Some((item.clone(), page));
-            let _ = this.content_frame().navigate(FramePage::TYPE, box_item(&item.header()));
+            let _ = this.content_frame().navigate(PageType::of::<FramePage>(), box_item(&item.header()));
         })));
         // A page opened elsewhere (a card of the home page, a smoke run) selects its item.
         let weak = self.to_ref().downgrade();
