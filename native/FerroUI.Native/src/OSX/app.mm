@@ -236,6 +236,28 @@ HRESULT FrnApplicationCommands::HideOthers()
     return S_OK;
 }
 
+// The standard About panel of AppKit, with the name and version given (the default application
+// menu names the framework there); the icon is the application's.
+HRESULT FrnApplicationCommands::ShowAboutPanel(const char* applicationName, const char* version)
+{
+    START_COM_CALL;
+    @autoreleasepool
+    {
+        NSMutableDictionary* options = [NSMutableDictionary dictionary];
+        if (applicationName != nullptr)
+            options[NSAboutPanelOptionApplicationName] = [NSString stringWithUTF8String:applicationName];
+        if (version != nullptr)
+        {
+            NSString* text = [NSString stringWithUTF8String:version];
+            options[NSAboutPanelOptionApplicationVersion] = text;
+            options[NSAboutPanelOptionVersion] = @"";
+        }
+        [NSApp activateIgnoringOtherApps:YES];
+        [NSApp orderFrontStandardAboutPanelWithOptions:options];
+    }
+    return S_OK;
+}
+
 
 extern IFrnApplicationCommands* CreateApplicationCommands()
 {
