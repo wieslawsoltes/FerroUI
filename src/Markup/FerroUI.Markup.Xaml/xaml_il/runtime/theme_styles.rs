@@ -239,7 +239,9 @@ pub fn build_control_theme(context: &Rc<XamlIlContext>, table: &ControlThemeTabl
     }
     for member in table.members {
         match member {
-            StyleMember::TargetType(type_) => ControlTheme::__markup_set_TargetType(&theme, Some(*type_)),
+            StyleMember::TargetType(type_) => {
+                ControlTheme::__markup_set_TargetType(&theme, Some(*type_));
+            }
             StyleMember::BasedOn { key, line, position } => based_on(context, &theme, *key, *line, *position)?,
             member => add_member(context, theme.upcast_ref::<StyleBase>(), member)?,
         }

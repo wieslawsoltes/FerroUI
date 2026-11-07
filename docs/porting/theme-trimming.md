@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Steps 1 to 4 of the plan are implemented (sections 8 to 11); the rest is not yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Steps 1 to 5 of the plan are implemented (sections 8 to 12); the rest is not yet. Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -950,3 +950,121 @@ step 3, and its `dist` executable is the same 28.63 MB: the roots from its code 
 edges of the controls it reaches add no unit. It opens, renders and closes with no diagnostic. The
 other samples do not opt in and are unchanged; opting them in, with their screenshots compared
 against `theme-roots = "all"`, is the gate for making trimming the default.
+
+## 12. Step 5 as implemented: ControlTheme tables
+
+The factory of a control theme runs once per theme dictionary, on the first lookup of its key, so
+it is cold code: the emitter writes it as a declarative table and one call of an interpreter.
+Templates, which run once per control instance, stay native code; two shared helpers replace the
+repetitive calls inside them (12.3). Behaviour does not change: the interpreters make the calls
+the statements made, in the same order, with the same errors at the same positions, and the
+objects built are the same.
+
+### 12.1 Runtime
+
+`src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/theme_styles.rs`, re-exported by
+`xaml_il::runtime::compiled` (the `rt` of generated code):
+
+| Generated code before | Table | Interpreter |
+|---|---|---|
+| the factory of a `ControlTheme` | `ControlThemeTable { parent, members: &[StyleMember] }` | `build_control_theme(context, table)` |
+| a selector chain (`Selectors::nesting(..)`, `class`, `template`, `of_type_info`, `name`, `not`, `or`, `property_equals_untyped`, ..) | `&'static [SelectorStep]` | `build_selector(steps)` |
+| the `is_instance` chain of a `{StaticResource}` value | `ResourceChoice` | `assign_resource_value(target, property, value, choice, priority)` |
+| consecutive `rt::bind_template_binding` on one object | `&'static [TemplateBindingRow]` | `bind_template_bindings(target, rows)` |
+
+- `StyleMember` is `TargetType(type)`, `BasedOn { key: ThemeKey, line, position }` (a text key or
+  a type key, `{StaticResource}` provided with `ControlTheme.BasedOn` as the target property),
+  `Setter(ThemeSetter)` or `Style { parent, selector, members, line, position }`, recursively.
+  `parent` says whether the theme or style is on the parent stack of the context while its
+  members are added, as the emitter pushed it.
+- `ThemeSetter { property, form, value }`. `property` is a `PropertyFn`
+  (`fn() -> &'static FerroProperty`), since a property definition is no constant. `form` is how
+  the statements made the setter: `Plain` (`rt::add_setter`, the value first), `Created`
+  (`rt::new_setter`, the value, `rt::add_setter_value`) or `Parented` (the `_with_parent`
+  helpers, the setter on the parent stack while its value is made).
+- `ThemeValue` is `Dynamic(key)` (`rt::add_dynamic_resource_setter_with_parent`),
+  `Static { key, line, position }`, `Template(ThemeTemplate)` (a `ControlTemplate` with its
+  optional target type and the build function of its content, which stays native code), the
+  constants `Null`, `Bool`, `Int`, `Double`, `Text`, `Thickness` and `CornerRadius`,
+  `Expression(fn() -> MarkupValue)` for an expression that needs no context and cannot fail (an
+  enumeration member), `Computed(ThemeValueFn)` for any other value, and `Absent` for a setter
+  without a value.
+- `ResourceChoice { name, member, index, unset, instance: ValueHandle, null, line, position }`:
+  the unset marker clears the property when `unset` is set, a binding is bound, an instance of
+  `instance` (or null when `null` is set) goes through the typed setter, else the error of no
+  setter. The checks are one non-generic function; `assign_resource_value::<T>` is instantiated
+  once per property value type, and sets the local value or the value at the priority of a
+  template. `ValueHandle` names the type of the check as data (`Class`, `Markup`, `Of`), made
+  when the check is made.
+- Every interpreter returns the first error, as the statements did; nothing panics on data from
+  markup. A member of the theme itself (`TargetType`, `BasedOn`) in a nested style, which the
+  emitter never writes, adds nothing.
+
+### 12.2 Emitter
+
+`src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_styles.rs`, called by `emitter.rs`.
+As for the rows of step 1, the shapes are recognised where the emitter has just written them,
+with the statements matched exactly; anything else is written as before.
+
+- **Factories.** When the body of deferred content is complete (`Emitter::deferred_content`) and
+  returns `control_theme_0`, `parse_theme` reads its top-level statements into a tree: the
+  target type, `BasedOn`, the setters of each form, and the nested styles with their selector
+  chains, recursively. A setter value that is not a constant, a resource reference or a
+  `ControlTemplate` of the usual shape is still accepted: its statements become a function of the
+  factory, `<factory>_value_<n>`, provided they name no local of the factory except their own and
+  the context. `control_theme_table` writes `static <FACTORY>_THEME: rt::ControlThemeTable` and the
+  value functions, and the factory becomes `let context = rt::deferred_context(..);` and
+  `rt::build_control_theme(&context, &<FACTORY>_THEME)`.
+- **Shared leaves.** The tables of one generated function share the leaves, never each other:
+  one function per property definition (`<function>_property_<n>`), one static per distinct
+  selector chain (`<FUNCTION>_SELECTOR_<n>`) and one function per value of a property selector.
+  Each factory keeps its own table and value functions, so a unit of step 2 refers only to its
+  own factories and the linker still removes the units an application does not reach. Items are
+  written in the order they are first needed, so the output does not depend on hashing.
+- **Setter choices.** `Emitter::dynamic_assignment` gives the `if` chain it built to
+  `resource_choice`; a chain of the helper's shape (the optional unset marker, a binding, one
+  typed setter, optionally null through the same setter, else no setter, all on one object and
+  property at one position) becomes one `rt::assign_resource_value` statement. That is the shape
+  the emitter writes for a `{StaticResource}` value; other chains stay. The rows of step 1 still
+  recognise a brush whose colour is a static resource in this form.
+- **Template bindings.** `template_binding_runs` rewrites every complete body of deferred content:
+  two or more consecutive `rt::bind_template_binding` statements on one object, position markers
+  between them allowed, become `rt::bind_template_bindings(object, <FUNCTION>_BINDINGS_<n>)?` over
+  a static table of (target, source, position) rows.
+
+### 12.3 What stays native
+
+- Factories with a member the table does not hold: animations (`StyleBase.Animations` with key
+  frames), a resource dictionary of the theme, the name scope, or any statement outside the
+  shapes. Counted on the checked-in output of the four themes with units before this step, 772
+  of the 784 factories are tables; the other 12 are 11 with animations and one with a resource
+  dictionary.
+- Template contents, apart from the two helpers: they are hot (once per control instance), and
+  the gate for them is first-template activation time, not size.
+- Choices of a setter of another shape (`set_direct_value`, two typed setters, a binding or a
+  template binding without a type check), and single template bindings.
+
+### 12.4 Tests
+
+- `ferroui-markup-xaml`, `theme_styles_tests.rs`: selector chains (with `not`, `or`, property
+  and `nth` steps) against the chains the statements built; a table against the theme of its
+  factory (target type, the setters of each form, a template, nested styles and their selectors,
+  the parent stack left as it was); the error of a failed `BasedOn` against the statements' error,
+  and of a missing static resource at its position; `assign_resource_value` for a colour, the
+  unset marker, a value of another type and null; the order in which template bindings read
+  their properties.
+- `ferroui-markup-xaml-loader`, `theme_styles_tests.rs`: the tree of a factory (taken from the
+  Fluent button theme), the table and the shared items written for it, `BasedOn` with a type key
+  and a static resource setter, selector chains with `or`, `not` and property steps, factories
+  that keep their code, constants, template binding runs, and setter choices that become one call
+  or keep their chain. `theme_rows_tests.rs`: the static brush in the new form.
+- The theme reference tests (`compiled_xaml_is_up_to_date`,
+  `build_script_output_is_the_checked_in_reference`), the emitter fixtures
+  (`tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs`,
+  `src/Markup/FerroUI.Markup.Xaml.WinUI/fixtures/winui_bindings.generated.rs`) and the
+  compiled-against-run-time document tests run on the regenerated output.
+
+### 12.5 Measurements
+
+To be filled in after the checked-in output is regenerated and measured (generated text and
+functions per theme, hello world `dist`, theme load time and first-template activation).
