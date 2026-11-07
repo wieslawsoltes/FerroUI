@@ -55,6 +55,7 @@ from the reference, or nothing is drawn).
 | Image brushes, `draw_bitmap` | GPU: an image shader or image draw; a raster image is uploaded once and kept by the resource cache of the GPU context while it fits the budget (128 MiB, next section) | GPU: an image of the scene, uploaded once per image | `tests/FerroUI.RenderTests/media/image_brush_tests.rs`, `tile_brush_tests.rs` |
 | Render target bitmaps (`RenderTargetBitmap`) | made by the application, not per frame | the same | - |
 | The visual cache (`CacheMode`) | a GPU layer kept while the content is the same | the same | - (no pixel test) |
+| 3D scenes (Viewport3D) (#608, [media3d.md](media3d.md)) | planned: the Metal executor on Graphite (D5) and the GL executor on Ganesh GL, ANGLE, Android and WebGL2 (D8), both from the one WGSL source translated by naga at build time, into a pooled offscreen texture with private depth and MSAA drawn as an image, the output reused while the scene is unchanged; the Vulkan executor (D9); raster and headless draw the CPU reference (D3), on a GPU surface only as the counted last resort | planned: the wgpu executor in the hybrid and GPU modes (D4, Metal first, then Vulkan, DX12 and GLES in D9), the output painted with `paint_device_layer`; the CPU mode draws the CPU reference; WebGL2: the CPU reference until route step 3 | planned: the comparison scenes of D3 in `tests/FerroUI.RenderBackends.Comparison`, the steady-state and compile-once tests of D4 and D5 (media3d.md, section 4) |
 
 ## The software masks of Ganesh (the A8 uploads)
 

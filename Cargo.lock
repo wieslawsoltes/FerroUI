@@ -2598,6 +2598,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media3d"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+]
+
+[[package]]
 name = "ferroui-metal"
 version = "0.5.0-preview.1"
 dependencies = [
