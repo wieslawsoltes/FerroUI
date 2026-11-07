@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Nothing here is implemented yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Step 1 of the plan is implemented (section 8); the rest is not yet. Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -463,3 +463,84 @@ release, the catalog), with the symbol attribution script of step 1.
 9. **Other libraries' controls.** For control libraries the application depends on (dialogs,
    TreeDataGrid, colour picker), root the themes of their types only through creates edges, or all of
    them whenever the application depends on the crate directly?
+
+## 8. Step 1 as implemented: resource and constant rows
+
+The emitter writes a run of resources of one shape, added to one dictionary, as a static table of
+rows and one call of the builder of the shape. Everything else is written as before.
+
+### 8.1 Runtime
+
+`src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/theme_resources.rs`, re-exported by
+`xaml_il::runtime::compiled` (the `rt` of generated code). One `#[inline(never)]`, non-generic
+builder per shape adds its rows in order and returns the first error:
+
+| Shape | Row | Builder |
+|---|---|---|
+| `{StaticResource Key}` alone | `ResourceAliasRow { key, target, namespaces, line, position, value_line, value_position }` | `add_resource_aliases(dictionary, context, document, rows)` |
+| `SolidColorBrush` with a literal colour | `LiteralBrushRow { key, color, namespaces, line, position }` | `add_literal_brushes(..)` |
+| `SolidColorBrush` bound to `{DynamicResource}` | `DynamicBrushRow { key, color_key, namespaces, line, position, value_line, value_position }` | `add_dynamic_brushes(..)` |
+| `SolidColorBrush` whose colour is `{StaticResource}` | `StaticBrushRow { .. }`, the fields of `DynamicBrushRow` | `add_static_brushes(..)` |
+| `x:Double` | `ValueRow<f64> { key, value, line, position }` | `add_double_resources(dictionary, rows)` |
+| `Thickness`, `CornerRadius` | `ValueRow<[f64; 4]>` | `add_thickness_resources`, `add_corner_radius_resources` |
+| `Color` | `ValueRow<u32>` (ARGB) | `add_color_resources` |
+| `x:String` | `ValueRow<&'static str>` | `add_string_resources` |
+
+The deferred builders take `&Ref<ResourceDictionary>`, the context of the declaration, the
+`&'static DocumentInfo` of the document and a `&'static` slice of rows. Each row is still added as
+deferred content of its own: one `Rc<DeferredContent>` per row, created by `deferred_content` with
+the context, as `rt::defer` creates it, and built on first lookup by a closure over the row. The
+build of a row makes the calls the generated build function made, in the same order: the context of
+the build (`deferred_context`, with the namespaces of the declaration when the row names them), then
+`static_resource_content`, `Color.FromUInt32` and `set_value`, `bind_dynamic_resource`, or the
+extension, `provide_value_invoked` and the run-time choice of setter (`is_instance` for the unset
+marker, a binding and a `Color`, else `no_setter`). Errors have the same messages and positions. A
+plain value is added as the statement added it: `rt::cast` of the dictionary to its contract, the
+key, the value, `IDictionary.Add`, at the position of the row.
+
+### 8.2 Emitter
+
+`src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_rows.rs`, called by `emitter.rs`. It
+recognises the shapes where the emitter writes them, not by re-reading the file:
+
+- A deferred resource is a row candidate when its build function is complete
+  (`Emitter::deferred_content`): its statements must be exactly those of one of the four shapes, with
+  only the key, the colour and the positions free, and it must not use the name scope.
+- Its addition is recorded where the emitter fuses it into `rt::add_deferred_resource` (a local
+  dictionary, a text key, the result type `object`); a plain value where the emitter writes
+  `IDictionary.Add` of a literal number, thickness, corner radius, `Color.FromUInt32` or text to a
+  local that holds a `ResourceDictionary`.
+- When a body is complete (the function of a document, before it is split into parts, and each
+  body of deferred content), each run of consecutive recorded additions of one shape to one
+  dictionary is replaced by the position marker of its first addition and one call of the builder
+  over a static table `<FUNCTION>_ROWS_<n>`. A run ends at any other statement, so the order of the
+  additions is kept. Deferred rows form a run even alone, since each replaces a build function; plain
+  values need a run of two. The build functions of the rows of a run are no longer emitted; their
+  slots keep their numbers, so the names of the other functions do not change.
+
+The framework paths the recognition compares with come from `EmitTypes::framework_path` (new:
+`IResourceDictionary`, `SolidColorBrush`, `Color`, `Thickness`, `CornerRadius`), in both the
+run-time and the build-time type systems, so both write the same text.
+
+### 8.3 What stays
+
+The other resource shapes (acrylic brushes, geometries, font families, enumerations, `GridLength`,
+`bool`, `i32`), additions with source information, additions to dictionaries that are not locals
+of known type, and everything outside dictionaries are written as before. The ControlTheme
+factories and the template contents are untouched (steps 2 and 5).
+
+### 8.4 Measurements
+
+Measured on macOS ARM64 against main at 2f8e8c192:
+
+| Theme | Generated text | Functions |
+|---|---:|---:|
+| WinUI | 14.64 MB to 10.08 MB | 6,265 to 815 |
+| macOS | 13.25 MB to 9.16 MB | 6,100 to 680 |
+| Fluent | 5.70 MB to 4.47 MB | 1,788 to 362 |
+| Simple | 3.24 MB to 3.10 MB | 354 to 284 |
+
+- Hello world (`samples/HelloWorld`, WinUI theme), `dist`: 40.39 MB to 37.73 MB (-2.66 MB, -6.6 %).
+  It opens, renders and closes with no diagnostic.
+- Theme load (`tests/load_time.rs`, release, WinUI, three runs each, alternated): first load about
+  7.0 ms with the rows and 7.1 ms before, second load 6.1 ms and 6.2 ms. No change beyond noise.

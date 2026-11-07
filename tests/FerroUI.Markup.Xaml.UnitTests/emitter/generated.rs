@@ -3265,25 +3265,17 @@ pub fn build_resource_dictionary_root_xaml(
     // resource_dictionary_root.xaml(1,131) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 131)?, rt::string_object("A"), rt::to_object(1.0_f64)), 1, 131)?;
     // resource_dictionary_root.xaml(1,144) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "B", ::ferroui_base::data::core::ValueType::object(), &context, build_resource_dictionary_root_xaml_deferred_0, 1, 144)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT, BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0)?;
     // resource_dictionary_root.xaml(1,205) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 205)?, rt::string_object("C"), rt::string_object("text")), 1, 205)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
-/// Builds the deferred content at `resource_dictionary_root.xaml(1,144)` (a template or a deferred resource).
-fn build_resource_dictionary_root_xaml_deferred_0(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT);
-    // resource_dictionary_root.xaml(1,144) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // resource_dictionary_root.xaml(1,144) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278222848_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes with a literal colour of a run of `resource_dictionary_root.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_RESOURCE_DICTIONARY_ROOT_XAML_ROWS_0: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "B", color: 4278222848_u32, namespaces: ::core::option::Option::None, line: 1, position: 144 },
+];
 
 fn build_resource_dictionary_root_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
@@ -3608,9 +3600,7 @@ pub fn build_compiled_binding_plain_property_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 1, 128)?, count_0.wrapping_add(2_i32));
     }
     // compiled_binding_plain_property.xaml(1,167) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 167)?, rt::string_object("A"), rt::to_object(1.0_f64)), 1, 167)?;
-    // compiled_binding_plain_property.xaml(1,199) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 199)?, rt::string_object("B"), rt::to_object(2.0_f64)), 1, 199)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_ROWS_0)?;
     stack_panel_0.set_value(::ferroui_base::StyledElement::data_context_property(), rt::to_object(::core::clone::Clone::clone(&resource_dictionary_0)));
     // compiled_binding_plain_property.xaml(1,258) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -3662,6 +3652,12 @@ pub fn build_compiled_binding_plain_property_xaml(
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
+
+/// The numbers of a run of `compiled_binding_plain_property.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_ROWS_0: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "A", value: 1.0_f64, line: 1, position: 167 },
+    rt::ValueRow { key: "B", value: 2.0_f64, line: 1, position: 199 },
+];
 
 fn build_compiled_binding_plain_property_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
