@@ -378,6 +378,13 @@ conversion, or that the panic comes from a third-party crate.
   `IObserver::on_error` returns `()`; delivering the `TargetInvocationError` to the default
   exception handler or to a `ThrownExceptions` of the binding instead of panicking changes the
   behaviour of the reference. Needs a decision.
+- **A rendering mode the backend cannot render with** (`ferroui-skia`
+  `platform_render_interface.rs:115`, `create_gpu`): forcing the OpenGL mode of the macOS native
+  backend (`FERROUI_SMOKE_RENDERING=opengl` of the catalog) with a Skia build without Ganesh GL
+  (the default macOS build, Graphite on Metal) panics on the render thread with "Graphics context
+  of type is not supported", which aborts with `panic = "abort"`. The default modes are not
+  affected. A fallible `create_backend_context`, falling back to software, or a platform that
+  offers only the modes the backend renders, is its own step.
 - **Run-time loading of application XAML outside a scope** (5.1): a failing deferred resource,
   include or template of `FerroRuntimeXamlLoader::load` panics, with abort too; that is fatal
   either way, and turning it into `Err` is a behaviour change.
