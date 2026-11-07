@@ -741,10 +741,17 @@ struct Emitter<'a> {
     /// Scoped tables are shared by the document's guards and deferred factories. A merged
     /// dictionary can contribute thousands of values with the same lexical declaration.
     namespace_tables: Vec<ScopedNamespaceTable>,
-    /// The types the reflection-binding paths of the document name
-    /// ([`reflection_path_types`]): every namespace table of the document gives each to the
-    /// entry it is found through.
+    /// The types the reflection-binding paths of the document name outside every unit of the
+    /// theme ([`reflection_path_types_by_unit`]): every namespace table of the document gives
+    /// each to the entry it is found through.
     path_types: Vec<PathType>,
+    /// The types of the paths of each unit (#612, root D): an entry of a unit whose documents
+    /// have such paths pushes a table with them around its code, and its deferred content
+    /// builds with that table, so the document's table names no class only a unit's binding
+    /// needs.
+    unit_path_types: HashMap<u32, Vec<PathType>>,
+    /// The types of the unit whose entry is being written, while it has paths.
+    entry_path_types: Option<Vec<PathType>>,
     /// The locals that hold a time span literal ([`time_span_literal`]), with its ticks:
     /// a member that declares a `Duration` takes the literal only when it is not negative
     /// ([`Emitter::coerce_time_span_literal`]).
@@ -778,6 +785,8 @@ struct Emitter<'a> {
 
 struct ScopedNamespaceTable {
     aliases: HashMap<String, String>,
+    /// The types of the unit's paths the table adds to the document's (#612, root D).
+    unit_types: Option<Vec<PathType>>,
     name: String,
     source: String,
 }
@@ -878,17 +887,27 @@ impl<'a> Emitter<'a> {
         }
     }
     fn scoped_namespace_table(&mut self, aliases: &HashMap<String, String>) -> String {
-        if aliases == &self.root_namespace_aliases {
+        if aliases == &self.root_namespace_aliases && self.entry_path_types.is_none() {
             return format!("{}.namespaces", self.document);
         }
-        if let Some(table) = self.namespace_tables.iter().find(|table| table.aliases == *aliases) {
+        let unit_types = self.entry_path_types.clone();
+        if let Some(table) =
+            self.namespace_tables.iter().find(|table| table.aliases == *aliases && table.unit_types == unit_types)
+        {
             return table.name.clone();
         }
         let name = format!("{}_XML_NAMESPACES_{}", self.function_name.to_uppercase(), self.namespace_tables.len());
+        let mut path_types = self.path_types.clone();
+        for path_type in unit_types.iter().flatten() {
+            if !path_types.contains(path_type) {
+                path_types.push(path_type.clone());
+            }
+        }
         self.namespace_tables.push(ScopedNamespaceTable {
             aliases: aliases.clone(),
+            unit_types,
             name: name.clone(),
-            source: super::transform::namespace_table_for_aliases(self.configuration, aliases, &self.path_types),
+            source: super::transform::namespace_table_for_aliases(self.configuration, aliases, &path_types),
         });
         name
     }
@@ -2007,7 +2026,28 @@ impl<'a> Emitter<'a> {
             if let Some(unit) = unit {
                 self.lines.push(theme_units::begin_marker(unit));
             }
+            // The reflection-binding paths of the unit resolve through a table of the unit's own
+            // (#612, root D), pushed around the entry and given to its deferred content.
+            let unit_types = unit.and_then(|unit| self.unit_path_types.get(&unit)).filter(|types| !types.is_empty()).cloned();
+            let outer_types = match unit_types {
+                Some(types) => Some(std::mem::replace(&mut self.entry_path_types, Some(types))),
+                None => None,
+            };
+            let guard = outer_types.as_ref().map(|_| {
+                let aliases = self.namespace_aliases.clone();
+                let table = self.scoped_namespace_table(&aliases);
+                let guard = self.local_named("unit_namespace_scope");
+                self.uses_context = true;
+                self.line(format!("let {guard} = rt::push_namespace_scope(&context, {table});"));
+                guard
+            });
             let result = self.resource_assignment(node, assignment, adder, target);
+            if let Some(guard) = guard {
+                self.line(format!("::core::mem::drop({guard});"));
+            }
+            if let Some(outer) = outer_types {
+                self.entry_path_types = outer;
+            }
             if unit.is_some() {
                 self.lines.push(format!("    {}", theme_units::END_MARKER));
             }
@@ -2935,8 +2975,9 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {\n",
         );
-        let scoped_table =
-            (declaration_aliases != self.root_namespace_aliases).then(|| self.scoped_namespace_table(&declaration_aliases));
+        // Content of a unit with reflection-binding paths builds with the unit's table (#612, root D).
+        let scoped_table = (declaration_aliases != self.root_namespace_aliases || self.entry_path_types.is_some())
+            .then(|| self.scoped_namespace_table(&declaration_aliases));
         let document_info = match &scoped_table {
             Some(table) => format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document),
             None => self.document.clone(),
@@ -4458,10 +4499,26 @@ pub(crate) fn reflection_path_types(
     configuration: &TransformerConfiguration,
     root: &Rc<dyn IXamlAstNode>,
 ) -> Vec<PathType> {
+    reflection_path_types_by_unit(types, configuration, root, None).0
+}
+
+/// The types the reflection-binding paths of `root` name ([`reflection_path_types`]), split by
+/// the unit of the theme each path is in (#612, root D): the paths outside every unit, and the
+/// paths of each unit by its index. Without `units` every path is outside the units.
+///
+/// The table of the document carries only the first list and each unit pushes a table with its
+/// own, so a unit the application trims takes the classes its paths name with it: a table of
+/// the document names its types through functions, and every unit's code reaches it.
+pub(crate) fn reflection_path_types_by_unit(
+    types: &dyn EmitTypes,
+    configuration: &TransformerConfiguration,
+    root: &Rc<dyn IXamlAstNode>,
+    units: Option<&theme_units::UnitEmission>,
+) -> (Vec<PathType>, HashMap<u32, Vec<PathType>>) {
     let reflection_types: Vec<Rc<dyn IXamlType>> =
         REFLECTION_BINDING_TYPES.iter().filter_map(|name| configuration.type_system.find_type(name)).collect();
     if reflection_types.is_empty() {
-        return Vec::new();
+        return (Vec::new(), HashMap::new());
     }
     let root_scope = root
         .namespace_scope()
@@ -4473,11 +4530,14 @@ pub(crate) fn reflection_path_types(
         root_scope,
         scopes: Vec::new(),
         objects: Vec::new(),
+        units,
+        unit_stack: Vec::new(),
         found: Vec::new(),
+        by_unit: HashMap::new(),
     };
     // The collection never fails a document: a node it cannot read is skipped.
     let _ = visit_node(root, &mut paths);
-    paths.found
+    (paths.found, paths.by_unit)
 }
 
 /// The visitor of [`reflection_path_types`]: for every node on the path from the root, the
@@ -4489,7 +4549,14 @@ struct ReflectionPaths<'t> {
     root_scope: Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>,
     scopes: Vec<Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>>,
     objects: Vec<Option<bool>>,
+    /// The units of the theme, when the document is partitioned into them, and the unit of each
+    /// node on the path from the root (an entry a merge inlined names its unit, its descendants
+    /// inherit it).
+    units: Option<&'t theme_units::UnitEmission>,
+    unit_stack: Vec<Option<u32>>,
+    /// The types of the paths outside every unit, and of the paths of each unit.
     found: Vec<PathType>,
+    by_unit: HashMap<u32, Vec<PathType>>,
 }
 
 impl ReflectionPaths<'_> {
@@ -4506,8 +4573,15 @@ impl ReflectionPaths<'_> {
             .unwrap_or_default()
     }
 
-    /// The types named by the path `text`, resolved with `aliases`.
-    fn collect(&mut self, text: &str, aliases: &HashMap<String, String>) {
+    /// The unit `node` belongs to: its own, as an entry a merge inlined, or its parent's.
+    fn unit_of(&self, node: &Rc<dyn IXamlAstNode>) -> Option<u32> {
+        self.units
+            .and_then(|units| units.unit_of(node))
+            .or_else(|| self.unit_stack.last().copied().flatten())
+    }
+
+    /// The types named by the path `text`, resolved with `aliases`, recorded for `unit`.
+    fn collect(&mut self, text: &str, aliases: &HashMap<String, String>, unit: Option<u32>) {
         use ferroui_base::data::core::parsers::{BindingExpressionGrammar, Node};
         let Ok((nodes, _)) = BindingExpressionGrammar::parse(text) else {
             return;
@@ -4520,8 +4594,12 @@ impl ReflectionPaths<'_> {
                 _ => continue,
             };
             if let Some(path_type) = self.resolve(aliases, &prefix, &name) {
-                if !self.found.contains(&path_type) {
-                    self.found.push(path_type);
+                let found = match unit {
+                    Some(unit) => self.by_unit.entry(unit).or_default(),
+                    None => &mut self.found,
+                };
+                if !found.contains(&path_type) {
+                    found.push(path_type);
                 }
             }
         }
@@ -4579,7 +4657,8 @@ impl IXamlAstVisitor for ReflectionPaths<'_> {
                 let first = object.arguments.borrow().first().and_then(|argument| text_of(&argument.as_node()));
                 if let Some(text) = first {
                     let aliases = self.aliases_at(&node);
-                    self.collect(&text, &aliases);
+                    let unit = self.unit_of(&node);
+                    self.collect(&text, &aliases, unit);
                 }
             }
         } else if let Some(assignment) = node.cast::<XamlPropertyAssignmentNode>() {
@@ -4590,7 +4669,8 @@ impl IXamlAstVisitor for ReflectionPaths<'_> {
                 for value in values {
                     if let Some(text) = text_of(&value.as_node()) {
                         let aliases = self.aliases_at(&node);
-                        self.collect(&text, &aliases);
+                        let unit = self.unit_of(&node);
+                        self.collect(&text, &aliases, unit);
                     }
                 }
             }
@@ -4599,6 +4679,8 @@ impl IXamlAstVisitor for ReflectionPaths<'_> {
     }
 
     fn push(&mut self, node: Rc<dyn IXamlAstNode>) {
+        let unit = self.unit_of(&node);
+        self.unit_stack.push(unit);
         self.scopes.push(node.namespace_scope());
         let object = node.as_value_with_manipulation_node().map(|group| {
             group.value().type_().get_clr_type().is_ok_and(|created| self.is_reflection_binding(&*created))
@@ -4607,6 +4689,7 @@ impl IXamlAstVisitor for ReflectionPaths<'_> {
     }
 
     fn pop(&mut self) {
+        self.unit_stack.pop();
         self.scopes.pop();
         self.objects.pop();
     }
@@ -4714,6 +4797,8 @@ pub fn emit_function<'a>(
         return Err(unsupported(&root_value, "the root object is not created with a constructor"));
     }
 
+    // The paths of each unit go into tables of their own (#612, root D).
+    let unit_path_types = reflection_path_types_by_unit(types, configuration, root, documents.units());
     let mut emitter = Emitter {
         types,
         configuration,
@@ -4734,7 +4819,9 @@ pub fn emit_function<'a>(
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         namespace_tables: Vec::new(),
-        path_types: reflection_path_types(types, configuration, root),
+        path_types: unit_path_types.0,
+        unit_path_types: unit_path_types.1,
+        entry_path_types: None,
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
         culture_literals: HashMap::new(),
