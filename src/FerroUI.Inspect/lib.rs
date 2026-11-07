@@ -925,8 +925,8 @@ fn is_input(name: &str) -> bool {
 fn catch(f: impl FnOnce() -> InspectResult) -> InspectResult {
     // Boundary (#567): a tool reaches application code (property changed and input handlers);
     // its panic answers the tool with an error. Arguments are validated before, so no expected
-    // error travels here. Isolating the application needs a build that unwinds (`dev` or
-    // `release-unwind` profile).
+    // error travels here. Isolating the application needs a build that unwinds (`dev`, `release` or
+    // `dist-unwind` profile).
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).unwrap_or_else(|error| {
         let message = error
             .downcast_ref::<String>()

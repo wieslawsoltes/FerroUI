@@ -1,0 +1,67 @@
+[package]
+name = "ferroui-treedatagrid-gpui-comparison"
+description = "Compares FerroUI's TreeDataGrid with the tables of GPUI (the DataTable and the Tree of gpui-component, and a table built on GPUI's uniform_list) in the scenarios of the TreeDataGrid benchmarks, measured with the harness of ferroui-benchmarks"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MIT"
+repository = "https://github.com/wieslawsoltes/FerroUI"
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+# A workspace of its own: the GPUI crates stay out of the workspace of the framework and out of
+# its lock file. The root manifest lists this directory in its `exclude`, as it does the
+# FerroBoard component. No lock file is committed: the first build writes it.
+[workspace]
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The counting allocator of the harness (ferroui-benchmarks, harness.rs): the table has what an
+# operation allocated. Off by default: counting costs time.
+count-allocations = ["ferroui-benchmarks/count-allocations"]
+
+[dependencies]
+# The harness: the registry, the runner, the smoke helpers and the allocation counts.
+ferroui-benchmarks = { path = "../FerroUI.Benchmarks" }
+# The source-only scenarios of the TreeDataGrid benchmarks (NeutralSourceBenchmarks), reused as
+# they are.
+ferroui-treedatagrid-benchmarks = { path = "../FerroUI.TreeDataGrid.Benchmarks" }
+ferroui-base = { path = "../../src/FerroUI.Base", features = ["testing"] }
+ferroui-controls = { path = "../../src/FerroUI.Controls", features = ["testing"] }
+ferroui-treedatagrid-core = { path = "../../src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
+ferroui-controls-treedatagrid = { path = "../../src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
+# The text of the platform variants: HarfBuzz shapes the text of the fonts of the system, which
+# the font manager of the Skia backend loads.
+ferroui-harfbuzz = { path = "../../src/HarfBuzz/FerroUI.HarfBuzz" }
+ferroui-skia = { path = "../../src/Skia/FerroUI.Skia" }
+
+# GPUI as gpui-component depends on it, so that there is one `gpui`. `test-support` gives the
+# test platform (`TestAppContext`, windows without a GPU). gpui-component and gpui-base are
+# built without their own `test-support` features, which wrap elements in test observers.
+gpui = { package = "gpui-pre", version = "=0.3.11", features = ["test-support"] }
+gpui-component = { version = "=0.9.0" }
+# The actions the Tree of gpui-component expands and collapses its entries with.
+gpui-base = { version = "=0.9.0" }
+
+# The text system of the platform for the GPUI targets: CoreText through font-kit, the one the
+# macOS platform of GPUI uses. `runtime_shaders` leaves the Metal shaders to run time, so that
+# the build does not need the Metal compiler; nothing here renders with Metal.
+[target.'cfg(target_os = "macos")'.dependencies]
+gpui_apple = { package = "gpui-pre-apple", version = "=0.3.11", features = ["font-kit", "runtime_shaders"] }
+
+# As the workspace of the framework: the Skia bindings of the Skia backend.
+[patch.crates-io]
+skia-bindings = { path = "../../external/rust-skia-bindings" }
+
+# The profiles of the workspace of the framework (profiles are not inherited across workspaces):
+# the benchmarks are measured with release.
+[profile.release]
+lto = "thin"
+
+[profile.fast-release]
+inherits = "release"
+lto = false

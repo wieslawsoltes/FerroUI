@@ -1,5 +1,5 @@
-Browser locale sorting/search uses unmodified ICU 68.2 data. Its complete license and
-provenance are retained in resources/native/icu/. Other native platforms use system ICU/NLS.
+Browser locale sorting/search uses the browser's own Intl.Collator and Intl.Segmenter; no ICU
+code or data is redistributed. Other native platforms use system ICU/NLS.
 
 FerroBoard derives from ScreenKeyboardControl.
 Copyright (c) Wiesław Šoltés and contributors

@@ -1,0 +1,37 @@
+[package]
+name = "ferroui-media3d"
+links = "ferroui_media3d_xaml"
+description = "WPF-style 3D for FerroUI: the Media3D values, and the scene model of Viewport3D"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The build script exports the type model of the crate (its value types, for markup); Cargo hands
+# the path of the file to the build scripts of the crates that depend on this one.
+build = "build.rs"
+
+# Unit tests live next to the code (`#[path = "..._tests.rs"]` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The base library only: the text forms of values (the tokenizer and the invariant numbers) and the
+# markup metadata the XAML converters are declared with.
+ferroui-base.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "core"
