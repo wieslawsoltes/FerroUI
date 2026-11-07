@@ -156,7 +156,9 @@ the 3D executor of this design closes it later (step D13).
   implement one optional capability of the drawing context,
   `IDrawingContextImplWithScene3D::draw_scene_3d(&Scene3DFrame) -> bool`, in
   `src/FerroUI.Base/platform/`; `false` means "not drawn on the GPU", and the caller draws the CPU
-  reference and counts it, the pattern of `draw_lighting` and `push_pixel_operation`.
+  reference and counts it, the pattern of `draw_lighting` and `push_pixel_operation`. As built in
+  D3 the backend draws the CPU reference itself, behind its feature `media3d`, and counts it on a
+  GPU surface (section 3.14); `false` is left for an image it could not make.
 - **Size:** the facade enables the crates through an opt-in feature `media3d`, off by default. An
   application that never names `Viewport3D` links none of this, and Skia builds do not link wgpu
   (section 3.4). Sizes are measured through the inputs of `perf.yml`, not locally.
@@ -554,6 +556,115 @@ vector is named there through its namespace (`xmlns:media3d="using:FerroUI.Media
 **Facade.** The feature `media3d` of the crate `ferroui` (off by default) re-exports the crate as
 `ferroui::media3d`, the naming rule of the facade (docs/release.md, section 2.1).
 
+### 3.14 The CPU reference as built (D3)
+
+**The crate.** `src/FerroUI.Rendering3D`, crate `ferroui-render3d`, depends on the base library and
+std only and forbids `unsafe`. Its modules: `uniforms` (the constants of a render), `lighting`
+(ProGPU's `ComputeWpfLighting` and the colour of each kind of layer), `cpu` (the rasterizer) and
+`output_cache` (the kept output). `NOTICE.md` records the port of the lighting from ProGPU (MIT) and
+the behaviour of WPF.
+
+**Uniforms** (`uniforms.rs`), `#[repr(C)]` and std140-compatible (every member a `vec4`, a `mat4x4`
+or an array of structures of whole `vec4`s, the offsets asserted by the tests), with the bytes
+written by `Std140::write_std140` and the same structures in WGSL in `WGSL_DECLARATIONS`, which the
+shader of D4 includes:
+
+| Structure | Members (byte offset) | Size |
+|---|---|---|
+| `LightUniforms` (ProGPU's `GpuLight3DRecord`) | `metadata` (0; `x` the kind: 0 ambient, 1 directional, 2 point, 3 spot), `color` (16), `position_range` (32; `w` the range, `f32::MAX` for infinite), `direction_inner_cos` (48; `w` the cosine of half the inner cone), `attenuation_outer_cos` (64; `w` the cosine of half the outer cone) | 80 |
+| `FrameUniforms` | `view_projection` (0), `camera_position` (64; `w` 1 for a position, 0 for the direction toward an orthographic camera), `light_count` (80, `vec4<u32>`), `lights` (96, 16 `LightUniforms`) | 1376 |
+| `DrawUniforms` | `world` (0), `normal_matrix` (64; the inverse transpose of the upper 3x3), `color` (128; the brush's colour times the material's `Color`, the brush's opacity in the alpha, straight), `ambient_color` (144), `material` (160; `x` the layer kind: 0 diffuse, 1 specular, 2 emissive; `y` `SpecularPower`; `z` the sign of the normals, -1 for back faces) | 176, at a stride of 256 for dynamic offsets |
+
+A matrix is stored as its rows, which a column-major `mat4x4<f32>` reads as its columns, so the
+shader's `M * v` is the snapshot's row-vector `v * M`; `view_projection` is `view * projection`.
+Colours are the gamma-encoded components over 255 (section 6.2).
+
+**The pipeline** (`cpu/mod.rs`, `cpu/clip.rs`), stage for stage that of the executors:
+
+1. The vertex stage once per model: the world position, the normal through the normal matrix at
+   unit length, the texture coordinate, and the clip position through `view_projection`.
+2. Clipping in homogeneous coordinates (Sutherland-Hodgman) against the near plane `z >= 0`, the
+   far plane `z <= w`, `w >= 1e-6` (for matrix cameras) and a guard band `|x|, |y| <= 4w` that keeps
+   the fixed-point coordinates small; the attributes interpolated linearly in clip space, the
+   polygon drawn as a fan.
+3. Setup: the perspective division, the viewport with rows going down, the vertices snapped to
+   1/256 of a sample. A triangle counterclockwise on the screen is a front face (WPF); a face whose
+   side has no layers is culled there.
+4. Rasterization by integer edge functions with the top-left rule (a sample on an edge shared by
+   two triangles is covered once), within the bounding box of the triangle and a tile of 64 by 64
+   pixels; the triangles are binned to the tiles once per render (a counting sort that keeps their
+   order).
+5. Per sample, after the depth test: the barycentric weights corrected for the perspective
+   (`w`), the interpolated world position and normal, and `lighting::shade`.
+6. Depth: `f32`, z over w, cleared to 1. The first diffuse layer of a side writes it with `Less`
+   (the first layer when that side has no diffuse layer); the other layers test `LessEqual` and do
+   not write it. Back layers are drawn after the front layers of the same model.
+7. Blending: a diffuse layer premultiplied source-over, a specular or emissive layer added with
+   alpha 0, every channel clamped to 0..1 as an RGBA8 target stores it.
+8. Resolve: 4x supersampling on an ordered grid (the samples at a quarter and three quarters of a
+   pixel each way; 1x with `CpuRenderOptions { antialiased: false }`, the edge mode `Aliased`), the
+   mean of the samples, the alpha raised to the largest colour channel (decision N), rounded to
+   premultiplied RGBA8.
+
+**Lighting** (`lighting.rs`). `compute_wpf_lighting` is ProGPU's loop over at most 16 lights: an
+ambient light adds its colour; a directional light lights along `-direction`; a point or spot
+light lights from its position, not beyond its range or at the light itself, attenuated by
+`1 / max(c + l d + q d^2, 1)`; a spot light is scaled by `clamp((rho - cos_outer) /
+max(cos_inner - cos_outer, 1e-6), 0, 1)` with the cosines of the half angles; `N . L <= 0`
+contributes nothing; the specular sum is Blinn-Phong, `max(N . H, 0)` to `SpecularPower`, with the
+attenuation. `shade` returns, premultiplied: for a diffuse layer `saturate(color * (ambient *
+ambient_color + diffuse))` with the alpha of the colour; for a specular layer `saturate(color *
+specular)` with alpha 0; for an emissive layer the colour with alpha 0. The view direction is toward
+the camera's position, or the one direction of an orthographic camera.
+
+**Brushes.** A solid colour brush is its colour and opacity. Any other brush (gradients, images,
+and the visual and drawing brushes without a shared form) is drawn with the layer's `Color` and the
+brush's opacity, counted (`ferroui_render3d::layers_with_unsampled_brushes`) and reported once,
+until D6.
+
+**Performance.** Nothing is allocated per pixel or per triangle: a `CpuRasterizer` keeps its
+vertex, triangle, pass, bin and tile buffers from one render to the next; rows are slices of the
+tile buffers. The image itself is one allocation per render.
+
+**Output cache** (`output_cache.rs`). `Scene3DOutputCache<T>` keeps the backend's form of the image
+(an `sk::Image`, a Vello `ImageData`) by the snapshot (its allocation, held weakly, and its
+generations), the size, the scale and the options, eight outputs by default, the least recently
+used making room; a new output of a scene replaces its older one, and the outputs of dropped
+snapshots go. An unchanged viewport is neither rasterized nor uploaded again.
+
+**The backends.** `ferroui-skia` (`scene3d.rs`) and `ferroui-vello`
+(`drawing_context_impl/scene_3d.rs`) implement `IDrawingContextImplWithScene3D` behind their
+feature `media3d` (decision M), which the facade's `media3d` turns on. The size of the image is the
+bounds of the frame at the resolution of the device (`ferroui_render3d::scene_pixel_size`: the
+lengths of the transformed axes, so also under a rotation or skew; at most 8192 pixels a side; the
+perspective of a 2D transform is not taken into account). The image is drawn over the bounds with
+bilinear sampling under the transform, clips and opacity of the context: on Skia an image of pixels
+through `drawable_image` (raster, Ganesh and Graphite alike; Graphite keeps the texture while the
+kept image lives), on Vello an image paint of the scene (CPU, hybrid and GPU). Skia without a GPU
+context and the CPU mode of Vello draw the reference by definition; Skia with a GPU context and the
+hybrid and GPU modes of Vello count every such scene (`ferroui_render3d::scenes_drawn_on_cpu`) and
+log the first, the gap D4 and later close. The headless platform's own drawing context draws
+nothing at all (also no 2D) and has no 3D capability; the headless platform with Skia draws through
+Skia raster.
+
+**Tests.** The unit tests of the crate: clipping at the near and far planes, a triangle beyond the
+far plane, the fill rule on the shared diagonal and on the edges of a quad through pixel centres,
+the resolve of an edge through a pixel, depth in either order, the layers of a material on the same
+depth, culling and `BackMaterial`, perspective-correct interpolation, the lighting against hand
+values (Lambert, attenuation and range, the spot cone, Blinn-Phong, each kind of layer), the
+layouts and their bytes, the WGSL members, the normal matrix, and the cache. The comparison scenes
+(`tests/FerroUI.RenderBackends.Comparison/scene3d_scenes.rs`, `scene3d_tests.rs`), 100 pixels at
+1x and 2x: `lit-cube`, `point-light`, `spot-light`, `orthographic-camera`, `matrix-camera`,
+`front-back-culling`, `material-group`, `transparent-overlap`, `near-far-clipping`,
+`clip-opacity-rotated` and `empty`, made by hand with WPF's camera matrices. The tests hold every
+backend and mode to the CPU reference (`Tolerance::Largest(2)` for the scenes drawn one to one),
+check the golden properties with pixel probes whose colours are computed from WPF's formulas in
+double precision (for example the +z face of the turned cube is red at 64 + 128 cos 30 of 255, the
+background transparent), compare Skia raster with each Vello mode (no pixel beyond the tolerance
+of the harness for the plain scenes, 3 % for the rotated one), check that a `MatrixCamera` with a
+perspective camera's matrices draws the same image, that an empty scene draws nothing, and that an
+unchanged viewport is rasterized once.
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -565,7 +676,7 @@ this page.
 | D0 | #608; this page; section 8 of the media specification; the row of gpu-rendering.md | none | none | in review |
 | D1 | The values (section 3.12) and their markup converters, with tests: inversion and determinant against hand values, append and prepend, `RotateAt`, axis and angle round trips, slerp, `Rect3D` union and intersection with `Empty`, points against vectors, the projective `Point4D`, the text forms | additions (a new crate) | low | in review |
 | D2 | The scene model (section 3.13): transforms, rotations, cameras, lights, materials, `Geometry3D` and `MeshGeometry3D` with the collections, models, `Visual3D`, `ModelVisual3D`, `Viewport3DVisual`, the control `Viewport3D`; `Scene3DSnapshot` with the fitted planes and the generations; the render-data operation `DrawScene3D` and the capability `IDrawingContextImplWithScene3D`; XAML registration and the namespace mapping; the facade feature `media3d`. Tests: the snapshot of nested `Model3DGroup`s with transforms, a camera change bumping only `camera_generation`, a mesh edit bumping the structure, a light colour bumping the records, the fitted planes, `Bounds`, the text forms of the collections, a cube scene loaded from XAML, the operation recorded, sent and replayed with and without the capability | additions | medium: the namespace clash of `Vector3D`; the shape of the snapshot fixes every executor's input | in review |
-| D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | planned |
+| D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
 | D4 | `scene3d.wgsl` and the wgpu executor in Vello (hybrid and GPU, Metal first): the pipeline cache, the mesh cache, the depth and MSAA pools, the composition by `paint_device_layer`, the reuse of the cached output; `IDrawingContextImplWithScene3D`. Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode`, `the_backends_draw_every_scene_3d_alike`, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation of the shader; `vello.yml` on Metal, lavapipe in `ci.yml` | addition (a capability trait) | high: the first GPU route; the uniform layout and alignment (256-byte dynamic offsets) | planned |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
 | D6 | Materials from brushes: gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | none new | medium | planned |
@@ -611,11 +722,12 @@ Taken with #608, open to change by the owner.
 | I | `Viewport3DVisual` (D2) | **The scene object of the viewport, not a 2D visual**; `Viewport3D` hosts one and records its snapshot | A 2D visual without layout would need its own bounds and arrangement for nothing; the render-data operation is written by the control |
 | J | The fitted planes (D2) | **Only for an infinite `FarPlaneDistance`**, both planes fitted to the scene with a margin, never closer than `NearPlaneDistance` | What the ticket asks; a finite far plane is the application's choice; to check against WPF (section 6.2) |
 | K | Generations (D2) | **One kind per change**; a structure change does not bump the records | An executor compares all three; a new structure rewrites the records anyway |
+| L | More than 16 lights (D3) | **The first 16 lights in tree order** (ambient lights included, as ProGPU's loop), the others left out, counted (`ferroui_render3d::lights_left_out`) and reported once; the GPU executors take the same 16 | One pass, the uniform block of every target; a second pass for the further lights stays possible if WPF parity needs it |
+| M | How the backends link the CPU reference (D3) | **A feature `media3d` of `ferroui-skia` and `ferroui-vello`**, turned on by the facade's `media3d` | An application without 3D links no rasterizer (the size rules); without the feature a scene is counted as not drawn, as in D2 |
+| N | Added light over a transparent pixel (D3) | **Specular and emissive layers add their colour with alpha 0; the resolve raises the alpha of a pixel to its largest colour channel** | The output stays a valid premultiplied image for the 2D compositor; over the viewport's own opaque geometry (the common case) nothing changes |
 
-Open for D4: what a viewport with more lights than the GPU takes (16) draws. WPF has no fixed
-count; whichever rule is chosen (for example a second pass for the further lights, or the lights
-beyond the limit left out and reported once) is stated here and applied by the CPU reference too,
-so the comparison tests hold.
+What a viewport with more lights than the GPU takes (16) draws was open for D4; D3 settles it
+(decision L) so that the CPU reference and the executors agree.
 
 ### 6.2 Fidelity points to verify against WPF
 
