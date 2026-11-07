@@ -25,9 +25,19 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
-# The base library only: the text forms of values (the tokenizer and the invariant numbers) and the
-# markup metadata the XAML converters are declared with.
+# The base library: the object model the scene objects are classes of, the text forms of values
+# (the tokenizer and the invariant numbers), the markup metadata, the brushes the materials paint
+# with, and the compiled form of a scene (`rendering::scene3d`) with the render-data operation that
+# draws it.
 ferroui-base.workspace = true
+# The control library: `Viewport3D` is a control.
+ferroui-controls.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing", "type-tables"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The run-time loader of markup, for the tests that load a scene from XAML.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
 
 [build-dependencies]
 ferroui-build-scan.workspace = true

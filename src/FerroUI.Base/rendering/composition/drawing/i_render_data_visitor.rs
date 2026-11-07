@@ -1,6 +1,7 @@
 use crate::media::{BoxShadows, IBrush, IPen, RenderOptions, TextOptions};
 use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IGeometryImpl, IGlyphRunImpl};
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::sync::Arc;
@@ -39,6 +40,12 @@ pub trait IRenderDataVisitor {
     fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>);
     fn on_draw_bitmap(&mut self, bitmap: Option<&std::sync::Arc<crate::platform::SharedBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect);
     fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>);
+
+    /// A 3D scene drawn over `bounds` (#608). The default ignores it, which
+    /// is what the hit test does until the 3D hit testing of step D10 of the
+    /// port (a viewport is hit where a model is, not over its whole area); the
+    /// replay and the bounds override it.
+    fn on_draw_scene_3d(&mut self, _scene: Option<&Arc<Scene3DSnapshot>>, _bounds: Rect) {}
 
     fn on_push_clip(&mut self, clip: RoundedRect) -> Self::Scope;
     fn on_push_geometry_clip(&mut self, geometry: Option<&Arc<dyn IGeometryImpl>>) -> Self::Scope;

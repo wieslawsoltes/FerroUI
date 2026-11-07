@@ -1625,6 +1625,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-markup-xaml-winui",
+ "ferroui-media3d",
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
@@ -2603,6 +2604,8 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]
@@ -2839,6 +2842,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",
@@ -2860,6 +2864,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-render3d"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "naga",
+ "wgpu",
+]
+
+[[package]]
 name = "ferroui-rich-text-oracle"
 version = "0.5.0-preview.1"
 dependencies = [
@@ -2878,6 +2891,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-metal",
  "ferroui-opengl",
+ "ferroui-render3d",
  "ferroui-vulkan",
  "skia-safe",
  "url",
@@ -3046,6 +3060,7 @@ dependencies = [
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
+ "ferroui-render3d",
  "fontique",
  "gif",
  "glifo",

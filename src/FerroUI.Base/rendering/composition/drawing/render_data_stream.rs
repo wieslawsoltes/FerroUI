@@ -4,7 +4,7 @@
 
 use super::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload, PushCompositingLayerPayload,
+    DrawLinePayload, DrawRectanglePayload, DrawScene3DPayload, IRenderDataVisitor, PushClipPayload, PushCompositingLayerPayload,
     PushEffectPayload, PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload,
     PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload, RenderDataOpcode, RenderDataReader,
     RenderDataResource, RenderDataResources, RenderDataWriter,
@@ -14,6 +14,7 @@ use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::IGlyphRunImpl;
 use crate::rendering::composition::server::{IServerObject, ServerObjectId};
 use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, BatchStreamWriter};
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::rc::Rc;
@@ -31,6 +32,7 @@ const TAG_EFFECT: u8 = 8;
 const TAG_SERVER_BRUSH: u8 = 9;
 const TAG_SERVER_PEN: u8 = 10;
 const TAG_SERVER_GEOMETRY: u8 = 11;
+const TAG_SCENE_3D: u8 = 12;
 
 /// A recorded sequence of drawing operations with its resource table.
 #[derive(Default)]
@@ -209,6 +211,14 @@ impl RenderDataStream {
         self.writer.write_payload(payload);
     }
 
+    /// Records a 3D scene drawn over `bounds` (#608). The snapshot is
+    /// immutable and shared: the table holds a counted reference to it.
+    pub fn draw_scene_3d(&mut self, scene: Option<Arc<Scene3DSnapshot>>, bounds: Rect) {
+        let payload =
+            DrawScene3DPayload { scene: self.resources.intern(scene.map(RenderDataResource::Scene3D)), bounds };
+        self.writer.write_payload(payload);
+    }
+
     pub fn push_clip(&mut self, clip: RoundedRect) {
         self.writer.write_payload(PushClipPayload { clip });
         self.enter_scope();
@@ -310,6 +320,10 @@ impl RenderDataStream {
                     writer.write(TAG_EFFECT);
                     writer.write_object(BatchObject::value(v.clone()));
                 }
+                RenderDataResource::Scene3D(v) => {
+                    writer.write(TAG_SCENE_3D);
+                    writer.write_object(BatchObject::value(v.clone()));
+                }
                 RenderDataResource::ServerBrush { server, .. } => {
                     writer.write(TAG_SERVER_BRUSH);
                     writer.write_server_object(Some(*server));
@@ -364,6 +378,7 @@ impl RenderDataStream {
                 TAG_BITMAP => RenderDataResource::Bitmap(value(reader)),
                 TAG_CUSTOM => RenderDataResource::CustomDrawOperation(value(reader)),
                 TAG_EFFECT => RenderDataResource::Effect(value(reader)),
+                TAG_SCENE_3D => RenderDataResource::Scene3D(value(reader)),
                 TAG_SERVER_BRUSH => {
                     let object = server_object(reader, resolve);
                     match object.clone().as_brush() {
@@ -452,6 +467,10 @@ impl RenderDataStream {
                 RenderDataOpcode::DrawCustom => {
                     let p = reader.read_payload::<DrawCustomPayload>();
                     visitor.on_draw_custom(resources.custom_draw_operation(p.operation));
+                }
+                RenderDataOpcode::DrawScene3D => {
+                    let p = reader.read_payload::<DrawScene3DPayload>();
+                    visitor.on_draw_scene_3d(resources.scene_3d(p.scene), p.bounds);
                 }
                 RenderDataOpcode::PushClip => {
                     let p = reader.read_payload::<PushClipPayload>();

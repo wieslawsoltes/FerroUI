@@ -110,6 +110,16 @@ pub struct DrawBitmapPayload {
 
 render_data_payload!(DrawBitmapPayload => DrawBitmap { bitmap: i32, opacity: f64, source_rect: Rect, dest_rect: Rect });
 
+/// A 3D scene: the handle of its snapshot in the resource table, and the
+/// viewport it is drawn over (#608).
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct DrawScene3DPayload {
+    pub scene: i32,
+    pub bounds: Rect,
+}
+
+render_data_payload!(DrawScene3DPayload => DrawScene3D { scene: i32, bounds: Rect });
+
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct DrawCustomPayload {
     pub operation: i32,
