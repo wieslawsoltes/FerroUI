@@ -212,7 +212,7 @@ not an option (no vertex stage with depth), nor are storage-buffer layouts like 
 (they exclude WebGL2 and GLES 3.0), nor wgpu everywhere (it would link wgpu into every Skia build
 and cannot run on the ANGLE and WebGL2 contexts Skia owns; decision B).
 
-**Lighting** (decision A). ProGPU's `ComputeWpfLighting`, per pixel: the sum of the ambient lights
+**Lighting** (decision A, recorded in DEVIATIONS.md). ProGPU's `ComputeWpfLighting`, per pixel: the sum of the ambient lights
 times the material's `AmbientColor`; Lambert diffuse; `SpecularMaterial` as an additive term with
 `SpecularPower` (Blinn-Phong); `EmissiveMaterial` added without light; WPF's attenuation
 `1 / max(c + l*d + q*d^2, 1)` cut off at `Range`; the spot falloff between the outer and the inner
@@ -254,8 +254,9 @@ mesh's texture coordinates; section 6.2). The video sampling ports ProGPU's
 ### 3.6 Depth, MSAA and the output target
 
 - **Formats.** Color RGBA8, premultiplied, cleared to transparent (0, 0, 0, 0) (ProGPU clears to an
-  opaque grey; WPF's viewport is transparent). Depth `Depth24Plus` (wgpu) or `DEPTH_COMPONENT24`
-  (GL), private to the pass.
+  opaque grey; WPF's viewport is transparent). Depth private to the pass: `Depth32Float` in the wgpu
+  executor (section 3.15: the `f32` depth of the CPU reference, a core format of WebGL2 and OpenGL
+  ES 3.0), `DEPTH_COMPONENT24` or `DEPTH_COMPONENT32F` in GL.
 - **Pooling.** Targets pooled by size rounded to 32 pixels, like `pooled_size`, with a depth pool
   like `vello_hybrid_scene_sink.rs`'s `depth_views`.
 - **Size.** Physical pixels: the arranged size times the render scale; under a rotation or skew of
@@ -643,7 +644,8 @@ through `drawable_image` (raster, Ganesh and Graphite alike; Graphite keeps the 
 kept image lives), on Vello an image paint of the scene (CPU, hybrid and GPU). Skia without a GPU
 context and the CPU mode of Vello draw the reference by definition; Skia with a GPU context and the
 hybrid and GPU modes of Vello count every such scene (`ferroui_render3d::scenes_drawn_on_cpu`) and
-log the first, the gap D4 and later close. The headless platform's own drawing context draws
+log the first, the gap D4 and later close (D4 closes it for the hybrid and GPU modes of Vello,
+section 3.15). The headless platform's own drawing context draws
 nothing at all (also no 2D) and has no 3D capability; the headless platform with Skia draws through
 Skia raster.
 
@@ -665,6 +667,104 @@ of the harness for the plain scenes, 3 % for the rotated one), check that a `Mat
 perspective camera's matrices draws the same image, that an empty scene draws nothing, and that an
 unchanged viewport is rasterized once.
 
+### 3.15 The wgpu executor as built (D4)
+
+**The shader** (`src/FerroUI.Rendering3D/shaders/scene3d.wgsl`, `shader.rs`). One WGSL module, a
+port of ProGPU's `Mesh3DSolid.wgsl` rewritten to the subset of section 3.4: the uniform blocks
+`FrameUniforms` (group 0) and `DrawUniforms` (group 1, at a dynamic offset per draw), declared by
+the text of `uniforms::WGSL_DECLARATIONS` unchanged; interleaved vertices of 32 bytes (position,
+normal, texture coordinate at locations 0 to 2) drawn with `u32` indices; `@builtin(front_facing)`
+for the side of a face; the loop over at most 16 lights; f32 throughout. The functions are those of
+`lighting.rs` and `cpu/mod.rs` in the same order of operations (`safe_normalize` keeps the zero
+vector zero, as the CPU reference does); the clip position is `@invariant`, so the layers of a
+material, drawn over the same triangles with `LessEqual`, have the same depth. Four entry points:
+`vs_main` and `fs_main` draw a layer, `vs_resolve` and `fs_resolve` are the resolve of decision N
+(the resolved colour with its alpha raised to its largest colour channel, read by `textureLoad`).
+The tests of `shader.rs` validate the module with naga, translate every entry point to GLSL ES
+3.00 with `is_webgl: true` (`invariant gl_Position`, `gl_FrontFacing`, `texelFetch`, std140
+blocks), check that the declarations are those of `uniforms.rs` and that naga lays the structures
+out at the offsets of the Rust structures, that only uniform blocks under 16 KiB and textures are
+bound, and how a mesh is written (`shader::write_mesh`: missing normals and texture coordinates
+zero, triangles naming a vertex that does not exist left out, as the CPU reference does).
+
+**Where it lives.** `ferroui-render3d`, module `wgpu_executor`, behind the crate's feature `wgpu`
+(the workspace's `wgpu`, without `unsafe`). The executor takes a `wgpu::Device`, a `wgpu::Queue`
+and the view of an output texture, nothing of Vello's, so the browser's WebGPU path and the ProGPU
+backend (D13) can draw with it too; `ferroui-vello` turns the feature on with its GPU modes and
+`media3d` (`wgpu-device` names `ferroui-render3d?/wgpu`) and keeps what is Vello's (the pool of
+device textures, the kept outputs, the painting) in `gpu/scene3d_passes.rs`.
+
+**The executor** (`Scene3DWgpuExecutor`, one per device and thread):
+
+- **Draws.** One draw per material layer, the front layers of a model and then its back layers, in
+  tree order; a front draw culls the back faces (`FrontFace::Ccw`: counterclockwise on the screen is
+  a front face) and a back draw the front faces. The first diffuse layer of a side writes depth with
+  `Less`, the others test `LessEqual` without writing; a diffuse layer blends premultiplied
+  source-over, a specular or emissive layer `One, One`.
+- **Pipelines** by `Scene3DPipelineKey` (`Copy`: the blend, the side, whether depth is written, the
+  sample count, the colour and depth formats), made on first demand inside an error scope and kept
+  in a `HashMap` of the executor, so at most eight per sample count and device, and one resolve
+  pipeline; counted (`pipelines_created`). The shader module, the three bind group layouts and the
+  two pipeline layouts are made once with the executor. The brush kind and the frame-sampling
+  variant join the key with D6 and D7.
+- **Meshes** by `(id, version)`: an interleaved vertex buffer and an index buffer, uploaded with
+  `Queue::write_buffer` when the pair is new; a new version of a mesh reuses the buffers of the
+  version it replaces when they are large enough. Meshes and targets not drawn for 240 renders go.
+- **Uniforms.** A `Scene3DViewport` holds the uniform buffers of one viewport with the bytes they
+  hold: the `FrameUniforms` (1376 bytes) in one, the `DrawUniforms` of its draws in another at a
+  stride of `min_uniform_buffer_offset_alignment` (176 bytes rounded up: 256 on every current
+  device), grown by powers of two, each with its bind group made once with the buffer. A render
+  writes the frame block when its bytes changed and the range of the draws whose bytes changed:
+  a camera that moves writes the 1376 bytes of the frame block alone.
+- **Targets.** The multisampled colour, the depth and the resolved colour of decision N are pooled
+  by the size of the output texture and the sample count, made on first need; depth is cleared once
+  per render and not stored. 4x MSAA where `Rgba8Unorm` and `Depth32Float` take four samples by
+  WebGPU's guarantees, one sample for `EdgeMode` `Aliased`. A scene of diffuse layers alone is
+  resolved by the GPU into the output; a scene with specular or emissive layers is resolved into
+  the pooled colour, and `fs_resolve` writes the output from it. The scene is drawn at the top left
+  of the output (viewport and scissor of its size); the rest of the texture is transparent.
+- **Failures.** The executor's creation, each pipeline and each render run in error scopes
+  (validation and memory). A failure with four samples is reported once and the executor draws
+  with one from then on; a failure with one sample is the error of the render.
+
+**Vello** (`gpu/scene3d_passes.rs`, `drawing_context_impl/scene_3d.rs`). In the hybrid and GPU
+modes (a scene of the device that paints with its textures) `draw_scene_3d` asks
+`scene3d_passes::scene_texture` for the texture of the scene and paints it over the bounds, the
+image's pixels stretched over them and sampled bilinearly, as the image of the CPU reference is
+painted, under the transform, clips, opacity and layers of the context. Each device keeps up to
+eight outputs, each a texture of the pool (`effect_passes::pooled_texture`, sizes rounded up to 32
+pixels) with its `Scene3DViewport`:
+
+1. the snapshot, its generations, the size, the scale and the edge mode of a kept output: the
+   output is painted again, no 3D pass (`cached_output_frames`);
+2. otherwise the output of the same viewport (the same device position and size), of a snapshot
+   that is gone, a new one, or the least recently used is drawn into; one that a scene not yet
+   rendered still paints with is swapped for another texture of the pool;
+3. a render that wrote uniforms and made nothing is a `uniform_only_frames`.
+
+An executor that cannot be made, or a render that fails, is reported once (area `Visual`, level
+error); that device then draws its 3D scenes with the CPU reference, each counted
+(`scenes_drawn_on_cpu`). The CPU mode, and a scene of the CPU renderer inside a GPU mode, draw the
+CPU reference as before. `ferroui_vello::gpu::scene3d_counters()` returns the counters of the
+thread (`VelloScene3DCounters`: pipelines created, mesh uploads, uniform-only frames, cached-output
+frames, 3D passes, textures and buffers made, uniform bytes, scenes drawn on the GPU).
+
+**Tests.** `scene3d_tests.rs` holds the hybrid and GPU modes to the CPU reference within 3 levels
+inside the faces (a pixel whose 3x3 neighbourhood in the reference differs by at most 8 levels) and
+within the mean of `Tolerance::Moves` over the image, since their edges are 4x MSAA (rotated-grid
+samples) and the reference's an ordered grid; the golden probes, inside the faces, keep their
+levels; the comparison with Skia raster allows the share of those edges (3 %).
+`steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture` (eight frames of a
+camera turning about the cube after two to warm up: eight 3D passes, eight uniform-only frames, no
+pipeline, mesh upload, texture or buffer, the frame block's bytes alone, nothing rasterized),
+`a_static_viewport_issues_no_3d_pass` (six frames whose 2D content animates: no pass, six kept
+outputs, no uniform written, the same pixels) and `pipelines_are_created_once_per_device` (every
+scene in each GPU mode at 1x and 2x makes at most one pipeline per key, and drawing them again, in
+the same or the other mode, which draws on the same device, makes none). The unit tests of
+`wgpu_executor.rs` check the stride, the key, three pipelines made once per device for a diffuse
+and an emissive layer (and three again on a second device), and a moving camera writing only the
+frame block.
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -677,7 +777,7 @@ this page.
 | D1 | The values (section 3.12) and their markup converters, with tests: inversion and determinant against hand values, append and prepend, `RotateAt`, axis and angle round trips, slerp, `Rect3D` union and intersection with `Empty`, points against vectors, the projective `Point4D`, the text forms | additions (a new crate) | low | in review |
 | D2 | The scene model (section 3.13): transforms, rotations, cameras, lights, materials, `Geometry3D` and `MeshGeometry3D` with the collections, models, `Visual3D`, `ModelVisual3D`, `Viewport3DVisual`, the control `Viewport3D`; `Scene3DSnapshot` with the fitted planes and the generations; the render-data operation `DrawScene3D` and the capability `IDrawingContextImplWithScene3D`; XAML registration and the namespace mapping; the facade feature `media3d`. Tests: the snapshot of nested `Model3DGroup`s with transforms, a camera change bumping only `camera_generation`, a mesh edit bumping the structure, a light colour bumping the records, the fitted planes, `Bounds`, the text forms of the collections, a cube scene loaded from XAML, the operation recorded, sent and replayed with and without the capability | additions | medium: the namespace clash of `Vector3D`; the shape of the snapshot fixes every executor's input | in review |
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
-| D4 | `scene3d.wgsl` and the wgpu executor in Vello (hybrid and GPU, Metal first): the pipeline cache, the mesh cache, the depth and MSAA pools, the composition by `paint_device_layer`, the reuse of the cached output; `IDrawingContextImplWithScene3D`. Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode`, `the_backends_draw_every_scene_3d_alike`, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation of the shader; `vello.yml` on Metal, lavapipe in `ci.yml` | addition (a capability trait) | high: the first GPU route; the uniform layout and alignment (256-byte dynamic offsets) | planned |
+| D4 | `scene3d.wgsl` and the wgpu executor (section 3.15): `ferroui-render3d`'s `shader` module and feature `wgpu` (the pipeline cache by a `Copy` key, the mesh cache by `(id, version)`, uniform buffers with dynamic offsets written only where they changed, the depth, MSAA and resolve pools, the fallback to one sample), and Vello's hybrid and GPU modes drawing on the device (`gpu/scene3d_passes.rs`: the outputs kept per device, painted as textures of the device, the CPU reference as the reported and counted last resort). Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode` and `the_backends_draw_every_scene_3d_alike` with the GPU modes, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation and GLSL ES 3.00 of the shader; run by `vello.yml` on Metal (its paths now include `src/FerroUI.Rendering3D/`), Vulkan with D9 | additions (the module `wgpu_executor`, `ferroui_vello::gpu::scene3d_counters`) | high: the first GPU route; the uniform layout and alignment (dynamic offsets at the device's alignment) | in review |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
 | D6 | Materials from brushes: gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | none new | medium | planned |
 | D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | planned |
