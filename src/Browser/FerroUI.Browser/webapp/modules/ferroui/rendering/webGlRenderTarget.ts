@@ -100,8 +100,10 @@ export class WebGlRenderTarget extends WebRenderTarget {
     }
 
     public static frameContext(handle: number): FrameGlContext | undefined {
-        // Media bridges to workers are explicitly unavailable in this profile.
-        return typeof document === "undefined" ? undefined : WebGlRenderTarget.frameContexts.get(handle);
+        // The context of a canvas of this thread: of the page, or of the render worker, which takes
+        // media frames transferred from the page (#601). Which route a producer uses is decided by
+        // where the compositor's context lives (`renders_on_render_thread`).
+        return WebGlRenderTarget.frameContexts.get(handle);
     }
 
     public static frameGeneration(handle: number): number {
