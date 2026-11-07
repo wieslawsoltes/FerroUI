@@ -320,9 +320,10 @@ those of the unmerged #496 that need no binary markup, re-applied to the current
   inherited-change notification through a callback stored on the property by an inheriting
   registration. A value type whose properties never coerce or inherit does not retain them.
 - **Installation by overload.** Typed, binding-value and boxed sources choose their observer
-  where they are bound; boxed sources are installed by one non-generic `add_boxed_binding` that
-  still delivers through the original typed `BindingEntry<T>` cache and typed observer (a fully
-  shared observer measured 7 to 21 % slower boxed style delivery in #496 and was not taken).
+  where they are bound; boxed sources are installed by one non-generic `add_boxed_binding`. In
+  #565 a boxed source still delivered through the typed `BindingEntry<T>` cache and a typed
+  observer (a fully shared observer measured 7 to 21 % slower boxed style delivery in #496 and was
+  not taken then); #576 erased that path (section 4.10).
 - **Cold construction.** Property identity, registration per owner type, direct property
   construction, class vtable initialisation, metadata host lookup and the nullable operations of
   the value type registry (one typed operation per nullable type) are shared non-generic paths.
@@ -472,6 +473,54 @@ executable (1.72 MB of closure bodies in hello world, most of them in markup met
 |---|---:|
 | class tables as constants (4.8) | 43.03 MB |
 | and fewer closures | 41.95 MB (**-1.07 MB**) |
+
+### 4.10 Type-erased binding observers (#576, part 1)
+
+A binding of untyped values (`IObservable<BoxedValue>`: style setters, markup, `bind_untyped`) was
+delivered by observers compiled once per value type of a property: the entry of a value frame
+(`BindingEntry<T>` with its `UntypedObserver<T>`), the local value observer (`Value<T>` with its
+`Observer<T>`) and the direct property observer (`DirectBindingObserver<T>` with `DirectUntyped<T>`).
+The routes of every property reach them, so every value type had all three (1.43 MB in 2,477
+functions with the animation observers, section 5.4).
+
+They are now one type each, not generic: `BoxedBindingEntry`, `BoxedLocalValueBindingObserver` and
+`DirectBoxedBindingObserver`. A value stays boxed (`BindingValue<BoxedValue>`), and the box always
+holds exactly the property's value type. The interpretation of an untyped value (the value type,
+`BindingValue<T>`, the unset and do-nothing markers, notifications, implicit conversion) is one
+function, `resolve_boxed_binding_value`. What names the value type is a route of the property, the
+table of `fn` pointers every property already has (`PropertyRoutes`), with four new entries:
+
+- `route_unpack_binding_value`: the parts of a `BindingValue<T>`, its value in a box;
+- `route_enable_data_validation`: the data validation flag of the metadata, read without a copy;
+- `route_set_local_value` (styled) and `route_set_direct_binding_value` (direct): the typed write
+  of the store, which moves the value out of a box the observer made and clones it otherwise;
+
+and the existing `route_box_value`, `route_copy_value`, `route_is_valid_value` and
+`route_get_default_value`. Two routes that constructed typed observers
+(`route_create_boxed_local_binding`, `route_create_binding_entry`) are gone.
+
+The typed paths are unchanged: `bind` and `bind_value` with their typed entries and observers,
+typed `set_value`, and the reads of `EffectiveValue<T>`. Behaviour is unchanged as well: priority,
+notification order, data validation, `UnsetValue` and `DoNothing`, disposal and reentrancy, and the
+number of copies of a value. A value in a frame is a snapshot in a box of the entry's own, as it was
+a clone in the typed entry, so each value delivered to a frame costs one allocation. The one
+difference is equality: an entry compares a new value with the comparer of the store
+(`value_equals`, which takes two NaN to be equal) instead of `PartialEq` alone, so a NaN delivered
+again is not published again, which the store would not have raised either.
+
+The animation observers (`StepObserver<A>`, `PreviewValue<T>`) are not part of this change: they
+are generic over the animator, not the property, and their code is the timing of the animation
+instance, inlined into them.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
+|---|---:|
+| fewer closures (4.9) | 41.95 MB |
+| one observer for untyped bindings | 40.39 MB (**-1.56 MB**) |
+
+The property, binding and styling benchmarks (`base::`, `data::`, `styling::` of
+`ferroui-benchmarks`, release, alternate runs) are within the noise of the machine: the median
+benchmark is 2 % faster, and the two resource lookups that are slower in both runs (`find_pre_resource`,
+`find_not_existing_resource`, 8 to 14 %) differ by as much between two runs of the same code.
 
 ## 5. What an executable is made of
 
