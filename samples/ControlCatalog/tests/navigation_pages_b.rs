@@ -140,8 +140,9 @@ fn navigation_demo_page_lists_the_samples_and_opens_one() {
     let sample_nav = page.get_control::<NavigationPage>("SampleNav");
     assert_eq!(1, sample_nav.stack_depth());
     let home = sample_nav.current_page().expect("the home page");
+    // The control demos of the gallery; the sample applications are not part of the catalog.
     let cards = descendants::<Button>(&home);
-    assert_eq!(22, cards.len());
+    assert_eq!(18, cards.len());
 
     click(&cards[0]);
     assert_eq!(2, sample_nav.stack_depth());
