@@ -48,11 +48,13 @@ use ferroui_controls::automation::peers::{
 };
 use ferroui_controls::automation::provider as aap;
 use ferroui_controls::automation::{
-    AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperty, AutomationPropertyChangedEventArgs,
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, RangeValuePatternIdentifiers,
+    AutomationElementIdentifiers, AutomationError, AutomationLiveSetting, AutomationProperty,
+    AutomationPropertyChangedEventArgs, ExpandCollapsePatternIdentifiers, ExpandCollapseState, RangeValuePatternIdentifiers,
     ScrollPatternIdentifiers, SelectionItemPatternIdentifiers, SelectionPatternIdentifiers, TogglePatternIdentifiers,
 };
-use ferroui_microcom::{make_com_with, ComPtr, HResult, IUnknown, InterfaceEntry, E_ABORT, E_FAIL, E_INVALIDARG};
+use ferroui_microcom::{
+    make_com_with, ComPtr, HResult, IUnknown, InterfaceEntry, COR_E_INVALIDOPERATION, E_ABORT, E_FAIL, E_INVALIDARG,
+};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -67,6 +69,24 @@ pub(crate) const ELEMENT_NOT_ENABLED: HResult = HResult(UiaCoreProviderApi::UIA_
 /// The peer has no provider of the pattern (the result code of the
 /// `NotSupportedException` of the reference).
 pub(crate) const NOT_SUPPORTED: HResult = HResult(0x8013_1515);
+/// An argument is out of the range of its valid values (the result code of
+/// the `ArgumentOutOfRangeException` of the reference,
+/// `COR_E_ARGUMENTOUTOFRANGE`).
+pub(crate) const ARGUMENT_OUT_OF_RANGE: HResult = HResult(0x8013_1502);
+
+/// The result code of a provider call that the state of its element refuses
+/// (#567): the result code the runtime of the reference returns for the
+/// exception the provider throws there. `InvalidOperationException` is
+/// `COR_E_INVALIDOPERATION`, the value of `UIA_E_INVALIDOPERATION`.
+pub(crate) fn automation_error_code(error: &AutomationError) -> HResult {
+    match error {
+        AutomationError::ElementNotEnabled(_) => ELEMENT_NOT_ENABLED,
+        AutomationError::InvalidOperation(_) => HResult(COR_E_INVALIDOPERATION),
+        AutomationError::ArgumentOutOfRange(_) => ARGUMENT_OUT_OF_RANGE,
+        AutomationError::NotSupported(_) => NOT_SUPPORTED,
+        _ => HResult(E_FAIL),
+    }
+}
 
 /// What a node is: the classes of the reference that derive from the node
 /// are kinds of the one COM class here.
@@ -539,9 +559,13 @@ impl AutomationNode {
     /// `InvokeSync`: runs `func` on the UI thread with the peer of the
     /// node and waits for its value.
     ///
-    /// A panic of `func` is the failure of the call (the exception of the
-    /// reference, which its runtime turns into a result code): a call of a
-    /// client must not end the thread that serves it.
+    /// A call the state of the control refuses is an error of the provider
+    /// (`AutomationError`), which the callers map to its result code
+    /// ([`AutomationNode::enabled`]). A panic of `func` is a bug (or a
+    /// panicking application handler that `invoke` runs, a button's click):
+    /// under unwinding it is the failure of the call, `E_FAIL`, so that a
+    /// call of a client does not end the thread that serves it; with
+    /// `panic = "abort"` it ends the process.
     pub(crate) fn invoke_sync<R: Send + 'static>(
         &self,
         func: impl FnOnce(&Ref<AutomationPeer>) -> R + Send + 'static,
@@ -549,6 +573,8 @@ impl AutomationNode {
         let id = self.id;
         let run = move || -> Result<R, HResult> {
             let peer = Self::peer_of(id).ok_or(ELEMENT_NOT_AVAILABLE)?;
+            // Boundary (#567): unexpected panics only; refused calls are
+            // errors of the providers, mapped without a panic.
             catch_unwind(AssertUnwindSafe(|| func(&peer))).map_err(|_| HResult(E_FAIL))
         };
         if self.dispatcher.check_access() {
@@ -571,10 +597,11 @@ impl AutomationNode {
         })?
     }
 
-    /// The failure of an element that is not enabled as the result code of
-    /// the system (`UIA_E_ELEMENTNOTENABLED`).
-    pub(crate) fn enabled<T>(result: Result<T, ElementNotEnabledError>) -> Result<T, HResult> {
-        result.map_err(|_| ELEMENT_NOT_ENABLED)
+    /// The error of a provider as the result code of the system: an element
+    /// that is not enabled is `UIA_E_ELEMENTNOTENABLED`, the other refusals
+    /// of [`AutomationError`] the codes of [`automation_error_code`].
+    pub(crate) fn enabled<T, E: Into<AutomationError>>(result: Result<T, E>) -> Result<T, HResult> {
+        result.map_err(|error| automation_error_code(&error.into()))
     }
 
     fn raise(id: i32, raise: impl FnOnce(Option<&IRawElementProviderSimple>)) {

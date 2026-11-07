@@ -495,10 +495,9 @@ available stencils, and flyout items expose invoke plus the applicable selection
 pattern. Width values clamp to their range and raise the framework's value
 change notification. These mappings use real framework flyouts and providers.
 
-FerroUI's existing selection-provider result type can represent only
-`ElementNotEnabledException`, so a forbidden add/remove selection operation
-returns that type with an explicit invalid-operation message. The operation is
-rejected, but the native `UIA_E_INVALIDOPERATION` HRESULT is not preserved.
+A forbidden add/remove selection operation returns
+`AutomationError::InvalidOperation` (#567), which the Windows backend answers
+with `UIA_E_INVALIDOPERATION`, the native result code.
 Provider and source-scenario tests are recorded individually in the test ledger;
 external accessibility-client behavior still requires platform validation.
 

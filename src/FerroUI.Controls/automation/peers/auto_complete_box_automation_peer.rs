@@ -3,7 +3,7 @@ use super::{
 };
 use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, ValuePatternIdentifiers,
+    AutomationError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, ValuePatternIdentifiers,
 };
 use crate::AutoCompleteBox;
 use ferroui_base::{
@@ -63,11 +63,11 @@ impl IExpandCollapseProvider for ProviderAdapter<AutoCompleteBoxAutomationPeer> 
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -122,13 +122,13 @@ impl AutoCompleteBoxAutomationPeer {
     }
 
     /// Closes the drop-down (the expand and collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(false);
         Ok(())
     }
 
     /// Opens the drop-down (the expand and collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(true);
         Ok(())
     }

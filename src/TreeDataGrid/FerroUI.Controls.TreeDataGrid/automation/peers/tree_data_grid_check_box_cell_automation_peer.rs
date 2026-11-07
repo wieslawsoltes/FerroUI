@@ -8,7 +8,7 @@ use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeerImpl,
 };
 use ferroui_controls::automation::provider::{IToggleProvider, ToggleState};
-use ferroui_controls::automation::ElementNotEnabledError;
+use ferroui_controls::automation::AutomationError;
 use std::rc::Rc;
 
 /// An automation peer which represents a [`TreeDataGridCheckBoxCell`].
@@ -44,7 +44,7 @@ impl IToggleProvider for ToggleProviderAdapter {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    fn toggle(&self) -> Result<(), AutomationError> {
         self.0.toggle()
     }
 }
@@ -80,14 +80,15 @@ impl TreeDataGridCheckBoxCellAutomationPeer {
 
     /// Moves the check box to its next state (`Toggle`).
     ///
-    /// # Panics
-    /// When the cell is read only (`NotSupportedException`).
-    pub fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    /// # Errors
+    /// [`AutomationError::ElementNotEnabled`] when the cell is not enabled,
+    /// [`AutomationError::NotSupported`] when it is read only (`NotSupportedException`).
+    pub fn toggle(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();
         if owner.is_read_only() {
-            panic!("TreeDataGrid checkbox cells are read-only.");
+            return Err(AutomationError::NotSupported("TreeDataGrid checkbox cells are read-only.".to_owned()));
         }
 
         owner.set_value(Self::next_value(owner.value(), owner.is_three_state()));

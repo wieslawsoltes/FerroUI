@@ -3,17 +3,20 @@
 //! `7e4b0c2096be402f51cc8f7d203ebf67cff183d0` (Microsoft Corporation, MIT).
 //! Only owned, portable values cross the dispatcher boundary.
 
-use super::automation_node::{ELEMENT_NOT_AVAILABLE, ELEMENT_NOT_ENABLED, NOT_SUPPORTED};
+use super::automation_node::{automation_error_code, ELEMENT_NOT_AVAILABLE, ELEMENT_NOT_ENABLED, NOT_SUPPORTED};
 use super::interop::{TextPatternRangeEndpoint, TextUnit, UiaCoreTypesApi};
 use super::marshalling::{ComVariant, VariantValue};
 use ferroui_base::media::Color;
 use ferroui_controls::automation::provider::{self as portable, TextAttribute, TextAttributeValue};
-use ferroui_controls::automation::ElementNotEnabledError;
+use ferroui_controls::automation::{AutomationError, ElementNotEnabledError};
 use ferroui_microcom::{ComPtr, HResult, IUnknown, COR_E_INVALIDOPERATION, E_FAIL, E_INVALIDARG};
 
 pub(crate) fn provider_error(error: portable::ProviderError) -> HResult {
     if error.downcast_ref::<ElementNotEnabledError>().is_some() {
         return ELEMENT_NOT_ENABLED;
+    }
+    if let Some(error) = error.downcast_ref::<AutomationError>() {
+        return automation_error_code(error);
     }
     match error.downcast_ref::<portable::TextProviderError>() {
         Some(portable::TextProviderError::ElementNotAvailable) => ELEMENT_NOT_AVAILABLE,

@@ -18,7 +18,6 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::{CultureInfo, DateTime, TestCultureDataProvider};
 use ferroui_base::{AnyValue, BoxedValue, FerroLocator, Ref};
 use std::cell::RefCell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 fn create_peer(control: &Control) -> Ref<AutomationPeer> {
@@ -273,7 +272,11 @@ mod calendar_automation_peer_tests {
         let target = Calendar::new();
         let peer = create_peer(&target).get_provider::<dyn IValueProvider>().unwrap();
 
-        assert!(catch_unwind(AssertUnwindSafe(|| peer.set_value(Some("2026-01-01")))).is_err());
+        let error = peer.set_value(Some("2026-01-01")).expect_err("the value of a calendar is read-only");
+        assert_eq!(
+            Some(&crate::automation::AutomationError::not_supported()),
+            error.downcast_ref::<crate::automation::AutomationError>()
+        );
     }
 
     #[test]

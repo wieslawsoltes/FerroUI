@@ -7,7 +7,6 @@ use crate::test_support::test_scope;
 use crate::ComboBox;
 use ferroui_base::{AnyValue, Ref};
 use std::cell::Cell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 fn value(combo_box: &Ref<ComboBox>) -> Rc<dyn IValueProvider> {
@@ -70,7 +69,13 @@ fn set_value_throws_when_not_editable() {
     let combo_box = ComboBox::new();
     let provider = value(&combo_box);
 
-    assert!(catch_unwind(AssertUnwindSafe(|| provider.set_value(Some("x")))).is_err());
+    let error = provider.set_value(Some("x")).expect_err("the combo box is not editable");
+    assert_eq!(
+        Some(&crate::automation::AutomationError::invalid_operation_with(
+            "Cannot set the value of a non-editable ComboBox."
+        )),
+        error.downcast_ref::<crate::automation::AutomationError>()
+    );
 }
 
 #[test]

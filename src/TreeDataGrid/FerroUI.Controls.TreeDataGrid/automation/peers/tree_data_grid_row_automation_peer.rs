@@ -15,7 +15,7 @@ use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, ISelectionItemProvider, ISelectionProvider, IToggleProvider, IValueProvider, ProviderError,
     ToggleState,
 };
-use ferroui_controls::automation::{ElementNotEnabledError, ExpandCollapseState};
+use ferroui_controls::automation::{AutomationError, ExpandCollapseState};
 use ferroui_treedatagrid_core::models::RowRef;
 use ferroui_treedatagrid_core::IndexPath;
 use std::rc::Rc;
@@ -82,7 +82,7 @@ impl IToggleProvider for ToggleProviderAdapter {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    fn toggle(&self) -> Result<(), AutomationError> {
         self.0.toggle()
     }
 }
@@ -103,8 +103,7 @@ impl IValueProvider for ValueProviderAdapter {
     }
 
     fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
-        self.0.set_value(value);
-        Ok(())
+        self.0.set_value(value).map_err(Into::into)
     }
 }
 
@@ -123,11 +122,11 @@ impl IExpandCollapseProvider for ExpandCollapseProviderAdapter {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -147,15 +146,15 @@ impl ISelectionItemProvider for SelectionItemProviderAdapter {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn add_to_selection(&self) -> Result<(), AutomationError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn remove_from_selection(&self) -> Result<(), AutomationError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledError> {
+    fn select(&self) -> Result<(), AutomationError> {
         self.0.select()
     }
 }
@@ -250,7 +249,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Expands or collapses the row (`Toggle`).
-    pub fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn toggle(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -262,7 +261,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Expands the row (`Expand`).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -274,7 +273,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Collapses the row (`Collapse`).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -285,14 +284,14 @@ impl TreeDataGridRowAutomationPeer {
         Ok(())
     }
 
-    /// # Panics
-    /// Always: rows are read only (`NotSupportedException`).
-    pub fn set_value(&self, _value: Option<&str>) {
-        panic!("TreeDataGrid rows are read-only.");
+    /// # Errors
+    /// Always [`AutomationError::NotSupported`]: rows are read only (`NotSupportedException`).
+    pub fn set_value(&self, _value: Option<&str>) -> Result<(), AutomationError> {
+        Err(AutomationError::NotSupported("TreeDataGrid rows are read-only.".to_owned()))
     }
 
     /// Adds the row to the selection (`AddToSelection`).
-    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn add_to_selection(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {
@@ -302,7 +301,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Removes the row from the selection (`RemoveFromSelection`).
-    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn remove_from_selection(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {
@@ -312,7 +311,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Selects the row alone (`Select`).
-    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn select(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {

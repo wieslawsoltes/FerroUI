@@ -24,7 +24,6 @@ use crate::{
 use ferroui_base::data::{BindingMode, IndexerBinding};
 use ferroui_base::{Ref, TypeInfo};
 use std::cell::Cell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 fn create_peer(control: &Control) -> Ref<AutomationPeer> {
@@ -220,7 +219,7 @@ fn list_item_peer_selects_its_item() {
     assert_eq!(1, target.selected_index());
 
     target.set_is_enabled(false);
-    assert_eq!(Err(ElementNotEnabledError::new()), first.select());
+    assert_eq!(Err(crate::automation::AutomationError::from(ElementNotEnabledError::new())), first.select());
     assert!(first.add_to_selection().is_err());
     assert!(first.remove_from_selection().is_err());
 }
@@ -273,9 +272,14 @@ fn scroll_viewer_peer_scrolls_its_owner() {
     assert_eq!(50.0, provider.vertical_scroll_percent());
 
     // A direction that cannot scroll, and a percentage out of range.
-    assert!(catch_unwind(AssertUnwindSafe(|| provider.set_scroll_percent(50.0, 50.0))).is_err());
-    assert!(catch_unwind(AssertUnwindSafe(|| provider.set_scroll_percent(ScrollPatternIdentifiers::NO_SCROLL, 101.0)))
-        .is_err());
+    assert_eq!(
+        Err(crate::automation::AutomationError::invalid_operation_with("Operation cannot be performed")),
+        provider.set_scroll_percent(50.0, 50.0)
+    );
+    assert_eq!(
+        Err(crate::automation::AutomationError::argument_out_of_range("verticalPercent")),
+        provider.set_scroll_percent(ScrollPatternIdentifiers::NO_SCROLL, 101.0)
+    );
 
     target.set_is_enabled(false);
     assert!(provider.set_scroll_percent(ScrollPatternIdentifiers::NO_SCROLL, 0.0).is_err());
