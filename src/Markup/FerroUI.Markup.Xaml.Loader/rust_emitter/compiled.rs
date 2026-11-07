@@ -36,10 +36,13 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
+use super::emitter::theme_units::{UnitEmission, TABLE as THEME_UNITS_TABLE};
 use super::emitter::{emit_function, reflection_path_types, root_value_handle_of, DocumentFunctions};
+use super::theme_unit_graph;
 use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
-use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
+use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
+use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitsModel, XamlMetadata};
 
 /// How the reason of a document of a group that did not transform starts
 /// ([`CompiledDocument::source`], [`GeneratedFile::documents`]): the error of the transform
@@ -112,6 +115,7 @@ impl GeneratedFile {
                 })
                 .collect(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+            theme_units: Vec::new(),
         }
     }
 }
@@ -444,7 +448,10 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
                 .and_then(|rest| rest.strip_prefix(function.as_str()));
             let deferred = || {
                 let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
-                let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
+                let rest = rest
+                    .strip_prefix("_deferred_")
+                    .or_else(|| rest.strip_prefix("_part_"))
+                    .or_else(|| rest.strip_prefix("_unit_"))?;
                 rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
             };
             build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
@@ -507,7 +514,9 @@ fn collides(a: &str, b: &str) -> bool {
     let is_deferred_of = |deferred: &str, function: &str| {
         deferred
             .strip_prefix(function)
-            .and_then(|rest| rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")))
+            .and_then(|rest| {
+                rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")).or_else(|| rest.strip_prefix("_unit_"))
+            })
             .is_some_and(|index| !index.is_empty() && index.chars().all(|c| c.is_ascii_digit()))
     };
     a == b || is_deferred_of(a, b) || is_deferred_of(b, a)
@@ -771,6 +780,17 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         names.push(function_name);
     }
 
+    // The units the compiled markup is partitioned into (#568, step 2 of
+    // docs/porting/theme-trimming.md): every document a merge inlined into another one is a unit
+    // of its own unless it is ambient. Planned from the documents and from where the merges took
+    // the entries from.
+    let origins = transformed[0].configuration.get_extra::<MergedEntryOrigins>().ok();
+    let plan = origins.as_ref().and_then(|origins| theme_unit_graph::plan(documents, &origins.documents()));
+    if let (Some(origins), Some(plan)) = (&origins, &plan) {
+        let unit_names = plan.units.iter().map(|unit| unit.name.clone()).collect();
+        functions.set_units(UnitEmission::new(origins.clone(), plan.unit_of_uri.clone(), unit_names));
+    }
+
     // The document of the class, then the documents its calls reach and the public
     // documents with a build function (the entries of the loader table). A document the
     // group merged into another one that is not public is not called and not emitted, as
@@ -885,6 +905,21 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         source.push('\n');
         source.push_str(function);
     }
+    // The units and the table of all units, when an entry of a unit was taken out of the
+    // functions of the documents (#568).
+    let units = functions.units().filter(|units| units.runs().iter().any(|runs| !runs.is_empty()));
+    let theme_units = match (units, plan) {
+        (Some(units), Some(plan)) => {
+            source.push('\n');
+            source.push_str(&units.table());
+            Some(ThemeUnitsModel {
+                class: class.full_name(),
+                table_path: format!("{module_path}::{THEME_UNITS_TABLE}"),
+                units: plan.units,
+            })
+        }
+        _ => None,
+    };
     source.push('\n');
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
@@ -922,6 +957,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         assembly_name: options.local_assembly.clone().unwrap_or_default(),
         crate_name: own_crate.to_string(),
         documents: exported,
+        theme_units,
     })
 }
 
@@ -955,9 +991,16 @@ pub struct ClassFile {
     assembly_name: String,
     crate_name: String,
     documents: Vec<DocumentModel>,
+    /// The unit graph of the theme of the class (#568), when its markup is partitioned into units.
+    theme_units: Option<ThemeUnitsModel>,
 }
 
 impl ClassFile {
+    /// The units the markup of the class is partitioned into (#568), when it is.
+    pub fn theme_units(&self) -> Option<&ThemeUnitsModel> {
+        self.theme_units.as_ref()
+    }
+
     /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
     /// for crates that include them. `dependencies` are the `.xamlmeta` files of the
     /// crates the documents include documents of, relative to the file the metadata is
@@ -968,6 +1011,7 @@ impl ClassFile {
             crate_name: self.crate_name.clone(),
             documents: self.documents.clone(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+            theme_units: self.theme_units.iter().cloned().collect(),
         }
     }
 }

@@ -15,13 +15,16 @@
 //! When the statements of a body are complete, [`row_runs`] replaces each run of consecutive
 //! row statements of one shape and one dictionary by one call of the builder of the shape over a
 //! table of the rows. A run ends at any other statement, including a statement of another
-//! shape, so the order of the additions is kept. A run shorter than the minimum of its shape
+//! shape, so the order of the additions is kept, and where the unit of the theme the statements
+//! are entries of changes (#568, step 2: the markers of [`super::theme_units`]), so that a unit
+//! keeps its rows. A run shorter than the minimum of its shape
 //! ([`RowKind::min_run`]) stays as it was written; everything that is not recognised stays as it
 //! was written. The build functions of the deferred rows of a run are then no longer emitted.
 
 use std::collections::{HashMap, HashSet};
 
 use super::super::emit_types::{EmitTypes, FrameworkType};
+use super::theme_units::unit_marker;
 use super::{absolute, identifiers, is_identifier, is_string_literal, static_resource_alias};
 
 /// The shortest run of plain values that is written as a row table. A deferred row is written
@@ -427,6 +430,9 @@ struct Found<'s> {
     code: usize,
     statement: usize,
     entry: &'s RowStatement,
+    /// The unit of the theme the statement is an entry of (#568, the markers of
+    /// [`super::theme_units`]); a run holds the entries of one unit only.
+    unit: Option<u32>,
 }
 
 /// The number of spaces a line is indented by.
@@ -446,13 +452,13 @@ fn found_at<'s>(
 ) -> Option<Found<'s>> {
     let text = lines[code].trim_start();
     if let Some(entry) = statements.get(text).filter(|entry| entry.prefix.is_none()) {
-        return Some(Found { start, code, statement: code, entry });
+        return Some(Found { start, code, statement: code, entry, unit: None });
     }
     let next = lines.get(code + 1)?;
     let entry = statements.get(next.trim_start())?;
     let (prefix, local) = entry.prefix.as_ref()?;
     (prefix == text && uses.get(local.as_str()) == Some(&2) && indentation(&lines[code]) == indentation(next))
-        .then_some(Found { start, code, statement: code + 1, entry })
+        .then_some(Found { start, code, statement: code + 1, entry, unit: None })
 }
 
 /// Ends the run `run`: a run as long as the minimum of its shape becomes the position markers
@@ -524,10 +530,15 @@ pub(super) fn row_runs(
     let mut body = Vec::with_capacity(lines.len());
     let mut tables = Vec::new();
     let mut run: Vec<Found<'_>> = Vec::new();
+    // The unit of the theme the statements are entries of, from the markers between them.
+    let mut unit: Option<u32> = None;
     let mut index = 0;
     while index < lines.len() {
         let start = index;
         while index < lines.len() && lines[index].trim_start().starts_with("//") {
+            if let Some(marker) = unit_marker(&lines[index]) {
+                unit = marker;
+            }
             index += 1;
         }
         if index == lines.len() {
@@ -535,14 +546,16 @@ pub(super) fn row_runs(
             body.extend(lines[start..].iter().cloned());
             break;
         }
-        let Some(found) = found_at(&lines, statements, &uses, start, index) else {
+        let Some(mut found) = found_at(&lines, statements, &uses, start, index) else {
             flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name);
             body.extend(lines[start..=index].iter().cloned());
             index += 1;
             continue;
         };
+        found.unit = unit;
         let continues = run.first().is_some_and(|first| {
             first.entry.kind == found.entry.kind
+                && first.unit == found.unit
                 && first.entry.dictionary == found.entry.dictionary
                 && indentation(&lines[first.code]) == indentation(&lines[found.code])
         });

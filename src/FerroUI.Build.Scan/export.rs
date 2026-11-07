@@ -283,7 +283,10 @@ impl Export {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
             match read {
-                Ok(read) if read.name == model.name => model.documents.extend(read.documents),
+                Ok(read) if read.name == model.name => {
+                    model.documents.extend(read.documents);
+                    model.theme_units.extend(read.theme_units);
+                }
                 Ok(read) => {
                     let error = format!("{}: the file describes the assembly `{}`, the crate is `{}`", path.display(), read.name, model.name);
                     return Outcome { lines, errors: vec![error] };
@@ -376,7 +379,7 @@ mod tests {
             populate_path: Some("::dependent::compiled_xaml::populate".to_string()),
             public: true,
         };
-        let mut metadata = XamlMetadata { name: "dependent".to_string(), crate_name: "dependent".to_string(), documents: vec![document.clone()], dependencies: Vec::new() };
+        let mut metadata = XamlMetadata { name: "dependent".to_string(), crate_name: "dependent".to_string(), documents: vec![document.clone()], dependencies: Vec::new(), theme_units: Vec::new() };
         fs::write(&checked_in, metadata.to_json()).expect("the checked-in file");
         let with_documents = || {
             Export::new(fixtures().join("dependent"), out.join("documents"), "dependent", vec![file.clone()])
