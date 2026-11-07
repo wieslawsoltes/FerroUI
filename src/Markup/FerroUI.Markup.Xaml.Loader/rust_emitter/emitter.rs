@@ -55,6 +55,10 @@ use super::emit_types::{
 };
 use super::source::rust_string_literal;
 
+/// Runs of theme resources written as row tables (#568).
+#[path = "theme_rows.rs"]
+mod theme_rows;
+
 /// Why a document is not eligible for emission: the first node (or member)
 /// the emitter has no exact Rust for.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -427,9 +431,30 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
 /// key, other members, another service provider.
 fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<Vec<String>> {
     let extension = types.framework_path(FrameworkType::StaticResourceExtension)?;
+    let StaticResourceAlias { marker, key, line, column } = static_resource_alias(&extension, lines, returned)?;
+    Some(vec![
+        format!("    {marker}"),
+        format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
+    ])
+}
+
+/// The parts of a body that is `{StaticResource key}` alone ([`static_resource_alias`]): the
+/// marker of `ResourceKey`, the key (a Rust string literal) and the position of `ProvideValue`.
+struct StaticResourceAlias<'s> {
+    marker: &'s str,
+    key: &'s str,
+    line: &'s str,
+    column: &'s str,
+}
+
+/// The parts of the body `lines`, returning `returned`, of deferred content that is
+/// `{StaticResource key}` alone, with `extension` the path of `StaticResourceExtension`: the
+/// extension created, its `ResourceKey` set to a text, `ProvideValue` with the context. `None`
+/// for any other body.
+fn static_resource_alias<'s>(extension: &str, lines: &'s [String], returned: &str) -> Option<StaticResourceAlias<'s>> {
     let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
-    let [create, marker, set_key, provide] = statements.as_slice() else { return None };
-    if *create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
+    let &[create, marker, set_key, provide] = statements.as_slice() else { return None };
+    if create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
         return None;
     }
     let key = set_key
@@ -444,10 +469,7 @@ fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], return
     if !is_string_literal(key) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err() || returned != "rt::to_value(provided_0)" {
         return None;
     }
-    Some(vec![
-        format!("    {marker}"),
-        format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
-    ])
+    Some(StaticResourceAlias { marker, key, line, column })
 }
 
 /// The literal of `::std::string::String::from("..")`, the form in which the emitter writes text
@@ -726,6 +748,17 @@ struct Emitter<'a> {
     /// that declares a `Locale` takes the literal only when it is a BCP-47 tag
     /// ([`Emitter::refused_locale_literal`]).
     culture_literals: HashMap<String, String>,
+    /// The paths of the framework types the rows of theme resources name (#568); `None` when
+    /// the type system lacks one, and then nothing is written as rows.
+    row_paths: Option<theme_rows::RowPaths>,
+    /// The deferred content in one of the shapes of the rows, by the name of its build
+    /// function, with the slot of the function ([`theme_rows::deferred_row`]).
+    deferred_rows: HashMap<String, (usize, theme_rows::DeferredRow)>,
+    /// The statements written so far that a row can replace, by their text
+    /// ([`theme_rows::RowStatement`]).
+    row_statements: HashMap<String, theme_rows::RowStatement>,
+    /// The row tables of the runs written as rows, in the order of their calls.
+    row_tables: Vec<String>,
 }
 
 struct ScopedNamespaceTable {
@@ -2719,9 +2752,11 @@ impl<'a> Emitter<'a> {
             let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
             if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, last, &local, &call)) {
                 self.lines.pop();
+                self.record_deferred_row(&fused);
                 self.line(fused);
                 return Ok(());
             }
+            self.record_value_row(&call);
             self.line(format!("{call};"));
             return Ok(());
         }
@@ -2741,6 +2776,50 @@ impl<'a> Emitter<'a> {
         let call = self.declared_call(node, &dictionary_setter, &[dictionary, key, info])?;
         self.line(format!("{call};"));
         Ok(())
+    }
+
+    /// Records the fused addition `statement` of a deferred resource as a row statement when
+    /// its build function is in one of the shapes of the rows ([`theme_rows`]).
+    fn record_deferred_row(&mut self, statement: &str) {
+        let Some(addition) = theme_rows::deferred_addition(statement) else { return };
+        let Some((slot, row)) = self.deferred_rows.get(addition.build) else { return };
+        let entry = theme_rows::deferred_row_statement(&addition, row, *slot);
+        self.row_statements.insert(statement.to_string(), entry);
+    }
+
+    /// Records `call`, the addition of a plain value to a dictionary, as a row statement when
+    /// the value has a literal form of the rows and the dictionary is a local that holds a
+    /// `ResourceDictionary` ([`theme_rows::value_row_statement`]).
+    fn record_value_row(&mut self, call: &str) {
+        let Some(paths) = &self.row_paths else { return };
+        let previous = self.lines.last().map(String::as_str);
+        let Some(entry) = theme_rows::value_row_statement(paths, call, previous) else { return };
+        let Some(dictionary_type) = self.types.framework_path(FrameworkType::ResourceDictionary) else { return };
+        if self.local_types.get(&entry.dictionary) != Some(&format!("::ferroui_base::Ref<{}>", absolute(&dictionary_type))) {
+            return;
+        }
+        self.row_statements.insert(format!("{call};"), entry);
+    }
+
+    /// `lines`, a complete body, with the runs of row statements written as row tables
+    /// ([`theme_rows::row_runs`]); the build functions of the deferred rows of those runs are
+    /// no longer emitted.
+    fn apply_row_runs(&mut self, lines: Vec<String>) -> Vec<String> {
+        let prefix = self.function_name.to_uppercase();
+        let mut next = self.row_tables.len();
+        let (lines, runs) = theme_rows::row_runs(lines, &self.row_statements, &self.document, || {
+            let name = format!("{prefix}_ROWS_{next}");
+            next += 1;
+            name
+        });
+        let document_text = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
+        for (name, run) in runs {
+            for slot in &run.slots {
+                self.deferred_functions[*slot].clear();
+            }
+            self.row_tables.push(theme_rows::row_table(&name, &document_text, &run));
+        }
+        lines
     }
 
     /// Deferred content (`XamlDeferredContentNode`): the build function as a
@@ -2788,6 +2867,7 @@ impl<'a> Emitter<'a> {
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
+        let body_lines = self.apply_row_runs(body_lines);
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         let context_name = if uses_context { "context" } else { "_context" };
@@ -2802,12 +2882,19 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {\n",
         );
-        let document_info = if declaration_aliases != self.root_namespace_aliases {
-            let table = self.scoped_namespace_table(&declaration_aliases);
-            format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document)
-        } else {
-            self.document.clone()
+        let scoped_table =
+            (declaration_aliases != self.root_namespace_aliases).then(|| self.scoped_namespace_table(&declaration_aliases));
+        let document_info = match &scoped_table {
+            Some(table) => format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document),
+            None => self.document.clone(),
         };
+        // Content in one of the shapes of the rows of theme resources: its addition to a
+        // dictionary can be written as a row, and then this function is not emitted.
+        if let Some(paths) = self.row_paths.as_ref().filter(|_| !uses_name_scope) {
+            if let Some(row) = theme_rows::deferred_row(paths, &body_lines, &returned, scoped_table.as_deref()) {
+                self.deferred_rows.insert(function.clone(), (slot, row));
+            }
+        }
         // The shared helper accepts the declaration's DocumentInfo as well as the root's.
         // Retain the fused resource fast path when a dictionary imports another lexical scope.
         let fused = fused_static_resource_content(self.types, &body_lines, &returned, &document_info);
@@ -4572,6 +4659,10 @@ pub fn emit_function<'a>(
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
         culture_literals: HashMap::new(),
+        row_paths: theme_rows::RowPaths::of(types),
+        deferred_rows: HashMap::new(),
+        row_statements: HashMap::new(),
+        row_tables: Vec::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -4641,7 +4732,9 @@ pub fn emit_function<'a>(
     );
     local_types.insert("root".to_string(), root_type.clone());
     local_types.insert(created.expr.clone(), root_type);
-    let (body, parts) = split_into_parts(function_name, &document_text, &emitter.lines, &local_types);
+    let lines = std::mem::take(&mut emitter.lines);
+    let lines = emitter.apply_row_runs(lines);
+    let (body, parts) = split_into_parts(function_name, &document_text, &lines, &local_types);
     for line in &body {
         source.push_str(line);
         source.push('\n');
@@ -4651,7 +4744,12 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(part);
     }
-    for function in &emitter.deferred_functions {
+    for table in &emitter.row_tables {
+        source.push('\n');
+        source.push_str(table);
+    }
+    // The build functions of deferred rows were cleared: their rows build them.
+    for function in emitter.deferred_functions.iter().filter(|function| !function.is_empty()) {
         source.push('\n');
         source.push_str(function);
     }
