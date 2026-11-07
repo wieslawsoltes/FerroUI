@@ -22,7 +22,7 @@ import android.widget.FrameLayout;
  * application that embeds the framework in a layout of its own creates the view with its context;
  * an activity of the framework ({@link FerroActivity}) creates it by itself.
  */
-public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalLayoutListener {
+public final class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalLayoutListener {
     // What the native side answers a motion event with: the result of the helper (none, false,
     // true) and whether the base class is called too.
     private static final int RESULT_MASK = 3;
