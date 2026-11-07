@@ -255,32 +255,37 @@ impl EglInterface {
     /// entry point must be terminated with `EGL_NONE`, as EGL requires.
     ///
     /// # Panics
-    /// Panics when a required entry point cannot be resolved.
+    /// Panics when a required entry point cannot be resolved; see
+    /// [`EglInterface::try_new`].
     pub unsafe fn new(get_proc_address: &GetProcAddress) -> Self {
-        Self { egl: EglEntryPoints::load(get_proc_address, &()) }
+        // SAFETY: the caller upholds the contract of the loader.
+        unsafe { Self::try_new(get_proc_address) }.unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// Resolves the entry points with `get_proc_address`; fails when a
+    /// required one cannot be resolved.
+    ///
+    /// # Safety
+    /// See [`EglInterface::new`].
+    pub unsafe fn try_new(get_proc_address: &GetProcAddress) -> Result<Self, OpenGlError> {
+        Ok(Self { egl: EglEntryPoints::load(get_proc_address, &())? })
     }
 
     /// Loads the EGL library `library` of the system by name and resolves the
     /// entry points with its `eglGetProcAddress` (`EglInterface(string library)`).
     /// Fails when the library cannot be loaded or does not export
-    /// `eglGetProcAddress`.
-    ///
-    /// # Panics
-    /// Panics when a required entry point cannot be resolved.
+    /// `eglGetProcAddress`, or a required entry point cannot be resolved.
     pub fn from_library(library: &str) -> Result<Self, OpenGlError> {
         let get_proc_address = load(library)?;
         // SAFETY: the loader asks `eglGetProcAddress` of the library, which returns null or
         // the address of the entry point of that name; the library is never unloaded, so
         // the entry points stay valid.
-        Ok(unsafe { Self::new(&get_proc_address) })
+        unsafe { Self::try_new(&get_proc_address) }
     }
 
     /// The EGL library of the system (`EglInterface()`): `libEGL.so.1` on
     /// Linux, `libEGL.so` on Android. Fails on another system, and as
     /// [`from_library`](Self::from_library) does.
-    ///
-    /// # Panics
-    /// Panics when a required entry point cannot be resolved.
     pub fn new_default() -> Result<Self, OpenGlError> {
         Self::from_library(default_library()?)
     }

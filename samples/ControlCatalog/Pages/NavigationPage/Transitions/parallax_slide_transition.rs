@@ -4,9 +4,9 @@ use ferroui_base::animation::easings::{Easing, CubicEaseOut};
 use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, JoinHandle};
+use ferroui_base::threading::{CancellationToken, JoinError, JoinHandle};
 use ferroui_base::{Ref, Visual};
-use mini_mvvm::start_async;
+use mini_mvvm::start_async_on_result;
 use std::cell::{Cell, RefCell};
 
 /// Example custom page transition: a parallax slide. The incoming page slides full-width from the right while the outgoing page shifts about 30% to the left with a subtle opacity fade, producing a depth-layered push effect.
@@ -70,10 +70,8 @@ fn get_visual_parent(from: Option<&Ref<Visual>>, to: Option<&Ref<Visual>>) -> Re
 
 /// `await Task.WhenAll(tasks)`: a failure to run one of the animations
 /// fails the transition.
-async fn when_all(tasks: Vec<AnimationTask>) {
-    if let Err(error) = AnimationTask::when_all(tasks).await {
-        panic!("{error}");
-    }
+async fn when_all(tasks: Vec<AnimationTask>) -> Result<(), JoinError> {
+    AnimationTask::when_all(tasks).await.map_err(|error| JoinError::Panicked(Box::new(error.to_string())))
 }
 
 impl IPageTransition for ParallaxSlideTransition {
@@ -89,9 +87,9 @@ impl IPageTransition for ParallaxSlideTransition {
         let from = from.cloned();
         let to = to.cloned();
 
-        start_async(async move {
+        start_async_on_result(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::new();
@@ -120,13 +118,14 @@ impl IPageTransition for ParallaxSlideTransition {
                 tasks.push(anim.run_async(to, cancellation_token.clone()));
             }
 
-            when_all(tasks).await;
+            when_all(tasks).await?;
 
             if let Some(from) = &from {
                 if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
+            Ok(())
         })
     }
 }

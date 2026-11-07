@@ -62,7 +62,7 @@ impl WglContext {
             is_lost: Cell::new(false),
         });
 
-        let current = this.try_make_current()?;
+        let current = WglContext::try_make_current(&this)?;
         let get_proc: GetProcAddress = Rc::new(|proc: &str| -> *const c_void {
             let Ok(proc) = CString::new(proc) else {
                 return std::ptr::null();
@@ -76,7 +76,13 @@ impl WglContext {
         // SAFETY: the loader answers null or the address of the named entry
         // point, of the driver of the context that was made current above
         // or of the OpenGL library of the system.
-        let gl_interface = unsafe { GlInterface::new(version, get_proc) };
+        let gl_interface = match unsafe { GlInterface::try_new(version, get_proc) } {
+            Ok(gl_interface) => gl_interface,
+            Err(error) => {
+                current.dispose();
+                return Err(error);
+            }
+        };
         let _ = this.gl_interface.set(Rc::new(gl_interface));
         current.dispose();
 
@@ -100,14 +106,12 @@ impl WglContext {
         wgl_get_current_context() == self.context.get() && wgl_get_current_dc() == self.dc
     }
 
-    /// `MakeCurrent()` with its failure as a result.
-    ///
-    /// # Panics
-    /// Panics when the context is lost (the
-    /// `PlatformGraphicsContextLostException` of the reference).
+    /// `MakeCurrent()` with its failure as a result, the loss of the
+    /// context (the `PlatformGraphicsContextLostException` of the
+    /// reference) included.
     pub fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         if self.is_lost.get() {
-            panic!("{}", PlatformGraphicsContextLostError);
+            return Err(OpenGlError::new(PlatformGraphicsContextLostError.to_string()));
         }
         if self.is_current() {
             return Ok(Disposable::empty());
@@ -195,12 +199,20 @@ impl IGlContext for WglContext {
     /// # Panics
     /// Panics when the context is lost or cannot be made current (the
     /// exceptions of the reference); [`WglContext::try_make_current`]
-    /// returns the second.
+    /// returns them.
     fn make_current(&self) -> Rc<dyn IDisposable> {
-        match self.try_make_current() {
+        match WglContext::try_make_current(self) {
             Ok(current) => current,
             Err(error) => panic!("{error}"),
         }
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        WglContext::try_make_current(self)
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        WglContext::try_make_current(self)
     }
 
     /// # Panics

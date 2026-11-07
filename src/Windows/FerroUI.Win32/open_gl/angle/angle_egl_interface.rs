@@ -44,7 +44,7 @@ impl Win32AngleEglInterface {
         // SAFETY: the loader of ANGLE returns, for a name, null or the
         // address of the entry point of that name, and the entry points are
         // part of the program.
-        Ok(unsafe { Self::from_loader(&get_proc_address) })
+        unsafe { Self::try_from_loader(&get_proc_address) }
     }
 
     /// Resolves the entry points with `get_proc_address`.
@@ -55,13 +55,24 @@ impl Win32AngleEglInterface {
     /// valid for as long as the interface is used.
     ///
     /// # Panics
-    /// Panics when a required entry point of EGL cannot be resolved.
+    /// Panics when a required entry point of EGL cannot be resolved; see
+    /// [`Win32AngleEglInterface::try_from_loader`].
     pub unsafe fn from_loader(get_proc_address: &GetProcAddress) -> Win32AngleEglInterface {
         // SAFETY: the caller upholds the contract of the loader.
-        let egl = Rc::new(unsafe { EglInterface::new(get_proc_address) });
+        unsafe { Self::try_from_loader(get_proc_address) }.unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// Resolves the entry points with `get_proc_address`; fails when a
+    /// required entry point of EGL cannot be resolved.
+    ///
+    /// # Safety
+    /// See [`Win32AngleEglInterface::from_loader`].
+    pub unsafe fn try_from_loader(get_proc_address: &GetProcAddress) -> Result<Win32AngleEglInterface, OpenGlError> {
+        // SAFETY: the caller upholds the contract of the loader.
+        let egl = Rc::new(unsafe { EglInterface::try_new(get_proc_address) }?);
         let create_device_angle = get_proc_address("eglCreateDeviceANGLE");
         let release_device_angle = get_proc_address("eglReleaseDeviceANGLE");
-        Win32AngleEglInterface {
+        Ok(Win32AngleEglInterface {
             egl,
             // SAFETY: an address that is not null is the entry point of that
             // name (the contract of the loader), whose signature under the
@@ -71,7 +82,7 @@ impl Win32AngleEglInterface {
             // SAFETY: as above.
             release_device_angle: (!release_device_angle.is_null())
                 .then(|| unsafe { std::mem::transmute::<*const c_void, ReleaseDeviceAngle>(release_device_angle) }),
-        }
+        })
     }
 
     /// The entry points of EGL.

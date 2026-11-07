@@ -12,6 +12,6 @@ mod mini_command;
 mod property_changed_extensions;
 mod view_model_base;
 
-pub use mini_command::{delay, start_async, Delay, MiniCommand, MiniCommandTask};
+pub use mini_command::{delay, start_async, start_async_on_result, Delay, MiniCommand, MiniCommandTask};
 pub use property_changed_extensions::PropertyChangedExtensions;
 pub use view_model_base::ViewModelBase;

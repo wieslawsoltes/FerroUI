@@ -6,9 +6,9 @@ use ferroui_base::animation::{
 };
 use ferroui_base::media::{ITransform, RotateTransform, ScaleTransform, TransformGroup, TranslateTransform};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, JoinHandle};
+use ferroui_base::threading::{CancellationToken, JoinError, JoinHandle};
 use ferroui_base::{Ref, RelativePoint, RelativeUnit, Visual};
-use mini_mvvm::start_async;
+use mini_mvvm::start_async_on_result;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -55,10 +55,8 @@ fn set_group(visual: &Ref<Visual>, group: Ref<TransformGroup>) {
 }
 
 /// `await Task.WhenAll(tasks)`: a failure to run one of the animations fails the transition.
-async fn when_all(tasks: Vec<AnimationTask>) {
-    if let Err(error) = AnimationTask::when_all(tasks).await {
-        panic!("{error}");
-    }
+async fn when_all(tasks: Vec<AnimationTask>) -> Result<(), JoinError> {
+    AnimationTask::when_all(tasks).await.map_err(|error| JoinError::Panicked(Box::new(error.to_string())))
 }
 
 impl CardStackPageTransition {
@@ -330,9 +328,9 @@ impl IPageTransition for CardStackPageTransition {
         let from = from.cloned();
         let to = to.cloned();
 
-        start_async(async move {
+        start_async_on_result(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::new();
@@ -408,7 +406,7 @@ impl IPageTransition for CardStackPageTransition {
                 tasks.push(animation.run_async(to, cancellation_token.clone()));
             }
 
-            when_all(tasks).await;
+            when_all(tasks).await?;
 
             if let Some(from) = &from {
                 if !cancellation_token.is_cancelled() {
@@ -425,6 +423,7 @@ impl IPageTransition for CardStackPageTransition {
                     translate.set_y(0.0);
                 }
             }
+            Ok(())
         })
     }
 

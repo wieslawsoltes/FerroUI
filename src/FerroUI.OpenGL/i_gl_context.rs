@@ -1,5 +1,5 @@
 use crate::surfaces::IGlPlatformSurfaceRenderTarget;
-use crate::{GlInterface, GlVersion};
+use crate::{GlInterface, GlVersion, OpenGlError};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
@@ -57,6 +57,23 @@ pub trait IGlContext: IPlatformGraphicsContext {
     /// Makes the context current. Disposing the result restores the
     /// previously current context.
     fn make_current(&self) -> Rc<dyn IDisposable>;
+
+    /// [`make_current`](Self::make_current) that fails, instead of
+    /// panicking, when the context is lost or cannot be made current: for
+    /// the callers that do without a broken context. The default asks
+    /// `make_current`; the contexts whose making current can fail override
+    /// it.
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        Ok(self.make_current())
+    }
+
+    /// [`ensure_current`](IPlatformGraphicsContext::ensure_current) that
+    /// fails, instead of panicking, when the context is lost or cannot be
+    /// made current. The default asks `ensure_current`; the contexts whose
+    /// making current can fail override it.
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        Ok(self.ensure_current())
+    }
 
     /// Whether the two contexts share their objects.
     fn is_shared_with(&self, context: &dyn IGlContext) -> bool;
