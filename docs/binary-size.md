@@ -451,7 +451,13 @@ browser profile inherits `release` and aborts too; the threaded module rebuilds 
 with `panic_abort` (`scripts/build-browser.sh`). Cargo ignores `panic` for tests, benches, build
 scripts and procedural macros, so the tests and benchmarks are unchanged.
 
-RELEASE_TABLE_PLACEHOLDER
+| `samples/HelloWorld`, macOS ARM64, `release` | with unwinding | `release` (abort) |
+|---|---:|---:|
+| executable | 48.92 MB | 38.66 MB (**-10.26 MB, -21 %**) |
+| `__text` | 23.67 MB | 20.48 MB |
+| unwind sections (`__eh_frame`, `__gcc_except_tab`, `__unwind_info`) | 5.57 MB | 0.19 MB |
+
+The abort build ran its smoke run (`FERROUI_SMOKE_EXIT_MS=5000`) to a clean exit.
 
 Workspace profiles do not reach an application in a workspace of its own: its root `Cargo.toml`
 states its own. The application templates (the `FerroUI/templates` repository) and the shared
