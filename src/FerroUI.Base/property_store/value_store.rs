@@ -1,7 +1,8 @@
 use super::effective_value::cast_effective_value;
 use super::{
-    entry_ptr_eq, frame_ptr_eq, BindingSource, DirectBindingObserver, EffectiveValue, EffectiveValueDyn,
-    FramePriority, FrameType, ImmediateValueFrame, IValueEntry, LocalValueBindingObserver, ValueFrame,
+    entry_ptr_eq, frame_ptr_eq, BindingSource, BoxedLocalValueBindingObserver, DirectBindingObserver,
+    DirectBoxedBindingObserver, EffectiveValue, EffectiveValueDyn, FramePriority, FrameType, ImmediateValueFrame,
+    IValueEntry, LocalValueBindingObserver, ValueFrame,
 };
 use crate::data::core::SinkRef;
 use crate::diagnostics::{
@@ -206,9 +207,9 @@ impl ValueStore {
         }
     }
 
-    /// Installs a boxed source without specializing subscription ownership and
-    /// priority selection for every property value type. The typed routes only
-    /// construct the inline cache and its weak observer.
+    /// Installs a boxed source without specializing subscription ownership,
+    /// priority selection or delivery for every property value type: the
+    /// observer and the entry of a boxed source are not typed.
     pub fn add_boxed_binding(
         &self,
         owner: &FerroObject,
@@ -217,7 +218,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         if priority == BindingPriority::LocalValue {
-            let observer = property.routes().route_create_boxed_local_binding(owner);
+            let observer = BoxedLocalValueBindingObserver::new(owner, property);
             self.dispose_existing_local_value_binding(property);
             self.set_local_value_binding(property, observer.clone());
             observer.start(source);
@@ -245,6 +246,21 @@ impl ValueStore {
         self.dispose_existing_local_value_binding(property);
         self.set_local_value_binding(property, observer.clone());
         start(&observer, source);
+        observer
+    }
+
+    /// Adds a binding of untyped values to a direct property, `property` as
+    /// registered for the owner. The observer is not typed.
+    pub fn add_direct_boxed_binding(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn IObservable<BoxedValue>>,
+    ) -> Rc<dyn IDisposable> {
+        let observer = DirectBoxedBindingObserver::new(owner, property);
+        self.dispose_existing_local_value_binding(property);
+        self.set_local_value_binding(property, observer.clone());
+        observer.start(source);
         observer
     }
 

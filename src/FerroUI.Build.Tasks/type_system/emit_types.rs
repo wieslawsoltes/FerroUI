@@ -1146,6 +1146,11 @@ impl EmitTypes for ModelEmitTypes {
             FrameworkType::StaticResourceExtension => "FerroUI.Markup.Xaml.MarkupExtensions.StaticResourceExtension",
             FrameworkType::DynamicResourceExtension => "FerroUI.Markup.Xaml.MarkupExtensions.DynamicResourceExtension",
             FrameworkType::TemplateBinding => "FerroUI.Data.TemplateBinding",
+            FrameworkType::IResourceDictionary => "FerroUI.Controls.IResourceDictionary",
+            FrameworkType::SolidColorBrush => "FerroUI.Media.SolidColorBrush",
+            FrameworkType::Color => "FerroUI.Media.Color",
+            FrameworkType::Thickness => "FerroUI.Thickness",
+            FrameworkType::CornerRadius => "FerroUI.CornerRadius",
         };
         public_path(self.set().type_at(self.system.named(full_name)?))
     }

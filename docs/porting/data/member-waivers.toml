@@ -842,7 +842,7 @@ reason = "one constructor: `BindingEntry::new` takes the `BindingSource` enum th
 project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.BindingEntryBase*"
 member = "On*"
-reason = "the observer callbacks are implemented by the private observers of the entry (`TypedObserver`, `ValueObserver`, `UntypedObserver`), one per kind of source, which call `validate` / `convert_and_validate`, `set_value` and `binding_completed`"
+reason = "the observer callbacks are implemented by the private observers of the entry (`TypedObserver` and `ValueObserver` of the typed `BindingEntry`, `BoxedBindingObserver` of the untyped `BoxedBindingEntry`), one per kind of source, which call `validate` / `convert_and_validate` / `receive`, `set_value` and `binding_completed`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -854,13 +854,13 @@ reason = "ported as `BindingEntry::validate` (a plain value) and `BindingEntry::
 project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.SourceUntypedBindingEntry*"
 member = "ConvertAndValidate"
-reason = "the `BindingValue<object?>` overload throws `NotSupportedException` upstream; an untyped value is converted by `StyledProperty::from_untyped` and validated by `BindingEntry::convert_and_validate`"
+reason = "the `BindingValue<object?>` overload throws `NotSupportedException` upstream; an untyped value is converted by `resolve_boxed_binding_value` and validated by `BoxedBindingEntry::receive`"
 
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.DirectBindingObserver*"
 member = "On*"
-reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `Untyped`, `DirectTyped`, `DirectValue`, `DirectUntyped`), one per kind of source, which call `next`, `next_value` and `completed`"
+reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `DirectTyped`, `DirectValue`, `DirectBoxed`), one per kind of source, which call `next`, `next_value` and `completed`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -872,13 +872,13 @@ reason = "one `start` taking the `BindingSource` enum that holds either kind of 
 project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.DirectUntypedBindingObserver*"
 member = "On*"
-reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `Untyped`, `DirectTyped`, `DirectValue`, `DirectUntyped`), one per kind of source, which call `next`, `next_value` and `completed`"
+reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `DirectTyped`, `DirectValue`, `DirectBoxed`), one per kind of source, which call `next`, `next_value` and `completed`"
 
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.LocalValueBindingObserver*"
 member = "On*"
-reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `Untyped`, `DirectTyped`, `DirectValue`, `DirectUntyped`), one per kind of source, which call `next`, `next_value` and `completed`"
+reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `DirectTyped`, `DirectValue`, `DirectBoxed`), one per kind of source, which call `next`, `next_value` and `completed`"
 
 [[waive]]
 project = "Avalonia.Base"
