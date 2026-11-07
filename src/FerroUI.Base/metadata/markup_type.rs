@@ -1158,14 +1158,14 @@ impl MarkupType {
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register`](Self::register) or
     /// [`register_all`](Self::register_all), which always register.
-    #[cfg(feature = "type-tables")]
+    #[cfg(any(feature = "type-tables", test))]
     #[inline(always)]
     pub fn register_table(types: &[&'static MarkupType]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(feature = "type-tables"))]
+    #[cfg(not(any(feature = "type-tables", test)))]
     #[inline(always)]
     pub fn register_table(types: &[&'static MarkupType]) {
         let _ = types;
@@ -1183,14 +1183,14 @@ impl MarkupType {
     /// by handle (the text of an enumeration member, the parsing of text) then knows the type
     /// with the tables of types trimmed. With `type-tables` the tables already hold
     /// every type, and this does nothing.
-    #[cfg(feature = "type-tables")]
+    #[cfg(any(feature = "type-tables", test))]
     #[inline(always)]
     pub fn register_used(type_: &'static MarkupType) {
         let _ = type_;
     }
 
     /// Trimmed (without `type-tables`): see the other definition.
-    #[cfg(not(feature = "type-tables"))]
+    #[cfg(not(any(feature = "type-tables", test)))]
     pub fn register_used(type_: &'static MarkupType) {
         registry().write().unwrap_or_else(|e| e.into_inner()).insert(type_);
     }
@@ -1353,7 +1353,7 @@ impl MarkupRegistry {
         }
         // Trimmed, the metadata of the value types of the properties is not in a table: it
         // is registered with the type, as a binding through a property finds it by handle.
-        #[cfg(not(feature = "type-tables"))]
+        #[cfg(not(any(feature = "type-tables", test)))]
         for property in type_.properties.iter().chain(type_.static_properties) {
             if let Some(value) = (property.value_markup)() {
                 self.insert(value);
