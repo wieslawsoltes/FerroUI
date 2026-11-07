@@ -11,14 +11,27 @@ extern "C" {
     #[wasm_bindgen(catch, js_name = openCollator)]
     fn open_collator(locale: &str) -> Result<BrowserCollator, JsValue>;
     #[wasm_bindgen(method, catch)]
-    fn compare(this: &BrowserCollator, left: &[u16], right: &[u16], ignore_case: bool) -> Result<i32, JsValue>;
+    fn compare(
+        this: &BrowserCollator,
+        left: &[u16],
+        right: &[u16],
+        ignore_case: bool,
+    ) -> Result<i32, JsValue>;
     #[wasm_bindgen(method, catch)]
-    fn contains(this: &BrowserCollator, text: &[u16], pattern: &[u16], ignore_case: bool) -> Result<bool, JsValue>;
+    fn contains(
+        this: &BrowserCollator,
+        text: &[u16],
+        pattern: &[u16],
+        ignore_case: bool,
+    ) -> Result<bool, JsValue>;
 }
 
 /// An engine failure (an exception of `Intl`) as the error of a native call.
 fn native(operation: &'static str) -> impl FnOnce(JsValue) -> CollationError {
-    move |_| CollationError::Native { operation, code: -1 }
+    move |_| CollationError::Native {
+        operation,
+        code: -1,
+    }
 }
 
 pub(super) struct Collator {
