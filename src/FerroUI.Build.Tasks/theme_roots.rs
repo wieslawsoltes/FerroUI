@@ -1,6 +1,6 @@
-//! The units of the themes an application keeps (#568, step 3 of docs/porting/theme-trimming.md):
-//! the opt-in of the application, its roots, and the closure of the roots over the unit graph of
-//! a theme.
+//! The units of the themes an application keeps (#568, steps 3 and 4 of
+//! docs/porting/theme-trimming.md): the opt-in of the application, its roots, and the closure of
+//! the roots over the unit graph of a theme.
 //!
 //! Not a port of an upstream file. A theme whose compiled markup is partitioned into units states
 //! its unit graph in its `.xamlmeta` (`theme_units`: for each unit the keys and type keys it
@@ -11,22 +11,26 @@
 //! - **Roots.** The types the compiled documents of the application construct, select or name in
 //!   `{x:Type}`, with their base classes (from the type models); every token of the documents that
 //!   may name a key; the names of `theme-roots = ["Name", ..]` (a unit, by the path of its
-//!   document, or a type or a key); and the roots a build script adds ([`Roots::extend`], what
-//!   step 4 adds from the sources). `theme-roots = "all"` and a build with the tables of types
-//!   (`DEP_FERROUI_BASE_XAML_TYPE_TABLES`: the run-time loader, hot reload, the designer,
-//!   DevTools) keep every unit.
+//!   document, or a type or a key); the names and string literals of the Rust sources of the
+//!   application ([`source_roots`]: a name that is a type key or a class, a string that is a key);
+//!   and the roots a build script adds ([`Roots::extend`]). `theme-roots = "all"` and a build with
+//!   the tables of types (`DEP_FERROUI_BASE_XAML_TYPE_TABLES`: the run-time loader, hot reload,
+//!   the designer, DevTools) keep every unit.
+//! - **Live types.** A live type makes its base classes live, and the classes its code creates
+//!   (the creates edges of the type models, `TypeModel::creates`: `ListBox` creates
+//!   `ListBoxItem`), transitively ([`TypeGraph::live`]).
 //! - **Closure.** The ambient unit (index 0) is always kept. A unit is kept when it defines a live
 //!   key or the type key of a live type, or is named. A kept unit makes its references live keys
 //!   (`StaticResource`, `DynamicResource`, `BasedOn`, `Theme` and every other mention of a key) and
-//!   its types live types, with their base classes: the types its templates construct root their
-//!   own control themes.
+//!   its types live types: the types its templates construct root their own control themes.
 //!
 //! The result is the canonical indices of the kept units, ascending: the order of the table the
 //! build writes and `with_parts` takes.
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use ferroui_build_scan::model::AssemblyModel;
+use ferroui_build_scan::model::{AssemblyModel, TypeKind};
+use ferroui_build_scan::scanner::SourceReferences;
 use ferroui_build_scan::xaml_metadata::ThemeUnitsModel;
 
 /// The key of the manifest table the opt-in is read from.
@@ -87,8 +91,8 @@ pub struct Roots {
 }
 
 impl Roots {
-    /// Adds the roots of `other`: what a build script states beside the documents (step 4 adds
-    /// the type names and string literals of the sources here).
+    /// Adds the roots of `other`: what a build script states beside the documents, and the
+    /// roots of the sources ([`source_roots`]).
     pub fn extend(&mut self, other: Roots) {
         self.types.extend(other.types);
         self.keys.extend(other.keys);
@@ -97,12 +101,18 @@ impl Roots {
     }
 }
 
-/// The base classes of types, by local name: what keeps the theme of a base class for a class
-/// that does not override its style key.
+/// The edges between types that make a type live with another, by local name: the base class
+/// of a class (what keeps the theme of a base class for a class that does not override its
+/// style key) and the classes the code of a class creates (#568, step 4: the containers a
+/// `ListBox` creates, the selection handles of a `TextBox`).
 #[derive(Clone, Debug, Default)]
-pub struct BaseClasses {
+pub struct TypeGraph {
     /// The local name of the base class of each class, by its local name.
     base_of: BTreeMap<String, String>,
+    /// The local names of the classes the code of each class creates, by its local name.
+    creates: BTreeMap<String, BTreeSet<String>>,
+    /// The local names of the classes of the object model.
+    classes: BTreeSet<String>,
 }
 
 /// The last segment of a Rust path, without generic arguments (`::a::b::Border<T>` is `Border`).
@@ -111,9 +121,16 @@ fn rust_local_name(text: &str) -> &str {
     text.rsplit("::").next().unwrap_or(text).trim()
 }
 
-impl BaseClasses {
-    /// The base classes the models state: for each class of the object model with a base class,
-    /// the markup name of the base, found by its Rust name.
+/// The last segment of a namespace-qualified name (`FerroUI.Controls.ListBoxItem` is
+/// `ListBoxItem`).
+fn markup_local_name(full_name: &str) -> &str {
+    full_name.rsplit('.').next().unwrap_or(full_name)
+}
+
+impl TypeGraph {
+    /// The edges the models state: for each class of the object model with a base class, the
+    /// markup name of the base, found by its Rust name; for each type that creates classes, their
+    /// local names.
     pub fn from_models<'m>(models: impl IntoIterator<Item = &'m AssemblyModel>) -> Self {
         let models: Vec<&AssemblyModel> = models.into_iter().collect();
         // The markup name of each type, by the local name of its Rust path.
@@ -123,23 +140,45 @@ impl BaseClasses {
                 markup_name.entry(rust_local_name(&type_.rust_path.text).to_string()).or_insert_with(|| type_.name.clone());
             }
         }
-        let mut base_of = BTreeMap::new();
+        let mut graph = Self::default();
         for model in &models {
             for type_ in &model.types {
+                if type_.object_model && type_.kind == TypeKind::Class {
+                    graph.classes.insert(type_.name.clone());
+                }
+                if !type_.creates.is_empty() {
+                    let created = graph.creates.entry(type_.name.clone()).or_default();
+                    created.extend(type_.creates.iter().map(|full_name| markup_local_name(full_name).to_string()).filter(|name| *name != type_.name));
+                }
                 let Some(base) = &type_.base else { continue };
                 let local = rust_local_name(&base.text);
                 let base = markup_name.get(local).cloned().unwrap_or_else(|| local.to_string());
                 if !base.is_empty() && base != type_.name {
-                    base_of.entry(type_.name.clone()).or_insert(base);
+                    graph.base_of.entry(type_.name.clone()).or_insert(base);
                 }
             }
         }
-        Self { base_of }
+        graph
     }
 
     /// The base classes stated as pairs `(class, base)`, for the tests.
     pub fn from_pairs(pairs: &[(&str, &str)]) -> Self {
-        Self { base_of: pairs.iter().map(|(class, base)| (class.to_string(), base.to_string())).collect() }
+        Self { base_of: pairs.iter().map(|(class, base)| (class.to_string(), base.to_string())).collect(), ..Self::default() }
+    }
+
+    /// The graph with the creates edges stated as pairs `(class, created)`, for the tests.
+    pub fn with_creates(mut self, pairs: &[(&str, &str)]) -> Self {
+        for (class, created) in pairs {
+            self.creates.entry(class.to_string()).or_default().insert(created.to_string());
+            self.classes.insert(class.to_string());
+            self.classes.insert(created.to_string());
+        }
+        self
+    }
+
+    /// Whether `name` is a class of the object model of the models, or a class of an edge.
+    pub fn is_class(&self, name: &str) -> bool {
+        self.classes.contains(name)
     }
 
     /// `name` and its base classes, nearest first.
@@ -153,11 +192,50 @@ impl BaseClasses {
         }
         chain
     }
+
+    /// The types that are live when `name` is: `name`, its base classes, the classes any of them
+    /// creates, and so on, transitively.
+    pub fn live(&self, name: &str) -> BTreeSet<String> {
+        let mut live = BTreeSet::new();
+        let mut pending = vec![name.to_string()];
+        while let Some(next) = pending.pop() {
+            for type_ in self.chain(&next) {
+                if !live.insert(type_.clone()) {
+                    continue;
+                }
+                pending.extend(self.creates.get(&type_).into_iter().flatten().filter(|created| !live.contains(*created)).cloned());
+            }
+        }
+        live
+    }
+}
+
+/// The roots the Rust sources of an application state (#568, step 4): its names that are a type
+/// key of a unit of `themes` or a class of `graph` (`CalendarView::new()`, `Ref<ListBox>`, a
+/// `use` of `CalendarView`), and its string literals that are a key a unit of `themes` defines
+/// (`"AccentButtonStyle"`, `"TextFillColorPrimaryBrush"`). Conservative: a name or a string that
+/// matches roots its units whatever the code does with it. A name the code builds at run time
+/// matches nothing, and needs `theme-roots`.
+pub fn source_roots<'t>(references: &SourceReferences, themes: impl IntoIterator<Item = &'t ThemeUnitsModel>, graph: &TypeGraph) -> Roots {
+    let mut type_keys: BTreeSet<&str> = BTreeSet::new();
+    let mut keys: BTreeSet<&str> = BTreeSet::new();
+    for theme in themes {
+        for unit in &theme.units {
+            type_keys.extend(unit.type_keys.iter().map(String::as_str));
+            keys.extend(unit.keys.iter().map(String::as_str));
+        }
+    }
+    Roots {
+        types: references.names.iter().filter(|name| type_keys.contains(name.as_str()) || graph.is_class(name)).cloned().collect(),
+        keys: references.strings.iter().filter(|text| keys.contains(text.as_str())).cloned().collect(),
+        ..Roots::default()
+    }
 }
 
 /// The canonical indices of the units of `theme` that `roots` keep, ascending (see the module
-/// documentation). `type_tables` keeps every unit.
-pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, bases: &BaseClasses, type_tables: bool) -> Vec<u32> {
+/// documentation). A live type makes the types of [`TypeGraph::live`] live. `type_tables` keeps
+/// every unit.
+pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, type_tables: bool) -> Vec<u32> {
     if roots.all || type_tables {
         let mut all: Vec<u32> = theme.units.iter().map(|unit| unit.index).collect();
         all.sort_unstable();
@@ -169,14 +247,14 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, bases: &BaseClasses, t
     let mut kept = vec![false; theme.units.len()];
     let mut pending: Vec<usize> = Vec::new();
     for type_ in &roots.types {
-        live_types.extend(bases.chain(type_));
+        live_types.extend(graph.live(type_));
     }
     for name in &roots.names {
         match theme.units.iter().position(|unit| unit.name == *name) {
             Some(position) => pending.push(position),
             None => {
                 live_keys.insert(name.clone());
-                live_types.extend(bases.chain(name));
+                live_types.extend(graph.live(name));
             }
         }
     }
@@ -190,7 +268,9 @@ pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, bases: &BaseClasses, t
             let unit = &theme.units[position];
             live_keys.extend(unit.references.iter().cloned());
             for type_ in &unit.types {
-                live_types.extend(bases.chain(type_));
+                if !live_types.contains(type_) {
+                    live_types.extend(graph.live(type_));
+                }
             }
         }
         // The units that define a live key or the type key of a live type.

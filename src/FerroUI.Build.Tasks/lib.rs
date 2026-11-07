@@ -160,8 +160,10 @@
 //! compiled markup it needs (#568, step 3 of docs/porting/theme-trimming.md). The emitter writes
 //! the construction as `WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`;
 //! after every group is compiled, the build computes the units from the roots of the documents,
-//! `theme-roots` and [`Build::theme_roots`] ([`theme_roots`]) and writes the table into
-//! `compiled_markup`, whose `register()` registers it for loads of the theme by URI. A build with
+//! the names and string literals of the Rust sources of the crate (step 4), `theme-roots` and
+//! [`Build::theme_roots`] ([`theme_roots`]), with the classes the code of each live class creates
+//! (the creates edges of the type models), and writes the table into `compiled_markup`, whose
+//! `register()` registers it for loads of the theme by URI. A build with
 //! the tables of types (`DEP_FERROUI_BASE_XAML_TYPE_TABLES`) keeps every unit. Without the opt-in
 //! nothing of this is written.
 //!
@@ -206,7 +208,7 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::export::ScanReport;
 use crate::model::AssemblyModel;
 use crate::model_set::ModelSet;
-use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
+use crate::scanner::{scan_crate, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
 pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
 use crate::xaml_compiler_diagnostics_filter::XamlCompilerDiagnosticsFilter;
@@ -215,7 +217,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup,
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
-use crate::theme_roots::{kept_units, parts_static_name, unit_static_path, BaseClasses, Roots, ThemeTrimming};
+use crate::theme_roots::{kept_units, parts_static_name, source_roots, unit_static_path, Roots, ThemeTrimming, TypeGraph};
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
 pub const DEFAULT_MODULE: &str = "compiled_xaml";
@@ -484,10 +486,12 @@ impl Build {
         self
     }
 
-    /// The scan of the sources of the crate, with the models of its dependencies.
-    fn scan(&self, dependencies: Vec<AssemblyModel>) -> Result<Scan, String> {
+    /// The scan of the sources of the crate, with the models of its dependencies; with the
+    /// names and string literals of its code when `references` (the roots of the themes it
+    /// trims).
+    fn scan(&self, dependencies: Vec<AssemblyModel>, references: bool) -> Result<Scan, String> {
         let root = ferroui_build_scan::export::source_root(&self.manifest_dir, self.source_root.as_deref())?;
-        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies);
+        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies).with_source_references(references);
         options.assembly_name = self.assembly.map(|assembly| assembly.name.to_string());
         Ok(scan_crate(&options))
     }
@@ -652,6 +656,8 @@ impl Build {
             None => Vec::new(),
         };
         let mut document_roots = Roots::default();
+        // The names and string literals of the sources of the crate (#568, step 4).
+        let mut source_references = SourceReferences::default();
 
         // The type model of the crate, from its sources.
         let scanned = self.export_metadata || on_models;
@@ -664,8 +670,8 @@ impl Build {
                 compiled_against = models.clone();
             }
             let started = Instant::now();
-            match self.scan(models) {
-                Ok(scan) => {
+            match self.scan(models, theme_parts.is_some()) {
+                Ok(mut scan) => {
                     report.scanned(&scan, started.elapsed());
                     for file in &scan.files {
                         rerun(&mut lines, &file.path);
@@ -675,6 +681,7 @@ impl Build {
                     }
                     if theme_parts.is_some() {
                         base_models.push(scan.model.clone());
+                        source_references = std::mem::take(&mut scan.references);
                     }
                     model = Some(scan.model);
                 }
@@ -950,8 +957,9 @@ impl Build {
             return Outcome { lines, errors };
         }
 
-        // The parts tables of the themes the documents construct (#568, step 3): the closure of
-        // the roots over the unit graph of each theme, from the roots of every group.
+        // The parts tables of the themes the documents construct (#568, steps 3 and 4): the
+        // closure of the roots over the unit graph of each theme, from the roots of every group
+        // and of the sources, with the base classes and the creates edges of the type models.
         let mut parts_tables: Vec<PartsTable> = Vec::new();
         if let Some(theme_parts) = &theme_parts {
             lines.push(format!("cargo::rerun-if-env-changed={TYPE_TABLES_VARIABLE}"));
@@ -959,12 +967,13 @@ impl Build {
             roots.names.extend(trimming.roots.iter().cloned());
             roots.all |= trimming.all;
             roots.extend(self.theme_roots.clone());
-            let bases = BaseClasses::from_models(&base_models);
+            let graph = TypeGraph::from_models(&base_models);
+            roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
             for class in theme_parts.used() {
                 let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
                     continue;
                 };
-                let kept = kept_units(units, &roots, &bases, self.type_tables);
+                let kept = kept_units(units, &roots, &graph, self.type_tables);
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: parts_static_name(&class),

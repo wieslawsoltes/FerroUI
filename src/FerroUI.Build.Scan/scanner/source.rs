@@ -18,9 +18,10 @@ use super::constants::{evaluate, Scope};
 use super::declarations::{read_declaration, read_property, Accessor, Declaration, DECLARATION_MACROS};
 use super::modules::{Glob, Import, ItemKind, Modules};
 use super::tokens::{
-    calls_of, group_of, ident_of, invocations, is_arrow, is_punct, stated_calls_of, split_types, text_of, tokens_of, with_parenthesised_break_values, Cursor, ParseError, Tokens, TypeEnd,
+    calls_of, group_of, ident_of, invocations, is_arrow, is_path_separator, is_punct, stated_calls_of, split_types, text_of, tokens_of, with_parenthesised_break_values, Cursor,
+    ParseError, Tokens, TypeEnd,
 };
-use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
+use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity, SourceReferences};
 use crate::model::VALUE_REGISTRATIONS;
 
 // The three APIs insert the same assignability pair into ValueTypes. The boxed form
@@ -128,6 +129,19 @@ pub(crate) struct Invocation {
     pub impl_owner: Option<String>,
 }
 
+/// A path of a type that the code of a file constructs (`X::new(..)`; see [`Code`]): what the
+/// creates edges of the classes are made of (#568, step 4 of docs/porting/theme-trimming.md).
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct Construction {
+    pub file: usize,
+    pub module: usize,
+    /// The type of the `impl` block the construction is written in, by its last segment.
+    pub owner: Option<String>,
+    /// The path of the type as written (`crate::parts::Spacer`), without the function; an empty
+    /// first segment for a path from the root (`::a::X`).
+    pub path: Vec<String>,
+}
+
 /// The names a function imports for itself (`use std::rc::Rc;` in its body): each name
 /// with the path it stands for. The types a statement of the function names are resolved
 /// with them first.
@@ -217,6 +231,11 @@ pub(crate) struct Source {
     pub invocations: Vec<Invocation>,
     /// The declarations read from expansions of local macros, by the name of the macro.
     pub expanded: BTreeMap<String, usize>,
+    /// The types the code of each file constructs, once each.
+    pub constructions: BTreeSet<Construction>,
+    /// The names and the string literals of the code, when the options ask for them
+    /// ([`ScanOptions::source_references`]).
+    pub references: Option<SourceReferences>,
     read_files: BTreeSet<PathBuf>,
 }
 
@@ -263,6 +282,8 @@ impl Source {
             dependency_macros: BTreeMap::new(),
             invocations: Vec::new(),
             expanded: BTreeMap::new(),
+            constructions: BTreeSet::new(),
+            references: options.source_references.then(SourceReferences::default),
             read_files: BTreeSet::new(),
         };
         // The export tables of the crates the crate is built on: what a glob import of one
@@ -380,6 +401,10 @@ impl Source {
             }
             let mut cfg = context.cfg.clone();
             cfg.extend(conditions);
+            // The code of a module is read with its own items.
+            if !matches!(item, syn::Item::Mod(_) | syn::Item::ExternCrate(_)) {
+                self.read_code(item, context);
+            }
             match item {
                 syn::Item::Mod(module) => self.read_module(module, context, cfg),
                 syn::Item::Use(item) => {
@@ -401,6 +426,21 @@ impl Source {
                     self.count_only(other, context.file, Category::Unread);
                 }
             }
+        }
+    }
+
+    /// The types the code of `item` constructs, and its names and string literals when they
+    /// are collected (#568, step 4; [`Code`]).
+    fn read_code(&mut self, item: &syn::Item, context: &Context) {
+        let owner = match item {
+            syn::Item::Impl(item) => last_segment_of_type(&item.self_ty),
+            _ => None,
+        };
+        let mut code = Code { paths: Vec::new(), references: self.references.as_mut() };
+        code.visit_item(item);
+        let paths = code.paths;
+        for path in paths {
+            self.constructions.insert(Construction { file: context.file, module: context.module, owner: owner.clone(), path });
         }
     }
 
@@ -958,6 +998,162 @@ impl<'ast> Visit<'ast> for Counter<'_> {
             }
         });
     }
+}
+
+/// Reads the code of an item for the trimming of themes (#568, step 4 of
+/// docs/porting/theme-trimming.md): the paths of the types it constructs and, when they are
+/// collected, its names and string literals.
+///
+/// A construction is a path whose last segment is a constructor name ([`is_constructor_name`]:
+/// `X::new(..)`, `X::new_with_..(..)`, `X::builder()`, `X::default()`), called or handed on as a
+/// function, with a module prefix or without (`a::X::new`), or with a qualified type
+/// (`<X>::new`, `<X as Default>::default`); the type is the path before the function. Expressions
+/// are read from the syntax tree, the bodies of macro invocations (`vec![X::new()]`) from their
+/// tokens. Comments are no tokens, and string literals and the paths of types (`Ref<X>`) are no
+/// constructions. Test code and attributes (documentation included) are left out.
+struct Code<'a> {
+    paths: Vec<Vec<String>>,
+    references: Option<&'a mut SourceReferences>,
+}
+
+impl<'ast> Visit<'ast> for Code<'_> {
+    fn visit_attribute(&mut self, _: &'ast syn::Attribute) {}
+
+    fn visit_item(&mut self, node: &'ast syn::Item) {
+        if !conditions_of(attributes_of(node)).0 {
+            syn::visit::visit_item(self, node);
+        }
+    }
+
+    fn visit_impl_item(&mut self, node: &'ast syn::ImplItem) {
+        if !conditions_of(attributes_of_member(node)).0 {
+            syn::visit::visit_impl_item(self, node);
+        }
+    }
+
+    fn visit_expr_path(&mut self, node: &'ast syn::ExprPath) {
+        if let Some(path) = constructed_type(node.qself.as_ref(), &node.path) {
+            self.paths.push(path);
+        }
+        syn::visit::visit_expr_path(self, node);
+    }
+
+    fn visit_ident(&mut self, node: &'ast proc_macro2::Ident) {
+        if let Some(references) = self.references.as_deref_mut() {
+            references.add_name(&node.to_string());
+        }
+    }
+
+    fn visit_lit_str(&mut self, node: &'ast syn::LitStr) {
+        if let Some(references) = self.references.as_deref_mut() {
+            references.add_string(&node.value());
+        }
+    }
+
+    fn visit_macro(&mut self, node: &'ast syn::Macro) {
+        self.read_tokens(&tokens_of(node.tokens.clone()));
+    }
+}
+
+impl Code<'_> {
+    /// The tokens of the body of a macro invocation, at any depth.
+    fn read_tokens(&mut self, tokens: &[TokenTree]) {
+        let mut index = 0;
+        while index < tokens.len() {
+            let token = &tokens[index];
+            // An attribute (`#[doc = ".."]` included) is skipped, and so is an item under
+            // `#[cfg(test)]`, which ends with its body or with a semicolon.
+            if is_punct(token, '#') {
+                let at = index + 1 + usize::from(tokens.get(index + 1).is_some_and(|next| is_punct(next, '!')));
+                if let Some(group) = tokens.get(at).and_then(|next| group_of(next, Delimiter::Bracket)) {
+                    index = at + 1;
+                    if text_of(&tokens_of(group.stream())) == "cfg(test)" {
+                        while let Some(next) = tokens.get(index) {
+                            index += 1;
+                            if group_of(next, Delimiter::Brace).is_some() || is_punct(next, ';') {
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
+            }
+            match token {
+                TokenTree::Group(group) => self.read_tokens(&tokens_of(group.stream())),
+                TokenTree::Ident(ident) => {
+                    if let Some(references) = self.references.as_deref_mut() {
+                        references.add_name(&ident.to_string());
+                    }
+                    // A path starts here unless a segment and `::` are before it; after a `::`
+                    // alone it is a path from the root.
+                    let after_separator = index >= 2 && is_path_separator(tokens, index - 2);
+                    let continued = after_separator && index >= 3 && (matches!(tokens[index - 3], TokenTree::Ident(_)) || is_punct(&tokens[index - 3], '>'));
+                    if !continued {
+                        if let Some(path) = constructed_path_of_tokens(tokens, index, after_separator) {
+                            self.paths.push(path);
+                        }
+                    }
+                }
+                TokenTree::Literal(literal) => {
+                    if let Some(references) = self.references.as_deref_mut() {
+                        if let syn::Lit::Str(text) = syn::Lit::new(literal.clone()) {
+                            references.add_string(&text.value());
+                        }
+                    }
+                }
+                TokenTree::Punct(_) => {}
+            }
+            index += 1;
+        }
+    }
+}
+
+/// Whether a function of a type by this name constructs the type: `new`, `new_..`, `builder`,
+/// `default`.
+pub(crate) fn is_constructor_name(name: &str) -> bool {
+    matches!(name, "new" | "builder" | "default") || name.starts_with("new_")
+}
+
+/// The segments of `path`, with an empty first segment for a path from the root; without
+/// generic arguments.
+fn segments_of(path: &syn::Path) -> Vec<String> {
+    let root = path.leading_colon.as_ref().map(|_| String::new());
+    root.into_iter().chain(path.segments.iter().map(|segment| segment.ident.to_string())).collect()
+}
+
+/// The type an expression path constructs (see [`Code`]): the path before a constructor name,
+/// or the qualified type.
+fn constructed_type(qself: Option<&syn::QSelf>, path: &syn::Path) -> Option<Vec<String>> {
+    if !is_constructor_name(&path.segments.last()?.ident.to_string()) {
+        return None;
+    }
+    if let Some(qself) = qself {
+        return match &*qself.ty {
+            syn::Type::Path(type_) if type_.qself.is_none() => Some(segments_of(&type_.path)),
+            _ => None,
+        };
+    }
+    let mut segments = segments_of(path);
+    segments.pop();
+    segments.iter().any(|segment| !segment.is_empty()).then_some(segments)
+}
+
+/// The type a path of tokens that starts at `index` constructs (see [`Code`]): its segments
+/// before a constructor name (`a::X::new` gives `a::X`), with an empty first segment when
+/// `rooted`. Nothing for a path with generic arguments.
+fn constructed_path_of_tokens(tokens: &[TokenTree], index: usize, rooted: bool) -> Option<Vec<String>> {
+    let mut segments: Vec<String> = if rooted { vec![String::new()] } else { Vec::new() };
+    let mut at = index;
+    loop {
+        segments.push(ident_of(tokens.get(at)?)?);
+        at += 1;
+        if !is_path_separator(tokens, at) {
+            break;
+        }
+        at += 2;
+    }
+    let function = segments.pop()?;
+    (is_constructor_name(&function) && segments.iter().any(|segment| !segment.is_empty())).then_some(segments)
 }
 
 /// The last segment of the path of a macro and its line.

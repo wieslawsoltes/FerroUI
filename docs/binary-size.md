@@ -537,20 +537,23 @@ theme-trimming = true
 
 The build of the application (`ferroui-build`) computes the units from what its documents name:
 the types they construct or select and their base classes, and every token that may be a key of
-the theme. It follows the keys, `BasedOn` chains and template types of the unit graph, and writes
+the theme. It adds what its Rust sources name (type names that are controls, string literals that
+are keys) and the controls the code of each live control creates (the creates edges of the type
+models). It follows the keys, `BasedOn` chains and template types of the unit graph, and writes
 the table that `<WinUITheme />` is constructed with (`WinUITheme::with_parts`). Two optional forms
 of `theme-roots`:
 
 ```toml
-# A control created only from Rust code, a style looked up by key from code, or a unit by its document.
+# A control or style whose name is built at run time, or a unit by its document.
 theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
 # Every unit, as without trimming (for comparing).
 theme-roots = "all"
 ```
 
-Until step 4 reads the application's sources, a control that only Rust code creates, and that no
-kept template constructs, needs a `theme-roots` entry. In debug builds the first lookup of such a
-control's theme logs `the WinUI control theme of <Type> was trimmed: add it to theme-roots`.
+A control or key the sources name, or that the code of a live control creates, is kept without a
+`theme-roots` entry (step 4, docs/porting/theme-trimming.md section 11); a name built at run time
+needs one. In debug builds the first lookup of a trimmed control's theme logs
+`the WinUI control theme of <Type> was trimmed: add it to theme-roots`.
 Builds with the tables of types (`ferroui-base/type-tables`: the run-time loader, hot reload, the
 designer, DevTools) keep every unit. So do themes constructed in Rust with `WinUITheme::new()`.
 The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
@@ -661,7 +664,7 @@ top of the machine code (#567).
 - Depend only on the themes the application uses. A theme declared in a document, or registered in
   `register_types()`, is linked; a theme that is not named is not.
 - Opt in to theme trimming (`[package.metadata.ferroui] theme-trimming = true`, section 4.11) and
-  name in `theme-roots` the controls the application creates only from code.
+  name in `theme-roots` the controls and keys whose names the application builds at run time.
 - Leave the panic strategy alone: the framework catches panics in its render loop and dispatcher.
 - `opt-level = "s"` for the whole program makes it about 15 % smaller still and costs about 19 % of
   processor time in layout and rendering (`docs/porting/desktop-performance.md`, section 4.1); it is

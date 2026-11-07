@@ -355,6 +355,8 @@ fn class_with_every_kind_of_member_is_read_exactly() {
         ("Child".to_string(), vec![attribute("Content", Vec::new()), attribute("DependsOn", vec![text("Tag")])]),
         ("Background".to_string(), Vec::new()),
     ];
+    // The code of the file constructs a `Brush` (step 4 of #568).
+    expected.creates = vec!["Fixture.Media.Brush".to_string()];
     assert_eq!(the_type(&scan, "Border"), &expected, "\n{}", listing(&scan.diagnostics));
 
     // The class the added owner names has the owner; a type that is not imported in the
@@ -1553,4 +1555,73 @@ fn members_that_are_constant_expressions_have_their_values() {
         listing(&scan.diagnostics)
     );
     assert_eq!((scan.statistics.enum_members, scan.statistics.enum_members_without_value), (24, 6));
+}
+
+fn creates_directory() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("creates")
+}
+
+/// The classes each class of a model creates, by name, for the classes that create any.
+fn creates_of(model: &AssemblyModel) -> BTreeMap<String, Vec<String>> {
+    model.types.iter().filter(|type_| !type_.creates.is_empty()).map(|type_| (type_.name.clone(), type_.creates.clone())).collect()
+}
+
+fn names(items: &[&str]) -> Vec<String> {
+    items.iter().map(|item| item.to_string()).collect()
+}
+
+/// The creates edges of the classes (#568, step 4): `X::new`, `X::new_..`, `X::builder` and
+/// `X::default`, in the blocks of a class and in its file, in the body of a macro, with a path
+/// of modules and through a qualified type, of classes of the crate and of the crate it is
+/// built on. Comments, documentation, string literals, types, other functions, names that are
+/// no class, the class itself (`Self` included) and test code make no edge.
+#[test]
+fn classes_record_the_classes_their_code_constructs() {
+    let root = creates_directory().join("lib.rs");
+    let alone = scan_crate(&ScanOptions::new("creates", root.clone()));
+    let expected = BTreeMap::from([
+        ("Item".to_string(), names(&["Handle", "Marker"])),
+        ("ItemList".to_string(), names(&["Item", "Separator", "Spacer"])),
+        ("Separator".to_string(), names(&["Glyph"])),
+    ]);
+    assert_eq!(creates_of(&alone.model), expected, "\n{}", listing(&alone.diagnostics));
+    // A scan does not collect the names and the strings unless asked to.
+    assert_eq!(alone.references, SourceReferences::default());
+
+    // With the model of the crate it is built on, its class is created too, by its full name.
+    let scan = scan_crate(&ScanOptions::new("creates", root).with_dependencies(vec![fixture().model]));
+    let mut expected = expected;
+    expected.insert("ItemList".to_string(), names(&["Fixture.Controls.Decorator", "Item", "Separator", "Spacer"]));
+    assert_eq!(creates_of(&scan.model), expected, "\n{}", listing(&scan.diagnostics));
+
+    // The model keeps them through its file.
+    assert_eq!(AssemblyModel::parse(&scan.model.to_json()).map(|model| creates_of(&model)), Ok(expected));
+}
+
+/// The border of the scanner fixture creates a brush in a function of its block; its own
+/// `Border::new()` and the values that are no classes (`Thickness`) make no edge.
+#[test]
+fn the_border_of_the_fixture_creates_its_brush() {
+    let scan = fixture();
+    assert_eq!(the_type(&scan, "Border").creates, names(&["Fixture.Media.Brush"]));
+    assert!(the_type(&scan, "Decorator").creates.is_empty());
+}
+
+/// The names and the string literals of the code (#568, step 4), when asked for: outside test
+/// code, comments and documentation, in the bodies of macros too; names that start with a
+/// lower-case letter are left out.
+#[test]
+fn source_references_are_the_names_and_strings_of_the_code() {
+    let scan = scan_crate(&ScanOptions::new("creates", creates_directory().join("lib.rs")).with_source_references(true));
+    let references = &scan.references;
+    for name in ["Plain", "Item", "Handle", "Spacer", "Unknown", "Thickness", "Control", "Separator", "Glyph"] {
+        assert!(references.names.contains(name), "{name}: {:?}", references.names);
+    }
+    assert!(!references.names.contains("describe") && !references.names.contains("ferroui_base"), "{:?}", references.names);
+    for text in ["Item::new()", "TextFillColorPrimaryBrush", "{}"] {
+        assert!(references.strings.contains(text), "{text}: {:?}", references.strings);
+    }
+    for text in ["OnlyInTests", "OnlyInTestFunctions", "DocumentedKey"] {
+        assert!(!references.strings.iter().any(|string| string.contains(text)), "{text}: {:?}", references.strings);
+    }
 }
