@@ -21,7 +21,7 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
-ferroui-base = { workspace = true, features = ["type-tables"] }
+ferroui-base = { workspace = true, features = ["full-themes"] }
 ferroui-controls.workspace = true
 # The contract of the run-time XAML loader, which the host registers.
 ferroui-markup-xaml.workspace = true

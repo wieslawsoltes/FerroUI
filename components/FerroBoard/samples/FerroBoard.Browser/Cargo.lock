@@ -236,6 +236,7 @@ dependencies = [
  "sys-locale",
  "time",
  "uuid",
+ "wasm-bindgen",
  "windows-sys",
 ]
 
