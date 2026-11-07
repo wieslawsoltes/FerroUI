@@ -586,7 +586,9 @@ async function fileRequests(page) {
 
 check("the start-up downloads the start-up files only; the other files follow the first frame, each once", async (page) => {
     const others = Object.keys(manifest.files).filter((asset) => !manifest.startup.includes(asset));
-    assert(others.length >= 20 && manifest.prefetch.length === others.length && new Set(manifest.prefetch).size === others.length,
+    // The pictures, the fonts and the other files of the pages: fewer than 20 since the galleries of
+    // NavigationPage, CarouselPage and DrawerPage show the controls only, without sample applications.
+    assert(others.length >= 10 && manifest.prefetch.length === others.length && new Set(manifest.prefetch).size === others.length,
         `the manifest lists ${others.length} files besides the start-up files, and prefetches ${manifest.prefetch.length}`);
     await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 120_000);
     const { resources, bundles, requests, marks } = await fileRequests(page);
