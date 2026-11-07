@@ -13,7 +13,8 @@
 //! When the body is complete, [`extract_runs`] takes each run (consecutive marked entries of one
 //! unit added to one dictionary) out of it into a function of its own,
 //! `<function>_unit_<n>(context, dictionary)`, and writes a call of `rt::apply_theme_unit` with
-//! the table of all units in its place. The entries are added where they were, in the same
+//! the active table of the class in its place ([`ACTIVE`]: the table of all units for the full
+//! theme, the parts of an application for `populate_with_parts`, step 3). The entries are added where they were, in the same
 //! order, with the same context, so the dictionaries are the same. An entry stays in the body,
 //! unmarked, when it is not one or more complete statements at the top level of the body, when
 //! it names a local of the body other than the context and one dictionary, or when a local it
@@ -38,6 +39,10 @@ pub(crate) const END_MARKER: &str = "//\u{1}end";
 
 /// The name the generated file gives the static table of all units.
 pub(crate) const TABLE: &str = "THEME_UNITS";
+
+/// The function of the generated file that gives the table the builds apply the units through:
+/// the active table of the class (#568, step 3).
+pub(crate) const ACTIVE: &str = "active_theme_units";
 
 /// The marker that opens an entry of the unit `unit`, indented as a statement of a body.
 pub(crate) fn begin_marker(unit: u32) -> String {
@@ -90,24 +95,68 @@ impl UnitEmission {
         self.runs.borrow().clone()
     }
 
-    /// The statics of the units and the table of all units, as items of the generated file:
-    /// `THEME_UNIT_<index>` for each unit, and `THEME_UNITS`.
-    pub(crate) fn table(&self) -> String {
+    /// The statics of the units and the tables of the theme, as items of the generated file:
+    /// `THEME_UNIT_<index>` for each unit (public, so that the parts table of an application
+    /// names them), `THEME_UNITS`, `AMBIENT_THEME_UNITS`, `THEME_CLASS`, the active table
+    /// ([`ACTIVE`]), `registered_theme_units` and, in debug builds, `THEME_UNIT_TYPE_KEYS`.
+    /// `class` is the full name of the class; `type_keys` are the type keys of each unit, by
+    /// its index.
+    pub(crate) fn table(&self, class: &str, type_keys: &[Vec<String>]) -> String {
         let runs = self.runs.borrow();
         let mut text = String::new();
         for (index, name) in self.names.iter().enumerate() {
             let name_text = name.replace('`', "'").replace(['\r', '\n'], " ");
             text.push_str(&format!("/// The unit `{name_text}` of the theme (#568): its runs, in the order the builds apply them.\n"));
             text.push_str(&format!(
-                "static THEME_UNIT_{index}: rt::ThemeUnit = rt::ThemeUnit {{ name: {}, index: {index}, runs: &[{}] }};\n\n",
+                "pub static THEME_UNIT_{index}: rt::ThemeUnit = rt::ThemeUnit {{ name: {}, index: {index}, runs: &[{}] }};\n\n",
                 super::rust_string_literal(name),
                 runs[index].join(", ")
             ));
         }
-        text.push_str("/// Every unit of the theme, in canonical order: the table the builds of its dictionaries\n");
-        text.push_str("/// apply the units through (#568).\n");
+        text.push_str("/// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors\n");
+        text.push_str("/// of the full theme name it, so that an application that keeps some units links only those.\n");
         let all: Vec<String> = (0..self.names.len()).map(|index| format!("&THEME_UNIT_{index}")).collect();
         text.push_str(&format!("pub static {TABLE}: &[&rt::ThemeUnit] = &[{}];\n", all.join(", ")));
+        text.push('\n');
+        text.push_str("/// The ambient unit alone: what a load by URI applies when the application registered no\n");
+        text.push_str("/// parts and constructed no full theme (#568, step 3).\n");
+        text.push_str("pub static AMBIENT_THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0];\n");
+        text.push('\n');
+        text.push_str("/// The full name of the class of the theme: the name its parts are registered and made\n");
+        text.push_str("/// active under (#568, step 3).\n");
+        text.push_str(&format!("pub const THEME_CLASS: &str = {};\n", super::rust_string_literal(class)));
+        text.push('\n');
+        text.push_str("/// The table the builds of the dictionaries apply the units through: the one the last\n");
+        text.push_str("/// populate of the class made active (#568, step 3).\n");
+        text.push_str(&format!("fn {ACTIVE}() -> rt::ThemeParts {{\n"));
+        text.push_str("    rt::active_theme_units(THEME_CLASS)\n");
+        text.push_str("}\n");
+        text.push('\n');
+        text.push_str("/// The units a load by URI and the constructors of the type information apply (#568, step 3):\n");
+        text.push_str("/// every unit, since the tables of types are linked (`ferroui-base/type-tables`: the run-time\n");
+        text.push_str("/// loader, hot reload, the designer, DevTools).\n");
+        text.push_str("#[cfg(ferroui_type_tables)]\n");
+        text.push_str("pub fn registered_theme_units() -> rt::ThemeParts {\n");
+        text.push_str(&format!("    {TABLE}\n"));
+        text.push_str("}\n");
+        text.push('\n');
+        text.push_str("/// The units a load by URI and the constructors of the type information apply (#568, step 3):\n");
+        text.push_str("/// the parts the application registered, else the ambient unit.\n");
+        text.push_str("#[cfg(not(ferroui_type_tables))]\n");
+        text.push_str("pub fn registered_theme_units() -> rt::ThemeParts {\n");
+        text.push_str("    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n");
+        text.push_str("}\n");
+        text.push('\n');
+        text.push_str("/// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control\n");
+        text.push_str("/// theme (#568, step 3). Debug builds only: release builds carry no names.\n");
+        text.push_str("#[cfg(debug_assertions)]\n");
+        let keys: Vec<String> = (0..self.names.len())
+            .map(|index| {
+                let names: Vec<String> = type_keys.get(index).map(Vec::as_slice).unwrap_or_default().iter().map(|key| super::rust_string_literal(key)).collect();
+                format!("&[{}]", names.join(", "))
+            })
+            .collect();
+        text.push_str(&format!("pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[{}];\n", keys.join(", ")));
         text
     }
 }
@@ -345,7 +394,7 @@ impl Extractor<'_> {
         text.push_str("}\n");
         self.functions.push(text);
         let index = self.units.push_run(run.unit, function);
-        self.body.push(format!("    rt::apply_theme_unit({TABLE}, {}, {index}, &context, &{})?;", run.unit, run.dictionary));
+        self.body.push(format!("    rt::apply_theme_unit({ACTIVE}(), {}, {index}, &context, &{})?;", run.unit, run.dictionary));
     }
 
     fn finish(mut self) -> (Vec<String>, Vec<String>) {

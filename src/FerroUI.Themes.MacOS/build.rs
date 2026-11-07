@@ -104,7 +104,9 @@ fn main() {
     // includes, compiled as one group against the type models into `$OUT_DIR/xaml/compiled_xaml.rs`,
     // with the `.xamlmeta` of the crate. The constructor is stated: the markup metadata of the theme
     // declares `new()` next to the constructor that takes the service provider, so the compiler
-    // would pick `new()`; the class is constructed as the Fluent theme is.
+    // would pick `new()`; the class is constructed as the Fluent theme is. It is the constructor with
+    // the units the application registered (`with_registered_parts`, #568 step 3): the loader table is
+    // reachable from `register_types()`, and the full constructor would keep every unit.
     let documents: Vec<(String, String)> = assets
         .iter()
         .filter(|(asset_path, _)| compiled(asset_path))
@@ -120,7 +122,7 @@ fn main() {
             ferroui_build::XamlGroup::new("compiled_xaml")
                 .documents(&documents)
                 .class_document("MacOSTheme.xaml")
-                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
+                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_registered_parts")),
         )
         .run();
 

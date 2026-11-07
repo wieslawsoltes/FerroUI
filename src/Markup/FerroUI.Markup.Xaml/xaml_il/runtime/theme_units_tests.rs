@@ -73,3 +73,51 @@ fn units_are_found_by_name() {
     assert_eq!(find_theme_unit(UNITS, "Controls/Button.xaml").map(|unit| unit.index), Some(1));
     assert!(find_theme_unit(UNITS, "Controls/Missing.xaml").is_none());
 }
+
+/// Step 3: the builds of a class apply the table the last populate of the class made active,
+/// and no unit before the first populate.
+#[test]
+fn the_active_table_is_the_last_one_set_for_the_class() {
+    static AMBIENT_ONLY: &[&ThemeUnit] = &[&AMBIENT];
+    assert!(active_theme_units("Tests.ActiveTheme").is_empty());
+    set_active_theme_units("Tests.ActiveTheme", UNITS);
+    set_active_theme_units("Tests.OtherTheme", AMBIENT_ONLY);
+    assert_eq!(active_theme_units("Tests.ActiveTheme").len(), 2);
+    set_active_theme_units("Tests.ActiveTheme", AMBIENT_ONLY);
+    assert_eq!(active_theme_units("Tests.ActiveTheme").iter().map(|unit| unit.index).collect::<Vec<_>>(), [0]);
+    assert_eq!(active_theme_units("Tests.OtherTheme").len(), 1);
+}
+
+/// Step 3: an application registers the parts it keeps; a registration replaces an earlier one,
+/// and the registration of the full theme does not replace one.
+#[test]
+fn registered_parts_are_found_by_class() {
+    static AMBIENT_ONLY: &[&ThemeUnit] = &[&AMBIENT];
+    assert!(registered_theme_parts("Tests.RegisteredTheme").is_none());
+    register_theme_parts_if_absent("Tests.RegisteredTheme", UNITS);
+    assert_eq!(registered_theme_parts("Tests.RegisteredTheme").map(<[_]>::len), Some(2));
+    register_theme_parts("Tests.RegisteredTheme", AMBIENT_ONLY);
+    register_theme_parts_if_absent("Tests.RegisteredTheme", UNITS);
+    assert_eq!(registered_theme_parts("Tests.RegisteredTheme").map(<[_]>::len), Some(1));
+}
+
+/// Step 3: the type keys a table leaves out are those of the units it does not have.
+#[test]
+fn trimmed_type_keys_are_those_of_the_units_left_out() {
+    static AMBIENT_ONLY: &[&ThemeUnit] = &[&AMBIENT];
+    static TYPE_KEYS: &[&[&str]] = &[&["Window"], &["Button", "RepeatButton"]];
+    assert_eq!(trimmed_type_keys(TYPE_KEYS, AMBIENT_ONLY), ["Button", "RepeatButton"]);
+    assert!(trimmed_type_keys(TYPE_KEYS, UNITS).is_empty());
+}
+
+/// Step 3: only the type key of a trimmed control theme is reported.
+#[test]
+fn only_trimmed_type_keys_are_reported() {
+    use ferroui_base::StaticType;
+    let trimmed: &[&'static str] = &["ResourceDictionary"];
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
+    // Reported once, and still recognised.
+    assert!(report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("ResourceDictionary"), trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &[]));
+}

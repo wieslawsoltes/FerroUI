@@ -522,6 +522,43 @@ The property, binding and styling benchmarks (`base::`, `data::`, `styling::` of
 benchmark is 2 % faster, and the two resource lookups that are slower in both runs (`find_pre_resource`,
 `find_not_existing_resource`, 8 to 14 %) differ by as much between two runs of the same code.
 
+### 4.11 Theme trimming in applications (#568, step 3, opt-in)
+
+A compiled theme is partitioned into units, one per control or resource document plus the ambient
+unit (docs/porting/theme-trimming.md, section 9). An application can construct the themes its
+documents construct from only the units it needs. The linker then removes the other units, and
+the control code that only their templates reach. It opts in in its manifest:
+
+```toml
+[package.metadata.ferroui]
+theme-trimming = true
+```
+
+The build of the application (`ferroui-build`) computes the units from what its documents name:
+the types they construct or select and their base classes, and every token that may be a key of
+the theme. It follows the keys, `BasedOn` chains and template types of the unit graph, and writes
+the table that `<WinUITheme />` is constructed with (`WinUITheme::with_parts`). Two optional forms
+of `theme-roots`:
+
+```toml
+# A control created only from Rust code, a style looked up by key from code, or a unit by its document.
+theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
+# Every unit, as without trimming (for comparing).
+theme-roots = "all"
+```
+
+Until step 4 reads the application's sources, a control that only Rust code creates, and that no
+kept template constructs, needs a `theme-roots` entry. In debug builds the first lookup of such a
+control's theme logs `the WinUI control theme of <Type> was trimmed: add it to theme-roots`.
+Builds with the tables of types (`ferroui-base/type-tables`: the run-time loader, hot reload, the
+designer, DevTools) keep every unit. So do themes constructed in Rust with `WinUITheme::new()`.
+The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
+
+| `samples/HelloWorld` (opted in), `dist`, macOS ARM64 | Size |
+|---|---:|
+| full theme (step 2) | 37.98 MB |
+| trimmed | Measured: (pending) |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
@@ -622,6 +659,8 @@ top of the machine code (#567).
   from the field (on Windows keep the PDB).
 - Depend only on the themes the application uses. A theme declared in a document, or registered in
   `register_types()`, is linked; a theme that is not named is not.
+- Opt in to theme trimming (`[package.metadata.ferroui] theme-trimming = true`, section 4.11) and
+  name in `theme-roots` the controls the application creates only from code.
 - Leave the panic strategy alone: the framework catches panics in its render loop and dispatcher.
 - `opt-level = "s"` for the whole program makes it about 15 % smaller still and costs about 19 % of
   processor time in layout and rendering (`docs/porting/desktop-performance.md`, section 4.1); it is

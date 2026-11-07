@@ -43,3 +43,10 @@ sample-build = { path = "../SampleBuild" }
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 sample-testing = { path = "../SampleTesting" }
+
+# The WinUI theme is constructed from the units of its compiled markup the documents need: the
+# window, the text block and what their themes reference (#568, step 3 of
+# docs/porting/theme-trimming.md). `theme-roots = "all"` keeps every unit, for comparing; a
+# control the application creates only from Rust code is named in `theme-roots`.
+[package.metadata.ferroui]
+theme-trimming = true

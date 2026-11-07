@@ -294,6 +294,31 @@ fn facts_of(xml: &Document<'_>) -> DocumentFacts {
     facts
 }
 
+/// What a document names that can root the units of a theme (#568, step 3): the build of an
+/// application reads its documents with the rules the unit graph reads the documents of a theme
+/// with ([`document_references`]).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct DocumentReferences {
+    /// The local names of the types the document constructs or selects: its elements (template
+    /// content included), its `TargetType`s, the type selectors of its selectors and its
+    /// `{x:Type}`s.
+    pub types: BTreeSet<String>,
+    /// What may name a key of a theme: every identifier token of its attribute values and text,
+    /// and the argument of every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`.
+    pub keys: BTreeSet<String>,
+}
+
+/// What the document `xaml` names that can root the units of a theme (#568, step 3), read as the
+/// unit graph reads a document of a theme: conservative, so that a token that happens to spell a
+/// key keeps the unit that defines it. `None` for a document that is not plain XML.
+pub fn document_references(xaml: &str) -> Option<DocumentReferences> {
+    let xml = Document::parse(xaml).ok()?;
+    let facts = facts_of(&xml);
+    let mut keys = facts.tokens;
+    keys.extend(facts.extension_keys);
+    Some(DocumentReferences { types: facts.types, keys })
+}
+
 /// The units of the group `documents` (`(name, xaml, URI)`, the document of the class first),
 /// given the URIs of the documents whose entries were merged into another document (`merged`).
 /// `None` when there is nothing to partition: no document is merged, every merged document

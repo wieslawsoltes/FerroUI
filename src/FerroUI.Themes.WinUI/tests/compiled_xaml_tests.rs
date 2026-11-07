@@ -32,10 +32,11 @@ fn generate() -> ClassFile {
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<WinUITheme as StaticType>::TYPE, WinUITheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
-    // constructor that takes the service provider, so the compiler would pick `new()`.
+    // constructor that takes the service provider, so the compiler would pick `new()`; it is the
+    // constructor with the units the application registered, as in `build.rs` (#568, step 3).
     generate_class_file(
         <WinUITheme as StaticType>::TYPE,
-        Some(ClassConstructor::ServiceProvider("with_service_provider")),
+        Some(ClassConstructor::ServiceProvider("with_registered_parts")),
         "::ferroui_themes_winui::compiled_xaml",
         &[],
     )
@@ -135,6 +136,29 @@ fn the_whole_theme_applies_every_unit() {
             assert!(found, "{key:?} of the unit {} is not in the theme", unit.name);
         }
     }
+}
+
+/// Step 3 of #568: a theme constructed from some of its units (`with_parts`) leaves out the
+/// entries of the units it is not given, and has them with the table of all units. The rating
+/// control's unit defines only its control theme, which no other unit references.
+#[test]
+fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    let rating = units.iter().position(|unit| unit.name == "Controls/RatingControl.xaml").expect("a unit of the rating control");
+    let parts: Vec<&'static ThemeUnit> = units.iter().enumerate().filter(|(position, _)| *position != rating).map(|(_, unit)| *unit).collect();
+    let parts: &'static [&'static ThemeUnit] = Box::leak(parts.into_boxed_slice());
+    let key = ResourceKey::Type(<ferroui_controls::RatingControl as StaticType>::TYPE);
+
+    let trimmed = WinUITheme::with_parts(None, parts);
+    assert!(trimmed.try_get_resource(&key, None).is_none(), "the control theme of the rating control is left out");
+    let full = WinUITheme::with_parts(None, units);
+    assert!(full.try_get_resource(&key, None).is_some(), "the full table has the control theme of the rating control");
+    // With the tables of types (the tests link the run-time loader), a load by URI and the type
+    // information apply every unit.
+    assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
 #[test]
