@@ -71,6 +71,15 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = WebGlRenderTarget, js_name = contextLost)]
     fn context_lost(context: i32) -> bool;
+
+    /// Uploads the media frame transferred to this worker (`SharedGlFrames.transfer` on the
+    /// page) into a new texture of the context and closes the frame: the name of the texture.
+    #[wasm_bindgen(catch, js_namespace = SharedGlFrames, js_name = importTransferred)]
+    fn import_transferred(context: i32, generation: u32, frame: u32, width: u32, height: u32) -> Result<u32, JsValue>;
+
+    /// Deletes a texture made by `importTransferred`.
+    #[wasm_bindgen(catch, js_namespace = SharedGlFrames, js_name = release)]
+    fn release_frame_texture(texture: u32) -> Result<(), JsValue>;
 }
 
 /// A canvas that is rendered to with WebGL, as the thread that draws to it
@@ -390,10 +399,12 @@ impl IPlatformGraphicsContext for WebGlContext {
 impl IGlContext for WebGlContext {
     fn shared_frame_context_id(&self) -> Option<u64> {
         self.verify_access();
-        if cfg!(all(
-            target_os = "emscripten",
-            not(target_feature = "atomics")
-        )) && self.version.major() >= 3
+        // The page's media elements are sampled directly only by a context of the page's thread:
+        // the module without threads, and a module with threads whose render thread did not start
+        // (#601). A render worker's context takes transferred frames instead.
+        if cfg!(target_os = "emscripten")
+            && !super::BrowserSharedRenderLoop::renders_on_render_thread()
+            && self.version.major() >= 3
             && self.context_id > 0
             && frame_generation(self.context_id) > 0
             && !context_lost(self.context_id)
@@ -406,6 +417,32 @@ impl IGlContext for WebGlContext {
     fn shared_frame_context_generation(&self) -> u64 {
         self.verify_access();
         frame_generation(self.context_id) as u64
+    }
+    fn transferred_frame_context_id(&self) -> Option<u64> {
+        self.verify_access();
+        if cfg!(all(target_os = "emscripten", target_feature = "atomics"))
+            && super::BrowserSharedRenderLoop::renders_on_render_thread()
+            && self.version.major() >= 3
+            && self.context_id > 0
+            && frame_generation(self.context_id) > 0
+            && !context_lost(self.context_id)
+        {
+            Some(self.context_id as u64)
+        } else {
+            None
+        }
+    }
+    fn import_transferred_frame(&self, frame: u32, width: u32, height: u32) -> Result<u32, String> {
+        self.verify_access();
+        if self.transferred_frame_context_id().is_none() {
+            return Err("The context takes no transferred browser frames".into());
+        }
+        import_transferred(self.context_id, frame_generation(self.context_id), frame, width, height)
+            .map_err(|error| error.as_string().unwrap_or_else(|| format!("{error:?}")))
+    }
+    fn release_transferred_frame_texture(&self, texture: u32) {
+        self.verify_access();
+        let _ = release_frame_texture(texture);
     }
     fn schedule_frame_completion(
         &self,

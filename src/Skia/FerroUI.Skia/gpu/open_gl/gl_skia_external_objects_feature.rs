@@ -43,6 +43,8 @@ pub struct GlSkiaExternalObjectsFeature {
     fbo: Cell<i32>,
     frame_context_id: Option<u64>,
     frame_generation: u64,
+    /// The context transferred browser frames are uploaded into (#601).
+    transfer_context_id: Option<u64>,
 }
 
 impl GlSkiaExternalObjectsFeature {
@@ -58,6 +60,7 @@ impl GlSkiaExternalObjectsFeature {
     ) -> Rc<Self> {
         let frame_context_id = gl_context.shared_frame_context_id();
         let frame_generation = gl_context.shared_frame_context_generation();
+        let transfer_context_id = gl_context.transferred_frame_context_id();
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             gr_context,
@@ -67,6 +70,7 @@ impl GlSkiaExternalObjectsFeature {
             fbo: Cell::new(0),
             frame_context_id,
             frame_generation,
+            transfer_context_id,
         })
     }
 
@@ -92,6 +96,9 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
             .unwrap_or_default();
         if self.frame_context_id.is_some() {
             types.push(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::SHARED_GL_TEXTURE.into());
+        }
+        if self.transfer_context_id.is_some() {
+            types.push(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME.into());
         }
         types
     }
@@ -122,6 +129,27 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
             let context_id=self.frame_context_id.expect("Direct frame sampling is unavailable");
             let texture_id=u32::try_from(handle.handle()).ok().filter(|id|*id!=0).expect("Invalid frame texture name");
             return Rc::new(GlSkiaImportedImage::new(self.gr_context.clone(),self.gl_context.clone(),self.fbo_provider(),ImportedImageSource::Frame{texture_id,properties,context_id,generation:self.frame_generation}));
+        }
+        if handle.handle_descriptor() == Some(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME) {
+            // #601: the page's media frame, uploaded now into a texture of this context, which the
+            // image owns until it is disposed.
+            self.transfer_context_id.expect("Transferred browser frames are unavailable");
+            let frame = u32::try_from(handle.handle()).ok().filter(|id| *id != 0).expect("Invalid transferred frame number");
+            let current = self.gl_context.ensure_current();
+            let texture = self.gl_context.import_transferred_frame(frame, properties.width as u32, properties.height as u32);
+            current.dispose();
+            let texture = texture.unwrap_or_else(|error| panic!("{error}"));
+            return Rc::new(GlSkiaImportedImage::new(
+                self.gr_context.clone(),
+                self.gl_context.clone(),
+                self.fbo_provider(),
+                ImportedImageSource::Transferred(TransferredTexture {
+                    texture,
+                    properties,
+                    gl_context: self.gl_context.clone(),
+                    released: Cell::new(false),
+                }),
+            ));
         }
         let Some(feature) = &self.feature else {
             panic!("Importing this platform handle is not supported");
@@ -192,6 +220,10 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
         image_handle_type: &str,
     ) -> CompositionGpuImportedImageSynchronizationCapabilities {
         if image_handle_type==ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::SHARED_GL_TEXTURE && self.frame_context_id.is_some() {
+            return CompositionGpuImportedImageSynchronizationCapabilities::AUTOMATIC;
+        }
+        // #601: the upload is a command of the context that samples the texture.
+        if image_handle_type == ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME && self.transfer_context_id.is_some() {
             return CompositionGpuImportedImageSynchronizationCapabilities::AUTOMATIC;
         }
         self.feature
@@ -300,6 +332,39 @@ enum ImportedImageSource {
     /// A texture of a context of the share group; a
     /// [`GlSkiaSharedTextureForComposition`].
     Shared(Arc<dyn ICompositionImportableSharedGpuContextImage>),
+    /// A browser media frame transferred to this render worker and uploaded into a texture of
+    /// this context when it was imported (#601). The image owns the texture.
+    Transferred(TransferredTexture),
+}
+
+/// The texture a transferred browser frame was uploaded into (#601): deleted when the image is
+/// disposed or dropped, on the render thread that owns both. A bitmap of the image is a copy in a
+/// texture of Skia (`take_snapshot`), so nothing reads the texture after that.
+struct TransferredTexture {
+    texture: u32,
+    properties: PlatformGraphicsExternalImageProperties,
+    gl_context: Rc<dyn IGlContext>,
+    released: Cell<bool>,
+}
+
+impl TransferredTexture {
+    fn release(&self) {
+        if !self.released.replace(true) {
+            if let Ok(current) = self.gl_context.try_ensure_current() {
+                self.gl_context.release_transferred_frame_texture(self.texture);
+                current.dispose();
+            } else {
+                // A context that cannot be made current is lost, with its textures.
+                self.gl_context.release_transferred_frame_texture(self.texture);
+            }
+        }
+    }
+}
+
+impl Drop for TransferredTexture {
+    fn drop(&mut self) {
+        self.release();
+    }
 }
 
 /// An image imported into the OpenGL context. A snapshot copies its texture
@@ -334,7 +399,7 @@ impl GlSkiaImportedImage {
         match &self.source {
             ImportedImageSource::External(image) => image,
             ImportedImageSource::Shared(_) => panic!("Only supported with an external image"),
-            ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {
+            ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) | ImportedImageSource::Transferred(_) => {
                 panic!("An immutable frame requires lease-backed presentation")
             }
         }
@@ -442,6 +507,14 @@ impl GlSkiaImportedImage {
                         GL_TEXTURE_2D,
                     )
                 }
+                ImportedImageSource::Transferred(transferred) => (
+                    transferred.properties.width,
+                    transferred.properties.height,
+                    GL_RGBA8,
+                    transferred.texture as i32,
+                    transferred.properties.top_left_origin,
+                    GL_TEXTURE_2D,
+                ),
                 ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {
                     panic!("An immutable frame cannot use a snapshot importer")
                 }
@@ -566,6 +639,7 @@ impl IPlatformRenderInterfaceImportedObject for GlSkiaImportedImage {
                 shared_texture(image).dispose_with(&*self.gl_context)
             }
             ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {} // The frame lease owns storage.
+            ImportedImageSource::Transferred(transferred) => transferred.release(),
         }
     }
 }
@@ -579,6 +653,25 @@ impl IPlatformRenderInterfaceImportedImage for GlSkiaImportedImage {
         use ferroui_base::rendering::composition::frames::{
             DeviceIdentity, FrameAlpha, FrameColor, FrameError, FrameFormat,
         };
+        if let ImportedImageSource::Transferred(transferred) = &self.source {
+            // #601: the frame was uploaded into this image's texture when it was imported; the
+            // bitmap is a copy in a texture of Skia, so the image may be disposed after it.
+            let m = frame.metadata();
+            m.validate(8192)?;
+            if !frame.is_current() {
+                return Err(FrameError::StaleGeneration);
+            }
+            let properties = &transferred.properties;
+            if m.width as i32 != properties.width || m.height as i32 != properties.height
+                || m.top_left_origin != properties.top_left_origin {
+                return Err(FrameError::InvalidDimensions);
+            }
+            if m.format != FrameFormat::Rgba8 || properties.format != PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm {
+                return Err(FrameError::UnsupportedFormat);
+            }
+            frame.counters().gpu_import();
+            return Ok(self.take_snapshot());
+        }
         if let ImportedImageSource::ExternalFrame(image, source) = &self.source {
             if self.fbo_provider.frame_context_id.is_none() { return Err(FrameError::MissingSynchronization); }
             let m = frame.metadata();

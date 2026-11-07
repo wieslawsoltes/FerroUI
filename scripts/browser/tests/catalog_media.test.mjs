@@ -1,6 +1,7 @@
 // Real catalog UI, native HTML media and page-owned Skia/WebGL on a GPU.
 // Build: scripts/build-browser.sh control-catalog-browser --debug
 // Run: FERROUI_BROWSER_ANGLE=metal node scripts/browser/tests/catalog_media.test.mjs <site>
+// Threaded site (#601): FERROUI_CATALOG_MEDIA_THREADS=1 with the site of `build-browser.sh --both`.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -29,8 +30,14 @@ const initScript = `(() => {
         return acquire(options);
     };
 })();`;
+// FERROUI_CATALOG_MEDIA_THREADS=1 runs the same checks on the module with threads, its compositor on
+// the render worker, where frames are transferred to the worker as WebCodecs frames (#601).
+const threaded = process.env.FERROUI_CATALOG_MEDIA_THREADS === "1";
 const page = drive(await open(site, {
-    query: "?RenderingMode=WebGL2&Threads=false&RenderThread=false",
+    query: threaded
+        ? "?RenderingMode=WebGL2&Threads=true&RenderThread=true"
+        : "?RenderingMode=WebGL2&Threads=false&RenderThread=false",
+    isolated: threaded,
     width: 1100, height: 1000, network: true,
     angle: process.env.FERROUI_BROWSER_ANGLE ?? "metal", initScript,
     chromeArgs: ["--use-fake-device-for-media-stream", "--mute-audio"],
@@ -49,6 +56,9 @@ const click = async text => page.clickElement(await page.find(text, inContent));
 const videoRequests = () => page.requests.filter(url => /\/media\/sintel-sample\.mp4(?:\?|$)/.test(url));
 try {
     await waitUntilReady(page, 60000);
+    if (threaded) {
+        assert.equal(await page.evaluate("self.crossOriginIsolated"), true, "the threaded site is not cross-origin isolated");
+    }
     // Leave ordinary idle asset prefetch enabled: it must still exclude video.
     await sleep(1800);
     assert.equal(videoRequests().length, 0, "startup/idle prefetch downloaded video");
