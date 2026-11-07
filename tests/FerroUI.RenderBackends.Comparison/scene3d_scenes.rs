@@ -398,6 +398,23 @@ fn lit_cube() -> Arc<Scene3DSnapshot> {
     snapshot(Some(cube_camera()), vec![turned_cube()], cube_lights())
 }
 
+/// The lit cube of the first scene, for the tests of the kept outputs.
+pub fn lit_cube_scene() -> Arc<Scene3DSnapshot> {
+    lit_cube()
+}
+
+/// The lit cube seen by the camera of [`cube_camera`] turned `step` degrees about the y axis at
+/// the same distance: the snapshot of the `step`-th frame of one viewport whose camera moves (its
+/// camera generation is `1 + step`). The mesh, the model and the lights are those of every step:
+/// the same `(id, version)`, the same records.
+pub fn orbiting_cube(step: u32) -> Arc<Scene3DSnapshot> {
+    let angle = (step as f32).to_radians();
+    let camera = perspective([4.0 * angle.sin(), 0.0, 4.0 * angle.cos()], 45.0, 1.0, 10.0);
+    let mut scene = (*snapshot(Some(camera), vec![turned_cube()], cube_lights())).clone();
+    scene.camera_generation = 1 + u64::from(step);
+    Arc::new(scene)
+}
+
 /// The centres of the two visible faces of the turned cube and their red: the ambient 64 plus
 /// 128 times the cosine to the light along -z (cos 30 for the +z face, cos 60 for the -x face).
 fn cube_face_probes(camera: &Scene3DCamera, side: usize, shift: f64) -> Vec<Probe> {
