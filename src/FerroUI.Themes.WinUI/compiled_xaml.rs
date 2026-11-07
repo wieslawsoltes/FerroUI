@@ -25,13 +25,25 @@ const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
-/// Populates `root` from the document of the class (`populate_winuitheme_xaml`), with a root service provider
-/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the
-/// run-time loader populates it.
+/// Populates `root` from the document of the class (`populate_winuitheme_xaml`) with every unit of the theme
+/// (`populate_with_parts` with the table of all units).
 pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::WinUITheme>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    populate_with_parts(service_provider, root, THEME_UNITS)
+}
+
+/// Populates `root` from the document of the class (`populate_winuitheme_xaml`) with the units `parts` of the
+/// theme, in canonical order (#568, step 3): the builds of its dictionaries apply those units
+/// and leave the others out. With a root service provider over `service_provider`
+/// (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the run-time loader populates it.
+pub fn populate_with_parts(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+    root: &::ferroui_base::Ref<crate::WinUITheme>,
+    parts: rt::ThemeParts,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    rt::set_active_theme_units(THEME_CLASS, parts);
     ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::WinUITheme as ::ferroui_base::StaticType>::TYPE, root);
     if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::WinUITheme as ::ferroui_base::StaticType>::TYPE) {
         return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
@@ -85,20 +97,20 @@ pub fn populate_winuitheme_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 6)?, count_0.wrapping_add(502_i32));
     }
     let namespace_scope_0 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(THEME_UNITS, 6, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 6, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
     // WinUITheme.xaml(102,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CompactStyles", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_0, 102, 8)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 3, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 13, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 19, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 25, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 26, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 30, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 31, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 60, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 63, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 3, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 13, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 19, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 25, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 26, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 30, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 31, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
     // WinUITheme.xaml(19,10) MergedDictionaries
     let merged_dictionaries_collection_0 = ::ferroui_base::controls::ResourceDictionary::__markup_get_MergedDictionaries(&resource_dictionary_0);
@@ -120,269 +132,269 @@ pub fn populate_winuitheme_xaml(
     // WinUITheme.xaml(17,6) Key
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 17, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 1, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_10 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_10), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 2, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 2, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_37 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_37), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 3, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 3, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_39 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_39), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 4, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 4, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_123 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_123), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 5, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 5, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_134 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_134), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 8, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_136 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_136), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 9, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 9, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_137 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_137), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 10, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 10, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_141 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_141), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 11, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 11, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_165 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_165), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 12, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 12, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_167 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_167), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 13, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 13, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_168 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_168), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 14, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 14, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_169 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_169), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 15, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 15, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_170 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_170), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 16, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 16, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_171 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_171), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 17, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 17, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_172 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_172), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 18, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 18, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_173 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_173), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 19, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 19, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_174 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_174), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 20, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 20, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_175 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_175), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 21, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 21, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_176 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_176), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 22, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 22, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_177 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_177), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 25, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 25, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_178 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_178), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 26, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 26, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_179 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_179), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 27, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 27, 0, &context, &resource_dictionary_1)?;
     let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
     // WinUITheme.xaml(16,6) Key
     let value_180 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 16, 6)?, rt::cast(::core::clone::Clone::clone(&value_180), 16, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 28, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 28, 0, &context, &resource_dictionary_1)?;
     ::core::mem::drop(namespace_scope_3);
     // WinUITheme.xaml(14,6) Key
     let value_181 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_181), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 29, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 29, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_182 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_182), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 30, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 30, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_183 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_183), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 31, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 31, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_187 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_187), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 32, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 32, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_188 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_188), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 33, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 33, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_189 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_189), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 34, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 34, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_191 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_191), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 35, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 35, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_192 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_192), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 36, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 36, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_193 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_193), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 37, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 37, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_194 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_194), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 38, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_195 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_195), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 39, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_196 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_196), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 40, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_198 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_198), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 41, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 41, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_200 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_200), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 42, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_201 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_201), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 43, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_202 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_202), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 44, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_203 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_203), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 45, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_204 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_204), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 46, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_205 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_205), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 47, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_206 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_206), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 48, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_207 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_207), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 49, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_208 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_208), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 50, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_209 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_209), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 51, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_210 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_210), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 52, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 52, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_211 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_211), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 53, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_212 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_212), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 54, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_213 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_213), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 55, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_214 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_214), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 56, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_215 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_215), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 57, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_216 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_216), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 58, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_217 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_217), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 59, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_218 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_218), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 60, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 60, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_219 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_219), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 61, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_220 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_220), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 62, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_221 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_221), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 63, 1, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 63, 1, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_222 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_222), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 64, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_223 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_223), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 65, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_224 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_224), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 66, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(14,6) Key
     let value_225 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_225), 14, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 67, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(15,6) Key
     let value_226 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_226), 15, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 68, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 68, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(15,6) Key
     let value_227 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_227), 15, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 69, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_1)?;
     // WinUITheme.xaml(15,6) Key
     let value_229 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 15, 6)?, rt::cast(::core::clone::Clone::clone(&value_229), 15, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 70, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_1)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 17, 6)?), 17, 6)?;
     // WinUITheme.xaml(27,6) ThemeDictionaries
@@ -399,269 +411,269 @@ pub fn populate_winuitheme_xaml(
     // WinUITheme.xaml(27,6) Key
     let value_231 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_231), 27, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 1, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 1, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(305,6) Key
     let value_240 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 305, 6)?, rt::cast(::core::clone::Clone::clone(&value_240), 305, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 2, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(27,6) Key
     let value_267 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_267), 27, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 3, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 3, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(218,6) Key
     let value_269 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 218, 6)?, rt::cast(::core::clone::Clone::clone(&value_269), 218, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 4, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 4, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(40,6) Key
     let value_353 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_353), 40, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 5, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 5, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(77,6) Key
     let value_364 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 77, 6)?, rt::cast(::core::clone::Clone::clone(&value_364), 77, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 8, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 8, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(96,6) Key
     let value_366 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 96, 6)?, rt::cast(::core::clone::Clone::clone(&value_366), 96, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 9, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 9, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(66,6) Key
     let value_367 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 66, 6)?, rt::cast(::core::clone::Clone::clone(&value_367), 66, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 10, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 10, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(119,6) Key
     let value_371 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 119, 6)?, rt::cast(::core::clone::Clone::clone(&value_371), 119, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 11, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 11, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(59,6) Key
     let value_395 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 59, 6)?, rt::cast(::core::clone::Clone::clone(&value_395), 59, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 12, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 12, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(19,6) Key
     let value_397 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_397), 19, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 13, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 13, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(29,6) Key
     let value_398 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 29, 6)?, rt::cast(::core::clone::Clone::clone(&value_398), 29, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 14, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 14, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(72,6) Key
     let value_399 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_399), 72, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 15, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 15, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(50,6) Key
     let value_400 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_400), 50, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 16, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 16, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(17,6) Key
     let value_401 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_401), 17, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 17, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 17, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(79,6) Key
     let value_402 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 79, 6)?, rt::cast(::core::clone::Clone::clone(&value_402), 79, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 18, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 18, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(42,6) Key
     let value_403 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 42, 6)?, rt::cast(::core::clone::Clone::clone(&value_403), 42, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 19, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 19, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(74,6) Key
     let value_404 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 74, 6)?, rt::cast(::core::clone::Clone::clone(&value_404), 74, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 20, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 20, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(36,6) Key
     let value_405 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_405), 36, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 21, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 21, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(87,6) Key
     let value_406 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 87, 6)?, rt::cast(::core::clone::Clone::clone(&value_406), 87, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 22, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 22, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(19,6) Key
     let value_407 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_407), 19, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 25, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 25, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(63,6) Key
     let value_408 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 63, 6)?, rt::cast(::core::clone::Clone::clone(&value_408), 63, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 26, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 26, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(72,6) Key
     let value_409 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 72, 6)?, rt::cast(::core::clone::Clone::clone(&value_409), 72, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 27, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 27, 1, &context, &resource_dictionary_2)?;
     let namespace_scope_4 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
     // WinUITheme.xaml(20,6) Key
     let value_410 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_410), 20, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 28, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 28, 1, &context, &resource_dictionary_2)?;
     ::core::mem::drop(namespace_scope_4);
     // WinUITheme.xaml(38,6) Key
     let value_411 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_411), 38, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 29, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 29, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(40,6) Key
     let value_412 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 40, 6)?, rt::cast(::core::clone::Clone::clone(&value_412), 40, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 30, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 30, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(92,6) Key
     let value_413 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_413), 92, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 31, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 31, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(102,6) Key
     let value_417 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 102, 6)?, rt::cast(::core::clone::Clone::clone(&value_417), 102, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 32, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 32, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(31,6) Key
     let value_418 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 31, 6)?, rt::cast(::core::clone::Clone::clone(&value_418), 31, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 33, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 33, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(50,6) Key
     let value_419 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_419), 50, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 34, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 34, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(37,6) Key
     let value_421 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 37, 6)?, rt::cast(::core::clone::Clone::clone(&value_421), 37, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 35, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 35, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(36,6) Key
     let value_422 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_422), 36, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 36, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 36, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(17,6) Key
     let value_423 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_423), 17, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 37, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 37, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(70,6) Key
     let value_424 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 70, 6)?, rt::cast(::core::clone::Clone::clone(&value_424), 70, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 38, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 38, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(17,6) Key
     let value_425 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_425), 17, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 39, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 39, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(65,6) Key
     let value_426 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 65, 6)?, rt::cast(::core::clone::Clone::clone(&value_426), 65, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 40, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(50,6) Key
     let value_428 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 50, 6)?, rt::cast(::core::clone::Clone::clone(&value_428), 50, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 41, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 41, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(26,6) Key
     let value_430 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 26, 6)?, rt::cast(::core::clone::Clone::clone(&value_430), 26, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 42, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(24,6) Key
     let value_431 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 24, 6)?, rt::cast(::core::clone::Clone::clone(&value_431), 24, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 43, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(28,6) Key
     let value_432 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 28, 6)?, rt::cast(::core::clone::Clone::clone(&value_432), 28, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 44, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 44, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(80,6) Key
     let value_433 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 80, 6)?, rt::cast(::core::clone::Clone::clone(&value_433), 80, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 45, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(17,6) Key
     let value_434 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_434), 17, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 46, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 46, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(27,6) Key
     let value_435 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_435), 27, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 47, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 47, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(18,6) Key
     let value_436 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_436), 18, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 48, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 48, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(18,6) Key
     let value_437 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_437), 18, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 49, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 49, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(27,6) Key
     let value_438 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 27, 6)?, rt::cast(::core::clone::Clone::clone(&value_438), 27, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 50, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 50, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(55,6) Key
     let value_439 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 55, 6)?, rt::cast(::core::clone::Clone::clone(&value_439), 55, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 51, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 51, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(46,6) Key
     let value_440 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_440), 46, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 52, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 52, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(19,6) Key
     let value_441 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_441), 19, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 53, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 53, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(18,6) Key
     let value_442 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_442), 18, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 54, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 54, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(92,6) Key
     let value_443 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 92, 6)?, rt::cast(::core::clone::Clone::clone(&value_443), 92, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 55, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 55, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(20,6) Key
     let value_444 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 20, 6)?, rt::cast(::core::clone::Clone::clone(&value_444), 20, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 56, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 56, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(119,6) Key
     let value_445 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 119, 6)?, rt::cast(::core::clone::Clone::clone(&value_445), 119, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 57, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 57, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(25,6) Key
     let value_446 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 25, 6)?, rt::cast(::core::clone::Clone::clone(&value_446), 25, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 58, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 58, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(22,6) Key
     let value_447 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_447), 22, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 59, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(18,6) Key
     let value_448 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_448), 18, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 60, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 60, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(22,6) Key
     let value_449 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_449), 22, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 61, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 61, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(38,6) Key
     let value_450 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 38, 6)?, rt::cast(::core::clone::Clone::clone(&value_450), 38, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 62, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(23,6) Key
     let value_451 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_451), 23, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 63, 2, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 63, 2, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(33,6) Key
     let value_452 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 33, 6)?, rt::cast(::core::clone::Clone::clone(&value_452), 33, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 64, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 64, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(43,6) Key
     let value_453 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_453), 43, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 65, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 65, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(43,6) Key
     let value_454 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 43, 6)?, rt::cast(::core::clone::Clone::clone(&value_454), 43, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 66, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 66, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(36,6) Key
     let value_455 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 36, 6)?, rt::cast(::core::clone::Clone::clone(&value_455), 36, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 67, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 67, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(46,6) Key
     let value_456 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 46, 6)?, rt::cast(::core::clone::Clone::clone(&value_456), 46, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 68, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 68, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(30,6) Key
     let value_457 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 30, 6)?, rt::cast(::core::clone::Clone::clone(&value_457), 30, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 69, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 69, 1, &context, &resource_dictionary_2)?;
     // WinUITheme.xaml(18,6) Key
     let value_459 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_459), 18, 6)?);
-    rt::apply_theme_unit(THEME_UNITS, 70, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 70, 1, &context, &resource_dictionary_2)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_230), rt::cast(resource_dictionary_2.clone(), 27, 6)?), 27, 6)?;
     // WinUITheme.xaml(37,6) ThemeDictionaries
@@ -678,328 +690,328 @@ pub fn populate_winuitheme_xaml(
     // WinUITheme.xaml(37,25) Key
     let value_461 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 37, 25)?, rt::cast(::core::clone::Clone::clone(&value_461), 37, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 1, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 1, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(595,25) Key
     let value_470 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 595, 25)?, rt::cast(::core::clone::Clone::clone(&value_470), 595, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 2, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 2, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(40,25) Key
     let value_497 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_497), 40, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 3, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 3, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(425,25) Key
     let value_499 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 425, 25)?, rt::cast(::core::clone::Clone::clone(&value_499), 425, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 4, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 4, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(66,25) Key
     let value_583 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_583), 66, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 5, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 5, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(140,25) Key
     let value_594 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 140, 25)?, rt::cast(::core::clone::Clone::clone(&value_594), 140, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 8, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 8, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(178,25) Key
     let value_596 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 178, 25)?, rt::cast(::core::clone::Clone::clone(&value_596), 178, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 9, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 9, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(118,25) Key
     let value_597 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 118, 25)?, rt::cast(::core::clone::Clone::clone(&value_597), 118, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 10, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 10, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(224,25) Key
     let value_601 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 224, 25)?, rt::cast(::core::clone::Clone::clone(&value_601), 224, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 11, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 11, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(104,25) Key
     let value_625 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 104, 25)?, rt::cast(::core::clone::Clone::clone(&value_625), 104, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 12, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 12, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(24,25) Key
     let value_627 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_627), 24, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 13, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 13, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(44,25) Key
     let value_628 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 44, 25)?, rt::cast(::core::clone::Clone::clone(&value_628), 44, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 14, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 14, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(130,25) Key
     let value_629 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_629), 130, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 15, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 15, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(86,25) Key
     let value_630 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_630), 86, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 16, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 16, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(20,25) Key
     let value_631 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_631), 20, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 17, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 17, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(144,25) Key
     let value_632 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 144, 25)?, rt::cast(::core::clone::Clone::clone(&value_632), 144, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 18, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 18, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(70,25) Key
     let value_633 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 70, 25)?, rt::cast(::core::clone::Clone::clone(&value_633), 70, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 19, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 19, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(134,25) Key
     let value_634 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 134, 25)?, rt::cast(::core::clone::Clone::clone(&value_634), 134, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 20, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 20, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(58,25) Key
     let value_635 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_635), 58, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 21, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 21, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(160,25) Key
     let value_636 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 160, 25)?, rt::cast(::core::clone::Clone::clone(&value_636), 160, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 22, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 22, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(24,25) Key
     let value_637 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_637), 24, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 25, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 25, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(112,25) Key
     let value_638 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 112, 25)?, rt::cast(::core::clone::Clone::clone(&value_638), 112, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 26, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 26, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(130,25) Key
     let value_639 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 130, 25)?, rt::cast(::core::clone::Clone::clone(&value_639), 130, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 27, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 27, 2, &context, &resource_dictionary_3)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
     // WinUITheme.xaml(24,25) Key
     let value_640 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_640), 24, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 28, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 28, 2, &context, &resource_dictionary_3)?;
     ::core::mem::drop(namespace_scope_5);
     // WinUITheme.xaml(62,25) Key
     let value_641 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_641), 62, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 29, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 29, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(66,25) Key
     let value_642 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 66, 25)?, rt::cast(::core::clone::Clone::clone(&value_642), 66, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 30, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 30, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(170,25) Key
     let value_643 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_643), 170, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 31, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 31, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(190,25) Key
     let value_647 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 190, 25)?, rt::cast(::core::clone::Clone::clone(&value_647), 190, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 32, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 32, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(48,25) Key
     let value_648 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 48, 25)?, rt::cast(::core::clone::Clone::clone(&value_648), 48, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 33, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 33, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(86,25) Key
     let value_649 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_649), 86, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 34, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 34, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(60,25) Key
     let value_652 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 60, 25)?, rt::cast(::core::clone::Clone::clone(&value_652), 60, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 35, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 35, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(58,25) Key
     let value_653 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_653), 58, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 36, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 36, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(20,25) Key
     let value_654 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_654), 20, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 37, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 37, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(126,25) Key
     let value_655 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 126, 25)?, rt::cast(::core::clone::Clone::clone(&value_655), 126, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 38, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 38, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(20,25) Key
     let value_656 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_656), 20, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 39, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 39, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(117,25) Key
     let value_657 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 117, 25)?, rt::cast(::core::clone::Clone::clone(&value_657), 117, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 40, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(86,25) Key
     let value_659 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 86, 25)?, rt::cast(::core::clone::Clone::clone(&value_659), 86, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 41, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 41, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(38,25) Key
     let value_662 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 38, 25)?, rt::cast(::core::clone::Clone::clone(&value_662), 38, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 42, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(34,25) Key
     let value_663 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 34, 25)?, rt::cast(::core::clone::Clone::clone(&value_663), 34, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 43, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(42,25) Key
     let value_664 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 42, 25)?, rt::cast(::core::clone::Clone::clone(&value_664), 42, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 44, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 44, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(146,25) Key
     let value_665 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 146, 25)?, rt::cast(::core::clone::Clone::clone(&value_665), 146, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 45, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(20,25) Key
     let value_666 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 20, 25)?, rt::cast(::core::clone::Clone::clone(&value_666), 20, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 46, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 46, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(40,25) Key
     let value_667 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_667), 40, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 47, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 47, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(22,25) Key
     let value_668 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_668), 22, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 48, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 48, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(22,25) Key
     let value_669 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_669), 22, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 49, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 49, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(40,25) Key
     let value_670 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 40, 25)?, rt::cast(::core::clone::Clone::clone(&value_670), 40, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 50, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 50, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(96,25) Key
     let value_671 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 96, 25)?, rt::cast(::core::clone::Clone::clone(&value_671), 96, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 51, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 51, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(78,25) Key
     let value_672 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 78, 25)?, rt::cast(::core::clone::Clone::clone(&value_672), 78, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 52, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 52, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(24,25) Key
     let value_673 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 24, 25)?, rt::cast(::core::clone::Clone::clone(&value_673), 24, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 53, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 53, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(22,25) Key
     let value_674 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_674), 22, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 54, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 54, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(170,25) Key
     let value_675 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 170, 25)?, rt::cast(::core::clone::Clone::clone(&value_675), 170, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 55, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 55, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(26,25) Key
     let value_676 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 26, 25)?, rt::cast(::core::clone::Clone::clone(&value_676), 26, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 56, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 56, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(224,25) Key
     let value_677 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 224, 25)?, rt::cast(::core::clone::Clone::clone(&value_677), 224, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 57, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 57, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(36,25) Key
     let value_678 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 36, 25)?, rt::cast(::core::clone::Clone::clone(&value_678), 36, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 58, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 58, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(30,25) Key
     let value_679 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_679), 30, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 59, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(22,25) Key
     let value_680 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 22, 25)?, rt::cast(::core::clone::Clone::clone(&value_680), 22, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 60, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 60, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(30,25) Key
     let value_681 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_681), 30, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 61, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 61, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(62,25) Key
     let value_682 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 62, 25)?, rt::cast(::core::clone::Clone::clone(&value_682), 62, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 62, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(32,25) Key
     let value_683 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 32, 25)?, rt::cast(::core::clone::Clone::clone(&value_683), 32, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 63, 3, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 63, 3, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(52,25) Key
     let value_684 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 52, 25)?, rt::cast(::core::clone::Clone::clone(&value_684), 52, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 64, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 64, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(72,25) Key
     let value_685 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_685), 72, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 65, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 65, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(72,25) Key
     let value_686 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 72, 25)?, rt::cast(::core::clone::Clone::clone(&value_686), 72, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 66, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 66, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(58,25) Key
     let value_687 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 58, 25)?, rt::cast(::core::clone::Clone::clone(&value_687), 58, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 67, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 67, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(77,25) Key
     let value_688 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 77, 25)?, rt::cast(::core::clone::Clone::clone(&value_688), 77, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 68, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 68, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(45,25) Key
     let value_689 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 45, 25)?, rt::cast(::core::clone::Clone::clone(&value_689), 45, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 69, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 69, 2, &context, &resource_dictionary_3)?;
     // WinUITheme.xaml(21,25) Key
     let value_691 = crate::WinUITheme::__markup_field_HighContrast();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 21, 25)?, rt::cast(::core::clone::Clone::clone(&value_691), 21, 25)?);
-    rt::apply_theme_unit(THEME_UNITS, 70, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 70, 2, &context, &resource_dictionary_3)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_460), rt::cast(resource_dictionary_3.clone(), 37, 6)?), 37, 6)?;
-    rt::apply_theme_unit(THEME_UNITS, 2, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 4, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 2, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 4, 3, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
     let namespace_scope_6 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(THEME_UNITS, 7, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 7, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
     let namespace_scope_7 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 8, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 9, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 11, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 12, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 15, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 16, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 17, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 18, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 20, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 21, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 8, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 9, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 11, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 12, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 15, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 16, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 17, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 18, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 20, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 21, 3, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
     let namespace_scope_8 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(THEME_UNITS, 23, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 24, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 23, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 24, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_8);
     let namespace_scope_9 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2);
-    rt::apply_theme_unit(THEME_UNITS, 28, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 28, 3, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_9);
     let namespace_scope_10 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 32, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 34, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 35, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 36, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 38, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 39, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 40, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 41, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 42, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 43, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 45, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 46, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 50, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 52, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 54, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 55, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 56, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 57, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 59, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 61, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 62, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 64, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 65, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 66, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 67, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 70, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 71, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 32, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 34, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 35, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 36, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 38, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 39, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 41, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 46, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 50, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 52, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 54, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 55, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 56, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 57, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 61, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 64, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 65, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 66, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 67, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 70, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_10);
     let namespace_scope_11 = rt::push_namespace_scope(&context, POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(THEME_UNITS, 72, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 73, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_11);
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 17, 6)?), 17, 6)?;
@@ -22796,114 +22808,114 @@ pub fn build_controls_winuicontrols_xaml(
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 12, 6)?);
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 12, 6)?, count_0.wrapping_add(302_i32));
     }
-    rt::apply_theme_unit(THEME_UNITS, 0, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 82, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 88, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 90, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 91, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 92, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 93, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 94, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 95, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 96, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 97, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 98, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 100, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 102, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 103, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 110, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 113, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 82, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 88, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 90, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 91, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 92, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 93, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 94, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 95, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 96, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 97, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 98, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 100, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 102, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 103, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 110, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 113, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(THEME_UNITS, 114, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 114, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
-    rt::apply_theme_unit(THEME_UNITS, 116, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 118, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 123, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 125, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 129, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 132, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 140, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 143, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 147, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 149, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 151, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 74, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 75, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 76, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 77, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 78, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 79, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 80, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 81, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 116, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 118, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 123, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 125, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 129, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 132, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 140, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 143, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 147, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 149, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 151, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 75, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 76, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 77, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 78, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 79, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 80, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 81, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 83, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 83, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
-    rt::apply_theme_unit(THEME_UNITS, 84, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 85, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 86, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 84, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 85, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 86, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 87, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 87, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
-    rt::apply_theme_unit(THEME_UNITS, 89, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 89, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
-    rt::apply_theme_unit(THEME_UNITS, 99, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 99, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
-    rt::apply_theme_unit(THEME_UNITS, 101, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 104, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 105, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 106, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 107, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 108, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 0, 1, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 109, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 111, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 112, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 115, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 117, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 101, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 104, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 105, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 106, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 107, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 108, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 1, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 109, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 111, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 112, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 115, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 117, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
-    rt::apply_theme_unit(THEME_UNITS, 119, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 119, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
-    rt::apply_theme_unit(THEME_UNITS, 120, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 121, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 120, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 121, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4);
-    rt::apply_theme_unit(THEME_UNITS, 122, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 122, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
-    rt::apply_theme_unit(THEME_UNITS, 124, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 126, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 127, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 128, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 130, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 131, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 133, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 134, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 135, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 136, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 137, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 138, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 139, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 141, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 142, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 144, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 145, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 146, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 148, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 150, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 124, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 126, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 127, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 128, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 130, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 131, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 133, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 134, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 135, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 136, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 137, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 138, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 139, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 141, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 142, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 144, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 145, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 146, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 148, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 150, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 152, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 152, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
-    rt::apply_theme_unit(THEME_UNITS, 153, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 154, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 155, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 156, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 157, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 153, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 154, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 155, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 156, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 157, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(THEME_UNITS, 158, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 158, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
-    rt::apply_theme_unit(THEME_UNITS, 159, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 160, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 161, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 162, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(THEME_UNITS, 163, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 159, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 160, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 161, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 162, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 163, 0, &context, &resource_dictionary_0)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 12, 6)?), 12, 6)?;
     // Controls/WinUIControls.xaml(138,4) Content
@@ -96584,500 +96596,534 @@ fn build_densitystyles_compact_xaml_deferred_0(
 }
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0, build_controls_winuicontrols_xaml_unit_50] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0, build_controls_winuicontrols_xaml_unit_50] };
 
 /// The unit `Resources/SystemResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SystemResources.xaml", index: 1, runs: &[populate_winuitheme_xaml_unit_10, populate_winuitheme_xaml_unit_76, populate_winuitheme_xaml_unit_142] };
+pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SystemResources.xaml", index: 1, runs: &[populate_winuitheme_xaml_unit_10, populate_winuitheme_xaml_unit_76, populate_winuitheme_xaml_unit_142] };
 
 /// The unit `Resources/Generic.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Generic.xaml", index: 2, runs: &[populate_winuitheme_xaml_unit_11, populate_winuitheme_xaml_unit_77, populate_winuitheme_xaml_unit_143, populate_winuitheme_xaml_unit_208] };
+pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Generic.xaml", index: 2, runs: &[populate_winuitheme_xaml_unit_11, populate_winuitheme_xaml_unit_77, populate_winuitheme_xaml_unit_143, populate_winuitheme_xaml_unit_208] };
 
 /// The unit `Resources/Common_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources.xaml", index: 3, runs: &[populate_winuitheme_xaml_unit_1, populate_winuitheme_xaml_unit_12, populate_winuitheme_xaml_unit_78, populate_winuitheme_xaml_unit_144] };
+pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources.xaml", index: 3, runs: &[populate_winuitheme_xaml_unit_1, populate_winuitheme_xaml_unit_12, populate_winuitheme_xaml_unit_78, populate_winuitheme_xaml_unit_144] };
 
 /// The unit `Resources/Common_themeresources_any.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources_any.xaml", index: 4, runs: &[populate_winuitheme_xaml_unit_13, populate_winuitheme_xaml_unit_79, populate_winuitheme_xaml_unit_145, populate_winuitheme_xaml_unit_209] };
+pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Common_themeresources_any.xaml", index: 4, runs: &[populate_winuitheme_xaml_unit_13, populate_winuitheme_xaml_unit_79, populate_winuitheme_xaml_unit_145, populate_winuitheme_xaml_unit_209] };
 
 /// The unit `Resources/Deprecated_themeresources_any.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources_any.xaml", index: 5, runs: &[populate_winuitheme_xaml_unit_14, populate_winuitheme_xaml_unit_80, populate_winuitheme_xaml_unit_146] };
+pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources_any.xaml", index: 5, runs: &[populate_winuitheme_xaml_unit_14, populate_winuitheme_xaml_unit_80, populate_winuitheme_xaml_unit_146] };
 
 /// The unit `Resources/RichEditBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RichEditBox_themeresources.xaml", index: 6, runs: &[populate_winuitheme_xaml_unit_0] };
+pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RichEditBox_themeresources.xaml", index: 6, runs: &[populate_winuitheme_xaml_unit_0] };
 
 /// The unit `Resources/PasswordBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PasswordBox_themeresources.xaml", index: 7, runs: &[populate_winuitheme_xaml_unit_210] };
+pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PasswordBox_themeresources.xaml", index: 7, runs: &[populate_winuitheme_xaml_unit_210] };
 
 /// The unit `Resources/TextBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBox_themeresources.xaml", index: 8, runs: &[populate_winuitheme_xaml_unit_15, populate_winuitheme_xaml_unit_81, populate_winuitheme_xaml_unit_147, populate_winuitheme_xaml_unit_211] };
+pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBox_themeresources.xaml", index: 8, runs: &[populate_winuitheme_xaml_unit_15, populate_winuitheme_xaml_unit_81, populate_winuitheme_xaml_unit_147, populate_winuitheme_xaml_unit_211] };
 
 /// The unit `Resources/MenuFlyout_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuFlyout_themeresources.xaml", index: 9, runs: &[populate_winuitheme_xaml_unit_16, populate_winuitheme_xaml_unit_82, populate_winuitheme_xaml_unit_148, populate_winuitheme_xaml_unit_212] };
+pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuFlyout_themeresources.xaml", index: 9, runs: &[populate_winuitheme_xaml_unit_16, populate_winuitheme_xaml_unit_82, populate_winuitheme_xaml_unit_148, populate_winuitheme_xaml_unit_212] };
 
 /// The unit `Resources/AcrylicBrush_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AcrylicBrush_themeresources.xaml", index: 10, runs: &[populate_winuitheme_xaml_unit_17, populate_winuitheme_xaml_unit_83, populate_winuitheme_xaml_unit_149] };
+pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AcrylicBrush_themeresources.xaml", index: 10, runs: &[populate_winuitheme_xaml_unit_17, populate_winuitheme_xaml_unit_83, populate_winuitheme_xaml_unit_149] };
 
 /// The unit `Resources/RevealBrush_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RevealBrush_themeresources.xaml", index: 11, runs: &[populate_winuitheme_xaml_unit_18, populate_winuitheme_xaml_unit_84, populate_winuitheme_xaml_unit_150, populate_winuitheme_xaml_unit_213] };
+pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RevealBrush_themeresources.xaml", index: 11, runs: &[populate_winuitheme_xaml_unit_18, populate_winuitheme_xaml_unit_84, populate_winuitheme_xaml_unit_150, populate_winuitheme_xaml_unit_213] };
 
 /// The unit `Resources/Deprecated_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources.xaml", index: 12, runs: &[populate_winuitheme_xaml_unit_19, populate_winuitheme_xaml_unit_85, populate_winuitheme_xaml_unit_151, populate_winuitheme_xaml_unit_214] };
+pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Deprecated_themeresources.xaml", index: 12, runs: &[populate_winuitheme_xaml_unit_19, populate_winuitheme_xaml_unit_85, populate_winuitheme_xaml_unit_151, populate_winuitheme_xaml_unit_214] };
 
 /// The unit `Resources/Hyperlink_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Hyperlink_themeresources.xaml", index: 13, runs: &[populate_winuitheme_xaml_unit_2, populate_winuitheme_xaml_unit_20, populate_winuitheme_xaml_unit_86, populate_winuitheme_xaml_unit_152] };
+pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Hyperlink_themeresources.xaml", index: 13, runs: &[populate_winuitheme_xaml_unit_2, populate_winuitheme_xaml_unit_20, populate_winuitheme_xaml_unit_86, populate_winuitheme_xaml_unit_152] };
 
 /// The unit `Resources/HyperlinkButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/HyperlinkButton_themeresources.xaml", index: 14, runs: &[populate_winuitheme_xaml_unit_21, populate_winuitheme_xaml_unit_87, populate_winuitheme_xaml_unit_153] };
+pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/HyperlinkButton_themeresources.xaml", index: 14, runs: &[populate_winuitheme_xaml_unit_21, populate_winuitheme_xaml_unit_87, populate_winuitheme_xaml_unit_153] };
 
 /// The unit `Resources/RadioButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButton_themeresources.xaml", index: 15, runs: &[populate_winuitheme_xaml_unit_22, populate_winuitheme_xaml_unit_88, populate_winuitheme_xaml_unit_154, populate_winuitheme_xaml_unit_215] };
+pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButton_themeresources.xaml", index: 15, runs: &[populate_winuitheme_xaml_unit_22, populate_winuitheme_xaml_unit_88, populate_winuitheme_xaml_unit_154, populate_winuitheme_xaml_unit_215] };
 
 /// The unit `Resources/AppBarButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarButton_themeresources.xaml", index: 16, runs: &[populate_winuitheme_xaml_unit_23, populate_winuitheme_xaml_unit_89, populate_winuitheme_xaml_unit_155, populate_winuitheme_xaml_unit_216] };
+pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarButton_themeresources.xaml", index: 16, runs: &[populate_winuitheme_xaml_unit_23, populate_winuitheme_xaml_unit_89, populate_winuitheme_xaml_unit_155, populate_winuitheme_xaml_unit_216] };
 
 /// The unit `Resources/AppBarSeparator_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarSeparator_themeresources.xaml", index: 17, runs: &[populate_winuitheme_xaml_unit_24, populate_winuitheme_xaml_unit_90, populate_winuitheme_xaml_unit_156, populate_winuitheme_xaml_unit_217] };
+pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarSeparator_themeresources.xaml", index: 17, runs: &[populate_winuitheme_xaml_unit_24, populate_winuitheme_xaml_unit_90, populate_winuitheme_xaml_unit_156, populate_winuitheme_xaml_unit_217] };
 
 /// The unit `Resources/AppBarToggleButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarToggleButton_themeresources.xaml", index: 18, runs: &[populate_winuitheme_xaml_unit_25, populate_winuitheme_xaml_unit_91, populate_winuitheme_xaml_unit_157, populate_winuitheme_xaml_unit_218] };
+pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AppBarToggleButton_themeresources.xaml", index: 18, runs: &[populate_winuitheme_xaml_unit_25, populate_winuitheme_xaml_unit_91, populate_winuitheme_xaml_unit_157, populate_winuitheme_xaml_unit_218] };
 
 /// The unit `Resources/ListBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListBox_themeresources.xaml", index: 19, runs: &[populate_winuitheme_xaml_unit_3, populate_winuitheme_xaml_unit_26, populate_winuitheme_xaml_unit_92, populate_winuitheme_xaml_unit_158] };
+pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListBox_themeresources.xaml", index: 19, runs: &[populate_winuitheme_xaml_unit_3, populate_winuitheme_xaml_unit_26, populate_winuitheme_xaml_unit_92, populate_winuitheme_xaml_unit_158] };
 
 /// The unit `Resources/ToggleSwitch_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleSwitch_themeresources.xaml", index: 20, runs: &[populate_winuitheme_xaml_unit_27, populate_winuitheme_xaml_unit_93, populate_winuitheme_xaml_unit_159, populate_winuitheme_xaml_unit_219] };
+pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleSwitch_themeresources.xaml", index: 20, runs: &[populate_winuitheme_xaml_unit_27, populate_winuitheme_xaml_unit_93, populate_winuitheme_xaml_unit_159, populate_winuitheme_xaml_unit_219] };
 
 /// The unit `Resources/CommandBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CommandBar_themeresources.xaml", index: 21, runs: &[populate_winuitheme_xaml_unit_28, populate_winuitheme_xaml_unit_94, populate_winuitheme_xaml_unit_160, populate_winuitheme_xaml_unit_220] };
+pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CommandBar_themeresources.xaml", index: 21, runs: &[populate_winuitheme_xaml_unit_28, populate_winuitheme_xaml_unit_94, populate_winuitheme_xaml_unit_160, populate_winuitheme_xaml_unit_220] };
 
 /// The unit `Resources/ListViewItem_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListViewItem_themeresources.xaml", index: 22, runs: &[populate_winuitheme_xaml_unit_29, populate_winuitheme_xaml_unit_95, populate_winuitheme_xaml_unit_161] };
+pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ListViewItem_themeresources.xaml", index: 22, runs: &[populate_winuitheme_xaml_unit_29, populate_winuitheme_xaml_unit_95, populate_winuitheme_xaml_unit_161] };
 
 /// The unit `Resources/TextBlock_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources.xaml", index: 23, runs: &[populate_winuitheme_xaml_unit_221] };
+pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources.xaml", index: 23, runs: &[populate_winuitheme_xaml_unit_221] };
 
 /// The unit `Resources/TextBlock_themeresources_v2.5.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources_v2.5.xaml", index: 24, runs: &[populate_winuitheme_xaml_unit_222] };
+pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TextBlock_themeresources_v2.5.xaml", index: 24, runs: &[populate_winuitheme_xaml_unit_222] };
 
 /// The unit `Resources/FlyoutPresenter_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlyoutPresenter_themeresources.xaml", index: 25, runs: &[populate_winuitheme_xaml_unit_4, populate_winuitheme_xaml_unit_30, populate_winuitheme_xaml_unit_96, populate_winuitheme_xaml_unit_162] };
+pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlyoutPresenter_themeresources.xaml", index: 25, runs: &[populate_winuitheme_xaml_unit_4, populate_winuitheme_xaml_unit_30, populate_winuitheme_xaml_unit_96, populate_winuitheme_xaml_unit_162] };
 
 /// The unit `Resources/Button_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Button_themeresources.xaml", index: 26, runs: &[populate_winuitheme_xaml_unit_5, populate_winuitheme_xaml_unit_31, populate_winuitheme_xaml_unit_97, populate_winuitheme_xaml_unit_163] };
+pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Button_themeresources.xaml", index: 26, runs: &[populate_winuitheme_xaml_unit_5, populate_winuitheme_xaml_unit_31, populate_winuitheme_xaml_unit_97, populate_winuitheme_xaml_unit_163] };
 
 /// The unit `Resources/ToggleButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleButton_themeresources.xaml", index: 27, runs: &[populate_winuitheme_xaml_unit_32, populate_winuitheme_xaml_unit_98, populate_winuitheme_xaml_unit_164] };
+pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToggleButton_themeresources.xaml", index: 27, runs: &[populate_winuitheme_xaml_unit_32, populate_winuitheme_xaml_unit_98, populate_winuitheme_xaml_unit_164] };
 
 /// The unit `Resources/CornerRadius_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CornerRadius_themeresources.xaml", index: 28, runs: &[populate_winuitheme_xaml_unit_33, populate_winuitheme_xaml_unit_99, populate_winuitheme_xaml_unit_165, populate_winuitheme_xaml_unit_223] };
+pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CornerRadius_themeresources.xaml", index: 28, runs: &[populate_winuitheme_xaml_unit_33, populate_winuitheme_xaml_unit_99, populate_winuitheme_xaml_unit_165, populate_winuitheme_xaml_unit_223] };
 
 /// The unit `Resources/RepeatButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RepeatButton_themeresources.xaml", index: 29, runs: &[populate_winuitheme_xaml_unit_34, populate_winuitheme_xaml_unit_100, populate_winuitheme_xaml_unit_166] };
+pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RepeatButton_themeresources.xaml", index: 29, runs: &[populate_winuitheme_xaml_unit_34, populate_winuitheme_xaml_unit_100, populate_winuitheme_xaml_unit_166] };
 
 /// The unit `Resources/CalendarDatePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarDatePicker_themeresources.xaml", index: 30, runs: &[populate_winuitheme_xaml_unit_6, populate_winuitheme_xaml_unit_35, populate_winuitheme_xaml_unit_101, populate_winuitheme_xaml_unit_167] };
+pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarDatePicker_themeresources.xaml", index: 30, runs: &[populate_winuitheme_xaml_unit_6, populate_winuitheme_xaml_unit_35, populate_winuitheme_xaml_unit_101, populate_winuitheme_xaml_unit_167] };
 
 /// The unit `Resources/CalendarView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarView_themeresources.xaml", index: 31, runs: &[populate_winuitheme_xaml_unit_7, populate_winuitheme_xaml_unit_36, populate_winuitheme_xaml_unit_102, populate_winuitheme_xaml_unit_168] };
+pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CalendarView_themeresources.xaml", index: 31, runs: &[populate_winuitheme_xaml_unit_7, populate_winuitheme_xaml_unit_36, populate_winuitheme_xaml_unit_102, populate_winuitheme_xaml_unit_168] };
 
 /// The unit `Resources/CheckBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CheckBox_themeresources.xaml", index: 32, runs: &[populate_winuitheme_xaml_unit_37, populate_winuitheme_xaml_unit_103, populate_winuitheme_xaml_unit_169, populate_winuitheme_xaml_unit_224] };
+pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/CheckBox_themeresources.xaml", index: 32, runs: &[populate_winuitheme_xaml_unit_37, populate_winuitheme_xaml_unit_103, populate_winuitheme_xaml_unit_169, populate_winuitheme_xaml_unit_224] };
 
 /// The unit `Resources/ContentDialog_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ContentDialog_themeresources.xaml", index: 33, runs: &[populate_winuitheme_xaml_unit_38, populate_winuitheme_xaml_unit_104, populate_winuitheme_xaml_unit_170] };
+pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ContentDialog_themeresources.xaml", index: 33, runs: &[populate_winuitheme_xaml_unit_38, populate_winuitheme_xaml_unit_104, populate_winuitheme_xaml_unit_170] };
 
 /// The unit `Resources/DatePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DatePicker_themeresources.xaml", index: 34, runs: &[populate_winuitheme_xaml_unit_39, populate_winuitheme_xaml_unit_105, populate_winuitheme_xaml_unit_171, populate_winuitheme_xaml_unit_225] };
+pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DatePicker_themeresources.xaml", index: 34, runs: &[populate_winuitheme_xaml_unit_39, populate_winuitheme_xaml_unit_105, populate_winuitheme_xaml_unit_171, populate_winuitheme_xaml_unit_225] };
 
 /// The unit `Resources/DateTimePickerFlyout_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DateTimePickerFlyout_themeresources.xaml", index: 35, runs: &[populate_winuitheme_xaml_unit_40, populate_winuitheme_xaml_unit_106, populate_winuitheme_xaml_unit_172, populate_winuitheme_xaml_unit_226] };
+pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DateTimePickerFlyout_themeresources.xaml", index: 35, runs: &[populate_winuitheme_xaml_unit_40, populate_winuitheme_xaml_unit_106, populate_winuitheme_xaml_unit_172, populate_winuitheme_xaml_unit_226] };
 
 /// The unit `Resources/FlipView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipView_themeresources.xaml", index: 36, runs: &[populate_winuitheme_xaml_unit_41, populate_winuitheme_xaml_unit_107, populate_winuitheme_xaml_unit_173, populate_winuitheme_xaml_unit_227] };
+pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipView_themeresources.xaml", index: 36, runs: &[populate_winuitheme_xaml_unit_41, populate_winuitheme_xaml_unit_107, populate_winuitheme_xaml_unit_173, populate_winuitheme_xaml_unit_227] };
 
 /// The unit `Resources/FlipViewItem_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipViewItem_themeresources.xaml", index: 37, runs: &[populate_winuitheme_xaml_unit_42, populate_winuitheme_xaml_unit_108, populate_winuitheme_xaml_unit_174] };
+pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/FlipViewItem_themeresources.xaml", index: 37, runs: &[populate_winuitheme_xaml_unit_42, populate_winuitheme_xaml_unit_108, populate_winuitheme_xaml_unit_174] };
 
 /// The unit `Resources/ScrollBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollBar_themeresources.xaml", index: 38, runs: &[populate_winuitheme_xaml_unit_43, populate_winuitheme_xaml_unit_109, populate_winuitheme_xaml_unit_175, populate_winuitheme_xaml_unit_228] };
+pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollBar_themeresources.xaml", index: 38, runs: &[populate_winuitheme_xaml_unit_43, populate_winuitheme_xaml_unit_109, populate_winuitheme_xaml_unit_175, populate_winuitheme_xaml_unit_228] };
 
 /// The unit `Resources/ScrollViewer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollViewer_themeresources.xaml", index: 39, runs: &[populate_winuitheme_xaml_unit_44, populate_winuitheme_xaml_unit_110, populate_winuitheme_xaml_unit_176, populate_winuitheme_xaml_unit_229] };
+pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ScrollViewer_themeresources.xaml", index: 39, runs: &[populate_winuitheme_xaml_unit_44, populate_winuitheme_xaml_unit_110, populate_winuitheme_xaml_unit_176, populate_winuitheme_xaml_unit_229] };
 
 /// The unit `Resources/Slider_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Slider_themeresources.xaml", index: 40, runs: &[populate_winuitheme_xaml_unit_45, populate_winuitheme_xaml_unit_111, populate_winuitheme_xaml_unit_177, populate_winuitheme_xaml_unit_230] };
+pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Slider_themeresources.xaml", index: 40, runs: &[populate_winuitheme_xaml_unit_45, populate_winuitheme_xaml_unit_111, populate_winuitheme_xaml_unit_177, populate_winuitheme_xaml_unit_230] };
 
 /// The unit `Resources/TimePicker_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TimePicker_themeresources.xaml", index: 41, runs: &[populate_winuitheme_xaml_unit_46, populate_winuitheme_xaml_unit_112, populate_winuitheme_xaml_unit_178, populate_winuitheme_xaml_unit_231] };
+pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TimePicker_themeresources.xaml", index: 41, runs: &[populate_winuitheme_xaml_unit_46, populate_winuitheme_xaml_unit_112, populate_winuitheme_xaml_unit_178, populate_winuitheme_xaml_unit_231] };
 
 /// The unit `Resources/ToolTip_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToolTip_themeresources.xaml", index: 42, runs: &[populate_winuitheme_xaml_unit_47, populate_winuitheme_xaml_unit_113, populate_winuitheme_xaml_unit_179, populate_winuitheme_xaml_unit_232] };
+pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ToolTip_themeresources.xaml", index: 42, runs: &[populate_winuitheme_xaml_unit_47, populate_winuitheme_xaml_unit_113, populate_winuitheme_xaml_unit_179, populate_winuitheme_xaml_unit_232] };
 
 /// The unit `Resources/RatingControl_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RatingControl_themeresources.xaml", index: 43, runs: &[populate_winuitheme_xaml_unit_48, populate_winuitheme_xaml_unit_114, populate_winuitheme_xaml_unit_180, populate_winuitheme_xaml_unit_233] };
+pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RatingControl_themeresources.xaml", index: 43, runs: &[populate_winuitheme_xaml_unit_48, populate_winuitheme_xaml_unit_114, populate_winuitheme_xaml_unit_180, populate_winuitheme_xaml_unit_233] };
 
 /// The unit `Resources/InfoBadge_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBadge_themeresources.xaml", index: 44, runs: &[populate_winuitheme_xaml_unit_49, populate_winuitheme_xaml_unit_115, populate_winuitheme_xaml_unit_181] };
+pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBadge_themeresources.xaml", index: 44, runs: &[populate_winuitheme_xaml_unit_49, populate_winuitheme_xaml_unit_115, populate_winuitheme_xaml_unit_181] };
 
 /// The unit `Resources/NavigationView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationView_themeresources.xaml", index: 45, runs: &[populate_winuitheme_xaml_unit_50, populate_winuitheme_xaml_unit_116, populate_winuitheme_xaml_unit_182, populate_winuitheme_xaml_unit_234] };
+pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationView_themeresources.xaml", index: 45, runs: &[populate_winuitheme_xaml_unit_50, populate_winuitheme_xaml_unit_116, populate_winuitheme_xaml_unit_182, populate_winuitheme_xaml_unit_234] };
 
 /// The unit `Resources/NavigationBackButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationBackButton_themeresources.xaml", index: 46, runs: &[populate_winuitheme_xaml_unit_51, populate_winuitheme_xaml_unit_117, populate_winuitheme_xaml_unit_183, populate_winuitheme_xaml_unit_235] };
+pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NavigationBackButton_themeresources.xaml", index: 46, runs: &[populate_winuitheme_xaml_unit_51, populate_winuitheme_xaml_unit_117, populate_winuitheme_xaml_unit_183, populate_winuitheme_xaml_unit_235] };
 
 /// The unit `Resources/PersonPicture_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PersonPicture_themeresources.xaml", index: 47, runs: &[populate_winuitheme_xaml_unit_52, populate_winuitheme_xaml_unit_118, populate_winuitheme_xaml_unit_184] };
+pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PersonPicture_themeresources.xaml", index: 47, runs: &[populate_winuitheme_xaml_unit_52, populate_winuitheme_xaml_unit_118, populate_winuitheme_xaml_unit_184] };
 
 /// The unit `Resources/RefreshContainer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshContainer_themeresources.xaml", index: 48, runs: &[populate_winuitheme_xaml_unit_53, populate_winuitheme_xaml_unit_119, populate_winuitheme_xaml_unit_185] };
+pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshContainer_themeresources.xaml", index: 48, runs: &[populate_winuitheme_xaml_unit_53, populate_winuitheme_xaml_unit_119, populate_winuitheme_xaml_unit_185] };
 
 /// The unit `Resources/RefreshVisualizer_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshVisualizer_themeresources.xaml", index: 49, runs: &[populate_winuitheme_xaml_unit_54, populate_winuitheme_xaml_unit_120, populate_winuitheme_xaml_unit_186] };
+pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RefreshVisualizer_themeresources.xaml", index: 49, runs: &[populate_winuitheme_xaml_unit_54, populate_winuitheme_xaml_unit_120, populate_winuitheme_xaml_unit_186] };
 
 /// The unit `Resources/MenuBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuBar_themeresources.xaml", index: 50, runs: &[populate_winuitheme_xaml_unit_55, populate_winuitheme_xaml_unit_121, populate_winuitheme_xaml_unit_187, populate_winuitheme_xaml_unit_236] };
+pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/MenuBar_themeresources.xaml", index: 50, runs: &[populate_winuitheme_xaml_unit_55, populate_winuitheme_xaml_unit_121, populate_winuitheme_xaml_unit_187, populate_winuitheme_xaml_unit_236] };
 
 /// The unit `Resources/TreeView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TreeView_themeresources.xaml", index: 51, runs: &[populate_winuitheme_xaml_unit_56, populate_winuitheme_xaml_unit_122, populate_winuitheme_xaml_unit_188] };
+pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TreeView_themeresources.xaml", index: 51, runs: &[populate_winuitheme_xaml_unit_56, populate_winuitheme_xaml_unit_122, populate_winuitheme_xaml_unit_188] };
 
 /// The unit `Resources/SplitButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitButton_themeresources.xaml", index: 52, runs: &[populate_winuitheme_xaml_unit_57, populate_winuitheme_xaml_unit_123, populate_winuitheme_xaml_unit_189, populate_winuitheme_xaml_unit_237] };
+pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitButton_themeresources.xaml", index: 52, runs: &[populate_winuitheme_xaml_unit_57, populate_winuitheme_xaml_unit_123, populate_winuitheme_xaml_unit_189, populate_winuitheme_xaml_unit_237] };
 
 /// The unit `Resources/DropDownButton_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DropDownButton_themeresources.xaml", index: 53, runs: &[populate_winuitheme_xaml_unit_58, populate_winuitheme_xaml_unit_124, populate_winuitheme_xaml_unit_190] };
+pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/DropDownButton_themeresources.xaml", index: 53, runs: &[populate_winuitheme_xaml_unit_58, populate_winuitheme_xaml_unit_124, populate_winuitheme_xaml_unit_190] };
 
 /// The unit `Resources/RadioButtons_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButtons_themeresources.xaml", index: 54, runs: &[populate_winuitheme_xaml_unit_59, populate_winuitheme_xaml_unit_125, populate_winuitheme_xaml_unit_191, populate_winuitheme_xaml_unit_238] };
+pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/RadioButtons_themeresources.xaml", index: 54, runs: &[populate_winuitheme_xaml_unit_59, populate_winuitheme_xaml_unit_125, populate_winuitheme_xaml_unit_191, populate_winuitheme_xaml_unit_238] };
 
 /// The unit `Resources/TabView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabView_themeresources.xaml", index: 55, runs: &[populate_winuitheme_xaml_unit_60, populate_winuitheme_xaml_unit_126, populate_winuitheme_xaml_unit_192, populate_winuitheme_xaml_unit_239] };
+pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabView_themeresources.xaml", index: 55, runs: &[populate_winuitheme_xaml_unit_60, populate_winuitheme_xaml_unit_126, populate_winuitheme_xaml_unit_192, populate_winuitheme_xaml_unit_239] };
 
 /// The unit `Resources/AutoSuggestBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AutoSuggestBox_themeresources.xaml", index: 56, runs: &[populate_winuitheme_xaml_unit_61, populate_winuitheme_xaml_unit_127, populate_winuitheme_xaml_unit_193, populate_winuitheme_xaml_unit_240] };
+pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/AutoSuggestBox_themeresources.xaml", index: 56, runs: &[populate_winuitheme_xaml_unit_61, populate_winuitheme_xaml_unit_127, populate_winuitheme_xaml_unit_193, populate_winuitheme_xaml_unit_240] };
 
 /// The unit `Resources/ComboBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ComboBox_themeresources.xaml", index: 57, runs: &[populate_winuitheme_xaml_unit_62, populate_winuitheme_xaml_unit_128, populate_winuitheme_xaml_unit_194, populate_winuitheme_xaml_unit_241] };
+pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ComboBox_themeresources.xaml", index: 57, runs: &[populate_winuitheme_xaml_unit_62, populate_winuitheme_xaml_unit_128, populate_winuitheme_xaml_unit_194, populate_winuitheme_xaml_unit_241] };
 
 /// The unit `Resources/SplitView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitView_themeresources.xaml", index: 58, runs: &[populate_winuitheme_xaml_unit_63, populate_winuitheme_xaml_unit_129, populate_winuitheme_xaml_unit_195] };
+pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SplitView_themeresources.xaml", index: 58, runs: &[populate_winuitheme_xaml_unit_63, populate_winuitheme_xaml_unit_129, populate_winuitheme_xaml_unit_195] };
 
 /// The unit `Resources/ProgressBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressBar_themeresources.xaml", index: 59, runs: &[populate_winuitheme_xaml_unit_64, populate_winuitheme_xaml_unit_130, populate_winuitheme_xaml_unit_196, populate_winuitheme_xaml_unit_242] };
+pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressBar_themeresources.xaml", index: 59, runs: &[populate_winuitheme_xaml_unit_64, populate_winuitheme_xaml_unit_130, populate_winuitheme_xaml_unit_196, populate_winuitheme_xaml_unit_242] };
 
 /// The unit `Resources/ProgressRing_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressRing_themeresources.xaml", index: 60, runs: &[populate_winuitheme_xaml_unit_8, populate_winuitheme_xaml_unit_65, populate_winuitheme_xaml_unit_131, populate_winuitheme_xaml_unit_197] };
+pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ProgressRing_themeresources.xaml", index: 60, runs: &[populate_winuitheme_xaml_unit_8, populate_winuitheme_xaml_unit_65, populate_winuitheme_xaml_unit_131, populate_winuitheme_xaml_unit_197] };
 
 /// The unit `Resources/NumberBox_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NumberBox_themeresources.xaml", index: 61, runs: &[populate_winuitheme_xaml_unit_66, populate_winuitheme_xaml_unit_132, populate_winuitheme_xaml_unit_198, populate_winuitheme_xaml_unit_243] };
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/NumberBox_themeresources.xaml", index: 61, runs: &[populate_winuitheme_xaml_unit_66, populate_winuitheme_xaml_unit_132, populate_winuitheme_xaml_unit_198, populate_winuitheme_xaml_unit_243] };
 
 /// The unit `Resources/Expander_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Expander_themeresources.xaml", index: 62, runs: &[populate_winuitheme_xaml_unit_67, populate_winuitheme_xaml_unit_133, populate_winuitheme_xaml_unit_199, populate_winuitheme_xaml_unit_244] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Expander_themeresources.xaml", index: 62, runs: &[populate_winuitheme_xaml_unit_67, populate_winuitheme_xaml_unit_133, populate_winuitheme_xaml_unit_199, populate_winuitheme_xaml_unit_244] };
 
 /// The unit `Resources/PagerControl_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PagerControl_themeresources.xaml", index: 63, runs: &[populate_winuitheme_xaml_unit_9, populate_winuitheme_xaml_unit_68, populate_winuitheme_xaml_unit_134, populate_winuitheme_xaml_unit_200] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PagerControl_themeresources.xaml", index: 63, runs: &[populate_winuitheme_xaml_unit_9, populate_winuitheme_xaml_unit_68, populate_winuitheme_xaml_unit_134, populate_winuitheme_xaml_unit_200] };
 
 /// The unit `Resources/InfoBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBar_themeresources.xaml", index: 64, runs: &[populate_winuitheme_xaml_unit_69, populate_winuitheme_xaml_unit_135, populate_winuitheme_xaml_unit_201, populate_winuitheme_xaml_unit_245] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/InfoBar_themeresources.xaml", index: 64, runs: &[populate_winuitheme_xaml_unit_69, populate_winuitheme_xaml_unit_135, populate_winuitheme_xaml_unit_201, populate_winuitheme_xaml_unit_245] };
 
 /// The unit `Resources/PipsPager_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PipsPager_themeresources.xaml", index: 65, runs: &[populate_winuitheme_xaml_unit_70, populate_winuitheme_xaml_unit_136, populate_winuitheme_xaml_unit_202, populate_winuitheme_xaml_unit_246] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/PipsPager_themeresources.xaml", index: 65, runs: &[populate_winuitheme_xaml_unit_70, populate_winuitheme_xaml_unit_136, populate_winuitheme_xaml_unit_202, populate_winuitheme_xaml_unit_246] };
 
 /// The unit `Resources/SelectorBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SelectorBar_themeresources.xaml", index: 66, runs: &[populate_winuitheme_xaml_unit_71, populate_winuitheme_xaml_unit_137, populate_winuitheme_xaml_unit_203, populate_winuitheme_xaml_unit_247] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/SelectorBar_themeresources.xaml", index: 66, runs: &[populate_winuitheme_xaml_unit_71, populate_winuitheme_xaml_unit_137, populate_winuitheme_xaml_unit_203, populate_winuitheme_xaml_unit_247] };
 
 /// The unit `Resources/TitleBar_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TitleBar_themeresources.xaml", index: 67, runs: &[populate_winuitheme_xaml_unit_72, populate_winuitheme_xaml_unit_138, populate_winuitheme_xaml_unit_204, populate_winuitheme_xaml_unit_248] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TitleBar_themeresources.xaml", index: 67, runs: &[populate_winuitheme_xaml_unit_72, populate_winuitheme_xaml_unit_138, populate_winuitheme_xaml_unit_204, populate_winuitheme_xaml_unit_248] };
 
 /// The unit `Resources/TabularSurfaces_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabularSurfaces_themeresources.xaml", index: 68, runs: &[populate_winuitheme_xaml_unit_73, populate_winuitheme_xaml_unit_139, populate_winuitheme_xaml_unit_205] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TabularSurfaces_themeresources.xaml", index: 68, runs: &[populate_winuitheme_xaml_unit_73, populate_winuitheme_xaml_unit_139, populate_winuitheme_xaml_unit_205] };
 
 /// The unit `Resources/TableView_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TableView_themeresources.xaml", index: 69, runs: &[populate_winuitheme_xaml_unit_74, populate_winuitheme_xaml_unit_140, populate_winuitheme_xaml_unit_206] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/TableView_themeresources.xaml", index: 69, runs: &[populate_winuitheme_xaml_unit_74, populate_winuitheme_xaml_unit_140, populate_winuitheme_xaml_unit_206] };
 
 /// The unit `Resources/ResizeGripper_themeresources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ResizeGripper_themeresources.xaml", index: 70, runs: &[populate_winuitheme_xaml_unit_75, populate_winuitheme_xaml_unit_141, populate_winuitheme_xaml_unit_207, populate_winuitheme_xaml_unit_249] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ResizeGripper_themeresources.xaml", index: 70, runs: &[populate_winuitheme_xaml_unit_75, populate_winuitheme_xaml_unit_141, populate_winuitheme_xaml_unit_207, populate_winuitheme_xaml_unit_249] };
 
 /// The unit `Resources/ThemeShadows.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ThemeShadows.xaml", index: 71, runs: &[populate_winuitheme_xaml_unit_250] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/ThemeShadows.xaml", index: 71, runs: &[populate_winuitheme_xaml_unit_250] };
 
 /// The unit `Resources/Glyphs.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Glyphs.xaml", index: 72, runs: &[populate_winuitheme_xaml_unit_251] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Glyphs.xaml", index: 72, runs: &[populate_winuitheme_xaml_unit_251] };
 
 /// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 73, runs: &[populate_winuitheme_xaml_unit_252] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 73, runs: &[populate_winuitheme_xaml_unit_252] };
 
 /// The unit `Controls/TextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 74, runs: &[build_controls_winuicontrols_xaml_unit_29] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 74, runs: &[build_controls_winuicontrols_xaml_unit_29] };
 
 /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 75, runs: &[build_controls_winuicontrols_xaml_unit_30] };
+pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 75, runs: &[build_controls_winuicontrols_xaml_unit_30] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 76, runs: &[build_controls_winuicontrols_xaml_unit_31] };
+pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 76, runs: &[build_controls_winuicontrols_xaml_unit_31] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_32] };
+pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_32] };
 
 /// The unit `Controls/RevealStyles.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_33] };
+pub static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_33] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_34] };
+pub static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_34] };
 
 /// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_35] };
+pub static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_35] };
 
 /// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_36] };
+pub static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_36] };
 
 /// The unit `Controls/Thumb.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_1] };
+pub static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_1] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_37] };
+pub static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_37] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_38] };
+pub static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_38] };
 
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_39] };
+pub static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_39] };
 
 /// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_40] };
+pub static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_40] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_41] };
+pub static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_41] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_2] };
+pub static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_2] };
 
 /// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_42] };
+pub static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_42] };
 
 /// The unit `Controls/FontIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_3] };
+pub static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_3] };
 
 /// The unit `Controls/SymbolIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_4] };
+pub static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_4] };
 
 /// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_5] };
+pub static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_5] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_6] };
+pub static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_6] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_7] };
+pub static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_7] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_8] };
+pub static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_8] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_9] };
+pub static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_9] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_10] };
+pub static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_10] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_11] };
+pub static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_11] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_43] };
+pub static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_43] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_12] };
+pub static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_12] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_44] };
+pub static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_44] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_13] };
+pub static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_13] };
 
 /// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_14] };
+pub static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_14] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_45] };
+pub static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_45] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_46] };
+pub static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_46] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_47] };
+pub static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_47] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_48] };
+pub static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_48] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_49] };
+pub static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_49] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_51] };
+pub static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_51] };
 
 /// The unit `Controls/InfoBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_15] };
+pub static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_15] };
 
 /// The unit `Controls/InfoBadge.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_52] };
+pub static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_52] };
 
 /// The unit `Controls/TitleBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_53] };
+pub static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_53] };
 
 /// The unit `Controls/ProgressRing.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_16] };
+pub static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_16] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_17] };
+pub static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_17] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_54] };
+pub static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_54] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_18] };
+pub static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_18] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_55] };
+pub static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_55] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_19] };
+pub static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_19] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_56] };
+pub static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_56] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_57] };
+pub static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_57] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_58] };
+pub static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_58] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_59] };
+pub static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_59] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_20] };
+pub static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_20] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_60] };
+pub static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_60] };
 
 /// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_21] };
+pub static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_21] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_61] };
+pub static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_61] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_62] };
+pub static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_62] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_63] };
+pub static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_63] };
 
 /// The unit `Controls/Frame.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_22] };
+pub static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_22] };
 
 /// The unit `Controls/NavigationView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_64] };
+pub static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_64] };
 
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_65] };
+pub static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_65] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_23] };
+pub static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_23] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_66] };
+pub static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_66] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_67] };
+pub static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_67] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_68] };
+pub static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_68] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_69] };
+pub static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_69] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_70] };
+pub static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_70] };
 
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_71] };
+pub static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_71] };
 
 /// The unit `Controls/NumberBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_72] };
+pub static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_72] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_24] };
+pub static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_24] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_73] };
+pub static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_73] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_74] };
+pub static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_74] };
 
 /// The unit `Controls/RatingControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_25] };
+pub static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_25] };
 
 /// The unit `Controls/PersonPicture.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_75] };
+pub static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_75] };
 
 /// The unit `Controls/PagerControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_76] };
+pub static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_76] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_77] };
+pub static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_77] };
 
 /// The unit `Controls/RefreshVisualizer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_26] };
+pub static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_26] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_78] };
+pub static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_78] };
 
 /// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_27] };
+pub static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_27] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_79] };
+pub static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_79] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_28] };
+pub static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_28] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_80] };
+pub static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_80] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_81] };
+pub static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_81] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_82] };
+pub static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_82] };
 
 /// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_83] };
+pub static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_83] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_84] };
+pub static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_84] };
 
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_85] };
+pub static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_85] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_86] };
+pub static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_86] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_87] };
+pub static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_87] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_88] };
+pub static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_88] };
 
 /// The unit `Controls/AutoSuggestBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_89] };
+pub static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_89] };
 
 /// The unit `Controls/RadioButtons.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_90] };
+pub static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_90] };
 
 /// The unit `Controls/RichEditBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_91] };
+pub static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_91] };
 
-/// Every unit of the theme, in canonical order: the table the builds of its dictionaries
-/// apply the units through (#568).
+/// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
+/// of the full theme name it, so that an application that keeps some units links only those.
 pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75, &THEME_UNIT_76, &THEME_UNIT_77, &THEME_UNIT_78, &THEME_UNIT_79, &THEME_UNIT_80, &THEME_UNIT_81, &THEME_UNIT_82, &THEME_UNIT_83, &THEME_UNIT_84, &THEME_UNIT_85, &THEME_UNIT_86, &THEME_UNIT_87, &THEME_UNIT_88, &THEME_UNIT_89, &THEME_UNIT_90, &THEME_UNIT_91, &THEME_UNIT_92, &THEME_UNIT_93, &THEME_UNIT_94, &THEME_UNIT_95, &THEME_UNIT_96, &THEME_UNIT_97, &THEME_UNIT_98, &THEME_UNIT_99, &THEME_UNIT_100, &THEME_UNIT_101, &THEME_UNIT_102, &THEME_UNIT_103, &THEME_UNIT_104, &THEME_UNIT_105, &THEME_UNIT_106, &THEME_UNIT_107, &THEME_UNIT_108, &THEME_UNIT_109, &THEME_UNIT_110, &THEME_UNIT_111, &THEME_UNIT_112, &THEME_UNIT_113, &THEME_UNIT_114, &THEME_UNIT_115, &THEME_UNIT_116, &THEME_UNIT_117, &THEME_UNIT_118, &THEME_UNIT_119, &THEME_UNIT_120, &THEME_UNIT_121, &THEME_UNIT_122, &THEME_UNIT_123, &THEME_UNIT_124, &THEME_UNIT_125, &THEME_UNIT_126, &THEME_UNIT_127, &THEME_UNIT_128, &THEME_UNIT_129, &THEME_UNIT_130, &THEME_UNIT_131, &THEME_UNIT_132, &THEME_UNIT_133, &THEME_UNIT_134, &THEME_UNIT_135, &THEME_UNIT_136, &THEME_UNIT_137, &THEME_UNIT_138, &THEME_UNIT_139, &THEME_UNIT_140, &THEME_UNIT_141, &THEME_UNIT_142, &THEME_UNIT_143, &THEME_UNIT_144, &THEME_UNIT_145, &THEME_UNIT_146, &THEME_UNIT_147, &THEME_UNIT_148, &THEME_UNIT_149, &THEME_UNIT_150, &THEME_UNIT_151, &THEME_UNIT_152, &THEME_UNIT_153, &THEME_UNIT_154, &THEME_UNIT_155, &THEME_UNIT_156, &THEME_UNIT_157, &THEME_UNIT_158, &THEME_UNIT_159, &THEME_UNIT_160, &THEME_UNIT_161, &THEME_UNIT_162, &THEME_UNIT_163];
+
+/// The ambient unit alone: what a load by URI applies when the application registered no
+/// parts and constructed no full theme (#568, step 3).
+pub static AMBIENT_THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0];
+
+/// The full name of the class of the theme: the name its parts are registered and made
+/// active under (#568, step 3).
+pub const THEME_CLASS: &str = "FerroUI.Themes.WinUI.WinUITheme";
+
+/// The table the builds of the dictionaries apply the units through: the one the last
+/// populate of the class made active (#568, step 3).
+fn active_theme_units() -> rt::ThemeParts {
+    rt::active_theme_units(THEME_CLASS)
+}
+
+/// The units a load by URI and the constructors of the type information apply (#568, step 3):
+/// every unit, since the tables of types are linked (`ferroui-base/type-tables`: the run-time
+/// loader, hot reload, the designer, DevTools).
+#[cfg(ferroui_type_tables)]
+pub fn registered_theme_units() -> rt::ThemeParts {
+    THEME_UNITS
+}
+
+/// The units a load by URI and the constructors of the type information apply (#568, step 3):
+/// the parts the application registered, else the ambient unit.
+#[cfg(not(ferroui_type_tables))]
+pub fn registered_theme_units() -> rt::ThemeParts {
+    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)
+}
+
+/// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
+/// theme (#568, step 3). Debug builds only: release builds carry no names.
+#[cfg(debug_assertions)]
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "TextBlock", "ThemeVariantScope", "Window", "WindowDrawnDecorations"], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &["Button"], &["RepeatButton"], &["ToggleButton"], &[], &["HyperlinkButton"], &["CheckBox"], &["RadioButton"], &["Thumb"], &["ScrollBar"], &["ScrollViewer"], &["TextBox"], &["ToolTip"], &["ProgressBar"], &["Separator"], &["PathIcon"], &["FontIcon"], &["SymbolIcon"], &["Label"], &["ItemsControl"], &["HeaderedContentControl"], &["GroupBox"], &["SelectableTextBlock"], &["TransitioningContentControl"], &["TextSelectionHandle"], &["DataValidationErrors"], &["GridSplitter"], &[], &["CalendarDayButton"], &["CalendarButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["NotificationCard"], &["InfoBar"], &["InfoBadge"], &["TitleBar"], &["ProgressRing"], &["WindowNotificationManager"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["SplitView"], &["ContentPage"], &["TabbedPage"], &["NavigationPage"], &["DrawerPage"], &["Frame"], &["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"], &["Carousel"], &["CarouselPage"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["DropDownButton"], &["SplitButton"], &["ToggleSwitch"], &["Slider"], &["NumericUpDown"], &["NumberBox"], &["ButtonSpinner"], &["Expander"], &["PipsPager"], &["RatingControl"], &["PersonPicture"], &["PagerControl"], &["RefreshContainer"], &["RefreshVisualizer"], &["FlyoutPresenter"], &[], &["MenuFlyoutPresenter"], &["ContextMenu"], &["MenuItem"], &["Menu"], &["ListBoxItem"], &["ListBox"], &["ComboBoxItem"], &["ComboBox"], &["TreeViewItem"], &["TreeView"], &["AutoCompleteBox"], &["AutoSuggestBox"], &["RadioButtons"], &["RichEditBox"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
@@ -97088,7 +97134,7 @@ pub fn try_load(
     uri: &str,
 ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     if rt::uri_equals(uri, "ferres://ferroui.themes.winui/WinUITheme.xaml", "") {
-        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::WinUITheme::with_service_provider(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
+        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::WinUITheme::with_registered_parts(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
     }
     ::core::result::Result::Ok(::core::option::Option::None)
 }
