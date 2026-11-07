@@ -7,6 +7,7 @@ mod i_ferro_xaml_il_parent_stack_provider;
 mod i_ferro_xaml_il_xml_namespace_info_provider_v1;
 mod runtime_list;
 mod theme_resources;
+mod theme_styles;
 mod theme_units;
 mod xaml_il_context;
 mod xaml_il_parent_stack_provider_wrapper;

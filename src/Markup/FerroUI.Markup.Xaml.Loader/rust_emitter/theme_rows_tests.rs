@@ -82,6 +82,40 @@ fn static_brush_body(extra: Option<&str>) -> Vec<String> {
     statements.iter().map(|statement| format!("    {statement}")).collect()
 }
 
+/// The brush whose colour is a static resource as the emitter writes it since #568, step 5: the
+/// choice of the setter is one call of `rt::assign_resource_value`.
+fn static_brush_assigned_body() -> Vec<String> {
+    let target = "solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>()";
+    let property = format!("{BRUSH}::color_property()");
+    body(&[
+        "// WinUITheme.xaml(91,8) SolidColorBrush",
+        &format!("let solid_color_brush_0 = {BRUSH}::new();"),
+        "context.push_parent(rt::to_value(solid_color_brush_0.clone()));",
+        "// WinUITheme.xaml(91,68) Color (setter chosen at run time)",
+        &format!("let static_resource_extension_0 = {EXTENSION}::__markup_new_1(rt::string_object(\"SystemAltHighColor\"));"),
+        &format!("let provided_0 = rt::provide_value_invoked(&context, rt::property_value({property}), &static_resource_extension_0, {EXTENSION}::__markup_ProvideValue_0, 91, 68)?;"),
+        "let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);",
+        &format!("rt::assign_resource_value({target}, {property}, value_0, &rt::ResourceChoice {{ name: \"Color\", member: \"FerroUI.Media.SolidColorBrush.set_Color\", index: 0, unset: true, instance: rt::ValueHandle::Markup(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 91, position: 68 }}, ::core::option::Option::None)?;"),
+        "context.pop_parent();",
+    ])
+}
+
+#[test]
+fn a_static_brush_with_the_shared_setter_choice_is_a_row() {
+    let paths = paths();
+    let row = deferred_row(&paths, &static_brush_assigned_body(), BRUSH_RETURNED, None).expect("a static brush");
+    assert_eq!(row, DeferredRow {
+        kind: RowKind::StaticBrush,
+        operand: "\"SystemAltHighColor\"".to_string(),
+        value_position: (91, 68),
+        namespaces: None,
+    });
+    // The choice of another colour type is not the shape.
+    let mut other = static_brush_assigned_body();
+    other[7] = other[7].replace("media::Color as", "media::Colors as");
+    assert!(deferred_row(&paths, &other, BRUSH_RETURNED, None).is_none());
+}
+
 #[test]
 fn the_four_deferred_shapes_are_recognised() {
     let paths = paths();

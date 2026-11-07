@@ -302,7 +302,21 @@ pub(super) fn deferred_row(paths: &RowPaths, lines: &[String], returned: &str, n
         format!("return ::core::result::Result::Err(rt::no_setter(\"Color\", &value_0, {line}, {position}));"),
         "}".to_string(),
     ];
-    (value.len() == expected.len() && value.iter().zip(&expected).all(|(statement, expected)| *statement == expected.as_str())).then(|| DeferredRow {
+    // Since #568 step 5 the choice is one call of `rt::assign_resource_value` (the emitter's
+    // `theme_styles::resource_choice`); the chain it replaces is still recognised.
+    let assigned = [
+        expected[0].clone(),
+        expected[1].clone(),
+        expected[2].clone(),
+        format!(
+            "rt::assign_resource_value({target}, {color_property}, value_0, &rt::ResourceChoice {{ name: \"Color\", member: \"FerroUI.Media.SolidColorBrush.set_Color\", index: 0, unset: true, instance: rt::ValueHandle::Markup(<{} as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: {line}, position: {position} }}, ::core::option::Option::None)?;",
+            paths.color
+        ),
+    ];
+    let matches = |expected: &[String]| {
+        value.len() == expected.len() && value.iter().zip(expected).all(|(statement, expected)| *statement == expected.as_str())
+    };
+    (matches(&expected[..]) || matches(&assigned[..])).then(|| DeferredRow {
         kind: RowKind::StaticBrush,
         operand: key.to_string(),
         value_position: (line, position),
