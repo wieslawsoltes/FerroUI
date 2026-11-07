@@ -76,17 +76,23 @@ Works with abort since this step (section 5):
   fresh root as `Err`;
 - the failure of a page transition (`CrossFade`, `PageSlide`, `Rotate3DTransition`,
   `CompositePageTransition`): `JoinError::Panicked` of the handle of `IPageTransition::start`;
-- the deferred animation resources of the Designer that fail to build: left out.
+- the deferred animation resources of the Designer that fail to build: left out;
+- a missing required OpenGL or EGL entry point (5.4): the creation of the context, display or
+  platform graphics fails with an `OpenGlError`, and the WGL start falls back to the next
+  rendering mode;
+- a GL context that cannot be made current while Skia releases a snapshot (5.4):
+  `IGlContext::try_ensure_current` fails and the image is released without it;
+- the page transitions of the control catalog (5.4): `JoinError::Panicked` of their handles;
+- the Vello combined geometry of a path whose coordinates are not finite (empty, without
+  reaching the sweep) and the swap chain of a lost device (left, without releasing it) (5.4).
 
 Breaks with abort (an expected error travels as a panic), production paths:
 
 | Site | What breaks |
 |---|---|
 | `ferroui-win32` `automation/automation_node.rs:552` | a UI Automation call the state of a control refuses (12 `panic!` sites of the automation peers of `ferroui-controls`) aborts instead of returning `E_FAIL` |
-| `ferroui-win32` `open_gl/wgl_platform_open_gl_interface.rs:90` | a driver without a required OpenGL entry point aborts the start instead of falling back to the next rendering mode |
-| `ferroui-skia` `gpu/open_gl/gl_skia_external_objects_feature.rs:479` | releasing a snapshot after its GL context was lost aborts |
-| `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` that the third-party sweep (`linesweeper`) gives up on aborts instead of drawing nothing |
-| `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface after its context was lost aborts |
+| `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` of finite paths that the third-party sweep (`linesweeper`) still gives up on aborts instead of drawing nothing (paths that are not finite are refused before the sweep, 5.4) |
+| `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.4) |
 | `ferroui-reactiveui` `binding/bindings/binding_errors.rs:47` | a fault of a binding source aborts instead of reaching `ThrownExceptions` |
 
 Breaks with abort, development tools only (built with `dev` or `release-unwind`): hot reload
@@ -294,9 +300,8 @@ under unwinding: the panic hook no longer prints these failures. The signature o
 `IPageTransition::start` does not change. Test: `executor_tests.rs`,
 `a_task_on_a_schedule_takes_its_outcome_from_the_result_of_its_future_without_a_panic`.
 
-Six of the seven page transitions of the control catalog (`samples/ControlCatalog`) still panic
-with the error of `AnimationTask::when_all` (deferred, 6.2); they can use `spawn_local_on_result` with
-`Dispatcher::task_schedule`.
+The six page transitions of the control catalog (`samples/ControlCatalog`) that panicked with
+the error of `AnimationTask::when_all` are converted too (5.4).
 
 ### 5.3 The deferred animation resources of the Designer
 
@@ -305,6 +310,42 @@ document with `ResourceDictionary::get` inside a `catch_unwind`, so that a defer
 fails to build is left out. It now reads them inside `with_xaml_errors`: the failure goes to the
 scope (5.1) and the key is left out without unwinding. The catch stays as the boundary of the
 constructors of the previewed application that the builder runs (a development tool).
+
+### 5.4 OpenGL loading, making a context current, Vello and the catalog transitions
+
+- **Entry points** (`ferroui-opengl` `entry_points.rs`): the generated `load` of a table returns
+  `Result<_, OpenGlError>`; a required entry point that does not resolve is
+  `Err("Unable to find an entry point named '<name>'.")`, the message of the panic before. New
+  `try_` forms: `GlBasicInfoInterface::try_new`, `GlContextInfo::try_create`,
+  `GlInterface::try_new`, `GlInterface::try_from_native_utf8_get_proc_address`,
+  `EglInterface::try_new` and `Win32AngleEglInterface::try_from_loader`. The plain forms keep
+  their signature and panic with the error, as before. Every framework caller uses the `try_`
+  form: the EGL, GLX and WGL contexts (which make their context current again on the failure),
+  `EglInterface::from_library`, the Wayland, DRM, Android and ANGLE EGL loaders, the macOS native
+  GL, EAGL and the WebGL context of the browser. `WglPlatformOpenGlInterface` no longer catches a
+  panic: the error of `WglDisplay::create_context` is logged and the start tries the next mode.
+  `BrowserWebGlRenderTarget::new` and `WebGlContext::new` return `Result`; a WebGL target whose
+  context cannot be used is left out with the error logged. Calling an absent optional entry
+  point is a bug and still panics (callers check `is_<name>_available`).
+- **Making a context current** (`IGlContext`): new provided methods `try_make_current` and
+  `try_ensure_current`, `Result<Rc<dyn IDisposable>, OpenGlError>`, whose defaults ask
+  `make_current` and `ensure_current`. The EGL, GLX, WGL, macOS native GL, EAGL and WebGL
+  contexts override them; the loss of the context is an error too.
+  `WglContext::try_make_current` returns the loss as an error instead of panicking. The release of
+  a Skia snapshot (`gl_skia_external_objects_feature.rs`) uses `try_ensure_current` and no longer
+  catches a panic.
+- **Vello**: `binary_op` refuses paths whose coordinates are not finite before the sweep (the
+  combination is empty, as when the sweep gives up); the catch of the sweep stays for the inputs
+  it still refuses. `drop_retired` leaves (`std::mem::forget`) the swap chain of a lost device
+  instead of releasing it, which `wgpu` cannot do without its context; the catch stays for a
+  device that is not known to be lost.
+- **Catalog transitions**: `Dispatcher::start_local_on_result_with_priority` (new, public) is
+  `start_local_with_priority` for a future that returns `Result<T, JoinError>`, and the page
+  transitions of `ferroui-base` use it. `mini_mvvm::start_async_on_result` wraps it for the
+  samples; the six transitions of the catalog (composite, fade through, page slide, parallax
+  slide, card stack and the custom transition of the `TransitioningContentControl` page) return
+  the error of `AnimationTask::when_all` through it. Their checks of the visual parent are
+  argument checks (bugs) and stay panics.
 
 ## 6. Deferred
 
@@ -328,24 +369,15 @@ conversion, or that the panic comes from a third-party crate.
   peers of `ferroui-controls`): the provider interfaces would need a wider error type
   (invalid operation, argument, not supported) and the Win32 nodes a mapping to `HRESULT`, about
   56 calls in 9 files. A change of the public provider traits; its own step.
-- **A missing required OpenGL entry point** (`ferroui-win32` `wgl_platform_open_gl_interface.rs:90`,
-  raised by `gl_entry_points!` of `ferroui-opengl`): the generated load and `GlInterface::new`
-  become fallible, 14 call sites in 10 files across the GL backends. Its own step.
-- **A GL context that cannot be made current** (`ferroui-skia`
-  `gl_skia_external_objects_feature.rs:479`): needs a fallible `try_make_current` on the EGL,
-  macOS native GL and EAGL contexts (GLX and WGL have one). Small, but it touches three
-  backends that need their platforms to validate.
 - **Panics of third-party crates** (`ferroui-vello` `combined_geometry_impl.rs:133`,
   `linesweeper`; `window_surface.rs:166`, the `Drop` of a `wgpu::Surface`): no `Result` exists on
-  our side. With abort they need a check of the inputs the sweep refuses or another boolean
-  operation, and leaking a surface whose context is known to be lost.
+  our side. Mitigated (5.4): paths that are not finite are refused before the sweep and the
+  surface of a lost device is left. What remains is a finite input the sweep still gives up on,
+  and a surface that cannot be released while its device is not known to be lost.
 - **The fault of a ReactiveUI binding source** (`ferroui-reactiveui` `binding_errors.rs:47`):
   `IObserver::on_error` returns `()`; delivering the `TargetInvocationError` to the default
   exception handler or to a `ThrownExceptions` of the binding instead of panicking changes the
   behaviour of the reference. Needs a decision.
-- **The page transitions of the control catalog** (six sample transitions in
-  `samples/ControlCatalog`): mechanical with `spawn_local_on_result` (5.2); sample code, left for
-  the step that validates the samples with abort.
 - **Run-time loading of application XAML outside a scope** (5.1): a failing deferred resource,
   include or template of `FerroRuntimeXamlLoader::load` panics, with abort too; that is fatal
   either way, and turning it into `Err` is a behaviour change.
@@ -460,7 +492,7 @@ Tests (T): `dispatching/glib_dispatcher_impl_base.rs:550` (`cfg(test)` module), 
 | `automation/automation_node.rs:552` | `AutomationNode::invoke_sync` | catches a panic of the peer code a UI Automation client calls, returns `E_FAIL` | E | breaks: a client call the state of the control refuses aborts the application (see below) |
 | `win32_native_control_host.rs:102` | `Win32NativeControlHost::create_new_attachment_with` | catches a panic of the application callback that creates the child | B | no change: a panicking callback aborts before the holder window is destroyed |
 | `win32_native_control_host.rs:117` | `Win32NativeControlHost::create_new_attachment_with` | raises it again after the holder and the attachment are disposed of | R | no change (belongs to :102) |
-| `open_gl/wgl_platform_open_gl_interface.rs:90` | `WglPlatformOpenGlInterface::try_create_with_profiles` | catches the panic of a missing required OpenGL entry point and reports WGL as not available | E | breaks: a driver without a required entry point aborts the start instead of falling back to the next rendering mode (see below) |
+| `open_gl/wgl_platform_open_gl_interface.rs:90` | `WglPlatformOpenGlInterface::try_create_with_profiles` | caught the panic of a missing required OpenGL entry point and reported WGL as not available | E | converted (5.4): the creation of the context fails with the error, which is logged, and the start falls back to the next rendering mode; no catch |
 
 Tests (T), 5 sites: `examples/win32_window.rs:2228`, `:2229` (a hook of the smoke run that ends
 the process with code 101 after the default hook; it behaves the same with abort),
@@ -493,7 +525,7 @@ as the reference catches every exception of the creation. A `Result` conversion:
 load returns `Result<_, OpenGlError>` and `GlInterface::new` becomes fallible; it has 14
 non-test call sites in 10 files (WGL, GLX, EGL, the macOS native GL, EAGL, WebGL, Skia). The
 panics of the `@call` arms (calling an optional entry point that is absent) are bugs and stay.
-Production path: the Windows start in an OpenGL mode.
+Production path: the Windows start in an OpenGL mode. Done as described in 5.4.
 
 ### FerroUI.Android (`src/Android/FerroUI.Android`)
 
@@ -538,7 +570,7 @@ catches panics), 1 site. It needs a build that unwinds.
 
 | File:line | Function | Catches or raises | Class | With abort |
 |---|---|---|---|---|
-| `gpu/open_gl/gl_skia_external_objects_feature.rs:479` | `GlSkiaImportedImage::take_snapshot` (dispose callback of the snapshot bitmap) | catches the panic of `ensure_current` on a context that cannot be made current and drops the image without it | E | breaks: releasing a snapshot after its GL context was lost aborts (see below) |
+| `gpu/open_gl/gl_skia_external_objects_feature.rs:479` | `GlSkiaImportedImage::take_snapshot` (dispose callback of the snapshot bitmap) | caught the panic of `ensure_current` on a context that cannot be made current and dropped the image without it | E | converted (5.4): `try_ensure_current` fails and the image is dropped without a current context; no catch |
 
 Tests (T), 6 sites: `tests.rs` 1, `gpu/metal/tests.rs` 3, `unit_tests/media/font_manager_tests.rs`
 1, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs` 1.
@@ -552,14 +584,14 @@ context that is likely dead. A `Result` conversion: a fallible `try_ensure_curre
 `try_make_current`) on the GL contexts returning `Result<Rc<dyn IDisposable>, OpenGlError>`;
 GLX and WGL already have `make_current_with(..) -> Result`, so the EGL, the macOS native GL and
 EAGL contexts need one. This is the only catch of that panic in the listed crates. Production
-path: the Skia OpenGL backend after a context loss.
+path: the Skia OpenGL backend after a context loss. Done as described in 5.4.
 
 ### FerroUI.Vello (`src/Vello/FerroUI.Vello`)
 
 | File:line | Function | Catches or raises | Class | With abort |
 |---|---|---|---|---|
-| `combined_geometry_impl.rs:133` | `binary_op` | catches a panic of `linesweeper::binary_op` (the sweep gives up on an input) and makes the empty geometry | E | breaks: a `CombinedGeometry` the sweep cannot handle aborts the application instead of drawing nothing (see below) |
-| `gpu/window_surface.rs:166` | `VelloSurfaceGpu::drop_retired` | catches a panic of dropping a `wgpu` surface whose context cannot be made current, logs it | E | breaks: closing a window after its context was lost aborts (see below) |
+| `combined_geometry_impl.rs:133` | `binary_op` | catches a panic of `linesweeper::binary_op` (the sweep gives up on an input) and makes the empty geometry | E | mitigated (5.4): paths that are not finite are refused first; a finite input the sweep gives up on still aborts (see below) |
+| `gpu/window_surface.rs:166` | `VelloSurfaceGpu::drop_retired` | catches a panic of dropping a `wgpu` surface whose context cannot be made current, logs it | E | mitigated (5.4): the surface of a lost device is left without releasing it; a surface that cannot be released otherwise still aborts (see below) |
 
 Tests (T), 3 sites: `effect_tests.rs` 1, `unit_tests/media/font_manager_tests.rs` 1,
 `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs` 1.
@@ -569,7 +601,7 @@ Tests (T), 3 sites: `effect_tests.rs` 1, `unit_tests/media/font_manager_tests.rs
 empty geometry of the contract. No `Result` is available from the library; keeping the
 behaviour with abort takes an upstream fix, a check of the inputs that the sweep refuses, or
 another implementation of the boolean operations. One caller, `combine_paths`, with
-up to three calls. Production path: every `CombinedGeometry` drawn with Vello.
+up to three calls. Production path: every `CombinedGeometry` drawn with Vello. Mitigated as described in 5.4.
 
 **`gpu/window_surface.rs:166`.** The error is a panic inside the `Drop` of a `wgpu::Surface`
 (third party) when its context cannot be made current. The catch logs it and goes on; it also
@@ -577,7 +609,7 @@ runs from `<VelloSurfaceGpu as Drop>::drop`. No `Result` is available from a `Dr
 behaviour takes leaking the surface (`std::mem::forget`) when the context is known to be lost,
 or an upstream fix. Callers: `drop_retired` from the frame start (`window_surface.rs:475`) and
 from `Drop`. Production path: closing a window of the Vello backend on Linux or Windows after a
-device or context loss.
+device or context loss. Mitigated as described in 5.4.
 
 ### FerroUI.OpenGL (`src/FerroUI.OpenGL`)
 

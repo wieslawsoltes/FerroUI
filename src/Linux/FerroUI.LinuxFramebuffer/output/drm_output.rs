@@ -396,7 +396,7 @@ mod imp {
             let get_proc_address = egl_get_proc_address().map_err(|error| OpenGlError::new(error.to_string()))?;
             // SAFETY: the loader returns null or the address of the entry point of that name of
             // the EGL library, which stays loaded.
-            let egl = Rc::new(unsafe { EglInterface::new(&get_proc_address) });
+            let egl = Rc::new(unsafe { EglInterface::try_new(&get_proc_address) }?);
             let egl_display = EglDisplay::new_with_creation_options(EglDisplayCreationOptions {
                 base: EglDisplayOptions {
                     egl: Some(egl),

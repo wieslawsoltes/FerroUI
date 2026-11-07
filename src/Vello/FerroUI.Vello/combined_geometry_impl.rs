@@ -5,7 +5,7 @@ use crate::vello_extensions::closed_path;
 use ferroui_base::media::{FillRule, GeometryCombineMode};
 use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::Rect;
-use kurbo::{BezPath, Shape};
+use kurbo::{BezPath, PathEl, Shape};
 use linesweeper::BinaryOp;
 use std::sync::Arc;
 
@@ -129,7 +129,13 @@ fn binary_op(a: &BezPath, b: &BezPath, fill_rule: FillRule, op: BinaryOp) -> Opt
 
     // The sweep is in an early state by its own account and may give up on
     // an input by panicking; a combination that fails is the empty geometry
-    // of the contract, not the end of the application.
+    // of the contract, not the end of the application. The inputs it is known
+    // to refuse that way, coordinates that are not finite, are refused here
+    // first, so that a build that aborts on panic does not reach the sweep
+    // with them (#567).
+    if !is_finite(a) || !is_finite(b) {
+        return None;
+    }
     let contours = std::panic::catch_unwind(|| linesweeper::binary_op(a, b, fill_rule, op)).ok()?.ok()?;
 
     let mut path = BezPath::new();
@@ -138,6 +144,16 @@ fn binary_op(a: &BezPath, b: &BezPath, fill_rule: FillRule, op: BinaryOp) -> Opt
     }
 
     Some(path)
+}
+
+/// Whether every point of the path has finite coordinates.
+fn is_finite(path: &BezPath) -> bool {
+    path.elements().iter().all(|element| match *element {
+        PathEl::MoveTo(p) | PathEl::LineTo(p) => p.is_finite(),
+        PathEl::QuadTo(p1, p2) => p1.is_finite() && p2.is_finite(),
+        PathEl::CurveTo(p1, p2, p3) => p1.is_finite() && p2.is_finite() && p3.is_finite(),
+        PathEl::ClosePath => true,
+    })
 }
 
 impl GeometryImpl for CombinedGeometryImpl {
@@ -155,3 +171,28 @@ impl GeometryImpl for CombinedGeometryImpl {
 }
 
 impl_geometry_impl!(CombinedGeometryImpl);
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream: the refusal of non-finite inputs is of this port.
+    use super::*;
+    use kurbo::Rect as KurboRect;
+
+    fn rect_path(x: f64) -> VelloPath {
+        VelloPath::new(KurboRect::new(x, 0.0, x + 10.0, 10.0).to_path(0.1), FillRule::NonZero)
+    }
+
+    #[test]
+    fn a_path_with_coordinates_that_are_not_finite_combines_to_nothing() {
+        let mut nan = BezPath::new();
+        nan.move_to((0.0, 0.0));
+        nan.line_to((f64::NAN, 5.0));
+        nan.line_to((5.0, f64::INFINITY));
+        nan.close_path();
+        let nan = VelloPath::new(nan, FillRule::NonZero);
+
+        assert!(combine_paths(GeometryCombineMode::Union, &nan, &rect_path(0.0)).is_none());
+        assert!(combine_paths(GeometryCombineMode::Intersect, &rect_path(0.0), &nan).is_none());
+        assert!(combine_paths(GeometryCombineMode::Union, &rect_path(0.0), &rect_path(5.0)).is_some());
+    }
+}

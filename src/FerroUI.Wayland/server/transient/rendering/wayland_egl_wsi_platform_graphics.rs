@@ -71,7 +71,7 @@ pub(crate) fn load_egl_interface() -> Result<EglInterface, OpenGlError> {
     });
     // SAFETY: the loader returns null or the address of the entry point of that name of
     // the EGL library, which stays loaded.
-    Ok(unsafe { EglInterface::new(&get_proc_address) })
+    unsafe { EglInterface::try_new(&get_proc_address) }
 }
 
 impl WaylandEglWsiPlatformGraphics {

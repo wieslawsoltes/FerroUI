@@ -92,8 +92,10 @@ pub struct BrowserWebGlRenderTarget {
 impl BrowserWebGlRenderTarget {
     /// Wraps the WebGL render target of the script side.
     ///
-    /// The thread that calls this is the one the target belongs to.
-    pub fn new(js: JsObject) -> Rc<Self> {
+    /// The thread that calls this is the one the target belongs to. Fails
+    /// when the context cannot be made current or its entry points cannot be
+    /// resolved.
+    pub fn new(js: JsObject) -> Result<Rc<Self>, OpenGlError> {
         let target = JsCast::unchecked_ref::<JsWebGlRenderTarget>(&js);
         let gl_info = GlInfo {
             context_id: target.context_handle(),
@@ -113,12 +115,12 @@ impl BrowserWebGlRenderTarget {
             // with the context of the page itself.
             #[cfg(feature = "vello")]
             (version > 1).then(|| target.canvas()),
-        );
-        Rc::new(Self {
+        )?;
+        Ok(Rc::new(Self {
             js,
             gl_info,
             gl_context,
-        })
+        }))
     }
 
     /// The WebGL context of the canvas.
@@ -288,20 +290,19 @@ impl IDisposable for RestoreContext {
 }
 
 impl WebGlContext {
-    /// Wraps the context with the given id and resolves its entry points.
+    /// Wraps the context with the given id and resolves its entry points;
+    /// fails when the context cannot be made current or a required entry
+    /// point cannot be resolved.
     pub fn new(
         context_id: i32,
         version: GlVersion,
         sample_count: i32,
         stencil_size: i32,
         #[cfg(feature = "vello")] canvas: Option<JsValue>,
-    ) -> Rc<Self> {
+    ) -> Result<Rc<Self>, OpenGlError> {
         let old = get_current_context();
         if !make_context_current(context_id) {
-            panic!(
-                "{}",
-                OpenGlError::new("Unable to make the context current")
-            );
+            return Err(OpenGlError::new("Unable to make the context current"));
         }
         let get_proc_address: GetProcAddress =
             Rc::new(|name: &str| -> *const c_void { native::get_proc_address(name) });
@@ -315,10 +316,11 @@ impl WebGlContext {
         // (`verify_access`). The previous context is restored below: every
         // later use of the interface happens inside `ensure_current`, which
         // `begin_draw` and the Skia GPU take before they call into it.
-        let gl_interface = Rc::new(unsafe { GlInterface::new(version, get_proc_address) });
+        let gl_interface = unsafe { GlInterface::try_new(version, get_proc_address) };
         make_context_current(old);
+        let gl_interface = Rc::new(gl_interface?);
 
-        Rc::new_cyclic(|this| Self {
+        Ok(Rc::new_cyclic(|this| Self {
             this: this.clone(),
             context_id,
             thread: thread::current().id(),
@@ -328,7 +330,7 @@ impl WebGlContext {
             stencil_size,
             #[cfg(feature = "vello")]
             canvas,
-        })
+        }))
     }
 
     fn verify_access(&self) {
@@ -433,17 +435,26 @@ impl IGlContext for WebGlContext {
     }
 
     fn make_current(&self) -> Rc<dyn IDisposable> {
+        IGlContext::try_make_current(self).unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         self.verify_access();
         let old = get_current_context();
         if !make_context_current(self.context_id) {
-            panic!(
-                "{}",
-                OpenGlError::new("Unable to make the context current")
-            );
+            return Err(OpenGlError::new("Unable to make the context current"));
         }
-        Rc::new(RestoreContext {
+        Ok(Rc::new(RestoreContext {
             context_id: Cell::new(Some(old)),
-        })
+        }))
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        self.verify_access();
+        if get_current_context() == self.context_id {
+            return Ok(Disposable::empty());
+        }
+        IGlContext::try_make_current(self)
     }
 
     fn is_shared_with(&self, _context: &dyn IGlContext) -> bool {

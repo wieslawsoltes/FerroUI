@@ -10,11 +10,11 @@ use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{IImage, ScaleTransform};
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, JoinHandle};
+use ferroui_base::threading::{CancellationToken, JoinError, JoinHandle};
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{Ref, Visual};
 use ferroui_controls::ItemsSource;
-use mini_mvvm::{start_async, ViewModelBase};
+use mini_mvvm::{start_async_on_result, ViewModelBase};
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
@@ -380,9 +380,9 @@ impl IPageTransition for CustomTransition {
         let from = from.cloned();
         let to = to.cloned();
 
-        start_async(async move {
+        start_async_on_result(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::new();
@@ -408,15 +408,16 @@ impl IPageTransition for CustomTransition {
                 tasks.push(animation.run_async(to, cancellation_token.clone()));
             }
 
-            if let Err(error) = AnimationTask::when_all(tasks).await {
-                panic!("{error}");
-            }
+            AnimationTask::when_all(tasks)
+                .await
+                .map_err(|error| JoinError::Panicked(Box::new(error.to_string())))?;
 
             if let Some(from) = &from {
                 if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
+            Ok(())
         })
     }
 }

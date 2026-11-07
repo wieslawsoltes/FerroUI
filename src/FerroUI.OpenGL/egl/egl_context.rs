@@ -105,7 +105,13 @@ impl EglContext {
         });
         // SAFETY: `eglGetProcAddress` returns null or the address of the named entry point of
         // the client API of the current context, and the context was made current above.
-        let gl_interface = unsafe { GlInterface::new(version, get_proc_address) };
+        let gl_interface = match unsafe { GlInterface::try_new(version, get_proc_address) } {
+            Ok(gl_interface) => gl_interface,
+            Err(error) => {
+                current.dispose();
+                return Err(error);
+            }
+        };
         let _ = this.gl_interface.set(Rc::new(gl_interface));
 
         let created: Vec<(TypeId, EglContextFeature)> = features
@@ -510,6 +516,20 @@ impl IGlContext for EglContext {
             Ok(current) => current,
             Err(error) => panic!("{error}"),
         }
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        self.make_current_with_surface(None).map_err(|error| match error {
+            MakeCurrentError::ContextLost => OpenGlError::new(PlatformGraphicsContextLostError.to_string()),
+            MakeCurrentError::OpenGl(error) => error,
+        })
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        if self.is_current() {
+            return Ok(Disposable::empty());
+        }
+        IGlContext::try_make_current(self)
     }
 
     /// # Panics

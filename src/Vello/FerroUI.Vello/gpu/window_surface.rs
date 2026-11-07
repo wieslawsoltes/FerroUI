@@ -161,8 +161,17 @@ impl VelloSurfaceGpu {
     fn drop_retired(&self) {
         let retired = std::mem::take(&mut *self.retired.borrow_mut());
         for swap_chain in retired {
-            // A swap chain that cannot be dropped (its context cannot be
-            // made current) is left to the end of the process.
+            // The surface of a lost device cannot be released: `wgpu` makes
+            // its context current to do so and panics when it cannot. It is
+            // left to the end of the process without trying, which a build
+            // that aborts on panic needs (#567).
+            if self.device.is_lost() {
+                std::mem::forget(swap_chain);
+                log_window_failure("the swap chain of a window that was closed was left: the device is lost");
+                continue;
+            }
+            // A swap chain that cannot be dropped otherwise (its context
+            // cannot be made current) is left to the end of the process.
             let dropped = std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || drop(swap_chain)));
             if dropped.is_err() {
                 log_window_failure("the swap chain of a window that was closed could not be released");

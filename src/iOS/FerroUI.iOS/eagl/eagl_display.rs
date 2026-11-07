@@ -126,7 +126,7 @@ impl EaglPlatformGraphics {
         // answers zero, so the interface knows no extensions and no version
         // strings, as the reference's does [R]. It is used afterwards only
         // by its context, on the thread where that context is current.
-        let iface = unsafe { GlInterface::new(Self::gl_version(), get_proc_address) };
+        let iface = unsafe { GlInterface::try_new(Self::gl_version(), get_proc_address) }?;
         GlContext::new(Rc::new(iface), None)
     }
 
@@ -212,8 +212,15 @@ impl GlContext {
     /// Panics with the message of a lost graphics context once the context
     /// is disposed, and when EAGL does not make it current.
     fn make_current_context(&self) -> Rc<dyn IDisposable> {
+        self.try_make_current_context().unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// [`make_current_context`](Self::make_current_context) that fails,
+    /// instead of panicking, when the context is lost or EAGL does not make
+    /// it current.
+    fn try_make_current_context(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         let Some(context) = self.context() else {
-            panic!("{}", PlatformGraphicsContextLostError);
+            return Err(OpenGlError::new(PlatformGraphicsContextLostError.to_string()));
         };
         // SAFETY: class methods of EAGL that read and set the context of
         // the calling thread. A context is current on one thread at a
@@ -223,9 +230,9 @@ impl GlContext {
         let old = unsafe { EAGLContext::currentContext() };
         // SAFETY: as above.
         if !unsafe { EAGLContext::setCurrentContext(Some(&context)) } {
-            panic!("{}", OpenGlError::new("Unable to make context current"));
+            return Err(OpenGlError::new("Unable to make context current"));
         }
-        Rc::new(ResetContext::new(old))
+        Ok(Rc::new(ResetContext::new(old)))
     }
 }
 
@@ -319,6 +326,20 @@ impl IGlContext for GlContext {
     /// is disposed, and when EAGL does not make it current.
     fn make_current(&self) -> Rc<dyn IDisposable> {
         self.make_current_context()
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        self.try_make_current_context()
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        let Some(context) = self.context() else {
+            return Err(OpenGlError::new(PlatformGraphicsContextLostError.to_string()));
+        };
+        if is_current(&context) {
+            return Ok(Disposable::empty());
+        }
+        self.try_make_current_context()
     }
 
     /// Whether the other context is a context of EAGL in the same share
