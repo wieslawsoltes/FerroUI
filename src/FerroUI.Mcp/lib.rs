@@ -290,7 +290,7 @@ impl Client {
             context.check_cancelled()?;
             // Boundary (#567): a service provider is application code on the worker thread of
             // the request; its panic answers the tool with an error. Isolating it needs a build
-            // that unwinds (`dev` or `release-unwind` profile).
+            // that unwinds (`dev`, `release` or `dist-unwind` profile).
             return std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 service.execute(name, &args, &context)
             }))
@@ -331,7 +331,7 @@ impl Client {
                         // Boundary (#567): a job of the dispatcher that runs an extension tool
                         // or the inspector, which reach application code; its panic answers
                         // the tool with an error. Isolating it needs a build that unwinds
-                        // (`dev` or `release-unwind` profile).
+                        // (`dev`, `release` or `dist-unwind` profile).
                         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                             if let Some(extension) = extension {
                                 extension.execute(&tool, &args, permissions)

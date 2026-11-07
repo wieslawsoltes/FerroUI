@@ -558,20 +558,27 @@ lto = false
 # then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
 # symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
 # release profile for a backtrace with names.
+#
+# Without unwinding (`panic = "abort"`, docs/binary-size.md, section 4.7, #567): a panic ends the
+# process, after the panic hook has run. The unwind tables and the landing pads are left out: hello
+# world's executable is 21 % smaller. No production path of the framework carries an expected
+# error as a panic (docs/porting/panics-as-exceptions.md); what a catch of a panic still isolates
+# is a bug, which then ends the process instead of being logged. The development tools that isolate
+# the code of the application they inspect (the Designer, the previewer, hot reload, DevTools) are
+# built with `dev`, `release` or `dist-unwind`. Cargo ignores the setting for tests, benches, build
+# scripts and procedural macros, which always unwind.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
 strip = "symbols"
-
-# The shipped build without unwinding (opt-in, docs/binary-size.md, section 4.7, #567): every panic
-# ends the process. The unwind tables and the landing pads are left out: hello world's dist build
-# is 21 % smaller. What catches a panic to carry on no longer can: the dispatcher's isolation of a
-# panicking job or handler, the render loop's guard, the error scope of the WinUI importer. For an
-# application that treats any panic as fatal; not for tests, which rely on unwinding.
-[profile.dist-abort]
-inherits = "dist"
 panic = "abort"
+
+# The shipped build with unwinding: `dist` with `panic = "unwind"`, for an application that catches
+# panics to carry on (a plug-in host, a tool that isolates the code it runs).
+[profile.dist-unwind]
+inherits = "dist"
+panic = "unwind"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
