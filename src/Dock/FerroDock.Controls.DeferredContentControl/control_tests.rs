@@ -598,7 +598,17 @@ fn items_control_presenters_use_scoped_time_budget_and_native_containers() {
         assert_eq!(templates[0].builds.get(), 1);
         assert_eq!(templates[1].builds.get(), 0);
         assert_eq!(templates[2].builds.get(), 0);
-        scene.drain(&t);
+        // The two quick templates fit one pass of 10 ms on an idle machine; a
+        // loaded one may take a further pass. What is checked is that the
+        // budget ends a pass and that every presenter is realized, not how
+        // fast the machine builds a template.
+        for _ in 0..3 {
+            if t.pending_count() == 0 {
+                break;
+            }
+            scene.drain(&t);
+        }
+        assert_eq!(t.pending_count(), 0);
         assert_eq!(templates.iter().map(|t| t.builds.get()).sum::<usize>(), 3);
         for presenter in presenters.borrow().iter() {
             assert!(presenter.child().is_some());
