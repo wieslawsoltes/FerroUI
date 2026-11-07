@@ -149,6 +149,9 @@
     "ferroui-markup-xaml-tests": {
       "NullReferenceException": 1
     },
+    "ferroui-media3d": {
+      "Quaternion": 1
+    },
     "ferroui-microcom": {
       "Guid": 1
     },

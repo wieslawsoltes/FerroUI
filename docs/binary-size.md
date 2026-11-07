@@ -416,28 +416,43 @@ of a caught panic after cleanup (the try/finally of the original). The classific
 [porting/panics-as-exceptions.md](porting/panics-as-exceptions.md). Turning panics into `Result`
 removes few of these records. The cost comes from unwinding itself.
 
-An application that treats any panic as fatal can build without unwinding, with the opt-in
-profile `dist-abort` (`cargo build --profile dist-abort`, `panic = "abort"` over `dist`):
+The shipped profile `dist` builds without unwinding (`panic = "abort"`, since #567; before, this
+was the opt-in profile `dist-abort`):
 
-| `samples/HelloWorld`, macOS ARM64, tables of types trimmed | `dist` | `dist-abort` |
+| `samples/HelloWorld`, macOS ARM64, tables of types trimmed | with unwinding | `dist` (abort) |
 |---|---:|---:|
 | executable | 45.28 MB | 35.71 MB (**-9.57 MB, -21 %**) |
 | `__text` | 34.48 MB | 31.35 MB |
 | unwind sections | 6.63 MB | 0.26 MB |
 
-What changes with `dist-abort`: a panic ends the process at once, without running destructors.
-- The dispatcher no longer isolates a panicking job or event handler. With unwinding, the panic is
-  caught, the frame is cleaned up and the panic is raised again on the dispatcher, the way the
-  original rethrows an exception of a handler.
-- The render loop no longer survives a panicking frame.
-- Compiled markup throws a markup error as a panic (`ferroui_markup_xaml::throw`). That is already
-  fatal outside an error scope. The error scope of the WinUI importer (`with_xaml_errors`) does
-  not unwind: the members a load reaches report their error to the scope, which returns it as
-  `Err` with abort too (`docs/porting/panics-as-exceptions.md`).
-- The Designer reports invalid animations by catching their panics, so it is not built with this
-  profile.
+The desktop control catalog (`samples/ControlCatalog.Desktop`, macOS ARM64, with its images and
+fonts) is 98.9 MB built this way.
 
-The default stays `dist`, with unwinding.
+What changes without unwinding: a panic ends the process at once, after the panic hook has run,
+without running destructors.
+- No production path carries an expected error as a panic: the markup error scope, the page
+  transitions, OpenGL loading, making a GL context current, UI Automation refusals and the Vello
+  inputs the third-party sweep refuses return errors (the classification of every site is in
+  [porting/panics-as-exceptions.md](porting/panics-as-exceptions.md)).
+- What a catch of a panic still isolates is a bug: the dispatcher no longer isolates a panicking
+  job or event handler, and the render loop no longer survives a panicking frame. With unwinding
+  the panic is caught, the frame is cleaned up and the panic is raised again on the dispatcher, the
+  way the original rethrows an exception of a handler.
+- The development tools that isolate the code of the application they inspect (the Designer, the
+  previewer of `DesignerSupport`, hot reload, DevTools) need unwinding. They are built with `dev`,
+  `release` or `dist-unwind`.
+
+`dist-unwind` is `dist` with unwinding, for an application that catches panics to carry on.
+`release` keeps unwinding: it is the profile of development builds that run the tools above, and
+of the benchmarks. Cargo ignores `panic` for tests, benches, build scripts and procedural macros.
+
+Workspace profiles do not reach an application in a workspace of its own: its root `Cargo.toml`
+states its own. The application templates (the `FerroUI/templates` repository) and the shared
+workspace settings that `scripts/apps/sync-workspace.py` writes carry `panic = "abort"` in their
+`dist` profile. An application that wants a report of a panic before the process ends installs a
+panic hook (`std::panic::set_hook`), which runs before the abort, as the Android and browser
+platforms do for their crash reports.
+
 ### 4.8 Class tables are constants (#569)
 
 A class's table of virtual members was built at run time by `Subclassable::build_vtable`, a

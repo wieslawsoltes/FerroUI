@@ -381,7 +381,7 @@ impl RemoteDesignerEntryPoint {
                         // Boundary (#567): closing the previous preview runs the closing and
                         // closed handlers of the previewed application; a panic of one must
                         // not lose the new preview. Isolating them needs a build that unwinds
-                        // (`dev` or `release-unwind` profile).
+                        // (`dev`, `release` or `dist-unwind` profile).
                         let _ = catch_unwind(AssertUnwindSafe(|| previous.close()));
                     }
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());

@@ -196,13 +196,11 @@ references and their licenses remain retained separately.
 
 ## Browser locale data
 
-Emscripten builds use the ICU 68.2 port and its unmodified 28,566,176-byte
-`icudt68l.dat` package (Unicode 13.0). The complete ICU/Unicode and third-party
-license is retained in `src/FerroBoard.Core/resources/native/icu/LICENSE`;
-exact upstream archive and data hashes are in the adjacent `provenance.json`.
-This data is embedded only for Emscripten and registered lazily. Desktop/mobile
-builds continue using their system locale services. Native collation data versions
-can differ from the keyboard text tables and the original .NET runtime.
+Emscripten builds use the browser's locale services, `Intl.Collator` and
+`Intl.Segmenter` of the JavaScript engine (`src/FerroBoard.Core/text/locale_text/collation.js`),
+as desktop/mobile builds use their system locale services. No ICU code or data is
+linked or embedded. The engine's collation data versions can differ from the keyboard
+text tables and the original .NET runtime.
 
 The selected Emscripten 6.0.10 runtime license references (Emscripten, LLVM
 compiler-rt/libc++/libc++abi/libunwind, musl, LLVM libc and mimalloc) are retained

@@ -12,10 +12,14 @@ pub use current::{
 };
 use std::cmp::Ordering;
 
-#[cfg(any(target_os = "macos", target_os = "linux", target_os = "emscripten"))]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 mod icu;
-#[cfg(any(target_os = "macos", target_os = "linux", target_os = "emscripten"))]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 use icu as backend;
+#[cfg(target_os = "emscripten")]
+mod browser;
+#[cfg(target_os = "emscripten")]
+use browser as backend;
 #[cfg(target_os = "windows")]
 mod windows;
 #[cfg(target_os = "windows")]
@@ -43,7 +47,7 @@ pub fn system_locale_name() -> Result<String, CollationError> {
 }
 
 /// Synchronous owner-thread locale service for keyboard resource labels and UI search.
-/// Uses system ICU on macOS/Linux and bundled ICU on Emscripten, public CoreFoundation on iOS, Android ICU through JNI and Windows NLS on Windows. Results can vary with
+/// Uses system ICU on macOS/Linux, the browser's `Intl.Collator` on Emscripten, public CoreFoundation on iOS, Android ICU through JNI and Windows NLS on Windows. Results can vary with
 /// platform data versions. Empty locale means root/invariant; embedded NUL is invalid.
 pub struct LocaleText {
     #[cfg(any(
@@ -153,8 +157,7 @@ impl LocaleText {
     target_os = "linux",
     target_os = "windows",
     target_os = "ios",
-    target_os = "android",
-    target_os = "emscripten"
+    target_os = "android"
 ))]
 fn length(text: &[u16]) -> Result<i32, CollationError> {
     i32::try_from(text.len()).map_err(|_| CollationError::InputTooLong)
@@ -164,8 +167,7 @@ fn length(text: &[u16]) -> Result<i32, CollationError> {
     target_os = "linux",
     target_os = "windows",
     target_os = "ios",
-    target_os = "android",
-    target_os = "emscripten"
+    target_os = "android"
 ))]
 fn pointer(text: &[u16]) -> *const u16 {
     static EMPTY: u16 = 0;

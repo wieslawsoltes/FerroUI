@@ -1177,6 +1177,7 @@ dependencies = [
  "sys-locale",
  "time",
  "uuid",
+ "wasm-bindgen",
  "windows-sys 0.61.2",
 ]
 
@@ -2594,6 +2595,14 @@ dependencies = [
  "ferroui-media-opengl",
  "ferroui-opengl",
  "ferroui-win32",
+]
+
+[[package]]
+name = "ferroui-media3d"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
 ]
 
 [[package]]
