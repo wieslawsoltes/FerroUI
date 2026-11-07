@@ -690,7 +690,7 @@
     },
     {
       "source": "SettingsPanel StringComparer.CurrentCulture / CurrentCultureIgnoreCase and String.Contains dependency",
-      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the Emscripten ICU68.2 port with matching immutable data.",
+      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the browser's Intl.Collator and Intl.Segmenter on Emscripten.",
       "status": "partially_verified",
       "evidence": [
         "tests/fixtures/culture-index.tsv",
@@ -856,7 +856,7 @@
     },
     {
       "source": "Sample startup and layout/settings locale sorting on Windows/Linux",
-      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the Emscripten ICU68.2 port with matching immutable data.",
+      "native": "Synchronous native locale text: system ICU on macOS/Linux, Windows NLS, public CoreFoundation on iOS, Android ICU via JNI and the browser's Intl.Collator and Intl.Segmenter on Emscripten.",
       "status": "partially_verified",
       "evidence": [
         "samples/FerroBoard.Sample/program.rs",
