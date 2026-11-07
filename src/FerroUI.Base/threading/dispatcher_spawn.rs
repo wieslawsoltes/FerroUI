@@ -200,6 +200,22 @@ impl Dispatcher {
         task::spawn_local_on(future, self.task_schedule(priority), FirstPoll::Now)
     }
 
+    /// [`start_local_with_priority`](Self::start_local_with_priority) for a future whose
+    /// failure is a value: an `Err` of the future fails the handle with that
+    /// [`JoinError`](ferroui_system::task::JoinError), as a panic of the future does, but without
+    /// unwinding, so the task fails the same way in a build that aborts on panic (#567).
+    ///
+    /// # Panics
+    /// When called from a thread other than the dispatcher thread.
+    pub fn start_local_on_result_with_priority<F, T>(&self, future: F, priority: DispatcherPriority) -> JoinHandle<T>
+    where
+        F: Future<Output = Result<T, ferroui_system::task::JoinError>> + 'static,
+        T: 'static,
+    {
+        self.verify_access();
+        task::spawn_local_on_result(future, self.task_schedule(priority), FirstPoll::Now)
+    }
+
     /// The priority of the job that runs on the calling thread ([`Dispatcher::current_priority`]),
     /// [`DispatcherPriority::DEFAULT`] outside of a job.
     pub(crate) fn current_job_priority(&self) -> DispatcherPriority {

@@ -72,7 +72,13 @@ impl GlxContext {
             Rc::new(|name: &str| -> *const c_void { GlxInterface::safe_get_proc_address(name) });
         // SAFETY: `glXGetProcAddress` returns null or the address of the named entry point of
         // the OpenGL library, and the context was made current above.
-        let gl_interface = unsafe { GlInterface::new(version, get_proc_address) };
+        let gl_interface = match unsafe { GlInterface::try_new(version, get_proc_address) } {
+            Ok(gl_interface) => gl_interface,
+            Err(error) => {
+                current.dispose();
+                return Err(error);
+            }
+        };
         let _ = this.gl_interface.set(Rc::new(gl_interface));
         let as_gl_context: Rc<dyn IGlContext> = this.clone();
         if let Some(external_objects) = ExternalObjectsOpenGlExtensionFeature::try_create(&as_gl_context) {
@@ -229,6 +235,17 @@ impl IGlContext for GlxContext {
             Ok(current) => current,
             Err(error) => panic!("{error}"),
         }
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        self.make_current_with(self.default_xid)
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        if self.is_current() {
+            return Ok(Disposable::empty());
+        }
+        self.make_current_with(self.default_xid)
     }
 
     /// # Panics

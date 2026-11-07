@@ -1,6 +1,6 @@
 use crate::animation::AnimationTask;
 use crate::threading::{CancellationToken, Dispatcher, DispatcherPriority};
-use ferroui_system::task::{self, FirstPoll, JoinError, JoinHandle};
+use ferroui_system::task::{JoinError, JoinHandle};
 use std::future::Future;
 use crate::{Ref, Visual};
 
@@ -63,9 +63,7 @@ pub(crate) fn continuation_priority() -> DispatcherPriority {
 /// (`JoinError::Panicked` when an animation could not be run), without a
 /// panic (#567).
 pub(crate) fn start_async(future: impl Future<Output = Result<(), JoinError>> + 'static) -> JoinHandle<()> {
-    let dispatcher = Dispatcher::current_dispatcher();
-    dispatcher.verify_access();
-    task::spawn_local_on_result(future, dispatcher.task_schedule(continuation_priority()), FirstPoll::Now)
+    Dispatcher::current_dispatcher().start_local_on_result_with_priority(future, continuation_priority())
 }
 
 /// Awaits the animations of a page transition. A failure to run one of them

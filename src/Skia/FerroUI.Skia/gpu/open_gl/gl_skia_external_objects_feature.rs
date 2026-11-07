@@ -23,7 +23,6 @@ use skia_safe::gpu::{backend_textures, images, Mipmapped, SurfaceOrigin};
 use skia_safe::{AlphaType, ColorType, Image};
 use std::any::Any;
 use std::cell::Cell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
@@ -476,7 +475,7 @@ impl GlSkiaImportedImage {
                 // A context that cannot be made current is likely dead:
                 // ignored, as upstream.
                 let restore_context = if dispose_context.is_on_thread() {
-                    catch_unwind(AssertUnwindSafe(|| dispose_context.get().ensure_current())).ok()
+                    dispose_context.get().try_ensure_current().ok()
                 } else {
                     None
                 };

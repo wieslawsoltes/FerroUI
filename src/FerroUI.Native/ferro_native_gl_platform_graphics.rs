@@ -99,7 +99,7 @@ impl FerroNativeGlPlatformGraphics {
             // names with `dlsym` in the OpenGL library of the system, and the
             // context of that library created above is current on this
             // thread until `current` is released.
-            let basic = unsafe { GlBasicInfoInterface::new(&get_proc_address) };
+            let basic = unsafe { GlBasicInfoInterface::try_new(&get_proc_address) }?;
             let major = basic.get_integerv(GL_MAJOR_VERSION);
             let minor = basic.get_integerv(GL_MINOR_VERSION);
             let profile_mask = basic.get_integerv(GL_CONTEXT_PROFILE_MASK);
@@ -108,7 +108,7 @@ impl FerroNativeGlPlatformGraphics {
 
             version = GlVersion::with_compatibility_profile(GlProfileType::OpenGL, major, minor, is_compatibility_profile);
             // SAFETY: as above.
-            gl_interface = Rc::new(unsafe { GlInterface::new(version, proc_address_of(&display)) });
+            gl_interface = Rc::new(unsafe { GlInterface::try_new(version, proc_address_of(&display)) }?);
             drop(current);
         }
 
@@ -342,7 +342,7 @@ impl GlContext {
 
     /// Makes the context current, or says why it cannot be: for the callers
     /// that ignore a broken context.
-    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, HResult> {
+    fn try_make_native_current(&self) -> Result<Rc<dyn IDisposable>, HResult> {
         let Some(native) = self.context() else {
             return Err(HResult::FAIL);
         };
@@ -401,7 +401,7 @@ impl IPlatformGraphicsContext for GlContext {
     fn poll_pending_gpu_work(&self) -> bool {
         let fences = std::mem::take(&mut *self.frame_fences.borrow_mut());
         if fences.is_empty() && !self.frame_retirement.has_pending() { return false; }
-        let current = match self.try_make_current() {
+        let current = match self.try_make_native_current() {
             Ok(current) => current,
             Err(_) => {
                 for (_, completion) in fences { completion.mark_indeterminate(); }
@@ -472,7 +472,7 @@ impl IGlContext for GlContext {
     }
     fn schedule_frame_completion(&self, completion: GpuCompletion) {
         if self.shared_frame_context_id().is_none() { completion.mark_indeterminate(); return; }
-        let current = match self.try_make_current() {
+        let current = match self.try_make_native_current() {
             Ok(current) => current,
             Err(_) => { completion.mark_indeterminate(); return; }
         };
@@ -504,7 +504,18 @@ impl IGlContext for GlContext {
     /// be made current.
     fn make_current(&self) -> Rc<dyn IDisposable> {
         self.throw_if_lost();
-        self.try_make_current().check()
+        self.try_make_native_current().check()
+    }
+
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        if self.is_lost() {
+            return Err(OpenGlError::new(PlatformGraphicsContextLostError.to_string()));
+        }
+        self.try_make_native_current().map_err(native_error("MakeCurrent"))
+    }
+
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        IGlContext::try_make_current(self)
     }
 
     /// # Panics
@@ -1039,7 +1050,7 @@ impl IGlExternalImageTexture for ImportedTexture {
         }
         // A context that is lost or cannot be made current is likely
         // broken: the texture is left to it, as in the original.
-        if let Ok(current) = self.context.try_make_current() {
+        if let Ok(current) = self.context.try_make_native_current() {
             self.context.gl_interface().delete_texture(self.id);
             current.dispose();
         }

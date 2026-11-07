@@ -89,7 +89,7 @@ impl AndroidEglPlatformGraphics {
         // SAFETY: the loader returns, for a name, null or the address of the entry point of
         // that name in the EGL library of the system or behind its `eglGetProcAddress`;
         // the library is never closed.
-        let egl = Rc::new(unsafe { EglInterface::new(&get_proc_address) });
+        let egl = Rc::new(unsafe { EglInterface::try_new(&get_proc_address) }?);
         EglDisplay::new_with_creation_options(EglDisplayCreationOptions {
             base: EglDisplayOptions {
                 egl: Some(egl),

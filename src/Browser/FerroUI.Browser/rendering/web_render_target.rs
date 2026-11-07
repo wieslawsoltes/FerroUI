@@ -1,6 +1,7 @@
 use super::{BrowserSoftwareRenderTarget, BrowserWebGlRenderTarget};
 use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
 use crate::interop::{non_null, JsObject};
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
@@ -137,13 +138,24 @@ ferroui_base::ferro_thread_local! {
 /// The render target the script of the calling thread created under `id`,
 /// wrapped for the framework.
 ///
+/// A WebGL target whose context cannot be used is left out, with the
+/// failure logged.
+///
 /// # Panics
 /// Panics when the target is of a kind the framework does not know.
 fn wrap_script_render_target(id: i32) -> Option<BrowserRenderTarget> {
     let js = non_null(get_js_render_target(id))?;
     let type_ = JsCast::unchecked_ref::<JsRenderTarget>(&js).render_target_type();
     if type_ == "webgl" {
-        return Some(BrowserRenderTarget::WebGl(BrowserWebGlRenderTarget::new(js)));
+        return match BrowserWebGlRenderTarget::new(js) {
+            Ok(target) => Some(BrowserRenderTarget::WebGl(target)),
+            Err(error) => {
+                if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::BROWSER_PLATFORM) {
+                    logger.log(None, &format!("Unable to use the WebGL context of render target {id}: {error}"));
+                }
+                None
+            }
+        };
     }
     if type_ == "software" {
         return Some(BrowserRenderTarget::Software(BrowserSoftwareRenderTarget::new(js)));

@@ -21,10 +21,16 @@ pub(crate) fn or_else(addr: *const c_void, next: impl FnOnce() -> *const c_void)
     }
 }
 
-/// The failure of calling or resolving an entry point the platform lacks.
+/// The failure of calling an optional entry point the platform lacks.
 #[cold]
 pub(crate) fn entry_point_not_found(name: &str) -> ! {
-    panic!("Unable to find an entry point named '{name}'.")
+    panic!("{}", missing_entry_point(name))
+}
+
+/// The failure of resolving a required entry point the platform lacks.
+#[cold]
+pub(crate) fn missing_entry_point(name: &str) -> crate::OpenGlError {
+    crate::OpenGlError::new(format!("Unable to find an entry point named '{name}'."))
 }
 
 /// Declares a table of OpenGL entry points.
@@ -38,9 +44,10 @@ pub(crate) fn entry_point_not_found(name: &str) -> ! {
 /// }
 /// ```
 ///
-/// - `required` entries make loading the table panic when they cannot be
-///   resolved; `optional` ones panic when called while missing and get an
-///   `is_<name>_available` method.
+/// - `required` entries make loading the table fail with an [`OpenGlError`](crate::OpenGlError)
+///   when they cannot be resolved; `optional` ones panic when called while
+///   missing and get an `is_<name>_available` method, which callers check
+///   first.
 /// - `safe` entries take plain values only. `unsafe` entries take pointers,
 ///   or make OpenGL read memory described by earlier calls, and become
 ///   `unsafe fn`.
@@ -61,8 +68,11 @@ macro_rules! gl_entry_points {
 
         impl $Table {
             #[allow(unused_variables)]
-            pub(crate) fn load($get: &$crate::entry_points::GetProcAddress, $info: &$Info) -> Self {
-                Self {
+            pub(crate) fn load(
+                $get: &$crate::entry_points::GetProcAddress,
+                $info: &$Info,
+            ) -> ::std::result::Result<Self, $crate::OpenGlError> {
+                Ok(Self {
                     $(
                         $name: {
                             let addr: *const ::std::ffi::c_void = $loader;
@@ -83,7 +93,7 @@ macro_rules! gl_entry_points {
                             }
                         },
                     )*
-                }
+                })
             }
         }
 
@@ -96,7 +106,7 @@ macro_rules! gl_entry_points {
 
     (@check required $name:ident $addr:ident) => {
         if $addr.is_null() {
-            $crate::entry_points::entry_point_not_found(stringify!($name));
+            return Err($crate::entry_points::missing_entry_point(stringify!($name)));
         }
     };
     (@check optional $name:ident $addr:ident) => {};

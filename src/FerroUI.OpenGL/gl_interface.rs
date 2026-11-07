@@ -1,6 +1,6 @@
 use crate::entry_points::{gl_entry_points, or_else, GetProcAddress};
 use crate::gl_consts::*;
-use crate::{GlBasicInfoInterface, GlExtensionEntryPoint, GlMinVersionEntryPoint, GlVersion};
+use crate::{GlBasicInfoInterface, GlExtensionEntryPoint, GlMinVersionEntryPoint, GlVersion, OpenGlError};
 use std::collections::HashSet;
 use std::ffi::{c_char, c_void, CString};
 use std::ops::Deref;
@@ -22,11 +22,25 @@ impl GlContextInfo {
     ///
     /// # Safety
     /// See [`GlBasicInfoInterface::new`].
+    ///
+    /// # Panics
+    /// Panics when a required entry point cannot be resolved; see
+    /// [`GlContextInfo::try_create`].
     pub unsafe fn create(version: GlVersion, get_proc_address: &GetProcAddress) -> GlContextInfo {
         // SAFETY: the caller upholds the contract of the loader.
-        let basic_info_interface = unsafe { GlBasicInfoInterface::new(get_proc_address) };
+        unsafe { Self::try_create(version, get_proc_address) }.unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// Describes the current context, asking it for its extensions; fails when
+    /// a required entry point cannot be resolved.
+    ///
+    /// # Safety
+    /// See [`GlBasicInfoInterface::new`].
+    pub unsafe fn try_create(version: GlVersion, get_proc_address: &GetProcAddress) -> Result<GlContextInfo, OpenGlError> {
+        // SAFETY: the caller upholds the contract of the loader.
+        let basic_info_interface = unsafe { GlBasicInfoInterface::try_new(get_proc_address) }?;
         let exts = basic_info_interface.get_extensions();
-        GlContextInfo::new(version, exts.into_iter().collect())
+        Ok(GlContextInfo::new(version, exts.into_iter().collect()))
     }
 
     /// The version of the API.
@@ -286,14 +300,14 @@ gl_entry_points! {
 impl GlInterface {
     /// # Safety
     /// See [`GlBasicInfoInterface::new`].
-    unsafe fn with_info(info: GlContextInfo, get_proc_address: GetProcAddress) -> Self {
+    unsafe fn with_info(info: GlContextInfo, get_proc_address: GetProcAddress) -> Result<Self, OpenGlError> {
         // SAFETY: the caller upholds the contract of the loader.
-        let base = unsafe { GlBasicInfoInterface::new(&get_proc_address) };
+        let base = unsafe { GlBasicInfoInterface::try_new(&get_proc_address) }?;
         let version = base.get_string(GL_VERSION);
         let renderer = base.get_string(GL_RENDERER);
         let vendor = base.get_string(GL_VENDOR);
-        let gl = GlEntryPoints::load(&get_proc_address, &info);
-        Self { base, get_proc_address, version, vendor, renderer, context_info: info, gl }
+        let gl = GlEntryPoints::load(&get_proc_address, &info)?;
+        Ok(Self { base, get_proc_address, version, vendor, renderer, context_info: info, gl })
     }
 
     /// Resolves the entry points of the current context, which implements
@@ -307,11 +321,23 @@ impl GlInterface {
     /// of that implementation is current.
     ///
     /// # Panics
-    /// Panics when a required entry point cannot be resolved.
+    /// Panics when a required entry point cannot be resolved; see
+    /// [`GlInterface::try_new`].
     pub unsafe fn new(version: GlVersion, get_proc_address: GetProcAddress) -> Self {
         // SAFETY: the caller upholds the contract of the loader.
+        unsafe { Self::try_new(version, get_proc_address) }.unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// Resolves the entry points of the current context, which implements
+    /// `version` of the API; fails when a required entry point cannot be
+    /// resolved, as when the context is older than the version or lost.
+    ///
+    /// # Safety
+    /// See [`GlInterface::new`].
+    pub unsafe fn try_new(version: GlVersion, get_proc_address: GetProcAddress) -> Result<Self, OpenGlError> {
+        // SAFETY: the caller upholds the contract of the loader.
         unsafe {
-            let info = GlContextInfo::create(version, &get_proc_address);
+            let info = GlContextInfo::try_create(version, &get_proc_address)?;
             Self::with_info(info, get_proc_address)
         }
     }
@@ -531,6 +557,23 @@ impl GlInterface {
         // SAFETY: the caller upholds the contract of the loader.
         unsafe { GlInterface::new(version, loader) }
     }
+
+    /// [`GlInterface::from_native_utf8_get_proc_address`] that fails, instead
+    /// of panicking, when a required entry point cannot be resolved.
+    ///
+    /// # Safety
+    /// See [`GlInterface::from_native_utf8_get_proc_address`].
+    pub unsafe fn try_from_native_utf8_get_proc_address(
+        version: GlVersion,
+        get_proc_address: impl Fn(*const c_char) -> *const c_void + 'static,
+    ) -> Result<GlInterface, OpenGlError> {
+        let loader: GetProcAddress = Rc::new(move |s: &str| {
+            let name = Self::c_string(s);
+            get_proc_address(name.as_ptr())
+        });
+        // SAFETY: the caller upholds the contract of the loader.
+        unsafe { GlInterface::try_new(version, loader) }
+    }
 }
 
 #[cfg(test)]
@@ -588,6 +631,17 @@ mod tests {
         let fake = FakeGl::install(GlVersion::new(GlProfileType::OpenGLES, 3, 0));
         fake.remove("glBindFramebuffer");
         fake.interface();
+    }
+
+    #[test]
+    fn try_new_reports_a_missing_required_entry_point_as_an_error() {
+        let fake = FakeGl::install(GlVersion::new(GlProfileType::OpenGLES, 3, 0));
+        fake.remove("glBindFramebuffer");
+        // SAFETY: the loader of the fake resolves to functions of this crate.
+        let error = unsafe { GlInterface::try_new(fake.version(), fake.loader()) }.err().unwrap();
+
+        assert_eq!("Unable to find an entry point named 'bind_framebuffer'.", error.message());
+        assert_eq!(None, error.error_code());
     }
 
     #[test]
