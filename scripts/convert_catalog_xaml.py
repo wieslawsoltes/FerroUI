@@ -23,12 +23,15 @@ the converted text, and `REMOVALS` the lines it takes out of them (the Fluent an
 which the catalog has with its feature `classic-themes` only, in `ClassicThemes.xaml`), each with
 the reason; the conversion applies the additions and then the removals, so `--check` compares a
 document with its conversion and its changes, and fails when an anchor or a removed line is
-gone. `PORT_DOCUMENTS` lists the markup files of the catalog that are the port's own, which
+gone; `REPLACEMENTS` are lines replaced, each an addition and a removal. `LEFT_OUT_DOCUMENTS` lists
+the upstream markup files the catalog does not have (the sample applications of the NavigationPage,
+CarouselPage and DrawerPage galleries), which are not converted and which `--check` does not report
+as missing. `PORT_DOCUMENTS` lists the markup files of the catalog that are the port's own, which
 `--check` does not report as files without an upstream file. They are recorded in
 docs/porting/DEVIATIONS.md (ControlCatalog sample) and samples/ControlCatalog/GAPS.md.
 
 File names: `.axaml` becomes `.xaml`, and the upstream name in a file name is replaced as in
-rule 5 (`AvaloniaFlixAppPage.xaml` -> `FerroFlixAppPage.xaml`). Directories are kept.
+rule 5. Directories are kept.
 
 usage: convert_catalog_xaml.py <upstream sample dir> <target dir> [--check]
 
@@ -134,6 +137,32 @@ ADDITIONS += [
     ),
 ]
 
+# The lines this project replaces in converted documents: (path relative to the sample, the line of
+# the conversion, the line of the port, why). Each is an addition after the line of the conversion
+# and the removal of that line.
+REPLACEMENTS = [
+    (
+        "Pages/TextBox/TextBoxFontsPage.xaml",
+        b'                   FontFamily="ferres://ControlCatalog/Assets/Fonts#WenQuanYi Micro Hei"\n',
+        b'                   FontFamily="ferres://ControlCatalog/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf#WenQuanYi Micro Hei"\n',
+        "the CJK sample uses the CJK subset of the catalog, which covers its text; the catalog does not ship the whole font",
+    ),
+    (
+        "Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml",
+        b'        <TextBlock Text="Curved Header Shop App" FontSize="16" FontWeight="SemiBold"\n',
+        b'        <TextBlock Text="Curved Header" FontSize="16" FontWeight="SemiBold"\n',
+        "the catalog shows the control, not the shop application of the original",
+    ),
+    (
+        "Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml",
+        "          <TextBlock FontSize=\"12\" TextWrapping=\"Wrap\" Text=\"\u2022 Tap a featured card or recommended item to open the profile page\" />\n".encode(),
+        "          <TextBlock FontSize=\"12\" TextWrapping=\"Wrap\" Text=\"\u2022 Tap the button of the featured card or the avatar to open the profile page\" />\n".encode(),
+        "the content of the page is plain cards; a button of the featured card opens the profile page",
+    ),
+]
+
+ADDITIONS += [(path, line, replacement, why) for path, line, replacement, why in REPLACEMENTS]
+
 # The lines this project removes from converted documents (after the additions): (path relative to
 # the sample, the lines, why). Each is in the converted text once.
 REMOVALS = [
@@ -162,6 +191,8 @@ REMOVALS = [
     ),
 ]
 
+REMOVALS += [(path, line, why) for path, line, _replacement, why in REPLACEMENTS]
+
 # The control themes this project removes from converted documents: (path relative to the sample,
 # the key of the control theme, why). The theme is removed from the line before its `<ControlTheme`
 # (a blank line) to its `</ControlTheme>`.
@@ -178,6 +209,29 @@ REPLACED_DOCUMENTS = [
         "the shell of the catalog is a NavigationView (docs/porting/winui-controls.md), where upstream's is a drawer page",
     ),
 ]
+
+# The upstream markup files the catalog leaves out, by the start of their converted path relative to
+# the sample, with why: they are not converted, and `--check` does not report them as missing. The
+# catalog shows the controls, not sample applications built with them (their assets are left out by
+# scripts/sync-control-catalog.sh).
+LEFT_OUT_DOCUMENTS = [
+    (prefix, "a sample application of the NavigationPage gallery")
+    for prefix in ("Pages/NavigationPage/FerroFlix", "Pages/NavigationPage/LAvenir", "Pages/NavigationPage/Pulse",
+                   "Pages/NavigationPage/RetroGaming", "Pages/NavigationPage/CurvedHeaderHomeScrollView",
+                   "Pages/NavigationPage/CurvedHeaderProfileScrollView")
+] + [
+    (prefix, "a sample application of the CarouselPage gallery")
+    for prefix in ("Pages/CarouselPage/CareCompanion", "Pages/CarouselPage/CarouselGalleryApp",
+                   "Pages/CarouselPage/Sanctuary")
+] + [
+    (prefix, "a sample application of the DrawerPage gallery")
+    for prefix in ("Pages/DrawerPage/ControlsGalleryApp", "Pages/DrawerPage/EcoTracker", "Pages/DrawerPage/Modern")
+]
+
+
+def is_left_out(relative: str) -> bool:
+    return any(relative.startswith(prefix) for prefix, _why in LEFT_OUT_DOCUMENTS)
+
 
 # The markup files of the catalog that are the port's own: (path relative to the sample, why).
 PORT_DOCUMENTS = [
@@ -278,7 +332,9 @@ def main() -> int:
     for path in sorted(upstream.rglob("*")):
         relative = path.relative_to(upstream)
         if path.is_file() and is_markup(path) and not {"bin", "obj"} & set(relative.parts):
-            files.append((path, target / relative.parent / convert_name(relative.name)))
+            destination = target / relative.parent / convert_name(relative.name)
+            if not is_left_out(destination.relative_to(target).as_posix()):
+                files.append((path, destination))
 
     failed = False
     destinations = set()

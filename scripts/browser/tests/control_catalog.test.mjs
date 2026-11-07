@@ -31,7 +31,7 @@
 //   and nothing requests a bundle (`.assets`); with that prefetch off (`?PrefetchAssets=false`), opening
 //   the Container Queries page downloads exactly its files and its images have their bitmaps and are
 //   drawn, and the CJK sample of the TextBox page finds its font (the typeface the font manager resolves
-//   is WenQuanYi Micro Hei) and draws its glyphs.
+//   is WenQuanYi Micro Hei, from the subset of the start-up files) and draws its glyphs.
 //
 // The view is read through the `catalogState` export of the host (samples/ControlCatalog.Browser),
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
@@ -653,8 +653,9 @@ check("the CJK sample of the TextBox page finds its font and draws its glyphs", 
     await navigate(page, "TextBox");
     const { requests } = await fileRequests(page);
     const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name);
-    assert(manifest.pages.TextBox.includes("/Assets/Fonts/WenQuanYiMicroHei-01.ttf") && manifest.pages.TextBox.every((name) => fetched.includes(name)),
-        `the TextBox page fetched ${fetched.join(", ")}`);
+    // The sample names the CJK subset of the catalog (Assets/FallbackFonts), which is a start-up file.
+    assert(manifest.startup.includes("/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf"), "the CJK subset is not a start-up file");
+    assert(manifest.pages.TextBox.every((name) => fetched.includes(name)), `the TextBox page fetched ${fetched.join(", ")}`);
     await page.clickElement(await page.find("Fonts and Complex Scripts", inContent));
     await page.until("the sample is shown", (s) => !s.navigating && s.elements.some((e) => e.text === "Complex scripts" || (e.type === "TextBox" && inContent(e))));
     const isCjk = (e) => e.type === "TextBox" && e.text?.startsWith("计算机科学") && e.x >= DRAWER_EDGE;

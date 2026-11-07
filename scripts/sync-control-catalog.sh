@@ -56,13 +56,33 @@ TARGET="$ROOT/samples/ControlCatalog"
 
 # The assets of the upstream project file: `Assets/**`, the shared application icons linked
 # into `Assets/`, and the embedded resource `Pages/teapot.bin`.
+#
+# The upstream assets the catalog leaves out, as names of a file or a directory below `Assets/`:
+# the photographs of the sample applications of the NavigationPage, CarouselPage and DrawerPage
+# galleries, which the catalog does not have (LEFT_OUT_DOCUMENTS of scripts/convert_catalog_xaml.py),
+# and the whole CJK font, of which the catalog ships a subset (Assets/FallbackFonts,
+# scripts/fonts/catalog_fallback_fonts.py).
+LEFT_OUT="Pulse Movies Sanctuary RetroGaming CurvedHeader ModernApp Restaurant WenQuanYiMicroHei-01.ttf"
+left_out() {
+    for name in $LEFT_OUT; do
+        case "/$1/" in
+            */"$name"/*) return 0 ;;
+        esac
+    done
+    return 1
+}
+EXCLUDED=""
+for name in $LEFT_OUT; do
+    EXCLUDED="$EXCLUDED -x $name"
+done
 if [ -n "$CHECK" ]; then
     # Both halves are checked and reported before the result.
     status=0
     python3 "$ROOT/scripts/convert_catalog_xaml.py" "$SOURCE" "$TARGET" --check || status=1
     # FerroUICatalogSymbols.ttf is the port's own (scripts/winui-controls/catalog_symbol_font.py),
     # and so is FallbackFonts (scripts/fonts/catalog_fallback_fonts.py).
-    diff -r -x icon.ico -x icon-32.png -x FerroUICatalogSymbols.ttf -x FallbackFonts "$SOURCE/Assets" "$TARGET/Assets" || status=1
+    # shellcheck disable=SC2086 # EXCLUDED is a list of options.
+    diff -r -x icon.ico -x icon-32.png -x FerroUICatalogSymbols.ttf -x FallbackFonts $EXCLUDED "$SOURCE/Assets" "$TARGET/Assets" || status=1
     cmp "$UPSTREAM/build/Assets/icon.ico" "$TARGET/Assets/icon.ico" || status=1
     cmp "$UPSTREAM/build/Assets/icon-32.png" "$TARGET/Assets/icon-32.png" || status=1
     cmp "$SOURCE/Pages/teapot.bin" "$TARGET/Pages/teapot.bin" || status=1
@@ -75,7 +95,13 @@ if [ -n "$CHECK" ]; then
 else
     python3 "$ROOT/scripts/convert_catalog_xaml.py" "$SOURCE" "$TARGET"
     mkdir -p "$TARGET/Assets" "$TARGET/Pages"
-    cp -R "$SOURCE/Assets/." "$TARGET/Assets/"
+    (cd "$SOURCE/Assets" && find . -type f) | while IFS= read -r file; do
+        file="${file#./}"
+        if ! left_out "$file"; then
+            mkdir -p "$TARGET/Assets/$(dirname "$file")"
+            cp "$SOURCE/Assets/$file" "$TARGET/Assets/$file"
+        fi
+    done
     cp "$UPSTREAM/build/Assets/icon.ico" "$UPSTREAM/build/Assets/icon-32.png" "$TARGET/Assets/"
     cp "$SOURCE/Pages/teapot.bin" "$TARGET/Pages/teapot.bin"
     echo "assets copied"

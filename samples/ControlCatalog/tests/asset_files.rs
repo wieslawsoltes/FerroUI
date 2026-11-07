@@ -119,20 +119,21 @@ fn every_page_opens_only_start_up_files_and_its_own_files() {
 }
 
 /// The split leaves the photographs and fonts of the pages out of the
-/// start-up files, and makes the large CJK font a file of the pages that
-/// build the font collection of `Assets/Fonts`.
+/// start-up files, and makes the fonts of `Assets/Fonts` files of the pages
+/// that build the font collection of that directory. The CJK sample of the
+/// TextBox page names the CJK subset of the font fallbacks, a start-up file.
 #[test]
 fn the_start_up_files_are_only_what_the_start_up_needs() {
-    for asset in ["/Assets/icon.ico", "/Assets/banner-bg.png", "/Assets/logo1.png"] {
+    for asset in ["/Assets/icon.ico", "/Assets/banner-bg.png", "/Assets/logo1.png", "/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf"] {
         assert!(STARTUP_ASSETS.contains(&asset), "{asset} is not a start-up file");
     }
-    for asset in ["/Assets/Fonts/WenQuanYiMicroHei-01.ttf", "/Assets/image1.jpg", "/Assets/hirsch-899118_640.jpg"] {
+    for asset in ["/Assets/Fonts/SourceSansPro-Regular.ttf", "/Assets/image1.jpg", "/Assets/hirsch-899118_640.jpg"] {
         assert!(!STARTUP_ASSETS.contains(&asset), "{asset} is a start-up file");
     }
     let pages_of = |asset: &str| -> Vec<&str> {
         PAGE_ASSETS.iter().filter(|(_, assets)| assets.contains(&asset)).map(|(page, _)| *page).collect()
     };
-    assert_eq!(vec!["TextBlock", "TextBox"], pages_of("/Assets/Fonts/WenQuanYiMicroHei-01.ttf"));
+    assert_eq!(vec!["TextBlock", "TextBox"], pages_of("/Assets/Fonts/SourceSansPro-Regular.ttf"));
     assert_eq!(vec!["Clipboard", "Container Queries", "Drag+Drop"], pages_of("/Assets/image1.jpg"));
 }
 

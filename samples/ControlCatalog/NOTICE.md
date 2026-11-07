@@ -133,7 +133,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### WenQuanYi Micro Hei
 
-`Assets/Fonts/WenQuanYiMicroHei-01.ttf`, and its subset `Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf`. The font states "Licensed under the Apache License,
+`Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf`, a subset of WenQuanYi Micro Hei 0.2.0-beta
+(https://downloads.sourceforge.net/project/wqy/wqy-microhei/0.2.0-beta/wqy-microhei-0.2.0-beta.tar.gz)
+to the CJK characters of the catalog. The upstream sample ships the whole font
+(`Assets/Fonts/WenQuanYiMicroHei-01.ttf`, 4.5 MB); this sample ships the subset only. The font
+states "Licensed under the Apache License,
 Version 2.0" (http://www.apache.org/licenses/LICENSE-2.0) in its name table; it derives from
 Droid Sans Fallback (Copyright Google, Apache License 2.0) and is published by the WenQuanYi
 project (Copyright WenQuanYi Board of Trustees) under the Apache License 2.0 or the GPL version 3
