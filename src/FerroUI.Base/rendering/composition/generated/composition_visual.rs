@@ -119,6 +119,8 @@ impl BatchValue for CompositionVisualChangedFields {
 /// [`CompositionVisualProps`]. Every hook defaults to doing nothing.
 pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn initialize_defaults_extra(&self) {}
+    /// A direct assignment replaces whole-property and subchannel animations.
+    fn on_animated_property_assigned(&self, _property_name: &str) {}
 
     fn validate_root_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
     fn on_root_changed(&self) {}
@@ -412,6 +414,12 @@ impl CompositionVisualProps {
     pub fn set_visible(&self, host: &dyn CompositionVisualHooks, value: bool) {
         let mut changed = false;
         let old_value = self.visible.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Visible");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_visible_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::VISIBLE) & !CompositionVisualChangedFields::VISIBLE_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_visible_change(host, old_value, value);
             CompositionVisualHooks::on_visible_changing(host);
@@ -453,6 +461,12 @@ impl CompositionVisualProps {
     pub fn set_opacity(&self, host: &dyn CompositionVisualHooks, value: f32) {
         let mut changed = false;
         let old_value = self.opacity.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Opacity");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_opacity_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::OPACITY) & !CompositionVisualChangedFields::OPACITY_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_opacity_change(host, old_value, value);
             CompositionVisualHooks::on_opacity_changing(host);
@@ -519,6 +533,12 @@ impl CompositionVisualProps {
     pub fn set_clip_to_bounds(&self, host: &dyn CompositionVisualHooks, value: bool) {
         let mut changed = false;
         let old_value = self.clip_to_bounds.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "ClipToBounds");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_clip_to_bounds_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CLIP_TO_BOUNDS) & !CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_clip_to_bounds_change(host, old_value, value);
             CompositionVisualHooks::on_clip_to_bounds_changing(host);
@@ -560,6 +580,12 @@ impl CompositionVisualProps {
     pub fn set_offset(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.offset.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Offset");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_offset_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::OFFSET) & !CompositionVisualChangedFields::OFFSET_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_offset_change(host, old_value, value);
             CompositionVisualHooks::on_offset_changing(host);
@@ -601,6 +627,12 @@ impl CompositionVisualProps {
     pub fn set_translation(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.translation.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Translation");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_translation_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::TRANSLATION) & !CompositionVisualChangedFields::TRANSLATION_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_translation_change(host, old_value, value);
             CompositionVisualHooks::on_translation_changing(host);
@@ -642,6 +674,12 @@ impl CompositionVisualProps {
     pub fn set_size(&self, host: &dyn CompositionVisualHooks, value: Vector) {
         let mut changed = false;
         let old_value = self.size.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Size");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_size_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::SIZE) & !CompositionVisualChangedFields::SIZE_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_size_change(host, old_value, value);
             CompositionVisualHooks::on_size_changing(host);
@@ -683,6 +721,12 @@ impl CompositionVisualProps {
     pub fn set_anchor_point(&self, host: &dyn CompositionVisualHooks, value: Vector) {
         let mut changed = false;
         let old_value = self.anchor_point.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "AnchorPoint");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_anchor_point_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ANCHOR_POINT) & !CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_anchor_point_change(host, old_value, value);
             CompositionVisualHooks::on_anchor_point_changing(host);
@@ -724,6 +768,12 @@ impl CompositionVisualProps {
     pub fn set_center_point(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.center_point.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "CenterPoint");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_center_point_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CENTER_POINT) & !CompositionVisualChangedFields::CENTER_POINT_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_center_point_change(host, old_value, value);
             CompositionVisualHooks::on_center_point_changing(host);
@@ -765,6 +815,12 @@ impl CompositionVisualProps {
     pub fn set_rotation_angle(&self, host: &dyn CompositionVisualHooks, value: f32) {
         let mut changed = false;
         let old_value = self.rotation_angle.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "RotationAngle");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_rotation_angle_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_ANGLE) & !CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_rotation_angle_change(host, old_value, value);
             CompositionVisualHooks::on_rotation_angle_changing(host);
@@ -806,6 +862,12 @@ impl CompositionVisualProps {
     pub fn set_orientation(&self, host: &dyn CompositionVisualHooks, value: Quaternion) {
         let mut changed = false;
         let old_value = self.orientation.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Orientation");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_orientation_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ORIENTATION) & !CompositionVisualChangedFields::ORIENTATION_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_orientation_change(host, old_value, value);
             CompositionVisualHooks::on_orientation_changing(host);
@@ -847,6 +909,12 @@ impl CompositionVisualProps {
     pub fn set_scale(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.scale.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "Scale");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_scale_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::SCALE) & !CompositionVisualChangedFields::SCALE_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_scale_change(host, old_value, value);
             CompositionVisualHooks::on_scale_changing(host);
@@ -888,6 +956,12 @@ impl CompositionVisualProps {
     pub fn set_transform_matrix(&self, host: &dyn CompositionVisualHooks, value: Matrix) {
         let mut changed = false;
         let old_value = self.transform_matrix.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "TransformMatrix");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_transform_matrix_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::TRANSFORM_MATRIX) & !CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_transform_matrix_change(host, old_value, value);
             CompositionVisualHooks::on_transform_matrix_changing(host);
@@ -1129,6 +1203,12 @@ impl CompositionVisualProps {
     pub fn set_rotation_axis(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.rotation_axis.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "RotationAxis");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_AXIS) & !CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_rotation_axis_change(host, old_value, value);
             CompositionVisualHooks::on_rotation_axis_changing(host);
@@ -1170,6 +1250,12 @@ impl CompositionVisualProps {
     pub fn set_relative_offset_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
         let old_value = self.relative_offset_adjustment.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "RelativeOffsetAdjustment");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) & !CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_relative_offset_adjustment_change(host, old_value, value);
             CompositionVisualHooks::on_relative_offset_adjustment_changing(host);
@@ -1211,6 +1297,12 @@ impl CompositionVisualProps {
     pub fn set_relative_size_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector) {
         let mut changed = false;
         let old_value = self.relative_size_adjustment.get();
+        CompositionVisualHooks::on_animated_property_assigned(host, "RelativeSizeAdjustment");
+        if !old_value.differs(&value) {
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base());
+            self.changed_fields_of_composition_visual.set((self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) & !CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED);
+            host.register_for_serialization();
+        }
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_relative_size_adjustment_change(host, old_value, value);
             CompositionVisualHooks::on_relative_size_adjustment_changing(host);

@@ -41,6 +41,8 @@ mod effects;
 #[allow(unused_imports)]
 pub(crate) use effects::cpu_layer_count;
 mod fragments;
+#[cfg(feature = "media3d")]
+mod scene_3d;
 mod scene_brushes;
 
 /// Context create info.
@@ -1823,6 +1825,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
             true => Some(self),
             false => None,
         }
+    }
+
+    #[cfg(feature = "media3d")]
+    fn as_drawing_context_impl_with_scene_3d(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithScene3D> {
+        Some(self)
     }
 
     fn get_feature(&mut self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {

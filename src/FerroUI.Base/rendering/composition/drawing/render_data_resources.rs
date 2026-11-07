@@ -2,6 +2,7 @@ use super::IRenderDataGeometry;
 use crate::media::{IBrush, IPen};
 use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::composition::server::ServerObjectId;
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -32,6 +33,9 @@ pub enum RenderDataResource {
     Bitmap(Arc<crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>>),
     CustomDrawOperation(std::sync::Arc<dyn ICustomDrawOperation>),
     Effect(Arc<dyn crate::media::IImmutableEffect>),
+    /// The snapshot of a 3D scene (#608): immutable and shared, sent to the
+    /// render thread as it is.
+    Scene3D(Arc<Scene3DSnapshot>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
     ServerPen { server: ServerObjectId, client: Rc<dyn IPen> },
     ServerGeometry { server: ServerObjectId, client: Rc<dyn IRenderDataGeometry> },
@@ -52,6 +56,7 @@ enum Kind {
     Bitmap,
     Custom,
     Effect,
+    Scene3D,
     Server,
 }
 
@@ -71,6 +76,7 @@ impl RenderDataResource {
             RenderDataResource::Bitmap(v) => (Kind::Bitmap, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Effect(v) => (Kind::Effect, Arc::as_ptr(v) as *const () as usize),
+            RenderDataResource::Scene3D(v) => (Kind::Scene3D, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::ServerBrush { server, .. }
             | RenderDataResource::ServerPen { server, .. }
             | RenderDataResource::ServerGeometry { server, .. } => (Kind::Server, server.index()),
@@ -180,6 +186,13 @@ impl RenderDataResources {
         match self.get(handle)? {
             RenderDataResource::Effect(effect) => Some(effect),
             _ => panic!("the render data resource is not an effect"),
+        }
+    }
+
+    pub fn scene_3d(&self, handle: i32) -> Option<&Arc<Scene3DSnapshot>> {
+        match self.get(handle)? {
+            RenderDataResource::Scene3D(scene) => Some(scene),
+            _ => panic!("the render data resource is not a 3D scene"),
         }
     }
 

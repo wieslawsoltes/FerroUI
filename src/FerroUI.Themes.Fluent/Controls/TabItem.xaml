@@ -45,7 +45,7 @@
             <Border Name="PART_SelectedPipe"
                     Background="{DynamicResource TabItemHeaderSelectedPipeFill}"
                     CornerRadius="{DynamicResource ControlCornerRadius}"
-                    IsVisible="False"/>
+                    Opacity="0"/>
           </Panel>
         </Border>
       </ControlTemplate>
@@ -62,7 +62,7 @@
       <Setter Property="Foreground" Value="{DynamicResource TabItemHeaderForegroundSelected}" />
     </Style>
     <Style Selector="^:selected /template/ Border#PART_SelectedPipe">
-      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Opacity" Value="1" />
     </Style>
 
     <!--  PointerOver state  -->

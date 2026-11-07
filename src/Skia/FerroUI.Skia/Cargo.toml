@@ -25,6 +25,9 @@ ferroui-opengl.workspace = true
 ferroui-metal.workspace = true
 ferroui-vulkan.workspace = true
 skia-safe.workspace = true
+# The CPU reference of 3D scenes (`Viewport3D`, #608), drawn as an image until the backend has a GPU
+# executor (feature `media3d`).
+ferroui-render3d = { workspace = true, optional = true }
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
@@ -95,6 +98,11 @@ native-frame-tests = []
 # and on Apple targets there is none, and the bindings then compile Skia from source
 # (docs/porting/vulkan.md, section 2).
 vulkan = ["skia-safe/vulkan", "skia-safe/ganesh"]
+# 3D scenes (`DrawScene3D` of `Viewport3D`, #608, docs/porting/media3d.md): drawn by the CPU reference
+# of `ferroui-render3d` as an image, on a GPU surface counted as the last resort. Off by default, so
+# an application without 3D links none of it; the facade's `media3d` turns it on. Without it a
+# scene draws nothing and is counted (`rendering::scene3d::scenes_not_drawn`).
+media3d = ["dep:ferroui-render3d"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

@@ -317,14 +317,14 @@ impl Visual {
         if rotation.is_some() || rotation_axis.is_some() {
             let (angle, orientation) =
                 rotation_to_composition(rotation.unwrap_or(0.0), rotation_axis.unwrap_or(Vector3::UNIT_Z));
-            comp.set_rotation_angle(angle);
-            comp.set_orientation(orientation);
+            if comp.rotation_angle() != angle { comp.set_rotation_angle(angle); }
+            if comp.orientation() != orientation { comp.set_orientation(orientation); }
         }
         if let Some(scale) = scale {
-            comp.set_scale(scale.into());
+            if comp.scale() != scale.into() { comp.set_scale(scale.into()); }
         }
         if let Some(center_point) = center_point {
-            comp.set_center_point(center_point.into());
+            if comp.center_point() != center_point.into() { comp.set_center_point(center_point.into()); }
         }
     }
 

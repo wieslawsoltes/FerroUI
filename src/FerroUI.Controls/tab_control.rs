@@ -5,6 +5,7 @@ use crate::primitives::{
     SelectingItemsControl, SelectingItemsControlImpl, SelectingItemsControlImplExt, TemplateAppliedEventArgs,
     TemplatedControlImpl,
 };
+use crate::selection_indicator_animation::SelectionIndicatorAnimation;
 use crate::templates::{FuncTemplate, IDataTemplate, ITemplateOf};
 use crate::{
     ContentControl, Control, ControlImpl, Dock, ItemsControl, ItemsControlImpl, ItemsControlImplExt, Panel,
@@ -19,7 +20,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty, FerroObject,
@@ -47,6 +48,8 @@ pub struct TabControl {
     current_transition: RefCell<Option<Rc<CancellationToken>>>,
     should_animate: Cell<bool>,
     pending_forward: Cell<bool>,
+    indicator_animation: SelectionIndicatorAnimation,
+    indicator_layout: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -94,7 +97,27 @@ impl FerroObjectImpl for TabControl {
 }
 
 impl VisualImpl for TabControl {
+    fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_attached_to_visual_tree(this, e);
+        let weak = this.to_ref().downgrade();
+        *this.indicator_layout.borrow_mut() = Some(this.layout_updated(move || {
+            if let Some(owner) = weak.upgrade() {
+                let indicator = owner
+                    .container_from_index(owner.selected_index())
+                    .and_then(|container| container.cast::<TabItem>())
+                    .and_then(|item| item.selection_indicator());
+                owner.indicator_animation.update(
+                    &owner,
+                    indicator,
+                    matches!(owner.tab_strip_placement(), Dock::Top | Dock::Bottom),
+                );
+            }
+        }));
+    }
+
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        this.indicator_layout.take();
+        this.indicator_animation.clear();
         Self::parent_on_detached_from_visual_tree(this, e);
 
         if let Some(current_transition) = this.current_transition.take() {
@@ -129,6 +152,7 @@ impl LayoutableImpl for TabControl {
 
 impl TemplatedControlImpl for TabControl {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
+        this.indicator_animation.clear();
         let items_presenter_part = e.name_scope().find_as::<ItemsPresenter>("PART_ItemsPresenter");
         *this.items_presenter_part.borrow_mut() = items_presenter_part.clone();
         if let Some(items_presenter_part) = &items_presenter_part {
@@ -359,6 +383,8 @@ impl TabControl {
             current_transition: RefCell::new(None),
             should_animate: Cell::new(false),
             pending_forward: Cell::new(false),
+            indicator_animation: SelectionIndicatorAnimation::default(),
+            indicator_layout: RefCell::new(None),
         }
     }
 
@@ -474,6 +500,7 @@ impl TabControl {
     }
 
     fn update_selected_content(&self, container: Option<Ref<Control>>) {
+        self.invalidate_arrange();
         if let Some(subscriptions) = self.selected_item_subscriptions.take() {
             subscriptions.dispose();
         }

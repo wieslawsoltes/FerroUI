@@ -16101,7 +16101,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_295_THEME: rt::ControlThemeTa
             line: 64,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_120, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(1.0_f64) }),
             ],
         },
         rt::StyleMember::Style {
@@ -32533,9 +32533,9 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabItemHeaderSelectedPipeFill", 46, 21)?;
     // Controls/FluentControls.xaml(47,21) CornerRadius
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 47, 21)?;
-    // Controls/FluentControls.xaml(45,14) IsVisible
+    // Controls/FluentControls.xaml(45,14) Opacity
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_1);
+    border_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_1);
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 45, 14)?;
     context.pop_parent();

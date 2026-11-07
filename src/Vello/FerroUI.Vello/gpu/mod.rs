@@ -14,6 +14,8 @@ pub(crate) mod effect_passes;
 pub mod external_objects;
 mod i_vello_gpu;
 pub(crate) mod shared_frame;
+#[cfg(feature = "media3d")]
+pub mod scene3d_passes;
 #[cfg(target_os = "macos")]
 pub mod metal;
 #[cfg(target_os = "macos")]
@@ -28,6 +30,8 @@ pub mod window_surface;
 
 pub use device_surface_render_target::DeviceSurfaceRenderTarget;
 pub use shared_frame::VelloSharedFrameBitmap;
+#[cfg(feature = "media3d")]
+pub use scene3d_passes::{scene3d_counters, VelloScene3DCounters};
 pub use i_vello_gpu::{create_window_scene_sink, window_rendering_mode, IVelloGpu};
 pub use vello_wgpu_device::{VelloWgpuDevice, VelloWgpuDeviceError};
 

@@ -131,6 +131,7 @@ mod i_drawing_context_impl_with_effects;
 mod gpu_effects;
 mod i_drawing_context_impl_with_fragments;
 mod i_drawing_context_impl_with_layer_effects;
+mod i_drawing_context_impl_with_scene_3d;
 mod i_drawing_context_with_acrylic_like_support;
 mod i_runtime_platform;
 mod internal;
@@ -148,6 +149,7 @@ pub use i_drawing_context_impl_with_fragments::{
 pub use i_drawing_context_impl_with_layer_effects::{
     IDrawingContextImplWithLayerEffects, MultiplyLayerFactors,
 };
+pub use i_drawing_context_impl_with_scene_3d::IDrawingContextImplWithScene3D;
 pub use i_drawing_context_with_acrylic_like_support::IDrawingContextWithAcrylicLikeSupport;
 pub use i_runtime_platform::{FormFactorType, IRuntimePlatform, RuntimePlatformInfo};
 pub use internal::{register_assets, register_manifest_resources};
