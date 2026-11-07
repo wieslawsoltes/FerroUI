@@ -155,17 +155,18 @@
 //!
 //! # Theme trimming
 //!
-//! An application whose manifest opts in (`[package.metadata.ferroui] theme-trimming = true`)
-//! constructs the themes its documents construct (`<WinUITheme />`) from the units of their
+//! An application (unless its manifest turns it off: `[package.metadata.ferroui]
+//! theme-trimming = false`) constructs the themes its documents construct (`<WinUITheme />`) from the units of their
 //! compiled markup it needs (#568, step 3 of docs/porting/theme-trimming.md). The emitter writes
 //! the construction as `WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`;
 //! after every group is compiled, the build computes the units from the roots of the documents,
 //! the names and string literals of the Rust sources of the crate (step 4), `theme-roots` and
 //! [`Build::theme_roots`] ([`theme_roots`]), with the classes the code of each live class creates
 //! (the creates edges of the type models), and writes the table into `compiled_markup`, whose
-//! `register()` registers it for loads of the theme by URI. A build with
-//! the tables of types (`DEP_FERROUI_BASE_XAML_TYPE_TABLES`) keeps every unit. Without the opt-in
-//! nothing of this is written.
+//! `register()` registers it for loads of the theme by URI. The compiled documents of the
+//! dependencies root what they name (the `references` of their `.xamlmeta`). A build that links
+//! what can show any control (`ferroui-base/full-themes`, `DEP_FERROUI_BASE_XAML_FULL_THEMES`)
+//! keeps every unit. With the trimming off nothing of this is written.
 //!
 //! # The GLSL of the runtime shader effects
 //!
@@ -206,7 +207,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::AssemblyModel;
+use crate::model::{AssemblyModel, MarkupReferencesModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -227,13 +228,15 @@ pub const DEFAULT_MODULE: &str = "compiled_xaml";
 pub const XAMLMETA_VARIABLE: &str = "FERROUI_XAMLMETA";
 
 /// The variable Cargo sets for the build script of a crate that depends on `ferroui-base` when
-/// the base crate is built with its feature `type-tables` (its `cargo::metadata=type_tables=1`):
-/// something in the build looks types up by name, and every unit of the themes is kept (#568).
-pub const TYPE_TABLES_VARIABLE: &str = "DEP_FERROUI_BASE_XAML_TYPE_TABLES";
+/// the base crate is built with its feature `full-themes` (its `cargo::metadata=full_themes=1`):
+/// something in the build can show a control that no compiled document and no source names (the
+/// run-time loader, hot reload, the designer, DevTools, Inspect), and every unit of the themes is
+/// kept (#568).
+pub const FULL_THEMES_VARIABLE: &str = "DEP_FERROUI_BASE_XAML_FULL_THEMES";
 
-/// The `cfg` a crate whose compiled markup has units is built with when the tables of types are
-/// linked ([`TYPE_TABLES_VARIABLE`]): its loads by URI then apply every unit (#568, step 3).
-pub const TYPE_TABLES_CFG: &str = "ferroui_type_tables";
+/// The `cfg` a crate whose compiled markup has units is built with when the base crate has
+/// `full-themes` ([`FULL_THEMES_VARIABLE`]): its loads by URI then apply every unit (#568, step 3).
+pub const FULL_THEMES_CFG: &str = "ferroui_full_themes";
 
 /// A group of documents that are compiled together into one module: the group
 /// transformers see every document of it, so includes between them are linked, as
@@ -342,7 +345,7 @@ pub struct Build {
     default_compile_bindings: bool,
     analyzer_config_files: Vec<PathBuf>,
     warnings_as_errors: bool,
-    type_tables: bool,
+    full_themes: bool,
     theme_roots: Roots,
 }
 
@@ -361,7 +364,7 @@ impl Build {
             &variable("CARGO_PKG_NAME").to_string_lossy(),
             ferroui_build_scan::export::dependencies_from_env(),
         )
-        .type_tables(env::var_os(TYPE_TABLES_VARIABLE).is_some())
+        .full_themes(env::var_os(FULL_THEMES_VARIABLE).is_some())
     }
 
     /// The build of the package `package_name` in `manifest_dir`, writing below `out_dir`,
@@ -386,23 +389,23 @@ impl Build {
             default_compile_bindings: false,
             analyzer_config_files: Vec::new(),
             warnings_as_errors: false,
-            type_tables: false,
+            full_themes: false,
             theme_roots: Roots::default(),
         }
     }
 
-    /// Whether the tables of types are linked into the build ([`TYPE_TABLES_VARIABLE`], which
+    /// Whether the base crate has `full-themes` in this build ([`FULL_THEMES_VARIABLE`], which
     /// [`from_env`](Self::from_env) reads): a crate whose compiled markup has units is then built
-    /// with the `cfg` [`TYPE_TABLES_CFG`], and an application that trims its themes keeps every
+    /// with the `cfg` [`FULL_THEMES_CFG`], and an application that trims its themes keeps every
     /// unit (#568, step 3).
-    pub fn type_tables(mut self, value: bool) -> Self {
-        self.type_tables = value;
+    pub fn full_themes(mut self, value: bool) -> Self {
+        self.full_themes = value;
         self
     }
 
     /// Roots of the themes the application trims, beside its documents and the `theme-roots` of
     /// its manifest (#568, step 3): units by the path of their document, types or keys. Nothing
-    /// without the opt-in of the manifest (`[package.metadata.ferroui] theme-trimming = true`).
+    /// when the manifest turns the trimming off (`[package.metadata.ferroui] theme-trimming = false`).
     pub fn theme_roots(mut self, names: &[&str]) -> Self {
         self.theme_roots.names.extend(names.iter().map(|name| name.to_string()));
         self
@@ -605,8 +608,8 @@ impl Build {
             }
         };
 
-        // The trimming of the themes the documents construct (#568, step 3): the opt-in and the
-        // roots of the manifest.
+        // The trimming of the themes the documents construct (#568, step 3; on by default): the
+        // switch and the roots of the manifest.
         let manifest = self.manifest_dir.join("Cargo.toml");
         let trimming = match fs::read_to_string(&manifest) {
             Ok(text) => match ThemeTrimming::from_manifest(&text) {
@@ -770,6 +773,7 @@ impl Build {
             documents: Vec::new(),
             dependencies: self.dependencies.iter().map(|path| path.display().to_string()).collect(),
             theme_units: Vec::new(),
+            references: MarkupReferencesModel::default(),
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
@@ -804,13 +808,13 @@ impl Build {
                 }
             };
             let borrowed: Vec<(&str, &str)> = documents.iter().map(|(name, xaml)| (name.as_str(), xaml.as_str())).collect();
-            // What the documents name that roots the units of the themes (#568, step 3).
-            if theme_parts.is_some() {
-                for (_, xaml) in &documents {
-                    if let Some(references) = document_references(xaml) {
-                        document_roots.types.extend(references.types);
-                        document_roots.keys.extend(references.keys);
-                    }
+            // What the documents name that roots the units of the themes (#568, step 3): the
+            // roots of an application that trims, and what the `.xamlmeta` of a crate without
+            // units states for the applications that depend on it.
+            for (_, xaml) in &documents {
+                if let Some(references) = document_references(xaml) {
+                    document_roots.types.extend(references.types);
+                    document_roots.keys.extend(references.keys);
                 }
             }
             let path = xaml_directory.join(format!("{}.rs", group.module));
@@ -962,18 +966,25 @@ impl Build {
         // and of the sources, with the base classes and the creates edges of the type models.
         let mut parts_tables: Vec<PartsTable> = Vec::new();
         if let Some(theme_parts) = &theme_parts {
-            lines.push(format!("cargo::rerun-if-env-changed={TYPE_TABLES_VARIABLE}"));
-            let mut roots = document_roots;
+            lines.push(format!("cargo::rerun-if-env-changed={FULL_THEMES_VARIABLE}"));
+            let mut roots = document_roots.clone();
             roots.names.extend(trimming.roots.iter().cloned());
             roots.all |= trimming.all;
             roots.extend(self.theme_roots.clone());
+            // The compiled documents of the dependencies run in the application too: what they
+            // name roots the units it keeps (a control library's template naming a key of the
+            // theme of the application).
+            for dependency in &dependencies {
+                roots.types.extend(dependency.references.types.iter().cloned());
+                roots.keys.extend(dependency.references.keys.iter().cloned());
+            }
             let graph = TypeGraph::from_models(&base_models);
             roots.extend(source_roots(&source_references, dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()), &graph));
             for class in theme_parts.used() {
                 let Some(units) = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()).find(|units| units.class == class) else {
                     continue;
                 };
-                let kept = kept_units(units, &roots, &graph, self.type_tables);
+                let kept = kept_units(units, &roots, &graph, self.full_themes);
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: parts_static_name(&class),
@@ -992,9 +1003,17 @@ impl Build {
                 .collect();
             write_if_changed(&xaml_directory.join("theme_parts.txt"), &listing, &mut errors);
         }
-        // A crate whose compiled markup has units is built with the `cfg` of the tables of types
-        // when they are linked (#568, step 3).
+        // A crate whose compiled markup has units is built with the `cfg` of `full-themes` when
+        // the base crate has it (#568, step 3).
         let has_theme_units = !metadata.theme_units.is_empty();
+        // What the compiled documents of a crate without units name, for the applications that
+        // trim (#568). The documents of a theme are rooted through its unit graph instead.
+        if !has_theme_units {
+            metadata.references = MarkupReferencesModel {
+                types: document_roots.types.iter().cloned().collect(),
+                keys: document_roots.keys.iter().cloned().collect(),
+            };
+        }
 
         // 4. The `.xamlmeta` (with the type model of the crate, when it was scanned) and
         // the file the crate includes.
@@ -1006,6 +1025,7 @@ impl Build {
                 model.documents = metadata.documents;
                 model.dependencies = metadata.dependencies;
                 model.theme_units = metadata.theme_units;
+                model.references = metadata.references;
                 model.to_json()
             }
             None => metadata.to_json(),
@@ -1036,10 +1056,10 @@ impl Build {
         lines.push(format!("cargo::metadata=xamlmeta={}", metadata_path.display()));
         lines.push(format!("cargo::rustc-env={XAMLMETA_VARIABLE}={}", metadata_path.display()));
         if has_theme_units {
-            lines.push(format!("cargo::rustc-check-cfg=cfg({TYPE_TABLES_CFG})"));
-            lines.push(format!("cargo::rerun-if-env-changed={TYPE_TABLES_VARIABLE}"));
-            if self.type_tables {
-                lines.push(format!("cargo::rustc-cfg={TYPE_TABLES_CFG}"));
+            lines.push(format!("cargo::rustc-check-cfg=cfg({FULL_THEMES_CFG})"));
+            lines.push(format!("cargo::rerun-if-env-changed={FULL_THEMES_VARIABLE}"));
+            if self.full_themes {
+                lines.push(format!("cargo::rustc-cfg={FULL_THEMES_CFG}"));
             }
         }
         Outcome { lines, errors }

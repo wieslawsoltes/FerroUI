@@ -8,9 +8,6 @@ use std::{
 mod ffi {
     include!(concat!(env!("OUT_DIR"), "/locale_icu.rs"));
 }
-#[cfg(target_os = "emscripten")]
-#[path = "icu_data.rs"]
-mod data;
 
 struct Handle(NonNull<c_void>);
 impl Drop for Handle {
@@ -58,8 +55,6 @@ pub(super) struct Collator {
 }
 impl Collator {
     pub(super) fn new(locale: &str) -> Result<Self, CollationError> {
-        #[cfg(target_os = "emscripten")]
-        data::install()?;
         let locale = CString::new(locale).map_err(|_| CollationError::InvalidLocale)?;
         Ok(Self {
             sensitive: open(&locale, 2)?,

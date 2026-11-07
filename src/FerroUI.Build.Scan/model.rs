@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
+pub use crate::xaml_metadata::{DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -1238,6 +1238,8 @@ pub struct AssemblyModel {
     pub dependencies: Vec<String>,
     /// The units of the compiled themes of the classes of the crate (#568).
     pub theme_units: Vec<ThemeUnitsModel>,
+    /// What the compiled documents of the crate name, for a crate without theme units (#568).
+    pub references: MarkupReferencesModel,
 }
 
 impl AssemblyModel {
@@ -1262,6 +1264,7 @@ impl AssemblyModel {
             documents: Vec::new(),
             dependencies: Vec::new(),
             theme_units: Vec::new(),
+            references: MarkupReferencesModel::default(),
         }
     }
 
@@ -1271,6 +1274,7 @@ impl AssemblyModel {
         model.documents = metadata.documents;
         model.dependencies = metadata.dependencies;
         model.theme_units = metadata.theme_units;
+        model.references = metadata.references;
         model
     }
 
@@ -1282,6 +1286,7 @@ impl AssemblyModel {
             documents: self.documents.clone(),
             dependencies: self.dependencies.clone(),
             theme_units: self.theme_units.clone(),
+            references: self.references.clone(),
         }
     }
 
@@ -1370,7 +1375,9 @@ impl AssemblyModel {
                 Json::Array(vec![Json::string(&exported.name), Json::Array(rules)])
             })
             .list("functions", &self.functions, FunctionsModel::to_json)
-            .list("theme_units", &self.theme_units, theme_units_to_json);
+            .list("theme_units", &self.theme_units, theme_units_to_json)
+            .list("referenced_types", &self.references.types, |name| Json::string(name))
+            .list("referenced_keys", &self.references.keys, |name| Json::string(name));
         Json::object(members).to_text()
     }
 
@@ -1446,6 +1453,10 @@ impl AssemblyModel {
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
             theme_units: fields.list("theme_units", theme_units_from_json)?,
+            references: MarkupReferencesModel {
+                types: fields.list("referenced_types", |name| text_of(name, "a referenced type"))?,
+                keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
+            },
         })
     }
 }

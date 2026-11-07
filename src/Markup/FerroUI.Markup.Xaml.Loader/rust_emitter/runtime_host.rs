@@ -261,6 +261,7 @@ mod tests {
             documents: vec![document("Style.xaml", true), document("Internal/Style.xaml", false)],
             dependencies: Vec::new(),
             theme_units: Vec::new(),
+            references: Default::default(),
         }
     }
 

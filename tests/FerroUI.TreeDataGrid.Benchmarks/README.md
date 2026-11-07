@@ -19,6 +19,10 @@ by the virtualization of the grid:
 Each scenario runs for the classic columns of the control crate and for the framework-neutral
 columns of the core where the reference has the parameter `NeutralSource`.
 
+The same scenarios compared with the tables of GPUI (gpui-component's `DataTable` and `Tree`, and a
+table on GPUI's `uniform_list`) are in
+[`../FerroUI.TreeDataGrid.GpuiComparison`](../FerroUI.TreeDataGrid.GpuiComparison/README.md).
+
 ## Layout
 
 One Rust file per reference file, in snake case. A benchmark class is a struct: its `new` is the

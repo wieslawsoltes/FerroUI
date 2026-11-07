@@ -1,0 +1,3 @@
+# gpui-pre 0.3.11 uses library features stabilized after the repository's minimum Rust.
+[toolchain]
+channel = "1.99.0"
