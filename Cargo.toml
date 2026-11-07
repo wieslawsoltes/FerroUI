@@ -1,8 +1,10 @@
 [workspace]
 resolver = "2"
 # Detachable native keyboard workspace, consumed through ordinary path dependencies; the
-# patched skia-bindings (external/rust-skia-bindings) is not a member either.
-exclude = ["components/FerroBoard", "external/rust-skia-bindings"]
+# patched skia-bindings (external/rust-skia-bindings) is not a member either. The comparison of
+# the TreeDataGrid with GPUI tables is a workspace of its own too, so that no GPUI crate enters
+# this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
+exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison"]
 members = [
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",

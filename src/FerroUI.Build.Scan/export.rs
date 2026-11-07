@@ -379,7 +379,7 @@ mod tests {
             populate_path: Some("::dependent::compiled_xaml::populate".to_string()),
             public: true,
         };
-        let mut metadata = XamlMetadata { name: "dependent".to_string(), crate_name: "dependent".to_string(), documents: vec![document.clone()], dependencies: Vec::new(), theme_units: Vec::new() };
+        let mut metadata = XamlMetadata { name: "dependent".to_string(), crate_name: "dependent".to_string(), documents: vec![document.clone()], dependencies: Vec::new(), theme_units: Vec::new(), references: Default::default() };
         fs::write(&checked_in, metadata.to_json()).expect("the checked-in file");
         let with_documents = || {
             Export::new(fixtures().join("dependent"), out.join("documents"), "dependent", vec![file.clone()])

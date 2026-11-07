@@ -210,9 +210,9 @@ fn the_table_lists_every_unit_with_its_runs() {
     assert!(table.contains("pub static AMBIENT_THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0];\n"), "{table}");
     assert!(table.contains("pub const THEME_CLASS: &str = \"Tests.Theme\";\n"), "{table}");
     assert!(table.contains("fn active_theme_units() -> rt::ThemeParts {\n    rt::active_theme_units(THEME_CLASS)\n}\n"), "{table}");
-    assert!(table.contains("#[cfg(ferroui_type_tables)]\npub fn registered_theme_units() -> rt::ThemeParts {\n    THEME_UNITS\n}\n"), "{table}");
+    assert!(table.contains("#[cfg(ferroui_full_themes)]\npub fn registered_theme_units() -> rt::ThemeParts {\n    THEME_UNITS\n}\n"), "{table}");
     assert!(
-        table.contains("#[cfg(not(ferroui_type_tables))]\npub fn registered_theme_units() -> rt::ThemeParts {\n    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n}\n"),
+        table.contains("#[cfg(not(ferroui_full_themes))]\npub fn registered_theme_units() -> rt::ThemeParts {\n    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n}\n"),
         "{table}"
     );
     assert!(table.ends_with("#[cfg(debug_assertions)]\npub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&[], &[\"Button\"], &[]];\n"), "{table}");

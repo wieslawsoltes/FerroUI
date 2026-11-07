@@ -31557,16 +31557,16 @@ fn active_theme_units() -> rt::ThemeParts {
 }
 
 /// The units a load by URI and the constructors of the type information apply (#568, step 3):
-/// every unit, since the tables of types are linked (`ferroui-base/type-tables`: the run-time
-/// loader, hot reload, the designer, DevTools).
-#[cfg(ferroui_type_tables)]
+/// every unit, since the build links what can show any control (`ferroui-base/full-themes`:
+/// the run-time loader, hot reload, the designer, DevTools, Inspect).
+#[cfg(ferroui_full_themes)]
 pub fn registered_theme_units() -> rt::ThemeParts {
     THEME_UNITS
 }
 
 /// The units a load by URI and the constructors of the type information apply (#568, step 3):
 /// the parts the application registered, else the ambient unit.
-#[cfg(not(ferroui_type_tables))]
+#[cfg(not(ferroui_full_themes))]
 pub fn registered_theme_units() -> rt::ThemeParts {
     rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)
 }

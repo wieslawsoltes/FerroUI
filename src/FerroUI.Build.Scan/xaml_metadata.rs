@@ -56,7 +56,9 @@
 //!         }
 //!       ]
 //!     }
-//!   ]
+//!   ],
+//!   "referenced_types": ["Border", "Button"],         only for a crate without units whose
+//!   "referenced_keys": ["ButtonBackground"]            documents name something (#568)
 //! }
 //! ```
 //!
@@ -114,6 +116,25 @@ pub struct ThemeUnitModel {
     pub types: Vec<String>,
 }
 
+/// What the compiled documents of a crate without theme units name that can root the units of
+/// a theme (#568): the types they construct or select and the tokens that may spell a key, by
+/// local name, sorted. An application that trims its themes roots what the documents of its
+/// dependencies name, since those documents run in it.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct MarkupReferencesModel {
+    /// The local names of the types the documents construct or select.
+    pub types: Vec<String>,
+    /// What may name a key: keys and the identifier tokens of the documents.
+    pub keys: Vec<String>,
+}
+
+impl MarkupReferencesModel {
+    /// Whether the documents name nothing.
+    pub fn is_empty(&self) -> bool {
+        self.types.is_empty() && self.keys.is_empty()
+    }
+}
+
 /// The units of the compiled theme of a class (#568).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ThemeUnitsModel {
@@ -142,6 +163,9 @@ pub struct XamlMetadata {
     /// The units of the compiled themes of the classes of the crate (#568), in the order of the
     /// compilation; empty for a crate without them.
     pub theme_units: Vec<ThemeUnitsModel>,
+    /// What the compiled documents of the crate name, for a crate without theme units (#568);
+    /// empty otherwise.
+    pub references: MarkupReferencesModel,
 }
 
 impl XamlMetadata {
@@ -175,6 +199,12 @@ impl XamlMetadata {
             }
             text.push_str("\n  ]");
         }
+        for (name, items) in [("referenced_types", &self.references.types), ("referenced_keys", &self.references.keys)] {
+            if !items.is_empty() {
+                let items: Vec<String> = items.iter().map(|item| json_string(item)).collect();
+                text.push_str(&format!(",\n  \"{name}\": [{}]", items.join(", ")));
+            }
+        }
         text.push_str("\n}\n");
         text
     }
@@ -207,12 +237,20 @@ impl XamlMetadata {
             Some((_, value)) => value.array("theme_units")?.iter().map(read_theme_units).collect::<Result<Vec<_>, String>>()?,
             None => Vec::new(),
         };
+        let strings = |name: &str| -> Result<Vec<String>, String> {
+            match object.iter().find(|(key, _)| key == name) {
+                Some((_, value)) => value.array(name)?.iter().map(|item| item.string(name).map(str::to_string)).collect(),
+                None => Ok(Vec::new()),
+            }
+        };
+        let references = MarkupReferencesModel { types: strings("referenced_types")?, keys: strings("referenced_keys")? };
         Ok(Self {
             name: field(object, "name")?.string("name")?.to_string(),
             crate_name: field(object, "crate_name")?.string("crate_name")?.to_string(),
             documents,
             dependencies,
             theme_units,
+            references,
         })
     }
 
@@ -575,11 +613,12 @@ mod tests {
             ],
             dependencies: vec!["../Other/compiled_xaml.xamlmeta".to_string()],
             theme_units: Vec::new(),
+            references: MarkupReferencesModel::default(),
         };
         let text = metadata.to_json();
         assert!(!text.contains("theme_units"), "a crate without units writes no units");
         assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
-        let empty = XamlMetadata { name: "A".into(), crate_name: "a".into(), documents: Vec::new(), dependencies: Vec::new(), theme_units: Vec::new() };
+        let empty = XamlMetadata { name: "A".into(), crate_name: "a".into(), documents: Vec::new(), dependencies: Vec::new(), theme_units: Vec::new(), references: MarkupReferencesModel::default() };
         assert_eq!(XamlMetadata::parse(&empty.to_json()), Ok(empty));
     }
 
@@ -609,6 +648,7 @@ mod tests {
                 },
                 ThemeUnitsModel { class: "Fixture.Other".to_string(), table_path: "::fixture::other::THEME_UNITS".to_string(), units: Vec::new() },
             ],
+            references: MarkupReferencesModel::default(),
         };
         let text = metadata.to_json();
         assert!(text.contains("\n          \"index\": 1,\n"), "{text}");
@@ -617,6 +657,28 @@ mod tests {
             XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": [], "theme_units": [{"class": "C", "table_path": "p", "units": [{"name": "u", "index": -1, "documents": [], "keys": [], "type_keys": [], "references": [], "types": []}]}]}"#),
             Err("index is not an unsigned integer".to_string())
         );
+    }
+
+    /// Not from upstream: what the documents of a crate without units name (#568) is read back
+    /// as it was written, and a file without it reads as one that names nothing.
+    #[test]
+    fn markup_references_round_trip_through_the_text() {
+        let metadata = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel {
+                types: vec!["Border".to_string(), "ThicknessTransition".to_string()],
+                keys: vec!["SplitViewPaneAnimationEasing".to_string(), "Key \"quoted\"".to_string()],
+            },
+        };
+        let text = metadata.to_json();
+        assert!(text.contains("\n  \"referenced_types\": [\"Border\", \"ThicknessTransition\"]"), "{text}");
+        assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
+        let plain = XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": []}"#).expect("a file without references");
+        assert!(plain.references.is_empty());
     }
 
     /// Not from upstream: escapes and errors of the reader.

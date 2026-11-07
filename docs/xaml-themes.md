@@ -257,8 +257,8 @@ application's setting, so it binds the same way.
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
-| Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | In review |
-| Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | In review |
+| Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
+| Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568 | Written, being built and validated |
 | Units for the Material theme (step 6) | #568, #603 | Planned |
 | Compiled bindings in all themes | #603 | Planned |

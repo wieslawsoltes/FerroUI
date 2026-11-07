@@ -281,7 +281,9 @@ impl Options {
         }
     }
 
-    fn matches(&self, descriptor: &Descriptor) -> bool {
+    /// Whether the filter selects `descriptor` (every benchmark without a
+    /// filter).
+    pub fn matches(&self, descriptor: &Descriptor) -> bool {
         if self.filter.is_empty() {
             return true;
         }
@@ -529,7 +531,38 @@ pub fn run_with(register: RegisterFn, options: &Options) {
     assert!(failed == 0, "{failed} benchmarks failed");
 }
 
-fn format_time(nanoseconds: f64) -> String {
+/// Measures the benchmarks `register` registers that `options` selects, each
+/// on a thread of its own as [`run_with`] does, prints a line for each as it
+/// ends, and returns their descriptors with what was measured, in the order
+/// of registration. For runners that print a table of their own, such as a
+/// comparison of the same scenario on several targets; `options.list` is
+/// not read here.
+pub fn measure_selected(register: RegisterFn, options: &Options) -> Vec<(Descriptor, Result<Measurement, String>)> {
+    let descriptors = descriptors_of(register);
+    let mut results = Vec::new();
+    for (index, descriptor) in descriptors.iter().enumerate() {
+        if !options.matches(descriptor) {
+            continue;
+        }
+        let thread_options = options.clone();
+        let result = on_benchmark_thread(register, index, move |entry| measure(entry, &thread_options));
+        match &result {
+            Ok(measurement) => println!(
+                "  {}: {} ({} invocations an iteration)",
+                descriptor.full_name(),
+                format_time(measurement.mean()),
+                measurement.invocations
+            ),
+            Err(message) => println!("  {}: FAILED: {message}", descriptor.full_name()),
+        }
+        results.push((descriptor.clone(), result));
+    }
+    results
+}
+
+/// A time in nanoseconds with the unit that suits it (`ns`, `us`, `ms`, `s`),
+/// as the tables print it.
+pub fn format_time(nanoseconds: f64) -> String {
     if nanoseconds < 1_000.0 {
         format!("{nanoseconds:.2} ns")
     } else if nanoseconds < 1_000_000.0 {
@@ -541,7 +574,9 @@ fn format_time(nanoseconds: f64) -> String {
     }
 }
 
-fn format_bytes(bytes: f64) -> String {
+/// A number of bytes with the unit that suits it (`B`, `KB`, `MB`), as the
+/// tables print it.
+pub fn format_bytes(bytes: f64) -> String {
     if bytes < 1024.0 {
         format!("{bytes:.0} B")
     } else if bytes < 1024.0 * 1024.0 {
