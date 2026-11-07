@@ -119,8 +119,9 @@ check("the pointer hovers and clicks a button", async (page) => {
     assert((await page.state()).button_over === "false", "the pointer left the button but it is still hovered");
 });
 
-// Rust panics unwind with the exceptions of the module (WebAssembly exception handling since Rust
-// 1.93): the `catch_unwind` of the dispatcher must catch them in the page as it does on the desktop.
+// In a `--debug` module Rust panics unwind with the exceptions of the module (WebAssembly exception
+// handling since Rust 1.93): the `catch_unwind` of the dispatcher catches them in the page as it does
+// on the desktop. The `browser` profile aborts on panic (#567).
 // libpng and libjpeg-turbo of Skia's prebuilt archive fail a decode with longjmp, which goes through
 // emscripten_sjlj.cpp of ferroui-skia: the decode fails cleanly and the next one works.
 check("a damaged PNG or JPEG fails to decode, and the decoders keep working", async (page) => {
@@ -129,11 +130,23 @@ check("a damaged PNG or JPEG fails to decode, and the decoders keep working", as
     assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
 });
 
-check("panics on the dispatcher are caught and passed on as on the desktop, and the view keeps working", async (page) => {
+// A module built with the `browser` profile aborts on panic, as `release` and `dist` do (#567): the
+// panic hook reports the panic, then the module traps and stops. A `--debug` module unwinds, and its
+// dispatcher catches and passes panics on as on the desktop.
+check("panics on the dispatcher: passed on when the module unwinds, reported then ended when it aborts", async (page) => {
     const panic = async (kind) => Object.fromEntries((await page.evaluate(`themedView.themedViewPanic("${kind}")`)).split(";").map((pair) => {
         const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
     }));
     const uncaught = () => page.errors.filter((line) => line.startsWith("[exception]"));
+
+    if (!(await page.evaluate("themedView.themedViewUnwinds()"))) {
+        let trapped = "";
+        try { await panic("invoke"); } catch (error) { trapped = String(error.message ?? error); }
+        assert(trapped.includes("unreachable"), `an aborting module did not stop at the panic: ${trapped || "no error"}`);
+        const reported = page.errors.filter((line) => line.includes("panicked at") || line.includes("an invoked callback panics"));
+        assert(reported.some((line) => line.includes("panicked at")), `the panic hook did not report the panic:\n${page.errors.join("\n")}`);
+        return;
+    }
 
     // `invoke_local`: the panic of the callback reaches the caller.
     assert((await panic("invoke")).invoke === "an invoked callback panics", "the panic of an invoked callback did not reach its caller");

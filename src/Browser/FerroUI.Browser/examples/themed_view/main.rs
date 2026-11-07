@@ -451,6 +451,13 @@ ferroui_base::ferro_thread_local! {
     static PANICS: RefCell<Panics> = RefCell::new(Panics::default());
 }
 
+/// Whether the module unwinds on panic (`cfg!(panic = "unwind")`): the `--debug` build does, the
+/// `browser` profile aborts as `release` and `dist` do (#567).
+#[wasm_bindgen(js_name = themedViewUnwinds)]
+pub fn themed_view_unwinds() -> bool {
+    cfg!(panic = "unwind")
+}
+
 /// Panics on the dispatcher, for the behaviour tests: the framework must catch
 /// and pass them on in the page as it does on the desktop (the `catch_unwind`
 /// of the dispatcher's job loop and of `invoke`).
