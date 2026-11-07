@@ -198,18 +198,15 @@ impl BindingNotification {
         }
     }
 
-    /// Converts the notification to a typed binding value (the notification
-    /// part of the reference's untyped-to-typed binding value conversion).
+    /// Resolves the notification into the parts of a binding value (the
+    /// notification part of the reference's untyped-to-typed binding value
+    /// conversion): its kind and error, with the value copied into
+    /// `copy_value`.
     ///
-    /// The notification's value must hold exactly `T`; a value that cannot be
-    /// converted produces a binding error, aggregated with the notification's
-    /// own error if it has one. `target_type` names `T` in that error.
-    pub(crate) fn to_binding_value<T: Clone + 'static>(&self, target_type: &str) -> crate::data::BindingValue<T> {
-        let mut typed = None::<T>;
-        let (kind, error) = self.resolve_binding_value(target_type, &mut typed);
-        crate::data::BindingValue::from_notification_parts(kind, typed, error)
-    }
-
+    /// The notification's value must hold exactly the type of the slot; a
+    /// value that cannot be copied produces a binding error, aggregated with
+    /// the notification's own error if it has one. `target_type` names the
+    /// type in that error.
     // Only copying the payload needs the destination Rust type. Keep the
     // error policy, including aggregation for an invalid fallback, shared
     // across all property types. The callback runs outside any RefCell borrow.

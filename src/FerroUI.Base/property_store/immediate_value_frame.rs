@@ -1,4 +1,4 @@
-use super::{BindingEntry, BindingSource, BoxedBindingValue, FrameType, IValueEntry, ValueFrame, ValueFrameBase};
+use super::{BindingEntry, BindingSource, BoxedBindingEntry, FrameType, IValueEntry, ValueFrame, ValueFrameBase};
 use crate::data::BindingPriority;
 use crate::reactive::{IDisposable, IObservable};
 use crate::{BoxedValue, FerroProperty, PropertyValue, StyledProperty};
@@ -33,10 +33,10 @@ impl ImmediateValueFrame {
         &self,
         property: &'static FerroProperty,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn BoxedBindingValue> {
+    ) -> Rc<BoxedBindingEntry> {
         let owner = self.base.owner().expect("frame has no owner");
         let frame: Rc<dyn ValueFrame> = self.this.upgrade().expect("frame is alive");
-        let entry = property.routes().route_create_binding_entry(&owner, Rc::downgrade(&frame), source);
+        let entry = BoxedBindingEntry::new(&owner, Rc::downgrade(&frame), property, source);
         self.base.add(entry.clone());
         entry
     }
