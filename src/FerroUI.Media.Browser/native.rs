@@ -20,6 +20,33 @@ extern "C" {
     fn write_image(texture: u32, source: &JsValue, width: u32, height: u32) -> Result<(), JsValue>;
     #[wasm_bindgen(js_namespace=SharedGlFrames,js_name=isVideoSource)]
     pub fn is_video_source(source: &JsValue) -> bool;
+    #[wasm_bindgen(js_namespace=SharedGlFrames,js_name=canTransfer)]
+    pub fn can_transfer() -> bool;
+    #[wasm_bindgen(catch,js_namespace=SharedGlFrames,js_name=transfer)]
+    fn transfer_image(source: &JsValue, width: u32, height: u32) -> Result<u32, JsValue>;
+    #[wasm_bindgen(js_namespace=SharedGlFrames,js_name=discard)]
+    fn discard(frame: u32);
+}
+/// A browser media frame transferred to the render worker (#601): the number the page's script
+/// gave it. The frame lives on the worker until the compositor imports it; a lease dropped
+/// before that discards it, on whichever thread the last lease goes.
+pub struct TransferredFrame {
+    id: u32,
+}
+impl TransferredFrame {
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+}
+impl Drop for TransferredFrame {
+    fn drop(&mut self) {
+        discard(self.id);
+    }
+}
+/// Wraps the current image of the media element as a WebCodecs frame and transfers it to the
+/// render worker.
+pub fn transfer(source: &JsValue, width: u32, height: u32) -> Result<TransferredFrame, MediaError> {
+    transfer_image(source, width, height).map(|id| TransferredFrame { id }).map_err(error)
 }
 pub fn current(context: i32, expected: u64) -> bool {
     u64::from(generation(context)) == expected && !lost(context)

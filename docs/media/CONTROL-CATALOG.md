@@ -26,9 +26,13 @@ The **desktop host installs them**: Metal on macOS, ANGLE/D3D11 on Windows and
 admitted EGL/DMA-BUF on Linux. Unsupported rendering profiles produce visible
 errors. The catalog does not select experimental macOS CGL media.
 
-The browser host also installs native playback/capture providers for the
-single-threaded, page-owned Skia WebGL profile. Worker media bridges remain
-deferred: a threaded module or unsupported renderer reports unavailability.
+The browser host also installs native playback/capture providers for the Skia
+WebGL2 profile. Where the compositor renders on the page's thread (the module
+without threads), frames are written into a shared texture directly. Where it
+renders on the render worker (the module with threads), each frame is wrapped
+as a WebCodecs `VideoFrame`, transferred to the worker and uploaded there when
+the compositor imports it (#601); a browser without `VideoFrame` reports that
+by name. An unsupported renderer reports unavailability.
 Offline QR decoding works in the browser; live native recognition is not
 installed there. The iOS and Android catalog entry points do not yet install
 playback/capture factories. Their pages report unavailability and disable live
@@ -128,9 +132,11 @@ FERROUI_BROWSER_ANGLE=metal \
 ```
 
 Serve the assembled site with MP4 MIME support (`video/mp4`) and normal static
-asset handling. The example test server already does this. The standard
-single-threaded browser build supports media; for a combined site, select
-`?Threads=false&RenderThread=false&RenderingMode=WebGL2`.
+asset handling. The example test server already does this. Both modules
+of a combined site support media: `?Threads=false&RenderThread=false&RenderingMode=WebGL2`
+selects the module without threads, and `FERROUI_CATALOG_MEDIA_THREADS=1` runs the
+check on the module with threads (`?Threads=true&RenderThread=true`), cross-origin
+isolated.
 
 The check uses real pointer input, native HTML playback and Skia/WebGL. It
 asserts that the served MP4 matches the source, is absent from WebAssembly and
