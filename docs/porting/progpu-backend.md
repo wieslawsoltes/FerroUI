@@ -56,7 +56,7 @@ separate state record. `DAMAGE_RECT` with `PRESERVE_TARGET` limits a frame to a 
 sources as its standard-WebGPU target (`progpu_native_dawn`). It calls WebGPU only through a
 dispatch table of procedures resolved at engine creation (`resolve_proc`), never through link-time
 symbols. FerroUI resolves them from wgpu-native compiled as a Rust dependency: the fork
-`wieslawsoltes/wgpu-native`, branch `progpu/wgpu-30` (wgpu-core 30.0.1, the same wgpu as the
+`FerroUI/wgpu-native`, branch `progpu/wgpu-30` (wgpu-core 30.0.1, the same wgpu as the
 `wgpu` crate of the Vello backend). The fork adds what the engine needs:
 - real futures with `wgpuInstanceWaitAny`, which the engine uses to poll its submissions without
   waiting;
@@ -214,7 +214,7 @@ the Rust writer as it lands, keeping the shim as the differential reference.
 The engine runs on any WebGPU implementation of the standard `webgpu.h` whose procedures the host
 resolves (`progpu_native_dawn_engine_create`); it links no WebGPU library.
 
-- **wgpu 30 (the default).** wgpu-native of the fork `wieslawsoltes/wgpu-native`, branch
+- **wgpu 30 (the default).** wgpu-native of the fork `FerroUI/wgpu-native`, branch
   `progpu/wgpu-30` (webgpu-headers `673658bc`), compiled as a Rust dependency of
   `progpu-native-sys` and linked statically. It shares wgpu-core 30 with the Vello backend, and the
   linker keeps only what the program reaches. Section 2.2 lists what the fork adds.

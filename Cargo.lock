@@ -7305,7 +7305,7 @@ dependencies = [
 [[package]]
 name = "wgpu-native"
 version = "0.0.0"
-source = "git+https://github.com/wieslawsoltes/wgpu-native?rev=309bf22#309bf22fac7e5505b1024ceda0bbdc9aabc6e586"
+source = "git+https://github.com/FerroUI/wgpu-native?rev=309bf22#309bf22fac7e5505b1024ceda0bbdc9aabc6e586"
 dependencies = [
  "bindgen",
  "bitflags",
