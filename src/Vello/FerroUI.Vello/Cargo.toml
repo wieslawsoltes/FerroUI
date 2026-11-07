@@ -30,6 +30,9 @@ zune-jpeg.workspace = true
 zune-bmp.workspace = true
 jpeg-encoder.workspace = true
 gif.workspace = true
+# The CPU reference of 3D scenes (`Viewport3D`, #608), drawn as an image until the backend has a GPU
+# executor (feature `media3d`).
+ferroui-render3d = { workspace = true, optional = true }
 vello_gpu = { workspace = true, optional = true }
 vello = { workspace = true, optional = true }
 wgpu = { workspace = true, optional = true }
@@ -54,6 +57,12 @@ gpu = ["dep:vello", "wgpu-device"]
 # What both GPU modes need: `wgpu`, and on macOS the Metal contracts of the platform with the bindings
 # that turn their handles into objects of `wgpu`. Not a feature to state: `hybrid` and `gpu` state it.
 wgpu-device = ["dep:wgpu", "dep:ferroui-metal", "dep:objc2", "dep:objc2-metal", "dep:x11-dl"]
+# 3D scenes (`DrawScene3D` of `Viewport3D`, #608, docs/porting/media3d.md): drawn by the CPU reference
+# of `ferroui-render3d` as an image in every mode, counted as the last resort in the hybrid and GPU
+# modes until the wgpu executor of step D4. Off by default, so an application without 3D links none
+# of it; the facade's `media3d` turns it on. Without it a scene draws nothing and is counted
+# (`rendering::scene3d::scenes_not_drawn`).
+media3d = ["dep:ferroui-render3d"]
 
 # The window of the macOS platform is drawn on the Metal device of the platform (gpu/metal.rs). The
 # bindings are the crates `wgpu` itself links for Metal, at the versions it asks for, so that the
