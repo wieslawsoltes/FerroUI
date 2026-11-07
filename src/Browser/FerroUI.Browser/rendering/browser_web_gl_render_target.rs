@@ -21,6 +21,7 @@ use std::any::{Any, TypeId};
 use std::cell::Cell;
 use std::ffi::c_void;
 use std::rc::{Rc, Weak};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::thread::{self, ThreadId};
 use wasm_bindgen::prelude::*;
@@ -280,6 +281,15 @@ pub struct WebGlContext {
     gl_interface: Rc<GlInterface>,
     sample_count: i32,
     stencil_size: i32,
+    /// What the thread of the context last answered for `is_lost`, `shared_frame_context_id`
+    /// (0 for none) and `shared_frame_context_generation`. The user interface asks the GPU
+    /// whether it is lost through the composition interop before it imports a media frame
+    /// (#601); with the compositor on the render worker, that thread cannot query the context
+    /// or the frame registry of the worker, so it reads what the render thread, which asks
+    /// every frame, saw last.
+    lost: AtomicBool,
+    frame_context: AtomicU64,
+    frame_generation: AtomicU64,
     /// The canvas of the context, when it is a WebGL 2 context: an object
     /// of the thread the context belongs to.
     #[cfg(feature = "vello")]
@@ -337,6 +347,9 @@ impl WebGlContext {
             gl_interface,
             sample_count,
             stencil_size,
+            lost: AtomicBool::new(false),
+            frame_context: AtomicU64::new(0),
+            frame_generation: AtomicU64::new(0),
             #[cfg(feature = "vello")]
             canvas,
         }))
@@ -375,8 +388,12 @@ impl IOptionalFeatureProvider for WebGlContext {
 
 impl IPlatformGraphicsContext for WebGlContext {
     fn is_lost(&self) -> bool {
-        self.verify_access();
-        context_lost(self.context_id)
+        if self.thread != thread::current().id() {
+            return self.lost.load(Ordering::Acquire);
+        }
+        let lost = context_lost(self.context_id);
+        self.lost.store(lost, Ordering::Release);
+        lost
     }
 
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
@@ -398,7 +415,9 @@ impl IPlatformGraphicsContext for WebGlContext {
 
 impl IGlContext for WebGlContext {
     fn shared_frame_context_id(&self) -> Option<u64> {
-        self.verify_access();
+        if self.thread != thread::current().id() {
+            return Some(self.frame_context.load(Ordering::Acquire)).filter(|id| *id != 0);
+        }
         // The page's media elements are sampled directly only by a context of the page's thread:
         // the module without threads, and a module with threads whose render thread did not start
         // (#601). A render worker's context takes transferred frames instead.
@@ -409,14 +428,20 @@ impl IGlContext for WebGlContext {
             && frame_generation(self.context_id) > 0
             && !context_lost(self.context_id)
         {
+            self.frame_context.store(self.context_id as u64, Ordering::Release);
             Some(self.context_id as u64)
         } else {
+            self.frame_context.store(0, Ordering::Release);
             None
         }
     }
     fn shared_frame_context_generation(&self) -> u64 {
-        self.verify_access();
-        frame_generation(self.context_id) as u64
+        if self.thread != thread::current().id() {
+            return self.frame_generation.load(Ordering::Acquire);
+        }
+        let generation = frame_generation(self.context_id) as u64;
+        self.frame_generation.store(generation, Ordering::Release);
+        generation
     }
     fn transferred_frame_context_id(&self) -> Option<u64> {
         self.verify_access();
