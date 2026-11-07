@@ -557,7 +557,7 @@ The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
 | `samples/HelloWorld` (opted in), `dist`, macOS ARM64 | Size |
 |---|---:|
 | full theme (step 2) | 37.98 MB |
-| trimmed | Measured: (pending) |
+| trimmed (30 of 164 units) | 28.63 MB (-9.35 MB, -24.6 %) |
 
 ## 5. What an executable is made of
 
