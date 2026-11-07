@@ -32,10 +32,11 @@ fn generate() -> ClassFile {
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<WinUITheme as StaticType>::TYPE, WinUITheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
-    // constructor that takes the service provider, so the compiler would pick `new()`.
+    // constructor that takes the service provider, so the compiler would pick `new()`; it is the
+    // constructor with the units the application registered, as in `build.rs` (#568, step 3).
     generate_class_file(
         <WinUITheme as StaticType>::TYPE,
-        Some(ClassConstructor::ServiceProvider("with_service_provider")),
+        Some(ClassConstructor::ServiceProvider("with_registered_parts")),
         "::ferroui_themes_winui::compiled_xaml",
         &[],
     )
@@ -90,6 +91,74 @@ fn build_script_output_is_the_checked_in_reference() {
     let (built, checked_in) = (read(env!("FERROUI_XAMLMETA")), read(METADATA_PATH));
     assert_eq!((&built.name, &built.crate_name), (&checked_in.name, &checked_in.crate_name));
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
+    // The unit graph of the theme (#568) is the same.
+    assert!(built.theme_units == checked_in.theme_units, "the theme units of the .xamlmeta of the build script differ from the checked-in reference");
+}
+
+/// The compiled markup is partitioned into units (#568, step 2 of
+/// docs/porting/theme-trimming.md): the table of all units is in canonical order, the
+/// `.xamlmeta` describes the same units, and the whole theme, which applies every unit through
+/// the table, has every key every unit of a merged document defines.
+#[test]
+fn the_whole_theme_applies_every_unit() {
+    use ferroui_base::controls::ResourceKey;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    assert!(units.len() > 100, "{} units", units.len());
+    for (position, unit) in units.iter().enumerate() {
+        assert_eq!(unit.index as usize, position, "{unit:?}");
+    }
+    assert_eq!(units[0].name, "ambient");
+
+    let metadata = XamlMetadata::parse(&std::fs::read_to_string(METADATA_PATH).expect("compiled_xaml.xamlmeta can be read"))
+        .expect("compiled_xaml.xamlmeta can be read");
+    let [graph] = metadata.theme_units.as_slice() else { panic!("one class with units: {:?}", metadata.theme_units.len()) };
+    assert_eq!(graph.class, "FerroUI.Themes.WinUI.WinUITheme");
+    assert_eq!(graph.table_path, "::ferroui_themes_winui::compiled_xaml::THEME_UNITS");
+    let names: Vec<&str> = graph.units.iter().map(|unit| unit.name.as_str()).collect();
+    assert_eq!(names, units.iter().map(|unit| unit.name).collect::<Vec<_>>());
+    let ambient = &graph.units[0];
+    for host in ["Controls/Window.xaml", "Controls/PopupRoot.xaml", "Controls/OverlayPopupHost.xaml", "Controls/AdornerLayer.xaml"] {
+        assert!(ambient.documents.iter().any(|document| document == host), "{host} is ambient: {:?}", ambient.documents);
+    }
+    let button = graph.units.iter().find(|unit| unit.name == "Controls/Button.xaml").expect("a unit of the button");
+    assert!(button.type_keys.iter().any(|type_key| type_key == "Button"), "{button:?}");
+    assert!(button.keys.iter().any(|key| key == "AccentButtonStyle"), "{button:?}");
+
+    let application = ferroui_controls::Application::current().expect("an application");
+    let theme = WinUITheme::new();
+    application.styles().add(theme.as_style());
+    let variants = super::support::variants();
+    for unit in &graph.units[1..] {
+        for key in &unit.keys {
+            let key = ResourceKey::from(key.as_str());
+            let found = variants.iter().any(|variant| application.try_get_resource(&key, Some(variant)).is_some());
+            assert!(found, "{key:?} of the unit {} is not in the theme", unit.name);
+        }
+    }
+}
+
+/// Step 3 of #568: a theme constructed from some of its units (`with_parts`) leaves out the
+/// entries of the units it is not given, and has them with the table of all units. The rating
+/// control's unit defines only its control theme, which no other unit references.
+#[test]
+fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    let rating = units.iter().position(|unit| unit.name == "Controls/RatingControl.xaml").expect("a unit of the rating control");
+    let parts: Vec<&'static ThemeUnit> = units.iter().enumerate().filter(|(position, _)| *position != rating).map(|(_, unit)| *unit).collect();
+    let parts: &'static [&'static ThemeUnit] = Box::leak(parts.into_boxed_slice());
+    let key = ResourceKey::Type(<ferroui_controls::RatingControl as StaticType>::TYPE);
+
+    let trimmed = WinUITheme::with_parts(None, parts);
+    assert!(trimmed.try_get_resource(&key, None).is_none(), "the control theme of the rating control is left out");
+    let full = WinUITheme::with_parts(None, units);
+    assert!(full.try_get_resource(&key, None).is_some(), "the full table has the control theme of the rating control");
+    // With the tables of types (the tests link the run-time loader), a load by URI and the type
+    // information apply every unit.
+    assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
 #[test]

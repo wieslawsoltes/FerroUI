@@ -306,6 +306,47 @@ fn a_run_ends_at_another_dictionary_and_at_any_other_statement() {
     assert_eq!(tables.iter().map(|(_, run)| run.rows.len()).collect::<Vec<_>>(), [2, 2, 2]);
 }
 
+/// Not from upstream (#568, step 2): the entries of a unit of a theme keep their rows; a run
+/// ends where the unit changes and steps over the markers of one unit.
+#[test]
+fn a_run_ends_where_the_unit_of_the_theme_changes() {
+    use super::super::theme_units::{begin_marker, END_MARKER};
+    let (first, second) = (begin_marker(1), begin_marker(2));
+    let (first, second) = (first.trim_start(), second.trim_start());
+    let value = |key: &str, number: f64, line: i32| format!("{};", value_call("resource_dictionary_1", key, &format!("rt::to_object({number:?}_f64)"), line, 1));
+    let lines = body(&[
+        first,
+        &value("A", 1.0, 1),
+        &value("B", 2.0, 2),
+        END_MARKER,
+        first,
+        &value("C", 3.0, 3),
+        END_MARKER,
+        second,
+        &value("D", 4.0, 4),
+        &value("E", 5.0, 5),
+        END_MARKER,
+        &value("F", 6.0, 6),
+        &value("G", 7.0, 7),
+    ]);
+    let statements = recorded(&lines, &[]);
+    let mut count = 0;
+    let (written, tables) = row_runs(lines, &statements, "D", || {
+        count += 1;
+        format!("ROWS_{count}")
+    });
+    assert_eq!(written, body(&[
+        first,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
+        END_MARKER,
+        second,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_2)?;",
+        END_MARKER,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_3)?;",
+    ]));
+    assert_eq!(tables.iter().map(|(_, run)| run.rows.len()).collect::<Vec<_>>(), [3, 2, 2]);
+}
+
 #[test]
 fn a_colour_whose_local_is_named_elsewhere_stays_a_statement() {
     let lines = body(&[

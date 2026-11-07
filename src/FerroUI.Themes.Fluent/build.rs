@@ -124,7 +124,10 @@ fn main() {
     // `.xamlmeta` of the crate: its type model and its compiled documents, for the crates that
     // include them. The constructor is stated: the markup metadata of the theme declares `new()` next
     // to the constructor that takes the service provider, so the compiler would pick `new()`, and
-    // upstream's class has the one constructor `FluentTheme(IServiceProvider? sp = null)`.
+    // upstream's class has the one constructor `FluentTheme(IServiceProvider? sp = null)`. It is the
+    // constructor with the units the application registered (`with_registered_parts`, #568 step 3):
+    // the loader table is reachable from `register_types()`, and the full constructor would keep
+    // every unit.
     let documents: Vec<(String, String)> = assets
         .iter()
         .filter(|(asset_path, _)| compiled(asset_path))
@@ -140,7 +143,7 @@ fn main() {
             ferroui_build::XamlGroup::new("compiled_xaml")
                 .documents(&documents)
                 .class_document("FluentTheme.xaml")
-                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
+                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_registered_parts")),
         )
         .run();
 

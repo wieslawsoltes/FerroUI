@@ -32,10 +32,11 @@ fn generate() -> ClassFile {
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<MacOSTheme as StaticType>::TYPE, MacOSTheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
-    // constructor that takes the service provider, so the compiler would pick `new()`.
+    // constructor that takes the service provider, so the compiler would pick `new()`; it is the
+    // constructor with the units the application registered, as in `build.rs` (#568, step 3).
     generate_class_file(
         <MacOSTheme as StaticType>::TYPE,
-        Some(ClassConstructor::ServiceProvider("with_service_provider")),
+        Some(ClassConstructor::ServiceProvider("with_registered_parts")),
         "::ferroui_themes_macos::compiled_xaml",
         &[],
     )
@@ -90,6 +91,8 @@ fn build_script_output_is_the_checked_in_reference() {
     let (built, checked_in) = (read(env!("FERROUI_XAMLMETA")), read(METADATA_PATH));
     assert_eq!((&built.name, &built.crate_name), (&checked_in.name, &checked_in.crate_name));
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
+    // The unit graph of the theme (#568) is the same.
+    assert!(built.theme_units == checked_in.theme_units, "the theme units of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
 #[test]

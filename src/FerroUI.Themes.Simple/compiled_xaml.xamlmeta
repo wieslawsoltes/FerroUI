@@ -19,5 +19,661 @@
       "public": false
     }
   ],
-  "dependencies": []
+  "dependencies": [],
+  "theme_units": [
+    {
+      "class": "FerroUI.Themes.Simple.SimpleTheme",
+      "table_path": "::ferroui_themes_simple::compiled_xaml::THEME_UNITS",
+      "units": [
+        {
+          "name": "ambient",
+          "index": 0,
+          "documents": ["SimpleTheme.xaml", "Controls/SimpleControls.xaml", "Controls/AdornerLayer.xaml", "Controls/Window.xaml", "Controls/WindowDrawnDecorations.xaml", "Controls/PopupRoot.xaml", "Controls/OverlayPopupHost.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/SelectableTextBlock.xaml", "Controls/RefreshVisualizer.xaml", "Controls/ThemeVariantScope.xaml"],
+          "keys": ["CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonHeight", "CaptionButtonWidth", "SelectableTextBlockContextFlyout", "SimpleDrawnCaptionButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "SelectableTextBlock", "ThemeVariantScope", "Window", "WindowDrawnDecorations"],
+          "references": ["CaptionButtonBackground", "CaptionButtonBorderBrush", "CaptionButtonCloseBackground", "CaptionButtonCloseBorderBrush", "CaptionButtonForeground", "CaptionButtonHeight", "CaptionButtonWidth", "ContentControlThemeFontFamily", "FontSizeNormal", "HighlightBrush", "HighlightForegroundBrush", "HighlightForegroundColor", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "SelectableTextBlockContextFlyout", "SimpleDrawnCaptionButton", "StringTextFlyoutCopyText", "ThemeAccentBrush", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeForegroundBrush", "TitleBarBackgroundBrush", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "types": ["AdornerLayer", "Border", "BoxShadows", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "LayoutTransformControl", "MenuFlyout", "MenuItem", "MergeResourceInclude", "OverlayPopupHost", "Panel", "Path", "PathIcon", "PopupRoot", "Rectangle", "RefreshVisualizer", "ResourceDictionary", "RotateTransform", "SelectableTextBlock", "Setter", "SolidColorBrush", "StackPanel", "Style", "StyleInclude", "Styles", "Template", "TextBlock", "ThemeVariantScope", "Viewbox", "VisualLayerManager", "Window", "WindowDrawnDecorations", "WindowDrawnDecorationsContent", "WindowDrawnDecorationsTemplate"]
+        },
+        {
+          "name": "Accents/Base.xaml",
+          "index": 1,
+          "documents": ["Accents/Base.xaml"],
+          "keys": ["CaptionButtonBackground", "CaptionButtonBorderBrush", "CaptionButtonForeground", "ContentControlThemeFontFamily", "DatePickerFlyoutPresenterHighlightFill", "ErrorBrush", "ErrorColor", "ErrorLowBrush", "ErrorLowColor", "FontSizeLarge", "FontSizeNormal", "FontSizeSmall", "HighlightBrush", "HighlightBrush2", "HighlightColor", "HighlightColor2", "HighlightForegroundBrush", "HighlightForegroundColor", "HyperlinkVisitedBrush", "HyperlinkVisitedColor", "IconElementThemeHeight", "IconElementThemeWidth", "NotificationCardBackgroundBrush", "NotificationCardErrorBackgroundBrush", "NotificationCardForegroundBrush", "NotificationCardInformationBackgroundBrush", "NotificationCardSuccessBackgroundBrush", "NotificationCardWarningBackgroundBrush", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "ScrollBarThickness", "ScrollBarThumbThickness", "TextControlPlaceholderOpacity", "ThemeAccentBrush", "ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeAccentColor", "ThemeAccentColor2", "ThemeAccentColor3", "ThemeAccentColor4", "ThemeBackgroundBrush", "ThemeBackgroundColor", "ThemeBorderHighBrush", "ThemeBorderHighColor", "ThemeBorderLowBrush", "ThemeBorderLowColor", "ThemeBorderMidBrush", "ThemeBorderMidColor", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlHighColor", "ThemeControlHighlightHighBrush", "ThemeControlHighlightHighColor", "ThemeControlHighlightLowBrush", "ThemeControlHighlightLowColor", "ThemeControlHighlightMidBrush", "ThemeControlHighlightMidColor", "ThemeControlLowBrush", "ThemeControlLowColor", "ThemeControlMidBrush", "ThemeControlMidColor", "ThemeControlMidHighBrush", "ThemeControlMidHighColor", "ThemeControlTransparentBrush", "ThemeControlVeryHighBrush", "ThemeControlVeryHighColor", "ThemeDisabledOpacity", "ThemeForegroundBrush", "ThemeForegroundColor", "ThemeForegroundLowBrush", "ThemeForegroundLowColor", "TimePickerFlyoutPresenterHighlightFill", "TitleBarBackgroundBrush"],
+          "type_keys": [],
+          "references": ["ErrorColor", "ErrorLowColor", "HighlightColor", "HighlightColor2", "HighlightForegroundColor", "HyperlinkVisitedColor", "ThemeAccentColor", "ThemeAccentColor2", "ThemeAccentColor3", "ThemeAccentColor4", "ThemeBackgroundBrush", "ThemeBackgroundColor", "ThemeBorderHighColor", "ThemeBorderLowColor", "ThemeBorderMidColor", "ThemeControlHighColor", "ThemeControlHighlightHighColor", "ThemeControlHighlightLowColor", "ThemeControlHighlightMidColor", "ThemeControlLowColor", "ThemeControlMidColor", "ThemeControlMidHighColor", "ThemeControlVeryHighColor", "ThemeForegroundColor", "ThemeForegroundLowColor"],
+          "types": ["Color", "Double", "FontFamily", "ResourceDictionary", "SolidColorBrush", "StaticResource", "Thickness"]
+        },
+        {
+          "name": "Strings/InvariantResources.xaml",
+          "index": 2,
+          "documents": ["Strings/InvariantResources.xaml"],
+          "keys": ["StringCalendarWeekNumberHeader", "StringDatePickerDayText", "StringDatePickerMonthText", "StringDatePickerYearText", "StringManagedFileChooserCancelText", "StringManagedFileChooserDateModifiedColumn", "StringManagedFileChooserFileNamePlaceholder", "StringManagedFileChooserNameColumn", "StringManagedFileChooserOkText", "StringManagedFileChooserOverwritePromptCancelText", "StringManagedFileChooserOverwritePromptConfirmText", "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", "StringManagedFileChooserShowHiddenFilesText", "StringManagedFileChooserSizeColumn", "StringManagedFileChooserTypeColumn", "StringScrollBarBottom", "StringScrollBarLeftEdge", "StringScrollBarPageDown", "StringScrollBarPageLeft", "StringScrollBarPageRight", "StringScrollBarPageUp", "StringScrollBarRightEdge", "StringScrollBarScrollDown", "StringScrollBarScrollHere", "StringScrollBarScrollLeft", "StringScrollBarScrollRight", "StringScrollBarScrollUp", "StringScrollBarTop", "StringTextFlyoutCopyText", "StringTextFlyoutCutText", "StringTextFlyoutPasteText", "StringTimePickerHourText", "StringTimePickerMinuteText", "StringTimePickerSecondText"],
+          "type_keys": [],
+          "references": [],
+          "types": ["ResourceDictionary"]
+        },
+        {
+          "name": "Controls/Button.xaml",
+          "index": 3,
+          "documents": ["Controls/Button.xaml"],
+          "keys": [],
+          "type_keys": ["Button"],
+          "references": ["ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/RadioButton.xaml",
+          "index": 4,
+          "documents": ["Controls/RadioButton.xaml"],
+          "keys": [],
+          "type_keys": ["RadioButton"],
+          "references": ["HighlightBrush", "ThemeAccentBrush", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeDisabledOpacity"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "Ellipse", "Grid", "RadioButton", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/Expander.xaml",
+          "index": 5,
+          "documents": ["Controls/Expander.xaml"],
+          "keys": ["SimpleExpanderToggleButtonDownTheme", "SimpleExpanderToggleButtonLeftTheme", "SimpleExpanderToggleButtonRightTheme", "SimpleExpanderToggleButtonTheme", "SimpleExpanderToggleButtonUpTheme"],
+          "type_keys": ["Expander"],
+          "references": ["SimpleExpanderToggleButtonDownTheme", "SimpleExpanderToggleButtonLeftTheme", "SimpleExpanderToggleButtonRightTheme", "SimpleExpanderToggleButtonTheme", "SimpleExpanderToggleButtonUpTheme", "ThemeBorderLowBrush", "ThemeForegroundBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "CrossFade", "Expander", "Grid", "Path", "ResourceDictionary", "RotateTransform", "Setter", "Style", "ToggleButton"]
+        },
+        {
+          "name": "Controls/RepeatButton.xaml",
+          "index": 6,
+          "documents": ["Controls/RepeatButton.xaml"],
+          "keys": [],
+          "type_keys": ["RepeatButton"],
+          "references": ["ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlMidBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "RepeatButton", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ToggleSwitch.xaml",
+          "index": 7,
+          "documents": ["Controls/ToggleSwitch.xaml"],
+          "keys": ["ToggleSwitchOnStrokeThickness", "ToggleSwitchOuterBorderStrokeThickness", "ToggleSwitchPostContentMargin", "ToggleSwitchPreContentMargin", "ToggleSwitchThemeMinWidth", "ToggleSwitchTopHeaderMargin"],
+          "type_keys": ["ToggleSwitch"],
+          "references": ["FontSizeNormal", "HighlightForegroundColor", "ThemeAccentColor", "ThemeAccentColor2", "ThemeAccentColor3", "ThemeBorderHighColor", "ThemeBorderMidColor", "ThemeControlMidHighColor", "ThemeForegroundColor", "ThemeForegroundLowColor", "ToggleSwitchOnStrokeThickness", "ToggleSwitchOuterBorderStrokeThickness", "ToggleSwitchPostContentMargin", "ToggleSwitchPreContentMargin", "ToggleSwitchThemeMinWidth", "ToggleSwitchTopHeaderMargin"],
+          "types": ["Border", "Canvas", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "DoubleTransition", "Ellipse", "Grid", "GridLength", "ResourceDictionary", "RowDefinition", "Setter", "Style", "Thickness", "ToggleSwitch", "Transitions"]
+        },
+        {
+          "name": "Controls/ButtonSpinner.xaml",
+          "index": 8,
+          "documents": ["Controls/ButtonSpinner.xaml"],
+          "keys": ["SimpleButtonSpinnerRepeatButton"],
+          "type_keys": ["ButtonSpinner"],
+          "references": ["ErrorBrush", "SimpleButtonSpinnerRepeatButton", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlMidBrush", "ThemeForegroundBrush"],
+          "types": ["Border", "ButtonSpinner", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DockPanel", "Path", "RepeatButton", "ResourceDictionary", "Setter", "Style", "UniformGrid"]
+        },
+        {
+          "name": "Controls/ToggleButton.xaml",
+          "index": 9,
+          "documents": ["Controls/ToggleButton.xaml"],
+          "keys": [],
+          "type_keys": ["ToggleButton"],
+          "references": ["ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style", "ToggleButton"]
+        },
+        {
+          "name": "Controls/DropDownButton.xaml",
+          "index": 10,
+          "documents": ["Controls/DropDownButton.xaml"],
+          "keys": [],
+          "type_keys": ["DropDownButton"],
+          "references": ["ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["Border", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "DropDownButton", "Grid", "PathIcon", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/PathIcon.xaml",
+          "index": 11,
+          "documents": ["Controls/PathIcon.xaml"],
+          "keys": [],
+          "type_keys": ["PathIcon"],
+          "references": ["IconElementThemeHeight", "IconElementThemeWidth"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "Path", "PathIcon", "ResourceDictionary", "Setter", "Viewbox"]
+        },
+        {
+          "name": "Controls/CheckBox.xaml",
+          "index": 12,
+          "documents": ["Controls/CheckBox.xaml"],
+          "keys": [],
+          "type_keys": ["CheckBox"],
+          "references": ["HighlightBrush", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["Border", "CheckBox", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "Panel", "Path", "Rectangle", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ToolTip.xaml",
+          "index": 13,
+          "documents": ["Controls/ToolTip.xaml"],
+          "keys": [],
+          "type_keys": ["ToolTip"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeBorderThickness"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "ToolTip"]
+        },
+        {
+          "name": "Controls/Label.xaml",
+          "index": 14,
+          "documents": ["Controls/Label.xaml"],
+          "keys": [],
+          "type_keys": ["Label"],
+          "references": [],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "Label", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ComboBoxItem.xaml",
+          "index": 15,
+          "documents": ["Controls/ComboBoxItem.xaml"],
+          "keys": [],
+          "type_keys": ["ComboBoxItem"],
+          "references": ["ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeControlHighlightMidBrush"],
+          "types": ["ComboBoxItem", "ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ComboBox.xaml",
+          "index": 16,
+          "documents": ["Controls/ComboBox.xaml"],
+          "keys": [],
+          "type_keys": ["ComboBox"],
+          "references": ["TextControlPlaceholderOpacity", "ThemeBackgroundBrush", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["Binding", "Border", "ComboBox", "ContentControl", "ControlTemplate", "ControlTheme", "Grid", "ItemsPresenter", "MultiBinding", "Path", "Popup", "ResourceDictionary", "ScrollViewer", "Setter", "SolidColorBrush", "Style", "TextBlock", "TextBox", "Thickness", "ToggleButton"]
+        },
+        {
+          "name": "Controls/Carousel.xaml",
+          "index": 17,
+          "documents": ["Controls/Carousel.xaml"],
+          "keys": [],
+          "type_keys": ["Carousel"],
+          "references": [],
+          "types": ["Carousel", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ResourceDictionary", "ScrollViewer", "Setter"]
+        },
+        {
+          "name": "Controls/TextBox.xaml",
+          "index": 18,
+          "documents": ["Controls/TextBox.xaml"],
+          "keys": ["PasswordBoxHideButtonData", "PasswordBoxRevealButtonData", "SimplePasswordBoxRevealButtonTheme", "SimpleTextBoxClearButtonTheme", "SimpleTextBoxContextFlyout", "TextBoxClearButtonData"],
+          "type_keys": ["TextBox"],
+          "references": ["ErrorBrush", "FontSizeSmall", "HighlightBrush", "HighlightForegroundBrush", "PasswordBoxHideButtonData", "PasswordBoxRevealButtonData", "SimplePasswordBoxRevealButtonTheme", "SimpleTextBoxClearButtonTheme", "SimpleTextBoxContextFlyout", "StringTextFlyoutCopyText", "StringTextFlyoutCutText", "StringTextFlyoutPasteText", "TextBoxClearButtonData", "TextControlPlaceholderOpacity", "ThemeBackgroundBrush", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeDisabledOpacity", "ThemeForegroundBrush", "ThemeForegroundColor", "ThemeForegroundLowBrush"],
+          "types": ["Binding", "Border", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DockPanel", "Grid", "MenuFlyout", "MenuItem", "MultiBinding", "Panel", "Path", "ResourceDictionary", "ScrollContentPresenter", "ScrollViewer", "Setter", "StreamGeometry", "Style", "Template", "TextBlock", "TextBox", "TextPresenter", "ToggleButton"]
+        },
+        {
+          "name": "Controls/AutoCompleteBox.xaml",
+          "index": 19,
+          "documents": ["Controls/AutoCompleteBox.xaml"],
+          "keys": [],
+          "type_keys": ["AutoCompleteBox"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeForegroundLowBrush"],
+          "types": ["AutoCompleteBox", "Border", "ControlTemplate", "ControlTheme", "ListBox", "Panel", "Popup", "ResourceDictionary", "Setter", "TextBox"]
+        },
+        {
+          "name": "Controls/DataValidationErrors.xaml",
+          "index": 20,
+          "documents": ["Controls/DataValidationErrors.xaml"],
+          "keys": [],
+          "type_keys": ["DataValidationErrors"],
+          "references": ["ErrorBrush"],
+          "types": ["Canvas", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataTemplate", "DataValidationErrors", "DockPanel", "ItemsControl", "Path", "ResourceDictionary", "Setter", "Style", "ToolTip"]
+        },
+        {
+          "name": "Controls/FlyoutPresenter.xaml",
+          "index": 21,
+          "documents": ["Controls/FlyoutPresenter.xaml"],
+          "keys": [],
+          "type_keys": ["FlyoutPresenter"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderMidBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "FlyoutPresenter", "ResourceDictionary", "ScrollViewer", "Setter"]
+        },
+        {
+          "name": "Controls/MenuFlyoutPresenter.xaml",
+          "index": 22,
+          "documents": ["Controls/MenuFlyoutPresenter.xaml"],
+          "keys": [],
+          "type_keys": ["MenuFlyoutPresenter"],
+          "references": ["SimpleMenuScrollViewer", "ThemeBackgroundBrush", "ThemeBorderMidBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ItemsPresenter", "MenuFlyoutPresenter", "ResourceDictionary", "ScrollViewer", "Setter"]
+        },
+        {
+          "name": "Controls/GroupBox.xaml",
+          "index": 23,
+          "documents": ["Controls/GroupBox.xaml"],
+          "keys": ["BorderGapMaskConverter"],
+          "type_keys": ["GroupBox"],
+          "references": ["BorderGapMaskConverter", "ThemeBorderMidBrush"],
+          "types": ["Binding", "Border", "BorderGapMaskConverter", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "GroupBox", "MultiBinding", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/GridSplitter.xaml",
+          "index": 24,
+          "documents": ["Controls/GridSplitter.xaml"],
+          "keys": [],
+          "type_keys": ["GridSplitter"],
+          "references": ["HighlightBrush", "ThemeControlMidBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "GridSplitter", "Rectangle", "ResourceDictionary", "Setter", "Template"]
+        },
+        {
+          "name": "Controls/HyperlinkButton.xaml",
+          "index": 25,
+          "documents": ["Controls/HyperlinkButton.xaml"],
+          "keys": [],
+          "type_keys": ["HyperlinkButton"],
+          "references": ["HyperlinkVisitedBrush", "ThemeAccentBrush", "ThemeBorderThickness", "ThemeDisabledOpacity"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "HyperlinkButton", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ItemsControl.xaml",
+          "index": 26,
+          "documents": ["Controls/ItemsControl.xaml"],
+          "keys": [],
+          "type_keys": ["ItemsControl"],
+          "references": [],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ItemsControl", "ItemsPresenter", "ResourceDictionary", "Setter"]
+        },
+        {
+          "name": "Controls/ListBoxItem.xaml",
+          "index": 27,
+          "documents": ["Controls/ListBoxItem.xaml"],
+          "keys": [],
+          "type_keys": ["ListBoxItem"],
+          "references": ["ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeControlHighlightMidBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "ListBoxItem", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ListBox.xaml",
+          "index": 28,
+          "documents": ["Controls/ListBox.xaml"],
+          "keys": [],
+          "type_keys": ["ListBox"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeDisabledOpacity"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ListBox", "ResourceDictionary", "ScrollViewer", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/ScrollBar.xaml",
+          "index": 29,
+          "documents": ["Controls/ScrollBar.xaml"],
+          "keys": ["SimpleHorizontalScrollBarContextFlyout", "SimpleVerticalScrollBarContextFlyout"],
+          "type_keys": ["ScrollBar"],
+          "references": ["ScrollBarThickness", "ScrollBarThumbThickness", "SimpleHorizontalScrollBarContextFlyout", "SimpleVerticalScrollBarContextFlyout", "StringScrollBarBottom", "StringScrollBarLeftEdge", "StringScrollBarPageDown", "StringScrollBarPageLeft", "StringScrollBarPageRight", "StringScrollBarPageUp", "StringScrollBarRightEdge", "StringScrollBarScrollDown", "StringScrollBarScrollHere", "StringScrollBarScrollLeft", "StringScrollBarScrollRight", "StringScrollBarScrollUp", "StringScrollBarTop", "ThemeAccentBrush", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeControlMidHighBrush", "ThemeControlVeryHighBrush", "ThemeForegroundLowBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "Grid", "MenuFlyout", "MenuItem", "Path", "RepeatButton", "ResourceDictionary", "ScrollBar", "Separator", "Setter", "Style", "Thumb", "Track"]
+        },
+        {
+          "name": "Controls/ScrollViewer.xaml",
+          "index": 30,
+          "documents": ["Controls/ScrollViewer.xaml"],
+          "keys": ["SimpleMenuScrollViewer"],
+          "type_keys": ["ScrollViewer"],
+          "references": ["ThemeAccentBrush", "ThemeControlMidBrush", "ThemeForegroundLowBrush"],
+          "types": ["Binding", "ControlTemplate", "ControlTheme", "DockPanel", "Grid", "MultiBinding", "Panel", "Path", "RepeatButton", "ResourceDictionary", "ScrollBar", "ScrollContentPresenter", "ScrollGestureRecognizer", "ScrollViewer", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/TabStrip.xaml",
+          "index": 31,
+          "documents": ["Controls/TabStrip.xaml"],
+          "keys": [],
+          "type_keys": ["TabStrip"],
+          "references": [],
+          "types": ["ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ResourceDictionary", "Setter", "TabStrip", "WrapPanel"]
+        },
+        {
+          "name": "Controls/TabStripItem.xaml",
+          "index": 32,
+          "documents": ["Controls/TabStripItem.xaml"],
+          "keys": [],
+          "type_keys": ["TabStripItem"],
+          "references": ["FontSizeLarge", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style", "TabStripItem"]
+        },
+        {
+          "name": "Controls/TabControl.xaml",
+          "index": 33,
+          "documents": ["Controls/TabControl.xaml"],
+          "keys": [],
+          "type_keys": ["TabControl"],
+          "references": [],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsPresenter", "Panel", "ResourceDictionary", "Setter", "Style", "TabControl", "WrapPanel"]
+        },
+        {
+          "name": "Controls/TabItem.xaml",
+          "index": 34,
+          "documents": ["Controls/TabItem.xaml"],
+          "keys": [],
+          "type_keys": ["TabItem"],
+          "references": ["FontSizeLarge", "ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeControlHighlightMidBrush", "ThemeDisabledOpacity", "ThemeForegroundLowBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style", "TabItem"]
+        },
+        {
+          "name": "Controls/PipsPager.xaml",
+          "index": 35,
+          "documents": ["Controls/PipsPager.xaml"],
+          "keys": [],
+          "type_keys": ["PipsPager"],
+          "references": ["ThemeAccentBrush", "ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeControlHighBrush", "ThemeControlLowBrush", "ThemeForegroundBrush"],
+          "types": ["BrushTransition", "Button", "ControlTemplate", "ControlTheme", "Ellipse", "ItemsPanelTemplate", "ListBox", "ListBoxItem", "Panel", "PathIcon", "PipsPager", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel", "Style", "Transitions"]
+        },
+        {
+          "name": "Controls/WindowNotificationManager.xaml",
+          "index": 36,
+          "documents": ["Controls/WindowNotificationManager.xaml"],
+          "keys": [],
+          "type_keys": ["WindowNotificationManager"],
+          "references": [],
+          "types": ["ControlTemplate", "ControlTheme", "DataTemplate", "ResourceDictionary", "ReversibleStackPanel", "Setter", "StackPanel", "Style", "TextBlock", "WindowNotificationManager"]
+        },
+        {
+          "name": "Controls/TransitioningContentControl.xaml",
+          "index": 37,
+          "documents": ["Controls/TransitioningContentControl.xaml"],
+          "keys": [],
+          "type_keys": ["TransitioningContentControl"],
+          "references": [],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "TransitioningContentControl"]
+        },
+        {
+          "name": "Controls/TreeView.xaml",
+          "index": 38,
+          "documents": ["Controls/TreeView.xaml"],
+          "keys": [],
+          "type_keys": ["TreeView"],
+          "references": ["ThemeBorderMidBrush", "ThemeBorderThickness"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ResourceDictionary", "ScrollViewer", "Setter", "TreeView"]
+        },
+        {
+          "name": "Controls/TreeViewItem.xaml",
+          "index": 39,
+          "documents": ["Controls/TreeViewItem.xaml"],
+          "keys": ["SimpleTreeViewItemToggleButtonTheme", "TreeViewItemIndent"],
+          "type_keys": ["TreeViewItem"],
+          "references": ["SimpleTreeViewItemToggleButtonTheme", "ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeControlHighlightMidBrush", "ThemeForegroundBrush", "TreeViewItemIndent"],
+          "types": ["Binding", "Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DynamicResource", "Grid", "ItemsPresenter", "MultiBinding", "Path", "ResourceDictionary", "RotateTransform", "Setter", "StackPanel", "Style", "ToggleButton", "TreeViewItem"]
+        },
+        {
+          "name": "Controls/ProgressBar.xaml",
+          "index": 40,
+          "documents": ["Controls/ProgressBar.xaml"],
+          "keys": ["StringFormatConverter"],
+          "type_keys": ["ProgressBar"],
+          "references": ["StringFormatConverter", "ThemeAccentBrush", "ThemeAccentBrush4", "ThemeForegroundBrush"],
+          "types": ["Animation", "Binding", "Border", "ControlTemplate", "ControlTheme", "Grid", "KeyFrame", "LayoutTransformControl", "MultiBinding", "Panel", "ProgressBar", "ResourceDictionary", "RotateTransform", "Setter", "StringFormatConverter", "Style", "TemplateBinding", "TextBlock"]
+        },
+        {
+          "name": "Controls/Separator.xaml",
+          "index": 41,
+          "documents": ["Controls/Separator.xaml"],
+          "keys": [],
+          "type_keys": ["Separator"],
+          "references": ["ThemeControlMidBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Separator", "Setter"]
+        },
+        {
+          "name": "Controls/Menu.xaml",
+          "index": 42,
+          "documents": ["Controls/Menu.xaml"],
+          "keys": ["SimpleTopLevelMenuItem"],
+          "type_keys": ["Menu"],
+          "references": ["SimpleMenuScrollViewer", "SimpleTopLevelMenuItem", "ThemeAccentBrush", "ThemeAccentBrush4", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeDisabledOpacity"],
+          "types": ["AccessText", "Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataTemplate", "ItemsPresenter", "Menu", "MenuItem", "Panel", "Path", "Popup", "ResourceDictionary", "ScrollViewer", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/MenuItem.xaml",
+          "index": 43,
+          "documents": ["Controls/MenuItem.xaml"],
+          "keys": ["KeyGestureConverter"],
+          "type_keys": ["MenuItem"],
+          "references": ["KeyGestureConverter", "SimpleMenuScrollViewer", "ThemeAccentBrush", "ThemeAccentBrush4", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["AccessText", "Border", "ColumnDefinition", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataTemplate", "Ellipse", "Grid", "ItemsPresenter", "MenuItem", "Path", "PlatformKeyGestureConverter", "Popup", "ResourceDictionary", "ScrollViewer", "Separator", "Setter", "Style", "Template", "TextBlock"]
+        },
+        {
+          "name": "Controls/ContextMenu.xaml",
+          "index": 44,
+          "documents": ["Controls/ContextMenu.xaml"],
+          "keys": [],
+          "type_keys": ["ContextMenu"],
+          "references": ["FontSizeNormal", "SimpleMenuScrollViewer", "ThemeBackgroundBrush", "ThemeBorderMidBrush"],
+          "types": ["Border", "ContextMenu", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ResourceDictionary", "ScrollViewer", "Setter"]
+        },
+        {
+          "name": "Controls/CalendarButton.xaml",
+          "index": 45,
+          "documents": ["Controls/CalendarButton.xaml"],
+          "keys": [],
+          "type_keys": ["CalendarButton"],
+          "references": ["FontSizeSmall", "HighlightBrush", "ThemeAccentBrush2", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
+          "types": ["CalendarButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "Rectangle", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/CalendarDayButton.xaml",
+          "index": 46,
+          "documents": ["Controls/CalendarDayButton.xaml"],
+          "keys": [],
+          "type_keys": ["CalendarDayButton"],
+          "references": ["FontSizeSmall", "HighlightBrush", "ThemeAccentBrush2", "ThemeControlLowBrush", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
+          "types": ["CalendarDayButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "Rectangle", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/CalendarItem.xaml",
+          "index": 47,
+          "documents": ["Controls/CalendarItem.xaml"],
+          "keys": [],
+          "type_keys": ["CalendarItem"],
+          "references": ["HighlightBrush", "StringCalendarWeekNumberHeader", "ThemeBackgroundBrush", "ThemeControlLowBrush", "ThemeDisabledOpacity", "ThemeForegroundBrush"],
+          "types": ["Border", "Button", "CalendarItem", "ColumnDefinition", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "Panel", "Path", "Rectangle", "ResourceDictionary", "RowDefinition", "Setter", "Style", "Template", "TextBlock"]
+        },
+        {
+          "name": "Controls/Calendar.xaml",
+          "index": 48,
+          "documents": ["Controls/Calendar.xaml"],
+          "keys": [],
+          "type_keys": ["Calendar"],
+          "references": ["ThemeAccentBrush2", "ThemeBackgroundBrush", "ThemeBorderHighBrush", "ThemeBorderThickness"],
+          "types": ["Calendar", "CalendarItem", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "StackPanel"]
+        },
+        {
+          "name": "Controls/CalendarDatePicker.xaml",
+          "index": 49,
+          "documents": ["Controls/CalendarDatePicker.xaml"],
+          "keys": [],
+          "type_keys": ["CalendarDatePicker"],
+          "references": ["FontSizeSmall", "HighlightBrush", "ThemeAccentBrush", "ThemeAccentBrush4", "ThemeBackgroundBrush", "ThemeBorderHighBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlLowBrush", "ThemeForegroundLowBrush"],
+          "types": ["Border", "Button", "Calendar", "CalendarDatePicker", "ControlTemplate", "ControlTheme", "Ellipse", "Grid", "Popup", "Rectangle", "ResourceDictionary", "Setter", "Style", "TextBlock", "TextBox"]
+        },
+        {
+          "name": "Controls/Slider.xaml",
+          "index": 50,
+          "documents": ["Controls/Slider.xaml"],
+          "keys": ["SliderRepeatTrackTheme"],
+          "type_keys": ["Slider"],
+          "references": ["SliderRepeatTrackTheme", "ThemeAccentBrush", "ThemeBorderLowBrush", "ThemeDisabledOpacity"],
+          "types": ["Border", "ColumnDefinition", "ControlTemplate", "ControlTheme", "Ellipse", "Grid", "RepeatButton", "ResourceDictionary", "RowDefinition", "Setter", "Slider", "Style", "Thumb", "TickBar", "Track"]
+        },
+        {
+          "name": "Controls/NotificationCard.xaml",
+          "index": 51,
+          "documents": ["Controls/NotificationCard.xaml"],
+          "keys": [],
+          "type_keys": ["NotificationCard"],
+          "references": ["FontSizeLarge", "NotificationCardBackgroundBrush", "NotificationCardErrorBackgroundBrush", "NotificationCardForegroundBrush", "NotificationCardInformationBackgroundBrush", "NotificationCardSuccessBackgroundBrush", "NotificationCardWarningBackgroundBrush"],
+          "types": ["Animation", "ContentPresenter", "ControlTemplate", "ControlTheme", "KeyFrame", "LayoutTransformControl", "NotificationCard", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/NumericUpDown.xaml",
+          "index": 52,
+          "documents": ["Controls/NumericUpDown.xaml"],
+          "keys": [],
+          "type_keys": ["NumericUpDown"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeForegroundLowBrush"],
+          "types": ["ButtonSpinner", "ControlTemplate", "ControlTheme", "DataValidationErrors", "NumericUpDown", "ResourceDictionary", "Setter", "TextBox"]
+        },
+        {
+          "name": "Controls/DateTimePickerShared.xaml",
+          "index": 53,
+          "documents": ["Controls/DateTimePickerShared.xaml"],
+          "keys": ["DateTimeFlyoutBorderPadding", "DateTimeFlyoutBorderThickness", "DateTimeFlyoutButtonBorderThickness", "SimpleDateTimePickerButton", "SimpleDateTimePickerDownButton", "SimpleDateTimePickerItem", "SimpleDateTimePickerUpButton"],
+          "type_keys": [],
+          "references": ["DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DateTimeFlyoutButtonBorderThickness", "SimpleDateTimePickerButton", "ThemeControlHighBrush", "ThemeControlHighlightLowBrush", "ThemeControlLowBrush", "ThemeControlMidHighColor", "ThemeControlTransparentBrush", "ThemeForegroundBrush"],
+          "types": ["Border", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "ListBoxItem", "Path", "Rectangle", "RepeatButton", "ResourceDictionary", "Setter", "SolidColorBrush", "Style", "Template", "Thickness", "Viewbox"]
+        },
+        {
+          "name": "Controls/DatePicker.xaml",
+          "index": 54,
+          "documents": ["Controls/DatePicker.xaml"],
+          "keys": ["DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DatePickerHostMonthPadding", "DatePickerHostPadding", "DatePickerSpacerThemeWidth", "DatePickerThemeMaxWidth", "DatePickerThemeMinWidth", "SimpleDatePickerFlyoutButton"],
+          "type_keys": ["DatePicker", "DatePickerPresenter"],
+          "references": ["DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerHostMonthPadding", "DatePickerHostPadding", "DatePickerSpacerThemeWidth", "DatePickerThemeMaxWidth", "DatePickerThemeMinWidth", "DateTimeFlyoutBorderPadding", "DateTimeFlyoutBorderThickness", "FontSizeNormal", "SimpleDatePickerFlyoutButton", "SimpleDateTimePickerButton", "SimpleDateTimePickerDownButton", "SimpleDateTimePickerItem", "SimpleDateTimePickerUpButton", "StringDatePickerDayText", "StringDatePickerMonthText", "StringDatePickerYearText", "ThemeAccentColor", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeControlHighBrush", "ThemeControlHighlightMidBrush", "ThemeControlLowBrush", "ThemeControlMidHighBrush", "ThemeControlMidHighColor", "ThemeDisabledOpacity", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
+          "types": ["Border", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DatePicker", "DatePickerPresenter", "DateTimePickerPanel", "Grid", "ListBoxItem", "Panel", "Path", "Popup", "Rectangle", "RepeatButton", "ResourceDictionary", "ScrollViewer", "Setter", "SolidColorBrush", "Style", "TextBlock", "Thickness"]
+        },
+        {
+          "name": "Controls/TimePicker.xaml",
+          "index": 55,
+          "documents": ["Controls/TimePicker.xaml"],
+          "keys": ["SimpleTimePickerFlyoutButton", "TimePickerBorderThemeThickness", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerFlyoutPresenterItemPadding", "TimePickerHostPadding", "TimePickerSpacerThemeWidth", "TimePickerThemeMaxWidth", "TimePickerThemeMinWidth"],
+          "type_keys": ["TimePicker", "TimePickerPresenter"],
+          "references": ["DateTimeFlyoutBorderPadding", "DateTimeFlyoutBorderThickness", "FontSizeNormal", "SimpleDateTimePickerButton", "SimpleDateTimePickerDownButton", "SimpleDateTimePickerItem", "SimpleDateTimePickerUpButton", "SimpleTimePickerFlyoutButton", "StringTimePickerHourText", "StringTimePickerMinuteText", "StringTimePickerSecondText", "ThemeAccentColor", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeControlHighBrush", "ThemeControlHighlightMidBrush", "ThemeControlLowBrush", "ThemeControlMidHighBrush", "ThemeControlMidHighColor", "ThemeDisabledOpacity", "ThemeForegroundBrush", "ThemeForegroundLowBrush", "TimePickerBorderThemeThickness", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerHostPadding", "TimePickerSpacerThemeWidth", "TimePickerThemeMaxWidth", "TimePickerThemeMinWidth"],
+          "types": ["Border", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DateTimePickerPanel", "Grid", "ListBoxItem", "Panel", "Path", "Popup", "Rectangle", "RepeatButton", "ResourceDictionary", "ScrollViewer", "Setter", "SolidColorBrush", "Style", "TextBlock", "Thickness", "TimePicker", "TimePickerPresenter"]
+        },
+        {
+          "name": "Controls/SplitView.xaml",
+          "index": 56,
+          "documents": ["Controls/SplitView.xaml"],
+          "keys": ["SplitViewCompactPaneThemeLength", "SplitViewOpenPaneThemeLength", "SplitViewPaneAnimationCloseDuration", "SplitViewPaneAnimationEasing", "SplitViewPaneAnimationOpenDuration"],
+          "type_keys": ["SplitView"],
+          "references": ["SplitViewCompactPaneThemeLength", "SplitViewOpenPaneThemeLength", "SplitViewPaneAnimationCloseDuration", "SplitViewPaneAnimationEasing", "SplitViewPaneAnimationOpenDuration", "ThemeControlHighlightLowBrush", "ThemeControlLowColor"],
+          "types": ["ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "DoubleTransition", "Easing", "Grid", "Panel", "Rectangle", "ResourceDictionary", "RowDefinition", "Setter", "SolidColorBrush", "SplitView", "Style", "TimeSpan", "Transitions"]
+        },
+        {
+          "name": "Controls/ManagedFileChooser.xaml",
+          "index": 57,
+          "documents": ["Controls/ManagedFileChooser.xaml"],
+          "keys": ["Icons", "LevelUp", "Refresh"],
+          "type_keys": ["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"],
+          "references": ["Icons", "LevelUp", "Refresh", "StringManagedFileChooserCancelText", "StringManagedFileChooserDateModifiedColumn", "StringManagedFileChooserFileNamePlaceholder", "StringManagedFileChooserNameColumn", "StringManagedFileChooserOkText", "StringManagedFileChooserOverwritePromptCancelText", "StringManagedFileChooserOverwritePromptConfirmText", "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", "StringManagedFileChooserShowHiddenFilesText", "StringManagedFileChooserSizeColumn", "StringManagedFileChooserTypeColumn", "ThemeBackgroundBrush", "ThemeControlMidBrush"],
+          "types": ["Binding", "Border", "Button", "CheckBox", "ChildFitter", "ColumnDefinition", "ComboBox", "ControlTemplate", "ControlTheme", "DataTemplate", "DockPanel", "DrawingGroup", "DrawingImage", "DynamicResource", "FileSizeStringConverter", "GeometryDrawing", "Grid", "GridSplitter", "Image", "KeyBinding", "ListBox", "ManagedFileChooser", "ManagedFileChooserOverwritePrompt", "MultiBinding", "Rectangle", "ResourceDictionary", "ResourceSelectorConverter", "Setter", "StackPanel", "StringFormatConverter", "Style", "TextBlock", "TextBox"]
+        },
+        {
+          "name": "Controls/SplitButton.xaml",
+          "index": 58,
+          "documents": ["Controls/SplitButton.xaml"],
+          "keys": ["BottomCornerRadiusFilterConverter", "LeftCornerRadiusFilterConverter", "PrimaryButtonBorderMultiplier", "RightCornerRadiusFilterConverter", "SecondaryButtonBorderMultiplier", "SeparatorBorderMultiplier", "SimpleSplitButtonComponent", "SplitButtonBorderThemeThickness", "SplitButtonMinHeight", "SplitButtonPrimaryButtonSize", "SplitButtonSecondaryButtonSize", "SplitButtonSeparatorWidth", "TopCornerRadiusFilterConverter"],
+          "type_keys": ["SplitButton"],
+          "references": ["LeftCornerRadiusFilterConverter", "PrimaryButtonBorderMultiplier", "RightCornerRadiusFilterConverter", "SecondaryButtonBorderMultiplier", "SeparatorBorderMultiplier", "SimpleSplitButtonComponent", "SplitButtonBorderThemeThickness", "SplitButtonMinHeight", "SplitButtonPrimaryButtonSize", "SplitButtonSecondaryButtonSize", "SplitButtonSeparatorWidth", "ThemeBorderHighColor", "ThemeBorderLowColor", "ThemeBorderMidColor", "ThemeControlHighColor", "ThemeControlMidColor", "ThemeDisabledOpacity", "ThemeForegroundColor"],
+          "types": ["Border", "Button", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "CornerRadiusFilterConverter", "Grid", "MarginMultiplierConverter", "PathIcon", "ResourceDictionary", "Setter", "SolidColorBrush", "SplitButton", "Style", "Thickness"]
+        },
+        {
+          "name": "Controls/RefreshContainer.xaml",
+          "index": 59,
+          "documents": ["Controls/RefreshContainer.xaml"],
+          "keys": [],
+          "type_keys": ["RefreshContainer"],
+          "references": [],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "RefreshContainer", "ResourceDictionary", "Setter"]
+        },
+        {
+          "name": "Controls/HeaderedContentControl.xaml",
+          "index": 60,
+          "documents": ["Controls/HeaderedContentControl.xaml"],
+          "keys": [],
+          "type_keys": ["HeaderedContentControl"],
+          "references": [],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "HeaderedContentControl", "ResourceDictionary", "Setter", "Style"]
+        },
+        {
+          "name": "Controls/TextSelectionHandle.xaml",
+          "index": 61,
+          "documents": ["Controls/TextSelectionHandle.xaml"],
+          "keys": ["TextCaretHandleDrawing", "TextCaretHandlePath", "TextSelectHandleSize", "TextSelectionHandleDrawing", "TextSelectionHandlePath"],
+          "type_keys": ["TextSelectionHandle"],
+          "references": ["HighlightBrush", "TextCaretHandleDrawing", "TextCaretHandlePath", "TextSelectHandleSize", "TextSelectionHandleDrawing", "TextSelectionHandlePath", "ThemeForegroundBrush"],
+          "types": ["Border", "CombinedGeometry", "ControlTemplate", "ControlTheme", "DrawingImage", "EllipseGeometry", "GeometryDrawing", "GeometryGroup", "Grid", "Image", "Pen", "RectangleGeometry", "ResourceDictionary", "RotateTransform", "ScaleTransform", "Setter", "Style", "TextSelectionHandle", "TransformGroup"]
+        },
+        {
+          "name": "Controls/CommandBar.xaml",
+          "index": 62,
+          "documents": ["Controls/CommandBar.xaml"],
+          "keys": [],
+          "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
+          "references": ["ThemeBackgroundBrush", "ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeControlMidHighBrush"],
+          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
+        },
+        {
+          "name": "Controls/ContentPage.xaml",
+          "index": 63,
+          "documents": ["Controls/ContentPage.xaml"],
+          "keys": [],
+          "type_keys": ["ContentPage"],
+          "references": ["ThemeBackgroundBrush", "ThemeForegroundBrush"],
+          "types": ["ContentPage", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ResourceDictionary", "Setter"]
+        },
+        {
+          "name": "Controls/CarouselPage.xaml",
+          "index": 64,
+          "documents": ["Controls/CarouselPage.xaml"],
+          "keys": [],
+          "type_keys": ["CarouselPage"],
+          "references": ["ThemeBackgroundBrush"],
+          "types": ["Carousel", "CarouselPage", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter"]
+        },
+        {
+          "name": "Controls/DrawerPage.xaml",
+          "index": 65,
+          "documents": ["Controls/DrawerPage.xaml"],
+          "keys": ["DrawerPaneButtonIcon", "NavigationControlNavBarHeight"],
+          "type_keys": ["DrawerPage"],
+          "references": ["DrawerPaneButtonIcon", "NavigationControlNavBarHeight", "ThemeBackgroundBrush", "ThemeForegroundBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "DrawerPage", "Grid", "Panel", "PathIcon", "ResourceDictionary", "Setter", "SplitView", "StreamGeometry", "Style", "ToggleButton"]
+        },
+        {
+          "name": "Controls/NavigationPage.xaml",
+          "index": 66,
+          "documents": ["Controls/NavigationPage.xaml"],
+          "keys": ["NavigationBarBackground", "NavigationBarForeground", "NavigationBarShadowBackground", "NavigationPageBackIcon", "NavigationPageMenuIcon"],
+          "type_keys": ["NavigationPage"],
+          "references": ["NavigationBarBackground", "NavigationBarForeground", "NavigationBarShadowBackground", "NavigationPageBackIcon", "ThemeBorderHighBrush", "ThemeControlHighlightLowBrush", "ThemeControlHighlightMidBrush", "ThemeControlMidColor", "ThemeForegroundColor"],
+          "types": ["Border", "Button", "CommandBar", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "GradientStop", "Grid", "LinearGradientBrush", "NavigationPage", "PageSlide", "Panel", "Path", "ResourceDictionary", "Setter", "SolidColorBrush", "SplineEasing", "StreamGeometry", "Style"]
+        },
+        {
+          "name": "Controls/TabbedPage.xaml",
+          "index": 67,
+          "documents": ["Controls/TabbedPage.xaml"],
+          "keys": ["TabbedPageTabControlTheme", "TabbedPageTabItemHeaderBackgroundDisabled", "TabbedPageTabItemHeaderBackgroundSelected", "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", "TabbedPageTabItemHeaderBackgroundSelectedPressed", "TabbedPageTabItemHeaderBackgroundUnselected", "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", "TabbedPageTabItemHeaderBackgroundUnselectedPressed", "TabbedPageTabItemHeaderCornerRadius", "TabbedPageTabItemHeaderFontSize", "TabbedPageTabItemHeaderForegroundDisabled", "TabbedPageTabItemHeaderForegroundSelected", "TabbedPageTabItemHeaderForegroundUnselected", "TabbedPageTabItemHeaderIconSize", "TabbedPageTabItemHeaderIndicatorCornerRadius", "TabbedPageTabItemHeaderIndicatorMargin", "TabbedPageTabItemHeaderMargin", "TabbedPageTabItemHeaderMinHeight", "TabbedPageTabItemHeaderPadding", "TabbedPageTabItemHeaderPipeThickness", "TabbedPageTabItemHeaderSpacing", "TabbedPageTabItemHeaderVerticalPipeHeight", "TabbedPageTabItemTheme", "TabbedPageTabStripBackground", "TabbedPageTabStripBorderBrush", "TabbedPageTabStripBorderThickness", "TabbedPageTabStripCornerRadius", "TabbedPageTabStripMargin", "TabbedPageTabStripPadding"],
+          "type_keys": ["TabbedPage"],
+          "references": ["TabbedPageTabControlTheme", "TabbedPageTabItemHeaderBackgroundDisabled", "TabbedPageTabItemHeaderBackgroundSelected", "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", "TabbedPageTabItemHeaderBackgroundSelectedPressed", "TabbedPageTabItemHeaderBackgroundUnselected", "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", "TabbedPageTabItemHeaderBackgroundUnselectedPressed", "TabbedPageTabItemHeaderCornerRadius", "TabbedPageTabItemHeaderFontSize", "TabbedPageTabItemHeaderForegroundDisabled", "TabbedPageTabItemHeaderForegroundSelected", "TabbedPageTabItemHeaderForegroundUnselected", "TabbedPageTabItemHeaderIconSize", "TabbedPageTabItemHeaderIndicatorCornerRadius", "TabbedPageTabItemHeaderIndicatorMargin", "TabbedPageTabItemHeaderMargin", "TabbedPageTabItemHeaderMinHeight", "TabbedPageTabItemHeaderPadding", "TabbedPageTabItemHeaderPipeThickness", "TabbedPageTabItemHeaderSpacing", "TabbedPageTabItemHeaderVerticalPipeHeight", "TabbedPageTabItemTheme", "TabbedPageTabStripBackground", "TabbedPageTabStripBorderBrush", "TabbedPageTabStripBorderThickness", "TabbedPageTabStripCornerRadius", "TabbedPageTabStripMargin", "TabbedPageTabStripPadding", "ThemeAccentColor", "ThemeBackgroundBrush", "ThemeBorderHighBrush", "ThemeControlHighlightMidColor", "ThemeControlMidColor"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "CornerRadius", "DataTemplate", "DockPanel", "ItemsPanelTemplate", "ItemsPresenter", "Panel", "ResourceDictionary", "Setter", "SolidColorBrush", "StackPanel", "Style", "TabControl", "TabItem", "TabbedPage", "Thickness", "UniformGrid"]
+        },
+        {
+          "name": "Controls/TableView.xaml",
+          "index": 68,
+          "documents": ["Controls/TableView.xaml"],
+          "keys": ["TableViewScrollViewerTheme"],
+          "type_keys": ["TableView"],
+          "references": ["TableViewRowPadding", "TableViewScrollViewerTheme", "ThemeBackgroundBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlMidBrush", "ThemeForegroundBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "DockPanel", "Grid", "ItemsPresenter", "Panel", "Rectangle", "ResourceDictionary", "ScrollBar", "ScrollContentPresenter", "ScrollGestureRecognizer", "ScrollViewer", "Setter", "TableView", "TableViewColumnHeadersPresenter"]
+        },
+        {
+          "name": "Controls/TableViewCell.xaml",
+          "index": 69,
+          "documents": ["Controls/TableViewCell.xaml"],
+          "keys": ["TableViewCellPadding"],
+          "type_keys": ["TableViewCell"],
+          "references": ["TableViewCellPadding"],
+          "types": ["ControlTheme", "ResourceDictionary", "Setter", "TableViewCell", "Thickness"]
+        },
+        {
+          "name": "Controls/TableViewColumnHeader.xaml",
+          "index": 70,
+          "documents": ["Controls/TableViewColumnHeader.xaml"],
+          "keys": ["TableViewColumnHeaderResizerTemplate", "TableViewColumnResizerMargin", "TableViewColumnResizerWidth"],
+          "type_keys": ["TableViewColumnHeader"],
+          "references": ["TableViewCellPadding", "TableViewColumnHeaderResizerTemplate", "TableViewColumnResizerMargin", "TableViewColumnResizerWidth", "ThemeBorderMidBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Rectangle", "ResourceDictionary", "Setter", "TableViewColumnHeader", "Thickness", "Thumb"]
+        },
+        {
+          "name": "Controls/TableViewRow.xaml",
+          "index": 71,
+          "documents": ["Controls/TableViewRow.xaml"],
+          "keys": ["TableViewRowPadding"],
+          "type_keys": ["TableViewRow"],
+          "references": ["TableViewRowPadding", "ThemeAccentBrush2", "ThemeAccentBrush3", "ThemeAccentBrush4", "ThemeControlHighlightHighBrush", "ThemeControlHighlightMidBrush", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
+          "types": ["Border", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style", "TableViewCellsPresenter", "TableViewRow", "Thickness"]
+        }
+      ]
+    }
+  ]
 }
