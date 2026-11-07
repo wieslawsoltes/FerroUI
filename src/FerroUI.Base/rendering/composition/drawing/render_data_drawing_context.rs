@@ -10,6 +10,7 @@ use crate::media::{
 use crate::platform::IGeometryImpl;
 use crate::media::imaging::BitmapBlendingMode;
 use crate::rendering::composition::Compositor;
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{FerroLocator, LocatorExtensions, Matrix, Point, Rect, Ref, RoundedRect};
 use std::collections::HashSet;
@@ -309,6 +310,11 @@ impl IDrawingContextCore for RenderDataDrawingContext {
 
     fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         self.stream().draw_custom(Some(custom.clone()));
+    }
+
+    fn draw_scene_3d_core(&mut self, scene: &Arc<Scene3DSnapshot>, bounds: Rect) {
+        // The snapshot is immutable and `Send`: it is recorded and sent as it is.
+        self.stream().draw_scene_3d(Some(scene.clone()), bounds);
     }
 
     fn draw_glyph_run(&mut self, foreground: Option<&Rc<dyn IBrush>>, glyph_run: &Rc<GlyphRun>) {

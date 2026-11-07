@@ -116,6 +116,10 @@ pub struct MockDrawingContextImpl {
     /// members of the row-major 4 x 5 form, rounded to three decimals). Off
     /// by default.
     pub log_matrices: bool,
+    /// Whether the context draws 3D scenes (`DrawScene3D <bounds> <models>
+    /// models <lights> lights`, #608), as a backend with a 3D executor does.
+    /// Off by default: a scene then draws nothing and is counted.
+    pub supports_scene_3d: bool,
 }
 
 impl MockDrawingContextImpl {
@@ -132,6 +136,7 @@ impl MockDrawingContextImpl {
             supports_gpu_effects: false,
             log_render_options: false,
             log_matrices: false,
+            supports_scene_3d: false,
         }
     }
 
@@ -342,12 +347,34 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         }
     }
 
+    fn as_drawing_context_impl_with_scene_3d(
+        &mut self,
+    ) -> Option<&mut dyn crate::platform::IDrawingContextImplWithScene3D> {
+        if self.supports_scene_3d {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 
     fn dispose(&mut self) {
         self.log.push("Dispose");
+    }
+}
+
+impl crate::platform::IDrawingContextImplWithScene3D for MockDrawingContextImpl {
+    fn draw_scene_3d(&mut self, frame: &crate::rendering::scene3d::Scene3DFrame) -> bool {
+        self.log.push(format!(
+            "DrawScene3D {} {} models {} lights",
+            frame.bounds,
+            frame.scene.models.len(),
+            frame.scene.lights.len()
+        ));
+        true
     }
 }
 

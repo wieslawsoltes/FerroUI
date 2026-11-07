@@ -24,10 +24,12 @@ pub enum RenderDataOpcode {
     Pop,
     // Append new opcodes so existing byte values remain stable.
     PushCompositingLayer,
+    /// A 3D scene of a `Viewport3D` (#608, `docs/porting/media3d.md`).
+    DrawScene3D,
 }
 
 impl RenderDataOpcode {
-    const ALL: [RenderDataOpcode; 18] = [
+    const ALL: [RenderDataOpcode; 19] = [
         Self::Invalid,
         Self::DrawLine,
         Self::DrawRectangle,
@@ -46,6 +48,7 @@ impl RenderDataOpcode {
         Self::PushEffect,
         Self::Pop,
         Self::PushCompositingLayer,
+        Self::DrawScene3D,
     ];
 }
 

@@ -2,6 +2,7 @@
 //! source that hosts one.
 
 pub mod composition;
+pub mod scene3d;
 pub mod scene_graph;
 #[cfg(any(test, feature = "testing"))]
 pub mod testing;

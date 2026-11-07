@@ -1,5 +1,5 @@
 use super::{
-    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingContextImplWithLayerEffects, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
+    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingContextImplWithLayerEffects, IDrawingContextImplWithScene3D, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion,
 };
 use crate::media::{BoxShadows, Color, IBrush, IPen, RenderOptions};
@@ -155,6 +155,15 @@ pub trait IDrawingContextImpl {
     /// backend can keep what is drawn as fragments and draw them again. A
     /// backend that implements the trait overrides this to return itself.
     fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
+        None
+    }
+
+    /// The context viewed as [`IDrawingContextImplWithScene3D`], when the
+    /// backend can draw 3D scenes (`DrawScene3D`, #608). A backend that
+    /// implements the trait overrides this to return itself; without it a
+    /// scene draws nothing and is counted
+    /// ([`scenes_not_drawn`](crate::rendering::scene3d::scenes_not_drawn)).
+    fn as_drawing_context_impl_with_scene_3d(&mut self) -> Option<&mut dyn IDrawingContextImplWithScene3D> {
         None
     }
 
