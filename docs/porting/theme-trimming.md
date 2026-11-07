@@ -945,6 +945,8 @@ theme's templates construct root theirs.
 
 ### 11.6 Measurements
 
-Measured: (pending). To be measured as for step 3: `samples/HelloWorld` (`dist`, macOS ARM64, the
-number of kept units in `$OUT_DIR/xaml/theme_parts.txt`), the catalog, and every compiled desktop
-sample with computed and `all` roots (no new missing-theme diagnostic, identical screenshots).
+Measured on macOS ARM64: `samples/HelloWorld` keeps the same 30 of the 164 WinUI units as with
+step 3, and its `dist` executable is the same 28.63 MB: the roots from its code and the creates
+edges of the controls it reaches add no unit. It opens, renders and closes with no diagnostic. The
+other samples do not opt in and are unchanged; opting them in, with their screenshots compared
+against `theme-roots = "all"`, is the gate for making trimming the default.

@@ -1117,7 +1117,7 @@ pub(crate) fn is_constructor_name(name: &str) -> bool {
 /// The segments of `path`, with an empty first segment for a path from the root; without
 /// generic arguments.
 fn segments_of(path: &syn::Path) -> Vec<String> {
-    let root = path.leading_colon.map(|_| String::new());
+    let root = path.leading_colon.as_ref().map(|_| String::new());
     root.into_iter().chain(path.segments.iter().map(|segment| segment.ident.to_string())).collect()
 }
 

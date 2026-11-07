@@ -355,6 +355,8 @@ fn class_with_every_kind_of_member_is_read_exactly() {
         ("Child".to_string(), vec![attribute("Content", Vec::new()), attribute("DependsOn", vec![text("Tag")])]),
         ("Background".to_string(), Vec::new()),
     ];
+    // The code of the file constructs a `Brush` (step 4 of #568).
+    expected.creates = vec!["Fixture.Media.Brush".to_string()];
     assert_eq!(the_type(&scan, "Border"), &expected, "\n{}", listing(&scan.diagnostics));
 
     // The class the added owner names has the owner; a type that is not imported in the
