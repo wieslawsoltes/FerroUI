@@ -16,7 +16,11 @@ public class FerroApplication extends Application {
     /** The name of the meta-data element that names the native library. */
     public static final String LIBRARY_META_DATA = "org.ferroui.android.library";
 
+    // Loading the native library is what this class is for. JDK 24 and later flag
+    // System.loadLibrary as a restricted method under -Xlint:all; JDKs that do not know
+    // the key ignore it.
     @Override
+    @SuppressWarnings("restricted")
     public void onCreate() {
         super.onCreate();
         System.loadLibrary(libraryName());
