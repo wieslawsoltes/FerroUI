@@ -1,8 +1,6 @@
 //! The few vector operations of the renderer, on plain arrays: what the WGSL of the executors
 //! writes with `vec3<f32>` and `vec4<f32>`, in the same order of operations.
 
-use ferroui_base::numerics::Matrix4x4;
-
 /// A 3-component vector.
 pub(crate) type Float3 = [f32; 3];
 /// A 4-component vector.
@@ -65,9 +63,10 @@ pub(crate) fn xyz(a: Float4) -> Float3 {
     [a[0], a[1], a[2]]
 }
 
-/// `[x, y, z, w] * matrix`: the row-vector product of the numerics (and of WPF).
-#[inline]
-pub(crate) fn transform4(v: Float4, m: &Matrix4x4) -> Float4 {
+/// `[x, y, z, w] * matrix`: the row-vector product of the numerics (and of WPF), which the tests
+/// compare the uniform form with.
+#[cfg(test)]
+pub(crate) fn transform4(v: Float4, m: &ferroui_base::numerics::Matrix4x4) -> Float4 {
     [
         v[0] * m.m11 + v[1] * m.m21 + v[2] * m.m31 + v[3] * m.m41,
         v[0] * m.m12 + v[1] * m.m22 + v[2] * m.m32 + v[3] * m.m42,
