@@ -861,3 +861,30 @@ fn work_that_is_not_send_is_scheduled_through_a_callback_of_its_thread() {
     assert!(!run_pending());
     assert_eq!(ran.get(), 1);
 }
+
+/// Work a thread still holds when it ends: a callback of the thread that is forgotten (a schedule
+/// dropped the work that would have run it) while the values of the thread are destroyed, after
+/// the standard library has destroyed its own data of the thread. Forgetting it, and the checks of
+/// its thread, must not ask `std::thread::current`, which panics then (the dispatcher of a test
+/// thread dropped an animation's cancellation guard that way, and the thread aborted, #567).
+#[test]
+fn a_callback_forgotten_while_its_thread_ends_does_not_panic() {
+    use crate::task::executor::{LocalCallback, RunCallback};
+
+    crate::ferro_thread_local! {
+        static HELD: RefCell<Option<RunCallback>> = const { RefCell::new(None) };
+    }
+
+    let ran = Arc::new(Mutex::new(false));
+    let flag = ran.clone();
+    let result = thread::spawn(move || {
+        let callback = LocalCallback::register(Box::new(move || *flag.lock().unwrap() = true));
+        HELD.with(|held| *held.borrow_mut() = Some(RunCallback::new(callback.handle())));
+        // The thread ends with the callback queued; its value is dropped with the thread's
+        // values, which forgets the callback.
+    })
+    .join();
+
+    assert!(result.is_ok(), "the thread panicked while it ended");
+    assert!(!*ran.lock().unwrap(), "a forgotten callback does not run");
+}
