@@ -531,5 +531,16 @@ factories and the template contents are untouched (steps 2 and 5).
 
 ### 8.4 Measurements
 
-Measured: (pending). To be filled in: the generated text and the machine code of `compiled_xaml` of
-each theme, hello world `dist` and release, the catalog, and `tests/load_time.rs`.
+Measured on macOS ARM64 against main at 2f8e8c192:
+
+| Theme | Generated text | Functions |
+|---|---:|---:|
+| WinUI | 14.64 MB to 10.08 MB | 6,265 to 815 |
+| macOS | 13.25 MB to 9.16 MB | 6,100 to 680 |
+| Fluent | 5.70 MB to 4.47 MB | 1,788 to 362 |
+| Simple | 3.24 MB to 3.10 MB | 354 to 284 |
+
+- Hello world (`samples/HelloWorld`, WinUI theme), `dist`: 40.39 MB to 37.73 MB (-2.66 MB, -6.6 %).
+  It opens, renders and closes with no diagnostic.
+- Theme load (`tests/load_time.rs`, release, WinUI, three runs each, alternated): first load about
+  7.0 ms with the rows and 7.1 ms before, second load 6.1 ms and 6.2 ms. No change beyond noise.
