@@ -569,6 +569,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Compiler cache (sccache)](docs/compiler-cache.md): installing and enabling sccache, cache location and size, what it caches, and its interplay with incremental compilation.
 - [Build performance](docs/build-performance.md): measured Cargo-compatible build options, compiler caching, browser work reuse, and reproducible CI comparisons.
 - [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.
+- [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
 - [Releasing](docs/release.md): the published crates, the version scheme and the release workflow; [changelog](CHANGELOG.md).
 
 ## Contributing
