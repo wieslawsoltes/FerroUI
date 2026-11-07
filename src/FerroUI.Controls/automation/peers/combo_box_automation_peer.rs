@@ -5,7 +5,7 @@ use super::{
 };
 use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
-    AutomationElementIdentifiers, AutomationProperties, ElementNotEnabledError, ExpandCollapsePatternIdentifiers,
+    AutomationElementIdentifiers, AutomationError, AutomationProperties, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ValuePatternIdentifiers,
 };
 use crate::{ComboBox, ComboBoxItem, ContentControl, Control, TextBlock};
@@ -111,11 +111,11 @@ impl IExpandCollapseProvider for ProviderAdapter<ComboBoxAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -167,13 +167,13 @@ impl ComboBoxAutomationPeer {
     }
 
     /// Closes the drop-down (the expand/collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(false);
         Ok(())
     }
 
     /// Opens the drop-down (the expand/collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(true);
         Ok(())
     }
@@ -198,10 +198,10 @@ impl ComboBoxAutomationPeer {
         }
     }
 
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
+    fn set_value(&self, value: Option<&str>) -> Result<(), AutomationError> {
         let owner = self.owner();
         if !owner.is_editable() {
-            panic!("Cannot set the value of a non-editable ComboBox.");
+            return Err(AutomationError::invalid_operation_with("Cannot set the value of a non-editable ComboBox."));
         }
 
         owner.set_current_value(ComboBox::text_property(), value.map(str::to_owned));

@@ -9,6 +9,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::{FerroObject, Point, Ref, Vector};
 use ferroui_controls::automation::provider::*;
+use ferroui_controls::automation::AutomationError;
 use ferroui_controls::{Control, TopLevel};
 use serde_json::Value;
 use std::rc::Rc;
@@ -43,7 +44,8 @@ pub(super) fn execute(
             "invoke" => peer
                 .get_provider::<dyn IInvokeProvider>()
                 .ok_or_else(unsupported)?
-                .invoke(),
+                .invoke()
+                .map_err(AutomationError::from),
             "toggle" => peer
                 .get_provider::<dyn IToggleProvider>()
                 .ok_or_else(unsupported)?

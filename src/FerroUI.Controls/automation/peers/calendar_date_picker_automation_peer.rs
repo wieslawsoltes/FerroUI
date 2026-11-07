@@ -3,7 +3,8 @@ use super::{
 };
 use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, ValuePatternIdentifiers,
+    AutomationError, ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    ValuePatternIdentifiers,
 };
 use crate::calendar_date_picker::CalendarDatePicker;
 use ferroui_base::{
@@ -82,11 +83,11 @@ impl IExpandCollapseProvider for ProviderAdapter<CalendarDatePickerAutomationPee
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -156,13 +157,13 @@ impl CalendarDatePickerAutomationPeer {
     }
 
     /// Opens the drop-down (the expand/collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(true);
         Ok(())
     }
 
     /// Closes the drop-down (the expand/collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.owner().set_is_drop_down_open(false);
         Ok(())
     }

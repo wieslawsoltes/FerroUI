@@ -3,7 +3,7 @@ use super::{
     ToggleButtonAutomationPeer,
 };
 use crate::automation::provider::{ISelectionItemProvider, ISelectionProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledError, SelectionItemPatternIdentifiers};
+use crate::automation::{AutomationError, SelectionItemPatternIdentifiers};
 use crate::primitives::ToggleButton;
 use crate::RadioButton;
 use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, Ref};
@@ -78,15 +78,15 @@ impl ISelectionItemProvider for ProviderAdapter<RadioButtonAutomationPeer> {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn add_to_selection(&self) -> Result<(), AutomationError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn remove_from_selection(&self) -> Result<(), AutomationError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledError> {
+    fn select(&self) -> Result<(), AutomationError> {
         self.0.select()
     }
 }
@@ -121,12 +121,13 @@ impl RadioButtonAutomationPeer {
     /// Adds the radio button to the selection (the selection item provider
     /// contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the radio button is not checked.
-    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
+    /// [`AutomationError::InvalidOperation`] if the radio button is not
+    /// checked.
+    pub fn add_to_selection(&self) -> Result<(), AutomationError> {
         if self.radio_button().is_checked() != Some(true) {
-            panic!("Operation cannot be performed");
+            return Err(AutomationError::invalid_operation_with("Operation cannot be performed"));
         }
         Ok(())
     }
@@ -134,24 +135,27 @@ impl RadioButtonAutomationPeer {
     /// Removes the radio button from the selection (the selection item
     /// provider contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the radio button is checked.
-    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
+    /// [`AutomationError::InvalidOperation`] if the radio button is
+    /// checked.
+    pub fn remove_from_selection(&self) -> Result<(), AutomationError> {
         if self.radio_button().is_checked() == Some(true) {
-            panic!("Operation cannot be performed");
+            return Err(AutomationError::invalid_operation_with("Operation cannot be performed"));
         }
         Ok(())
     }
 
     /// Checks the radio button (the selection item provider contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the radio button is disabled.
-    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
+    /// [`AutomationError::InvalidOperation`] if the radio button is
+    /// disabled (the reference throws an `InvalidOperationException`
+    /// here, not an `ElementNotEnabledException`).
+    pub fn select(&self) -> Result<(), AutomationError> {
         if !self.is_enabled() {
-            panic!("Element is disabled thus it cannot be selected");
+            return Err(AutomationError::invalid_operation_with("Element is disabled thus it cannot be selected"));
         }
 
         self.radio_button().set_is_checked(Some(true));

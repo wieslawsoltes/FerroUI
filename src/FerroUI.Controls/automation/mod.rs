@@ -3,6 +3,7 @@
 //! contracts the peers implement.
 
 mod automation_element_identifiers;
+mod automation_error;
 mod automation_live_setting;
 mod automation_properties;
 mod automation_property;
@@ -25,6 +26,7 @@ mod value_pattern_identifiers;
 mod automation_properties_tests;
 
 pub use automation_element_identifiers::AutomationElementIdentifiers;
+pub use automation_error::AutomationError;
 pub use automation_live_setting::AutomationLiveSetting;
 pub use automation_properties::{AccessibilityView, AutomationProperties};
 pub use automation_property::AutomationProperty;
