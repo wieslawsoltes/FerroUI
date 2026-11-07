@@ -14,8 +14,9 @@
 //!   document, or a type or a key); the names and string literals of the Rust sources of the
 //!   application ([`source_roots`]: a name that is a type key or a class, a string that is a key);
 //!   and the roots a build script adds ([`Roots::extend`]). `theme-roots = "all"` and a build with
-//!   the tables of types (`DEP_FERROUI_BASE_XAML_TYPE_TABLES`: the run-time loader, hot reload,
-//!   the designer, DevTools) keep every unit.
+//!   `ferroui-base/full-themes` (`DEP_FERROUI_BASE_XAML_FULL_THEMES`: the run-time loader, hot
+//!   reload, the designer, DevTools, Inspect) keep every unit. What the compiled documents of the
+//!   dependencies name is a root too (the `references` of their `.xamlmeta`).
 //! - **Live types.** A live type makes its base classes live, and the classes its code creates
 //!   (the creates edges of the type models, `TypeModel::creates`: `ListBox` creates
 //!   `ListBoxItem`), transitively ([`TypeGraph::live`]).
@@ -233,10 +234,10 @@ pub fn source_roots<'t>(references: &SourceReferences, themes: impl IntoIterator
 }
 
 /// The canonical indices of the units of `theme` that `roots` keep, ascending (see the module
-/// documentation). A live type makes the types of [`TypeGraph::live`] live. `type_tables` keeps
+/// documentation). A live type makes the types of [`TypeGraph::live`] live. `full_themes` keeps
 /// every unit.
-pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, type_tables: bool) -> Vec<u32> {
-    if roots.all || type_tables {
+pub fn kept_units(theme: &ThemeUnitsModel, roots: &Roots, graph: &TypeGraph, full_themes: bool) -> Vec<u32> {
+    if roots.all || full_themes {
         let mut all: Vec<u32> = theme.units.iter().map(|unit| unit.index).collect();
         all.sort_unstable();
         all.dedup();

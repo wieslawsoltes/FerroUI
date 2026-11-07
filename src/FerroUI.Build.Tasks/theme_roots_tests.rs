@@ -102,7 +102,7 @@ fn explicit_roots_name_units_types_or_keys() {
 }
 
 #[test]
-fn every_unit_is_kept_for_all_or_with_the_tables_of_types() {
+fn every_unit_is_kept_for_all_or_with_full_themes() {
     let all = Roots { all: true, ..Roots::default() };
     assert_eq!(kept(&all), (0..9).collect::<Vec<u32>>());
     assert_eq!(kept_units(&theme(), &Roots::default(), &TypeGraph::default(), true), (0..9).collect::<Vec<u32>>());

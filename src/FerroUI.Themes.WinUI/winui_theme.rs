@@ -182,8 +182,8 @@ impl WinUITheme {
     }
 
     /// Creates the theme with the units the application registered (#568, step 3): the
-    /// constructor of a load by URI and of the type information. Every unit when the tables of
-    /// types are linked (`ferroui-base/type-tables`), else the parts the application registered
+    /// constructor of a load by URI and of the type information. Every unit when the build has
+    /// `ferroui-base/full-themes`, else the parts the application registered
     /// (`rt::register_theme_parts`), else the full theme if one was constructed before, else the
     /// ambient unit alone.
     #[doc(hidden)]

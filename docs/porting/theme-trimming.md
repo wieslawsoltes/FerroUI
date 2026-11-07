@@ -285,9 +285,10 @@ The theme crate compiles its documents once, as today. The emitter partitions th
   tables. `WinUITheme::new()` and `with_service_provider()` keep their meaning, the full theme, and
   are the only references to the static table of all units. `try_load` (the URI loader that
   `register_types` registers) applies the units the application registered and refers to all units
-  only under a cfg that the theme's build sets when `ferroui-base` is built with `type-tables`.
-  `ferroui-base` already has `links = "ferroui_base_xaml"`: its build script can print
-  `cargo::metadata=type_tables=1`, so dependent build scripts see `DEP_FERROUI_BASE_XAML_TYPE_TABLES`.
+  only under a cfg that the theme's build sets when `ferroui-base` is built with `full-themes`
+  (`type-tables` until 11.7). `ferroui-base` already has `links = "ferroui_base_xaml"`: its build
+  script can print `cargo::metadata=full_themes=1`, so dependent build scripts see
+  `DEP_FERROUI_BASE_XAML_FULL_THEMES`.
 - **Application side.** When a compiled document constructs a class whose `.xamlmeta` has units
   (`<WinUITheme />` in `App.xaml`), the emitter writes
   `WinUITheme::with_parts(sp, &crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI)`. After all
@@ -303,7 +304,8 @@ The theme crate compiles its documents once, as today. The emitter partitions th
     example `ListBox` creates `ListBoxItem` containers and `TextBox` creates `TextSelectionHandle`;
   - explicit roots in `[package.metadata.ferroui] theme-roots = ["AccentButtonStyle",
     "CalendarView"]`, or `theme-roots = "all"`;
-  - everything, when `DEP_FERROUI_BASE_XAML_TYPE_TABLES` is set.
+  - the keys and types the compiled documents of the dependencies name (11.7);
+  - everything, when `DEP_FERROUI_BASE_XAML_FULL_THEMES` is set.
 - **Linker.** Unit functions and tables that nothing references are removed by section garbage
   collection (`-dead_strip`, `--gc-sections`, `/OPT:REF`). Rust emits function sections by default,
   so this works without LTO. Removing a unit also removes the controls that only its templates
@@ -715,20 +717,24 @@ variant. A control that only Rust code creates was not a root in step 3 and need
 creates edges of the type models root it (section 11); only a name built at run time still needs
 `theme-roots`.
 
-### 10.2 The type tables switch
+### 10.2 The full themes switch
 
-`ferroui-base` already has `links = "ferroui_base_xaml"`. With its feature `type-tables` its build
-script now prints `cargo::metadata=type_tables=1`, which the build scripts of the crates that
-depend on it directly see as `DEP_FERROUI_BASE_XAML_TYPE_TABLES`. `ferroui-build` reads the
-variable (`Build::from_env`, `Build::type_tables`):
+`ferroui-base` already has `links = "ferroui_base_xaml"`. With its feature `full-themes` (which
+includes `type-tables`) its build script prints `cargo::metadata=full_themes=1`, which the build
+scripts of the crates that depend on it directly see as `DEP_FERROUI_BASE_XAML_FULL_THEMES`.
+`ferroui-build` reads the variable (`Build::from_env`, `Build::full_themes`):
 
-- a crate whose compiled markup has units gets `cargo::rustc-check-cfg=cfg(ferroui_type_tables)`
-  and, when the variable is set, `cargo::rustc-cfg=ferroui_type_tables`;
+- a crate whose compiled markup has units gets `cargo::rustc-check-cfg=cfg(ferroui_full_themes)`
+  and, when the variable is set, `cargo::rustc-cfg=ferroui_full_themes`;
 - an application that trims keeps every unit when the variable is set. That is the run-time loader,
-  hot reload, the designer, DevTools, Inspect and the declarative View API: each of them can show a
-  control that no compiled document names. Test builds whose dev-dependencies link the run-time
-  loader get the full theme for the same reason. The trimmed configuration is checked by release
-  runs (screenshots, sizes).
+  hot reload, the designer, DevTools and Inspect: each of them can show a control that no compiled
+  document and no source of the application names. Test builds whose dev-dependencies link the
+  run-time loader get the full theme for the same reason. The trimmed configuration is checked by
+  release runs (screenshots, sizes).
+
+As first implemented, the switch was `type-tables` itself, so the declarative View API and the
+behaviors (which look types up by name but construct only what their application's code names)
+also kept every unit. 11.7 separates the two.
 
 ### 10.3 Runtime and theme API
 
@@ -753,7 +759,7 @@ The generated file of a class with units (the emitter, `rust_emitter/theme_units
 - the unit statics are public (`pub static THEME_UNIT_<index>`), so that an application's table
   names them. `AMBIENT_THEME_UNITS` is the ambient unit alone. `THEME_CLASS` is the full name of the
   class;
-- `pub fn registered_theme_units()` returns `THEME_UNITS` under `cfg(ferroui_type_tables)`, else the
+- `pub fn registered_theme_units()` returns `THEME_UNITS` under `cfg(ferroui_full_themes)`, else the
   registered parts, else `AMBIENT_THEME_UNITS`;
 - `THEME_UNIT_TYPE_KEYS`, the type keys of each unit by index, exists under `cfg(debug_assertions)`
   only.
@@ -950,3 +956,31 @@ step 3, and its `dist` executable is the same 28.63 MB: the roots from its code 
 edges of the controls it reaches add no unit. It opens, renders and closes with no diagnostic. The
 other samples do not opt in and are unchanged; opting them in, with their screenshots compared
 against `theme-roots = "all"`, is the gate for making trimming the default.
+
+### 11.7 The documents of the dependencies, and `full-themes`
+
+Opting the desktop samples in (the gate of 11.6) found two gaps.
+
+- **The documents of the dependencies.** A control library's compiled document can name a key of
+  the application's theme: `samples/SampleControls/HamburgerMenu/HamburgerMenu.xaml` animates its
+  pane with `{StaticResource SplitViewPaneAnimationEasing}`, a key of the Fluent `SplitView`
+  document. The roots read only the application's documents, so `RenderDemo` and
+  `VirtualizationDemo` trimmed the unit away and failed at start-up ("Static resource ... not
+  found"). The `.xamlmeta` of a crate whose compiled markup has no theme units now records what its
+  documents name (`referenced_types`, `referenced_keys`: `document_references` of each document,
+  sorted), and an application that trims roots what all of its dependencies' documents name. The
+  documents of a theme are rooted through its unit graph instead, so a theme crate records none.
+  This is conservative (open question 9): a library's documents root their keys and types whenever
+  the application depends on the library, used or not.
+- **`type-tables` is not `full-themes`.** `ferroui-view` (the selector parser of `style(..)`) and
+  `ferroui-xaml-interactivity` (the member lookup of the behaviors) look types up by name, so they
+  enable `type-tables`; that made every application that uses them keep every unit
+  (`HelloWorld.ComponentHost` kept 164 of 164 WinUI units, `BehaviorsGallery` 75 of 75 Fluent
+  units). Neither constructs a control that its application's documents or sources do not name:
+  `rsx!` names its elements in the sources, which step 4 roots. `ferroui-base` therefore has a
+  separate feature, `full-themes = ["type-tables"]`, for what can show any control (the run-time
+  loader, hot reload, the designer, DevTools, Inspect, Diagnostics, and the unit-test builds of
+  `ferroui-controls` and `ferroui-markup-xaml`), and the switch of 10.2 reads it.
+
+Measurements: see 11.8.
+
