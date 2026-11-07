@@ -328,14 +328,14 @@ impl TypeInfo {
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register_all`](Self::register_all), which always
     /// registers.
-    #[cfg(feature = "type-tables")]
+    #[cfg(any(feature = "type-tables", test))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(feature = "type-tables"))]
+    #[cfg(not(any(feature = "type-tables", test)))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         let _ = types;
