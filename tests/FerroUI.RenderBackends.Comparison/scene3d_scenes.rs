@@ -40,6 +40,11 @@ pub struct Scene3DCase {
     /// tolerance of the harness: none for a scene drawn one to one, the antialiasing of the edges
     /// of a rotated image for the others.
     pub bound: f64,
+    /// The layers the scene draws over the same silhouettes (a `MaterialGroup` with a diffuse, a
+    /// specular and an emissive layer draws three): each layer's edges are sampled by 4x MSAA on
+    /// the device and by the ordered grid of the reference, so the edge bounds of a GPU executor
+    /// grow with it. The interior bound does not.
+    pub layers: u32,
 }
 
 /// A pixel with the colour it has (premultiplied RGBA), within `levels`.
@@ -766,7 +771,7 @@ fn case(
     scene: fn() -> Arc<Scene3DSnapshot>,
     probes: fn(usize) -> Vec<Probe>,
 ) -> Scene3DCase {
-    Scene3DCase { name, scene, draw: draw_plain, plain: true, probes, tolerance: Tolerance::Largest(2), bound: 0.05 }
+    Scene3DCase { name, scene, draw: draw_plain, plain: true, probes, tolerance: Tolerance::Largest(2), bound: 0.05, layers: 1 }
 }
 
 /// The eleven scenes of step D3.
@@ -778,7 +783,7 @@ pub fn scenes() -> Vec<Scene3DCase> {
         case("orthographic-camera", orthographic_scene, orthographic_probes),
         case("matrix-camera", matrix_camera_scene, matrix_camera_probes),
         case("front-back-culling", culling_scene, culling_probes),
-        case("material-group", material_group_scene, material_group_probes),
+        Scene3DCase { layers: 3, ..case("material-group", material_group_scene, material_group_probes) },
         case("transparent-overlap", transparency_scene, transparency_probes),
         case("near-far-clipping", clipping_scene, clipping_probes),
         Scene3DCase {
@@ -789,6 +794,7 @@ pub fn scenes() -> Vec<Scene3DCase> {
             probes: rotated_probes,
             tolerance: Tolerance::Moves,
             bound: 3.0,
+            layers: 1,
         },
         case("empty", empty_scene, empty_probes),
     ]

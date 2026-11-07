@@ -105,8 +105,8 @@ impl DeviceDifference {
 
     /// The faces within [`GPU_INTERIOR_LEVELS`], and the mean within that of
     /// [`Tolerance::Moves`]: the edges may differ, the image may not.
-    fn is_within(&self) -> bool {
-        self.interior_largest <= GPU_INTERIOR_LEVELS && self.mean <= MOVED_MEAN
+    fn is_within(&self, layers: u32) -> bool {
+        self.interior_largest <= GPU_INTERIOR_LEVELS && self.mean <= MOVED_MEAN * f64::from(layers.max(1))
     }
 }
 
@@ -138,7 +138,7 @@ fn every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode() {
                         difference.mean,
                         100.0 * difference.edge_outliers,
                     );
-                    if !difference.is_within() {
+                    if !difference.is_within(case.layers) {
                         failures.push(format!("{} on {} at {scale}x: {difference:?}", case.name, backend.name));
                     }
                     continue;
@@ -199,7 +199,8 @@ fn every_scene_3d_has_its_golden_properties_in_every_backend_and_mode() {
 /// ([`GPU_EDGE_SHARE`], the mean of `Tolerance::Moves`) for a mode that draws on the device.
 fn alike_bounds(case: &Scene3DCase, on_device: bool) -> (f64, f64) {
     if on_device {
-        (case.bound.max(GPU_EDGE_SHARE), 2.0 * Tolerance::Moves.mean() + 0.05)
+        let layers = f64::from(case.layers.max(1));
+        (case.bound.max(GPU_EDGE_SHARE * layers), (2.0 * Tolerance::Moves.mean() + 0.05) * layers)
     } else {
         (case.bound, 2.0 * case.tolerance.mean() + 0.05)
     }
