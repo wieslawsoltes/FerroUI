@@ -208,7 +208,8 @@ impl MacOSTheme {
     ///
     /// `parts` are units of `crate::compiled_xaml::THEME_UNITS`, in canonical order (ascending
     /// indices), with the ambient unit (index 0) first: the table an application's build writes
-    /// when it trims its themes (`[package.metadata.ferroui] theme-trimming = true`). The theme
+    /// when it trims its themes (the default; `[package.metadata.ferroui] theme-trimming = false`
+    /// turns it off). The theme
     /// applies those units, at the places of the full theme and in its order; a unit that `parts`
     /// leaves out adds nothing. Only the units named are linked into the application. In debug
     /// builds a lookup of a control theme that `parts` left out logs once that it was trimmed.
@@ -237,8 +238,8 @@ impl MacOSTheme {
     }
 
     /// Creates the theme with the units the application registered (#568, step 3): the
-    /// constructor of a load by URI and of the type information. Every unit when the tables of
-    /// types are linked (`ferroui-base/type-tables`), else the parts the application registered
+    /// constructor of a load by URI and of the type information. Every unit when the build has
+    /// `ferroui-base/full-themes`, else the parts the application registered
     /// (`rt::register_theme_parts`), else the full theme if one was constructed before, else the
     /// ambient unit alone.
     #[doc(hidden)]
