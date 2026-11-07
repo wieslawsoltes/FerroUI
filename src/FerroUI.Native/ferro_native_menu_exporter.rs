@@ -3,16 +3,16 @@
 
 use crate::ferro_native_platform_extensions::MacOSPlatformOptions;
 use crate::frn_menu::{FrnMenu, IMenuFactory};
+use crate::frn_string::to_c_string;
 use crate::helpers::ComResultExt;
 use crate::interop::*;
 use crate::mac_os_native_menu_commands::MacOSNativeMenuCommands;
 use ferroui_base::input::{Key, KeyGesture, KeyModifiers};
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::platform::{INativeMenuExporter, ITopLevelNativeMenuExporter};
-use ferroui_controls::{Application, NativeDock, NativeMenu, NativeMenuItem, NativeMenuItemSeparator, WindowBase};
-use ferroui_dialogs::AboutFerroDialog;
+use ferroui_controls::{Application, NativeDock, NativeMenu, NativeMenuItem, NativeMenuItemSeparator};
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -130,30 +130,20 @@ impl FerroNativeMenuExporter {
         }
     }
 
-    fn create_default_app_menu() -> Ref<NativeMenu> {
+    /// The application menu of an application that sets none: "About FerroUI", which shows the
+    /// standard About panel of the system with the name and version of the framework (#612: a
+    /// dialog written in markup here linked the dialogs, their markup and the controls they use
+    /// into every application).
+    fn create_default_app_menu(commands: Option<ComPtr<IFrnApplicationCommands>>) -> Ref<NativeMenu> {
         let result = NativeMenu::new();
 
         let about_item = NativeMenuItem::with_header("About FerroUI");
 
         // The subscription lives as long as the item.
-        about_item.click(|_| {
-            Dispatcher::ui_thread().spawn_local_with_priority(
-                async {
-                    let dialog = AboutFerroDialog::new();
-
-                    let main_window = Application::current()
-                        .and_then(|app| app.application_lifetime())
-                        .and_then(|lifetime| lifetime.as_classic_desktop_style_application_lifetime().and_then(|d| d.main_window()))
-                        .filter(|main_window| main_window.is_visible());
-                    match main_window {
-                        Some(main_window) => {
-                            let _ = dialog.show_dialog(&main_window).await;
-                        }
-                        None => WindowBase::show(&dialog),
-                    }
-                },
-                DispatcherPriority::DEFAULT,
-            );
+        about_item.click(move |_| {
+            if let Some(commands) = &commands {
+                commands.show_about_panel(Some(c"FerroUI"), Some(&to_c_string(env!("CARGO_PKG_VERSION")))).check();
+            }
         }).detach();
 
         result.add(about_item);
@@ -243,7 +233,7 @@ impl FerroNativeMenuExporter {
                     let app_menu = match app_menu {
                         Some(app_menu) => app_menu,
                         None => {
-                            let app_menu = Self::create_default_app_menu();
+                            let app_menu = Self::create_default_app_menu(self.application_commands.clone());
 
                             if let Some(app) = &app {
                                 NativeMenu::set_menu(app, Some(app_menu.clone()));
