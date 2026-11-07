@@ -884,6 +884,10 @@ impl NavigationViewItem {
         }
     }
 
+    pub(crate) fn selection_indicator(&self) -> Option<Ref<Control>> {
+        self.parts.borrow().selection_indicator.clone()
+    }
+
     /// `UpdateVisualState`: the states of WinUI as pseudo-classes, the indentation of the content
     /// grid, the selection indicator and the tool tip of a closed compact item.
     fn update_visual_state(&self) {

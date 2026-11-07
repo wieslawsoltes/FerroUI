@@ -628,3 +628,39 @@ fn invalid_subchannel_target_panics() {
     }));
     assert!(result.is_err());
 }
+
+/// WinUI selection indicators restore their pose with ordinary property assignments,
+/// including unchanged values. A later StartAnimation in the same commit must win.
+#[test]
+fn property_assignment_restores_the_value_and_allows_same_batch_replacement() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+    let animation = fixture.compositor.create_scalar_key_frame_animation();
+    animation.insert_key_frame(0.0, 4.0);
+    animation.insert_key_frame(1.0, 4.0);
+    animation.set_duration(Duration::from_secs(30));
+    visual.start_animation("Scale.Y", &*animation);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(1));
+    assert_eq!(server.scale().y, 4.0);
+    assert_eq!(visual.scale().y, 1.0, "the UI still holds the resting value");
+    visual.set_scale(Vector3D::new(1.0, 1.0, 1.0));
+    assert!(visual.try_get_animation_controller("Scale.Y").is_none());
+    fixture.run_jobs();
+    assert_eq!(server.scale().y, 1.0);
+    assert!(!fixture.compositor.server().animations().need_next_tick());
+
+    visual.start_animation("Scale.Y", &*animation);
+    visual.set_scale(Vector3D::new(1.0, 1.0, 1.0));
+    visual.start_animation("Scale.Y", &*animation);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(1));
+    assert_eq!(server.scale().y, 4.0, "the final start replaces the earlier reset");
+    assert!(visual.try_get_animation_controller("Scale.Y").is_some());
+    visual.set_scale(Vector3D::new(1.0, 1.0, 1.0));
+    fixture.run_jobs();
+    assert_eq!(server.scale(), Vector3D::new(1.0, 1.0, 1.0));
+}

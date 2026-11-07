@@ -6,6 +6,7 @@ use crate::automation::peers::{AutomationPeer, ControlAutomationPeer, Navigation
 use crate::automation::{AutomationProperties, SelectionPatternIdentifiers};
 use crate::items_source::{reference_equals, ItemsSource};
 use crate::navigation_view_events::*;
+use crate::selection_indicator_animation::SelectionIndicatorAnimation;
 use crate::primitives::{
     NavigationViewTemplateSettings, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
     TemplatedControlImplExt,
@@ -31,7 +32,7 @@ use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
-    StyledElement, StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, VisualImpl, WeakRef,
+    StyledElement, StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -147,7 +148,7 @@ impl Parts {
 ///
 /// The menu items are realized in stack panels, not in `ItemsRepeater`s with a hierarchical
 /// `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md, section 10.4): the
-/// overflow of the top pane, the animations of the selection indicator and of the pane, the
+/// overflow of the top pane, the animations of the pane, the
 /// shadow of the pane, the padding of the title bar, the shoulder navigation and the selectors of
 /// templates and styles.
 #[repr(C)]
@@ -170,6 +171,8 @@ pub struct NavigationView {
     rebuild_pending: Cell<bool>,
     rebuild_force: Cell<bool>,
     syncing_selection: Cell<bool>,
+    indicator_animation: SelectionIndicatorAnimation,
+    indicator_layout: RefCell<Option<Subscription>>,
     pending_invocation: RefCell<Option<Ref<NavigationViewItemBase>>>,
     pending_selection: Cell<bool>,
     pending_selection_revision: Cell<u64>,
@@ -294,7 +297,7 @@ ferro_class_info!(NavigationView {
         ],
     },
 });
-ferro_impl_classes!(NavigationView: StyledElementImpl, VisualImpl, InteractiveImpl, ContentControlImpl);
+ferro_impl_classes!(NavigationView: StyledElementImpl, InteractiveImpl, ContentControlImpl);
 
 /// The coercion of WinUI's lengths and widths (`NavigationView::OnPropertyChanged`'s
 /// `CoerceToGreaterThanZero`): a negative length is 0.
@@ -471,6 +474,8 @@ impl NavigationView {
             rebuild_pending: Cell::new(false),
             rebuild_force: Cell::new(false),
             syncing_selection: Cell::new(false),
+            indicator_animation: SelectionIndicatorAnimation::default(),
+            indicator_layout: RefCell::new(None),
             pending_invocation: RefCell::new(None),
             pending_selection: Cell::new(false),
             pending_selection_revision: Cell::new(0),
@@ -888,6 +893,7 @@ impl LayoutableImpl for NavigationView {
             // The templated control removes the old tree before OnApplyTemplate and does not call it
             // for no template: the old parts are revoked first, so that a retained button or split
             // view cannot act on the control afterwards.
+            this.indicator_animation.clear();
             this.parts.take().detach();
             Self::parent_apply_template(this);
             *this.applied_template.borrow_mut() = template;
@@ -933,6 +939,7 @@ impl InputElementImpl for NavigationView {
 
 impl TemplatedControlImpl for NavigationView {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
+        this.indicator_animation.clear();
         this.parts.replace(Parts::default()).detach();
         Self::parent_on_apply_template(this, args);
         let scope = args.name_scope();
@@ -2000,6 +2007,7 @@ impl NavigationView {
             }
         }
         self.syncing_selection.set(was_syncing);
+        self.invalidate_arrange();
     }
 
     /// `OnSelectedItemPropertyChanged`.
@@ -2174,5 +2182,44 @@ impl NavigationView {
                 handler(&args);
             }
         }
+    }
+}
+
+impl VisualImpl for NavigationView {
+    fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_attached_to_visual_tree(this, e);
+        let weak = this.to_ref().downgrade();
+        *this.indicator_layout.borrow_mut() = Some(this.layout_updated(move || {
+            if let Some(owner) = weak.upgrade() {
+                owner.update_selection_indicator();
+            }
+        }));
+    }
+
+    fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        this.indicator_layout.take();
+        this.indicator_animation.clear();
+        Self::parent_on_detached_from_visual_tree(this, e);
+    }
+}
+
+impl NavigationView {
+    fn update_selection_indicator(&self) {
+        let selected = self.container_from_menu_item(&self.selected_item());
+        let entry = self.entries().into_iter().find(|entry| Some(&entry.container) == selected.as_ref());
+        // FindLowestLevelContainerToDisplaySelectionIndicator: a selected descendant hidden
+        // by a collapsed ancestor is represented by that ancestor's indicator.
+        let item = entry.and_then(|entry| {
+            entry.ancestors.into_iter()
+                .filter_map(|container| container.cast::<NavigationViewItem>())
+                .find(|item| !item.is_expanded())
+                .or_else(|| entry.container.cast::<NavigationViewItem>())
+        });
+        let indicator = item.and_then(|item| item.selection_indicator());
+        self.indicator_animation.update(
+            self,
+            indicator,
+            self.pane_display_mode() == NavigationViewPaneDisplayMode::Top,
+        );
     }
 }

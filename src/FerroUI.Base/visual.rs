@@ -535,16 +535,19 @@ impl VisualImpl for Visual {
         // composition visual (so that the initial values do not).
         this.apply_composition_transitions(&comp, false);
 
-        // TODO: Introduce a dirty mask like WPF has, so we don't overwrite properties every time
-        comp.set_offset(crate::Vector3D::new(bounds.x, bounds.y, 0.0));
-        comp.set_size(crate::Vector::new(bounds.width, bounds.height));
-        comp.set_visible(
-            (this.is_visible() || this.is_shown_by_composition())
-                && !this.is_hidden_by_composition()
-                && !this.is_render_suppressed(),
-        );
-        comp.set_opacity(this.opacity() as f32);
-        comp.set_clip_to_bounds(this.clip_to_bounds());
+        // Composition property assignment replaces an animation, including assignment of
+        // an unchanged API-side value. Only forward actual framework changes to the handoff
+        // visual, so an unrelated repaint does not replace an application's animation.
+        let offset = crate::Vector3D::new(bounds.x, bounds.y, 0.0);
+        if comp.offset() != offset { comp.set_offset(offset); }
+        let size = crate::Vector::new(bounds.width, bounds.height);
+        if comp.size() != size { comp.set_size(size); }
+        let visible = (this.is_visible() || this.is_shown_by_composition())
+            && !this.is_hidden_by_composition() && !this.is_render_suppressed();
+        if comp.visible() != visible { comp.set_visible(visible); }
+        let opacity = this.opacity() as f32;
+        if comp.opacity() != opacity { comp.set_opacity(opacity); }
+        if comp.clip_to_bounds() != this.clip_to_bounds() { comp.set_clip_to_bounds(this.clip_to_bounds()); }
         comp.set_clip(this.clip().and_then(|clip| clip.platform_impl()));
 
         let opacity_mask = this.opacity_mask();
@@ -598,10 +601,10 @@ impl VisualImpl for Visual {
             render_transform = render_transform * manipulation;
         }
 
-        comp.set_transform_matrix(render_transform);
+        if comp.transform_matrix() != render_transform { comp.set_transform_matrix(render_transform); }
 
         if let Some(translation) = this.composition_translation() {
-            comp.set_translation(translation);
+            if comp.translation() != translation { comp.set_translation(translation); }
         }
 
         this.synchronize_composition_facades(&comp);
