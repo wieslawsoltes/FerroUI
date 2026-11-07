@@ -31,10 +31,15 @@ impl ItemsPanelTemplate {
 
     /// Builds the panel.
     ///
+    /// Inside an error scope of a load
+    /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
+    /// failure is the error of the scope and the template builds nothing.
+    ///
     /// # Panics
-    /// Panics if the content builds a control that is not a panel.
+    /// Outside an error scope, panics if the content builds a control that is
+    /// not a panel.
     pub fn build(&self) -> Option<Ref<Panel>> {
-        crate::throw(self.try_build())
+        crate::throw_or(self.try_build(), || None)
     }
 
     /// [`build`](Self::build) without the panic: content that is not a

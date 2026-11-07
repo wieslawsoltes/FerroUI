@@ -108,6 +108,8 @@ fn using_stream<T>(
     stream: Rc<dyn DockStream>,
     action: impl FnOnce() -> SerializationResult<T>,
 ) -> SerializationResult<T> {
+    // Boundary (#567): the `using` of the reference; errors are `SerializationResult` values,
+    // and the stream of the application is closed before a panic is raised again.
     let result = catch_unwind(AssertUnwindSafe(action));
     stream.close().map_err(DockSerializationError::new)?;
     match result {

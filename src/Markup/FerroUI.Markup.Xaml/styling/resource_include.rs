@@ -6,7 +6,7 @@ use ferroui_base::controls::{
     ResourceValue,
 };
 use ferroui_base::metadata::{IServiceProvider, MarkupDelegate};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::utilities::UriRef;
 use ferroui_base::ferro_markup_type;
@@ -66,6 +66,16 @@ impl ResourceInclude {
     /// loaded.
     pub fn loaded(&self) -> Rc<dyn IResourceDictionary> {
         crate::throw(self.try_loaded())
+    }
+
+    /// The loaded resource dictionary for the members of the resource contracts, which have
+    /// no error channel: inside an error scope of a load
+    /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
+    /// document that cannot be loaded is the error of the scope, and the
+    /// include acts as if it were empty (#567); outside, it panics as
+    /// [`loaded`](Self::loaded) does.
+    fn loaded_or_reported(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        crate::throw_or(self.try_loaded().map(Some), || None)
     }
 
     /// The loaded resource dictionary; loads it on first use. A missing
@@ -135,12 +145,12 @@ impl ResourceInclude {
 
 impl IResourceNode for ResourceInclude {
     fn has_resources(&self) -> bool {
-        self.loaded().has_resources()
+        self.loaded_or_reported().is_some_and(|loaded| loaded.has_resources())
     }
 
     fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         if !self.is_loading.get() {
-            return self.loaded().try_get_resource(key, theme);
+            return self.loaded_or_reported()?.try_get_resource(key, theme);
         }
 
         None
@@ -163,19 +173,26 @@ impl IResourceProvider for ResourceInclude {
     }
 
     fn owner(&self) -> Option<ResourceHostRef> {
-        self.loaded().owner()
+        self.loaded_or_reported()?.owner()
     }
 
     fn owner_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.loaded().owner_changed(handler)
+        match self.loaded_or_reported() {
+            Some(loaded) => loaded.owner_changed(handler),
+            None => Disposable::empty(),
+        }
     }
 
     fn add_owner(&self, owner: &ResourceHostRef) {
-        self.loaded().add_owner(owner)
+        if let Some(loaded) = self.loaded_or_reported() {
+            loaded.add_owner(owner);
+        }
     }
 
     fn remove_owner(&self, owner: &ResourceHostRef) {
-        self.loaded().remove_owner(owner)
+        if let Some(loaded) = self.loaded_or_reported() {
+            loaded.remove_owner(owner);
+        }
     }
 }
 

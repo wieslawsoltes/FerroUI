@@ -82,6 +82,9 @@ impl GlibDispatcherImpl {
             return false;
         };
         let queue = platform.event_grouper_dispatch_queue().clone();
+        // Boundary (#567): a GLib source callback, which a panic must not unwind through. The
+        // events dispatched here run application handlers; their panic goes to the frame of the
+        // dispatcher, which raises it again from `run_loop`.
         let result = catch_unwind(AssertUnwindSafe(|| {
             // Completely drain X11 socket while we are at it
             while self.x11_events.is_pending() {

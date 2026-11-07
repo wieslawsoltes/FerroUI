@@ -87,6 +87,9 @@ impl INativeControlHostImpl for X11NativeControlHost {
         let holder = Rc::new(DumbWindow::new(self.platform.info(), true, Some(self.window_handle())));
         // It has to be disposed when the creation or the attachment fails.
         let attachment: RefCell<Option<Rc<Attachment>>> = RefCell::new(None);
+        // Boundary (#567): the try/catch of the reference around the application callback that
+        // creates the child. The holder and the attachment are disposed of before its panic is
+        // raised again.
         let result = catch_unwind(AssertUnwindSafe(|| {
             let holder_handle: Rc<dyn IPlatformHandle> = holder.clone();
             let child = create(holder_handle);

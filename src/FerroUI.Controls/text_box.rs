@@ -2456,6 +2456,8 @@ impl TextBox {
             match pasted.await {
                 Ok(result) => result,
                 // A failure of the paste is the one the clipboard operation does not handle.
+                // Boundary (#567): the panic of the paste task is raised again into the operation,
+                // whose catch in `ClipboardHelper::start` raises it on the dispatcher.
                 Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
                 // A paste that was dropped with the dispatcher has nothing left to do.
                 Err(JoinError::Canceled) => Ok(()),

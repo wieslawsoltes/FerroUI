@@ -114,6 +114,8 @@ impl DockHelpers {
         let input = input.filter(|v| v.is_effectively_visible())?;
         let mut raw = None;
         let mut visible = None;
+        // Boundary (#567): the hit test runs the custom hit tests of application controls; as in
+        // the reference, a failure is printed and the drop search goes on without a hit.
         if let Err(error) = catch_unwind(AssertUnwindSafe(|| {
             raw = Some(input.get_visuals_at(point));
             visible = Some(input.get_visuals_at_filtered(point, &Self::is_hit_test_visible));

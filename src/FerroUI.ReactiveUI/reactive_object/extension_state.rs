@@ -152,6 +152,8 @@ impl ExtensionState {
         };
         log_subscriber_exception(self.sender_type.get(), &error);
         let Some(thrown_exceptions) = self.thrown_exceptions.get().cloned() else {
+            // Boundary (#567): with no `ThrownExceptions` observer the panic of the subscriber is
+            // raised again, as the `throw;` of the reference.
             std::panic::resume_unwind(payload);
         };
         thrown_exceptions.on_next(error);

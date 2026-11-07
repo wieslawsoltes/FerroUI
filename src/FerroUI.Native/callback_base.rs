@@ -20,6 +20,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 /// implementation of the current thread and `default` is returned to native
 /// code.
 pub(crate) fn guard<R>(default: R, body: impl FnOnce() -> R) -> R {
+    // Boundary (#567): the body of a callback native code calls, which a panic must not
+    // unwind through. The panic is raised again from `DispatcherImpl::run_loop`.
     match catch_unwind(AssertUnwindSafe(body)) {
         Ok(result) => result,
         Err(payload) => {

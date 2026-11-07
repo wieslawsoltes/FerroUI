@@ -54,6 +54,9 @@ impl PanicError {
     /// or the error of the panic with its payload, which `std::panic::resume_unwind` rethrows
     /// (`throw;`).
     pub fn catch<R>(action: impl FnOnce() -> R) -> Result<R, (ObservableError, Box<dyn Any + Send>)> {
+        // Boundary (#567): every caller wraps user code (selectors, factories, handlers, command
+        // bodies, subscribers) where the reference catches an `Exception` and routes it to
+        // `OnError` or `ThrownExceptions`.
         catch_unwind(AssertUnwindSafe(action)).map_err(|payload| (Self::from_payload(&*payload), payload))
     }
 }
