@@ -1624,6 +1624,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-markup-xaml-winui",
+ "ferroui-media3d",
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
@@ -2602,6 +2603,8 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]

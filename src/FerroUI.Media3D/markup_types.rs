@@ -1,27 +1,49 @@
-//! Markup metadata of the values: their text converters (`Parse`), their constructors, their
-//! components and their distinguished values, so markup writes `Position="0,0,5"`,
-//! `Transform="Identity"` or `Bounds="Empty"` for a property of one of these types.
+//! Markup metadata of the values and the collections: their text converters (`Parse`), their
+//! constructors, their components and their distinguished values, so markup writes
+//! `Position="0,0,5"`, `Transform="Identity"`, `Bounds="Empty"`, `Positions="0,0,0 1,0,0 0,1,0"` or
+//! `TriangleIndices="0 1 2"` for a property of one of these types; and the registration of the
+//! classes of the scene model and of the control `Viewport3D`.
 //!
-//! The types are in the namespace `FerroUI.Media.Media3D`. Mapping that namespace into the
-//! framework's XML namespace (WPF's types are in its default XAML namespace) comes with the scene
-//! objects of step D2 (`docs/porting/media3d.md`, section 3.12): the base library's composition
-//! `Vector3D` already has that name there.
+//! The types are in the namespace `FerroUI.Media.Media3D` (WPF's `System.Windows.Media.Media3D`),
+//! `Viewport3D` in `FerroUI.Controls` (WPF's `System.Windows.Controls`). Both are mapped into the
+//! XML namespace of the framework, as WPF maps its namespaces into its default XAML namespace, so
+//! markup names `<Viewport3D>`, `<PerspectiveCamera>` or `<MeshGeometry3D>` without a prefix.
+//!
+//! One name is in two of the mapped namespaces: `Vector3D`, the 3D vector of this crate and the
+//! composition vector of the base library (namespace `FerroUI`). A property declares its type,
+//! so `LookDirection="0,0,-1"` or `Axis="0,1,0"` is read as the vector of this crate whatever
+//! the mapping; only a type named by its name in markup (an element `<Vector3D>`, `x:Type`,
+//! `x:DataType`) is looked up in the XML namespace, where the first mapped namespace that has
+//! the name wins: the base library's, which is registered first, so markup that worked keeps
+//! working. Such markup names the 3D vector with the prefix of its namespace
+//! (`xmlns:media3d="using:FerroUI.Media.Media3D"`, `<media3d:Vector3D>`); the base library's
+//! `Vector3D` stays unchanged (`docs/porting/media3d.md`, section 3.12).
 
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped};
-use ferroui_base::{ferro_markup_type, TypeInfo};
+use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
+use ferroui_base::{ferro_markup_type, Ref, StaticType, TypeInfo};
 
-use crate::{Matrix3D, Point3D, Point4D, Quaternion, Rect3D, Size3D, Vector3D};
+use crate::{
+    Int32Collection, Material, MaterialCollection, Matrix3D, Model3D, Model3DCollection, Point3D, Point3DCollection,
+    Point4D, Quaternion, Rect3D, Size3D, Transform3D, Transform3DCollection, Vector3D, Vector3DCollection, Visual3D,
+    Visual3DCollection,
+};
 
-/// The namespace of the types of this crate.
-const NAMESPACES: &[(&str, &str)] = &[("ferroui_media3d", "FerroUI.Media.Media3D")];
+/// The namespaces of the modules of this crate: the scene model in WPF's 3D namespace, the
+/// control with the controls.
+const NAMESPACES: &[(&str, &str)] =
+    &[("ferroui_media3d", "FerroUI.Media.Media3D"), ("ferroui_media3d::controls", "FerroUI.Controls")];
 
-/// What this crate states about itself for markup: its assembly name. No XML namespace maps to
-/// its namespace yet (see the documentation of the module).
+/// What this crate states about itself for markup: its assembly name and the namespaces the XML
+/// namespace of the framework maps to (see the documentation of the module for the one name they
+/// share with the base library).
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "FerroUI.Media3D",
     crate_name: "ferroui_media3d",
-    xmlns_definitions: &[],
+    xmlns_definitions: &[
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Media.Media3D" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls" },
+    ],
     xmlns_prefixes: &[],
     metadata: &[],
 };
@@ -163,7 +185,69 @@ ferro_markup_type!(struct Matrix3D {
     ],
 });
 
-/// The types declared in this file.
+// The collections. A collection of values is read from its text form; every collection takes
+// its items from markup through `Add`.
+
+ferro_markup_type!(class Point3DCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Point3DCollection, Option<Point3DCollection>],
+    parse: Point3DCollection::parse,
+    constructors: [() => Point3DCollection::new],
+    properties: [Count: i32 { get: |c: &Point3DCollection| c.len() as i32 }],
+    methods: [fn Add(Point3D) => |c: &Point3DCollection, item: Point3D| c.add(item)],
+});
+
+ferro_markup_type!(class Vector3DCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Vector3DCollection, Option<Vector3DCollection>],
+    parse: Vector3DCollection::parse,
+    constructors: [() => Vector3DCollection::new],
+    properties: [Count: i32 { get: |c: &Vector3DCollection| c.len() as i32 }],
+    methods: [fn Add(Vector3D) => |c: &Vector3DCollection, item: Vector3D| c.add(item)],
+});
+
+ferro_markup_type!(class Int32Collection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Int32Collection, Option<Int32Collection>],
+    parse: Int32Collection::parse,
+    constructors: [() => Int32Collection::new],
+    properties: [Count: i32 { get: |c: &Int32Collection| c.len() as i32 }],
+    methods: [fn Add(i32) => |c: &Int32Collection, item: i32| c.add(item)],
+});
+
+ferro_markup_type!(class Model3DCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Model3DCollection, Option<Model3DCollection>],
+    constructors: [() => Model3DCollection::new],
+    properties: [Count: i32 { get: |c: &Model3DCollection| c.len() as i32 }],
+    methods: [fn Add(Ref<Model3D>) => |c: &Model3DCollection, item: Ref<Model3D>| c.add(item)],
+});
+
+ferro_markup_type!(class Transform3DCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Transform3DCollection, Option<Transform3DCollection>],
+    constructors: [() => Transform3DCollection::new],
+    properties: [Count: i32 { get: |c: &Transform3DCollection| c.len() as i32 }],
+    methods: [fn Add(Ref<Transform3D>) => |c: &Transform3DCollection, item: Ref<Transform3D>| c.add(item)],
+});
+
+ferro_markup_type!(class MaterialCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [MaterialCollection, Option<MaterialCollection>],
+    constructors: [() => MaterialCollection::new],
+    properties: [Count: i32 { get: |c: &MaterialCollection| c.len() as i32 }],
+    methods: [fn Add(Ref<Material>) => |c: &MaterialCollection, item: Ref<Material>| c.add(item)],
+});
+
+ferro_markup_type!(class Visual3DCollection {
+    namespace: "FerroUI.Media.Media3D",
+    handles: [Visual3DCollection, Option<Visual3DCollection>],
+    constructors: [() => Visual3DCollection::new],
+    properties: [Count: i32 { get: |c: &Visual3DCollection| c.len() as i32 }],
+    methods: [fn Add(Ref<Visual3D>) => |c: &Visual3DCollection, item: Ref<Visual3D>| c.add(item)],
+});
+
+/// The values declared in this file.
 pub(crate) const TYPES: &[&MarkupType] = &[
     <Point3D as MarkupTyped>::MARKUP,
     <Vector3D as MarkupTyped>::MARKUP,
@@ -174,21 +258,82 @@ pub(crate) const TYPES: &[&MarkupType] = &[
     <Matrix3D as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the namespace, the markup metadata and the assembly of this crate (and those of the
-/// base library) with the tables of known types, and the nullable forms of the values with the
-/// untyped value conversions. Cheap and idempotent; nothing is initialised until a type is used.
+/// The collections declared in this file.
+pub(crate) const COLLECTIONS: &[&MarkupType] = &[
+    <Point3DCollection as MarkupTyped>::MARKUP,
+    <Vector3DCollection as MarkupTyped>::MARKUP,
+    <Int32Collection as MarkupTyped>::MARKUP,
+    <Model3DCollection as MarkupTyped>::MARKUP,
+    <Transform3DCollection as MarkupTyped>::MARKUP,
+    <MaterialCollection as MarkupTyped>::MARKUP,
+    <Visual3DCollection as MarkupTyped>::MARKUP,
+];
+
+macro_rules! types {
+    ($($type_:ty),* $(,)?) => {
+        &[$(<$type_ as StaticType>::TYPE),*]
+    };
+}
+
+/// The classes of the crate.
+const CLASSES: &[&TypeInfo] = types![
+    // FerroUI.Media.Media3D
+    crate::Transform3D,
+    crate::TranslateTransform3D,
+    crate::ScaleTransform3D,
+    crate::RotateTransform3D,
+    crate::MatrixTransform3D,
+    crate::Transform3DGroup,
+    crate::Rotation3D,
+    crate::AxisAngleRotation3D,
+    crate::QuaternionRotation3D,
+    crate::Camera,
+    crate::ProjectionCamera,
+    crate::PerspectiveCamera,
+    crate::OrthographicCamera,
+    crate::MatrixCamera,
+    crate::Model3D,
+    crate::GeometryModel3D,
+    crate::Model3DGroup,
+    crate::Light,
+    crate::AmbientLight,
+    crate::DirectionalLight,
+    crate::PointLightBase,
+    crate::PointLight,
+    crate::SpotLight,
+    crate::Geometry3D,
+    crate::MeshGeometry3D,
+    crate::Material,
+    crate::DiffuseMaterial,
+    crate::SpecularMaterial,
+    crate::EmissiveMaterial,
+    crate::MaterialGroup,
+    crate::Visual3D,
+    crate::ModelVisual3D,
+    crate::Viewport3DVisual,
+    // FerroUI.Controls
+    crate::Viewport3D,
+];
+
+/// Registers the namespaces, the classes, the markup metadata and the assembly of this crate
+/// (and those of the control library and the base library) with the tables of known types, and
+/// the nullable forms of the values and the collections with the untyped value conversions.
+/// Cheap and idempotent; nothing is initialised until a type is used.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
-        ferroui_base::register_types();
+        ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
+        TypeInfo::register_table(CLASSES);
         MarkupType::register_table(TYPES);
+        MarkupType::register_table(COLLECTIONS);
         MarkupAssembly::register_table(&ASSEMBLY);
         ValueTypes::register_global(register_value_types);
     });
 }
 
-/// The nullable forms of the values, for the untyped value conversions (per thread).
+/// The nullable forms of the values and the collections, for the untyped value conversions (per
+/// thread).
 fn register_value_types() {
     ValueTypes::register_nullable::<Point3D>();
     ValueTypes::register_nullable::<Vector3D>();
@@ -197,6 +342,14 @@ fn register_value_types() {
     ValueTypes::register_nullable::<Point4D>();
     ValueTypes::register_nullable::<Quaternion>();
     ValueTypes::register_nullable::<Matrix3D>();
+    ValueTypes::register_nullable::<Point3DCollection>();
+    ValueTypes::register_nullable::<Vector3DCollection>();
+    ValueTypes::register_nullable::<Int32Collection>();
+    ValueTypes::register_nullable::<Model3DCollection>();
+    ValueTypes::register_nullable::<Transform3DCollection>();
+    ValueTypes::register_nullable::<MaterialCollection>();
+    ValueTypes::register_nullable::<Visual3DCollection>();
+    // The texture coordinates are the base library's `Points`, which it registers itself.
 }
 
 #[cfg(test)]
