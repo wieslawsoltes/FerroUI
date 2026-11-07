@@ -17,7 +17,7 @@ use ferroui_controls::automation::provider::{
 };
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationProperty, AutomationPropertyChangedEventArgs,
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    ExpandCollapsePatternIdentifiers, ExpandCollapseState,
     RangeValuePatternIdentifiers, SelectionItemPatternIdentifiers, SelectionPatternIdentifiers,
     TogglePatternIdentifiers, ValuePatternIdentifiers,
 };
@@ -205,9 +205,10 @@ impl Drop for FrnAutomationPeer {
     }
 }
 
-/// Hands the error of a provider member to the dispatcher, as an exception
-/// thrown by a callback is in the reference.
-fn raise_on_error(result: Result<(), ElementNotEnabledError>) {
+/// Hands the error of a provider member (an `ElementNotEnabledError`, or the
+/// `AutomationError` of a call the state of the element refuses, #567) to the
+/// dispatcher, as an exception thrown by a callback is in the reference.
+fn raise_on_error<E: std::any::Any + Send>(result: Result<(), E>) {
     if let Err(e) = result {
         crate::callback_base::raise_exception(Box::new(e));
     }

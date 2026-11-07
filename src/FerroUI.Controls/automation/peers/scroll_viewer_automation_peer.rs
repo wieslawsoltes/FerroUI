@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IScrollProvider, ProviderAdapter, ScrollAmount};
-use crate::automation::{ElementNotEnabledError, ScrollPatternIdentifiers};
+use crate::automation::{AutomationError, ScrollPatternIdentifiers};
 use crate::ScrollViewer;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -69,7 +69,7 @@ impl IScrollProvider for ProviderAdapter<ScrollViewerAutomationPeer> {
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledError> {
+    ) -> Result<(), AutomationError> {
         self.0.scroll(horizontal_amount, vertical_amount)
     }
 
@@ -77,7 +77,7 @@ impl IScrollProvider for ProviderAdapter<ScrollViewerAutomationPeer> {
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledError> {
+    ) -> Result<(), AutomationError> {
         self.0.set_scroll_percent(horizontal_percent, vertical_percent)
     }
 }
@@ -166,16 +166,18 @@ impl ScrollViewerAutomationPeer {
     /// Scrolls the visible region of the content area horizontally and
     /// vertically (the scroll provider contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if a direction that cannot scroll is asked to scroll.
+    /// [`AutomationError::ElementNotEnabled`] if the control is not
+    /// enabled, [`AutomationError::InvalidOperation`] if a direction that
+    /// cannot scroll is asked to scroll.
     pub fn scroll(
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledError> {
+    ) -> Result<(), AutomationError> {
         if !self.is_enabled() {
-            return Err(ElementNotEnabledError::new());
+            return Err(AutomationError::element_not_enabled());
         }
 
         let scroll_horizontally = horizontal_amount != ScrollAmount::NoAmount;
@@ -183,7 +185,7 @@ impl ScrollViewerAutomationPeer {
 
         if scroll_horizontally && !self.horizontally_scrollable() || scroll_vertically && !self.vertically_scrollable()
         {
-            panic!("Operation cannot be performed");
+            return Err(AutomationError::invalid_operation_with("Operation cannot be performed"));
         }
 
         let owner = self.owner();
@@ -211,18 +213,20 @@ impl ScrollViewerAutomationPeer {
     /// the total content area within the control (the scroll provider
     /// contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if a direction that cannot scroll is asked to scroll, or if
-    /// a percentage is out of range.
+    /// [`AutomationError::ElementNotEnabled`] if the control is not
+    /// enabled, [`AutomationError::InvalidOperation`] if a direction that
+    /// cannot scroll is asked to scroll, [`AutomationError::ArgumentOutOfRange`]
+    /// if a percentage is out of range.
     #[allow(clippy::precedence)]
     pub fn set_scroll_percent(
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledError> {
+    ) -> Result<(), AutomationError> {
         if !self.is_enabled() {
-            return Err(ElementNotEnabledError::new());
+            return Err(AutomationError::element_not_enabled());
         }
 
         let scroll_horizontally = horizontal_percent != ScrollPatternIdentifiers::NO_SCROLL;
@@ -230,18 +234,18 @@ impl ScrollViewerAutomationPeer {
 
         if scroll_horizontally && !self.horizontally_scrollable() || scroll_vertically && !self.vertically_scrollable()
         {
-            panic!("Operation cannot be performed");
+            return Err(AutomationError::invalid_operation_with("Operation cannot be performed"));
         }
 
         // The grouping of the two range checks below is the one of the
         // reference: a percentage above 100 is out of range whether or not
         // the direction scrolls.
         if scroll_horizontally && (horizontal_percent < 0.0) || (horizontal_percent > 100.0) {
-            panic!("Specified argument was out of the range of valid values. (Parameter 'horizontalPercent')");
+            return Err(AutomationError::argument_out_of_range("horizontalPercent"));
         }
 
         if scroll_vertically && (vertical_percent < 0.0) || (vertical_percent > 100.0) {
-            panic!("Specified argument was out of the range of valid values. (Parameter 'verticalPercent')");
+            return Err(AutomationError::argument_out_of_range("verticalPercent"));
         }
 
         let owner = self.owner();

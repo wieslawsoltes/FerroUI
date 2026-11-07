@@ -7,7 +7,7 @@
 //! test rows implement.
 
 use super::automation_peer_test_helper::{create_flat_target, create_peer, FlatTargetOptions};
-use super::support::{assert_panics, run_jobs, start_app};
+use super::support::{run_jobs, start_app};
 use crate::automation::peers::TreeDataGridRowAutomationPeer;
 use crate::models::{CellRef, ColumnRef, ITreeDataGridRows};
 use crate::primitives::TreeDataGridRow;
@@ -17,7 +17,7 @@ use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, ISelectionItemProvider, IToggleProvider, IValueProvider, ToggleState,
 };
-use ferroui_controls::automation::{ElementNotEnabledError, ExpandCollapseState};
+use ferroui_controls::automation::{AutomationError, ElementNotEnabledError, ExpandCollapseState};
 use ferroui_treedatagrid_core::models::{IExpander, IRow, RowRef, RowsChangedHandler};
 use ferroui_treedatagrid_core::{GridLength, ITreeDataGridSource, IndexPath};
 use std::any::Any;
@@ -94,8 +94,8 @@ fn toggle_should_throw_when_row_is_disabled() {
     let toggle_provider = peer.get_provider::<dyn IToggleProvider>().expect("a toggle provider");
 
     // `Assert.Throws<ElementNotEnabledException>`: the error of the provider's result.
-    let result: Result<(), ElementNotEnabledError> = toggle_provider.toggle();
-    assert!(result.is_err());
+    let result = toggle_provider.toggle();
+    assert_eq!(Err(AutomationError::ElementNotEnabled(ElementNotEnabledError::new())), result);
 }
 
 #[test]
@@ -111,10 +111,9 @@ fn value_provider_should_be_read_only() {
 
     assert!(value_provider.is_read_only());
     assert_eq!(Some("Node A".to_string()), value_provider.value());
-    // `NotSupportedException`: the peer panics.
-    assert_panics(|| {
-        let _ = value_provider.set_value(Some("Updated"));
-    });
+    // `NotSupportedException`: the error of the provider's result.
+    let error = value_provider.set_value(Some("Updated")).expect_err("rows are read only");
+    assert!(matches!(error.downcast_ref::<AutomationError>(), Some(AutomationError::NotSupported(_))));
 }
 
 #[test]

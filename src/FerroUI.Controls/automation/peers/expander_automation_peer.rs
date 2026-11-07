@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IExpandCollapseProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
+use crate::automation::{AutomationError, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
 use crate::{Control, Expander};
 use ferroui_base::{
     ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
@@ -62,11 +62,11 @@ impl IExpandCollapseProvider for ProviderAdapter<ExpanderAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -100,13 +100,13 @@ impl ExpanderAutomationPeer {
     }
 
     /// Collapses the expander (the expand and collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.owner().set_is_expanded(false);
         Ok(())
     }
 
     /// Expands the expander (the expand and collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.owner().set_is_expanded(true);
         Ok(())
     }

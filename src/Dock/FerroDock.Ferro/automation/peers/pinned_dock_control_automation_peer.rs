@@ -12,7 +12,7 @@ use ferroui_controls::automation::{
         ControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::IExpandCollapseProvider,
-    AutomationProperties, ElementNotEnabledError, ExpandCollapseState,
+    AutomationError, AutomationProperties, ExpandCollapseState,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -137,13 +137,13 @@ impl IExpandCollapseProvider for Provider {
     fn shows_menu(&self) -> bool {
         false
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         if let Some(pinned) = self.0.get_pinned_dock() {
             pinned.set_is_expanded(true);
         }
         Ok(())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         if let Some(pinned) = self.0.get_pinned_dock() {
             pinned.set_is_expanded(false);
         }
