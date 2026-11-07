@@ -2999,17 +2999,7 @@ pub fn build_static_resource_local_xaml(
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScopedAccent"));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 315)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 315)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_1.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 315)?);
-    } else if value_0.is_none() {
-        border_1.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 315)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_0, 1, 315));
-    }
+    rt::assign_resource_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0, &rt::ResourceChoice { name: "Background", member: "FerroUI.Controls.Border.set_Background", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 1, position: 315 }, ::core::option::Option::None)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 1, 308)?;
     context.pop_parent();
@@ -3116,17 +3106,7 @@ pub fn build_static_resource_missing_xaml(
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Missing"));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 99)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 99)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 99)?);
-    } else if value_0.is_none() {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 99)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_0, 1, 99));
-    }
+    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0, &rt::ResourceChoice { name: "Background", member: "FerroUI.Controls.Border.set_Background", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 1, position: 99 }, ::core::option::Option::None)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -3356,6 +3336,41 @@ pub fn build_control_theme_resources_xaml(
     ::core::result::Result::Ok(border_0)
 }
 
+/// A property definition of the tables of `control_theme_resources.xaml` (#568).
+fn build_control_theme_resources_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_base::Visual::opacity_property())
+}
+
+/// The control theme built by `build_control_theme_resources_xaml_deferred_1`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROL_THEME_RESOURCES_XAML_DEFERRED_1_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: false,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_resources_xaml_property_0, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.5_f64) }),
+    ],
+};
+
+/// A property definition of the tables of `control_theme_resources.xaml` (#568).
+fn build_control_theme_resources_xaml_property_1() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::primitives::TemplatedControl::background_property())
+}
+
+/// A property definition of the tables of `control_theme_resources.xaml` (#568).
+fn build_control_theme_resources_xaml_property_2() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property())
+}
+
+/// The control theme built by `build_control_theme_resources_xaml_deferred_2`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROL_THEME_RESOURCES_XAML_DEFERRED_2_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("Base"), line: 1, position: 314 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_resources_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "Accent", line: 1, position: 376 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_resources_xaml_property_2, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("Accent") }),
+    ],
+};
+
 /// Builds the deferred content at `control_theme_resources.xaml(1,118)` (a template or a deferred resource).
 fn build_control_theme_resources_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
@@ -3373,14 +3388,9 @@ fn build_control_theme_resources_xaml_deferred_0(
 fn build_control_theme_resources_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,163) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    // control_theme_resources.xaml(1,163) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    // control_theme_resources.xaml(1,210) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+    rt::build_control_theme(&context, &BUILD_CONTROL_THEME_RESOURCES_XAML_DEFERRED_1_THEME)
 }
 
 /// Builds the deferred content at `control_theme_resources.xaml(1,265)` (a template or a deferred resource).
@@ -3389,25 +3399,7 @@ fn build_control_theme_resources_xaml_deferred_2(
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,265) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // control_theme_resources.xaml(1,265) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    // control_theme_resources.xaml(1,314) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Base"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 314)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 1, 314)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 1, 314)?);
-    // control_theme_resources.xaml(1,347) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // control_theme_resources.xaml(1,376) Value
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Accent"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 376)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_1));
-    // control_theme_resources.xaml(1,410) Content
-    // control_theme_resources.xaml(1,439) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "Accent");
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+    rt::build_control_theme(&context, &BUILD_CONTROL_THEME_RESOURCES_XAML_DEFERRED_2_THEME)
 }
 
 fn build_control_theme_resources_xaml_untyped(
@@ -4024,24 +4016,27 @@ pub fn build_control_theme_template_xaml(
     ::core::result::Result::Ok(border_0)
 }
 
+/// A property definition of the tables of `control_theme_template.xaml` (#568).
+fn build_control_theme_template_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::primitives::TemplatedControl::template_property())
+}
+
+/// The control theme built by `build_control_theme_template_xaml_deferred_0`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROL_THEME_TEMPLATE_XAML_DEFERRED_0_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: false,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_template_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_control_theme_template_xaml_deferred_1, parent: false, line: 1, position: 211 }) }),
+    ],
+};
+
 /// Builds the deferred content at `control_theme_template.xaml(1,118)` (a template or a deferred resource).
 fn build_control_theme_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT);
     // control_theme_template.xaml(1,118) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    // control_theme_template.xaml(1,118) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    // control_theme_template.xaml(1,166) Content
-    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // control_theme_template.xaml(1,194) Value
-    let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
-    // control_theme_template.xaml(1,211) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_theme_template_xaml_deferred_1, 1, 211)?;
-    ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+    rt::build_control_theme(&context, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DEFERRED_0_THEME)
 }
 
 /// Builds the deferred content at `control_theme_template.xaml(1,211)` (a template or a deferred resource).
@@ -5528,17 +5523,7 @@ pub fn build_static_resource_element_xaml(
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_1, rt::string_object("Accent"));
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 15, 8)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
-    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_1.clone(), 15, 8)?;
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Border.set_Background", 0, 15, 8)?);
-    } else if value_1.is_none() {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Border.set_Background", 0, 15, 8)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_1, 15, 8));
-    }
+    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_1, &rt::ResourceChoice { name: "Background", member: "FerroUI.Controls.Border.set_Background", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 15, position: 8 }, ::core::option::Option::None)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 13, 4)?;
     context.pop_parent();
@@ -5547,18 +5532,27 @@ pub fn build_static_resource_element_xaml(
     ::core::result::Result::Ok(stack_panel_0)
 }
 
+/// A property definition of the tables of `static_resource_element.xaml` (#568).
+fn build_static_resource_element_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_base::Visual::opacity_property())
+}
+
+/// The control theme built by `build_static_resource_element_xaml_deferred_0`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_STATIC_RESOURCE_ELEMENT_XAML_DEFERRED_0_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: false,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_static_resource_element_xaml_property_0, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.5_f64) }),
+    ],
+};
+
 /// Builds the deferred content at `static_resource_element.xaml(3,6)` (a template or a deferred resource).
 fn build_static_resource_element_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT);
     // static_resource_element.xaml(3,6) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    // static_resource_element.xaml(3,6) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    // static_resource_element.xaml(4,8) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+    rt::build_control_theme(&context, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DEFERRED_0_THEME)
 }
 
 /// Builds the deferred content at `static_resource_element.xaml(6,6)` (a template or a deferred resource).
