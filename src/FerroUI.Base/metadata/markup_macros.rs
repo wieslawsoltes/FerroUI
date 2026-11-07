@@ -2036,7 +2036,7 @@ macro_rules! __ferro_compiler_metadata {
 /// definition is chosen by the features of this crate, wherever the declaration is.
 #[doc(hidden)]
 #[macro_export]
-#[cfg(not(feature = "type-tables"))]
+#[cfg(not(any(feature = "type-tables", test)))]
 macro_rules! __ferro_value_markup {
     ($type_:ty) => {
         || {
@@ -2049,7 +2049,7 @@ macro_rules! __ferro_value_markup {
 
 #[doc(hidden)]
 #[macro_export]
-#[cfg(feature = "type-tables")]
+#[cfg(any(feature = "type-tables", test))]
 macro_rules! __ferro_value_markup {
     ($type_:ty) => {
         || ::std::option::Option::None

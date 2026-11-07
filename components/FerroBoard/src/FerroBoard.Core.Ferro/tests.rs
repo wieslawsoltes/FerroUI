@@ -69,7 +69,7 @@ fn dependency_model_and_runtime_have_identical_settings_and_enum_facts() {
             .collect::<Vec<_>>();
         assert_eq!(actual, expected);
         for m in r.enum_members {
-            let value = (m.get)();
+            let value = m.get(r).unwrap();
             assert_eq!((r.enum_to_value.unwrap())(value.as_ref()), Some(m.value));
             let roundtrip = (r.enum_from_value.unwrap())(m.value).unwrap();
             assert_eq!(

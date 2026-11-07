@@ -162,19 +162,16 @@ impl MarkupTyped for KeyboardVisibilityMode {
                 ferroui_base::metadata::MarkupEnumMember {
                     name: "Auto",
                     value: 0,
-                    get: || Rc::new(KeyboardVisibilityMode::Auto),
                     rust_variant: Some("Auto"),
                 },
                 ferroui_base::metadata::MarkupEnumMember {
                     name: "AlwaysVisible",
                     value: 1,
-                    get: || Rc::new(KeyboardVisibilityMode::AlwaysVisible),
                     rust_variant: Some("AlwaysVisible"),
                 },
                 ferroui_base::metadata::MarkupEnumMember {
                     name: "Manual",
                     value: 2,
-                    get: || Rc::new(KeyboardVisibilityMode::Manual),
                     rust_variant: Some("Manual"),
                 },
             ];
