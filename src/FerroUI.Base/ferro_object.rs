@@ -6,7 +6,7 @@ use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
 use crate::utilities::HandlerList;
 use crate::{
     BoxedValue, DirectPropertyBase, FerroProperty, FerroPropertyChangedEventArgs, FerroPropertyRegistry,
-    Nullable, ObjectType, PropertyValue, Ref, StaticType, StyledProperty, Subclassable, TypeInfo, Upcast, WeakRef,
+    Nullable, ObjectType, PropertyValue, Ref, StaticType, StyledProperty, Subclassable, TypeIdentity, TypeInfo, Upcast, WeakRef,
 };
 use std::any::Any;
 use std::cell::{Cell, OnceCell, RefCell};
@@ -41,7 +41,11 @@ pub struct FerroObject {
     dispatcher: OnceCell<Arc<Dispatcher>>,
 }
 
+/// The identity of the root class, which type checks compare (#612).
+static FERRO_OBJECT_IDENTITY: TypeIdentity = TypeIdentity::new("FerroObject");
+
 static FERRO_OBJECT_TYPE: TypeInfo = TypeInfo::new("FerroObject", None)
+    .with_identity(&FERRO_OBJECT_IDENTITY)
     .with_module_path(module_path!())
     .with_class_init(<FerroObject as ObjectType>::register_class)
     .with_handles(|| [std::any::TypeId::of::<Ref<FerroObject>>(), std::any::TypeId::of::<Option<Ref<FerroObject>>>()])
@@ -73,6 +77,8 @@ unsafe impl ObjectType for FerroObject {
     type VTable = FerroObjectVTable;
 
     const CLASS_VTABLE: FerroObjectVTable = <FerroObject as Subclassable<FerroObject>>::VTABLE;
+
+    const IDENTITY: &'static TypeIdentity = &FERRO_OBJECT_IDENTITY;
 
     #[inline]
     fn vtable() -> &'static FerroObjectVTable {
@@ -348,7 +354,7 @@ impl FerroObject {
     /// Whether the object is of class `T` or a class derived from it.
     #[inline]
     pub fn is<T: ObjectType>(&self) -> bool {
-        T::TYPE.is_assignable_from(self.get_type())
+        self.get_type().derives_from(T::IDENTITY)
     }
 
     /// Returns the object viewed as class `T` if it is one.
