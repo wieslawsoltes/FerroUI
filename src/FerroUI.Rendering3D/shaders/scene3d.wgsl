@@ -130,13 +130,14 @@ fn compute_wpf_lighting(n: vec3<f32>, v: vec3<f32>, world_position: vec3<f32>, s
         var attenuation = 1.0;
         if (kind >= 2u) {
             let to_light = light.position_range.xyz - world_position;
-            let distance = length(to_light);
-            if (distance <= 0.000001 || distance > light.position_range.w) {
+            let light_distance = length(to_light);
+            if (light_distance <= 0.000001 || light_distance > light.position_range.w) {
                 continue;
             }
-            l = to_light * (1.0 / distance);
+            l = to_light * (1.0 / light_distance);
             let factors = light.attenuation_outer_cos.xyz;
-            attenuation = 1.0 / max(factors.x + factors.y * distance + factors.z * distance * distance, 1.0);
+            attenuation = 1.0
+                / max(factors.x + factors.y * light_distance + factors.z * light_distance * light_distance, 1.0);
             if (kind >= 3u) {
                 let rho = max(dot(safe_normalize(direction * -1.0), l), 0.0);
                 let outer_cos = light.attenuation_outer_cos.w;
