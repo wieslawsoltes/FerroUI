@@ -116,6 +116,7 @@ impl GeneratedFile {
                 .collect(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
             theme_units: Vec::new(),
+            references: Default::default(),
         }
     }
 }
@@ -1044,6 +1045,7 @@ impl ClassFile {
             documents: self.documents.clone(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
             theme_units: self.theme_units.iter().cloned().collect(),
+            references: Default::default(),
         }
     }
 }
