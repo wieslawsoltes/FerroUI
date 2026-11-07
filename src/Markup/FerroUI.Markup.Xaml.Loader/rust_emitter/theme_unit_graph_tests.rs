@@ -189,3 +189,33 @@ fn selectors_name_their_type_selectors_only() {
     assert_eq!(selector_types("local|Item.selected:is(Button) [IsChecked=True] TextBlock"), ["Item", "Button", "TextBlock"]);
     assert_eq!(selector_types(":not(.Accent) Border:nth-child(2n+1)"), ["Border"]);
 }
+
+/// Step 3: an application document names its types (elements, `TargetType`, selectors,
+/// `{x:Type}`) and every token that may be a key; an include's `Source` and the preview of a
+/// design are not read.
+#[test]
+fn an_application_document_names_its_types_and_keys() {
+    let xaml = format!(
+        r#"<Window {NAMESPACES} x:Class="App.MainWindow" Title="Hello">
+          <Window.Styles>
+            <StyleInclude Source="ferres://App/Ignored/Theme.xaml" />
+            <Style Selector="Button.accent > TextBlock"><Setter Property="Foreground" Value="{{DynamicResource AccentBrush}}" /></Style>
+          </Window.Styles>
+          <Design.PreviewWith><CalendarView /></Design.PreviewWith>
+          <StackPanel>
+            <TextBlock Text="Hello, World!" Theme="{{StaticResource ResourceKey=CaptionTextBlockStyle}}" />
+            <ContentControl ContentTemplate="{{x:Type ToggleSwitch}}" />
+          </StackPanel>
+        </Window>"#
+    );
+    let references = document_references(&xaml).expect("plain XML");
+    for name in ["Window", "Style", "StyleInclude", "StackPanel", "TextBlock", "ContentControl", "Button", "ToggleSwitch"] {
+        assert!(references.types.contains(name), "{name}: {:?}", references.types);
+    }
+    assert!(!references.types.contains("CalendarView"), "{:?}", references.types);
+    for key in ["AccentBrush", "CaptionTextBlockStyle", "Hello"] {
+        assert!(references.keys.contains(key), "{key}: {:?}", references.keys);
+    }
+    assert!(!references.keys.contains("Ignored"), "{:?}", references.keys);
+    assert_eq!(document_references("<!DOCTYPE Window [<!-- x -->]><Window />"), None);
+}

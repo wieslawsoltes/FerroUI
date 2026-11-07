@@ -69,12 +69,12 @@ fn the_entries_of_a_unit_become_runs_called_where_they_were() {
     let (written, functions) = extract(lines, &units);
     assert_eq!(written, body(&[
         "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
-        "rt::apply_theme_unit(THEME_UNITS, 1, 0, &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_0)?;",
         // A comment between the runs belongs to what follows it.
         "// t.xaml(1,1) Content (resource)",
-        "rt::apply_theme_unit(THEME_UNITS, 2, 0, &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_unit(active_theme_units(), 2, 0, &context, &resource_dictionary_0)?;",
         "let namespace_scope_0 = rt::push_namespace_scope(&context, TABLE);",
-        "rt::apply_theme_unit(THEME_UNITS, 2, 1, &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_0)?;",
         "::core::mem::drop(namespace_scope_0);",
         "::core::result::Result::Ok(styles_0)",
     ]));
@@ -126,9 +126,9 @@ fn a_run_ends_at_another_dictionary_and_at_another_unit() {
     assert_eq!(written, body(&[
         "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
         "let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();",
-        "rt::apply_theme_unit(THEME_UNITS, 1, 0, &context, &resource_dictionary_0)?;",
-        "rt::apply_theme_unit(THEME_UNITS, 1, 1, &context, &resource_dictionary_1)?;",
-        "rt::apply_theme_unit(THEME_UNITS, 2, 0, &context, &resource_dictionary_1)?;",
+        "rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_unit(active_theme_units(), 1, 1, &context, &resource_dictionary_1)?;",
+        "rt::apply_theme_unit(active_theme_units(), 2, 0, &context, &resource_dictionary_1)?;",
     ]));
     assert_eq!(functions.len(), 3);
     assert!(functions[2].contains("ROWS_2)?;\n    rt::add_double_resources(&resource_dictionary_1, ROWS_3)?;"), "{}", functions[2]);
@@ -191,16 +191,29 @@ fn the_table_lists_every_unit_with_its_runs() {
     let units = units();
     units.push_run(2, "populate_t_xaml_unit_0".to_string());
     units.push_run(2, "populate_t_xaml_unit_3".to_string());
-    assert_eq!(
-        units.table(),
-        "/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.\n\
-         static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: \"ambient\", index: 0, runs: &[] };\n\n\
-         /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
-         static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: \"Controls/Button.xaml\", index: 1, runs: &[] };\n\n\
-         /// The unit `Resources/Base.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
-         static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: \"Resources/Base.xaml\", index: 2, runs: &[populate_t_xaml_unit_0, populate_t_xaml_unit_3] };\n\n\
-         /// Every unit of the theme, in canonical order: the table the builds of its dictionaries\n\
-         /// apply the units through (#568).\n\
-         pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2];\n"
+    let type_keys = vec![Vec::new(), vec!["Button".to_string()], Vec::new()];
+    let table = units.table("Tests.Theme", &type_keys);
+    assert!(
+        table.starts_with(
+            "/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.\n\
+             pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: \"ambient\", index: 0, runs: &[] };\n\n\
+             /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
+             pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: \"Controls/Button.xaml\", index: 1, runs: &[] };\n\n\
+             /// The unit `Resources/Base.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
+             pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: \"Resources/Base.xaml\", index: 2, runs: &[populate_t_xaml_unit_0, populate_t_xaml_unit_3] };\n\n"
+        ),
+        "{table}"
     );
+    assert!(table.contains("pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2];\n"), "{table}");
+    // Step 3: the ambient unit alone, the class, the active table, the registered units (all of
+    // them with the tables of types) and the type keys of the diagnostic.
+    assert!(table.contains("pub static AMBIENT_THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0];\n"), "{table}");
+    assert!(table.contains("pub const THEME_CLASS: &str = \"Tests.Theme\";\n"), "{table}");
+    assert!(table.contains("fn active_theme_units() -> rt::ThemeParts {\n    rt::active_theme_units(THEME_CLASS)\n}\n"), "{table}");
+    assert!(table.contains("#[cfg(ferroui_type_tables)]\npub fn registered_theme_units() -> rt::ThemeParts {\n    THEME_UNITS\n}\n"), "{table}");
+    assert!(
+        table.contains("#[cfg(not(ferroui_type_tables))]\npub fn registered_theme_units() -> rt::ThemeParts {\n    rt::registered_theme_parts(THEME_CLASS).unwrap_or(AMBIENT_THEME_UNITS)\n}\n"),
+        "{table}"
+    );
+    assert!(table.ends_with("#[cfg(debug_assertions)]\npub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&[], &[\"Button\"], &[]];\n"), "{table}");
 }

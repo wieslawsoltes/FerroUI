@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Steps 1 and 2 of the plan are implemented (sections 8 and 9); the rest is not yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Steps 1, 2 and 3 of the plan are implemented (sections 8, 9 and 10); the rest is not yet. Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -550,8 +550,8 @@ Measured on macOS ARM64 against main at 2f8e8c192:
 The emitter partitions the compiled markup of a class whose documents merge other documents
 (`MergeResourceInclude`, inlined by `XamlMergeResourceGroupTransformer`) into units. Behaviour
 does not change: the whole theme applies every unit, at the places its entries had, in the same
-order. Nothing chooses a subset yet (`with_parts`, the root computation and the application
-tables are step 3).
+order. Step 2 chooses no subset; `with_parts`, the root computation and the application tables
+are step 3 (section 10).
 
 ### 9.1 Units
 
@@ -662,3 +662,177 @@ Measured on macOS ARM64 against step 1 (section 8):
 - Catalog (`fast-release`): the 14 screenshots are byte-identical to step 1 except the home page,
   whose animated banner differs between any two runs; the page tour selects all 127 pages and logs
   the same lines.
+
+## 10. Step 3 as implemented: root tables in applications
+
+An application opts in, and its build computes the units of each theme its documents construct.
+The theme crates still compile once, and their output does not depend on any application.
+Without the opt-in an application's generated code is what it was before, and it gets the full
+theme.
+
+### 10.1 The opt-in and the roots
+
+The opt-in is a key of the application's manifest. That is the owner's rule for size features:
+opt-in first, the default later.
+
+```toml
+[package.metadata.ferroui]
+theme-trimming = true
+# Optional: units (by the path of their document), types or keys that the documents do not name.
+theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
+# Or keep every unit (the trimmed construction with the full table), for comparing:
+# theme-roots = "all"
+```
+
+`ferroui-build` reads the table from `Cargo.toml` in the crate directory with a small reader of
+these three forms (`theme_roots::ThemeTrimming::from_manifest`). A value in any other form fails the
+build and names the key. A build script can add roots with `Build::theme_roots(&[..])`, which is
+also where step 4 adds the roots it reads from sources. The roots are:
+
+- the types the compiled documents of the application construct, select or name in `{x:Type}`
+  (elements, template content included, `TargetType`, the type selectors of selectors). The unit
+  graph reads them with the rules it uses for theme documents
+  (`rust_emitter::document_references`). Each type comes with its base classes, which the type
+  models give (`theme_roots::BaseClasses`, by the Rust name of the base). That covers a subclass
+  that does not override its style key;
+- every identifier token of the attribute values and text of the documents, and the argument of
+  every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`. A token that is a key of the theme
+  roots the units that define it (conservative, as for the units);
+- the names of `theme-roots` and of `Build::theme_roots`: a unit by the path of its document, or else
+  a type and a key;
+- everything for `theme-roots = "all"`, and everything when the build has the tables of types
+  (below).
+
+The closure (`theme_roots::kept_units`): the ambient unit is always kept. A unit is kept when it
+defines a live key or the type key of a live type, or when it is named. A kept unit makes its
+`references` live keys (StaticResource, DynamicResource, BasedOn, `Theme=` and every other mention
+of a key of the group). It makes its `types` live types, with their base classes, so the controls
+its templates construct root their own control themes. The result is the canonical indices,
+ascending. Every definition of a live key is kept: overrides and the theme dictionaries of every
+variant. A control that only Rust code creates is not a root until step 4, so it needs a
+`theme-roots` entry for now (see 10.5).
+
+### 10.2 The type tables switch
+
+`ferroui-base` already has `links = "ferroui_base_xaml"`. With its feature `type-tables` its build
+script now prints `cargo::metadata=type_tables=1`, which the build scripts of the crates that
+depend on it directly see as `DEP_FERROUI_BASE_XAML_TYPE_TABLES`. `ferroui-build` reads the
+variable (`Build::from_env`, `Build::type_tables`):
+
+- a crate whose compiled markup has units gets `cargo::rustc-check-cfg=cfg(ferroui_type_tables)`
+  and, when the variable is set, `cargo::rustc-cfg=ferroui_type_tables`;
+- an application that trims keeps every unit when the variable is set. That is the run-time loader,
+  hot reload, the designer, DevTools, Inspect and the declarative View API: each of them can show a
+  control that no compiled document names. Test builds whose dev-dependencies link the run-time
+  loader get the full theme for the same reason. The trimmed configuration is checked by release
+  runs (screenshots, sizes).
+
+### 10.3 Runtime and theme API
+
+`xaml_il/runtime/theme_units.rs` (re-exported by `rt`):
+
+- `ThemeParts = &'static [&'static ThemeUnit]`;
+- `set_active_theme_units(class, parts)` and `active_theme_units(class)`: the table the builds of a
+  class apply (a thread-local table of tables keyed by the full name of the class). The populate of
+  the class sets it before it builds anything and leaves it set, for content built later;
+- `register_theme_parts(class, parts)`, `register_theme_parts_if_absent(class, parts)` and
+  `registered_theme_parts(class)`: what an application registers for loads by URI (process-wide);
+- `trimmed_type_keys(type_keys, parts)` and `report_trimmed_theme(theme, key, trimmed)` for the
+  diagnostics (10.4).
+
+The generated file of a class with units (the emitter, `rust_emitter/theme_units.rs` and
+`compiled.rs`):
+
+- the builds call `rt::apply_theme_unit(active_theme_units(), ..)` instead of naming
+  `THEME_UNITS`;
+- `pub fn populate_with_parts(sp, root, parts)` makes `parts` active and populates.
+  `populate(sp, root)` is `populate_with_parts(sp, root, THEME_UNITS)`;
+- the unit statics are public (`pub static THEME_UNIT_<index>`), so that an application's table
+  names them. `AMBIENT_THEME_UNITS` is the ambient unit alone. `THEME_CLASS` is the full name of the
+  class;
+- `pub fn registered_theme_units()` returns `THEME_UNITS` under `cfg(ferroui_type_tables)`, else the
+  registered parts, else `AMBIENT_THEME_UNITS`;
+- `THEME_UNIT_TYPE_KEYS`, the type keys of each unit by index, exists under `cfg(debug_assertions)`
+  only.
+
+The theme classes (`WinUITheme`, `FluentTheme`, `SimpleTheme`, `MacOSTheme`; Material has no
+units):
+
+| Entry point | Units |
+|---|---|
+| `new()`, `with_service_provider(sp)` | all (`THEME_UNITS`). They also register the full table for the class unless parts are registered, so that a later load by URI gets the full theme, as before |
+| `with_parts(sp, parts: &'static [&'static rt::ThemeUnit])` | the given units, in canonical order, at the places of the full theme. `parts` must include the ambient unit (index 0), which has `CompactStyles` and the structure of the theme |
+| `with_registered_parts(sp)`, `with_registered_parts_default()` (hidden) | `registered_theme_units()` |
+
+The constructors of the type information (`new:` of `ferro_class_info!`, the service-provider
+constructor of its markup metadata) and the loader table (`build.rs` states
+`ClassConstructor::ServiceProvider("with_registered_parts")`) are the hidden constructors. Both are
+reachable from every construction: `populate_with_parts` names the class's `TYPE`, and
+`register_types()` registers `try_load`. Naming `THEME_UNITS` there would keep every unit. Compiled
+markup is unaffected by the change of `new:`, since the emitter writes `T::new()` by convention. One
+behaviour changes for an application that does not opt in. A load of the theme by URI, in a
+build without the tables of types and before any full theme was constructed, now gets the ambient
+unit alone, where it got the full theme before. No sample does this: the compiled markup of an
+include of the theme constructs it with `new()`, and every run-time loader links the tables.
+
+### 10.4 The application side
+
+- The emitter (`Emitter::default_object`): when the options of the transform have a parts table for
+  the class (`TransformOptions::theme_parts`, a `ThemePartsTables` extra of the configuration),
+  `<WinUITheme />` is written as
+  `::ferroui_themes_winui::WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME)`.
+  Without trimming it writes `WinUITheme::new()` as before. The tables record the classes they were
+  used for.
+- `ferroui-build`, after every group: for each class used, the kept units become
+  `pub static THEME_PARTS_<CLASS>: &[&rt::ThemeUnit]` in `compiled_markup` of `$OUT_DIR/xaml/mod.rs`,
+  in canonical order, each entry commented with the name of its unit. `compiled_markup::register()`
+  calls `rt::register_theme_parts(<class>, THEME_PARTS_<CLASS>)`. The kept units are also listed in
+  `$OUT_DIR/xaml/theme_parts.txt`, for measuring and debugging.
+- Diagnostics: in debug builds `with_parts` records the type keys of the units left out. The lookup
+  of the WinUI, Fluent and macOS themes (`try_get_resource`) logs once per type through the
+  framework logger (warning, area `Control`) when a lookup of such a type key misses:
+  `the WinUI control theme of CalendarView was trimmed: add it to theme-roots`. It yields nothing,
+  so the control behaves as it does today without a theme. This is the deferred entry of 4(d) done
+  as a hook on the miss: an entry keyed by the type would need the type information of every
+  trimmed type, which a build without the tables of types does not have by name. The Simple theme
+  has no lookup of its own and logs nothing. Release builds carry no names.
+
+### 10.5 Limits until step 4
+
+- Controls created only from Rust code (`Button::new()` in code-behind, the containers a
+  `ListBox` creates when no document names `ListBoxItem`, the selection handles of a `TextBox`)
+  are not roots. The closure reaches many of them through the templates of the controls the
+  documents name. Any others need `theme-roots` until step 4 reads the creates edges and the
+  sources. The debug diagnostic names each one the first time it is looked up.
+- Keys that code looks up by string (`TryFindResource("TextFillColorPrimaryBrush")`) are roots only
+  when a document or `theme-roots` names them, or when a kept unit references them.
+- An application that constructs a theme in Rust (`WinUITheme::new()`) keeps the full theme. It can
+  pass a table to `with_parts` itself.
+
+### 10.6 Tests
+
+- `ferroui-build`, `theme_roots_tests.rs`: fixture graphs for the ambient unit and its references,
+  a type root, key tokens, a BasedOn chain, types constructed by templates, base classes,
+  explicit roots (unit, type, key), `all`, the type-tables override, roots added by a build script,
+  the static names, and the manifest reader (opt-in, roots over lines with comments, `"all"`,
+  errors). `lib.rs`: the parts table and its registration in `mod.rs`, and a wrong opt-in failing
+  the build.
+- `ferroui-markup-xaml-loader`: the references of an application document
+  (`theme_unit_graph_tests.rs`), and the new items of the table and the active-table calls
+  (`theme_units_tests.rs`).
+- `ferroui-markup-xaml`: the active table, registration, trimmed type keys and the report
+  (`theme_units_tests.rs`).
+- `ferroui-themes-winui`: `with_parts` without the unit of the rating control leaves its control
+  theme out, and the full table has it (`compiled_xaml_tests.rs`).
+
+### 10.7 Measurements
+
+`samples/HelloWorld` opts in (`theme-trimming = true`).
+
+| `samples/HelloWorld`, macOS ARM64 | Size |
+|---|---:|
+| `dist`, step 2 (section 9.4) | 37.98 MB |
+| `dist`, trimmed (30 of the 164 WinUI units) | 28.63 MB (-9.35 MB, -24.6 %) |
+| `dist`, `theme-roots = "all"` | 37.98 MB |
+
+Screenshots of the trimmed build and of `theme-roots = "all"` (macOS, `fast-release`, the window captured after 3.5 s): the same picture; the only difference is one grey level in the antialiasing of the window title. The trimmed `dist` build opens, renders and closes with no diagnostic. Applications that do not opt in are unchanged: the control catalog's 14 screenshots are byte-identical to step 2 (except its animated home banner, which differs between any two runs), its page tour selects all 127 pages and logs the same lines, and the include fixture that loads the Simple and Fluent themes by URI passes.

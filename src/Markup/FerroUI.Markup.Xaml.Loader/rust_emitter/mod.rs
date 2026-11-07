@@ -113,6 +113,7 @@ pub mod runtime_types;
 mod source;
 /// The units of a compiled theme and their graph (#568).
 mod theme_unit_graph;
+pub use theme_unit_graph::{document_references, DocumentReferences};
 mod transform;
 
 pub use compiled::{
@@ -123,7 +124,9 @@ pub use compiled::{
 pub use runtime_host::{compile_documents, generate_class_file, generate_file};
 #[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
 pub use runtime_host::{transformed_class_group, transformed_tree};
-pub use transform::{transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, TransformOptions, TransformedDocument, METHOD_NOT_FOUND};
+pub use transform::{
+    transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions, TransformedDocument, METHOD_NOT_FOUND,
+};
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};

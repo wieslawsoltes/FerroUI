@@ -879,17 +879,51 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         source.push_str("/// The XML namespaces of documents of this file, as the compiler resolved them.\n");
         source.push_str(&format!("const XML_NAMESPACES_{index}: rt::XmlNamespaceTable = {table};\n"));
     }
+    // The units and the table of all units, when an entry of a unit was taken out of the
+    // functions of the documents (#568).
+    let units = functions.units().filter(|units| units.runs().iter().any(|runs| !runs.is_empty()));
+    let partitioned = units.is_some() && plan.is_some();
     source.push('\n');
-    source.push_str(&format!(
-        "/// Populates `root` from the document of the class (`{}`), with a root service provider\n",
-        names[0]
-    ));
-    source.push_str("/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the\n");
-    source.push_str("/// run-time loader populates it.\n");
-    source.push_str("pub fn populate(\n");
-    source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-    source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
-    source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+    if partitioned {
+        // The full theme populates through the table of all units; an application that keeps
+        // some units populates through `populate_with_parts` (#568, step 3).
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`) with every unit of the theme\n",
+            names[0]
+        ));
+        source.push_str("/// (`populate_with_parts` with the table of all units).\n");
+        source.push_str("pub fn populate(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+        source.push_str(&format!("    populate_with_parts(service_provider, root, {THEME_UNITS_TABLE})\n"));
+        source.push_str("}\n");
+        source.push('\n');
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`) with the units `parts` of the\n",
+            names[0]
+        ));
+        source.push_str("/// theme, in canonical order (#568, step 3): the builds of its dictionaries apply those units\n");
+        source.push_str("/// and leave the others out. With a root service provider over `service_provider`\n");
+        source.push_str("/// (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the run-time loader populates it.\n");
+        source.push_str("pub fn populate_with_parts(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str("    parts: rt::ThemeParts,\n");
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+        source.push_str("    rt::set_active_theme_units(THEME_CLASS, parts);\n");
+    } else {
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`), with a root service provider\n",
+            names[0]
+        ));
+        source.push_str("/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the\n");
+        source.push_str("/// run-time loader populates it.\n");
+        source.push_str("pub fn populate(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+    }
     source.push_str(&format!("    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<::{} as ::ferroui_base::StaticType>::TYPE, root);\n", class_path.trim_start_matches("::")));
     source.push_str(&format!("    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<::{} as ::ferroui_base::StaticType>::TYPE) {{\n", class_path.trim_start_matches("::")));
     source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
@@ -905,13 +939,11 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         source.push('\n');
         source.push_str(function);
     }
-    // The units and the table of all units, when an entry of a unit was taken out of the
-    // functions of the documents (#568).
-    let units = functions.units().filter(|units| units.runs().iter().any(|runs| !runs.is_empty()));
     let theme_units = match (units, plan) {
         (Some(units), Some(plan)) => {
             source.push('\n');
-            source.push_str(&units.table());
+            let type_keys: Vec<Vec<String>> = plan.units.iter().map(|unit| unit.type_keys.clone()).collect();
+            source.push_str(&units.table(&class.full_name(), &type_keys));
             Some(ThemeUnitsModel {
                 class: class.full_name(),
                 table_path: format!("{module_path}::{THEME_UNITS_TABLE}"),
