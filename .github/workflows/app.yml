@@ -340,6 +340,8 @@ jobs:
         id: apk
         env:
           ARGS: ${{ inputs.android }}
+        # bash with pipefail: a failed package step fails here, not at the upload of an empty path.
+        shell: bash
         run: |
           eval "args=($ARGS)"
           FERROUI_ANDROID_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/android/apk.sh package "${args[@]}" | tee "$RUNNER_TEMP/apk.out"
