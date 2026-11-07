@@ -1,7 +1,8 @@
-use crate::data::{BindingError, BindingValue, BindingValueType};
+use crate::data::{BindingError, BindingNotification, BindingValue, BindingValueType};
+use crate::ferro_property::BoxedPayloadSlot;
 use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, StyledProperty, WeakRef};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 /// The source keeps its observer weakly. The value store holds the observer
@@ -163,18 +164,12 @@ impl<T: PropertyValue> IObserver<BindingValue<T>> for Value<T> {
 pub(crate) struct DirectBindingObserver<T: PropertyValue> {
     state: LocalBindingState,
     property: &'static DirectPropertyBase<T>,
-    /// Whether the source produces untyped values.
-    is_untyped: Cell<bool>,
 }
 
 impl<T: PropertyValue> DirectBindingObserver<T> {
     pub fn new(owner: &FerroObject, property: &'static DirectPropertyBase<T>) -> Rc<Self> {
         let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
-        Rc::new(Self {
-            state: LocalBindingState::new(owner, has_data_validation),
-            property,
-            is_untyped: Cell::new(false),
-        })
+        Rc::new(Self { state: LocalBindingState::new(owner, has_data_validation), property })
     }
 
     pub(crate) fn start_typed(self: &Rc<Self>, source: Rc<dyn IObservable<T>>) {
@@ -185,21 +180,8 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
         self.state.started(source.subscribe(Rc::new(DirectValue(Rc::downgrade(self)))));
     }
 
-    pub(crate) fn start_untyped(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {
-        self.is_untyped.set(true);
-        self.state.started(source.subscribe(Rc::new(DirectUntyped(Rc::downgrade(self)))));
-    }
-
-    /// `disposing` is true when the binding is disposed, false when its
-    /// source completes or fails.
-    fn completed(&self, disposing: bool) {
-        // Untyped direct bindings clear validation only on explicit disposal.
-        let clear = if disposing || !self.is_untyped.get() {
-            ClearValidation::AfterRemoval
-        } else {
-            ClearValidation::Keep
-        };
-        self.state.completed(self.property.as_property(), self, clear);
+    fn completed(&self) {
+        self.state.completed(self.property.as_property(), self, ClearValidation::AfterRemoval);
     }
 
     fn next_value(&self, value: BindingValue<T>) {
@@ -215,7 +197,7 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
 impl<T: PropertyValue> IDisposable for DirectBindingObserver<T> {
     fn dispose(&self) {
         self.state.detach();
-        self.completed(true);
+        self.completed();
     }
 }
 
@@ -228,12 +210,12 @@ impl<T: PropertyValue> IObserver<T> for DirectTyped<T> {
     }
     fn on_error(&self, _error: ObservableError) {
         if let Some(observer) = self.0.upgrade() {
-            observer.completed(false)
+            observer.completed()
         }
     }
     fn on_completed(&self) {
         if let Some(observer) = self.0.upgrade() {
-            observer.completed(false)
+            observer.completed()
         }
     }
 }
@@ -247,34 +229,92 @@ impl<T: PropertyValue> IObserver<BindingValue<T>> for DirectValue<T> {
     }
     fn on_error(&self, _error: ObservableError) {
         if let Some(observer) = self.0.upgrade() {
-            observer.completed(false)
+            observer.completed()
         }
     }
     fn on_completed(&self) {
         if let Some(observer) = self.0.upgrade() {
-            observer.completed(false)
+            observer.completed()
         }
     }
 }
 
-struct DirectUntyped<T: PropertyValue>(Weak<DirectBindingObserver<T>>);
-impl<T: PropertyValue> IObserver<BoxedValue> for DirectUntyped<T> {
-    fn on_next(&self, value: BoxedValue) {
+/// Observes a binding source of untyped values and writes its values to a
+/// direct property.
+///
+/// The observer is not typed: values stay boxed until the typed write of the
+/// direct property, which is the `route_set_direct_binding_value` of the
+/// property. Its other operations do not depend on the value type.
+pub(crate) struct DirectBoxedBindingObserver {
+    state: LocalBindingState,
+    property: &'static FerroProperty,
+}
+
+impl DirectBoxedBindingObserver {
+    /// `property` is the direct property as registered for the owner.
+    pub(crate) fn new(owner: &FerroObject, property: &'static FerroProperty) -> Rc<Self> {
+        let has_data_validation = property.routes().route_enable_data_validation(owner).unwrap_or(false);
+        Rc::new(Self { state: LocalBindingState::new(owner, has_data_validation), property })
+    }
+
+    pub(crate) fn start(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {
+        self.state.started(source.subscribe(Rc::new(DirectBoxed(Rc::downgrade(self)))));
+    }
+
+    /// `disposing` is true when the binding is disposed, false when its
+    /// source completes or fails.
+    fn completed(&self, disposing: bool) {
+        // Untyped direct bindings clear validation only on explicit disposal.
+        let clear = if disposing { ClearValidation::AfterRemoval } else { ClearValidation::Keep };
+        self.state.completed(self.property, self, clear);
+    }
+
+    /// Interprets an untyped value: a value of the property's value type, the
+    /// unset and do-nothing markers, a `BindingValue` of the value type or a
+    /// binding notification, in that order. Any other value is a binding
+    /// error; there is no implicit conversion.
+    fn resolve(&self, value: &BoxedValue) -> BindingValue<BoxedValue> {
         use crate::{DoNothingType, UnsetValueType};
-        let Some(observer) = self.0.upgrade() else { return };
-        let value = if let Some(v) = value.downcast_ref::<T>() {
-            BindingValue::new(v.clone())
+        let property = self.property;
+        if value.value_type_id() == property.property_type() {
+            BindingValue::new(value.clone())
         } else if value.is::<UnsetValueType>() {
             BindingValue::unset()
         } else if value.is::<DoNothingType>() {
             BindingValue::do_nothing()
-        } else if let Some(v) = value.downcast_ref::<BindingValue<T>>() {
-            v.clone()
-        } else if let Some(n) = value.downcast_ref::<crate::data::BindingNotification>() {
-            n.to_binding_value(observer.property.property_type_name())
+        } else if let Some(v) = property.routes().route_unpack_binding_value(value.as_any()) {
+            v
+        } else if let Some(n) = value.downcast_ref::<BindingNotification>() {
+            let mut slot = BoxedPayloadSlot::new(property);
+            let (kind, error) = n.resolve_binding_value(property.property_type_name(), &mut slot);
+            BindingValue::from_notification_parts(kind, slot.into_value(), error)
         } else {
-            BindingValue::binding_error(crate::data::BindingError::message("Invalid value type."))
-        };
+            BindingValue::binding_error(BindingError::message("Invalid value type."))
+        }
+    }
+
+    fn next_value(&self, value: BindingValue<BoxedValue>) {
+        if value.value_type() == BindingValueType::DO_NOTHING {
+            return;
+        }
+        if let Some(owner) = self.state.owner.upgrade() {
+            self.property.routes().route_set_direct_binding_value(&owner, value);
+        }
+    }
+}
+
+impl IDisposable for DirectBoxedBindingObserver {
+    fn dispose(&self) {
+        self.state.detach();
+        self.completed(true);
+    }
+}
+
+struct DirectBoxed(Weak<DirectBoxedBindingObserver>);
+impl IObserver<BoxedValue> for DirectBoxed {
+    fn on_next(&self, value: BoxedValue) {
+        let Some(observer) = self.0.upgrade() else { return };
+        let value = observer.resolve(&value);
         observer.next_value(value)
     }
     fn on_error(&self, _error: ObservableError) {

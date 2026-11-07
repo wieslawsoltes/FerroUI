@@ -78,97 +78,13 @@ pub fn populate_simpletheme_xaml(
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 6, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 6, 6)?);
     // SimpleTheme.xaml(7,43) Content (resource)
-    let value_2 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 7, 43)?, rt::string_object("ThemeBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_2))), 7, 43)?;
-    // SimpleTheme.xaml(8,42) Content (resource)
-    let value_3 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4289374890_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 8, 42)?, rt::string_object("ThemeBorderLowColor"), rt::to_object(::core::clone::Clone::clone(&value_3))), 8, 42)?;
-    // SimpleTheme.xaml(9,42) Content (resource)
-    let value_4 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4287137928_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 9, 42)?, rt::string_object("ThemeBorderMidColor"), rt::to_object(::core::clone::Clone::clone(&value_4))), 9, 42)?;
-    // SimpleTheme.xaml(10,43) Content (resource)
-    let value_5 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4281545523_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 10, 43)?, rt::string_object("ThemeBorderHighColor"), rt::to_object(::core::clone::Clone::clone(&value_5))), 10, 43)?;
-    // SimpleTheme.xaml(11,43) Content (resource)
-    let value_6 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4287007129_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 11, 43)?, rt::string_object("ThemeControlLowColor"), rt::to_object(::core::clone::Clone::clone(&value_6))), 11, 43)?;
-    // SimpleTheme.xaml(12,43) Content (resource)
-    let value_7 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294309365_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 12, 43)?, rt::string_object("ThemeControlMidColor"), rt::to_object(::core::clone::Clone::clone(&value_7))), 12, 43)?;
-    // SimpleTheme.xaml(13,47) Content (resource)
-    let value_8 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4290954185_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 13, 47)?, rt::string_object("ThemeControlMidHighColor"), rt::to_object(::core::clone::Clone::clone(&value_8))), 13, 47)?;
-    // SimpleTheme.xaml(14,44) Content (resource)
-    let value_9 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285032552_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 14, 44)?, rt::string_object("ThemeControlHighColor"), rt::to_object(::core::clone::Clone::clone(&value_9))), 14, 44)?;
-    // SimpleTheme.xaml(15,48) Content (resource)
-    let value_10 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284177243_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 48)?, rt::string_object("ThemeControlVeryHighColor"), rt::to_object(::core::clone::Clone::clone(&value_10))), 15, 48)?;
-    // SimpleTheme.xaml(16,52) Content (resource)
-    let value_11 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4293980400_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 16, 52)?, rt::string_object("ThemeControlHighlightLowColor"), rt::to_object(::core::clone::Clone::clone(&value_11))), 16, 52)?;
-    // SimpleTheme.xaml(17,52) Content (resource)
-    let value_12 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291875024_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 17, 52)?, rt::string_object("ThemeControlHighlightMidColor"), rt::to_object(::core::clone::Clone::clone(&value_12))), 17, 52)?;
-    // SimpleTheme.xaml(18,53) Content (resource)
-    let value_13 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4286611584_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("ThemeControlHighlightHighColor"), rt::to_object(::core::clone::Clone::clone(&value_13))), 18, 53)?;
-    // SimpleTheme.xaml(19,43) Content (resource)
-    let value_14 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190080_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 43)?, rt::string_object("ThemeForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_14))), 19, 43)?;
-    // SimpleTheme.xaml(20,37) Content (resource)
-    let value_15 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278742942_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 37)?, rt::string_object("HighlightColor"), rt::to_object(::core::clone::Clone::clone(&value_15))), 20, 37)?;
-    // SimpleTheme.xaml(21,38) Content (resource)
-    let value_16 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278804613_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 21, 38)?, rt::string_object("HighlightColor2"), rt::to_object(::core::clone::Clone::clone(&value_16))), 21, 38)?;
-    // SimpleTheme.xaml(22,44) Content (resource)
-    let value_17 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285013416_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 22, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_17))), 22, 44)?;
+    rt::add_color_resources(&resource_dictionary_1, POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
     // SimpleTheme.xaml(24,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_0, 24, 8)?;
-    // SimpleTheme.xaml(25,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeBorderLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_1, 25, 8)?;
-    // SimpleTheme.xaml(26,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeBorderMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_2, 26, 8)?;
-    // SimpleTheme.xaml(27,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeBorderHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_3, 27, 8)?;
-    // SimpleTheme.xaml(28,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_4, 28, 8)?;
-    // SimpleTheme.xaml(29,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_5, 29, 8)?;
-    // SimpleTheme.xaml(30,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlMidHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_6, 30, 8)?;
-    // SimpleTheme.xaml(31,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_7, 31, 8)?;
-    // SimpleTheme.xaml(32,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlVeryHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_8, 32, 8)?;
-    // SimpleTheme.xaml(33,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlHighlightLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_9, 33, 8)?;
-    // SimpleTheme.xaml(34,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlHighlightMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_10, 34, 8)?;
-    // SimpleTheme.xaml(35,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeControlHighlightHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_11, 35, 8)?;
-    // SimpleTheme.xaml(36,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "ThemeForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_12, 36, 8)?;
-    // SimpleTheme.xaml(37,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "HighlightBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_13, 37, 8)?;
-    // SimpleTheme.xaml(38,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "HighlightBrush2", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_14, 38, 8)?;
-    // SimpleTheme.xaml(39,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "HyperlinkVisitedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_15, 39, 8)?;
+    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
     // SimpleTheme.xaml(41,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "RefreshVisualizerForeground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_16, 41, 8)?;
-    // SimpleTheme.xaml(42,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "RefreshVisualizerBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_17, 42, 8)?;
-    // SimpleTheme.xaml(46,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "CaptionButtonForeground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_18, 46, 8)?;
-    // SimpleTheme.xaml(47,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "CaptionButtonBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_19, 47, 8)?;
-    // SimpleTheme.xaml(48,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "CaptionButtonBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_20, 48, 8)?;
+    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_2)?;
     // SimpleTheme.xaml(49,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "TitleBarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_21, 49, 8)?;
+    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_3)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 6, 6)?), 6, 6)?;
     // SimpleTheme.xaml(52,6) ThemeDictionaries
@@ -186,145 +102,25 @@ pub fn populate_simpletheme_xaml(
     let value_19 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 52, 6)?, rt::cast(::core::clone::Clone::clone(&value_19), 52, 6)?);
     // SimpleTheme.xaml(53,43) Content (resource)
-    let value_20 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4280821800_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 53, 43)?, rt::string_object("ThemeBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_20))), 53, 43)?;
-    // SimpleTheme.xaml(54,42) Content (resource)
-    let value_21 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4283453520_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 54, 42)?, rt::string_object("ThemeBorderLowColor"), rt::to_object(::core::clone::Clone::clone(&value_21))), 54, 42)?;
-    // SimpleTheme.xaml(55,42) Content (resource)
-    let value_22 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4286611584_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 55, 42)?, rt::string_object("ThemeBorderMidColor"), rt::to_object(::core::clone::Clone::clone(&value_22))), 55, 42)?;
-    // SimpleTheme.xaml(56,43) Content (resource)
-    let value_23 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4288716960_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 43)?, rt::string_object("ThemeBorderHighColor"), rt::to_object(::core::clone::Clone::clone(&value_23))), 56, 43)?;
-    // SimpleTheme.xaml(57,43) Content (resource)
-    let value_24 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4280821800_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 57, 43)?, rt::string_object("ThemeControlLowColor"), rt::to_object(::core::clone::Clone::clone(&value_24))), 57, 43)?;
-    // SimpleTheme.xaml(58,43) Content (resource)
-    let value_25 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4283453520_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 58, 43)?, rt::string_object("ThemeControlMidColor"), rt::to_object(::core::clone::Clone::clone(&value_25))), 58, 43)?;
-    // SimpleTheme.xaml(59,47) Content (resource)
-    let value_26 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285032552_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 59, 47)?, rt::string_object("ThemeControlMidHighColor"), rt::to_object(::core::clone::Clone::clone(&value_26))), 59, 47)?;
-    // SimpleTheme.xaml(60,44) Content (resource)
-    let value_27 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4286611584_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 60, 44)?, rt::string_object("ThemeControlHighColor"), rt::to_object(::core::clone::Clone::clone(&value_27))), 60, 44)?;
-    // SimpleTheme.xaml(61,48) Content (resource)
-    let value_28 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4293913583_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 61, 48)?, rt::string_object("ThemeControlVeryHighColor"), rt::to_object(::core::clone::Clone::clone(&value_28))), 61, 48)?;
-    // SimpleTheme.xaml(62,52) Content (resource)
-    let value_29 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4289243304_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 62, 52)?, rt::string_object("ThemeControlHighlightLowColor"), rt::to_object(::core::clone::Clone::clone(&value_29))), 62, 52)?;
-    // SimpleTheme.xaml(63,52) Content (resource)
-    let value_30 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4286743170_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 63, 52)?, rt::string_object("ThemeControlHighlightMidColor"), rt::to_object(::core::clone::Clone::clone(&value_30))), 63, 52)?;
-    // SimpleTheme.xaml(64,53) Content (resource)
-    let value_31 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4283453520_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 64, 53)?, rt::string_object("ThemeControlHighlightHighColor"), rt::to_object(::core::clone::Clone::clone(&value_31))), 64, 53)?;
-    // SimpleTheme.xaml(65,43) Content (resource)
-    let value_32 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4292796126_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 65, 43)?, rt::string_object("ThemeForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_32))), 65, 43)?;
-    // SimpleTheme.xaml(66,37) Content (resource)
-    let value_33 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4279344858_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 66, 37)?, rt::string_object("HighlightColor"), rt::to_object(::core::clone::Clone::clone(&value_33))), 66, 37)?;
-    // SimpleTheme.xaml(67,38) Content (resource)
-    let value_34 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278804613_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 67, 38)?, rt::string_object("HighlightColor2"), rt::to_object(::core::clone::Clone::clone(&value_34))), 67, 38)?;
-    // SimpleTheme.xaml(68,44) Content (resource)
-    let value_35 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291136249_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 68, 44)?, rt::string_object("HyperlinkVisitedColor"), rt::to_object(::core::clone::Clone::clone(&value_35))), 68, 44)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_SIMPLETHEME_XAML_ROWS_4)?;
     // SimpleTheme.xaml(70,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_22, 70, 8)?;
-    // SimpleTheme.xaml(71,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeBorderLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_23, 71, 8)?;
-    // SimpleTheme.xaml(72,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeBorderMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_24, 72, 8)?;
-    // SimpleTheme.xaml(73,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeBorderHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_25, 73, 8)?;
-    // SimpleTheme.xaml(74,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_26, 74, 8)?;
-    // SimpleTheme.xaml(75,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_27, 75, 8)?;
-    // SimpleTheme.xaml(76,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlMidHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_28, 76, 8)?;
-    // SimpleTheme.xaml(77,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_29, 77, 8)?;
-    // SimpleTheme.xaml(78,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlVeryHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_30, 78, 8)?;
-    // SimpleTheme.xaml(79,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlHighlightLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_31, 79, 8)?;
-    // SimpleTheme.xaml(80,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlHighlightMidBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_32, 80, 8)?;
-    // SimpleTheme.xaml(81,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeControlHighlightHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_33, 81, 8)?;
-    // SimpleTheme.xaml(82,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ThemeForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_34, 82, 8)?;
-    // SimpleTheme.xaml(83,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "HighlightBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_35, 83, 8)?;
-    // SimpleTheme.xaml(84,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "HighlightBrush2", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_36, 84, 8)?;
-    // SimpleTheme.xaml(85,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "HyperlinkVisitedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_37, 85, 8)?;
+    rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_5)?;
     // SimpleTheme.xaml(87,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "RefreshVisualizerForeground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_38, 87, 8)?;
-    // SimpleTheme.xaml(88,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "RefreshVisualizerBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_39, 88, 8)?;
-    // SimpleTheme.xaml(92,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "CaptionButtonForeground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_40, 92, 8)?;
-    // SimpleTheme.xaml(93,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "CaptionButtonBackground", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_41, 93, 8)?;
-    // SimpleTheme.xaml(94,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "CaptionButtonBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_42, 94, 8)?;
+    rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_6)?;
     // SimpleTheme.xaml(95,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "TitleBarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_43, 95, 8)?;
+    rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_7)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_18), rt::cast(resource_dictionary_2.clone(), 52, 6)?), 52, 6)?;
     // SimpleTheme.xaml(98,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_44, 98, 53)?;
     // SimpleTheme.xaml(99,35) Content (resource)
-    let value_36 = ::ferroui_base::media::Color::__markup_FromUInt32_2(3423706842_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 99, 35)?, rt::string_object("ThemeAccentColor"), rt::to_object(::core::clone::Clone::clone(&value_36))), 99, 35)?;
-    // SimpleTheme.xaml(100,36) Content (resource)
-    let value_37 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2568068826_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 100, 36)?, rt::string_object("ThemeAccentColor2"), rt::to_object(::core::clone::Clone::clone(&value_37))), 100, 36)?;
-    // SimpleTheme.xaml(101,36) Content (resource)
-    let value_38 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1712430810_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 101, 36)?, rt::string_object("ThemeAccentColor3"), rt::to_object(::core::clone::Clone::clone(&value_38))), 101, 36)?;
-    // SimpleTheme.xaml(102,36) Content (resource)
-    let value_39 = ::ferroui_base::media::Color::__markup_FromUInt32_2(856792794_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 102, 36)?, rt::string_object("ThemeAccentColor4"), rt::to_object(::core::clone::Clone::clone(&value_39))), 102, 36)?;
-    // SimpleTheme.xaml(103,42) Content (resource)
-    let value_40 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4286611584_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 103, 42)?, rt::string_object("ThemeForegroundLowColor"), rt::to_object(::core::clone::Clone::clone(&value_40))), 103, 42)?;
-    // SimpleTheme.xaml(104,43) Content (resource)
-    let value_41 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 104, 43)?, rt::string_object("HighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_41))), 104, 43)?;
-    // SimpleTheme.xaml(105,29) Content (resource)
-    let value_42 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 105, 29)?, rt::string_object("ErrorColor"), rt::to_object(::core::clone::Clone::clone(&value_42))), 105, 29)?;
-    // SimpleTheme.xaml(106,32) Content (resource)
-    let value_43 = ::ferroui_base::media::Color::__markup_FromUInt32_2(285147136_u32);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 106, 32)?, rt::string_object("ErrorLowColor"), rt::to_object(::core::clone::Clone::clone(&value_43))), 106, 32)?;
+    rt::add_color_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_8)?;
     // SimpleTheme.xaml(107,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "HighlightForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_45, 107, 4)?;
-    // SimpleTheme.xaml(108,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeForegroundLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_46, 108, 4)?;
-    // SimpleTheme.xaml(109,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeAccentBrush2", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_47, 109, 4)?;
-    // SimpleTheme.xaml(110,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeAccentBrush3", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_48, 110, 4)?;
-    // SimpleTheme.xaml(111,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeAccentBrush4", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_49, 111, 4)?;
-    // SimpleTheme.xaml(112,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeAccentBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_50, 112, 4)?;
-    // SimpleTheme.xaml(113,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ErrorBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_51, 113, 4)?;
-    // SimpleTheme.xaml(114,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ErrorLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_52, 114, 4)?;
+    rt::add_static_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_9)?;
     // SimpleTheme.xaml(115,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_53, 115, 4)?;
     // SimpleTheme.xaml(119,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_54, 119, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_10)?;
     // SimpleTheme.xaml(122,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardInformationBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_55, 122, 4)?;
     // SimpleTheme.xaml(126,4) Content (resource)
@@ -334,7 +130,7 @@ pub fn populate_simpletheme_xaml(
     // SimpleTheme.xaml(134,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NotificationCardErrorBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_58, 134, 4)?;
     // SimpleTheme.xaml(138,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ThemeControlTransparentBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_59, 138, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_11)?;
     // SimpleTheme.xaml(139,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DatePickerFlyoutPresenterHighlightFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_60, 139, 4)?;
     // SimpleTheme.xaml(143,4) Content (resource)
@@ -342,92 +138,10 @@ pub fn populate_simpletheme_xaml(
     // SimpleTheme.xaml(147,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 147, 43)?, rt::string_object("ThemeBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 147, 43)?;
     // SimpleTheme.xaml(148,44) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 148, 44)?, rt::string_object("ThemeDisabledOpacity"), rt::to_object(0.5_f64)), 148, 44)?;
-    // SimpleTheme.xaml(150,37) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 150, 37)?, rt::string_object("FontSizeSmall"), rt::to_object(10.0_f64)), 150, 37)?;
-    // SimpleTheme.xaml(151,38) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 151, 38)?, rt::string_object("FontSizeNormal"), rt::to_object(12.0_f64)), 151, 38)?;
-    // SimpleTheme.xaml(152,37) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 152, 37)?, rt::string_object("FontSizeLarge"), rt::to_object(16.0_f64)), 152, 37)?;
-    // SimpleTheme.xaml(154,42) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 154, 42)?, rt::string_object("ScrollBarThickness"), rt::to_object(18.0_f64)), 154, 42)?;
-    // SimpleTheme.xaml(155,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 155, 47)?, rt::string_object("ScrollBarThumbThickness"), rt::to_object(8.0_f64)), 155, 47)?;
-    // SimpleTheme.xaml(157,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 157, 46)?, rt::string_object("IconElementThemeHeight"), rt::to_object(20.0_f64)), 157, 46)?;
-    // SimpleTheme.xaml(158,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 158, 45)?, rt::string_object("IconElementThemeWidth"), rt::to_object(20.0_f64)), 158, 45)?;
-    // SimpleTheme.xaml(160,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 160, 53)?, rt::string_object("TextControlPlaceholderOpacity"), rt::to_object(0.5_f64)), 160, 53)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_12)?;
     ::core::mem::drop(namespace_scope_0);
     // SimpleTheme.xaml(5,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 52)?, rt::string_object("StringCalendarWeekNumberHeader"), rt::string_object("\u{a0}")), 5, 52)?;
-    // SimpleTheme.xaml(7,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 45)?, rt::string_object("StringDatePickerDayText"), rt::string_object("day")), 7, 45)?;
-    // SimpleTheme.xaml(8,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 8, 47)?, rt::string_object("StringDatePickerMonthText"), rt::string_object("month")), 8, 47)?;
-    // SimpleTheme.xaml(9,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 9, 46)?, rt::string_object("StringDatePickerYearText"), rt::string_object("year")), 9, 46)?;
-    // SimpleTheme.xaml(11,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 11, 46)?, rt::string_object("StringTimePickerHourText"), rt::string_object("hour")), 11, 46)?;
-    // SimpleTheme.xaml(12,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 12, 48)?, rt::string_object("StringTimePickerMinuteText"), rt::string_object("minute")), 12, 48)?;
-    // SimpleTheme.xaml(13,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 13, 48)?, rt::string_object("StringTimePickerSecondText"), rt::string_object("second")), 13, 48)?;
-    // SimpleTheme.xaml(15,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 15, 45)?, rt::string_object("StringTextFlyoutCutText"), rt::string_object("Cut")), 15, 45)?;
-    // SimpleTheme.xaml(16,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 46)?, rt::string_object("StringTextFlyoutCopyText"), rt::string_object("Copy")), 16, 46)?;
-    // SimpleTheme.xaml(17,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 17, 47)?, rt::string_object("StringTextFlyoutPasteText"), rt::string_object("Paste")), 17, 47)?;
-    // SimpleTheme.xaml(19,65) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 19, 65)?, rt::string_object("StringManagedFileChooserFileNamePlaceholder"), rt::string_object("File name")), 19, 65)?;
-    // SimpleTheme.xaml(20,65) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 65)?, rt::string_object("StringManagedFileChooserShowHiddenFilesText"), rt::string_object("Show hidden files")), 20, 65)?;
-    // SimpleTheme.xaml(21,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 52)?, rt::string_object("StringManagedFileChooserOkText"), rt::string_object("OK")), 21, 52)?;
-    // SimpleTheme.xaml(22,56) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 56)?, rt::string_object("StringManagedFileChooserCancelText"), rt::string_object("Cancel")), 22, 56)?;
-    // SimpleTheme.xaml(23,56) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 23, 56)?, rt::string_object("StringManagedFileChooserNameColumn"), rt::string_object("Name")), 23, 56)?;
-    // SimpleTheme.xaml(24,64) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 64)?, rt::string_object("StringManagedFileChooserDateModifiedColumn"), rt::string_object("Date Modified")), 24, 64)?;
-    // SimpleTheme.xaml(25,56) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 56)?, rt::string_object("StringManagedFileChooserTypeColumn"), rt::string_object("Type")), 25, 56)?;
-    // SimpleTheme.xaml(26,56) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 26, 56)?, rt::string_object("StringManagedFileChooserSizeColumn"), rt::string_object("Size")), 26, 56)?;
-    // SimpleTheme.xaml(27,82) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 27, 82)?, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"), rt::string_object("{0} already exists. Do you want to replace it?")), 27, 82)?;
-    // SimpleTheme.xaml(28,72) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 28, 72)?, rt::string_object("StringManagedFileChooserOverwritePromptConfirmText"), rt::string_object("Yes")), 28, 72)?;
-    // SimpleTheme.xaml(29,71) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 29, 71)?, rt::string_object("StringManagedFileChooserOverwritePromptCancelText"), rt::string_object("No")), 29, 71)?;
-    // SimpleTheme.xaml(30,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 30, 47)?, rt::string_object("StringScrollBarScrollHere"), rt::string_object("Scroll Here")), 30, 47)?;
-    // SimpleTheme.xaml(31,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 31, 40)?, rt::string_object("StringScrollBarTop"), rt::string_object("Top")), 31, 40)?;
-    // SimpleTheme.xaml(32,43) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 32, 43)?, rt::string_object("StringScrollBarBottom"), rt::string_object("Bottom")), 32, 43)?;
-    // SimpleTheme.xaml(33,43) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 43)?, rt::string_object("StringScrollBarPageUp"), rt::string_object("Page Up")), 33, 43)?;
-    // SimpleTheme.xaml(34,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 45)?, rt::string_object("StringScrollBarPageDown"), rt::string_object("Page Down")), 34, 45)?;
-    // SimpleTheme.xaml(35,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 45)?, rt::string_object("StringScrollBarScrollUp"), rt::string_object("Scroll Up")), 35, 45)?;
-    // SimpleTheme.xaml(36,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 47)?, rt::string_object("StringScrollBarScrollDown"), rt::string_object("Scroll Down")), 36, 47)?;
-    // SimpleTheme.xaml(37,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 45)?, rt::string_object("StringScrollBarLeftEdge"), rt::string_object("Left Edge")), 37, 45)?;
-    // SimpleTheme.xaml(38,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 46)?, rt::string_object("StringScrollBarRightEdge"), rt::string_object("Right Edge")), 38, 46)?;
-    // SimpleTheme.xaml(39,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 45)?, rt::string_object("StringScrollBarPageLeft"), rt::string_object("Page Left")), 39, 45)?;
-    // SimpleTheme.xaml(40,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 46)?, rt::string_object("StringScrollBarPageRight"), rt::string_object("Page Right")), 40, 46)?;
-    // SimpleTheme.xaml(41,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 47)?, rt::string_object("StringScrollBarScrollLeft"), rt::string_object("Scroll Left")), 41, 47)?;
-    // SimpleTheme.xaml(42,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("StringScrollBarScrollRight"), rt::string_object("Scroll Right")), 42, 48)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_13)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 5, 6)?), 5, 6)?;
     // SimpleTheme.xaml(13,4) Content
@@ -439,951 +153,198 @@ pub fn populate_simpletheme_xaml(
     ::core::result::Result::Ok(())
 }
 
-/// Builds the deferred content at `SimpleTheme.xaml(24,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_0(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(24,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(24,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBackgroundColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 24, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 24, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 24, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 24, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
+    rt::ValueRow { key: "ThemeBackgroundColor", value: 4294967295_u32, line: 7, position: 43 },
+    rt::ValueRow { key: "ThemeBorderLowColor", value: 4289374890_u32, line: 8, position: 42 },
+    rt::ValueRow { key: "ThemeBorderMidColor", value: 4287137928_u32, line: 9, position: 42 },
+    rt::ValueRow { key: "ThemeBorderHighColor", value: 4281545523_u32, line: 10, position: 43 },
+    rt::ValueRow { key: "ThemeControlLowColor", value: 4287007129_u32, line: 11, position: 43 },
+    rt::ValueRow { key: "ThemeControlMidColor", value: 4294309365_u32, line: 12, position: 43 },
+    rt::ValueRow { key: "ThemeControlMidHighColor", value: 4290954185_u32, line: 13, position: 47 },
+    rt::ValueRow { key: "ThemeControlHighColor", value: 4285032552_u32, line: 14, position: 44 },
+    rt::ValueRow { key: "ThemeControlVeryHighColor", value: 4284177243_u32, line: 15, position: 48 },
+    rt::ValueRow { key: "ThemeControlHighlightLowColor", value: 4293980400_u32, line: 16, position: 52 },
+    rt::ValueRow { key: "ThemeControlHighlightMidColor", value: 4291875024_u32, line: 17, position: 52 },
+    rt::ValueRow { key: "ThemeControlHighlightHighColor", value: 4286611584_u32, line: 18, position: 53 },
+    rt::ValueRow { key: "ThemeForegroundColor", value: 4278190080_u32, line: 19, position: 43 },
+    rt::ValueRow { key: "HighlightColor", value: 4278742942_u32, line: 20, position: 37 },
+    rt::ValueRow { key: "HighlightColor2", value: 4278804613_u32, line: 21, position: 38 },
+    rt::ValueRow { key: "HyperlinkVisitedColor", value: 4285013416_u32, line: 22, position: 44 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(25,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_1(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(25,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(25,52) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 25, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 25, 52)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 25, 52)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 25, 52));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_1: &[rt::StaticBrushRow] = &[
+    rt::StaticBrushRow { key: "ThemeBackgroundBrush", color_key: "ThemeBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 24, position: 8, value_line: 24, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeBorderLowBrush", color_key: "ThemeBorderLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 25, position: 8, value_line: 25, value_position: 52 },
+    rt::StaticBrushRow { key: "ThemeBorderMidBrush", color_key: "ThemeBorderMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 26, position: 8, value_line: 26, value_position: 52 },
+    rt::StaticBrushRow { key: "ThemeBorderHighBrush", color_key: "ThemeBorderHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 27, position: 8, value_line: 27, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlLowBrush", color_key: "ThemeControlLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 28, position: 8, value_line: 28, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlMidBrush", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 29, position: 8, value_line: 29, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlMidHighBrush", color_key: "ThemeControlMidHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 30, position: 8, value_line: 30, value_position: 57 },
+    rt::StaticBrushRow { key: "ThemeControlHighBrush", color_key: "ThemeControlHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 31, position: 8, value_line: 31, value_position: 54 },
+    rt::StaticBrushRow { key: "ThemeControlVeryHighBrush", color_key: "ThemeControlVeryHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 32, position: 8, value_line: 32, value_position: 58 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightLowBrush", color_key: "ThemeControlHighlightLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 33, position: 8, value_line: 33, value_position: 62 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightMidBrush", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 34, position: 8, value_line: 34, value_position: 62 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightHighBrush", color_key: "ThemeControlHighlightHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 35, position: 8, value_line: 35, value_position: 63 },
+    rt::StaticBrushRow { key: "ThemeForegroundBrush", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 36, position: 8, value_line: 36, value_position: 53 },
+    rt::StaticBrushRow { key: "HighlightBrush", color_key: "HighlightColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 37, position: 8, value_line: 37, value_position: 47 },
+    rt::StaticBrushRow { key: "HighlightBrush2", color_key: "HighlightColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 38, position: 8, value_line: 38, value_position: 48 },
+    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 39, position: 8, value_line: 39, value_position: 54 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(26,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_2(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(26,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(26,52) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 26, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 26, 52)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 26, 52)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 26, 52));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_2: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 41, position: 8 },
+    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 42, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4278190080_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 46, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4293256677_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 47, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 48, position: 8 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(27,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_3(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(27,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(27,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 27, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 27, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 27, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 27, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The resource aliases of a run of `SimpleTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_3: &[rt::ResourceAliasRow] = &[
+    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "ThemeBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 49, position: 8, value_line: 49, value_position: 8 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(28,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_4(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(28,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(28,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 28, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 28, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 28, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 28, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
+    rt::ValueRow { key: "ThemeBackgroundColor", value: 4280821800_u32, line: 53, position: 43 },
+    rt::ValueRow { key: "ThemeBorderLowColor", value: 4283453520_u32, line: 54, position: 42 },
+    rt::ValueRow { key: "ThemeBorderMidColor", value: 4286611584_u32, line: 55, position: 42 },
+    rt::ValueRow { key: "ThemeBorderHighColor", value: 4288716960_u32, line: 56, position: 43 },
+    rt::ValueRow { key: "ThemeControlLowColor", value: 4280821800_u32, line: 57, position: 43 },
+    rt::ValueRow { key: "ThemeControlMidColor", value: 4283453520_u32, line: 58, position: 43 },
+    rt::ValueRow { key: "ThemeControlMidHighColor", value: 4285032552_u32, line: 59, position: 47 },
+    rt::ValueRow { key: "ThemeControlHighColor", value: 4286611584_u32, line: 60, position: 44 },
+    rt::ValueRow { key: "ThemeControlVeryHighColor", value: 4293913583_u32, line: 61, position: 48 },
+    rt::ValueRow { key: "ThemeControlHighlightLowColor", value: 4289243304_u32, line: 62, position: 52 },
+    rt::ValueRow { key: "ThemeControlHighlightMidColor", value: 4286743170_u32, line: 63, position: 52 },
+    rt::ValueRow { key: "ThemeControlHighlightHighColor", value: 4283453520_u32, line: 64, position: 53 },
+    rt::ValueRow { key: "ThemeForegroundColor", value: 4292796126_u32, line: 65, position: 43 },
+    rt::ValueRow { key: "HighlightColor", value: 4279344858_u32, line: 66, position: 37 },
+    rt::ValueRow { key: "HighlightColor2", value: 4278804613_u32, line: 67, position: 38 },
+    rt::ValueRow { key: "HyperlinkVisitedColor", value: 4291136249_u32, line: 68, position: 44 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(29,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_5(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(29,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(29,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 29, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 29, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 29, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 29, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_5: &[rt::StaticBrushRow] = &[
+    rt::StaticBrushRow { key: "ThemeBackgroundBrush", color_key: "ThemeBackgroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 70, position: 8, value_line: 70, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeBorderLowBrush", color_key: "ThemeBorderLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 71, position: 8, value_line: 71, value_position: 52 },
+    rt::StaticBrushRow { key: "ThemeBorderMidBrush", color_key: "ThemeBorderMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 72, position: 8, value_line: 72, value_position: 52 },
+    rt::StaticBrushRow { key: "ThemeBorderHighBrush", color_key: "ThemeBorderHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 73, position: 8, value_line: 73, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlLowBrush", color_key: "ThemeControlLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 74, position: 8, value_line: 74, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlMidBrush", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 75, position: 8, value_line: 75, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeControlMidHighBrush", color_key: "ThemeControlMidHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 76, position: 8, value_line: 76, value_position: 57 },
+    rt::StaticBrushRow { key: "ThemeControlHighBrush", color_key: "ThemeControlHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 77, position: 8, value_line: 77, value_position: 54 },
+    rt::StaticBrushRow { key: "ThemeControlVeryHighBrush", color_key: "ThemeControlVeryHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 78, position: 8, value_line: 78, value_position: 58 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightLowBrush", color_key: "ThemeControlHighlightLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 79, position: 8, value_line: 79, value_position: 62 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightMidBrush", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 80, position: 8, value_line: 80, value_position: 62 },
+    rt::StaticBrushRow { key: "ThemeControlHighlightHighBrush", color_key: "ThemeControlHighlightHighColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 81, position: 8, value_line: 81, value_position: 63 },
+    rt::StaticBrushRow { key: "ThemeForegroundBrush", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 82, position: 8, value_line: 82, value_position: 53 },
+    rt::StaticBrushRow { key: "HighlightBrush", color_key: "HighlightColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 83, position: 8, value_line: 83, value_position: 47 },
+    rt::StaticBrushRow { key: "HighlightBrush2", color_key: "HighlightColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 84, position: 8, value_line: 84, value_position: 48 },
+    rt::StaticBrushRow { key: "HyperlinkVisitedBrush", color_key: "HyperlinkVisitedColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 85, position: 8, value_line: 85, value_position: 54 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(30,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_6(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(30,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(30,57) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlMidHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 30, 57)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 30, 57)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 30, 57)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 30, 57));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_6: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "RefreshVisualizerForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 87, position: 8 },
+    rt::LiteralBrushRow { key: "RefreshVisualizerBackground", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 88, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonForeground", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 92, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonBackground", color: 4280096527_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 93, position: 8 },
+    rt::LiteralBrushRow { key: "CaptionButtonBorderBrush", color: 4291480266_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 94, position: 8 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(31,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_7(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(31,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(31,54) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 31, 54)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 31, 54)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 31, 54)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 31, 54));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The resource aliases of a run of `SimpleTheme.xaml`, added in order by `rt::add_resource_aliases` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_7: &[rt::ResourceAliasRow] = &[
+    rt::ResourceAliasRow { key: "TitleBarBackgroundBrush", target: "ThemeBackgroundBrush", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 95, position: 8, value_line: 95, value_position: 8 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(32,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_8(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(32,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(32,58) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlVeryHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 58)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 32, 58)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 32, 58)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 32, 58));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
+    rt::ValueRow { key: "ThemeAccentColor", value: 3423706842_u32, line: 99, position: 35 },
+    rt::ValueRow { key: "ThemeAccentColor2", value: 2568068826_u32, line: 100, position: 36 },
+    rt::ValueRow { key: "ThemeAccentColor3", value: 1712430810_u32, line: 101, position: 36 },
+    rt::ValueRow { key: "ThemeAccentColor4", value: 856792794_u32, line: 102, position: 36 },
+    rt::ValueRow { key: "ThemeForegroundLowColor", value: 4286611584_u32, line: 103, position: 42 },
+    rt::ValueRow { key: "HighlightForegroundColor", value: 4294967295_u32, line: 104, position: 43 },
+    rt::ValueRow { key: "ErrorColor", value: 4294901760_u32, line: 105, position: 29 },
+    rt::ValueRow { key: "ErrorLowColor", value: 285147136_u32, line: 106, position: 32 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(33,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_9(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(33,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(33,62) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 33, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 33, 62)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 33, 62)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 33, 62));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, added in order by `rt::add_static_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_9: &[rt::StaticBrushRow] = &[
+    rt::StaticBrushRow { key: "HighlightForegroundBrush", color_key: "HighlightForegroundColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 107, position: 4, value_line: 107, value_position: 53 },
+    rt::StaticBrushRow { key: "ThemeForegroundLowBrush", color_key: "ThemeForegroundLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 108, position: 4, value_line: 108, value_position: 52 },
+    rt::StaticBrushRow { key: "ThemeAccentBrush2", color_key: "ThemeAccentColor2", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 109, position: 4, value_line: 109, value_position: 46 },
+    rt::StaticBrushRow { key: "ThemeAccentBrush3", color_key: "ThemeAccentColor3", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 110, position: 4, value_line: 110, value_position: 46 },
+    rt::StaticBrushRow { key: "ThemeAccentBrush4", color_key: "ThemeAccentColor4", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 111, position: 4, value_line: 111, value_position: 46 },
+    rt::StaticBrushRow { key: "ThemeAccentBrush", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 112, position: 4, value_line: 112, value_position: 45 },
+    rt::StaticBrushRow { key: "ErrorBrush", color_key: "ErrorColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 113, position: 4, value_line: 113, value_position: 39 },
+    rt::StaticBrushRow { key: "ErrorLowBrush", color_key: "ErrorLowColor", namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 114, position: 4, value_line: 114, value_position: 42 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(34,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_10(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(34,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(34,62) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 34, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 34, 62)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 34, 62)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 34, 62));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_10: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "NotificationCardForegroundBrush", color: 4294967295_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 119, position: 4 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(35,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_11(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(35,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(35,63) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 63)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 35, 63)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 35, 63)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 35, 63));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The brushes with a literal colour of a run of `SimpleTheme.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_11: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "ThemeControlTransparentBrush", color: 16777215_u32, namespaces: ::core::option::Option::Some(POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0), line: 138, position: 4 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(36,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_12(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(36,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(36,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeForegroundColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 36, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 36, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 36, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 36, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
+/// The numbers of a run of `SimpleTheme.xaml`, added in order by `rt::add_double_resources` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_12: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "ThemeDisabledOpacity", value: 0.5_f64, line: 148, position: 44 },
+    rt::ValueRow { key: "FontSizeSmall", value: 10.0_f64, line: 150, position: 37 },
+    rt::ValueRow { key: "FontSizeNormal", value: 12.0_f64, line: 151, position: 38 },
+    rt::ValueRow { key: "FontSizeLarge", value: 16.0_f64, line: 152, position: 37 },
+    rt::ValueRow { key: "ScrollBarThickness", value: 18.0_f64, line: 154, position: 42 },
+    rt::ValueRow { key: "ScrollBarThumbThickness", value: 8.0_f64, line: 155, position: 47 },
+    rt::ValueRow { key: "IconElementThemeHeight", value: 20.0_f64, line: 157, position: 46 },
+    rt::ValueRow { key: "IconElementThemeWidth", value: 20.0_f64, line: 158, position: 45 },
+    rt::ValueRow { key: "TextControlPlaceholderOpacity", value: 0.5_f64, line: 160, position: 53 },
+];
 
-/// Builds the deferred content at `SimpleTheme.xaml(37,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_13(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(37,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(37,47) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HighlightColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 47)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 37, 47)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 37, 47)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 37, 47));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(38,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_14(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(38,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(38,48) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HighlightColor2"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 38, 48)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 38, 48)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 38, 48)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 38, 48));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(39,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_15(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(39,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(39,54) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HyperlinkVisitedColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 39, 54)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 39, 54)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 39, 54)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 39, 54));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(41,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_16(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(41,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(41,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190080_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(42,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_17(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(42,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(42,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(46,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_18(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(46,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(46,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190080_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(47,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_19(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(47,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(47,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4293256677_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(48,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_20(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(48,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(48,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291480266_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(49,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_21(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    // SimpleTheme.xaml(49,55) ResourceKey
-    rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 }, "ThemeBackgroundBrush", 49, 8)
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(70,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_22(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(70,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(70,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBackgroundColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 70, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 70, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 70, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(71,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_23(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(71,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(71,52) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 71, 52)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 71, 52)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 71, 52));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(72,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_24(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(72,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(72,52) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 72, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 72, 52)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 72, 52)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 72, 52));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(73,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_25(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(73,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(73,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeBorderHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 73, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 73, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 73, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 73, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(74,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_26(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(74,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(74,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 74, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 74, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 74, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(75,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_27(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(75,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(75,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 75, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 75, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 75, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(76,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_28(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(76,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(76,57) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlMidHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 76, 57)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 76, 57)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 76, 57)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 76, 57));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(77,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_29(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(77,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(77,54) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 77, 54)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 77, 54)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 77, 54)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 77, 54));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(78,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_30(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(78,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(78,58) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlVeryHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 78, 58)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 78, 58)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 78, 58)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 78, 58));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(79,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_31(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(79,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(79,62) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 79, 62)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 79, 62)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 79, 62));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(80,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_32(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(80,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(80,62) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightMidColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 62)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 80, 62)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 80, 62)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 80, 62));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(81,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_33(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(81,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(81,63) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeControlHighlightHighColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 81, 63)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 81, 63)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 81, 63)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 81, 63));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(82,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_34(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(82,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(82,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeForegroundColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 82, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 82, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 82, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 82, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(83,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_35(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(83,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(83,47) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HighlightColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 47)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 83, 47)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 83, 47)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 83, 47));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(84,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_36(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(84,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(84,48) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HighlightColor2"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 84, 48)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 84, 48)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 84, 48)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 84, 48));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(85,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_37(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(85,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(85,54) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HyperlinkVisitedColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 54)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 85, 54)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 85, 54)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 85, 54));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(87,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_38(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(87,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(87,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(88,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_39(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(88,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(88,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(92,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_40(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(92,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(92,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(93,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_41(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(93,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(93,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4280096527_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(94,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_42(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(94,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(94,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291480266_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(95,8)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_43(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    // SimpleTheme.xaml(95,55) ResourceKey
-    rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 }, "ThemeBackgroundBrush", 95, 8)
-}
+/// The texts of a run of `SimpleTheme.xaml`, added in order by `rt::add_string_resources` (#568).
+static POPULATE_SIMPLETHEME_XAML_ROWS_13: &[rt::ValueRow<&'static str>] = &[
+    rt::ValueRow { key: "StringCalendarWeekNumberHeader", value: "\u{a0}", line: 5, position: 52 },
+    rt::ValueRow { key: "StringDatePickerDayText", value: "day", line: 7, position: 45 },
+    rt::ValueRow { key: "StringDatePickerMonthText", value: "month", line: 8, position: 47 },
+    rt::ValueRow { key: "StringDatePickerYearText", value: "year", line: 9, position: 46 },
+    rt::ValueRow { key: "StringTimePickerHourText", value: "hour", line: 11, position: 46 },
+    rt::ValueRow { key: "StringTimePickerMinuteText", value: "minute", line: 12, position: 48 },
+    rt::ValueRow { key: "StringTimePickerSecondText", value: "second", line: 13, position: 48 },
+    rt::ValueRow { key: "StringTextFlyoutCutText", value: "Cut", line: 15, position: 45 },
+    rt::ValueRow { key: "StringTextFlyoutCopyText", value: "Copy", line: 16, position: 46 },
+    rt::ValueRow { key: "StringTextFlyoutPasteText", value: "Paste", line: 17, position: 47 },
+    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 19, position: 65 },
+    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 20, position: 65 },
+    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 21, position: 52 },
+    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 22, position: 56 },
+    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 23, position: 56 },
+    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 24, position: 64 },
+    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 25, position: 56 },
+    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 26, position: 56 },
+    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 27, position: 82 },
+    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 28, position: 72 },
+    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 29, position: 71 },
+    rt::ValueRow { key: "StringScrollBarScrollHere", value: "Scroll Here", line: 30, position: 47 },
+    rt::ValueRow { key: "StringScrollBarTop", value: "Top", line: 31, position: 40 },
+    rt::ValueRow { key: "StringScrollBarBottom", value: "Bottom", line: 32, position: 43 },
+    rt::ValueRow { key: "StringScrollBarPageUp", value: "Page Up", line: 33, position: 43 },
+    rt::ValueRow { key: "StringScrollBarPageDown", value: "Page Down", line: 34, position: 45 },
+    rt::ValueRow { key: "StringScrollBarScrollUp", value: "Scroll Up", line: 35, position: 45 },
+    rt::ValueRow { key: "StringScrollBarScrollDown", value: "Scroll Down", line: 36, position: 47 },
+    rt::ValueRow { key: "StringScrollBarLeftEdge", value: "Left Edge", line: 37, position: 45 },
+    rt::ValueRow { key: "StringScrollBarRightEdge", value: "Right Edge", line: 38, position: 46 },
+    rt::ValueRow { key: "StringScrollBarPageLeft", value: "Page Left", line: 39, position: 45 },
+    rt::ValueRow { key: "StringScrollBarPageRight", value: "Page Right", line: 40, position: 46 },
+    rt::ValueRow { key: "StringScrollBarScrollLeft", value: "Scroll Left", line: 41, position: 47 },
+    rt::ValueRow { key: "StringScrollBarScrollRight", value: "Scroll Right", line: 42, position: 48 },
+];
 
 /// Builds the deferred content at `SimpleTheme.xaml(98,53)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_44(
@@ -1391,206 +352,6 @@ fn populate_simpletheme_xaml_deferred_44(
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("fonts:Inter#Inter, $Default"))))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(107,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_45(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(107,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(107,53) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HighlightForegroundColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 107, 53)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 107, 53)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 107, 53)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 107, 53));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(108,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_46(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(108,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(108,52) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeForegroundLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 108, 52)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 108, 52)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 108, 52)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 108, 52));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(109,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_47(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(109,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(109,46) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor2"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 109, 46)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 109, 46)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 109, 46)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 109, 46));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(110,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_48(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(110,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(110,46) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor3"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 110, 46)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 110, 46)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 110, 46)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 110, 46));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(111,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_49(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(111,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(111,46) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor4"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 111, 46)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 111, 46)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 111, 46)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 111, 46));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(112,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_50(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(112,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(112,45) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeAccentColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 112, 45)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 112, 45)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 112, 45)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 112, 45));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(113,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_51(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(113,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(113,39) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ErrorColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 113, 39)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 113, 39)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 113, 39)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 113, 39));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(114,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_52(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(114,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // SimpleTheme.xaml(114,42) Color (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ErrorLowColor"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::media::SolidColorBrush::color_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 114, 42)?;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), value_0.clone(), 114, 42)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), rt::exact(value_0.clone(), "FerroUI.Media.SolidColorBrush.set_Color", 0, 114, 42)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Color", &value_0, 114, 42));
-    }
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `SimpleTheme.xaml(115,4)` (a template or a deferred resource).
@@ -1604,19 +365,6 @@ fn populate_simpletheme_xaml_deferred_53(
     solid_color_brush_0.set_value(::ferroui_base::media::Brush::opacity_property(), 0.75_f64);
     // SimpleTheme.xaml(115,4) Color
     let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4282664004_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(119,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_54(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(119,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(119,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
@@ -1677,19 +425,6 @@ fn populate_simpletheme_xaml_deferred_58(
     solid_color_brush_0.set_value(::ferroui_base::media::Brush::opacity_property(), 0.75_f64);
     // SimpleTheme.xaml(134,4) Color
     let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4290584620_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `SimpleTheme.xaml(138,4)` (a template or a deferred resource).
-fn populate_simpletheme_xaml_deferred_59(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
-    // SimpleTheme.xaml(138,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // SimpleTheme.xaml(138,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
@@ -1978,9 +713,7 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(37,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 47)?, rt::string_object("ToggleSwitchThemeMinWidth"), rt::to_object(0.0_f64)), 37, 47)?;
     // Controls/SimpleControls.xaml(38,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 52)?, rt::string_object("ToggleSwitchOnStrokeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 38, 52)?;
-    // Controls/SimpleControls.xaml(39,61) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 61)?, rt::string_object("ToggleSwitchOuterBorderStrokeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 39, 61)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0)?;
     // Controls/SimpleControls.xaml(41,4) Content (resource)
     let deferred_55 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_120, 41, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_55) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 41, 4)?;
@@ -1990,16 +723,12 @@ pub fn build_controls_simplecontrols_xaml(
     let deferred_57 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_123, 16, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_57) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
     // Controls/SimpleControls.xaml(5,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 40)?, rt::string_object("CaptionButtonWidth"), rt::to_object(45.0_f64)), 5, 40)?;
-    // Controls/SimpleControls.xaml(6,41) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 6, 41)?, rt::string_object("CaptionButtonHeight"), rt::to_object(30.0_f64)), 6, 41)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1)?;
     // Controls/SimpleControls.xaml(7,67) Content (resource)
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
     // Controls/SimpleControls.xaml(8,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CaptionButtonCloseBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_125, 8, 4)?;
-    // Controls/SimpleControls.xaml(9,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CaptionButtonCloseBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_126, 9, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
     // Controls/SimpleControls.xaml(11,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_127, 11, 4)?;
     // Controls/SimpleControls.xaml(36,4) Content (resource)
@@ -2073,11 +802,7 @@ pub fn build_controls_simplecontrols_xaml(
     let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_178, 16, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
     // Controls/SimpleControls.xaml(24,58) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 58)?, rt::string_object("DateTimeFlyoutButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 24, 58)?;
-    // Controls/SimpleControls.xaml(25,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 52)?, rt::string_object("DateTimeFlyoutBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 25, 52)?;
-    // Controls/SimpleControls.xaml(26,50) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 26, 50)?, rt::string_object("DateTimeFlyoutBorderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 26, 50)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
     // Controls/SimpleControls.xaml(29,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_183, 29, 4)?;
     // Controls/SimpleControls.xaml(53,4) Content (resource)
@@ -2088,23 +813,9 @@ pub fn build_controls_simplecontrols_xaml(
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_188, 120, 4)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/SimpleControls.xaml(33,62) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 62)?, rt::string_object("DatePickerFlyoutPresenterHighlightHeight"), rt::to_object(40.0_f64)), 33, 62)?;
-    // Controls/SimpleControls.xaml(34,57) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 57)?, rt::string_object("DatePickerFlyoutPresenterItemHeight"), rt::to_object(40.0_f64)), 34, 57)?;
-    // Controls/SimpleControls.xaml(35,74) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 74)?, rt::string_object("DatePickerFlyoutPresenterAcceptDismissHostGridHeight"), rt::to_object(41.0_f64)), 35, 74)?;
-    // Controls/SimpleControls.xaml(36,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 45)?, rt::string_object("DatePickerThemeMinWidth"), rt::to_object(296.0_f64)), 36, 45)?;
-    // Controls/SimpleControls.xaml(37,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 45)?, rt::string_object("DatePickerThemeMaxWidth"), rt::to_object(456.0_f64)), 37, 45)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
     // Controls/SimpleControls.xaml(38,59) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 59)?, rt::string_object("DatePickerFlyoutPresenterItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 38, 59)?;
-    // Controls/SimpleControls.xaml(39,60) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 60)?, rt::string_object("DatePickerFlyoutPresenterMonthPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 39, 60)?;
-    // Controls/SimpleControls.xaml(40,44) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 44)?, rt::string_object("DatePickerHostPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 40, 44)?;
-    // Controls/SimpleControls.xaml(41,49) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 49)?, rt::string_object("DatePickerHostMonthPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 41, 49)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
     // Controls/SimpleControls.xaml(42,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 42, 48)?;
     // Controls/SimpleControls.xaml(44,4) Content (resource)
@@ -2116,23 +827,13 @@ pub fn build_controls_simplecontrols_xaml(
     let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_194, 172, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 172, 4)?;
     // Controls/SimpleControls.xaml(33,57) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 57)?, rt::string_object("TimePickerFlyoutPresenterItemHeight"), rt::to_object(40.0_f64)), 33, 57)?;
-    // Controls/SimpleControls.xaml(34,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 48)?, rt::string_object("TimePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 34, 48)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6)?;
     // Controls/SimpleControls.xaml(35,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 53)?;
     // Controls/SimpleControls.xaml(36,62) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 62)?, rt::string_object("TimePickerFlyoutPresenterHighlightHeight"), rt::to_object(40.0_f64)), 36, 62)?;
-    // Controls/SimpleControls.xaml(37,74) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 74)?, rt::string_object("TimePickerFlyoutPresenterAcceptDismissHostGridHeight"), rt::to_object(41.0_f64)), 37, 74)?;
-    // Controls/SimpleControls.xaml(38,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 45)?, rt::string_object("TimePickerThemeMinWidth"), rt::to_object(242.0_f64)), 38, 45)?;
-    // Controls/SimpleControls.xaml(39,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 45)?, rt::string_object("TimePickerThemeMaxWidth"), rt::to_object(456.0_f64)), 39, 45)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
     // Controls/SimpleControls.xaml(40,59) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 59)?, rt::string_object("TimePickerFlyoutPresenterItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 40, 59)?;
-    // Controls/SimpleControls.xaml(41,44) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 44)?, rt::string_object("TimePickerHostPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64))), 41, 44)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
     // Controls/SimpleControls.xaml(43,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_196, 43, 4)?;
     // Controls/SimpleControls.xaml(79,4) Content (resource)
@@ -2142,9 +843,7 @@ pub fn build_controls_simplecontrols_xaml(
     let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_200, 205, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 205, 4)?;
     // Controls/SimpleControls.xaml(19,50) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 19, 50)?, rt::string_object("SplitViewOpenPaneThemeLength"), rt::to_object(320.0_f64)), 19, 50)?;
-    // Controls/SimpleControls.xaml(20,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 53)?, rt::string_object("SplitViewCompactPaneThemeLength"), rt::to_object(48.0_f64)), 20, 53)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9)?;
     // Controls/SimpleControls.xaml(21,60) Content (resource)
     let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 60)?, rt::string_object("SplitViewPaneAnimationOpenDuration"), rt::to_object(::core::clone::Clone::clone(&value_1))), 21, 60)?;
@@ -2173,13 +872,7 @@ pub fn build_controls_simplecontrols_xaml(
     ::core::mem::drop(namespace_scope_6);
     let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/SimpleControls.xaml(14,50) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 50)?, rt::string_object("SplitButtonPrimaryButtonSize"), rt::to_object(24.0_f64)), 14, 50)?;
-    // Controls/SimpleControls.xaml(15,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 15, 52)?, rt::string_object("SplitButtonSecondaryButtonSize"), rt::to_object(24.0_f64)), 15, 52)?;
-    // Controls/SimpleControls.xaml(16,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 47)?, rt::string_object("SplitButtonSeparatorWidth"), rt::to_object(1.0_f64)), 16, 47)?;
-    // Controls/SimpleControls.xaml(17,42) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 17, 42)?, rt::string_object("SplitButtonMinHeight"), rt::to_object(24.0_f64)), 17, 42)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
     // Controls/SimpleControls.xaml(18,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 18, 54)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 54)?;
     // Controls/SimpleControls.xaml(20,4) Content (resource)
@@ -2282,40 +975,26 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(12,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_249, 12, 50)?;
     // Controls/SimpleControls.xaml(14,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_250, 14, 4)?;
-    // Controls/SimpleControls.xaml(15,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarForeground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_251, 15, 4)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11)?;
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_252, 17, 4)?;
     // Controls/SimpleControls.xaml(22,4) Content (resource)
     let deferred_129 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_253, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_129) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
     // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundUnselected", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_255, 17, 4)?;
-    // Controls/SimpleControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundSelected", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_256, 18, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
     // Controls/SimpleControls.xaml(19,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_257, 19, 4)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13)?;
     // Controls/SimpleControls.xaml(20,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_258, 20, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14)?;
     // Controls/SimpleControls.xaml(21,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundUnselectedPressed", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_259, 21, 4)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15)?;
     // Controls/SimpleControls.xaml(22,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundSelectedPressed", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_260, 22, 4)?;
-    // Controls/SimpleControls.xaml(23,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderBackgroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_261, 23, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16)?;
     // Controls/SimpleControls.xaml(26,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderForegroundUnselected", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_262, 26, 4)?;
-    // Controls/SimpleControls.xaml(27,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderForegroundSelected", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_263, 27, 4)?;
-    // Controls/SimpleControls.xaml(28,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemHeaderForegroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_264, 28, 4)?;
+    rt::add_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17)?;
     // Controls/SimpleControls.xaml(30,54) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 30, 54)?, rt::string_object("TabbedPageTabItemHeaderMinHeight"), rt::to_object(48.0_f64)), 30, 54)?;
-    // Controls/SimpleControls.xaml(31,63) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 31, 63)?, rt::string_object("TabbedPageTabItemHeaderVerticalPipeHeight"), rt::to_object(18.0_f64)), 31, 63)?;
-    // Controls/SimpleControls.xaml(32,58) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 32, 58)?, rt::string_object("TabbedPageTabItemHeaderPipeThickness"), rt::to_object(2.0_f64)), 32, 58)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18)?;
     // Controls/SimpleControls.xaml(34,70) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 70)?, rt::string_object("TabbedPageTabItemHeaderIndicatorCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 70)?;
     // Controls/SimpleControls.xaml(35,61) Content (resource)
@@ -2323,27 +1002,19 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(38,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 61)?, rt::string_object("TabbedPageTabItemHeaderCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 38, 61)?;
     // Controls/SimpleControls.xaml(39,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 53)?, rt::string_object("TabbedPageTabItemHeaderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 8.0_f64, 12.0_f64, 8.0_f64))), 39, 53)?;
-    // Controls/SimpleControls.xaml(40,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 52)?, rt::string_object("TabbedPageTabItemHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 40, 52)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19)?;
     // Controls/SimpleControls.xaml(43,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 43, 53)?, rt::string_object("TabbedPageTabItemHeaderIconSize"), rt::to_object(20.0_f64)), 43, 53)?;
-    // Controls/SimpleControls.xaml(44,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 44, 53)?, rt::string_object("TabbedPageTabItemHeaderFontSize"), rt::to_object(12.0_f64)), 44, 53)?;
-    // Controls/SimpleControls.xaml(45,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 45, 52)?, rt::string_object("TabbedPageTabItemHeaderSpacing"), rt::to_object(4.0_f64)), 45, 52)?;
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20)?;
     // Controls/SimpleControls.xaml(48,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabStripBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_265, 48, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21)?;
     // Controls/SimpleControls.xaml(49,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 49, 56)?, rt::string_object("TabbedPageTabStripCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 49, 56)?;
     // Controls/SimpleControls.xaml(50,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 50, 56)?, rt::string_object("TabbedPageTabStripBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 50, 56)?;
     // Controls/SimpleControls.xaml(51,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabStripBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_266, 51, 4)?;
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22)?;
     // Controls/SimpleControls.xaml(52,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 47)?, rt::string_object("TabbedPageTabStripMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 52, 47)?;
-    // Controls/SimpleControls.xaml(53,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 48)?, rt::string_object("TabbedPageTabStripPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 53, 48)?;
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23)?;
     // Controls/SimpleControls.xaml(56,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_267, 56, 4)?;
     // Controls/SimpleControls.xaml(102,4) Content (resource)
@@ -2381,6 +1052,158 @@ pub fn build_controls_simplecontrols_xaml(
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(styles_0)
 }
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 38, position: 52 },
+    rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 39, position: 61 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "CaptionButtonWidth", value: 45.0_f64, line: 5, position: 40 },
+    rt::ValueRow { key: "CaptionButtonHeight", value: 30.0_f64, line: 6, position: 41 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "CaptionButtonCloseBackground", color: 4293398819_u32, namespaces: ::core::option::Option::None, line: 8, position: 4 },
+    rt::LiteralBrushRow { key: "CaptionButtonCloseBorderBrush", color: 4294013050_u32, namespaces: ::core::option::Option::None, line: 9, position: 4 },
+];
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 24, position: 58 },
+    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 25, position: 52 },
+    rt::ValueRow { key: "DateTimeFlyoutBorderPadding", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 26, position: 50 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 33, position: 62 },
+    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 34, position: 57 },
+    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 35, position: 74 },
+    rt::ValueRow { key: "DatePickerThemeMinWidth", value: 296.0_f64, line: 36, position: 45 },
+    rt::ValueRow { key: "DatePickerThemeMaxWidth", value: 456.0_f64, line: 37, position: 45 },
+];
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 38, position: 59 },
+    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 39, position: 60 },
+    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 44 },
+    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 49 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "TimePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 33, position: 57 },
+    rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 34, position: 48 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 36, position: 62 },
+    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 37, position: 74 },
+    rt::ValueRow { key: "TimePickerThemeMinWidth", value: 242.0_f64, line: 38, position: 45 },
+    rt::ValueRow { key: "TimePickerThemeMaxWidth", value: 456.0_f64, line: 39, position: 45 },
+];
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 59 },
+    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 44 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "SplitViewOpenPaneThemeLength", value: 320.0_f64, line: 19, position: 50 },
+    rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 20, position: 53 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "SplitButtonPrimaryButtonSize", value: 24.0_f64, line: 14, position: 50 },
+    rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 24.0_f64, line: 15, position: 52 },
+    rt::ValueRow { key: "SplitButtonSeparatorWidth", value: 1.0_f64, line: 16, position: 47 },
+    rt::ValueRow { key: "SplitButtonMinHeight", value: 24.0_f64, line: 17, position: 42 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "NavigationBarBackground", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 14, position: 4, value_line: 14, value_position: 52 },
+    rt::DynamicBrushRow { key: "NavigationBarForeground", color_key: "ThemeForegroundColor", namespaces: ::core::option::Option::None, line: 15, position: 4, value_line: 15, value_position: 52 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 17, position: 4 },
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelected", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 18, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_13: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOver", color_key: "ThemeControlMidColor", namespaces: ::core::option::Option::None, line: 19, position: 4, value_line: 19, value_position: 83 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_14: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 20, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_15: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderBackgroundUnselectedPressed", color_key: "ThemeControlHighlightMidColor", namespaces: ::core::option::Option::None, line: 21, position: 4, value_line: 21, value_position: 79 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_16: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundSelectedPressed", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 22, position: 4 },
+    rt::LiteralBrushRow { key: "TabbedPageTabItemHeaderBackgroundDisabled", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 23, position: 4 },
+];
+
+/// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_dynamic_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_17: &[rt::DynamicBrushRow] = &[
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundUnselected", color_key: "ThemeForegroundMidColor", namespaces: ::core::option::Option::None, line: 26, position: 4, value_line: 26, value_position: 72 },
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundSelected", color_key: "ThemeAccentColor", namespaces: ::core::option::Option::None, line: 27, position: 4, value_line: 27, value_position: 70 },
+    rt::DynamicBrushRow { key: "TabbedPageTabItemHeaderForegroundDisabled", color_key: "ThemeDisabledColor", namespaces: ::core::option::Option::None, line: 28, position: 4, value_line: 28, value_position: 70 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "TabbedPageTabItemHeaderMinHeight", value: 48.0_f64, line: 30, position: 54 },
+    rt::ValueRow { key: "TabbedPageTabItemHeaderVerticalPipeHeight", value: 18.0_f64, line: 31, position: 63 },
+    rt::ValueRow { key: "TabbedPageTabItemHeaderPipeThickness", value: 2.0_f64, line: 32, position: 58 },
+];
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "TabbedPageTabItemHeaderPadding", value: [12.0_f64, 8.0_f64, 12.0_f64, 8.0_f64], line: 39, position: 53 },
+    rt::ValueRow { key: "TabbedPageTabItemHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 52 },
+];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "TabbedPageTabItemHeaderIconSize", value: 20.0_f64, line: 43, position: 53 },
+    rt::ValueRow { key: "TabbedPageTabItemHeaderFontSize", value: 12.0_f64, line: 44, position: 53 },
+    rt::ValueRow { key: "TabbedPageTabItemHeaderSpacing", value: 4.0_f64, line: 45, position: 52 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabStripBackground", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 48, position: 4 },
+];
+
+/// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_literal_brushes` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: &[rt::LiteralBrushRow] = &[
+    rt::LiteralBrushRow { key: "TabbedPageTabStripBorderBrush", color: 16777215_u32, namespaces: ::core::option::Option::None, line: 51, position: 4 },
+];
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "TabbedPageTabStripMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 52, position: 47 },
+    rt::ValueRow { key: "TabbedPageTabStripPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 48 },
+];
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_0(
@@ -13135,32 +11958,6 @@ fn build_controls_simplecontrols_xaml_deferred_124(
     context.pop_parent();
     rt::invoked(data_validation_errors_0.try_end_init(), 26, 10)?;
     ::core::result::Result::Ok(rt::to_value(data_validation_errors_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(8,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_125(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(8,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(8,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4293398819_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(9,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_126(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(9,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(9,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294013050_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,4)` (a template or a deferred resource).
@@ -29269,34 +28066,6 @@ fn build_controls_simplecontrols_xaml_deferred_249(
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/SimpleControls.xaml(14,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_250(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(14,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(14,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeControlMidColor", 14, 52)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(15,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_251(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(15,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(15,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeForegroundColor", 15, 52)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_252(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
@@ -30069,167 +28838,6 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 50, 10)?;
     ::core::result::Result::Ok(rt::to_value(panel_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_255(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(17,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(17,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_256(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(18,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(18,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(19,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_257(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(19,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(19,83) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeControlMidColor", 19, 83)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(20,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_258(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(20,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(20,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(21,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_259(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(21,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(21,79) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeControlHighlightMidColor", 21, 79)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_260(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(22,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(22,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(23,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_261(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(23,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(23,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(26,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_262(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(26,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(26,72) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeForegroundMidColor", 26, 72)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(27,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_263(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(27,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(27,70) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeAccentColor", 27, 70)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(28,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_264(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(28,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // Controls/SimpleControls.xaml(28,70) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "ThemeDisabledColor", 28, 70)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(48,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_265(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(48,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(48,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/SimpleControls.xaml(51,4)` (a template or a deferred resource).
-fn build_controls_simplecontrols_xaml_deferred_266(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(51,4) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // Controls/SimpleControls.xaml(51,4) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(56,4)` (a template or a deferred resource).

@@ -440,6 +440,13 @@ impl EmitTypes for RuntimeEmitTypes {
                 <ferroui_markup_xaml::markup_extensions::DynamicResourceExtension as MarkupTyped>::MARKUP.rust_path()
             }
             FrameworkType::TemplateBinding => <ferroui_base::data::TemplateBinding as MarkupTyped>::MARKUP.rust_path(),
+            FrameworkType::IResourceDictionary => {
+                <dyn ferroui_base::controls::IResourceDictionary as MarkupTyped>::MARKUP.rust_path()
+            }
+            FrameworkType::SolidColorBrush => ferroui_base::media::SolidColorBrush::TYPE.rust_path(),
+            FrameworkType::Color => <ferroui_base::media::Color as MarkupTyped>::MARKUP.rust_path(),
+            FrameworkType::Thickness => <ferroui_base::Thickness as MarkupTyped>::MARKUP.rust_path(),
+            FrameworkType::CornerRadius => <ferroui_base::CornerRadius as MarkupTyped>::MARKUP.rust_path(),
         };
         path.map(absolute)
     }

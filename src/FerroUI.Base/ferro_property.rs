@@ -1,4 +1,4 @@
-use crate::data::{BindingMode, BindingPriority};
+use crate::data::{BindingMode, BindingPriority, BindingValue};
 use crate::ferro_property_metadata::Coercion;
 use crate::property_store::{EffectiveValue, EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
@@ -211,6 +211,56 @@ impl<T: Clone + 'static> PayloadSlot for Option<T> {
     }
 }
 
+/// The untyped destination of an untyped value: a box of its own, which takes
+/// a copy of the payload when it is of the property's value type. The slot of
+/// the type-erased binding observers, which keep their values boxed; the copy
+/// is the [`route_box_value`](PropertyRoutes::route_box_value) of the
+/// property.
+pub(crate) struct BoxedPayloadSlot {
+    routes: &'static dyn PropertyRoutes,
+    value: Option<BoxedValue>,
+}
+
+impl BoxedPayloadSlot {
+    #[inline]
+    pub(crate) fn new(property: &FerroProperty) -> Self {
+        Self { routes: property.routes(), value: None }
+    }
+
+    /// The copy of the payload, if there is one.
+    #[inline]
+    pub(crate) fn into_value(self) -> Option<BoxedValue> {
+        self.value
+    }
+}
+
+impl PayloadSlot for BoxedPayloadSlot {
+    fn copy_payload(&mut self, value: &dyn Any) -> bool {
+        self.value = self.routes.route_box_value(value);
+        self.value.is_some()
+    }
+}
+
+/// The value of `value` if it holds exactly a `T`: moved out of the box when
+/// no one else holds it, else a clone. The typed end of the type-erased
+/// binding observers, which hand a box they made themselves (the copy of a
+/// converted or notified value) without a second copy.
+pub(crate) fn take_boxed_value<T: PropertyValue>(value: BoxedValue) -> Option<T> {
+    let value: Rc<dyn Any> = value;
+    let value = value.downcast::<T>().ok()?;
+    Some(Rc::try_unwrap(value).unwrap_or_else(|value| T::clone(&value)))
+}
+
+/// The parts of `value` if it is a `BindingValue<T>`, with its value copied
+/// into a box of its own: the binding value case of an untyped binding, the
+/// one that names `T` (see
+/// [`route_unpack_binding_value`](PropertyRoutes::route_unpack_binding_value)).
+pub(crate) fn unpack_binding_value<T: PropertyValue>(value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+    let value = value.downcast_ref::<BindingValue<T>>()?;
+    let payload = value.has_value().then(|| Rc::new(value.value().clone()) as BoxedValue);
+    Some(BindingValue::from_notification_parts(value.value_type(), payload, value.error().cloned()))
+}
+
 #[inline(never)]
 pub(crate) fn copy_converted_property_value(
     property: &FerroProperty,
@@ -257,22 +307,26 @@ pub(crate) trait PropertyRoutes {
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
-    /// Creates the typed cache for shared local boxed-source installation.
-    /// Direct properties keep their own binding path.
-    fn route_create_boxed_local_binding(
-        &'static self,
-        _owner: &FerroObject,
-    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+    /// Whether the metadata of the property for the type of `owner` enables
+    /// data validation; read without copying the metadata. The binding
+    /// observers of untyped sources read it once, when they are created.
+    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool>;
+    /// The parts of `value` if it is a `BindingValue<T>` of the property's
+    /// value type `T`, with the value in a box of its own; `None` if it is not.
+    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>>;
+    /// Sets the local value of a styled property from a box that holds exactly
+    /// the property's value type: the typed `set_local_value` of the store,
+    /// for an untyped local binding. Only supported by styled properties.
+    fn route_set_local_value(&'static self, _o: &FerroObject, _value: BoxedValue) {
         panic!("not supported for direct properties");
     }
-    /// Creates a value entry for `frame` that reads its values from `source`.
-    /// Only supported by styled properties.
-    fn route_create_binding_entry(
-        &'static self,
-        o: &FerroObject,
-        frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
-        source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedBindingValue>;
+    /// Sets a direct property from an untyped binding value whose value, if
+    /// any, holds exactly the property's value type: the typed
+    /// `set_direct_value_unchecked` of an untyped direct binding. Only
+    /// supported by direct properties.
+    fn route_set_direct_binding_value(&'static self, _o: &FerroObject, _value: BindingValue<BoxedValue>) {
+        panic!("not supported for styled properties");
+    }
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);

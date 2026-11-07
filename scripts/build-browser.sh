@@ -340,11 +340,15 @@ BUILT="$BUILD_DIR/wasm32-unknown-emscripten/$PROFILE"
 WASM="$(sed -n "s/.*locateFile(['\"]\\([^'\"]*\\.wasm\\)['\"].*/\\1/p; s/.*new URL(['\"]\\([^'\"]*\\.wasm\\)['\"].*/\\1/p" "$BUILT/$APPLICATION.js" | head -n 1)"
 [ -n "$WASM" ] || WASM="$APPLICATION.wasm"
 [ -f "$BUILT/$WASM" ] || { echo "the script of the module loads $WASM, which the build did not write" >&2; exit 1; }
-# The threaded mode: every object that C and C++ code brought to the link (the static archives in
-# the directories the build scripts gave the linker: Skia, its bindings shim, HarfBuzz, the setjmp
-# bridge) has to be compiled with atomics and bulk memory, and the memory of the module has to be
-# shared. The linker only refuses an object without atomics when it uses thread-local storage; this
-# refuses all of them, and prints what each archive was compiled with.
+# The threaded mode: every object that C and C++ code brought to the link (the static archives the
+# build scripts gave the linker: Skia, its bindings shim, HarfBuzz, the setjmp bridge, ICU) has to be
+# compiled with atomics and bulk memory, and the memory of the module has to be shared. The linker
+# only refuses an object without atomics when it uses thread-local storage; this refuses all of them,
+# and prints what each archive was compiled with. A build script that names its libraries
+# (`rustc-link-lib`) has only those archives checked: a directory it searches can hold other
+# archives that are not linked (the ICU of the Emscripten sysroot sits beside the single-threaded
+# variants of the system libraries). One that names none has every archive of its directories
+# checked.
 if [ -n "$THREADS" ] && [ -z "$NO_CHECK_FEATURES" ]; then
   echo "== target features (threads)"
   CHECKED=("$BUILT/$WASM")
@@ -356,10 +360,20 @@ if [ -n "$THREADS" ] && [ -z "$NO_CHECK_FEATURES" ]; then
       if (!line.startsWith("{")) continue;
       const message = JSON.parse(line);
       if (message.reason !== "build-script-executed") continue;
+      // The static libraries the script links, by the file name of their archive.
+      const named = new Set();
+      for (const library of message.linked_libs ?? []) {
+        const [kind, name] = library.includes("=") ? library.split("=", 2) : ["", library];
+        if (kind === "" || kind.split(":")[0] === "static") named.add(`lib${name.split(":")[0]}.a`);
+      }
       for (const linked of message.linked_paths ?? []) {
         const directory = linked.replace(/^[a-z]+=/, "");
         if (!fs.existsSync(directory)) continue;
-        for (const name of fs.readdirSync(directory)) if (name.endsWith(".a")) archives.add(path.join(directory, name));
+        for (const name of fs.readdirSync(directory)) {
+          if (!name.endsWith(".a")) continue;
+          if ((message.linked_libs ?? []).length > 0 && !named.has(name)) continue;
+          archives.add(path.join(directory, name));
+        }
       }
     }
     for (const archive of archives) console.log(archive);' "$MESSAGES")
