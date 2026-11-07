@@ -10,7 +10,7 @@ use crate::{
     EagerParentStackEnumerator, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadError,
     XamlResourceNode,
 };
-use ferroui_base::controls::{ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeRef};
+use ferroui_base::controls::{ChildNameScope, DeferredContentFailed, IDeferredContent, INameScope, NameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
 use ferroui_base::data::{BindingBase, BindingPriority};
@@ -197,12 +197,19 @@ impl DeferredContent {
 
     /// Builds the content: `Build(IServiceProvider?)`.
     ///
+    /// Inside an error scope of a load
+    /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
+    /// failure is the error of the scope and the result is empty.
+    ///
     /// # Panics
-    /// Panics if the builder fails, or if the built object is not of the
-    /// result type (the invalid cast of the managed original). Use
-    /// [`try_build_with`](Self::try_build_with) to handle both.
+    /// Outside an error scope, panics if the builder fails, or if the built
+    /// object is not of the result type (the invalid cast of the managed
+    /// original). Use [`try_build_with`](Self::try_build_with) to handle both.
     pub fn build_with(&self, service_provider: Option<&Rc<dyn IServiceProvider>>) -> DeferredResult {
-        crate::throw(self.try_build_with(service_provider))
+        crate::throw_or(self.try_build_with(service_provider), || DeferredResult {
+            result: None,
+            name_scope: NameScopeRef::new(NameScope::new()),
+        })
     }
 
     /// [`build_with`](Self::build_with) without the panic: the error of the
@@ -262,6 +269,22 @@ impl DeferredContent {
 impl IDeferredContent for DeferredContent {
     fn build(&self, service_provider: Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue> {
         self.build_with(service_provider).result
+    }
+
+    /// A failure goes to the error scope of the load, and the content is
+    /// then not there (a deferred resource that fails stays deferred); outside
+    /// a scope it panics, as [`build`](IDeferredContent::build) does.
+    fn try_build(
+        &self,
+        service_provider: Option<&Rc<dyn IServiceProvider>>,
+    ) -> Result<Option<BoxedValue>, DeferredContentFailed> {
+        match self.try_build_with(service_provider) {
+            Ok(built) => Ok(built.result),
+            Err(error) => match crate::xaml_error_scope::report(error) {
+                Ok(()) => Err(DeferredContentFailed),
+                Err(error) => crate::xaml_error_scope::throw(error),
+            },
+        }
     }
 }
 

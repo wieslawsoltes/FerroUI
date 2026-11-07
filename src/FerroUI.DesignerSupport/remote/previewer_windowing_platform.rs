@@ -103,6 +103,9 @@ impl IWindowingPlatform for PreviewerWindowingPlatform {
                 last_window_transport.dispose();
             }
             //Ignore
+            // Boundary (#567): the reference ignores an exception of the dispose of the last
+            // preview window, which runs the handlers of the previewed application. Isolating
+            // them needs a build that unwinds (`dev` or `release-unwind` profile).
             let _ = catch_unwind(AssertUnwindSafe(|| last_window.dispose()));
         }
 

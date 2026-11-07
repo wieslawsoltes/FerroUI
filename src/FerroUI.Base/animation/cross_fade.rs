@@ -103,7 +103,7 @@ impl CrossFade {
 
         start_async(async move {
             if cancellation_token.is_cancelled() {
-                return;
+                return Ok(());
             }
 
             let mut tasks = Vec::new();
@@ -117,13 +117,16 @@ impl CrossFade {
                 tasks.push(fade_in_animation.run_async_with_clock(to, None, cancellation_token.clone()));
             }
 
-            when_all(tasks).await;
+            if let Err(error) = when_all(tasks).await {
+                return Err(error);
+            }
 
             if let Some(from) = &from {
                 if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
+            Ok(())
         })
     }
 

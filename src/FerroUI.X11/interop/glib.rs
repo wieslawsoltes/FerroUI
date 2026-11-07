@@ -114,6 +114,8 @@ pub(crate) fn panic_message(payload: &(dyn Any + Send)) -> String {
 /// Runs a callback GLib called. A panic ends here, logged: it cannot
 /// unwind through the C frames of the library.
 fn guarded<R>(default: R, call: impl FnOnce() -> R) -> R {
+    // Boundary (#567): the body of an `extern "C"` callback of GLib, which a panic must not
+    // unwind through.
     match catch_unwind(AssertUnwindSafe(call)) {
         Ok(value) => value,
         Err(payload) => {
@@ -504,6 +506,8 @@ impl Glib {
         let (tcs, task) = GlibTask::new();
         self.g_timeout_add_once(
             0,
+            // Boundary (#567): `RunOnGlibThread` of the reference, which sets the exception of
+            // the callback on the task; the callback is application code (`GtkInteropHelper`).
             Box::new(move || match catch_unwind(AssertUnwindSafe(action)) {
                 Ok(value) => tcs.try_set_result(Ok(value)),
                 Err(payload) => tcs.try_set_result(Err(panic_message(&*payload))),

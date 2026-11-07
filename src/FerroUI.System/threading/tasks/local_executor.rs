@@ -64,6 +64,8 @@ pub fn spawn_local<T: 'static>(future: impl Future<Output = Result<T, Observable
                 // A panic after the task ended (in a continuation that its end ran) cannot fault
                 // it: it goes on from the call that polled the future, as before.
                 if !failed.try_complete(Err(Rc::new(TaskWorkError { message: panic_message(&*payload) }))) {
+                    // Boundary (#567): raised again to the caller of the poll (belongs to the
+                    // catch of the poll loop of `task::executor`).
                     std::panic::resume_unwind(payload);
                 }
             }
@@ -135,6 +137,9 @@ pub fn run<T: Clone + Send + 'static>(
     let slot = Arc::new(Mutex::new(Slot { outcome: None, waker: None }));
     let worker_slot = slot.clone();
     std::thread::spawn(move || {
+        // Boundary (#567): the top of the worker thread; the work is application code, and its
+        // panic is the error of the task (`TaskWorkError`), as the exception of `Task.Run` faults
+        // its task in the reference.
         let outcome = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(work)) {
             Ok(Ok(value)) => Ok(value),
             Ok(Err(error)) => Err(error.to_string()),

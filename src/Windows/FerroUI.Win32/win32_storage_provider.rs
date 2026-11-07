@@ -227,6 +227,8 @@ mod imp {
                         let _apartment = Apartment::enter();
                         // A panic in the dialog must not leave the picker
                         // waiting for ever.
+                        // Boundary (#567): the top of the thread of the dialog; the errors of
+                        // the dialog are values, only a bug panics.
                         std::panic::catch_unwind(|| show_dialog(hwnd, &request))
                             .unwrap_or_else(|_| Err("the file dialog panicked".to_string()))
                     };

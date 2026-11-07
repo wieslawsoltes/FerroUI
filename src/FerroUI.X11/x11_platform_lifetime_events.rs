@@ -132,6 +132,8 @@ fn get_instance(smc_conn: usize) -> Option<Arc<Shared>> {
 /// A handler the library called: a panic ends here, it cannot unwind into
 /// the library.
 fn guarded(call: impl FnOnce()) {
+    // Boundary (#567): the body of an `extern "C"` handler of libSM, which a panic must not
+    // unwind through.
     if std::panic::catch_unwind(std::panic::AssertUnwindSafe(call)).is_err() {
         warn("A handler of the session management connection panicked.");
     }

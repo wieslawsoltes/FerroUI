@@ -346,6 +346,8 @@ impl<F: Future> Future for CatchUnwind<F> {
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.get_mut();
+        // Boundary (#567): the `try { await operation; } catch { }` of the reference around a
+        // continuation that only owns clean-up; awaiting a task gives its failure as a value.
         match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| this.future.as_mut().poll(cx))) {
             Ok(Poll::Ready(output)) => Poll::Ready(Some(output)),
             Ok(Poll::Pending) => Poll::Pending,

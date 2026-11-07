@@ -551,6 +551,9 @@ impl HostWindow {
         if !self.try_begin_window_drag(e, scope, true) {
             return false;
         }
+        // Boundary (#567): the catch-and-rethrow of the reference; the platform move drag can run
+        // a modal loop with application handlers, and the drag state is cancelled before the
+        // panic is raised again.
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             Window::begin_move_drag(self, e)
         }));

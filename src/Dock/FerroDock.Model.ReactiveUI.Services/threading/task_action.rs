@@ -26,6 +26,8 @@ pub(crate) fn panic_error(payload: Box<dyn Any + Send>) -> ObservableError {
 pub(crate) fn invoke_task(
     action: impl FnOnce() -> Shared<Result<(), ObservableError>>,
 ) -> Shared<Result<(), ObservableError>> {
+    // Boundary (#567): the action is application code (a busy or reload handler); its panic
+    // faults the task, as a synchronous exception of a C# async method does.
     catch_unwind(AssertUnwindSafe(action))
         .unwrap_or_else(|payload| Shared::ready(Err(panic_error(payload))))
 }
@@ -44,6 +46,8 @@ pub(crate) fn spawn_catching<T: Clone + 'static>(
             mut self: std::pin::Pin<&mut Self>,
             cx: &mut std::task::Context<'_>,
         ) -> std::task::Poll<Self::Output> {
+            // Boundary (#567): the future runs application code (dialog content, reloadables,
+            // change observers); its panic faults the task, as in a C# async method.
             match catch_unwind(AssertUnwindSafe(|| self.future.as_mut().poll(cx))) {
                 Ok(result) => result,
                 Err(payload) => std::task::Poll::Ready(Err(panic_error(payload))),
