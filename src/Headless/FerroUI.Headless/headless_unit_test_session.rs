@@ -40,6 +40,7 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
+#[cfg(feature = "harfbuzz")]
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_system::task::oneshot;
 use std::any::Any;
@@ -477,7 +478,8 @@ impl HeadlessUnitTestSession {
                         }
 
                         if app_builder.text_shaping_subsystem_initializer().is_none() {
-                            app_builder = app_builder.use_harfbuzz();
+                            #[cfg(feature = "harfbuzz")]
+                            { app_builder = app_builder.use_harfbuzz(); }
                         }
 
                         SessionThread { app_builder, shared_priority: Cell::new(None) }

@@ -17,6 +17,7 @@ use ferroui_base::threading::{Dispatcher, DispatcherFrame};
 use ferroui_base::FerroLocator;
 use ferroui_controls::platform::{IPlatformIconLoader, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform};
 use ferroui_controls::AppBuilder;
+#[cfg(feature = "harfbuzz")]
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -253,8 +254,10 @@ impl FerroHeadlessPlatformExtensions for AppBuilder {
             // The builder is a handle: the call configures the builder it is made on.
             drop(self.use_rendering_subsystem(HeadlessPlatformRenderInterface::initialize, "Headless"));
         }
-        self.use_standard_runtime_platform_subsystem()
-            .use_windowing_subsystem(move || FerroHeadlessPlatform::initialize(&opts), "Headless")
-            .use_harfbuzz()
+        let builder = self.use_standard_runtime_platform_subsystem()
+            .use_windowing_subsystem(move || FerroHeadlessPlatform::initialize(&opts), "Headless");
+        #[cfg(feature = "harfbuzz")]
+        let builder = builder.use_harfbuzz();
+        builder
     }
 }

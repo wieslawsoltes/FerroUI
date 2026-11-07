@@ -1,0 +1,572 @@
+{
+  "commit": "97653e5036db8c25baf51fc38da08b4a468e7696",
+  "working_tree_modified": true,
+  "os": "27.0.1",
+  "architecture": "arm64",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "profile": "dist",
+  "package": "hello-world",
+  "native_backend": "quartz-metal",
+  "commands": {
+    "skia": [
+      "cargo",
+      "build",
+      "--locked",
+      "--profile",
+      "dist",
+      "-p",
+      "hello-world",
+      "--no-default-features",
+      "--features",
+      "skia"
+    ],
+    "quartz-metal": [
+      "cargo",
+      "build",
+      "--locked",
+      "--profile",
+      "dist",
+      "-p",
+      "hello-world",
+      "--no-default-features",
+      "--features",
+      "quartz-metal"
+    ]
+  },
+  "measurements": {
+    "skia": {
+      "path": "target/quartz-prototype/hello-world-skia",
+      "bytes": 28282256,
+      "gzip_bytes": 10801706,
+      "sha256": "d0907c683ef3a7515fe13d88711e26be50ef2b58a6767db8e3070cf2a2bbf0b9",
+      "dynamic_libraries": [
+        "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)",
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)",
+        "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+        "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+        "\t/System/Library/Frameworks/MetalKit.framework/Versions/A/MetalKit (compatibility version 1.0.0, current version 174.4.0)",
+        "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+        "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)",
+        "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)",
+        "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)",
+        "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+        "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+        "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)",
+        "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)",
+        "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 904.0.0)"
+      ]
+    },
+    "quartz-metal": {
+      "path": "target/quartz-prototype/hello-world-quartz-metal",
+      "bytes": 23466800,
+      "gzip_bytes": 8583627,
+      "sha256": "a3785aad479eb2fcbc31590635592b225f0ca7e3457fa080edafa3e465bda47a",
+      "dynamic_libraries": [
+        "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.32.0)",
+        "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.20.133)",
+        "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.1.6)",
+        "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 776.2.0)",
+        "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.10.17)",
+        "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+        "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+        "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 383.1.0)",
+        "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 910.0.0)",
+        "\t/System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)",
+        "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+        "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)"
+      ]
+    }
+  },
+  "build_environment": {
+    "MACOSX_DEPLOYMENT_TARGET": null,
+    "RUSTFLAGS": null,
+    "SKIA_LIBRARY_SEARCH_PATH": null,
+    "SKIA_NINJA_COMMAND": "/tmp/ferro-prototype-tools/bin/ninja"
+  },
+  "saved_bytes": 4815456,
+  "saved_percent": 17.03,
+  "native_dependency_exclusion_verified": true,
+  "measured_date": "2026-11-07",
+  "historical_cpu_result": {
+    "commit": "97653e5036db8c25baf51fc38da08b4a468e7696",
+    "working_tree_modified": true,
+    "os": "27.0.1",
+    "architecture": "arm64",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "profile": "dist",
+    "package": "hello-world",
+    "commands": {
+      "skia": [
+        "cargo",
+        "build",
+        "--locked",
+        "--profile",
+        "dist",
+        "-p",
+        "hello-world",
+        "--no-default-features",
+        "--features",
+        "skia"
+      ],
+      "quartz": [
+        "cargo",
+        "build",
+        "--locked",
+        "--profile",
+        "dist",
+        "-p",
+        "hello-world",
+        "--no-default-features",
+        "--features",
+        "quartz"
+      ]
+    },
+    "measurements": {
+      "skia": {
+        "path": "target/quartz-prototype/hello-world-skia",
+        "bytes": 28282256,
+        "gzip_bytes": 10801706,
+        "sha256": "d0907c683ef3a7515fe13d88711e26be50ef2b58a6767db8e3070cf2a2bbf0b9",
+        "dynamic_libraries": [
+          "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)",
+          "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+          "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)",
+          "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+          "\t/System/Library/Frameworks/MetalKit.framework/Versions/A/MetalKit (compatibility version 1.0.0, current version 174.4.0)",
+          "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)",
+          "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)",
+          "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)",
+          "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)",
+          "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+          "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+          "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+          "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+          "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)",
+          "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)",
+          "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 904.0.0)"
+        ]
+      },
+      "quartz": {
+        "path": "target/quartz-prototype/hello-world-quartz",
+        "bytes": 23400000,
+        "gzip_bytes": 8553561,
+        "sha256": "9fcd4091f2bd3fdd9674fc767ece423cc2e0f7f7c7d0bc477a247771e029fd5c",
+        "dynamic_libraries": [
+          "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)",
+          "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)",
+          "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)",
+          "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)",
+          "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)",
+          "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+          "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+          "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)",
+          "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+          "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+          "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 904.0.0)",
+          "\t/System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+          "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)",
+          "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+          "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)"
+        ]
+      }
+    },
+    "build_environment": {
+      "MACOSX_DEPLOYMENT_TARGET": null,
+      "RUSTFLAGS": null,
+      "SKIA_LIBRARY_SEARCH_PATH": null
+    },
+    "saved_bytes": 4882256,
+    "saved_percent": 17.26,
+    "native_dependency_exclusion_verified": true,
+    "measured_date": "2026-11-07",
+    "validation": {
+      "backend_unit_tests": {
+        "command": [
+          "cargo",
+          "test",
+          "-j",
+          "1",
+          "-p",
+          "ferroui-quartz",
+          "--lib"
+        ],
+        "passed": 8,
+        "failed": 0
+      },
+      "hello_world_smoke": {
+        "skia_exit_code": 0,
+        "quartz_exit_code": 0,
+        "screenshot_pixels": [
+          800,
+          480
+        ]
+      },
+      "catalog_smoke": {
+        "profile": "dev",
+        "backend": "quartz",
+        "overview_pages": [
+          "Home",
+          "TextBlock",
+          "TextBox",
+          "Image",
+          "TabbedPage"
+        ],
+        "screenshots": 10,
+        "render_loop_errors": 0
+      },
+      "identical_theme_parts_sha256": "20b22207c88715089b4a6ee004e758eebefd2c288ead7bc723f3f445399299fd"
+    },
+    "source_sha256": {
+      "Cargo.lock": "f7fe56db0b7f385ac6a14a3928f063c399b359549f5e4f38a310b2507f830623",
+      "Cargo.toml": "e3907837ef1afe9005960bfcd88c4330202b3d903b05805ba5b334cadd9a463e",
+      "samples/HelloWorld/Cargo.toml": "8225d0c66e302dda33237536096ccc1533a1d88b0b7cddb66e4307e24195c988",
+      "samples/HelloWorld/program.rs": "d19e270ef26438d76f48ef5eeb11416c7d84d58845b819b0d1bdbd2cb18943db",
+      "src/FerroUI.Desktop/Cargo.toml": "258542039ff04621d9464029b3fe5e8f7e3896abb7d1ec22d4f1c319464c535f",
+      "src/FerroUI.Desktop/app_builder_desktop_extensions.rs": "ce79d7a0a2f054fc9625bc73b091b3b657b0660bdf2c70d6eb644fd03ae5914a",
+      "src/Quartz/FerroUI.Quartz/Cargo.toml": "3dca0bc86918722775e70becdb425e40c1e3d06d0937e6ca4a1cc497b9e1a6ae",
+      "src/Quartz/FerroUI.Quartz/bitmap.rs": "8fda3f7ed382af509cc62fa4b7cf30522a052efd27d023b6cf1349cc0f003a43",
+      "src/Quartz/FerroUI.Quartz/build.rs": "a764a2d6ce488701681727f005bf3d5b68388a3fd77897b9090a85fa40bcdd90",
+      "src/Quartz/FerroUI.Quartz/drawing.rs": "85798b9d8ccdf64ff94f7ca93793f6217d620070f1599cc60539f7299bbf07be",
+      "src/Quartz/FerroUI.Quartz/ffi.rs": "26b86bf6d896e64d41a011bac3e341ad9462efbacee951769e0102cb967212ea",
+      "src/Quartz/FerroUI.Quartz/fonts.rs": "055bd11b0ac64fd3fba816d7a85780c4777f79dddfea875af5ef5b9f41c6ac6d",
+      "src/Quartz/FerroUI.Quartz/geometry.rs": "bc57fe65d64264ce761882e8a509fff69659ffa76fd515095ddaf1bcbbd7e5bb",
+      "src/Quartz/FerroUI.Quartz/lib.rs": "f5ff35990027d2a35f7803660cd0a3d9dc974f628d3caed54294da54a57f8c77",
+      "src/Quartz/FerroUI.Quartz/native.m": "5790c561d9e418a3a7ef2e8f3df235281fea7384671dff375bd18ac2f6b52a6b",
+      "src/Quartz/FerroUI.Quartz/path_measure.rs": "217ad70425878449d1d5dcc3c8f34762e08da8d235bea147385eaeaded7db371",
+      "src/Quartz/FerroUI.Quartz/region.rs": "7e836c8b28f1dcdee87a217e3cb166eab91d4abb5834b6a12a28d88b7a910828",
+      "src/Quartz/FerroUI.Quartz/tests.rs": "1aba88aa3af3b9b2f00c805d23856bf7aa624c8743be323d7bae930b80bc4724"
+    },
+    "limitations": "Experimental CPU drawing backend; rendering and text feature parity with Skia/HarfBuzz is incomplete. See quartz-prototype.md."
+  },
+  "historical_metal_before_media": {
+    "measurements": {
+      "skia": {
+        "path": "target/quartz-prototype/hello-world-skia",
+        "bytes": 28282256,
+        "gzip_bytes": 10801706,
+        "sha256": "d0907c683ef3a7515fe13d88711e26be50ef2b58a6767db8e3070cf2a2bbf0b9",
+        "dynamic_libraries": [
+          "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)",
+          "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+          "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)",
+          "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+          "\t/System/Library/Frameworks/MetalKit.framework/Versions/A/MetalKit (compatibility version 1.0.0, current version 174.4.0)",
+          "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)",
+          "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+          "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)",
+          "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)",
+          "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)",
+          "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+          "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+          "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+          "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+          "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)",
+          "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)",
+          "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 904.0.0)"
+        ]
+      },
+      "quartz-metal": {
+        "path": "target/quartz-prototype/hello-world-quartz-metal",
+        "bytes": 23433632,
+        "gzip_bytes": 8568486,
+        "sha256": "efc846c10c3b1e051da13f5cbc0b101b95ae8a52c396a0911016b4a070951fc1",
+        "dynamic_libraries": [
+          "\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.32.0)",
+          "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.20.133)",
+          "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.1.8)",
+          "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.1.8)",
+          "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.1.6)",
+          "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 776.2.0)",
+          "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.10.17)",
+          "\t/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)",
+          "\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+          "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 383.1.0)",
+          "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/Versions/A/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+          "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+          "\t/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText (compatibility version 1.0.0, current version 910.0.0)",
+          "\t/System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO (compatibility version 1.0.0, current version 1.0.0)",
+          "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+          "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)",
+          "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+          "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)"
+        ]
+      }
+    },
+    "saved_bytes": 4848624,
+    "saved_percent": 17.14,
+    "validation": {
+      "backend_unit_tests": {
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "-j1",
+          "-p",
+          "ferroui-quartz",
+          "--features",
+          "metal",
+          "--lib"
+        ],
+        "passed": 10,
+        "failed": 0
+      },
+      "cpu_reference_regression_tests": {
+        "passed": 8,
+        "failed": 0
+      },
+      "hello_world_smoke": {
+        "skia_exit_code": 0,
+        "quartz_metal_exit_code": 0,
+        "screenshot_pixels": [
+          800,
+          480
+        ],
+        "normal_gpu_counters": {
+          "surfaces": 1,
+          "compute_dispatches": 17,
+          "image_dispatches": 0,
+          "presentations": 2,
+          "readbacks": 0,
+          "uploads": 0,
+          "errors": 0
+        },
+        "screenshot_gpu_counters": {
+          "surfaces": 2,
+          "compute_dispatches": 34,
+          "image_dispatches": 8,
+          "presentations": 2,
+          "readbacks": 1,
+          "uploads": 0,
+          "errors": 0
+        }
+      },
+      "catalog_smoke": {
+        "profile": "dev",
+        "backend": "quartz-metal",
+        "overview_pages": [
+          "Home",
+          "TextBlock",
+          "TextBox",
+          "Image",
+          "TabbedPage"
+        ],
+        "screenshots": 10,
+        "render_loop_errors": 0
+      },
+      "identical_theme_parts_sha256": "20b22207c88715089b4a6ee004e758eebefd2c288ead7bc723f3f445399299fd"
+    },
+    "source_sha256": {
+      "Cargo.lock": "270370b4adee09399739c75d440443df4c5ee2c81d0760f98193b826de54dba4",
+      "Cargo.toml": "e3907837ef1afe9005960bfcd88c4330202b3d903b05805ba5b334cadd9a463e",
+      "samples/HelloWorld/Cargo.toml": "94877490c9b52a49b413c38290986f3d51df78ced7ad76241694e943b399eaf5",
+      "samples/HelloWorld/program.rs": "5d7426688d348a31cc3d53d3ebc2db8a51c8661dc6386260346fec3e2ee24911",
+      "src/FerroUI.Desktop/Cargo.toml": "fb73a8f3ab11eb9568786baf84ebaaa0ae4d12a742c7abef2364d6cdadb93c08",
+      "src/FerroUI.Desktop/app_builder_desktop_extensions.rs": "06d41ee4a663922fc0c79072fbe3f8ea6a28cf2af0c1866b552796d844471c5c",
+      "src/Quartz/FerroUI.Quartz/Cargo.toml": "6ee88bcfc1b2e6ba0537b9d570730e652c25106ef721a64ec4cb6ea9208c453e",
+      "src/Quartz/FerroUI.Quartz/bitmap.rs": "b8738fce01e7b57c48af40209a2fe5e52cb7485a8f41e23a1be64528c7232183",
+      "src/Quartz/FerroUI.Quartz/build.rs": "788aec7930e113b2292c51789f25d3e42bcc065e0015296250bee0c74ee53c4a",
+      "src/Quartz/FerroUI.Quartz/drawing.rs": "931f8d2df8ee626779ea723b9a49beeb15dc23bd465f584282472cf7b4f2877d",
+      "src/Quartz/FerroUI.Quartz/ffi.rs": "aeaab9044dca73e863bcafcfe189f59f7cb557eaa49790c75bbf75138e01d8a8",
+      "src/Quartz/FerroUI.Quartz/fonts.rs": "055bd11b0ac64fd3fba816d7a85780c4777f79dddfea875af5ef5b9f41c6ac6d",
+      "src/Quartz/FerroUI.Quartz/geometry.rs": "bc57fe65d64264ce761882e8a509fff69659ffa76fd515095ddaf1bcbbd7e5bb",
+      "src/Quartz/FerroUI.Quartz/lib.rs": "037b0129afa7730a927d3decd19bfa04c7f8c8e95625abdfef8f6ff493dcb835",
+      "src/Quartz/FerroUI.Quartz/metal.h": "6fabc338187a72d55013aec998f13d8a81375b1aa64d2a9a45ee17dbb12297f2",
+      "src/Quartz/FerroUI.Quartz/metal.m": "1f8f4adfb10dcc0cd99641103b9f9a4823a6d7b805b133c89918d2d4a1ced8c4",
+      "src/Quartz/FerroUI.Quartz/metal.rs": "924a7801fa5d805701d9ab9c8ed925132318de14acc6d3a29629e5be7062613f",
+      "src/Quartz/FerroUI.Quartz/native.m": "84fd80ee77e5bd20ad840130c7da00eaaac87e8107991449fe67f2bd8e96f58c",
+      "src/Quartz/FerroUI.Quartz/path_measure.rs": "217ad70425878449d1d5dcc3c8f34762e08da8d235bea147385eaeaded7db371",
+      "src/Quartz/FerroUI.Quartz/region.rs": "7e836c8b28f1dcdee87a217e3cb166eab91d4abb5834b6a12a28d88b7a910828",
+      "src/Quartz/FerroUI.Quartz/shaders.metal": "a9f5c6420448c3ba28c8af2447c7765f02bbe4560d69dacba8e620dae252afdc",
+      "src/Quartz/FerroUI.Quartz/tests.rs": "cbc1bc4befc1769d366fe8b94be50f677b562379a22d3e4b9f053a6449d90e0c"
+    }
+  },
+  "validation": {
+    "backend_unit_tests": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-j1",
+        "-p",
+        "ferroui-quartz",
+        "--features",
+        "metal",
+        "--lib"
+      ],
+      "passed": 13,
+      "failed": 0
+    },
+    "cpu_reference_regression_tests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "hello_world_smoke": {
+      "skia_exit_code": 0,
+      "quartz_metal_exit_code": 0,
+      "screenshot_pixels": [
+        800,
+        480
+      ],
+      "normal_gpu_counters": {
+        "surfaces": 1,
+        "compute_dispatches": 17,
+        "image_dispatches": 0,
+        "presentations": 2,
+        "readbacks": 0,
+        "uploads": 0,
+        "errors": 0
+      },
+      "screenshot_gpu_counters": {
+        "surfaces": 2,
+        "compute_dispatches": 34,
+        "image_dispatches": 8,
+        "presentations": 2,
+        "readbacks": 1,
+        "uploads": 0,
+        "errors": 0
+      }
+    },
+    "catalog_smoke": {
+      "profile": "dev",
+      "backend": "quartz-metal",
+      "overview_pages": [
+        "Home",
+        "TextBlock",
+        "TextBox",
+        "Image",
+        "TabbedPage"
+      ],
+      "screenshots": 10,
+      "render_loop_errors": 0
+    },
+    "identical_theme_parts_sha256": "20b22207c88715089b4a6ee004e758eebefd2c288ead7bc723f3f445399299fd",
+    "media_interop": {
+      "native_video_playback": true,
+      "minimum_presented_gpu_conversions": 5,
+      "synthetic_camera_preview": true,
+      "synthetic_camera_size": [
+        640,
+        480
+      ],
+      "synthetic_camera_fps": 30,
+      "physical_camera_preview_verified": false,
+      "physical_camera_reason": "This Mac reports zero cameras; user confirmed no webcam is available. Permission is Granted.",
+      "all_media_cpu_pixel_transfer_counters_zero": true,
+      "media_preview_additional_readbacks": 0,
+      "media_preview_additional_uploads": 0,
+      "metal_errors": 0,
+      "video_and_camera_retirement_verified": true,
+      "gpu_checkpoints": {
+        "start": [
+          23,
+          739,
+          23,
+          2,
+          7,
+          11,
+          0
+        ],
+        "video": [
+          31,
+          2979,
+          49,
+          39,
+          7,
+          11,
+          0
+        ],
+        "camera": [
+          38,
+          3644,
+          57,
+          53,
+          7,
+          11,
+          0
+        ]
+      },
+      "pass_evidence": [
+        "CATALOG_VIDEO_PASS autoplay=false shared_texture=true counters=FrameTransferSnapshot { preview: PixelTransferCount { attempts: 0, bytes: 0 }, analysis: PixelTransferCount { attempts: 0, bytes: 0 }, photo: PixelTransferCount { attempts: 0, bytes: 0 }, diagnostic: PixelTransferCount { attempts: 0, bytes: 0 }, probe: PixelTransferCount { attempts: 0, bytes: 0 }, gpu_imports: 8, gpu_copies: 0, gpu_conversions: 8, gpu_operations: [GpuTransferCount { reason: ColorSpaceConversion, copies: 0, conversions: 8 }] }",
+        "CATALOG_CAMERA_CAPTURE_PASS 640 \u00d7 480 at 30 fps; Some(\"GPU IOSurface test camera (synthetic)\") synthetic=true counters=FrameTransferSnapshot { preview: PixelTransferCount { attempts: 0, bytes: 0 }, analysis: PixelTransferCount { attempts: 0, bytes: 0 }, photo: PixelTransferCount { attempts: 0, bytes: 0 }, diagnostic: PixelTransferCount { attempts: 0, bytes: 0 }, probe: PixelTransferCount { attempts: 0, bytes: 0 }, gpu_imports: 9, gpu_copies: 0, gpu_conversions: 7, gpu_operations: [GpuTransferCount { reason: PixelFormatConversion, copies: 0, conversions: 7 }] }"
+      ],
+      "fixture_features": [
+        "quartz-media-test-fixtures"
+      ],
+      "fixture_environment": {
+        "FERROUI_SMOKE_MEDIA": "1",
+        "FERROUI_SMOKE_MEDIA_CAMERA": "1",
+        "FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA": "1",
+        "FERROUI_METAL_STATS": "1"
+      },
+      "fixture_log": "target/quartz-prototype/media-interop/synthetic-camera-and-video.log",
+      "normal_build_video_and_discovery_verified": true,
+      "normal_build_log": "target/quartz-prototype/media-interop/native-video-and-discovery.log"
+    },
+    "textbox_border": {
+      "regression_test_passed": true,
+      "high_dpi_and_translation_tested": true,
+      "quartz_screenshot": "target/quartz-prototype/quartz-border-fixed/01-home-composed.png",
+      "skia_reference": "target/quartz-prototype/skia-border-reference/01-home-composed.png"
+    }
+  },
+  "source_sha256": {
+    "Cargo.lock": "abaec430d3be84627955bad1e5c5bbde791315bed5c1f983f15f321d34505760",
+    "Cargo.toml": "e3907837ef1afe9005960bfcd88c4330202b3d903b05805ba5b334cadd9a463e",
+    "samples/HelloWorld/Cargo.toml": "94877490c9b52a49b413c38290986f3d51df78ced7ad76241694e943b399eaf5",
+    "samples/HelloWorld/program.rs": "5d7426688d348a31cc3d53d3ebc2db8a51c8661dc6386260346fec3e2ee24911",
+    "src/FerroUI.Desktop/Cargo.toml": "fb73a8f3ab11eb9568786baf84ebaaa0ae4d12a742c7abef2364d6cdadb93c08",
+    "src/FerroUI.Desktop/app_builder_desktop_extensions.rs": "06d41ee4a663922fc0c79072fbe3f8ea6a28cf2af0c1866b552796d844471c5c",
+    "samples/ControlCatalog.Desktop/Cargo.toml": "1cafe552c64d238505a0c5620c6ee92b15f60d5cdff82cffe4c13d6f92429dbe",
+    "samples/ControlCatalog.Desktop/program.rs": "b271b3bc1b25b8e7bf02754d012e07fc982e7659dc38cb4c0c487d94dd2eed44",
+    "samples/ControlCatalog.Desktop/media_samples.rs": "481c5f9a12f6fa13c9174c519d26171d0ccc3997581408c4b4d1de383ad63d0b",
+    "samples/ControlCatalog.Desktop/media_camera_fixture.rs": "d41862cde82b0146dc7a06921dbcf117443c7c2fd8ce9435ee13a745eb27f030",
+    "samples/ControlCatalog/media_samples.rs": "2428af10fcaabfa80bc46c3369dbc4be6c08f6fddd5eacb63ac71076efd66f8a",
+    "src/Quartz/FerroUI.Quartz/Cargo.toml": "adf158461b6bee0b297b53bccfb9a0a186d7df1330a21b867523559e888e168a",
+    "src/Quartz/FerroUI.Quartz/bitmap.rs": "b8738fce01e7b57c48af40209a2fe5e52cb7485a8f41e23a1be64528c7232183",
+    "src/Quartz/FerroUI.Quartz/build.rs": "f802708b471f91022c8fd253b5680967dbcde037d7589b872dfe34be8d8648e6",
+    "src/Quartz/FerroUI.Quartz/drawing.rs": "9318d358fb1e4abc094ad513177c26051d57f5378eca9b9d5a6f16ce4f97e906",
+    "src/Quartz/FerroUI.Quartz/external_objects.rs": "0bcfcb272d1ee581ce3caeb083d5851ab97a88a7f6930ef1b286a2c75d1653c2",
+    "src/Quartz/FerroUI.Quartz/external_objects_tests.rs": "12b6ffd56ef63654835fc8c76e84cdfcc39cee77bd4aed2838569e9c4a61d6a6",
+    "src/Quartz/FerroUI.Quartz/ffi.rs": "434203da6b8324cd67a70792774b761b8d3518a6e80cb80dc4066a28ec6ba6ea",
+    "src/Quartz/FerroUI.Quartz/fonts.rs": "055bd11b0ac64fd3fba816d7a85780c4777f79dddfea875af5ef5b9f41c6ac6d",
+    "src/Quartz/FerroUI.Quartz/geometry.rs": "bc57fe65d64264ce761882e8a509fff69659ffa76fd515095ddaf1bcbbd7e5bb",
+    "src/Quartz/FerroUI.Quartz/lib.rs": "a84d4ee6d442dfe6d7e0de6d2abafea764c647794bda3e799db57460bcf09cb4",
+    "src/Quartz/FerroUI.Quartz/metal.h": "8495a4553b7224e13c6d3e93c9fc89a6513f98f7b13d62ffe93d880d3d0041cd",
+    "src/Quartz/FerroUI.Quartz/metal.m": "c54925858f7aea73329e618c5d4175f06930c3cefc2f5bd7fff7ab6c300d6772",
+    "src/Quartz/FerroUI.Quartz/metal.rs": "e09644222ee09ab2ae0ca359f9f2dae30165edb84694482463bc8f2811b58910",
+    "src/Quartz/FerroUI.Quartz/native.m": "84fd80ee77e5bd20ad840130c7da00eaaac87e8107991449fe67f2bd8e96f58c",
+    "src/Quartz/FerroUI.Quartz/path_measure.rs": "217ad70425878449d1d5dcc3c8f34762e08da8d235bea147385eaeaded7db371",
+    "src/Quartz/FerroUI.Quartz/region.rs": "7e836c8b28f1dcdee87a217e3cb166eab91d4abb5834b6a12a28d88b7a910828",
+    "src/Quartz/FerroUI.Quartz/shaders.metal": "b864865cec76b7a3aae53617a980bb464aa3715472b365c92b0050a096db5cc4",
+    "src/Quartz/FerroUI.Quartz/tests.rs": "8d2e904d600c62faf806ba1c32e2bc8dfb560e2d4b9ac5864ba84b6a18eca59d"
+  },
+  "limitations": "Experimental Metal renderer. Native video playback and synthetic IOSurface camera preview verified; physical camera unverified because no webcam is available. General effects and text/rendering parity remain incomplete."
+}

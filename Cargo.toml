@@ -159,6 +159,7 @@ members = [
     "src/FerroUI.Remote.Protocol",
     "src/FerroUI.DesignerSupport",
     "src/Skia/FerroUI.Skia",
+    "src/Quartz/FerroUI.Quartz",
     "src/Vello/FerroUI.Vello",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
@@ -410,6 +411,7 @@ ferroui-opengl = { version = "=0.5.0-preview.1", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.5.0-preview.1", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.5.0-preview.1", path = "src/FerroUI.Remote.Protocol" }
 ferroui-designer-support = { version = "=0.5.0-preview.1", path = "src/FerroUI.DesignerSupport" }
+ferroui-quartz = { version = "=0.5.0-preview.1", path = "src/Quartz/FerroUI.Quartz" }
 ferroui-skia = { version = "=0.5.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.5.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.5.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }

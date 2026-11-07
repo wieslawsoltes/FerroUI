@@ -613,7 +613,6 @@ dependencies = [
  "ferroui-vello",
  "image",
  "mini-mvvm",
- "skia-safe",
  "treedatagrid-demo",
  "unicode-normalization",
  "url",
@@ -676,6 +675,7 @@ dependencies = [
  "ferroui-media-video-windows",
  "ferroui-media-windows",
  "ferroui-native",
+ "ferroui-quartz",
  "ferroui-vello",
  "ferroui-wayland",
  "ferroui-win32",
@@ -1997,6 +1997,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-native",
+ "ferroui-quartz",
  "ferroui-skia",
  "ferroui-win32",
  "ferroui-x11",
@@ -2742,6 +2743,21 @@ dependencies = [
  "serde_json",
  "tempfile",
  "url",
+]
+
+[[package]]
+name = "ferroui-quartz"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-media-apple",
+ "ferroui-metal",
+ "kurbo",
+ "naga",
+ "objc2",
+ "objc2-metal",
 ]
 
 [[package]]
@@ -3712,6 +3728,8 @@ dependencies = [
  "ferroui-desktop",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "ferroui-native",
+ "ferroui-quartz",
  "ferroui-themes-winui",
  "sample-build",
  "sample-support",

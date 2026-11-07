@@ -33,8 +33,18 @@ ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-themes-winui = { workspace = true }
-ferroui-desktop = { workspace = true }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
 sample-support = { path = "../SampleSupport" }
+
+[features]
+default = ["skia"]
+skia = ["ferroui-desktop/skia"]
+quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
+quartz-metal = ["quartz", "ferroui-desktop/quartz-metal", "dep:ferroui-quartz"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, optional = true }
+ferroui-quartz = { workspace = true, optional = true, features = ["metal"] }
 
 [build-dependencies]
 sample-build = { path = "../SampleBuild" }
