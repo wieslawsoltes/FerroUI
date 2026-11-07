@@ -581,6 +581,32 @@ The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
 | full theme (step 2) | 37.98 MB |
 | trimmed (30 of 164 units) | 28.63 MB (-9.35 MB, -24.6 %) |
 
+### 4.12 Type checks name the identity of a class, not its type (#612, B1)
+
+`is::<T>()`, `cast::<T>()` and `downcast_ref::<T>()` compared the runtime type of the object with
+`T::TYPE`, the `TypeInfo` of `T`. A `TypeInfo` holds the class's initialisation, its constructor,
+its markup metadata and the registration of its handle, so every type check anywhere kept all of
+these for `T` in the executable, even in an application that never creates a `T`: a check whether
+a text element sits in a `RichTextBlock` linked the rich text block, its properties and their
+generic code into a window without one.
+
+Each class now has an identity of its own (`TypeIdentity`, `ObjectType::IDENTITY`, one static per
+class made by `ferro_class!`), which its `TypeInfo` points to. A type check walks the base chain of
+the object's runtime type and compares identities (`TypeInfo::derives_from`); it gives the answers
+the comparison of `TypeInfo`s gave, and it names only the identity. The rest of a class is linked
+when something uses it.
+
+| `ferroui-desktop --example hello_window`, release, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| Executable | 41.76 MB | 38.64 MB | -3.12 MB (-7.5 %) |
+| Classes initialised | 188 | 153 | -35 |
+| `ferroui_base` (code and named data) | 8.70 MB | 8.29 MB | -0.41 MB |
+| `ferroui_controls` | 2.59 MB | 1.76 MB | -0.83 MB |
+
+The next steps of #612 keep the initialisation, the constructor and the markup metadata of a class
+reachable from its `TypeInfo` only with the tables of types (reflection), and remove the other
+defaults that construct what an application does not use.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
