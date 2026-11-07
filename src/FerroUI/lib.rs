@@ -45,6 +45,7 @@
 //! | `browser`, `skia`, `harfbuzz` | `ferroui-browser` | `browser` | no |
 //! | `vello` | `ferroui-vello`; its GPU modes with `vello-hybrid` and `vello-gpu` | `vello` | no |
 //! | `headless` | `ferroui-headless` | `headless` | no |
+//! | `media3d` | `ferroui-media3d` (WPF-style 3D: `Viewport3D` and the Media3D scene model) | `media3d` | no |
 //! | `opengl`, `metal`, `vulkan` | the platform graphics contracts | `opengl`, `metal`, `vulkan` | no |
 //!
 //! An application for the browser turns the default features off and names
@@ -212,6 +213,8 @@ pub use ferroui_reactiveui_controls as reactiveui_controls;
 pub use ferroui_browser as browser;
 #[cfg(feature = "headless")]
 pub use ferroui_headless as headless;
+#[cfg(feature = "media3d")]
+pub use ferroui_media3d as media3d;
 #[cfg(feature = "vello")]
 pub use ferroui_vello as vello;
 

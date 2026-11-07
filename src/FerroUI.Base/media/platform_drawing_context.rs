@@ -7,6 +7,7 @@ use crate::media::{
     RenderOptions, TextOptions,
 };
 use crate::platform::{IDrawingContextImpl, IGeometryImpl};
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::cell::RefCell;
@@ -133,6 +134,10 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         let mut immediate = ImmediateDrawingContext::borrowed(self.platform_impl.get());
         custom.render(&mut immediate);
         immediate.dispose();
+    }
+
+    fn draw_scene_3d_core(&mut self, scene: &Arc<Scene3DSnapshot>, bounds: Rect) {
+        crate::rendering::scene3d::draw_scene_3d(self.platform_impl.get(), scene, bounds);
     }
 
     fn draw_glyph_run(&mut self, foreground: Option<&Rc<dyn IBrush>>, glyph_run: &Rc<GlyphRun>) {

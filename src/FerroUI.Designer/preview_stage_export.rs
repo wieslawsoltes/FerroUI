@@ -99,7 +99,7 @@ pub fn capture_preview_stage_png(
     }
     // Boundary (#567): the size and the backend are checked above; rendering the stage runs the
     // render code of the previewed controls, and a panic of it answers with an error. Isolating
-    // it needs a build that unwinds (`dev` or `release-unwind` profile).
+    // it needs a build that unwinds (`dev`, `release` or `dist-unwind` profile).
     let png = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let bitmap = BitmapGuard(RenderTargetBitmap::with_dpi(
             pixels,

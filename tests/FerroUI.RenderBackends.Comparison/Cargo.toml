@@ -14,9 +14,12 @@ path = "lib.rs"
 # The one crate that links both render backends: an application has one.
 [dependencies]
 ferroui-base.workspace = true
-ferroui-skia.workspace = true
+# With the 3D scenes (scene3d_scenes.rs): the CPU reference of `ferroui-render3d` in each backend.
+ferroui-skia = { workspace = true, features = ["media3d"] }
 # With every rendering mode: the harness compares them (modes.rs).
-ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
+ferroui-vello = { workspace = true, features = ["hybrid", "gpu", "media3d"] }
+# The CPU reference itself, which the 3D scenes are compared with.
+ferroui-render3d.workspace = true
 # The text scenes: the shaper both backends are used with, and Skia itself
 # for the one thing the contracts have no member for, an instance of a
 # variable font.

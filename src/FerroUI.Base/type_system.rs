@@ -38,6 +38,39 @@ use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use std::sync::{OnceLock, RwLock};
 
+/// The identity of a class: what a type check (`is::<T>()`, `cast::<T>()`,
+/// `downcast_ref::<T>()`) compares. One static per class, made by
+/// [`ferro_class!`]; the [`TypeInfo`] of the class points to it.
+///
+/// A type check names only this, not the [`TypeInfo`] of the class, whose
+/// initialisation, constructor and markup metadata the linker then keeps
+/// only when something uses them: checking whether an object is a
+/// `RichTextBlock` does not link the rich text block into an application
+/// that never creates one (#612).
+pub struct TypeIdentity {
+    name: &'static str,
+}
+
+impl TypeIdentity {
+    /// The identity of the class `name`. Each class has its own static of
+    /// this type; two identities are the same only if they are the same
+    /// static.
+    pub const fn new(name: &'static str) -> Self {
+        Self { name }
+    }
+
+    /// The name of the class, for diagnostics.
+    pub const fn name(&self) -> &'static str {
+        self.name
+    }
+}
+
+impl fmt::Debug for TypeIdentity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("TypeIdentity").field(&self.name).finish()
+    }
+}
+
 /// Describes a class (or a non-instantiable type that owns attached
 /// properties): its name, where it is declared, its base class, how to
 /// initialise it and how to create an instance of it.
@@ -47,6 +80,7 @@ use std::sync::{OnceLock, RwLock};
 pub struct TypeInfo {
     name: &'static str,
     base: Option<&'static TypeInfo>,
+    identity: Option<&'static TypeIdentity>,
     module_path: &'static str,
     class_init: Option<fn()>,
     constructor: Option<fn() -> Ref<FerroObject>>,
@@ -61,6 +95,7 @@ impl TypeInfo {
         Self {
             name,
             base,
+            identity: None,
             module_path: "",
             class_init: None,
             constructor: None,
@@ -69,6 +104,37 @@ impl TypeInfo {
             interfaces: &[],
             markup: None,
         }
+    }
+
+    /// States the identity of the class ([`TypeIdentity`]): its own static,
+    /// which type checks compare. Set by [`ferro_class!`] for every class.
+    pub const fn with_identity(mut self, identity: &'static TypeIdentity) -> Self {
+        self.identity = Some(identity);
+        self
+    }
+
+    /// The identity of the class ([`TypeIdentity`]), what type checks compare;
+    /// `None` for a type that is not a class.
+    #[inline]
+    pub fn identity(&self) -> Option<&'static TypeIdentity> {
+        self.identity
+    }
+
+    /// Whether this type is the class with the identity `identity` or derives
+    /// from it: the type check of `is::<T>()` with `T::IDENTITY`, which, unlike
+    /// [`is_assignable_from`](Self::is_assignable_from) with `T::TYPE`, does not
+    /// keep the initialisation, the constructor and the markup metadata of `T`
+    /// in the executable (#612).
+    #[inline]
+    pub fn derives_from(&self, identity: &'static TypeIdentity) -> bool {
+        let mut current = Some(self);
+        while let Some(type_) = current {
+            if type_.identity.is_some_and(|candidate| std::ptr::eq(candidate, identity)) {
+                return true;
+            }
+            current = type_.base;
+        }
+        false
     }
 
     /// States the Rust module that declares the type (`module_path!()` at
@@ -639,6 +705,13 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
     #[doc(hidden)]
     const CLASS_VTABLE: Self::VTable;
 
+    /// The identity of the class ([`TypeIdentity`]): what `is::<Self>()`,
+    /// `cast::<Self>()` and `downcast_ref::<Self>()` compare. A type check names
+    /// this rather than [`StaticType::TYPE`], so it does not keep the
+    /// initialisation, the constructor and the markup metadata of the class in
+    /// the executable (#612).
+    const IDENTITY: &'static TypeIdentity;
+
     /// The virtual table used by instances whose most-derived class is `Self`.
     fn vtable() -> &'static Self::VTable;
 
@@ -853,7 +926,7 @@ impl<T: ObjectType> Ref<T> {
     #[inline]
     pub fn is<U: ObjectType>(&self) -> bool {
         let object: &FerroObject = (**self).upcast();
-        U::TYPE.is_assignable_from(object.get_type())
+        object.get_type().derives_from(U::IDENTITY)
     }
 
     /// Creates a weak reference to the object.
@@ -1180,6 +1253,7 @@ macro_rules! ferro_class {
                     stringify!($name),
                     Some(<$base as $crate::StaticType>::TYPE),
                 )
+                .with_identity(<$name>::__IDENTITY)
                 .with_module_path(::std::module_path!())
                 .with_class_init(<$name as $crate::ObjectType>::register_class)
                 .with_constructor({
@@ -1212,6 +1286,13 @@ macro_rules! ferro_class {
             /// The runtime type of this class.
             pub const TYPE: &'static $crate::TypeInfo = <$name as $crate::StaticType>::TYPE;
 
+            /// The identity of this class, which type checks compare (#612).
+            #[doc(hidden)]
+            pub const __IDENTITY: &'static $crate::TypeIdentity = {
+                static IDENTITY: $crate::TypeIdentity = $crate::TypeIdentity::new(stringify!($name));
+                &IDENTITY
+            };
+
             /// Returns a strong reference to this object.
             #[inline]
             pub fn to_ref(&self) -> $crate::Ref<$name> {
@@ -1230,6 +1311,7 @@ macro_rules! ferro_class {
             type VTable = <$base as $crate::ObjectType>::VTable;
 
             const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+            const IDENTITY: &'static $crate::TypeIdentity = <$name>::__IDENTITY;
 
             #[inline]
             fn vtable() -> &'static Self::VTable {
@@ -1275,6 +1357,7 @@ macro_rules! ferro_class {
                 type VTable = [<$name VTable>];
 
                 const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+                const IDENTITY: &'static $crate::TypeIdentity = <$name>::__IDENTITY;
 
                 #[inline]
                 fn vtable() -> &'static Self::VTable {
@@ -1609,3 +1692,7 @@ macro_rules! ferro_overrides {
         }
     };
 }
+
+#[cfg(test)]
+#[path = "type_identity_tests.rs"]
+mod type_identity_tests;

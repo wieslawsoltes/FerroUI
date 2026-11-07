@@ -42,10 +42,11 @@ QR detection, geometry and application feedback; arbitrary texture producers;
 and presentation of a 3D renderer's output inside normal UI composition. Camera
 and video frames must also be usable as textures inside that renderer.
 
-A general 3D scene engine, physics, model/asset language, editor, animation
-system for scene assets, media recording/editing/transcoding, DRM playback,
-remote desktop, and arbitrary capture of the operating-system desktop are not
-required by this scope. They can be subsequent products or capabilities. The
+3D scenes are in scope through the WPF-style `Viewport3D` and Media3D model of
+#608 ([design](../porting/media3d.md); section 8). Physics, a model/asset
+language, an editor, an animation system for scene assets, media
+recording/editing/transcoding, DRM playback, remote desktop, and arbitrary
+capture of the operating-system desktop are not required by this scope. They can be subsequent products or capabilities. The
 server/backend is not part of this implementation and is not to be rewritten.
 
 Requirements using **must** describe the target implementation. **Current** in
@@ -561,10 +562,34 @@ tests must say which they validate.
 
 ## 8. 3D canvas and texture embedding
 
-The initial 3D product is a composited host for a renderer, not a new scene engine.
-The client owns its scene, geometry, materials, viewpoint and scene hit testing.
-The framework owns integration with arranged size/scale, scheduling, compatible
-GPU resources, completion/lifetimes and normal UI composition.
+Two 3D products build on the embedding foundation:
+
+- **3D scenes.** The framework renders WPF-style 3D scenes: `Viewport3D` and the
+  Media3D model (values, transforms, cameras, lights, materials, meshes, models
+  and visuals), with GPU shaders in every backend, counted GPU and CPU fallbacks,
+  framework hit testing and XAML. The design, the fallback chain and the steps
+  are in [docs/porting/media3d.md](../porting/media3d.md) (#608), which this
+  section defers to for the scene engine. This supersedes the earlier boundary
+  of this section, which excluded a built-in scene engine.
+- **A host for a client renderer** (`RendererHost`, `TextureRenderer`). The
+  client owns its scene, geometry, materials, viewpoint and scene hit testing;
+  the framework owns integration with arranged size/scale, scheduling,
+  compatible GPU resources, completion/lifetimes and normal UI composition. The
+  host stays available next to `Viewport3D` for renderers the framework does not
+  provide.
+
+Video and camera frames become materials of 3D scenes through the same frame
+textures that 2D presentation uses: a `Viewport3D` material samples the leased
+frame texture on the same device or context, with its sampling transform and
+color conversion, without a CPU copy, imports a frame once for its 2D and 3D
+consumers, and holds the lease until GPU completion. It adds no frame route of
+its own and reports a missing importer exactly as 2D presentation does
+(docs/porting/media3d.md, section 3.11).
+
+The rest of this section states the requirements both products meet; where it
+says "the client", it is the client renderer of the host, and for a `Viewport3D`
+the framework takes that role (it renders the scene, constructs rays and
+intersects the scene for hit testing).
 
 The renderer must be able to render into an admitted texture/resource using the
 current compatible device or a tested interop route. Depth/stencil and
@@ -1018,6 +1043,6 @@ Preserve framework OS floors with availability checks and report narrower media
 capabilities explicitly. Freeze named reference hardware, workloads and performance
 thresholds before performance acceptance.
 
-Playlists, DRM, recording/editing, HDR, subtitle rendering, playback-rate features,
-desktop capture and a general scene engine are deferred. GPU-preferred fallback
+Playlists, DRM, recording/editing, HDR, subtitle rendering, playback-rate features
+and desktop capture are deferred; 3D scenes follow docs/porting/media3d.md (#608). GPU-preferred fallback
 never closes a missing primary GPU implementation gate.

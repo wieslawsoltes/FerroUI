@@ -36,6 +36,8 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Video` | `ferroui-media-video` | MediaSource, MediaPlayer and MediaPlaybackSession; depends on Media |
 | `FerroUI.Media.Camera` | `ferroui-media-camera` | Discovery, explicit capture, negotiated settings and owned photos; depends on Media |
 | `FerroUI.Media.Qr` | `ferroui-media-qr` | Optional QR analysis; depends on Media, independently of video/camera providers |
+| `FerroUI.Media3D` | `ferroui-media3d` | WPF-style 3D: the Media3D values and, from step D2, the scene model of `Viewport3D`; [design](../porting/media3d.md) |
+| `FerroUI.Rendering3D` | `ferroui-render3d` | The renderer of the 3D scenes: the CPU reference rasterizer (step D3), the uniform layouts the GPU executors share and the output cache; depends on the base library only |
 | `FerroUI.Media.Controls` | `ferroui-media-controls` | Common TexturePresenter and renderer-host control |
 | `FerroUI.Media.Video.Controls` | `ferroui-media-video-controls` | MediaPlayerElement and MediaTransportControls |
 | `FerroUI.Media.Apple` | `ferroui-media-apple` | Shared CoreVideo ownership and IOSurface imports |

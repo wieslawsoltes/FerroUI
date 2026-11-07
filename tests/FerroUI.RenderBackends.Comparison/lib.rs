@@ -20,6 +20,7 @@ pub mod custom_effect_scenes;
 pub mod effect_scenes;
 pub mod geometries;
 pub mod modes;
+pub mod scene3d_scenes;
 pub mod scenes;
 pub mod text;
 
@@ -214,6 +215,8 @@ mod codec_tests;
 mod custom_effect_tests;
 #[cfg(test)]
 mod effect_tests;
+#[cfg(test)]
+mod scene3d_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
