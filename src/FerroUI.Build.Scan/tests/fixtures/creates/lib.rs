@@ -11,7 +11,7 @@ pub mod list;
 pub mod parts;
 
 pub use item::Item;
-pub use list::List;
+pub use list::ItemList;
 pub use parts::{Glyph, Handle, Marker, Separator, Spacer};
 
 /// A plain value, which is no class: what constructs it makes no edge.

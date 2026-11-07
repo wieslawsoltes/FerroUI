@@ -1581,7 +1581,7 @@ fn classes_record_the_classes_their_code_constructs() {
     let alone = scan_crate(&ScanOptions::new("creates", root.clone()));
     let expected = BTreeMap::from([
         ("Item".to_string(), names(&["Handle", "Marker"])),
-        ("List".to_string(), names(&["Item", "Separator", "Spacer"])),
+        ("ItemList".to_string(), names(&["Item", "Separator", "Spacer"])),
         ("Separator".to_string(), names(&["Glyph"])),
     ]);
     assert_eq!(creates_of(&alone.model), expected, "\n{}", listing(&alone.diagnostics));
@@ -1591,7 +1591,7 @@ fn classes_record_the_classes_their_code_constructs() {
     // With the model of the crate it is built on, its class is created too, by its full name.
     let scan = scan_crate(&ScanOptions::new("creates", root).with_dependencies(vec![fixture().model]));
     let mut expected = expected;
-    expected.insert("List".to_string(), names(&["Fixture.Controls.Decorator", "Item", "Separator", "Spacer"]));
+    expected.insert("ItemList".to_string(), names(&["Fixture.Controls.Decorator", "Item", "Separator", "Spacer"]));
     assert_eq!(creates_of(&scan.model), expected, "\n{}", listing(&scan.diagnostics));
 
     // The model keeps them through its file.

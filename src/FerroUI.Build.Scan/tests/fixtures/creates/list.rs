@@ -7,13 +7,13 @@ use crate::item::Item;
 use crate::parts::Separator;
 
 #[repr(C)]
-pub struct List {
+pub struct ItemList {
     base: Control,
 }
 
-ferro_class!(List: Control);
+ferro_class!(ItemList: Control);
 
-impl List {
+impl ItemList {
     pub fn create_container(&self) -> Ref<Control> {
         Item::new().upcast()
     }
@@ -27,8 +27,8 @@ impl List {
     }
 
     /// The class itself is no edge.
-    pub fn same(&self) -> Ref<List> {
-        List::new()
+    pub fn same(&self) -> Ref<ItemList> {
+        ItemList::new()
     }
 
     /// A class of the crate the fixture is scanned with, when it is.
