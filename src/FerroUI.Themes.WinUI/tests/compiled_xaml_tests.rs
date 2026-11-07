@@ -168,3 +168,77 @@ fn regenerate_compiled_xaml() {
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
 }
+
+/// #612, root D: a namespace table that names classes for reflection-binding paths is reachable
+/// only through the units of the theme, so a unit the application trims takes those classes with
+/// it. From the public functions of the module, following the items each item names, without
+/// passing through the table of a unit (`THEME_UNIT_<n>`, `THEME_UNITS`), no such table is
+/// reached: the code outside every unit names none. (The ambient unit, `THEME_UNIT_0`, is always
+/// applied, so the classes its own paths name are always linked, as everything else in it.)
+#[test]
+fn the_classes_of_reflection_paths_are_reached_only_through_their_units() {
+    use std::collections::{BTreeMap, BTreeSet};
+    let source = std::fs::read_to_string(PATH).expect("the checked-in compiled_xaml.rs");
+    // The top-level items: a line that starts an item at column 0 begins it.
+    let mut items: BTreeMap<String, (bool, String)> = BTreeMap::new();
+    let mut current: Option<(String, bool)> = None;
+    let mut body = String::new();
+    let item_name = |line: &str| -> Option<(String, bool)> {
+        let rest = line.strip_prefix("pub ").unwrap_or(line);
+        let public = line.starts_with("pub ");
+        for keyword in ["fn ", "static ", "const "] {
+            if let Some(after) = rest.strip_prefix(keyword) {
+                let name: String = after.chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+                return (!name.is_empty()).then_some((name, public));
+            }
+        }
+        None
+    };
+    for line in source.lines() {
+        if let Some(found) = item_name(line) {
+            if let Some((name, public)) = current.take() {
+                items.insert(name, (public, std::mem::take(&mut body)));
+            }
+            current = Some(found);
+        }
+        body.push_str(line);
+        body.push('\n');
+    }
+    if let Some((name, public)) = current {
+        items.insert(name, (public, body));
+    }
+    let names: BTreeSet<&str> = items.keys().map(String::as_str).collect();
+    let references = |text: &str| -> Vec<String> {
+        text.split(|c: char| !(c.is_alphanumeric() || c == '_'))
+            .filter(|word| names.contains(word))
+            .map(str::to_string)
+            .collect()
+    };
+    // The channel of the units: the table of each unit and the table of all of them.
+    let selective = |name: &str| {
+        name == "THEME_UNITS" || name.strip_prefix("THEME_UNIT_").is_some_and(|index| index.parse::<u32>().is_ok())
+    };
+    let class_tables: BTreeSet<&str> = items
+        .iter()
+        .filter(|(_, (_, text))| text.contains("rt::XmlNamespaceTable") && text.contains("CastTarget::Class("))
+        .map(|(name, _)| name.as_str())
+        .collect();
+    assert!(!class_tables.is_empty(), "the theme has reflection-binding paths that name classes");
+    let mut reached: BTreeSet<String> = BTreeSet::new();
+    let mut pending: Vec<String> = items.iter().filter(|(_, (public, _))| *public).map(|(name, _)| name.clone()).collect();
+    pending.retain(|name| !selective(name));
+    while let Some(name) = pending.pop() {
+        if !reached.insert(name.clone()) {
+            continue;
+        }
+        let own = items[&name].1.clone();
+        // The item's own name in its first line is not a reference.
+        for referenced in references(&own) {
+            if referenced != name && !selective(&referenced) && !reached.contains(&referenced) {
+                pending.push(referenced);
+            }
+        }
+    }
+    let leaked: Vec<&&str> = class_tables.iter().filter(|table| reached.contains(**table)).collect();
+    assert!(leaked.is_empty(), "namespace tables naming classes reached outside their units: {leaked:?}");
+}

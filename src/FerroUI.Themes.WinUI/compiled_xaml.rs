@@ -15,12 +15,6 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
-    ("x", &[]),
-];
-
-/// The XML namespaces of documents of this file, as the compiler resolved them.
-const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
     ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("x", &[]),
 ];
@@ -20919,28 +20913,78 @@ fn populate_winuitheme_xaml_deferred_5694(
 
 /// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
 const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
-    ("primitives", &[("FerroUI.Themes.WinUI.Primitives", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
 const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
-    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
 const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
-    ("collections", &[("System.Collections", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("primitives", &[("FerroUI.Themes.WinUI.Primitives", "", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
 const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_9: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("collections", &[("System.Collections", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("collections", &[("System.Collections", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_11: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
     ("dialogs", &[("FerroUI.Dialogs", "", &[])]),
     ("internal", &[("FerroUI.Dialogs.Internal", "", &[])]),
@@ -20948,10 +20992,57 @@ const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3: rt::XmlNamespaceTable 
 ];
 
 /// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
-const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("ProgressBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
+    ("dialogs", &[("FerroUI.Dialogs", "", &[])]),
+    ("internal", &[("FerroUI.Dialogs.Internal", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_13: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
     ("primitives", &[("FerroUI.Themes.WinUI.Primitives", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("primitives", &[("FerroUI.Themes.WinUI.Primitives", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/WinUIControls.xaml`.
+const BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.WinUI", "FerroUI.Themes.WinUI", &[])]),
     ("x", &[]),
 ];
 
@@ -20993,7 +21084,7 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 103, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 110, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 113, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
+    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 114, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
     rt::apply_theme_unit(active_theme_units(), 116, 0, &context, &resource_dictionary_0)?;
@@ -21015,17 +21106,17 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 79, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 80, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 81, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 83, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
     rt::apply_theme_unit(active_theme_units(), 84, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 85, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 86, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 87, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
     rt::apply_theme_unit(active_theme_units(), 89, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
+    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_9);
     rt::apply_theme_unit(active_theme_units(), 99, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
     rt::apply_theme_unit(active_theme_units(), 101, 0, &context, &resource_dictionary_0)?;
@@ -21040,12 +21131,12 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 112, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 115, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 117, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
+    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_11);
     rt::apply_theme_unit(active_theme_units(), 119, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
     rt::apply_theme_unit(active_theme_units(), 120, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 121, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4);
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_13);
     rt::apply_theme_unit(active_theme_units(), 122, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
     rt::apply_theme_unit(active_theme_units(), 124, 0, &context, &resource_dictionary_0)?;
@@ -21068,7 +21159,7 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 146, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 148, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 150, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 152, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
     rt::apply_theme_unit(active_theme_units(), 153, 0, &context, &resource_dictionary_0)?;
@@ -21076,7 +21167,7 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 155, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 156, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 157, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 158, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
     rt::apply_theme_unit(active_theme_units(), 159, 0, &context, &resource_dictionary_0)?;
@@ -21119,24 +21210,36 @@ fn build_controls_winuicontrols_xaml_unit_0(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(16,4) Content (resource)
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_0, 16, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    ::core::mem::drop(unit_namespace_scope_0);
+    let unit_namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(13,4) Content (resource)
     let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_2, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::mem::drop(unit_namespace_scope_1);
+    let unit_namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(12,4) Content (resource)
     let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_4, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::mem::drop(unit_namespace_scope_2);
+    let unit_namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(14,4) Content (resource)
     let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_6, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::mem::drop(unit_namespace_scope_3);
+    let unit_namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(11,4) Content (resource)
     let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_8, 11, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    ::core::mem::drop(unit_namespace_scope_4);
+    let unit_namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(16,4) Content (resource)
     let deferred_5 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_9, 16, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_5) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    ::core::mem::drop(unit_namespace_scope_5);
     ::core::result::Result::Ok(())
 }
 
@@ -21329,9 +21432,11 @@ fn build_controls_winuicontrols_xaml_unit_15(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
     // Controls/WinUIControls.xaml(44,4) Content (resource)
     let deferred_20 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_39, 44, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_20) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 44, 4)?;
+    ::core::mem::drop(unit_namespace_scope_6);
     ::core::result::Result::Ok(())
 }
 
@@ -21446,9 +21551,11 @@ fn build_controls_winuicontrols_xaml_unit_24(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(35,4) Content (resource)
     let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_61, 35, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 35, 4)?;
+    ::core::mem::drop(unit_namespace_scope_7);
     ::core::result::Result::Ok(())
 }
 
@@ -21472,9 +21579,11 @@ fn build_controls_winuicontrols_xaml_unit_26(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/WinUIControls.xaml(24,4) Content (resource)
     let deferred_31 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_66, 24, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_31) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
+    ::core::mem::drop(unit_namespace_scope_8);
     ::core::result::Result::Ok(())
 }
 
@@ -21687,13 +21796,19 @@ fn build_controls_winuicontrols_xaml_unit_38(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/WinUIControls.xaml(66,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_141, 66, 4)?;
+    ::core::mem::drop(unit_namespace_scope_9);
+    let unit_namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/WinUIControls.xaml(161,4) Content (resource)
     let deferred_75 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_143, 161, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_75) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    ::core::mem::drop(unit_namespace_scope_10);
+    let unit_namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/WinUIControls.xaml(163,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ScrollViewerScrollBarlessTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_144, 163, 4)?;
+    ::core::mem::drop(unit_namespace_scope_11);
     ::core::result::Result::Ok(())
 }
 
@@ -21704,21 +21819,35 @@ fn build_controls_winuicontrols_xaml_unit_39(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(69,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_146, 69, 4)?;
+    ::core::mem::drop(unit_namespace_scope_12);
+    let unit_namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(119,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_148, 119, 4)?;
+    ::core::mem::drop(unit_namespace_scope_13);
+    let unit_namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(169,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_150, 169, 4)?;
+    ::core::mem::drop(unit_namespace_scope_14);
+    let unit_namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(219,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_151, 219, 4)?;
+    ::core::mem::drop(unit_namespace_scope_15);
+    let unit_namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(234,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_152, 234, 4)?;
+    ::core::mem::drop(unit_namespace_scope_16);
+    let unit_namespace_scope_17 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(431,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultPasswordBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_154, 431, 4)?;
+    ::core::mem::drop(unit_namespace_scope_17);
+    let unit_namespace_scope_18 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(444,4) Content (resource)
     let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_155, 444, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 444, 4)?;
+    ::core::mem::drop(unit_namespace_scope_18);
     ::core::result::Result::Ok(())
 }
 
@@ -21744,13 +21873,19 @@ fn build_controls_winuicontrols_xaml_unit_41(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_19 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8);
     // Controls/WinUIControls.xaml(63,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ProgressBarTextFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_159, 63, 4)?;
+    ::core::mem::drop(unit_namespace_scope_19);
+    let unit_namespace_scope_20 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8);
     // Controls/WinUIControls.xaml(65,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultProgressBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_160, 65, 4)?;
+    ::core::mem::drop(unit_namespace_scope_20);
+    let unit_namespace_scope_21 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8);
     // Controls/WinUIControls.xaml(259,4) Content (resource)
     let deferred_88 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_162, 259, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_88) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 259, 4)?;
+    ::core::mem::drop(unit_namespace_scope_21);
     ::core::result::Result::Ok(())
 }
 
@@ -21776,11 +21911,15 @@ fn build_controls_winuicontrols_xaml_unit_43(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_22 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10);
     // Controls/WinUIControls.xaml(26,4) Content (resource)
     let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_167, 26, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 26, 4)?;
+    ::core::mem::drop(unit_namespace_scope_22);
+    let unit_namespace_scope_23 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10);
     // Controls/WinUIControls.xaml(64,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TooltipDataValidationErrors", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_170, 64, 4)?;
+    ::core::mem::drop(unit_namespace_scope_23);
     ::core::result::Result::Ok(())
 }
 
@@ -21791,16 +21930,26 @@ fn build_controls_winuicontrols_xaml_unit_44(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_24 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(66,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_173, 66, 4)?;
+    ::core::mem::drop(unit_namespace_scope_24);
+    let unit_namespace_scope_25 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(128,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_176, 128, 4)?;
+    ::core::mem::drop(unit_namespace_scope_25);
+    let unit_namespace_scope_26 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(177,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorUpButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_178, 177, 4)?;
+    ::core::mem::drop(unit_namespace_scope_26);
+    let unit_namespace_scope_27 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(205,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorDownButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_180, 205, 4)?;
+    ::core::mem::drop(unit_namespace_scope_27);
+    let unit_namespace_scope_28 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(233,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_182, 233, 4)?;
+    ::core::mem::drop(unit_namespace_scope_28);
     ::core::result::Result::Ok(())
 }
 
@@ -21811,15 +21960,23 @@ fn build_controls_winuicontrols_xaml_unit_45(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_29 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(50,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemWeekDayNameStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_184, 50, 4)?;
+    ::core::mem::drop(unit_namespace_scope_29);
+    let unit_namespace_scope_30 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(68,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemHeaderNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_185, 68, 4)?;
+    ::core::mem::drop(unit_namespace_scope_30);
+    let unit_namespace_scope_31 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(132,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_188, 132, 4)?;
+    ::core::mem::drop(unit_namespace_scope_31);
+    let unit_namespace_scope_32 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(203,4) Content (resource)
     let deferred_101 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_191, 203, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_101) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 203, 4)?;
+    ::core::mem::drop(unit_namespace_scope_32);
     ::core::result::Result::Ok(())
 }
 
@@ -21864,18 +22021,28 @@ fn build_controls_winuicontrols_xaml_unit_48(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_33 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(73,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DatePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_205, 73, 4)?;
+    ::core::mem::drop(unit_namespace_scope_33);
+    let unit_namespace_scope_34 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(111,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultDatePickerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_207, 111, 4)?;
+    ::core::mem::drop(unit_namespace_scope_34);
+    let unit_namespace_scope_35 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(229,4) Content (resource)
     let deferred_110 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_210, 229, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_110) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 229, 4)?;
+    ::core::mem::drop(unit_namespace_scope_35);
+    let unit_namespace_scope_36 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(231,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultDatePickerFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_211, 231, 4)?;
+    ::core::mem::drop(unit_namespace_scope_36);
+    let unit_namespace_scope_37 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(381,4) Content (resource)
     let deferred_112 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_213, 381, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_112) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 381, 4)?;
+    ::core::mem::drop(unit_namespace_scope_37);
     ::core::result::Result::Ok(())
 }
 
@@ -21886,14 +22053,20 @@ fn build_controls_winuicontrols_xaml_unit_49(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_38 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(67,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TimePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_214, 67, 4)?;
+    ::core::mem::drop(unit_namespace_scope_38);
+    let unit_namespace_scope_39 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(105,4) Content (resource)
     let deferred_114 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_216, 105, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_114) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 105, 4)?;
+    ::core::mem::drop(unit_namespace_scope_39);
+    let unit_namespace_scope_40 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(242,4) Content (resource)
     let deferred_115 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_219, 242, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_115) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 242, 4)?;
+    ::core::mem::drop(unit_namespace_scope_40);
     ::core::result::Result::Ok(())
 }
 
@@ -21904,24 +22077,40 @@ fn build_controls_winuicontrols_xaml_unit_50(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_41 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(48,67) Content (resource)
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 48, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 48, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 48, 67)?;
+    ::core::mem::drop(unit_namespace_scope_41);
+    let unit_namespace_scope_42 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(53,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_221, 53, 4)?;
+    ::core::mem::drop(unit_namespace_scope_42);
+    let unit_namespace_scope_43 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(103,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowDrawnDecorationsCloseButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_223, 103, 4)?;
+    ::core::mem::drop(unit_namespace_scope_43);
+    let unit_namespace_scope_44 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(120,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TitleBarBackButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_224, 120, 4)?;
+    ::core::mem::drop(unit_namespace_scope_44);
+    let unit_namespace_scope_45 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(171,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TitleBarPaneToggleButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_226, 171, 4)?;
+    ::core::mem::drop(unit_namespace_scope_45);
+    let unit_namespace_scope_46 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(222,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowChromeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_228, 222, 4)?;
+    ::core::mem::drop(unit_namespace_scope_46);
+    let unit_namespace_scope_47 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(234,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTitleBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_230, 234, 4)?;
+    ::core::mem::drop(unit_namespace_scope_47);
+    let unit_namespace_scope_48 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(429,4) Content (resource)
     let deferred_122 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_232, 429, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_122) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 429, 4)?;
+    ::core::mem::drop(unit_namespace_scope_48);
     ::core::result::Result::Ok(())
 }
 
@@ -21932,11 +22121,15 @@ fn build_controls_winuicontrols_xaml_unit_51(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_49 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(58,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "InfoBarCloseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_233, 58, 4)?;
+    ::core::mem::drop(unit_namespace_scope_49);
+    let unit_namespace_scope_50 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(96,4) Content (resource)
     let deferred_124 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_234, 96, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NotificationCard as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_124) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 96, 4)?;
+    ::core::mem::drop(unit_namespace_scope_50);
     ::core::result::Result::Ok(())
 }
 
@@ -22007,11 +22200,15 @@ fn build_controls_winuicontrols_xaml_unit_54(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_51 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/WinUIControls.xaml(46,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_257, 46, 4)?;
+    ::core::mem::drop(unit_namespace_scope_51);
+    let unit_namespace_scope_52 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/WinUIControls.xaml(130,4) Content (resource)
     let deferred_145 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_259, 130, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_145) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 130, 4)?;
+    ::core::mem::drop(unit_namespace_scope_52);
     ::core::result::Result::Ok(())
 }
 
@@ -22037,20 +22234,72 @@ fn build_controls_winuicontrols_xaml_unit_56(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_53 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(56,65) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_WINUICONTROLS_XAML_ROWS_0)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 56, 65)?, rt::string_object("StringManagedFileChooserFileNamePlaceholder"), rt::string_object("File name")), 56, 65)?;
+    ::core::mem::drop(unit_namespace_scope_53);
+    let unit_namespace_scope_54 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(57,65) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 57, 65)?, rt::string_object("StringManagedFileChooserShowHiddenFilesText"), rt::string_object("Show hidden files")), 57, 65)?;
+    ::core::mem::drop(unit_namespace_scope_54);
+    let unit_namespace_scope_55 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(58,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 52)?, rt::string_object("StringManagedFileChooserOkText"), rt::string_object("OK")), 58, 52)?;
+    ::core::mem::drop(unit_namespace_scope_55);
+    let unit_namespace_scope_56 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(59,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 59, 56)?, rt::string_object("StringManagedFileChooserCancelText"), rt::string_object("Cancel")), 59, 56)?;
+    ::core::mem::drop(unit_namespace_scope_56);
+    let unit_namespace_scope_57 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(60,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 60, 56)?, rt::string_object("StringManagedFileChooserNameColumn"), rt::string_object("Name")), 60, 56)?;
+    ::core::mem::drop(unit_namespace_scope_57);
+    let unit_namespace_scope_58 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(61,64) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 61, 64)?, rt::string_object("StringManagedFileChooserDateModifiedColumn"), rt::string_object("Date Modified")), 61, 64)?;
+    ::core::mem::drop(unit_namespace_scope_58);
+    let unit_namespace_scope_59 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(62,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 62, 56)?, rt::string_object("StringManagedFileChooserTypeColumn"), rt::string_object("Type")), 62, 56)?;
+    ::core::mem::drop(unit_namespace_scope_59);
+    let unit_namespace_scope_60 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(63,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 63, 56)?, rt::string_object("StringManagedFileChooserSizeColumn"), rt::string_object("Size")), 63, 56)?;
+    ::core::mem::drop(unit_namespace_scope_60);
+    let unit_namespace_scope_61 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(64,82) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 64, 82)?, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"), rt::string_object("{0} already exists. Do you want to replace it?")), 64, 82)?;
+    ::core::mem::drop(unit_namespace_scope_61);
+    let unit_namespace_scope_62 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(65,72) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 65, 72)?, rt::string_object("StringManagedFileChooserOverwritePromptConfirmText"), rt::string_object("Yes")), 65, 72)?;
+    ::core::mem::drop(unit_namespace_scope_62);
+    let unit_namespace_scope_63 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
+    // Controls/WinUIControls.xaml(66,71) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 66, 71)?, rt::string_object("StringManagedFileChooserOverwritePromptCancelText"), rt::string_object("No")), 66, 71)?;
+    ::core::mem::drop(unit_namespace_scope_63);
+    let unit_namespace_scope_64 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(70,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserListViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_265, 70, 4)?;
+    ::core::mem::drop(unit_namespace_scope_64);
+    let unit_namespace_scope_65 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(109,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserListViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_267, 109, 4)?;
+    ::core::mem::drop(unit_namespace_scope_65);
+    let unit_namespace_scope_66 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(221,4) Content (resource)
     let deferred_150 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_270, 221, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_150) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 221, 4)?;
+    ::core::mem::drop(unit_namespace_scope_66);
+    let unit_namespace_scope_67 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(435,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultContentDialogStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_275, 435, 4)?;
+    ::core::mem::drop(unit_namespace_scope_67);
+    let unit_namespace_scope_68 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12);
     // Controls/WinUIControls.xaml(542,4) Content (resource)
     let deferred_152 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_277, 542, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_152) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 542, 4)?;
+    ::core::mem::drop(unit_namespace_scope_68);
     ::core::result::Result::Ok(())
 }
 
@@ -22091,19 +22340,31 @@ fn build_controls_winuicontrols_xaml_unit_59(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_69 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(83,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewScrollButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_286, 83, 4)?;
+    ::core::mem::drop(unit_namespace_scope_69);
+    let unit_namespace_scope_70 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(147,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_288, 147, 4)?;
+    ::core::mem::drop(unit_namespace_scope_70);
+    let unit_namespace_scope_71 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(200,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewCloseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_290, 200, 4)?;
+    ::core::mem::drop(unit_namespace_scope_71);
+    let unit_namespace_scope_72 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(249,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_292, 249, 4)?;
+    ::core::mem::drop(unit_namespace_scope_72);
+    let unit_namespace_scope_73 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(357,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTabViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_294, 357, 4)?;
+    ::core::mem::drop(unit_namespace_scope_73);
+    let unit_namespace_scope_74 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/WinUIControls.xaml(515,4) Content (resource)
     let deferred_162 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_299, 515, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_162) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 515, 4)?;
+    ::core::mem::drop(unit_namespace_scope_74);
     ::core::result::Result::Ok(())
 }
 
@@ -22146,13 +22407,19 @@ fn build_controls_winuicontrols_xaml_unit_62(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_75 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/WinUIControls.xaml(51,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBackButtonNormalStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_314, 51, 4)?;
+    ::core::mem::drop(unit_namespace_scope_75);
+    let unit_namespace_scope_76 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/WinUIControls.xaml(151,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBackButtonSmallStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_317, 151, 4)?;
+    ::core::mem::drop(unit_namespace_scope_76);
+    let unit_namespace_scope_77 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/WinUIControls.xaml(155,4) Content (resource)
     let deferred_170 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_318, 155, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_170) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 155, 4)?;
+    ::core::mem::drop(unit_namespace_scope_77);
     ::core::result::Result::Ok(())
 }
 
@@ -22188,20 +22455,30 @@ fn build_controls_winuicontrols_xaml_unit_64(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_78 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/WinUIControls.xaml(108,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewPaneSearchButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_333, 108, 4)?;
+    ::core::mem::drop(unit_namespace_scope_78);
+    let unit_namespace_scope_79 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/WinUIControls.xaml(147,4) Content (resource)
     let deferred_179 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_335, 147, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_179) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 147, 4)?;
+    ::core::mem::drop(unit_namespace_scope_79);
+    let unit_namespace_scope_80 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/WinUIControls.xaml(482,4) Content (resource)
     let deferred_180 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_337, 482, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_180) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 482, 4)?;
+    ::core::mem::drop(unit_namespace_scope_80);
+    let unit_namespace_scope_81 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/WinUIControls.xaml(861,4) Content (resource)
     let deferred_181 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_339, 861, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_181) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 861, 4)?;
+    ::core::mem::drop(unit_namespace_scope_81);
+    let unit_namespace_scope_82 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/WinUIControls.xaml(905,4) Content (resource)
     let deferred_182 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_341, 905, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_182) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 905, 4)?;
+    ::core::mem::drop(unit_namespace_scope_82);
     ::core::result::Result::Ok(())
 }
 
@@ -22229,34 +22506,58 @@ fn build_controls_winuicontrols_xaml_unit_66(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_83 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(105,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_347, 105, 4)?;
+    ::core::mem::drop(unit_namespace_scope_83);
+    let unit_namespace_scope_84 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(304,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AppBarButtonOverflowStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_350, 304, 4)?;
+    ::core::mem::drop(unit_namespace_scope_84);
+    let unit_namespace_scope_85 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(309,4) Content (resource)
     let deferred_188 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_351, 309, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_188) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 309, 4)?;
+    ::core::mem::drop(unit_namespace_scope_85);
+    let unit_namespace_scope_86 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(312,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarToggleButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_352, 312, 4)?;
+    ::core::mem::drop(unit_namespace_scope_86);
+    let unit_namespace_scope_87 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(708,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AppBarToggleButtonOverflowStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_355, 708, 4)?;
+    ::core::mem::drop(unit_namespace_scope_87);
+    let unit_namespace_scope_88 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(713,4) Content (resource)
     let deferred_191 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_356, 713, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarToggleButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_191) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 713, 4)?;
+    ::core::mem::drop(unit_namespace_scope_88);
+    let unit_namespace_scope_89 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(716,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarSeparatorStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_357, 716, 4)?;
+    ::core::mem::drop(unit_namespace_scope_89);
+    let unit_namespace_scope_90 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(752,4) Content (resource)
     let deferred_193 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_359, 752, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_193) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 752, 4)?;
+    ::core::mem::drop(unit_namespace_scope_90);
+    let unit_namespace_scope_91 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(755,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "EllipsisButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_360, 755, 4)?;
+    ::core::mem::drop(unit_namespace_scope_91);
+    let unit_namespace_scope_92 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(822,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultCommandBarOverflowPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_362, 822, 4)?;
+    ::core::mem::drop(unit_namespace_scope_92);
+    let unit_namespace_scope_93 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(851,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_364, 851, 4)?;
+    ::core::mem::drop(unit_namespace_scope_93);
+    let unit_namespace_scope_94 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(973,4) Content (resource)
     let deferred_197 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_368, 973, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_197) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 973, 4)?;
+    ::core::mem::drop(unit_namespace_scope_94);
     ::core::result::Result::Ok(())
 }
 
@@ -22282,17 +22583,27 @@ fn build_controls_winuicontrols_xaml_unit_68(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_95 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(63,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_373, 63, 4)?;
+    ::core::mem::drop(unit_namespace_scope_95);
+    let unit_namespace_scope_96 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(118,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_376, 118, 4)?;
+    ::core::mem::drop(unit_namespace_scope_96);
+    let unit_namespace_scope_97 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(379,4) Content (resource)
     let deferred_202 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_379, 379, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_202) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 379, 4)?;
+    ::core::mem::drop(unit_namespace_scope_97);
+    let unit_namespace_scope_98 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(383,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_380, 383, 4)?;
+    ::core::mem::drop(unit_namespace_scope_98);
+    let unit_namespace_scope_99 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/WinUIControls.xaml(436,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_383, 436, 4)?;
+    ::core::mem::drop(unit_namespace_scope_99);
     ::core::result::Result::Ok(())
 }
 
@@ -22341,19 +22652,31 @@ fn build_controls_winuicontrols_xaml_unit_71(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_100 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(67,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_403, 67, 4)?;
+    ::core::mem::drop(unit_namespace_scope_100);
+    let unit_namespace_scope_101 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(79,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_404, 79, 4)?;
+    ::core::mem::drop(unit_namespace_scope_101);
+    let unit_namespace_scope_102 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(93,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_405, 93, 4)?;
+    ::core::mem::drop(unit_namespace_scope_102);
+    let unit_namespace_scope_103 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(124,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_406, 124, 4)?;
+    ::core::mem::drop(unit_namespace_scope_103);
+    let unit_namespace_scope_104 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(253,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownButtonSpinnerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_408, 253, 4)?;
+    ::core::mem::drop(unit_namespace_scope_104);
+    let unit_namespace_scope_105 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/WinUIControls.xaml(301,4) Content (resource)
     let deferred_218 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_410, 301, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_218) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 301, 4)?;
+    ::core::mem::drop(unit_namespace_scope_105);
     ::core::result::Result::Ok(())
 }
 
@@ -22364,11 +22687,15 @@ fn build_controls_winuicontrols_xaml_unit_72(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_106 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(68,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupContentRootButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_412, 68, 4)?;
+    ::core::mem::drop(unit_namespace_scope_106);
+    let unit_namespace_scope_107 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/WinUIControls.xaml(97,4) Content (resource)
     let deferred_220 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_413, 97, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_220) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 97, 4)?;
+    ::core::mem::drop(unit_namespace_scope_107);
     ::core::result::Result::Ok(())
 }
 
@@ -22533,13 +22860,19 @@ fn build_controls_winuicontrols_xaml_unit_81(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_108 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/WinUIControls.xaml(60,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_472, 60, 4)?;
+    ::core::mem::drop(unit_namespace_scope_108);
+    let unit_namespace_scope_109 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/WinUIControls.xaml(174,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_475, 174, 4)?;
+    ::core::mem::drop(unit_namespace_scope_109);
+    let unit_namespace_scope_110 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/WinUIControls.xaml(200,4) Content (resource)
     let deferred_256 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_477, 200, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_256) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 200, 4)?;
+    ::core::mem::drop(unit_namespace_scope_110);
     ::core::result::Result::Ok(())
 }
 
@@ -22652,15 +22985,23 @@ fn build_controls_winuicontrols_xaml_unit_88(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_111 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(53,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_510, 53, 4)?;
+    ::core::mem::drop(unit_namespace_scope_111);
+    let unit_namespace_scope_112 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(104,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_512, 104, 4)?;
+    ::core::mem::drop(unit_namespace_scope_112);
+    let unit_namespace_scope_113 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(246,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAutoSuggestBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_514, 246, 4)?;
+    ::core::mem::drop(unit_namespace_scope_113);
+    let unit_namespace_scope_114 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/WinUIControls.xaml(316,4) Content (resource)
     let deferred_278 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_516, 316, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_278) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 316, 4)?;
+    ::core::mem::drop(unit_namespace_scope_114);
     ::core::result::Result::Ok(())
 }
 
@@ -22703,39 +23044,33 @@ fn build_controls_winuicontrols_xaml_unit_91(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_115 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
     // Controls/WinUIControls.xaml(23,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_WINUICONTROLS_XAML_ROWS_1)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 23, 44)?, rt::string_object("StringRichEditBoldText"), rt::string_object("Bold")), 23, 44)?;
+    ::core::mem::drop(unit_namespace_scope_115);
+    let unit_namespace_scope_116 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
+    // Controls/WinUIControls.xaml(24,46) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 46)?, rt::string_object("StringRichEditItalicText"), rt::string_object("Italic")), 24, 46)?;
+    ::core::mem::drop(unit_namespace_scope_116);
+    let unit_namespace_scope_117 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
+    // Controls/WinUIControls.xaml(25,49) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 49)?, rt::string_object("StringRichEditUnderlineText"), rt::string_object("Underline")), 25, 49)?;
+    ::core::mem::drop(unit_namespace_scope_117);
+    let unit_namespace_scope_118 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
     // Controls/WinUIControls.xaml(26,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WinUIRichEditBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_527, 26, 4)?;
+    ::core::mem::drop(unit_namespace_scope_118);
+    let unit_namespace_scope_119 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
     // Controls/WinUIControls.xaml(50,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultRichEditBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_528, 50, 4)?;
+    ::core::mem::drop(unit_namespace_scope_119);
+    let unit_namespace_scope_120 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19);
     // Controls/WinUIControls.xaml(159,4) Content (resource)
     let deferred_286 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_530, 159, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_286) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 159, 4)?;
+    ::core::mem::drop(unit_namespace_scope_120);
     ::core::result::Result::Ok(())
 }
-
-/// The texts of a run of `Controls/WinUIControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_ROWS_0: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 56, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 57, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 58, position: 52 },
-    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 59, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 60, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 61, position: 64 },
-    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 62, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 63, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 64, position: 82 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 65, position: 72 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 66, position: 71 },
-];
-
-/// The texts of a run of `Controls/WinUIControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_ROWS_1: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringRichEditBoldText", value: "Bold", line: 23, position: 44 },
-    rt::ValueRow { key: "StringRichEditItalicText", value: "Italic", line: 24, position: 46 },
-    rt::ValueRow { key: "StringRichEditUnderlineText", value: "Underline", line: 25, position: 49 },
-];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
@@ -51073,7 +51408,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_530_THEME: rt::ControlThemeTab
 fn build_controls_winuicontrols_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(16,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_0_THEME)
 }
@@ -51082,7 +51417,7 @@ fn build_controls_winuicontrols_xaml_deferred_0(
 fn build_controls_winuicontrols_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(19,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -51117,7 +51452,7 @@ fn build_controls_winuicontrols_xaml_deferred_1(
 fn build_controls_winuicontrols_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(13,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_2_THEME)
 }
@@ -51126,7 +51461,7 @@ fn build_controls_winuicontrols_xaml_deferred_2(
 fn build_controls_winuicontrols_xaml_deferred_3(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(22,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -51194,7 +51529,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
 fn build_controls_winuicontrols_xaml_deferred_4(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(12,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_4_THEME)
 }
@@ -51203,7 +51538,7 @@ fn build_controls_winuicontrols_xaml_deferred_4(
 fn build_controls_winuicontrols_xaml_deferred_5(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(22,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -51251,7 +51586,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
 fn build_controls_winuicontrols_xaml_deferred_6(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(14,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_6_THEME)
 }
@@ -51260,7 +51595,7 @@ fn build_controls_winuicontrols_xaml_deferred_6(
 fn build_controls_winuicontrols_xaml_deferred_7(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(26,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -51328,7 +51663,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
 fn build_controls_winuicontrols_xaml_deferred_8(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(11,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_8_THEME)
 }
@@ -51337,7 +51672,7 @@ fn build_controls_winuicontrols_xaml_deferred_8(
 fn build_controls_winuicontrols_xaml_deferred_9(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(16,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_9_THEME)
 }
@@ -51346,7 +51681,7 @@ fn build_controls_winuicontrols_xaml_deferred_9(
 fn build_controls_winuicontrols_xaml_deferred_10(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(26,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -52564,7 +52899,7 @@ fn build_controls_winuicontrols_xaml_deferred_38(
 fn build_controls_winuicontrols_xaml_deferred_39(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/WinUIControls.xaml(44,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_39_THEME)
 }
@@ -52573,7 +52908,7 @@ fn build_controls_winuicontrols_xaml_deferred_39(
 fn build_controls_winuicontrols_xaml_deferred_40(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(53,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -53165,7 +53500,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
 fn build_controls_winuicontrols_xaml_deferred_43(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/WinUIControls.xaml(27,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_43_THEME)
 }
@@ -53174,7 +53509,7 @@ fn build_controls_winuicontrols_xaml_deferred_43(
 fn build_controls_winuicontrols_xaml_deferred_44(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(30,10) ReversibleStackPanel
     let reversible_stack_panel_0 = ::ferroui_controls::ReversibleStackPanel::new();
@@ -53221,7 +53556,7 @@ fn build_controls_winuicontrols_xaml_deferred_44(
 fn build_controls_winuicontrols_xaml_deferred_45(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/WinUIControls.xaml(35,16) InfoBarPanel
     let info_bar_panel_0 = crate::primitives::InfoBarPanel::new();
     context.set_intermediate_root_object(rt::to_value(info_bar_panel_0.clone()));
@@ -53346,7 +53681,7 @@ fn build_controls_winuicontrols_xaml_deferred_45(
 fn build_controls_winuicontrols_xaml_deferred_46(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/WinUIControls.xaml(56,16) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
@@ -54691,7 +55026,7 @@ fn build_controls_winuicontrols_xaml_deferred_60(
 fn build_controls_winuicontrols_xaml_deferred_61(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(35,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_61_THEME)
 }
@@ -54700,7 +55035,7 @@ fn build_controls_winuicontrols_xaml_deferred_61(
 fn build_controls_winuicontrols_xaml_deferred_62(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(52,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -55119,7 +55454,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
 fn build_controls_winuicontrols_xaml_deferred_66(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/WinUIControls.xaml(24,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_66_THEME)
 }
@@ -55128,7 +55463,7 @@ fn build_controls_winuicontrols_xaml_deferred_66(
 fn build_controls_winuicontrols_xaml_deferred_67(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/WinUIControls.xaml(33,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
@@ -55183,7 +55518,7 @@ fn build_controls_winuicontrols_xaml_deferred_67(
 fn build_controls_winuicontrols_xaml_deferred_68(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(46,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -56781,7 +57116,7 @@ fn build_controls_winuicontrols_xaml_deferred_121(
 fn build_controls_winuicontrols_xaml_deferred_122(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/WinUIControls.xaml(53,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(15_i64));
@@ -56794,7 +57129,7 @@ fn build_controls_winuicontrols_xaml_deferred_122(
 fn build_controls_winuicontrols_xaml_deferred_123(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(58,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_123_THEME)
 }
@@ -56803,7 +57138,7 @@ fn build_controls_winuicontrols_xaml_deferred_123(
 fn build_controls_winuicontrols_xaml_deferred_124(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(61,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -56823,7 +57158,7 @@ fn build_controls_winuicontrols_xaml_deferred_124(
 fn build_controls_winuicontrols_xaml_deferred_125(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(67,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_125_THEME)
 }
@@ -56832,7 +57167,7 @@ fn build_controls_winuicontrols_xaml_deferred_125(
 fn build_controls_winuicontrols_xaml_deferred_126(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(70,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -56897,7 +57232,7 @@ fn build_controls_winuicontrols_xaml_deferred_126(
 fn build_controls_winuicontrols_xaml_deferred_127(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(99,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_127_THEME)
 }
@@ -56906,7 +57241,7 @@ fn build_controls_winuicontrols_xaml_deferred_127(
 fn build_controls_winuicontrols_xaml_deferred_128(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(102,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -56971,7 +57306,7 @@ fn build_controls_winuicontrols_xaml_deferred_128(
 fn build_controls_winuicontrols_xaml_deferred_129(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(131,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_129_THEME)
 }
@@ -56980,7 +57315,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
 fn build_controls_winuicontrols_xaml_deferred_130(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(134,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -57045,7 +57380,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
 fn build_controls_winuicontrols_xaml_deferred_131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(163,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_131_THEME)
 }
@@ -57054,7 +57389,7 @@ fn build_controls_winuicontrols_xaml_deferred_131(
 fn build_controls_winuicontrols_xaml_deferred_132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(166,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -57119,7 +57454,7 @@ fn build_controls_winuicontrols_xaml_deferred_132(
 fn build_controls_winuicontrols_xaml_deferred_133(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(195,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_133_THEME)
 }
@@ -57128,7 +57463,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
 fn build_controls_winuicontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(198,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -57184,7 +57519,7 @@ fn build_controls_winuicontrols_xaml_deferred_134(
 fn build_controls_winuicontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(220,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_135_THEME)
 }
@@ -57193,7 +57528,7 @@ fn build_controls_winuicontrols_xaml_deferred_135(
 fn build_controls_winuicontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(223,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -57249,7 +57584,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
 fn build_controls_winuicontrols_xaml_deferred_137(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(243,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_137_THEME)
 }
@@ -57258,7 +57593,7 @@ fn build_controls_winuicontrols_xaml_deferred_137(
 fn build_controls_winuicontrols_xaml_deferred_138(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(258,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -57623,7 +57958,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
 fn build_controls_winuicontrols_xaml_deferred_139(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(358,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -57987,7 +58322,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
 fn build_controls_winuicontrols_xaml_deferred_140(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(495,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_140_THEME)
 }
@@ -57996,7 +58331,7 @@ fn build_controls_winuicontrols_xaml_deferred_140(
 fn build_controls_winuicontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/WinUIControls.xaml(66,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_141_THEME)
 }
@@ -58005,7 +58340,7 @@ fn build_controls_winuicontrols_xaml_deferred_141(
 fn build_controls_winuicontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(76,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58254,7 +58589,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
 fn build_controls_winuicontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/WinUIControls.xaml(161,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_143_THEME)
 }
@@ -58263,7 +58598,7 @@ fn build_controls_winuicontrols_xaml_deferred_143(
 fn build_controls_winuicontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(163,4) TargetType
@@ -58279,7 +58614,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
 fn build_controls_winuicontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(164,6) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -58359,7 +58694,7 @@ fn build_controls_winuicontrols_xaml_deferred_145(
 fn build_controls_winuicontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(69,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_146_THEME)
 }
@@ -58368,7 +58703,7 @@ fn build_controls_winuicontrols_xaml_deferred_146(
 fn build_controls_winuicontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(72,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58431,7 +58766,7 @@ fn build_controls_winuicontrols_xaml_deferred_147(
 fn build_controls_winuicontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(119,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_148_THEME)
 }
@@ -58440,7 +58775,7 @@ fn build_controls_winuicontrols_xaml_deferred_148(
 fn build_controls_winuicontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(122,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58503,7 +58838,7 @@ fn build_controls_winuicontrols_xaml_deferred_149(
 fn build_controls_winuicontrols_xaml_deferred_150(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(169,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -58768,7 +59103,7 @@ fn build_controls_winuicontrols_xaml_deferred_150(
 fn build_controls_winuicontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(219,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -58855,7 +59190,7 @@ fn build_controls_winuicontrols_xaml_deferred_151(
 fn build_controls_winuicontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(234,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_152_THEME)
 }
@@ -58864,7 +59199,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
 fn build_controls_winuicontrols_xaml_deferred_153(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(261,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -59189,7 +59524,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
 fn build_controls_winuicontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(431,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_154_THEME)
 }
@@ -59198,7 +59533,7 @@ fn build_controls_winuicontrols_xaml_deferred_154(
 fn build_controls_winuicontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(444,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_155_THEME)
 }
@@ -59275,7 +59610,7 @@ fn build_controls_winuicontrols_xaml_deferred_158(
 fn build_controls_winuicontrols_xaml_deferred_159(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8 });
     let string_format_converter_0 = ::ferroui_controls::converters::StringFormatConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(string_format_converter_0))
 }
@@ -59284,7 +59619,7 @@ fn build_controls_winuicontrols_xaml_deferred_159(
 fn build_controls_winuicontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8 });
     // Controls/WinUIControls.xaml(65,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -60002,7 +60337,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
 fn build_controls_winuicontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(77,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -60228,7 +60563,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
 fn build_controls_winuicontrols_xaml_deferred_162(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_8 });
     // Controls/WinUIControls.xaml(259,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_162_THEME)
 }
@@ -60325,7 +60660,7 @@ fn build_controls_winuicontrols_xaml_deferred_166(
 fn build_controls_winuicontrols_xaml_deferred_167(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/WinUIControls.xaml(26,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_167_THEME)
 }
@@ -60334,7 +60669,7 @@ fn build_controls_winuicontrols_xaml_deferred_167(
 fn build_controls_winuicontrols_xaml_deferred_168(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(29,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -60426,7 +60761,7 @@ fn build_controls_winuicontrols_xaml_deferred_168(
 fn build_controls_winuicontrols_xaml_deferred_169(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/WinUIControls.xaml(51,10) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     context.set_intermediate_root_object(rt::to_value(items_control_0.clone()));
@@ -60457,7 +60792,7 @@ fn build_controls_winuicontrols_xaml_deferred_169(
 fn build_controls_winuicontrols_xaml_deferred_170(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     // Controls/WinUIControls.xaml(64,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_170_THEME)
 }
@@ -60466,7 +60801,7 @@ fn build_controls_winuicontrols_xaml_deferred_170(
 fn build_controls_winuicontrols_xaml_deferred_171(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(67,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -60555,7 +60890,7 @@ fn build_controls_winuicontrols_xaml_deferred_171(
 fn build_controls_winuicontrols_xaml_deferred_172(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_10 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(88,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -60654,7 +60989,7 @@ fn build_controls_winuicontrols_xaml_deferred_172(
 fn build_controls_winuicontrols_xaml_deferred_173(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(66,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_173_THEME)
 }
@@ -60663,7 +60998,7 @@ fn build_controls_winuicontrols_xaml_deferred_173(
 fn build_controls_winuicontrols_xaml_deferred_174(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(80,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -60698,7 +61033,7 @@ fn build_controls_winuicontrols_xaml_deferred_174(
 fn build_controls_winuicontrols_xaml_deferred_175(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(91,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -60746,7 +61081,7 @@ fn build_controls_winuicontrols_xaml_deferred_175(
 fn build_controls_winuicontrols_xaml_deferred_176(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(128,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_176_THEME)
 }
@@ -60755,7 +61090,7 @@ fn build_controls_winuicontrols_xaml_deferred_176(
 fn build_controls_winuicontrols_xaml_deferred_177(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(138,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -60809,7 +61144,7 @@ fn build_controls_winuicontrols_xaml_deferred_177(
 fn build_controls_winuicontrols_xaml_deferred_178(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(177,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_178_THEME)
 }
@@ -60818,7 +61153,7 @@ fn build_controls_winuicontrols_xaml_deferred_178(
 fn build_controls_winuicontrols_xaml_deferred_179(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(192,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
@@ -60870,7 +61205,7 @@ fn build_controls_winuicontrols_xaml_deferred_179(
 fn build_controls_winuicontrols_xaml_deferred_180(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(205,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_180_THEME)
 }
@@ -60879,7 +61214,7 @@ fn build_controls_winuicontrols_xaml_deferred_180(
 fn build_controls_winuicontrols_xaml_deferred_181(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(220,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
@@ -60931,7 +61266,7 @@ fn build_controls_winuicontrols_xaml_deferred_181(
 fn build_controls_winuicontrols_xaml_deferred_182(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(233,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_182_THEME)
 }
@@ -60940,7 +61275,7 @@ fn build_controls_winuicontrols_xaml_deferred_182(
 fn build_controls_winuicontrols_xaml_deferred_183(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(246,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -60998,7 +61333,7 @@ fn build_controls_winuicontrols_xaml_deferred_183(
 fn build_controls_winuicontrols_xaml_deferred_184(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(50,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_184_THEME)
 }
@@ -61007,7 +61342,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
 fn build_controls_winuicontrols_xaml_deferred_185(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(68,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_185_THEME)
 }
@@ -61016,7 +61351,7 @@ fn build_controls_winuicontrols_xaml_deferred_185(
 fn build_controls_winuicontrols_xaml_deferred_186(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(87,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -61053,7 +61388,7 @@ fn build_controls_winuicontrols_xaml_deferred_186(
 fn build_controls_winuicontrols_xaml_deferred_187(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(99,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -61090,7 +61425,7 @@ fn build_controls_winuicontrols_xaml_deferred_187(
 fn build_controls_winuicontrols_xaml_deferred_188(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(132,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_188_THEME)
 }
@@ -61099,7 +61434,7 @@ fn build_controls_winuicontrols_xaml_deferred_188(
 fn build_controls_winuicontrols_xaml_deferred_189(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(148,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -61136,7 +61471,7 @@ fn build_controls_winuicontrols_xaml_deferred_189(
 fn build_controls_winuicontrols_xaml_deferred_190(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(160,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -61173,7 +61508,7 @@ fn build_controls_winuicontrols_xaml_deferred_190(
 fn build_controls_winuicontrols_xaml_deferred_191(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(203,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_191_THEME)
 }
@@ -61182,7 +61517,7 @@ fn build_controls_winuicontrols_xaml_deferred_191(
 fn build_controls_winuicontrols_xaml_deferred_192(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(207,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
@@ -61206,7 +61541,7 @@ fn build_controls_winuicontrols_xaml_deferred_192(
 fn build_controls_winuicontrols_xaml_deferred_193(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(212,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -62365,7 +62700,7 @@ fn build_controls_winuicontrols_xaml_deferred_204(
 fn build_controls_winuicontrols_xaml_deferred_205(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(73,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_205_THEME)
 }
@@ -62374,7 +62709,7 @@ fn build_controls_winuicontrols_xaml_deferred_205(
 fn build_controls_winuicontrols_xaml_deferred_206(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(76,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -62423,7 +62758,7 @@ fn build_controls_winuicontrols_xaml_deferred_206(
 fn build_controls_winuicontrols_xaml_deferred_207(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(111,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_207_THEME)
 }
@@ -62432,7 +62767,7 @@ fn build_controls_winuicontrols_xaml_deferred_207(
 fn build_controls_winuicontrols_xaml_deferred_208(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(129,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -62469,7 +62804,7 @@ fn build_controls_winuicontrols_xaml_deferred_208(
 fn build_controls_winuicontrols_xaml_deferred_209(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(143,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -62717,7 +63052,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
 fn build_controls_winuicontrols_xaml_deferred_210(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(229,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_210_THEME)
 }
@@ -62726,7 +63061,7 @@ fn build_controls_winuicontrols_xaml_deferred_210(
 fn build_controls_winuicontrols_xaml_deferred_211(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(231,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_211_THEME)
 }
@@ -62735,7 +63070,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
 fn build_controls_winuicontrols_xaml_deferred_212(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(248,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -63355,7 +63690,7 @@ fn build_controls_winuicontrols_xaml_deferred_212(
 fn build_controls_winuicontrols_xaml_deferred_213(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(381,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_213_THEME)
 }
@@ -63364,7 +63699,7 @@ fn build_controls_winuicontrols_xaml_deferred_213(
 fn build_controls_winuicontrols_xaml_deferred_214(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(67,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_214_THEME)
 }
@@ -63373,7 +63708,7 @@ fn build_controls_winuicontrols_xaml_deferred_214(
 fn build_controls_winuicontrols_xaml_deferred_215(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(70,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -63422,7 +63757,7 @@ fn build_controls_winuicontrols_xaml_deferred_215(
 fn build_controls_winuicontrols_xaml_deferred_216(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(105,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_216_THEME)
 }
@@ -63431,7 +63766,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
 fn build_controls_winuicontrols_xaml_deferred_217(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(120,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -63468,7 +63803,7 @@ fn build_controls_winuicontrols_xaml_deferred_217(
 fn build_controls_winuicontrols_xaml_deferred_218(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(134,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -63791,7 +64126,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
 fn build_controls_winuicontrols_xaml_deferred_219(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(242,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_219_THEME)
 }
@@ -63800,7 +64135,7 @@ fn build_controls_winuicontrols_xaml_deferred_219(
 fn build_controls_winuicontrols_xaml_deferred_220(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(258,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -64545,7 +64880,7 @@ fn build_controls_winuicontrols_xaml_deferred_220(
 fn build_controls_winuicontrols_xaml_deferred_221(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(53,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_221_THEME)
 }
@@ -64554,7 +64889,7 @@ fn build_controls_winuicontrols_xaml_deferred_221(
 fn build_controls_winuicontrols_xaml_deferred_222(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(64,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -64604,7 +64939,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
 fn build_controls_winuicontrols_xaml_deferred_223(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(103,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_223_THEME)
 }
@@ -64613,7 +64948,7 @@ fn build_controls_winuicontrols_xaml_deferred_223(
 fn build_controls_winuicontrols_xaml_deferred_224(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(120,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_224_THEME)
 }
@@ -64622,7 +64957,7 @@ fn build_controls_winuicontrols_xaml_deferred_224(
 fn build_controls_winuicontrols_xaml_deferred_225(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(131,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -64670,7 +65005,7 @@ fn build_controls_winuicontrols_xaml_deferred_225(
 fn build_controls_winuicontrols_xaml_deferred_226(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(171,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_226_THEME)
 }
@@ -64679,7 +65014,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
 fn build_controls_winuicontrols_xaml_deferred_227(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(182,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -64727,7 +65062,7 @@ fn build_controls_winuicontrols_xaml_deferred_227(
 fn build_controls_winuicontrols_xaml_deferred_228(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(222,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_228_THEME)
 }
@@ -64736,7 +65071,7 @@ fn build_controls_winuicontrols_xaml_deferred_228(
 fn build_controls_winuicontrols_xaml_deferred_229(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(225,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -64765,7 +65100,7 @@ fn build_controls_winuicontrols_xaml_deferred_229(
 fn build_controls_winuicontrols_xaml_deferred_230(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(234,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_230_THEME)
 }
@@ -64774,7 +65109,7 @@ fn build_controls_winuicontrols_xaml_deferred_230(
 fn build_controls_winuicontrols_xaml_deferred_231(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(241,10) WindowDrawnDecorationsContent
     let window_drawn_decorations_content_0 = ::ferroui_controls::chrome::WindowDrawnDecorationsContent::new();
@@ -65284,7 +65619,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
 fn build_controls_winuicontrols_xaml_deferred_232(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(429,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_232_THEME)
 }
@@ -65293,7 +65628,7 @@ fn build_controls_winuicontrols_xaml_deferred_232(
 fn build_controls_winuicontrols_xaml_deferred_233(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(58,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_233_THEME)
 }
@@ -65302,7 +65637,7 @@ fn build_controls_winuicontrols_xaml_deferred_233(
 fn build_controls_winuicontrols_xaml_deferred_234(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(96,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -65561,7 +65896,7 @@ fn build_controls_winuicontrols_xaml_deferred_234(
 fn build_controls_winuicontrols_xaml_deferred_235(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(107,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -66577,7 +66912,7 @@ fn build_controls_winuicontrols_xaml_deferred_256(
 fn build_controls_winuicontrols_xaml_deferred_257(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/WinUIControls.xaml(46,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_257_THEME)
 }
@@ -66586,7 +66921,7 @@ fn build_controls_winuicontrols_xaml_deferred_257(
 fn build_controls_winuicontrols_xaml_deferred_258(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(49,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -66865,7 +67200,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
 fn build_controls_winuicontrols_xaml_deferred_259(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/WinUIControls.xaml(130,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_259_THEME)
 }
@@ -66874,7 +67209,7 @@ fn build_controls_winuicontrols_xaml_deferred_259(
 fn build_controls_winuicontrols_xaml_deferred_260(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(148,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -67090,7 +67425,7 @@ fn build_controls_winuicontrols_xaml_deferred_264(
 fn build_controls_winuicontrols_xaml_deferred_265(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(70,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_265_THEME)
 }
@@ -67099,7 +67434,7 @@ fn build_controls_winuicontrols_xaml_deferred_265(
 fn build_controls_winuicontrols_xaml_deferred_266(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(79,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -67145,7 +67480,7 @@ fn build_controls_winuicontrols_xaml_deferred_266(
 fn build_controls_winuicontrols_xaml_deferred_267(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(109,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_267_THEME)
 }
@@ -67154,7 +67489,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
 fn build_controls_winuicontrols_xaml_deferred_268(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(123,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -67191,7 +67526,7 @@ fn build_controls_winuicontrols_xaml_deferred_268(
 fn build_controls_winuicontrols_xaml_deferred_269(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(135,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67283,7 +67618,7 @@ fn build_controls_winuicontrols_xaml_deferred_269(
 fn build_controls_winuicontrols_xaml_deferred_270(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(221,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_270_THEME)
 }
@@ -67292,7 +67627,7 @@ fn build_controls_winuicontrols_xaml_deferred_270(
 fn build_controls_winuicontrols_xaml_deferred_271(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(227,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -68021,7 +68356,7 @@ fn build_controls_winuicontrols_xaml_deferred_271(
 fn build_controls_winuicontrols_xaml_deferred_272(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(244,20) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -68194,7 +68529,7 @@ fn build_controls_winuicontrols_xaml_deferred_272(
 fn build_controls_winuicontrols_xaml_deferred_273(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(353,26) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -68230,7 +68565,7 @@ fn build_controls_winuicontrols_xaml_deferred_273(
 fn build_controls_winuicontrols_xaml_deferred_274(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(378,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
@@ -68540,7 +68875,7 @@ fn build_controls_winuicontrols_xaml_deferred_274(
 fn build_controls_winuicontrols_xaml_deferred_275(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(435,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -68694,7 +69029,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
 fn build_controls_winuicontrols_xaml_deferred_276(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(444,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -68987,7 +69322,7 @@ fn build_controls_winuicontrols_xaml_deferred_276(
 fn build_controls_winuicontrols_xaml_deferred_277(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_12 });
     // Controls/WinUIControls.xaml(542,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_277_THEME)
 }
@@ -69328,7 +69663,7 @@ fn build_controls_winuicontrols_xaml_deferred_285(
 fn build_controls_winuicontrols_xaml_deferred_286(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(83,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_286_THEME)
 }
@@ -69337,7 +69672,7 @@ fn build_controls_winuicontrols_xaml_deferred_286(
 fn build_controls_winuicontrols_xaml_deferred_287(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(99,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -69368,7 +69703,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
 fn build_controls_winuicontrols_xaml_deferred_288(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(147,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_288_THEME)
 }
@@ -69377,7 +69712,7 @@ fn build_controls_winuicontrols_xaml_deferred_288(
 fn build_controls_winuicontrols_xaml_deferred_289(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(163,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -69408,7 +69743,7 @@ fn build_controls_winuicontrols_xaml_deferred_289(
 fn build_controls_winuicontrols_xaml_deferred_290(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(200,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_290_THEME)
 }
@@ -69417,7 +69752,7 @@ fn build_controls_winuicontrols_xaml_deferred_290(
 fn build_controls_winuicontrols_xaml_deferred_291(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(216,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -69448,7 +69783,7 @@ fn build_controls_winuicontrols_xaml_deferred_291(
 fn build_controls_winuicontrols_xaml_deferred_292(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(249,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_292_THEME)
 }
@@ -69457,7 +69792,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
 fn build_controls_winuicontrols_xaml_deferred_293(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(252,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -70029,7 +70364,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
 fn build_controls_winuicontrols_xaml_deferred_294(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(357,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_294_THEME)
 }
@@ -70038,7 +70373,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
 fn build_controls_winuicontrols_xaml_deferred_295(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(366,10) TabViewEqualWidthPanel
     let tab_view_equal_width_panel_0 = crate::primitives::TabViewEqualWidthPanel::new();
     context.set_intermediate_root_object(rt::to_value(tab_view_equal_width_panel_0.clone()));
@@ -70057,7 +70392,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
 fn build_controls_winuicontrols_xaml_deferred_296(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(372,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -70342,7 +70677,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
 fn build_controls_winuicontrols_xaml_deferred_297(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(453,12) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -70358,7 +70693,7 @@ fn build_controls_winuicontrols_xaml_deferred_297(
 fn build_controls_winuicontrols_xaml_deferred_298(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(485,12) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -70374,7 +70709,7 @@ fn build_controls_winuicontrols_xaml_deferred_298(
 fn build_controls_winuicontrols_xaml_deferred_299(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/WinUIControls.xaml(515,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_299_THEME)
 }
@@ -71665,7 +72000,7 @@ fn build_controls_winuicontrols_xaml_deferred_313(
 fn build_controls_winuicontrols_xaml_deferred_314(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/WinUIControls.xaml(51,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_314_THEME)
 }
@@ -71674,7 +72009,7 @@ fn build_controls_winuicontrols_xaml_deferred_314(
 fn build_controls_winuicontrols_xaml_deferred_315(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/WinUIControls.xaml(67,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -71709,7 +72044,7 @@ fn build_controls_winuicontrols_xaml_deferred_315(
 fn build_controls_winuicontrols_xaml_deferred_316(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(78,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -71801,7 +72136,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
 fn build_controls_winuicontrols_xaml_deferred_317(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/WinUIControls.xaml(151,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_317_THEME)
 }
@@ -71810,7 +72145,7 @@ fn build_controls_winuicontrols_xaml_deferred_317(
 fn build_controls_winuicontrols_xaml_deferred_318(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/WinUIControls.xaml(155,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_318_THEME)
 }
@@ -71819,7 +72154,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
 fn build_controls_winuicontrols_xaml_deferred_319(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(185,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -73344,7 +73679,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
 fn build_controls_winuicontrols_xaml_deferred_333(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(108,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_333_THEME)
 }
@@ -73353,7 +73688,7 @@ fn build_controls_winuicontrols_xaml_deferred_333(
 fn build_controls_winuicontrols_xaml_deferred_334(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(120,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -73390,7 +73725,7 @@ fn build_controls_winuicontrols_xaml_deferred_334(
 fn build_controls_winuicontrols_xaml_deferred_335(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(147,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_335_THEME)
 }
@@ -73399,7 +73734,7 @@ fn build_controls_winuicontrols_xaml_deferred_335(
 fn build_controls_winuicontrols_xaml_deferred_336(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(154,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -74631,7 +74966,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
 fn build_controls_winuicontrols_xaml_deferred_337(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(482,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME)
 }
@@ -74640,7 +74975,7 @@ fn build_controls_winuicontrols_xaml_deferred_337(
 fn build_controls_winuicontrols_xaml_deferred_338(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(499,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -75127,7 +75462,7 @@ fn build_controls_winuicontrols_xaml_deferred_338(
 fn build_controls_winuicontrols_xaml_deferred_339(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(861,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME)
 }
@@ -75136,7 +75471,7 @@ fn build_controls_winuicontrols_xaml_deferred_339(
 fn build_controls_winuicontrols_xaml_deferred_340(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(870,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -75216,7 +75551,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
 fn build_controls_winuicontrols_xaml_deferred_341(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/WinUIControls.xaml(905,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_341_THEME)
 }
@@ -75225,7 +75560,7 @@ fn build_controls_winuicontrols_xaml_deferred_341(
 fn build_controls_winuicontrols_xaml_deferred_342(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(912,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -75338,7 +75673,7 @@ fn build_controls_winuicontrols_xaml_deferred_346(
 fn build_controls_winuicontrols_xaml_deferred_347(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(105,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME)
 }
@@ -75347,7 +75682,7 @@ fn build_controls_winuicontrols_xaml_deferred_347(
 fn build_controls_winuicontrols_xaml_deferred_348(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(119,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -75384,7 +75719,7 @@ fn build_controls_winuicontrols_xaml_deferred_348(
 fn build_controls_winuicontrols_xaml_deferred_349(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(131,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -75598,7 +75933,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
 fn build_controls_winuicontrols_xaml_deferred_350(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(304,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_350_THEME)
 }
@@ -75607,7 +75942,7 @@ fn build_controls_winuicontrols_xaml_deferred_350(
 fn build_controls_winuicontrols_xaml_deferred_351(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(309,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_351_THEME)
 }
@@ -75616,7 +75951,7 @@ fn build_controls_winuicontrols_xaml_deferred_351(
 fn build_controls_winuicontrols_xaml_deferred_352(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(312,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME)
 }
@@ -75625,7 +75960,7 @@ fn build_controls_winuicontrols_xaml_deferred_352(
 fn build_controls_winuicontrols_xaml_deferred_353(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(327,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -75662,7 +75997,7 @@ fn build_controls_winuicontrols_xaml_deferred_353(
 fn build_controls_winuicontrols_xaml_deferred_354(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(339,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -75917,7 +76252,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
 fn build_controls_winuicontrols_xaml_deferred_355(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(708,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_355_THEME)
 }
@@ -75926,7 +76261,7 @@ fn build_controls_winuicontrols_xaml_deferred_355(
 fn build_controls_winuicontrols_xaml_deferred_356(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(713,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_356_THEME)
 }
@@ -75935,7 +76270,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
 fn build_controls_winuicontrols_xaml_deferred_357(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(716,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_357_THEME)
 }
@@ -75944,7 +76279,7 @@ fn build_controls_winuicontrols_xaml_deferred_357(
 fn build_controls_winuicontrols_xaml_deferred_358(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(722,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -75998,7 +76333,7 @@ fn build_controls_winuicontrols_xaml_deferred_358(
 fn build_controls_winuicontrols_xaml_deferred_359(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(752,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_359_THEME)
 }
@@ -76007,7 +76342,7 @@ fn build_controls_winuicontrols_xaml_deferred_359(
 fn build_controls_winuicontrols_xaml_deferred_360(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(755,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_360_THEME)
 }
@@ -76016,7 +76351,7 @@ fn build_controls_winuicontrols_xaml_deferred_360(
 fn build_controls_winuicontrols_xaml_deferred_361(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(773,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -76077,7 +76412,7 @@ fn build_controls_winuicontrols_xaml_deferred_361(
 fn build_controls_winuicontrols_xaml_deferred_362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(822,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_362_THEME)
 }
@@ -76086,7 +76421,7 @@ fn build_controls_winuicontrols_xaml_deferred_362(
 fn build_controls_winuicontrols_xaml_deferred_363(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(833,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -76141,7 +76476,7 @@ fn build_controls_winuicontrols_xaml_deferred_363(
 fn build_controls_winuicontrols_xaml_deferred_364(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(851,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME)
 }
@@ -76150,7 +76485,7 @@ fn build_controls_winuicontrols_xaml_deferred_364(
 fn build_controls_winuicontrols_xaml_deferred_365(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(865,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -76526,7 +76861,7 @@ fn build_controls_winuicontrols_xaml_deferred_365(
 fn build_controls_winuicontrols_xaml_deferred_366(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(892,24) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -76542,7 +76877,7 @@ fn build_controls_winuicontrols_xaml_deferred_366(
 fn build_controls_winuicontrols_xaml_deferred_367(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(944,22) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -76555,7 +76890,7 @@ fn build_controls_winuicontrols_xaml_deferred_367(
 fn build_controls_winuicontrols_xaml_deferred_368(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(973,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_368_THEME)
 }
@@ -76749,7 +77084,7 @@ fn build_controls_winuicontrols_xaml_deferred_372(
 fn build_controls_winuicontrols_xaml_deferred_373(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(63,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_373_THEME)
 }
@@ -76758,7 +77093,7 @@ fn build_controls_winuicontrols_xaml_deferred_373(
 fn build_controls_winuicontrols_xaml_deferred_374(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(78,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -76795,7 +77130,7 @@ fn build_controls_winuicontrols_xaml_deferred_374(
 fn build_controls_winuicontrols_xaml_deferred_375(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(90,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -76842,7 +77177,7 @@ fn build_controls_winuicontrols_xaml_deferred_375(
 fn build_controls_winuicontrols_xaml_deferred_376(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(118,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME)
 }
@@ -76851,7 +77186,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
 fn build_controls_winuicontrols_xaml_deferred_377(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(134,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -76888,7 +77223,7 @@ fn build_controls_winuicontrols_xaml_deferred_377(
 fn build_controls_winuicontrols_xaml_deferred_378(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(150,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -77226,7 +77561,7 @@ fn build_controls_winuicontrols_xaml_deferred_378(
 fn build_controls_winuicontrols_xaml_deferred_379(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(379,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_379_THEME)
 }
@@ -77235,7 +77570,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
 fn build_controls_winuicontrols_xaml_deferred_380(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(383,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_380_THEME)
 }
@@ -77244,7 +77579,7 @@ fn build_controls_winuicontrols_xaml_deferred_380(
 fn build_controls_winuicontrols_xaml_deferred_381(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(394,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -77281,7 +77616,7 @@ fn build_controls_winuicontrols_xaml_deferred_381(
 fn build_controls_winuicontrols_xaml_deferred_382(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(406,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -77328,7 +77663,7 @@ fn build_controls_winuicontrols_xaml_deferred_382(
 fn build_controls_winuicontrols_xaml_deferred_383(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(436,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME)
 }
@@ -77337,7 +77672,7 @@ fn build_controls_winuicontrols_xaml_deferred_383(
 fn build_controls_winuicontrols_xaml_deferred_384(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/WinUIControls.xaml(452,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -77374,7 +77709,7 @@ fn build_controls_winuicontrols_xaml_deferred_384(
 fn build_controls_winuicontrols_xaml_deferred_385(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(469,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -79250,7 +79585,7 @@ fn build_controls_winuicontrols_xaml_deferred_402(
 fn build_controls_winuicontrols_xaml_deferred_403(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(67,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_403_THEME)
 }
@@ -79259,7 +79594,7 @@ fn build_controls_winuicontrols_xaml_deferred_403(
 fn build_controls_winuicontrols_xaml_deferred_404(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(79,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_404_THEME)
 }
@@ -79268,7 +79603,7 @@ fn build_controls_winuicontrols_xaml_deferred_404(
 fn build_controls_winuicontrols_xaml_deferred_405(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(93,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_405_THEME)
 }
@@ -79277,7 +79612,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
 fn build_controls_winuicontrols_xaml_deferred_406(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(124,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_406_THEME)
 }
@@ -79286,7 +79621,7 @@ fn build_controls_winuicontrols_xaml_deferred_406(
 fn build_controls_winuicontrols_xaml_deferred_407(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(129,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -79647,7 +79982,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
 fn build_controls_winuicontrols_xaml_deferred_408(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(253,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_408_THEME)
 }
@@ -79656,7 +79991,7 @@ fn build_controls_winuicontrols_xaml_deferred_408(
 fn build_controls_winuicontrols_xaml_deferred_409(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(258,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -79820,7 +80155,7 @@ fn build_controls_winuicontrols_xaml_deferred_409(
 fn build_controls_winuicontrols_xaml_deferred_410(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/WinUIControls.xaml(301,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_410_THEME)
 }
@@ -79829,7 +80164,7 @@ fn build_controls_winuicontrols_xaml_deferred_410(
 fn build_controls_winuicontrols_xaml_deferred_411(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(315,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -79927,7 +80262,7 @@ fn build_controls_winuicontrols_xaml_deferred_411(
 fn build_controls_winuicontrols_xaml_deferred_412(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(68,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_412_THEME)
 }
@@ -79936,7 +80271,7 @@ fn build_controls_winuicontrols_xaml_deferred_412(
 fn build_controls_winuicontrols_xaml_deferred_413(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/WinUIControls.xaml(97,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME)
 }
@@ -79945,7 +80280,7 @@ fn build_controls_winuicontrols_xaml_deferred_413(
 fn build_controls_winuicontrols_xaml_deferred_414(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(107,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -82573,7 +82908,7 @@ fn build_controls_winuicontrols_xaml_deferred_462(
 fn build_controls_winuicontrols_xaml_deferred_463(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let platform_key_gesture_converter_0 = ::ferroui_controls::converters::PlatformKeyGestureConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(platform_key_gesture_converter_0))
 }
@@ -82582,7 +82917,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
 fn build_controls_winuicontrols_xaml_deferred_464(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(81,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME)
 }
@@ -82591,7 +82926,7 @@ fn build_controls_winuicontrols_xaml_deferred_464(
 fn build_controls_winuicontrols_xaml_deferred_465(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(94,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -83037,7 +83372,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
 fn build_controls_winuicontrols_xaml_deferred_466(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(397,12) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -83070,7 +83405,7 @@ fn build_controls_winuicontrols_xaml_deferred_466(
 fn build_controls_winuicontrols_xaml_deferred_467(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(408,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_467_THEME)
 }
@@ -83079,7 +83414,7 @@ fn build_controls_winuicontrols_xaml_deferred_467(
 fn build_controls_winuicontrols_xaml_deferred_468(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(413,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_468_THEME)
 }
@@ -83088,7 +83423,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
 fn build_controls_winuicontrols_xaml_deferred_469(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(417,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_469_THEME)
 }
@@ -83097,7 +83432,7 @@ fn build_controls_winuicontrols_xaml_deferred_469(
 fn build_controls_winuicontrols_xaml_deferred_470(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(426,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME)
 }
@@ -83106,7 +83441,7 @@ fn build_controls_winuicontrols_xaml_deferred_470(
 fn build_controls_winuicontrols_xaml_deferred_471(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(454,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_471_THEME)
 }
@@ -83115,7 +83450,7 @@ fn build_controls_winuicontrols_xaml_deferred_471(
 fn build_controls_winuicontrols_xaml_deferred_472(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/WinUIControls.xaml(60,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME)
 }
@@ -83124,7 +83459,7 @@ fn build_controls_winuicontrols_xaml_deferred_472(
 fn build_controls_winuicontrols_xaml_deferred_473(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/WinUIControls.xaml(70,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -83161,7 +83496,7 @@ fn build_controls_winuicontrols_xaml_deferred_473(
 fn build_controls_winuicontrols_xaml_deferred_474(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(82,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -83395,7 +83730,7 @@ fn build_controls_winuicontrols_xaml_deferred_474(
 fn build_controls_winuicontrols_xaml_deferred_475(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/WinUIControls.xaml(174,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_475_THEME)
 }
@@ -83404,7 +83739,7 @@ fn build_controls_winuicontrols_xaml_deferred_475(
 fn build_controls_winuicontrols_xaml_deferred_476(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(182,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -83451,7 +83786,7 @@ fn build_controls_winuicontrols_xaml_deferred_476(
 fn build_controls_winuicontrols_xaml_deferred_477(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/WinUIControls.xaml(200,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_477_THEME)
 }
@@ -84743,7 +85078,7 @@ fn build_controls_winuicontrols_xaml_deferred_499(
 fn build_controls_winuicontrols_xaml_deferred_500(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/WinUIControls.xaml(60,4) Left
     ::ferroui_controls::converters::MarginMultiplierConverter::__markup_set_Left(&margin_multiplier_converter_0, ::core::clone::Clone::clone(&true));
@@ -84756,7 +85091,7 @@ fn build_controls_winuicontrols_xaml_deferred_500(
 fn build_controls_winuicontrols_xaml_deferred_501(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(63,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_501_THEME)
 }
@@ -84765,7 +85100,7 @@ fn build_controls_winuicontrols_xaml_deferred_501(
 fn build_controls_winuicontrols_xaml_deferred_502(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(71,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -84867,7 +85202,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
 fn build_controls_winuicontrols_xaml_deferred_503(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(108,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME)
 }
@@ -84876,7 +85211,7 @@ fn build_controls_winuicontrols_xaml_deferred_503(
 fn build_controls_winuicontrols_xaml_deferred_504(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(124,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -84913,7 +85248,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
 fn build_controls_winuicontrols_xaml_deferred_505(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(136,10) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -85125,7 +85460,7 @@ fn build_controls_winuicontrols_xaml_deferred_505(
 fn build_controls_winuicontrols_xaml_deferred_506(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/WinUIControls.xaml(300,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_506_THEME)
 }
@@ -85195,7 +85530,7 @@ fn build_controls_winuicontrols_xaml_deferred_509(
 fn build_controls_winuicontrols_xaml_deferred_510(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(53,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_510_THEME)
 }
@@ -85204,7 +85539,7 @@ fn build_controls_winuicontrols_xaml_deferred_510(
 fn build_controls_winuicontrols_xaml_deferred_511(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(56,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -85274,7 +85609,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
 fn build_controls_winuicontrols_xaml_deferred_512(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(104,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_512_THEME)
 }
@@ -85283,7 +85618,7 @@ fn build_controls_winuicontrols_xaml_deferred_512(
 fn build_controls_winuicontrols_xaml_deferred_513(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(120,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -85568,7 +85903,7 @@ fn build_controls_winuicontrols_xaml_deferred_513(
 fn build_controls_winuicontrols_xaml_deferred_514(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(246,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_514_THEME)
 }
@@ -85577,7 +85912,7 @@ fn build_controls_winuicontrols_xaml_deferred_514(
 fn build_controls_winuicontrols_xaml_deferred_515(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(262,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -85758,7 +86093,7 @@ fn build_controls_winuicontrols_xaml_deferred_515(
 fn build_controls_winuicontrols_xaml_deferred_516(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/WinUIControls.xaml(316,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_516_THEME)
 }
@@ -86266,7 +86601,7 @@ fn build_controls_winuicontrols_xaml_deferred_526(
 fn build_controls_winuicontrols_xaml_deferred_527(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19 });
     // Controls/WinUIControls.xaml(26,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -86568,7 +86903,7 @@ fn build_controls_winuicontrols_xaml_deferred_527(
 fn build_controls_winuicontrols_xaml_deferred_528(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19 });
     // Controls/WinUIControls.xaml(50,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME)
 }
@@ -86577,7 +86912,7 @@ fn build_controls_winuicontrols_xaml_deferred_528(
 fn build_controls_winuicontrols_xaml_deferred_529(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19 });
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(71,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -86754,13 +87089,13 @@ fn build_controls_winuicontrols_xaml_deferred_529(
 fn build_controls_winuicontrols_xaml_deferred_530(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_19 });
     // Controls/WinUIControls.xaml(159,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_530_THEME)
 }
 
 /// The base URI and the XML namespaces of `DensityStyles/Compact.xaml`.
-static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.winui/DensityStyles/Compact.xaml"), namespaces: XML_NAMESPACES_2 };
+static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.winui/DensityStyles/Compact.xaml"), namespaces: XML_NAMESPACES_1 };
 
 /// Generated from `DensityStyles/Compact.xaml`.
 pub fn build_densitystyles_compact_xaml(

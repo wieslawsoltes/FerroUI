@@ -15,12 +15,6 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
-    ("x", &[]),
-];
-
-/// The XML namespaces of documents of this file, as the compiler resolved them.
-const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
     ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("x", &[]),
 ];
@@ -17099,28 +17093,71 @@ fn populate_macostheme_xaml_deferred_5510(
 
 /// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
 const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
-    ("primitives", &[("FerroUI.Themes.MacOS.Primitives", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
 const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
-    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("primitives", &[("FerroUI.Themes.MacOS.Primitives", "", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
 const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
-    ("collections", &[("System.Collections", "", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("x", &[]),
 ];
 
 /// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
 const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_8: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("collections", &[("System.Collections", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("collections", &[("System.Collections", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_10: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
     ("dialogs", &[("FerroUI.Dialogs", "", &[])]),
     ("internal", &[("FerroUI.Dialogs.Internal", "", &[])]),
@@ -17128,10 +17165,57 @@ const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3: rt::XmlNamespaceTable 
 ];
 
 /// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
-const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE)), ("RefreshVisualizer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE)), ("InfoBar", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE)), ("ScrollViewer", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE)), ("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("DataValidationErrors", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)), ("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE)), ("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE)), ("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("ListBoxItem", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "FerroUI.Controls", &[])]),
+    ("dialogs", &[("FerroUI.Dialogs", "", &[])]),
+    ("internal", &[("FerroUI.Dialogs.Internal", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_12: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
     ("primitives", &[("FerroUI.Themes.MacOS.Primitives", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("converters", &[("FerroUI.Controls.Converters", "", &[])]),
+    ("primitives", &[("FerroUI.Themes.MacOS.Primitives", "", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("NavigationPage", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE)), ("Button", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("TextBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE)), ("RepeatButton", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("Menu", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("RichEditBox", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
+    ("x", &[]),
+];
+
+/// A lexical XML namespace scope used by `Controls/MacOSControls.xaml`.
+const BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[("NavigationView", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE))]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Themes.MacOS", "FerroUI.Themes.MacOS", &[])]),
     ("x", &[]),
 ];
 
@@ -17171,7 +17255,7 @@ pub fn build_controls_macoscontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 100, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 102, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 103, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
+    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1);
     rt::apply_theme_unit(active_theme_units(), 110, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
     rt::apply_theme_unit(active_theme_units(), 112, 0, &context, &resource_dictionary_0)?;
@@ -17194,17 +17278,17 @@ pub fn build_controls_macoscontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 79, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 80, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 81, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 83, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
     rt::apply_theme_unit(active_theme_units(), 84, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 85, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 86, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 87, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
     rt::apply_theme_unit(active_theme_units(), 89, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
+    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_8);
     rt::apply_theme_unit(active_theme_units(), 99, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
     rt::apply_theme_unit(active_theme_units(), 101, 0, &context, &resource_dictionary_0)?;
@@ -17217,12 +17301,12 @@ pub fn build_controls_macoscontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 109, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 111, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 113, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3);
+    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_10);
     rt::apply_theme_unit(active_theme_units(), 115, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
     rt::apply_theme_unit(active_theme_units(), 116, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 117, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4);
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_12);
     rt::apply_theme_unit(active_theme_units(), 118, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
     rt::apply_theme_unit(active_theme_units(), 120, 0, &context, &resource_dictionary_0)?;
@@ -17241,7 +17325,7 @@ pub fn build_controls_macoscontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 136, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 138, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 140, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 142, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
     rt::apply_theme_unit(active_theme_units(), 143, 0, &context, &resource_dictionary_0)?;
@@ -17249,7 +17333,7 @@ pub fn build_controls_macoscontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 145, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 146, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 147, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1);
+    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 148, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
     rt::apply_theme_unit(active_theme_units(), 149, 0, &context, &resource_dictionary_0)?;
@@ -17298,24 +17382,36 @@ fn build_controls_macoscontrols_xaml_unit_0(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(8,4) Content (resource)
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_0, 8, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    ::core::mem::drop(unit_namespace_scope_0);
+    let unit_namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(13,4) Content (resource)
     let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_2, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::mem::drop(unit_namespace_scope_1);
+    let unit_namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(12,4) Content (resource)
     let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_4, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::mem::drop(unit_namespace_scope_2);
+    let unit_namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(14,4) Content (resource)
     let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_6, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::mem::drop(unit_namespace_scope_3);
+    let unit_namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(11,4) Content (resource)
     let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_8, 11, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    ::core::mem::drop(unit_namespace_scope_4);
+    let unit_namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(7,4) Content (resource)
     let deferred_5 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_9, 7, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_5) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    ::core::mem::drop(unit_namespace_scope_5);
     ::core::result::Result::Ok(())
 }
 
@@ -17586,9 +17682,11 @@ fn build_controls_macoscontrols_xaml_unit_21(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(22,4) Content (resource)
     let deferred_26 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_54, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_26) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::mem::drop(unit_namespace_scope_6);
     ::core::result::Result::Ok(())
 }
 
@@ -17599,9 +17697,11 @@ fn build_controls_macoscontrols_xaml_unit_22(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3);
     // Controls/MacOSControls.xaml(24,4) Content (resource)
     let deferred_27 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_57, 24, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_27) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
+    ::core::mem::drop(unit_namespace_scope_7);
     ::core::result::Result::Ok(())
 }
 
@@ -17637,9 +17737,11 @@ fn build_controls_macoscontrols_xaml_unit_25(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4);
     // Controls/MacOSControls.xaml(46,4) Content (resource)
     let deferred_30 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_63, 46, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::InfoBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_30) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 46, 4)?;
+    ::core::mem::drop(unit_namespace_scope_8);
     ::core::result::Result::Ok(())
 }
 
@@ -17854,13 +17956,19 @@ fn build_controls_macoscontrols_xaml_unit_37(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/MacOSControls.xaml(66,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_146, 66, 4)?;
+    ::core::mem::drop(unit_namespace_scope_9);
+    let unit_namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/MacOSControls.xaml(161,4) Content (resource)
     let deferred_74 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_148, 161, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_74) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    ::core::mem::drop(unit_namespace_scope_10);
+    let unit_namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/MacOSControls.xaml(163,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ScrollViewerScrollBarlessTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_149, 163, 4)?;
+    ::core::mem::drop(unit_namespace_scope_11);
     ::core::result::Result::Ok(())
 }
 
@@ -17871,21 +17979,35 @@ fn build_controls_macoscontrols_xaml_unit_38(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(23,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_151, 23, 4)?;
+    ::core::mem::drop(unit_namespace_scope_12);
+    let unit_namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(73,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_153, 73, 4)?;
+    ::core::mem::drop(unit_namespace_scope_13);
+    let unit_namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(123,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_155, 123, 4)?;
+    ::core::mem::drop(unit_namespace_scope_14);
+    let unit_namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(173,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_156, 173, 4)?;
+    ::core::mem::drop(unit_namespace_scope_15);
+    let unit_namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(188,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_157, 188, 4)?;
+    ::core::mem::drop(unit_namespace_scope_16);
+    let unit_namespace_scope_17 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(414,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultPasswordBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_160, 414, 4)?;
+    ::core::mem::drop(unit_namespace_scope_17);
+    let unit_namespace_scope_18 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(427,4) Content (resource)
     let deferred_82 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_161, 427, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_82) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 427, 4)?;
+    ::core::mem::drop(unit_namespace_scope_18);
     ::core::result::Result::Ok(())
 }
 
@@ -17943,11 +18065,15 @@ fn build_controls_macoscontrols_xaml_unit_42(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_19 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9);
     // Controls/MacOSControls.xaml(26,4) Content (resource)
     let deferred_90 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_173, 26, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_90) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 26, 4)?;
+    ::core::mem::drop(unit_namespace_scope_19);
+    let unit_namespace_scope_20 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9);
     // Controls/MacOSControls.xaml(64,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TooltipDataValidationErrors", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_176, 64, 4)?;
+    ::core::mem::drop(unit_namespace_scope_20);
     ::core::result::Result::Ok(())
 }
 
@@ -17958,16 +18084,26 @@ fn build_controls_macoscontrols_xaml_unit_43(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_21 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(24,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_179, 24, 4)?;
+    ::core::mem::drop(unit_namespace_scope_21);
+    let unit_namespace_scope_22 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(88,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_182, 88, 4)?;
+    ::core::mem::drop(unit_namespace_scope_22);
+    let unit_namespace_scope_23 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(137,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorUpButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_184, 137, 4)?;
+    ::core::mem::drop(unit_namespace_scope_23);
+    let unit_namespace_scope_24 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(165,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorDownButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_186, 165, 4)?;
+    ::core::mem::drop(unit_namespace_scope_24);
+    let unit_namespace_scope_25 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(193,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DateTimePickerLoopingSelectorItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_188, 193, 4)?;
+    ::core::mem::drop(unit_namespace_scope_25);
     ::core::result::Result::Ok(())
 }
 
@@ -17978,15 +18114,23 @@ fn build_controls_macoscontrols_xaml_unit_44(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_26 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(50,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemWeekDayNameStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_190, 50, 4)?;
+    ::core::mem::drop(unit_namespace_scope_26);
+    let unit_namespace_scope_27 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(68,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemHeaderNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_191, 68, 4)?;
+    ::core::mem::drop(unit_namespace_scope_27);
+    let unit_namespace_scope_28 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(132,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CalendarItemNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_194, 132, 4)?;
+    ::core::mem::drop(unit_namespace_scope_28);
+    let unit_namespace_scope_29 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(203,4) Content (resource)
     let deferred_100 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_197, 203, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_100) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 203, 4)?;
+    ::core::mem::drop(unit_namespace_scope_29);
     ::core::result::Result::Ok(())
 }
 
@@ -18031,18 +18175,28 @@ fn build_controls_macoscontrols_xaml_unit_47(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_30 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(21,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DatePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_210, 21, 4)?;
+    ::core::mem::drop(unit_namespace_scope_30);
+    let unit_namespace_scope_31 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(66,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultDatePickerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_213, 66, 4)?;
+    ::core::mem::drop(unit_namespace_scope_31);
+    let unit_namespace_scope_32 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(181,4) Content (resource)
     let deferred_109 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_216, 181, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_109) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 181, 4)?;
+    ::core::mem::drop(unit_namespace_scope_32);
+    let unit_namespace_scope_33 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(183,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultDatePickerFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_217, 183, 4)?;
+    ::core::mem::drop(unit_namespace_scope_33);
+    let unit_namespace_scope_34 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(333,4) Content (resource)
     let deferred_111 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_219, 333, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_111) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 333, 4)?;
+    ::core::mem::drop(unit_namespace_scope_34);
     ::core::result::Result::Ok(())
 }
 
@@ -18053,14 +18207,20 @@ fn build_controls_macoscontrols_xaml_unit_48(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_35 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(21,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TimePickerFlyoutButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_220, 21, 4)?;
+    ::core::mem::drop(unit_namespace_scope_35);
+    let unit_namespace_scope_36 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(66,4) Content (resource)
     let deferred_113 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_223, 66, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_113) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 66, 4)?;
+    ::core::mem::drop(unit_namespace_scope_36);
+    let unit_namespace_scope_37 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(200,4) Content (resource)
     let deferred_114 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_226, 200, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_114) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 200, 4)?;
+    ::core::mem::drop(unit_namespace_scope_37);
     ::core::result::Result::Ok(())
 }
 
@@ -18071,36 +18231,64 @@ fn build_controls_macoscontrols_xaml_unit_49(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_38 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(7,67) Content (resource)
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 12 36 0 #40000000, 0 1 4 0 #33000000")), 7, 67)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
+    ::core::mem::drop(unit_namespace_scope_38);
+    let unit_namespace_scope_39 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(8,55) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficRestoreGeometry", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_228, 8, 55)?;
+    ::core::mem::drop(unit_namespace_scope_39);
+    let unit_namespace_scope_40 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(9,52) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficZoomGeometry", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_229, 9, 52)?;
+    ::core::mem::drop(unit_namespace_scope_40);
+    let unit_namespace_scope_41 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(10,56) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficMinimizeGeometry", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_230, 10, 56)?;
+    ::core::mem::drop(unit_namespace_scope_41);
+    let unit_namespace_scope_42 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(11,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficCloseGeometry", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_231, 11, 53)?;
+    ::core::mem::drop(unit_namespace_scope_42);
+    let unit_namespace_scope_43 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(12,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_232, 12, 4)?;
+    ::core::mem::drop(unit_namespace_scope_43);
+    let unit_namespace_scope_44 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(46,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSZoomCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_234, 46, 4)?;
+    ::core::mem::drop(unit_namespace_scope_44);
+    let unit_namespace_scope_45 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(49,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSMinimizeCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_235, 49, 4)?;
+    ::core::mem::drop(unit_namespace_scope_45);
+    let unit_namespace_scope_46 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(52,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowDrawnDecorationsCloseButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_236, 52, 4)?;
+    ::core::mem::drop(unit_namespace_scope_46);
+    let unit_namespace_scope_47 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(55,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TitleBarBackButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_237, 55, 4)?;
+    ::core::mem::drop(unit_namespace_scope_47);
+    let unit_namespace_scope_48 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(90,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TitleBarPaneToggleButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_239, 90, 4)?;
+    ::core::mem::drop(unit_namespace_scope_48);
+    let unit_namespace_scope_49 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(125,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WindowChromeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_241, 125, 4)?;
+    ::core::mem::drop(unit_namespace_scope_49);
+    let unit_namespace_scope_50 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(132,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTitleBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_243, 132, 4)?;
+    ::core::mem::drop(unit_namespace_scope_50);
+    let unit_namespace_scope_51 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(251,4) Content (resource)
     let deferred_127 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_245, 251, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_127) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 251, 4)?;
+    ::core::mem::drop(unit_namespace_scope_51);
     ::core::result::Result::Ok(())
 }
 
@@ -18111,11 +18299,15 @@ fn build_controls_macoscontrols_xaml_unit_50(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_52 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(58,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "InfoBarCloseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_246, 58, 4)?;
+    ::core::mem::drop(unit_namespace_scope_52);
+    let unit_namespace_scope_53 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(96,4) Content (resource)
     let deferred_129 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_247, 96, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NotificationCard as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_129) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 96, 4)?;
+    ::core::mem::drop(unit_namespace_scope_53);
     ::core::result::Result::Ok(())
 }
 
@@ -18126,11 +18318,15 @@ fn build_controls_macoscontrols_xaml_unit_51(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_54 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/MacOSControls.xaml(46,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_249, 46, 4)?;
+    ::core::mem::drop(unit_namespace_scope_54);
+    let unit_namespace_scope_55 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6);
     // Controls/MacOSControls.xaml(130,4) Content (resource)
     let deferred_131 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_251, 130, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_131) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 130, 4)?;
+    ::core::mem::drop(unit_namespace_scope_55);
     ::core::result::Result::Ok(())
 }
 
@@ -18156,20 +18352,72 @@ fn build_controls_macoscontrols_xaml_unit_53(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_56 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(56,65) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 56, 65)?, rt::string_object("StringManagedFileChooserFileNamePlaceholder"), rt::string_object("File name")), 56, 65)?;
+    ::core::mem::drop(unit_namespace_scope_56);
+    let unit_namespace_scope_57 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(57,65) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 57, 65)?, rt::string_object("StringManagedFileChooserShowHiddenFilesText"), rt::string_object("Show hidden files")), 57, 65)?;
+    ::core::mem::drop(unit_namespace_scope_57);
+    let unit_namespace_scope_58 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(58,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 52)?, rt::string_object("StringManagedFileChooserOkText"), rt::string_object("OK")), 58, 52)?;
+    ::core::mem::drop(unit_namespace_scope_58);
+    let unit_namespace_scope_59 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(59,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 59, 56)?, rt::string_object("StringManagedFileChooserCancelText"), rt::string_object("Cancel")), 59, 56)?;
+    ::core::mem::drop(unit_namespace_scope_59);
+    let unit_namespace_scope_60 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(60,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 60, 56)?, rt::string_object("StringManagedFileChooserNameColumn"), rt::string_object("Name")), 60, 56)?;
+    ::core::mem::drop(unit_namespace_scope_60);
+    let unit_namespace_scope_61 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(61,64) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 61, 64)?, rt::string_object("StringManagedFileChooserDateModifiedColumn"), rt::string_object("Date Modified")), 61, 64)?;
+    ::core::mem::drop(unit_namespace_scope_61);
+    let unit_namespace_scope_62 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(62,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 62, 56)?, rt::string_object("StringManagedFileChooserTypeColumn"), rt::string_object("Type")), 62, 56)?;
+    ::core::mem::drop(unit_namespace_scope_62);
+    let unit_namespace_scope_63 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(63,56) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 63, 56)?, rt::string_object("StringManagedFileChooserSizeColumn"), rt::string_object("Size")), 63, 56)?;
+    ::core::mem::drop(unit_namespace_scope_63);
+    let unit_namespace_scope_64 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(64,82) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 64, 82)?, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"), rt::string_object("{0} already exists. Do you want to replace it?")), 64, 82)?;
+    ::core::mem::drop(unit_namespace_scope_64);
+    let unit_namespace_scope_65 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(65,72) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 65, 72)?, rt::string_object("StringManagedFileChooserOverwritePromptConfirmText"), rt::string_object("Yes")), 65, 72)?;
+    ::core::mem::drop(unit_namespace_scope_65);
+    let unit_namespace_scope_66 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
+    // Controls/MacOSControls.xaml(66,71) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 66, 71)?, rt::string_object("StringManagedFileChooserOverwritePromptCancelText"), rt::string_object("No")), 66, 71)?;
+    ::core::mem::drop(unit_namespace_scope_66);
+    let unit_namespace_scope_67 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(70,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserListViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_257, 70, 4)?;
+    ::core::mem::drop(unit_namespace_scope_67);
+    let unit_namespace_scope_68 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(109,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserListViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_259, 109, 4)?;
+    ::core::mem::drop(unit_namespace_scope_68);
+    let unit_namespace_scope_69 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(221,4) Content (resource)
     let deferred_136 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_262, 221, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_136) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 221, 4)?;
+    ::core::mem::drop(unit_namespace_scope_69);
+    let unit_namespace_scope_70 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(435,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultContentDialogStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_267, 435, 4)?;
+    ::core::mem::drop(unit_namespace_scope_70);
+    let unit_namespace_scope_71 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11);
     // Controls/MacOSControls.xaml(542,4) Content (resource)
     let deferred_138 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_269, 542, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_138) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 542, 4)?;
+    ::core::mem::drop(unit_namespace_scope_71);
     ::core::result::Result::Ok(())
 }
 
@@ -18210,19 +18458,31 @@ fn build_controls_macoscontrols_xaml_unit_56(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_72 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(18,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewScrollButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_278, 18, 4)?;
+    ::core::mem::drop(unit_namespace_scope_72);
+    let unit_namespace_scope_73 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(61,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_280, 61, 4)?;
+    ::core::mem::drop(unit_namespace_scope_73);
+    let unit_namespace_scope_74 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(95,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabViewCloseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_282, 95, 4)?;
+    ::core::mem::drop(unit_namespace_scope_74);
+    let unit_namespace_scope_75 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(129,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_284, 129, 4)?;
+    ::core::mem::drop(unit_namespace_scope_75);
+    let unit_namespace_scope_76 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(193,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultTabViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_286, 193, 4)?;
+    ::core::mem::drop(unit_namespace_scope_76);
+    let unit_namespace_scope_77 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13);
     // Controls/MacOSControls.xaml(296,4) Content (resource)
     let deferred_148 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_291, 296, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_148) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 296, 4)?;
+    ::core::mem::drop(unit_namespace_scope_77);
     ::core::result::Result::Ok(())
 }
 
@@ -18265,13 +18525,19 @@ fn build_controls_macoscontrols_xaml_unit_59(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_78 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/MacOSControls.xaml(51,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBackButtonNormalStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_306, 51, 4)?;
+    ::core::mem::drop(unit_namespace_scope_78);
+    let unit_namespace_scope_79 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/MacOSControls.xaml(151,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationBackButtonSmallStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_309, 151, 4)?;
+    ::core::mem::drop(unit_namespace_scope_79);
+    let unit_namespace_scope_80 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14);
     // Controls/MacOSControls.xaml(155,4) Content (resource)
     let deferred_156 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_310, 155, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_156) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 155, 4)?;
+    ::core::mem::drop(unit_namespace_scope_80);
     ::core::result::Result::Ok(())
 }
 
@@ -18324,34 +18590,58 @@ fn build_controls_macoscontrols_xaml_unit_62(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_81 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(29,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_329, 29, 4)?;
+    ::core::mem::drop(unit_namespace_scope_81);
+    let unit_namespace_scope_82 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(173,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AppBarButtonOverflowStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_332, 173, 4)?;
+    ::core::mem::drop(unit_namespace_scope_82);
+    let unit_namespace_scope_83 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(177,4) Content (resource)
     let deferred_169 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_333, 177, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_169) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 177, 4)?;
+    ::core::mem::drop(unit_namespace_scope_83);
+    let unit_namespace_scope_84 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(178,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarToggleButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_334, 178, 4)?;
+    ::core::mem::drop(unit_namespace_scope_84);
+    let unit_namespace_scope_85 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(501,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AppBarToggleButtonOverflowStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_337, 501, 4)?;
+    ::core::mem::drop(unit_namespace_scope_85);
+    let unit_namespace_scope_86 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(505,4) Content (resource)
     let deferred_172 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_338, 505, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarToggleButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_172) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 505, 4)?;
+    ::core::mem::drop(unit_namespace_scope_86);
+    let unit_namespace_scope_87 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(506,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAppBarSeparatorStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_339, 506, 4)?;
+    ::core::mem::drop(unit_namespace_scope_87);
+    let unit_namespace_scope_88 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(532,4) Content (resource)
     let deferred_174 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_341, 532, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_174) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 532, 4)?;
+    ::core::mem::drop(unit_namespace_scope_88);
+    let unit_namespace_scope_89 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(533,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "EllipsisButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_342, 533, 4)?;
+    ::core::mem::drop(unit_namespace_scope_89);
+    let unit_namespace_scope_90 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(580,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultCommandBarOverflowPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_344, 580, 4)?;
+    ::core::mem::drop(unit_namespace_scope_90);
+    let unit_namespace_scope_91 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(599,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_346, 599, 4)?;
+    ::core::mem::drop(unit_namespace_scope_91);
+    let unit_namespace_scope_92 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(668,4) Content (resource)
     let deferred_178 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_350, 668, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_178) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 668, 4)?;
+    ::core::mem::drop(unit_namespace_scope_92);
     ::core::result::Result::Ok(())
 }
 
@@ -18377,17 +18667,27 @@ fn build_controls_macoscontrols_xaml_unit_64(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_93 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(25,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_359, 25, 4)?;
+    ::core::mem::drop(unit_namespace_scope_93);
+    let unit_namespace_scope_94 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(75,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_362, 75, 4)?;
+    ::core::mem::drop(unit_namespace_scope_94);
+    let unit_namespace_scope_95 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(332,4) Content (resource)
     let deferred_183 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_365, 332, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_183) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 332, 4)?;
+    ::core::mem::drop(unit_namespace_scope_95);
+    let unit_namespace_scope_96 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(336,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_366, 336, 4)?;
+    ::core::mem::drop(unit_namespace_scope_96);
+    let unit_namespace_scope_97 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0);
     // Controls/MacOSControls.xaml(384,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_369, 384, 4)?;
+    ::core::mem::drop(unit_namespace_scope_97);
     ::core::result::Result::Ok(())
 }
 
@@ -18436,19 +18736,31 @@ fn build_controls_macoscontrols_xaml_unit_67(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_98 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(23,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_389, 23, 4)?;
+    ::core::mem::drop(unit_namespace_scope_98);
+    let unit_namespace_scope_99 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(38,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_390, 38, 4)?;
+    ::core::mem::drop(unit_namespace_scope_99);
+    let unit_namespace_scope_100 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(52,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_391, 52, 4)?;
+    ::core::mem::drop(unit_namespace_scope_100);
+    let unit_namespace_scope_101 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(83,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_392, 83, 4)?;
+    ::core::mem::drop(unit_namespace_scope_101);
+    let unit_namespace_scope_102 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(228,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownButtonSpinnerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_394, 228, 4)?;
+    ::core::mem::drop(unit_namespace_scope_102);
+    let unit_namespace_scope_103 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15);
     // Controls/MacOSControls.xaml(278,4) Content (resource)
     let deferred_199 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_396, 278, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_199) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 278, 4)?;
+    ::core::mem::drop(unit_namespace_scope_103);
     ::core::result::Result::Ok(())
 }
 
@@ -18581,13 +18893,19 @@ fn build_controls_macoscontrols_xaml_unit_74(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_104 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/MacOSControls.xaml(18,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_444, 18, 4)?;
+    ::core::mem::drop(unit_namespace_scope_104);
+    let unit_namespace_scope_105 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/MacOSControls.xaml(80,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_447, 80, 4)?;
+    ::core::mem::drop(unit_namespace_scope_105);
+    let unit_namespace_scope_106 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16);
     // Controls/MacOSControls.xaml(94,4) Content (resource)
     let deferred_230 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_449, 94, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_230) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
+    ::core::mem::drop(unit_namespace_scope_106);
     ::core::result::Result::Ok(())
 }
 
@@ -18700,15 +19018,23 @@ fn build_controls_macoscontrols_xaml_unit_81(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_107 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(21,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_483, 21, 4)?;
+    ::core::mem::drop(unit_namespace_scope_107);
+    let unit_namespace_scope_108 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(72,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_485, 72, 4)?;
+    ::core::mem::drop(unit_namespace_scope_108);
+    let unit_namespace_scope_109 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(230,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAutoSuggestBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_487, 230, 4)?;
+    ::core::mem::drop(unit_namespace_scope_109);
+    let unit_namespace_scope_110 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7);
     // Controls/MacOSControls.xaml(300,4) Content (resource)
     let deferred_252 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_489, 300, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_252) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 300, 4)?;
+    ::core::mem::drop(unit_namespace_scope_110);
     ::core::result::Result::Ok(())
 }
 
@@ -18764,11 +19090,15 @@ fn build_controls_macoscontrols_xaml_unit_83(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_111 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(70,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupContentRootButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_508, 70, 4)?;
+    ::core::mem::drop(unit_namespace_scope_111);
+    let unit_namespace_scope_112 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2);
     // Controls/MacOSControls.xaml(99,4) Content (resource)
     let deferred_271 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_509, 99, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_271) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 99, 4)?;
+    ::core::mem::drop(unit_namespace_scope_112);
     ::core::result::Result::Ok(())
 }
 
@@ -18843,15 +19173,31 @@ fn build_controls_macoscontrols_xaml_unit_88(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_113 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/MacOSControls.xaml(25,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 44)?, rt::string_object("StringRichEditBoldText"), rt::string_object("Bold")), 25, 44)?;
+    ::core::mem::drop(unit_namespace_scope_113);
+    let unit_namespace_scope_114 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/MacOSControls.xaml(26,46) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 26, 46)?, rt::string_object("StringRichEditItalicText"), rt::string_object("Italic")), 26, 46)?;
+    ::core::mem::drop(unit_namespace_scope_114);
+    let unit_namespace_scope_115 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
+    // Controls/MacOSControls.xaml(27,49) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 27, 49)?, rt::string_object("StringRichEditUnderlineText"), rt::string_object("Underline")), 27, 49)?;
+    ::core::mem::drop(unit_namespace_scope_115);
+    let unit_namespace_scope_116 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/MacOSControls.xaml(28,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WinUIRichEditBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_532, 28, 4)?;
+    ::core::mem::drop(unit_namespace_scope_116);
+    let unit_namespace_scope_117 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/MacOSControls.xaml(52,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultRichEditBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_533, 52, 4)?;
+    ::core::mem::drop(unit_namespace_scope_117);
+    let unit_namespace_scope_118 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17);
     // Controls/MacOSControls.xaml(161,4) Content (resource)
     let deferred_284 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_535, 161, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_284) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    ::core::mem::drop(unit_namespace_scope_118);
     ::core::result::Result::Ok(())
 }
 
@@ -18862,20 +19208,30 @@ fn build_controls_macoscontrols_xaml_unit_89(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    let unit_namespace_scope_119 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/MacOSControls.xaml(110,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewPaneSearchButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_536, 110, 4)?;
+    ::core::mem::drop(unit_namespace_scope_119);
+    let unit_namespace_scope_120 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/MacOSControls.xaml(149,4) Content (resource)
     let deferred_286 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_538, 149, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_286) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 149, 4)?;
+    ::core::mem::drop(unit_namespace_scope_120);
+    let unit_namespace_scope_121 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/MacOSControls.xaml(484,4) Content (resource)
     let deferred_287 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_540, 484, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_287) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 484, 4)?;
+    ::core::mem::drop(unit_namespace_scope_121);
+    let unit_namespace_scope_122 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/MacOSControls.xaml(863,4) Content (resource)
     let deferred_288 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_542, 863, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_288) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 863, 4)?;
+    ::core::mem::drop(unit_namespace_scope_122);
+    let unit_namespace_scope_123 = rt::push_namespace_scope(&context, BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18);
     // Controls/MacOSControls.xaml(907,4) Content (resource)
     let deferred_289 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_544, 907, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_289) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 907, 4)?;
+    ::core::mem::drop(unit_namespace_scope_123);
     ::core::result::Result::Ok(())
 }
 
@@ -18893,28 +19249,6 @@ fn build_controls_macoscontrols_xaml_unit_90(
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TitleBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_291) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 231, 4)?;
     ::core::result::Result::Ok(())
 }
-
-/// The texts of a run of `Controls/MacOSControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 56, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 57, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 58, position: 52 },
-    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 59, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 60, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 61, position: 64 },
-    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 62, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 63, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 64, position: 82 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 65, position: 72 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 66, position: 71 },
-];
-
-/// The texts of a run of `Controls/MacOSControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringRichEditBoldText", value: "Bold", line: 25, position: 44 },
-    rt::ValueRow { key: "StringRichEditItalicText", value: "Italic", line: 26, position: 46 },
-    rt::ValueRow { key: "StringRichEditUnderlineText", value: "Underline", line: 27, position: 49 },
-];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
@@ -46156,7 +46490,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_548_THEME: rt::ControlThemeTab
 fn build_controls_macoscontrols_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(8,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_0_THEME)
 }
@@ -46165,7 +46499,7 @@ fn build_controls_macoscontrols_xaml_deferred_0(
 fn build_controls_macoscontrols_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(11,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -46190,7 +46524,7 @@ fn build_controls_macoscontrols_xaml_deferred_1(
 fn build_controls_macoscontrols_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(13,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_2_THEME)
 }
@@ -46199,7 +46533,7 @@ fn build_controls_macoscontrols_xaml_deferred_2(
 fn build_controls_macoscontrols_xaml_deferred_3(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(22,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -46267,7 +46601,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
 fn build_controls_macoscontrols_xaml_deferred_4(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(12,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_4_THEME)
 }
@@ -46276,7 +46610,7 @@ fn build_controls_macoscontrols_xaml_deferred_4(
 fn build_controls_macoscontrols_xaml_deferred_5(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(22,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -46324,7 +46658,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
 fn build_controls_macoscontrols_xaml_deferred_6(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(14,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_6_THEME)
 }
@@ -46333,7 +46667,7 @@ fn build_controls_macoscontrols_xaml_deferred_6(
 fn build_controls_macoscontrols_xaml_deferred_7(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(26,10) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
@@ -46401,7 +46735,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
 fn build_controls_macoscontrols_xaml_deferred_8(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(11,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_8_THEME)
 }
@@ -46410,7 +46744,7 @@ fn build_controls_macoscontrols_xaml_deferred_8(
 fn build_controls_macoscontrols_xaml_deferred_9(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(7,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_9_THEME)
 }
@@ -46419,7 +46753,7 @@ fn build_controls_macoscontrols_xaml_deferred_9(
 fn build_controls_macoscontrols_xaml_deferred_10(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(19,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -47628,7 +47962,7 @@ fn build_controls_macoscontrols_xaml_deferred_38(
 fn build_controls_macoscontrols_xaml_deferred_39(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(27,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_39_THEME)
 }
@@ -47637,7 +47971,7 @@ fn build_controls_macoscontrols_xaml_deferred_39(
 fn build_controls_macoscontrols_xaml_deferred_40(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(30,10) ReversibleStackPanel
     let reversible_stack_panel_0 = ::ferroui_controls::ReversibleStackPanel::new();
@@ -47684,7 +48018,7 @@ fn build_controls_macoscontrols_xaml_deferred_40(
 fn build_controls_macoscontrols_xaml_deferred_41(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(35,16) InfoBarPanel
     let info_bar_panel_0 = crate::primitives::InfoBarPanel::new();
     context.set_intermediate_root_object(rt::to_value(info_bar_panel_0.clone()));
@@ -47809,7 +48143,7 @@ fn build_controls_macoscontrols_xaml_deferred_41(
 fn build_controls_macoscontrols_xaml_deferred_42(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(56,16) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
@@ -48335,7 +48669,7 @@ fn build_controls_macoscontrols_xaml_deferred_53(
 fn build_controls_macoscontrols_xaml_deferred_54(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(22,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_54_THEME)
 }
@@ -48344,7 +48678,7 @@ fn build_controls_macoscontrols_xaml_deferred_54(
 fn build_controls_macoscontrols_xaml_deferred_55(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(37,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -48369,7 +48703,7 @@ fn build_controls_macoscontrols_xaml_deferred_55(
 fn build_controls_macoscontrols_xaml_deferred_56(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(45,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -48580,7 +48914,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
 fn build_controls_macoscontrols_xaml_deferred_57(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(24,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_57_THEME)
 }
@@ -48589,7 +48923,7 @@ fn build_controls_macoscontrols_xaml_deferred_57(
 fn build_controls_macoscontrols_xaml_deferred_58(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(33,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
@@ -48644,7 +48978,7 @@ fn build_controls_macoscontrols_xaml_deferred_58(
 fn build_controls_macoscontrols_xaml_deferred_59(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(46,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -48781,7 +49115,7 @@ fn build_controls_macoscontrols_xaml_deferred_62(
 fn build_controls_macoscontrols_xaml_deferred_63(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_63_THEME)
 }
@@ -48790,7 +49124,7 @@ fn build_controls_macoscontrols_xaml_deferred_63(
 fn build_controls_macoscontrols_xaml_deferred_64(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(55,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -51186,7 +51520,7 @@ fn build_controls_macoscontrols_xaml_deferred_126(
 fn build_controls_macoscontrols_xaml_deferred_127(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/MacOSControls.xaml(15,4) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(15_i64));
@@ -51199,7 +51533,7 @@ fn build_controls_macoscontrols_xaml_deferred_127(
 fn build_controls_macoscontrols_xaml_deferred_128(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(16,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_128_THEME)
 }
@@ -51208,7 +51542,7 @@ fn build_controls_macoscontrols_xaml_deferred_128(
 fn build_controls_macoscontrols_xaml_deferred_129(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(19,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -51228,7 +51562,7 @@ fn build_controls_macoscontrols_xaml_deferred_129(
 fn build_controls_macoscontrols_xaml_deferred_130(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(23,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_130_THEME)
 }
@@ -51237,7 +51571,7 @@ fn build_controls_macoscontrols_xaml_deferred_130(
 fn build_controls_macoscontrols_xaml_deferred_131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(26,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -51302,7 +51636,7 @@ fn build_controls_macoscontrols_xaml_deferred_131(
 fn build_controls_macoscontrols_xaml_deferred_132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(42,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_132_THEME)
 }
@@ -51311,7 +51645,7 @@ fn build_controls_macoscontrols_xaml_deferred_132(
 fn build_controls_macoscontrols_xaml_deferred_133(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(45,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -51376,7 +51710,7 @@ fn build_controls_macoscontrols_xaml_deferred_133(
 fn build_controls_macoscontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(61,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_134_THEME)
 }
@@ -51385,7 +51719,7 @@ fn build_controls_macoscontrols_xaml_deferred_134(
 fn build_controls_macoscontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(64,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -51450,7 +51784,7 @@ fn build_controls_macoscontrols_xaml_deferred_135(
 fn build_controls_macoscontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(80,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_136_THEME)
 }
@@ -51459,7 +51793,7 @@ fn build_controls_macoscontrols_xaml_deferred_136(
 fn build_controls_macoscontrols_xaml_deferred_137(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(83,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -51524,7 +51858,7 @@ fn build_controls_macoscontrols_xaml_deferred_137(
 fn build_controls_macoscontrols_xaml_deferred_138(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(99,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_138_THEME)
 }
@@ -51533,7 +51867,7 @@ fn build_controls_macoscontrols_xaml_deferred_138(
 fn build_controls_macoscontrols_xaml_deferred_139(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(102,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -51578,7 +51912,7 @@ fn build_controls_macoscontrols_xaml_deferred_139(
 fn build_controls_macoscontrols_xaml_deferred_140(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(116,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_140_THEME)
 }
@@ -51587,7 +51921,7 @@ fn build_controls_macoscontrols_xaml_deferred_140(
 fn build_controls_macoscontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(119,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -51632,7 +51966,7 @@ fn build_controls_macoscontrols_xaml_deferred_141(
 fn build_controls_macoscontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(133,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_142_THEME)
 }
@@ -51641,7 +51975,7 @@ fn build_controls_macoscontrols_xaml_deferred_142(
 fn build_controls_macoscontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(146,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -52038,7 +52372,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
 fn build_controls_macoscontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(195,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -52434,7 +52768,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
 fn build_controls_macoscontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(274,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_145_THEME)
 }
@@ -52443,7 +52777,7 @@ fn build_controls_macoscontrols_xaml_deferred_145(
 fn build_controls_macoscontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/MacOSControls.xaml(66,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_146_THEME)
 }
@@ -52452,7 +52786,7 @@ fn build_controls_macoscontrols_xaml_deferred_146(
 fn build_controls_macoscontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(76,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -52710,7 +53044,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
 fn build_controls_macoscontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/MacOSControls.xaml(161,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_148_THEME)
 }
@@ -52719,7 +53053,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
 fn build_controls_macoscontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(163,4) TargetType
@@ -52735,7 +53069,7 @@ fn build_controls_macoscontrols_xaml_deferred_149(
 fn build_controls_macoscontrols_xaml_deferred_150(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(164,6) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -52815,7 +53149,7 @@ fn build_controls_macoscontrols_xaml_deferred_150(
 fn build_controls_macoscontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(23,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_151_THEME)
 }
@@ -52824,7 +53158,7 @@ fn build_controls_macoscontrols_xaml_deferred_151(
 fn build_controls_macoscontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(26,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -52885,7 +53219,7 @@ fn build_controls_macoscontrols_xaml_deferred_152(
 fn build_controls_macoscontrols_xaml_deferred_153(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(73,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_153_THEME)
 }
@@ -52894,7 +53228,7 @@ fn build_controls_macoscontrols_xaml_deferred_153(
 fn build_controls_macoscontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(76,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -52957,7 +53291,7 @@ fn build_controls_macoscontrols_xaml_deferred_154(
 fn build_controls_macoscontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(123,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -53222,7 +53556,7 @@ fn build_controls_macoscontrols_xaml_deferred_155(
 fn build_controls_macoscontrols_xaml_deferred_156(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(173,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -53309,7 +53643,7 @@ fn build_controls_macoscontrols_xaml_deferred_156(
 fn build_controls_macoscontrols_xaml_deferred_157(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(188,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_157_THEME)
 }
@@ -53318,7 +53652,7 @@ fn build_controls_macoscontrols_xaml_deferred_157(
 fn build_controls_macoscontrols_xaml_deferred_158(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(211,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -53343,7 +53677,7 @@ fn build_controls_macoscontrols_xaml_deferred_158(
 fn build_controls_macoscontrols_xaml_deferred_159(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(221,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -53746,7 +54080,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
 fn build_controls_macoscontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(414,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_160_THEME)
 }
@@ -53755,7 +54089,7 @@ fn build_controls_macoscontrols_xaml_deferred_160(
 fn build_controls_macoscontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(427,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_161_THEME)
 }
@@ -53833,7 +54167,7 @@ fn build_controls_macoscontrols_xaml_deferred_164(
 fn build_controls_macoscontrols_xaml_deferred_165(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let string_format_converter_0 = ::ferroui_controls::converters::StringFormatConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(string_format_converter_0))
 }
@@ -53842,7 +54176,7 @@ fn build_controls_macoscontrols_xaml_deferred_165(
 fn build_controls_macoscontrols_xaml_deferred_166(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(24,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -54168,7 +54502,7 @@ fn build_controls_macoscontrols_xaml_deferred_166(
 fn build_controls_macoscontrols_xaml_deferred_167(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(36,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -54405,7 +54739,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
 fn build_controls_macoscontrols_xaml_deferred_168(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(134,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_168_THEME)
 }
@@ -54502,7 +54836,7 @@ fn build_controls_macoscontrols_xaml_deferred_172(
 fn build_controls_macoscontrols_xaml_deferred_173(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     // Controls/MacOSControls.xaml(26,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_173_THEME)
 }
@@ -54511,7 +54845,7 @@ fn build_controls_macoscontrols_xaml_deferred_173(
 fn build_controls_macoscontrols_xaml_deferred_174(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(29,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -54603,7 +54937,7 @@ fn build_controls_macoscontrols_xaml_deferred_174(
 fn build_controls_macoscontrols_xaml_deferred_175(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     // Controls/MacOSControls.xaml(51,10) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     context.set_intermediate_root_object(rt::to_value(items_control_0.clone()));
@@ -54634,7 +54968,7 @@ fn build_controls_macoscontrols_xaml_deferred_175(
 fn build_controls_macoscontrols_xaml_deferred_176(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     // Controls/MacOSControls.xaml(64,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_176_THEME)
 }
@@ -54643,7 +54977,7 @@ fn build_controls_macoscontrols_xaml_deferred_176(
 fn build_controls_macoscontrols_xaml_deferred_177(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(67,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -54732,7 +55066,7 @@ fn build_controls_macoscontrols_xaml_deferred_177(
 fn build_controls_macoscontrols_xaml_deferred_178(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_9 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(88,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -54831,7 +55165,7 @@ fn build_controls_macoscontrols_xaml_deferred_178(
 fn build_controls_macoscontrols_xaml_deferred_179(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(24,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_179_THEME)
 }
@@ -54840,7 +55174,7 @@ fn build_controls_macoscontrols_xaml_deferred_179(
 fn build_controls_macoscontrols_xaml_deferred_180(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(38,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -54865,7 +55199,7 @@ fn build_controls_macoscontrols_xaml_deferred_180(
 fn build_controls_macoscontrols_xaml_deferred_181(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(45,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -54929,7 +55263,7 @@ fn build_controls_macoscontrols_xaml_deferred_181(
 fn build_controls_macoscontrols_xaml_deferred_182(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(88,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_182_THEME)
 }
@@ -54938,7 +55272,7 @@ fn build_controls_macoscontrols_xaml_deferred_182(
 fn build_controls_macoscontrols_xaml_deferred_183(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(98,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -54992,7 +55326,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
 fn build_controls_macoscontrols_xaml_deferred_184(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(137,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_184_THEME)
 }
@@ -55001,7 +55335,7 @@ fn build_controls_macoscontrols_xaml_deferred_184(
 fn build_controls_macoscontrols_xaml_deferred_185(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(152,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
@@ -55053,7 +55387,7 @@ fn build_controls_macoscontrols_xaml_deferred_185(
 fn build_controls_macoscontrols_xaml_deferred_186(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(165,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_186_THEME)
 }
@@ -55062,7 +55396,7 @@ fn build_controls_macoscontrols_xaml_deferred_186(
 fn build_controls_macoscontrols_xaml_deferred_187(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(180,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
@@ -55114,7 +55448,7 @@ fn build_controls_macoscontrols_xaml_deferred_187(
 fn build_controls_macoscontrols_xaml_deferred_188(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(193,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_188_THEME)
 }
@@ -55123,7 +55457,7 @@ fn build_controls_macoscontrols_xaml_deferred_188(
 fn build_controls_macoscontrols_xaml_deferred_189(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(206,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -55181,7 +55515,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
 fn build_controls_macoscontrols_xaml_deferred_190(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(50,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_190_THEME)
 }
@@ -55190,7 +55524,7 @@ fn build_controls_macoscontrols_xaml_deferred_190(
 fn build_controls_macoscontrols_xaml_deferred_191(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(68,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_191_THEME)
 }
@@ -55199,7 +55533,7 @@ fn build_controls_macoscontrols_xaml_deferred_191(
 fn build_controls_macoscontrols_xaml_deferred_192(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(87,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -55236,7 +55570,7 @@ fn build_controls_macoscontrols_xaml_deferred_192(
 fn build_controls_macoscontrols_xaml_deferred_193(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(99,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -55273,7 +55607,7 @@ fn build_controls_macoscontrols_xaml_deferred_193(
 fn build_controls_macoscontrols_xaml_deferred_194(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(132,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_194_THEME)
 }
@@ -55282,7 +55616,7 @@ fn build_controls_macoscontrols_xaml_deferred_194(
 fn build_controls_macoscontrols_xaml_deferred_195(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(148,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -55319,7 +55653,7 @@ fn build_controls_macoscontrols_xaml_deferred_195(
 fn build_controls_macoscontrols_xaml_deferred_196(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(160,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -55356,7 +55690,7 @@ fn build_controls_macoscontrols_xaml_deferred_196(
 fn build_controls_macoscontrols_xaml_deferred_197(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(203,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_197_THEME)
 }
@@ -55365,7 +55699,7 @@ fn build_controls_macoscontrols_xaml_deferred_197(
 fn build_controls_macoscontrols_xaml_deferred_198(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(207,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
@@ -55389,7 +55723,7 @@ fn build_controls_macoscontrols_xaml_deferred_198(
 fn build_controls_macoscontrols_xaml_deferred_199(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(212,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -56552,7 +56886,7 @@ fn build_controls_macoscontrols_xaml_deferred_209(
 fn build_controls_macoscontrols_xaml_deferred_210(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(21,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_210_THEME)
 }
@@ -56561,7 +56895,7 @@ fn build_controls_macoscontrols_xaml_deferred_210(
 fn build_controls_macoscontrols_xaml_deferred_211(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(24,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -56586,7 +56920,7 @@ fn build_controls_macoscontrols_xaml_deferred_211(
 fn build_controls_macoscontrols_xaml_deferred_212(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(31,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -56635,7 +56969,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
 fn build_controls_macoscontrols_xaml_deferred_213(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(66,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_213_THEME)
 }
@@ -56644,7 +56978,7 @@ fn build_controls_macoscontrols_xaml_deferred_213(
 fn build_controls_macoscontrols_xaml_deferred_214(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(85,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -56669,7 +57003,7 @@ fn build_controls_macoscontrols_xaml_deferred_214(
 fn build_controls_macoscontrols_xaml_deferred_215(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(94,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -56917,7 +57251,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
 fn build_controls_macoscontrols_xaml_deferred_216(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(181,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_216_THEME)
 }
@@ -56926,7 +57260,7 @@ fn build_controls_macoscontrols_xaml_deferred_216(
 fn build_controls_macoscontrols_xaml_deferred_217(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(183,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_217_THEME)
 }
@@ -56935,7 +57269,7 @@ fn build_controls_macoscontrols_xaml_deferred_217(
 fn build_controls_macoscontrols_xaml_deferred_218(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(200,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -57548,7 +57882,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
 fn build_controls_macoscontrols_xaml_deferred_219(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(333,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_219_THEME)
 }
@@ -57557,7 +57891,7 @@ fn build_controls_macoscontrols_xaml_deferred_219(
 fn build_controls_macoscontrols_xaml_deferred_220(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(21,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_220_THEME)
 }
@@ -57566,7 +57900,7 @@ fn build_controls_macoscontrols_xaml_deferred_220(
 fn build_controls_macoscontrols_xaml_deferred_221(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(24,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -57591,7 +57925,7 @@ fn build_controls_macoscontrols_xaml_deferred_221(
 fn build_controls_macoscontrols_xaml_deferred_222(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(31,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -57640,7 +57974,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
 fn build_controls_macoscontrols_xaml_deferred_223(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(66,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_223_THEME)
 }
@@ -57649,7 +57983,7 @@ fn build_controls_macoscontrols_xaml_deferred_223(
 fn build_controls_macoscontrols_xaml_deferred_224(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(82,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -57674,7 +58008,7 @@ fn build_controls_macoscontrols_xaml_deferred_224(
 fn build_controls_macoscontrols_xaml_deferred_225(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(91,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -57997,7 +58331,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
 fn build_controls_macoscontrols_xaml_deferred_226(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(200,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_226_THEME)
 }
@@ -58006,7 +58340,7 @@ fn build_controls_macoscontrols_xaml_deferred_226(
 fn build_controls_macoscontrols_xaml_deferred_227(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(216,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58744,7 +59078,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
 fn build_controls_macoscontrols_xaml_deferred_228(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 3,0 V 3 H 0 Z M 5,8 V 5 H 8 Z")), 8, 55)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -58753,7 +59087,7 @@ fn build_controls_macoscontrols_xaml_deferred_228(
 fn build_controls_macoscontrols_xaml_deferred_229(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 0,0 H 5 L 0,5 Z M 8,8 H 3 L 8,3 Z")), 9, 52)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -58762,7 +59096,7 @@ fn build_controls_macoscontrols_xaml_deferred_229(
 fn build_controls_macoscontrols_xaml_deferred_230(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 0,3.5 H 8 V 4.5 H 0 Z")), 10, 56)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -58771,7 +59105,7 @@ fn build_controls_macoscontrols_xaml_deferred_230(
 fn build_controls_macoscontrols_xaml_deferred_231(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 1,0 L 4,3 L 7,0 L 8,1 L 5,4 L 8,7 L 7,8 L 4,5 L 1,8 L 0,7 L 3,4 L 0,1 Z")), 11, 53)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
@@ -58780,7 +59114,7 @@ fn build_controls_macoscontrols_xaml_deferred_231(
 fn build_controls_macoscontrols_xaml_deferred_232(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(12,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_232_THEME)
 }
@@ -58789,7 +59123,7 @@ fn build_controls_macoscontrols_xaml_deferred_232(
 fn build_controls_macoscontrols_xaml_deferred_233(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(29,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58868,7 +59202,7 @@ fn build_controls_macoscontrols_xaml_deferred_233(
 fn build_controls_macoscontrols_xaml_deferred_234(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_234_THEME)
 }
@@ -58877,7 +59211,7 @@ fn build_controls_macoscontrols_xaml_deferred_234(
 fn build_controls_macoscontrols_xaml_deferred_235(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(49,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_235_THEME)
 }
@@ -58886,7 +59220,7 @@ fn build_controls_macoscontrols_xaml_deferred_235(
 fn build_controls_macoscontrols_xaml_deferred_236(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(52,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_236_THEME)
 }
@@ -58895,7 +59229,7 @@ fn build_controls_macoscontrols_xaml_deferred_236(
 fn build_controls_macoscontrols_xaml_deferred_237(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(55,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_237_THEME)
 }
@@ -58904,7 +59238,7 @@ fn build_controls_macoscontrols_xaml_deferred_237(
 fn build_controls_macoscontrols_xaml_deferred_238(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(66,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -58952,7 +59286,7 @@ fn build_controls_macoscontrols_xaml_deferred_238(
 fn build_controls_macoscontrols_xaml_deferred_239(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(90,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_239_THEME)
 }
@@ -58961,7 +59295,7 @@ fn build_controls_macoscontrols_xaml_deferred_239(
 fn build_controls_macoscontrols_xaml_deferred_240(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(101,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -59009,7 +59343,7 @@ fn build_controls_macoscontrols_xaml_deferred_240(
 fn build_controls_macoscontrols_xaml_deferred_241(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(125,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_241_THEME)
 }
@@ -59018,7 +59352,7 @@ fn build_controls_macoscontrols_xaml_deferred_241(
 fn build_controls_macoscontrols_xaml_deferred_242(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(128,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -59047,7 +59381,7 @@ fn build_controls_macoscontrols_xaml_deferred_242(
 fn build_controls_macoscontrols_xaml_deferred_243(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(132,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_243_THEME)
 }
@@ -59056,7 +59390,7 @@ fn build_controls_macoscontrols_xaml_deferred_243(
 fn build_controls_macoscontrols_xaml_deferred_244(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(138,10) WindowDrawnDecorationsContent
     let window_drawn_decorations_content_0 = ::ferroui_controls::chrome::WindowDrawnDecorationsContent::new();
@@ -59617,7 +59951,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
 fn build_controls_macoscontrols_xaml_deferred_245(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(251,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_245_THEME)
 }
@@ -59626,7 +59960,7 @@ fn build_controls_macoscontrols_xaml_deferred_245(
 fn build_controls_macoscontrols_xaml_deferred_246(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(58,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_246_THEME)
 }
@@ -59635,7 +59969,7 @@ fn build_controls_macoscontrols_xaml_deferred_246(
 fn build_controls_macoscontrols_xaml_deferred_247(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(96,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -59897,7 +60231,7 @@ fn build_controls_macoscontrols_xaml_deferred_247(
 fn build_controls_macoscontrols_xaml_deferred_248(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(107,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -60170,7 +60504,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
 fn build_controls_macoscontrols_xaml_deferred_249(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_249_THEME)
 }
@@ -60179,7 +60513,7 @@ fn build_controls_macoscontrols_xaml_deferred_249(
 fn build_controls_macoscontrols_xaml_deferred_250(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(49,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -60467,7 +60801,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
 fn build_controls_macoscontrols_xaml_deferred_251(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/MacOSControls.xaml(130,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_251_THEME)
 }
@@ -60476,7 +60810,7 @@ fn build_controls_macoscontrols_xaml_deferred_251(
 fn build_controls_macoscontrols_xaml_deferred_252(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_6 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(148,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -60692,7 +61026,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
 fn build_controls_macoscontrols_xaml_deferred_257(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(70,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_257_THEME)
 }
@@ -60701,7 +61035,7 @@ fn build_controls_macoscontrols_xaml_deferred_257(
 fn build_controls_macoscontrols_xaml_deferred_258(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(79,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -60747,7 +61081,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
 fn build_controls_macoscontrols_xaml_deferred_259(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(109,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_259_THEME)
 }
@@ -60756,7 +61090,7 @@ fn build_controls_macoscontrols_xaml_deferred_259(
 fn build_controls_macoscontrols_xaml_deferred_260(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(123,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -60793,7 +61127,7 @@ fn build_controls_macoscontrols_xaml_deferred_260(
 fn build_controls_macoscontrols_xaml_deferred_261(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(135,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -60885,7 +61219,7 @@ fn build_controls_macoscontrols_xaml_deferred_261(
 fn build_controls_macoscontrols_xaml_deferred_262(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(221,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_262_THEME)
 }
@@ -60894,7 +61228,7 @@ fn build_controls_macoscontrols_xaml_deferred_262(
 fn build_controls_macoscontrols_xaml_deferred_263(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(227,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -61623,7 +61957,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
 fn build_controls_macoscontrols_xaml_deferred_264(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(244,20) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -61796,7 +62130,7 @@ fn build_controls_macoscontrols_xaml_deferred_264(
 fn build_controls_macoscontrols_xaml_deferred_265(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(353,26) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -61832,7 +62166,7 @@ fn build_controls_macoscontrols_xaml_deferred_265(
 fn build_controls_macoscontrols_xaml_deferred_266(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(378,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
@@ -62142,7 +62476,7 @@ fn build_controls_macoscontrols_xaml_deferred_266(
 fn build_controls_macoscontrols_xaml_deferred_267(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(435,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -62300,7 +62634,7 @@ fn build_controls_macoscontrols_xaml_deferred_267(
 fn build_controls_macoscontrols_xaml_deferred_268(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(444,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -62593,7 +62927,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
 fn build_controls_macoscontrols_xaml_deferred_269(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_11 });
     // Controls/MacOSControls.xaml(542,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_269_THEME)
 }
@@ -62775,7 +63109,7 @@ fn build_controls_macoscontrols_xaml_deferred_277(
 fn build_controls_macoscontrols_xaml_deferred_278(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(18,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_278_THEME)
 }
@@ -62784,7 +63118,7 @@ fn build_controls_macoscontrols_xaml_deferred_278(
 fn build_controls_macoscontrols_xaml_deferred_279(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(33,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -62815,7 +63149,7 @@ fn build_controls_macoscontrols_xaml_deferred_279(
 fn build_controls_macoscontrols_xaml_deferred_280(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(61,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_280_THEME)
 }
@@ -62824,7 +63158,7 @@ fn build_controls_macoscontrols_xaml_deferred_280(
 fn build_controls_macoscontrols_xaml_deferred_281(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(76,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -62855,7 +63189,7 @@ fn build_controls_macoscontrols_xaml_deferred_281(
 fn build_controls_macoscontrols_xaml_deferred_282(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(95,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_282_THEME)
 }
@@ -62864,7 +63198,7 @@ fn build_controls_macoscontrols_xaml_deferred_282(
 fn build_controls_macoscontrols_xaml_deferred_283(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(110,10) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -62895,7 +63229,7 @@ fn build_controls_macoscontrols_xaml_deferred_283(
 fn build_controls_macoscontrols_xaml_deferred_284(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(129,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_284_THEME)
 }
@@ -62904,7 +63238,7 @@ fn build_controls_macoscontrols_xaml_deferred_284(
 fn build_controls_macoscontrols_xaml_deferred_285(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(132,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -63482,7 +63816,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
 fn build_controls_macoscontrols_xaml_deferred_286(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(193,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_286_THEME)
 }
@@ -63491,7 +63825,7 @@ fn build_controls_macoscontrols_xaml_deferred_286(
 fn build_controls_macoscontrols_xaml_deferred_287(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(200,10) TabViewEqualWidthPanel
     let tab_view_equal_width_panel_0 = crate::primitives::TabViewEqualWidthPanel::new();
     context.set_intermediate_root_object(rt::to_value(tab_view_equal_width_panel_0.clone()));
@@ -63510,7 +63844,7 @@ fn build_controls_macoscontrols_xaml_deferred_287(
 fn build_controls_macoscontrols_xaml_deferred_288(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(205,10) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
@@ -63812,7 +64146,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
 fn build_controls_macoscontrols_xaml_deferred_289(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(240,12) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -63828,7 +64162,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
 fn build_controls_macoscontrols_xaml_deferred_290(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(267,12) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -63844,7 +64178,7 @@ fn build_controls_macoscontrols_xaml_deferred_290(
 fn build_controls_macoscontrols_xaml_deferred_291(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_4 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_13 });
     // Controls/MacOSControls.xaml(296,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_291_THEME)
 }
@@ -65391,7 +65725,7 @@ fn build_controls_macoscontrols_xaml_deferred_305(
 fn build_controls_macoscontrols_xaml_deferred_306(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/MacOSControls.xaml(51,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_306_THEME)
 }
@@ -65400,7 +65734,7 @@ fn build_controls_macoscontrols_xaml_deferred_306(
 fn build_controls_macoscontrols_xaml_deferred_307(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/MacOSControls.xaml(67,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -65435,7 +65769,7 @@ fn build_controls_macoscontrols_xaml_deferred_307(
 fn build_controls_macoscontrols_xaml_deferred_308(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(78,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -65527,7 +65861,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
 fn build_controls_macoscontrols_xaml_deferred_309(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/MacOSControls.xaml(151,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_309_THEME)
 }
@@ -65536,7 +65870,7 @@ fn build_controls_macoscontrols_xaml_deferred_309(
 fn build_controls_macoscontrols_xaml_deferred_310(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     // Controls/MacOSControls.xaml(155,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_310_THEME)
 }
@@ -65545,7 +65879,7 @@ fn build_controls_macoscontrols_xaml_deferred_310(
 fn build_controls_macoscontrols_xaml_deferred_311(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_14 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(163,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67146,7 +67480,7 @@ fn build_controls_macoscontrols_xaml_deferred_328(
 fn build_controls_macoscontrols_xaml_deferred_329(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(29,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_329_THEME)
 }
@@ -67155,7 +67489,7 @@ fn build_controls_macoscontrols_xaml_deferred_329(
 fn build_controls_macoscontrols_xaml_deferred_330(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(42,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -67192,7 +67526,7 @@ fn build_controls_macoscontrols_xaml_deferred_330(
 fn build_controls_macoscontrols_xaml_deferred_331(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(49,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67411,7 +67745,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
 fn build_controls_macoscontrols_xaml_deferred_332(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(173,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_332_THEME)
 }
@@ -67420,7 +67754,7 @@ fn build_controls_macoscontrols_xaml_deferred_332(
 fn build_controls_macoscontrols_xaml_deferred_333(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(177,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_333_THEME)
 }
@@ -67429,7 +67763,7 @@ fn build_controls_macoscontrols_xaml_deferred_333(
 fn build_controls_macoscontrols_xaml_deferred_334(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(178,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_334_THEME)
 }
@@ -67438,7 +67772,7 @@ fn build_controls_macoscontrols_xaml_deferred_334(
 fn build_controls_macoscontrols_xaml_deferred_335(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(192,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -67475,7 +67809,7 @@ fn build_controls_macoscontrols_xaml_deferred_335(
 fn build_controls_macoscontrols_xaml_deferred_336(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(199,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67735,7 +68069,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
 fn build_controls_macoscontrols_xaml_deferred_337(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(501,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_337_THEME)
 }
@@ -67744,7 +68078,7 @@ fn build_controls_macoscontrols_xaml_deferred_337(
 fn build_controls_macoscontrols_xaml_deferred_338(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(505,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_338_THEME)
 }
@@ -67753,7 +68087,7 @@ fn build_controls_macoscontrols_xaml_deferred_338(
 fn build_controls_macoscontrols_xaml_deferred_339(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(506,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_339_THEME)
 }
@@ -67762,7 +68096,7 @@ fn build_controls_macoscontrols_xaml_deferred_339(
 fn build_controls_macoscontrols_xaml_deferred_340(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(512,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67816,7 +68150,7 @@ fn build_controls_macoscontrols_xaml_deferred_340(
 fn build_controls_macoscontrols_xaml_deferred_341(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(532,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_341_THEME)
 }
@@ -67825,7 +68159,7 @@ fn build_controls_macoscontrols_xaml_deferred_341(
 fn build_controls_macoscontrols_xaml_deferred_342(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(533,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_342_THEME)
 }
@@ -67834,7 +68168,7 @@ fn build_controls_macoscontrols_xaml_deferred_342(
 fn build_controls_macoscontrols_xaml_deferred_343(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(550,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -67895,7 +68229,7 @@ fn build_controls_macoscontrols_xaml_deferred_343(
 fn build_controls_macoscontrols_xaml_deferred_344(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(580,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_344_THEME)
 }
@@ -67904,7 +68238,7 @@ fn build_controls_macoscontrols_xaml_deferred_344(
 fn build_controls_macoscontrols_xaml_deferred_345(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(591,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -67959,7 +68293,7 @@ fn build_controls_macoscontrols_xaml_deferred_345(
 fn build_controls_macoscontrols_xaml_deferred_346(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(599,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_346_THEME)
 }
@@ -67968,7 +68302,7 @@ fn build_controls_macoscontrols_xaml_deferred_346(
 fn build_controls_macoscontrols_xaml_deferred_347(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(611,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -68365,7 +68699,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
 fn build_controls_macoscontrols_xaml_deferred_348(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(625,26) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -68384,7 +68718,7 @@ fn build_controls_macoscontrols_xaml_deferred_348(
 fn build_controls_macoscontrols_xaml_deferred_349(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(643,22) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
@@ -68397,7 +68731,7 @@ fn build_controls_macoscontrols_xaml_deferred_349(
 fn build_controls_macoscontrols_xaml_deferred_350(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(668,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_350_THEME)
 }
@@ -68682,7 +69016,7 @@ fn build_controls_macoscontrols_xaml_deferred_358(
 fn build_controls_macoscontrols_xaml_deferred_359(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(25,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_359_THEME)
 }
@@ -68691,7 +69025,7 @@ fn build_controls_macoscontrols_xaml_deferred_359(
 fn build_controls_macoscontrols_xaml_deferred_360(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(40,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -68716,7 +69050,7 @@ fn build_controls_macoscontrols_xaml_deferred_360(
 fn build_controls_macoscontrols_xaml_deferred_361(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(47,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -68763,7 +69097,7 @@ fn build_controls_macoscontrols_xaml_deferred_361(
 fn build_controls_macoscontrols_xaml_deferred_362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(75,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_362_THEME)
 }
@@ -68772,7 +69106,7 @@ fn build_controls_macoscontrols_xaml_deferred_362(
 fn build_controls_macoscontrols_xaml_deferred_363(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(91,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -68797,7 +69131,7 @@ fn build_controls_macoscontrols_xaml_deferred_363(
 fn build_controls_macoscontrols_xaml_deferred_364(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(103,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -69149,7 +69483,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
 fn build_controls_macoscontrols_xaml_deferred_365(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(332,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_365_THEME)
 }
@@ -69158,7 +69492,7 @@ fn build_controls_macoscontrols_xaml_deferred_365(
 fn build_controls_macoscontrols_xaml_deferred_366(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(336,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME)
 }
@@ -69167,7 +69501,7 @@ fn build_controls_macoscontrols_xaml_deferred_366(
 fn build_controls_macoscontrols_xaml_deferred_367(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(347,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -69192,7 +69526,7 @@ fn build_controls_macoscontrols_xaml_deferred_367(
 fn build_controls_macoscontrols_xaml_deferred_368(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(354,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -69239,7 +69573,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
 fn build_controls_macoscontrols_xaml_deferred_369(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(384,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME)
 }
@@ -69248,7 +69582,7 @@ fn build_controls_macoscontrols_xaml_deferred_369(
 fn build_controls_macoscontrols_xaml_deferred_370(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/MacOSControls.xaml(400,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -69273,7 +69607,7 @@ fn build_controls_macoscontrols_xaml_deferred_370(
 fn build_controls_macoscontrols_xaml_deferred_371(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(412,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -70927,7 +71261,7 @@ fn build_controls_macoscontrols_xaml_deferred_388(
 fn build_controls_macoscontrols_xaml_deferred_389(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(23,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_389_THEME)
 }
@@ -70936,7 +71270,7 @@ fn build_controls_macoscontrols_xaml_deferred_389(
 fn build_controls_macoscontrols_xaml_deferred_390(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(38,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_390_THEME)
 }
@@ -70945,7 +71279,7 @@ fn build_controls_macoscontrols_xaml_deferred_390(
 fn build_controls_macoscontrols_xaml_deferred_391(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(52,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME)
 }
@@ -70954,7 +71288,7 @@ fn build_controls_macoscontrols_xaml_deferred_391(
 fn build_controls_macoscontrols_xaml_deferred_392(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(83,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_392_THEME)
 }
@@ -70963,7 +71297,7 @@ fn build_controls_macoscontrols_xaml_deferred_392(
 fn build_controls_macoscontrols_xaml_deferred_393(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(88,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -71374,7 +71708,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
 fn build_controls_macoscontrols_xaml_deferred_394(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(228,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_394_THEME)
 }
@@ -71383,7 +71717,7 @@ fn build_controls_macoscontrols_xaml_deferred_394(
 fn build_controls_macoscontrols_xaml_deferred_395(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(233,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -71555,7 +71889,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
 fn build_controls_macoscontrols_xaml_deferred_396(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     // Controls/MacOSControls.xaml(278,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_396_THEME)
 }
@@ -71564,7 +71898,7 @@ fn build_controls_macoscontrols_xaml_deferred_396(
 fn build_controls_macoscontrols_xaml_deferred_397(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_15 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(295,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -73138,7 +73472,7 @@ fn build_controls_macoscontrols_xaml_deferred_434(
 fn build_controls_macoscontrols_xaml_deferred_435(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let platform_key_gesture_converter_0 = ::ferroui_controls::converters::PlatformKeyGestureConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(platform_key_gesture_converter_0))
 }
@@ -73147,7 +73481,7 @@ fn build_controls_macoscontrols_xaml_deferred_435(
 fn build_controls_macoscontrols_xaml_deferred_436(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(24,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_436_THEME)
 }
@@ -73156,7 +73490,7 @@ fn build_controls_macoscontrols_xaml_deferred_436(
 fn build_controls_macoscontrols_xaml_deferred_437(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(35,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -73623,7 +73957,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
 fn build_controls_macoscontrols_xaml_deferred_438(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(241,12) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -73656,7 +73990,7 @@ fn build_controls_macoscontrols_xaml_deferred_438(
 fn build_controls_macoscontrols_xaml_deferred_439(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(246,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_439_THEME)
 }
@@ -73665,7 +73999,7 @@ fn build_controls_macoscontrols_xaml_deferred_439(
 fn build_controls_macoscontrols_xaml_deferred_440(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(250,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_440_THEME)
 }
@@ -73674,7 +74008,7 @@ fn build_controls_macoscontrols_xaml_deferred_440(
 fn build_controls_macoscontrols_xaml_deferred_441(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(253,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_441_THEME)
 }
@@ -73683,7 +74017,7 @@ fn build_controls_macoscontrols_xaml_deferred_441(
 fn build_controls_macoscontrols_xaml_deferred_442(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(259,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_442_THEME)
 }
@@ -73692,7 +74026,7 @@ fn build_controls_macoscontrols_xaml_deferred_442(
 fn build_controls_macoscontrols_xaml_deferred_443(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(285,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME)
 }
@@ -73701,7 +74035,7 @@ fn build_controls_macoscontrols_xaml_deferred_443(
 fn build_controls_macoscontrols_xaml_deferred_444(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/MacOSControls.xaml(18,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_444_THEME)
 }
@@ -73710,7 +74044,7 @@ fn build_controls_macoscontrols_xaml_deferred_444(
 fn build_controls_macoscontrols_xaml_deferred_445(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/MacOSControls.xaml(29,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -73735,7 +74069,7 @@ fn build_controls_macoscontrols_xaml_deferred_445(
 fn build_controls_macoscontrols_xaml_deferred_446(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(34,10) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -73985,7 +74319,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
 fn build_controls_macoscontrols_xaml_deferred_447(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/MacOSControls.xaml(80,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_447_THEME)
 }
@@ -73994,7 +74328,7 @@ fn build_controls_macoscontrols_xaml_deferred_447(
 fn build_controls_macoscontrols_xaml_deferred_448(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(88,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -74041,7 +74375,7 @@ fn build_controls_macoscontrols_xaml_deferred_448(
 fn build_controls_macoscontrols_xaml_deferred_449(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_16 });
     // Controls/MacOSControls.xaml(94,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_449_THEME)
 }
@@ -75297,7 +75631,7 @@ fn build_controls_macoscontrols_xaml_deferred_472(
 fn build_controls_macoscontrols_xaml_deferred_473(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/MacOSControls.xaml(19,4) Left
     ::ferroui_controls::converters::MarginMultiplierConverter::__markup_set_Left(&margin_multiplier_converter_0, ::core::clone::Clone::clone(&true));
@@ -75310,7 +75644,7 @@ fn build_controls_macoscontrols_xaml_deferred_473(
 fn build_controls_macoscontrols_xaml_deferred_474(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(20,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_474_THEME)
 }
@@ -75319,7 +75653,7 @@ fn build_controls_macoscontrols_xaml_deferred_474(
 fn build_controls_macoscontrols_xaml_deferred_475(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(29,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -75427,7 +75761,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
 fn build_controls_macoscontrols_xaml_deferred_476(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME)
 }
@@ -75436,7 +75770,7 @@ fn build_controls_macoscontrols_xaml_deferred_476(
 fn build_controls_macoscontrols_xaml_deferred_477(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(60,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -75461,7 +75795,7 @@ fn build_controls_macoscontrols_xaml_deferred_477(
 fn build_controls_macoscontrols_xaml_deferred_478(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(65,10) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -75641,7 +75975,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
 fn build_controls_macoscontrols_xaml_deferred_479(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/MacOSControls.xaml(154,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_479_THEME)
 }
@@ -75711,7 +76045,7 @@ fn build_controls_macoscontrols_xaml_deferred_482(
 fn build_controls_macoscontrols_xaml_deferred_483(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(21,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_483_THEME)
 }
@@ -75720,7 +76054,7 @@ fn build_controls_macoscontrols_xaml_deferred_483(
 fn build_controls_macoscontrols_xaml_deferred_484(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(24,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -75788,7 +76122,7 @@ fn build_controls_macoscontrols_xaml_deferred_484(
 fn build_controls_macoscontrols_xaml_deferred_485(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(72,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_485_THEME)
 }
@@ -75797,7 +76131,7 @@ fn build_controls_macoscontrols_xaml_deferred_485(
 fn build_controls_macoscontrols_xaml_deferred_486(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(88,10) DataValidationErrors
     let data_validation_errors_0 = ::ferroui_controls::DataValidationErrors::new();
@@ -76132,7 +76466,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
 fn build_controls_macoscontrols_xaml_deferred_487(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(230,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_487_THEME)
 }
@@ -76141,7 +76475,7 @@ fn build_controls_macoscontrols_xaml_deferred_487(
 fn build_controls_macoscontrols_xaml_deferred_488(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(246,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -76315,7 +76649,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
 fn build_controls_macoscontrols_xaml_deferred_489(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/MacOSControls.xaml(300,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_489_THEME)
 }
@@ -76596,7 +76930,7 @@ fn build_controls_macoscontrols_xaml_deferred_507(
 fn build_controls_macoscontrols_xaml_deferred_508(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(70,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_508_THEME)
 }
@@ -76605,7 +76939,7 @@ fn build_controls_macoscontrols_xaml_deferred_508(
 fn build_controls_macoscontrols_xaml_deferred_509(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(99,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_509_THEME)
 }
@@ -76614,7 +76948,7 @@ fn build_controls_macoscontrols_xaml_deferred_509(
 fn build_controls_macoscontrols_xaml_deferred_510(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(109,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -78325,7 +78659,7 @@ fn build_controls_macoscontrols_xaml_deferred_531(
 fn build_controls_macoscontrols_xaml_deferred_532(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/MacOSControls.xaml(28,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
     context.push_parent(rt::to_value(menu_flyout_0.clone()));
@@ -78627,7 +78961,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
 fn build_controls_macoscontrols_xaml_deferred_533(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/MacOSControls.xaml(52,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_533_THEME)
 }
@@ -78636,7 +78970,7 @@ fn build_controls_macoscontrols_xaml_deferred_533(
 fn build_controls_macoscontrols_xaml_deferred_534(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(73,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -78813,7 +79147,7 @@ fn build_controls_macoscontrols_xaml_deferred_534(
 fn build_controls_macoscontrols_xaml_deferred_535(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_17 });
     // Controls/MacOSControls.xaml(161,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_535_THEME)
 }
@@ -78822,7 +79156,7 @@ fn build_controls_macoscontrols_xaml_deferred_535(
 fn build_controls_macoscontrols_xaml_deferred_536(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(110,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_536_THEME)
 }
@@ -78831,7 +79165,7 @@ fn build_controls_macoscontrols_xaml_deferred_536(
 fn build_controls_macoscontrols_xaml_deferred_537(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(122,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -78868,7 +79202,7 @@ fn build_controls_macoscontrols_xaml_deferred_537(
 fn build_controls_macoscontrols_xaml_deferred_538(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(149,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_538_THEME)
 }
@@ -78877,7 +79211,7 @@ fn build_controls_macoscontrols_xaml_deferred_538(
 fn build_controls_macoscontrols_xaml_deferred_539(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(156,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -80109,7 +80443,7 @@ fn build_controls_macoscontrols_xaml_deferred_539(
 fn build_controls_macoscontrols_xaml_deferred_540(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(484,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME)
 }
@@ -80118,7 +80452,7 @@ fn build_controls_macoscontrols_xaml_deferred_540(
 fn build_controls_macoscontrols_xaml_deferred_541(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(501,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -80605,7 +80939,7 @@ fn build_controls_macoscontrols_xaml_deferred_541(
 fn build_controls_macoscontrols_xaml_deferred_542(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(863,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME)
 }
@@ -80614,7 +80948,7 @@ fn build_controls_macoscontrols_xaml_deferred_542(
 fn build_controls_macoscontrols_xaml_deferred_543(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(872,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -80694,7 +81028,7 @@ fn build_controls_macoscontrols_xaml_deferred_543(
 fn build_controls_macoscontrols_xaml_deferred_544(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     // Controls/MacOSControls.xaml(907,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME)
 }
@@ -80703,7 +81037,7 @@ fn build_controls_macoscontrols_xaml_deferred_544(
 fn build_controls_macoscontrols_xaml_deferred_545(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_18 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(914,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -81211,7 +81545,7 @@ fn build_controls_macoscontrols_xaml_deferred_548(
 }
 
 /// The base URI and the XML namespaces of `DensityStyles/Compact.xaml`.
-static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.macos/DensityStyles/Compact.xaml"), namespaces: XML_NAMESPACES_2 };
+static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.macos/DensityStyles/Compact.xaml"), namespaces: XML_NAMESPACES_1 };
 
 /// Generated from `DensityStyles/Compact.xaml`.
 pub fn build_densitystyles_compact_xaml(

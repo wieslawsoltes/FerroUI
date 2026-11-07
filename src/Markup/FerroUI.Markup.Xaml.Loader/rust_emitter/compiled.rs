@@ -37,7 +37,7 @@ use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
 use super::emitter::theme_units::{UnitEmission, TABLE as THEME_UNITS_TABLE};
-use super::emitter::{emit_function, reflection_path_types, root_value_handle_of, DocumentFunctions};
+use super::emitter::{emit_function, reflection_path_types, reflection_path_types_by_unit, root_value_handle_of, DocumentFunctions};
 use super::theme_unit_graph;
 use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
@@ -814,7 +814,10 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
         let namespaces = transformed.namespaces.as_ref().ok_or_else(|| format!("{}: no namespace information", document.0))?;
-        let table = namespaces.source(&reflection_path_types(types, &transformed.configuration, &transformed.root));
+        // The paths of the units of a theme go into the units' tables (#612, root D).
+        let table = namespaces.source(
+            &reflection_path_types_by_unit(types, &transformed.configuration, &transformed.root, functions.units()).0,
+        );
         let table_index = match tables.iter().position(|known| *known == table) {
             Some(known) => known,
             None => {
