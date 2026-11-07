@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Generates the two substitute fonts of the glyph typeface tests.
 
-Avalonia's `GlyphTypefaceTests.cs` loads `MiSans-Normal.ttf` (a CJK font with a
+The reference's `GlyphTypefaceTests.cs` loads `MiSans-Normal.ttf` (a CJK font with a
 `vmtx` table) and `NISC18030.ttf` (a bitmap font without a `head` table). Neither
 file states a licence that allows redistributing it here, so the port's tests
-load two small fonts derived from WenQuanYi Micro Hei (Apache License 2.0),
-which the ControlCatalog sample already ships:
+load two small fonts derived from WenQuanYi Micro Hei 0.2.0-beta (Apache License
+2.0):
 
 - `WenQuanYiMicroHei-Subset.ttf`: the font subset to U+0020, U+4E2D, U+6587 and
   U+5B57, keeping `vhea` and `vmtx` (the shape of `MiSans-Normal.ttf` the tests
@@ -14,9 +14,16 @@ which the ControlCatalog sample already ships:
   `NISC18030.ttf` that a glyph typeface reads (`OS/2`, `cmap`, `maxp`, `name`,
   `post`), with the `head` table renamed to `bhed` as in that bitmap font.
 
-Requires fontTools (`pip install fonttools`). Run from the repository root:
+The source font is not in the repository. It is the first font of
+`wqy-microhei.ttc` of the release of the WenQuanYi project:
 
-    python3 scripts/generate_glyph_typeface_test_fonts.py
+    https://downloads.sourceforge.net/project/wqy/wqy-microhei/0.2.0-beta/wqy-microhei-0.2.0-beta.tar.gz
+
+or the same font as a single file (`WenQuanYiMicroHei-01.ttf`, as the reference's
+sample ships it, which the committed files were made from). Requires fontTools
+(`pip install fonttools`). Run from the repository root:
+
+    python3 scripts/generate_glyph_typeface_test_fonts.py <path of the source font>
 
 The output is deterministic for a given fontTools version; the generated files
 are committed under `src/FerroUI.Base/test_assets/fonts/`.
@@ -30,14 +37,15 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.sfnt import SFNTReader, SFNTWriter
 
-SOURCE = "samples/ControlCatalog/Assets/Fonts/WenQuanYiMicroHei-01.ttf"
 OUT_DIR = "src/FerroUI.Base/test_assets/fonts"
 CODEPOINTS = [0x20, 0x4E2D, 0x6587, 0x5B57]
 NO_HEAD_TABLES = ["OS/2", "cmap", "maxp", "name", "post"]
 
 
-def make_subset():
+def make_subset(source):
     options = subset.Options()
+    # The first font of a collection (`wqy-microhei.ttc`); a single font ignores the number.
+    options.font_number = 0
     options.layout_features = []
     options.name_IDs = ["*"]
     options.name_languages = ["*"]
@@ -45,7 +53,7 @@ def make_subset():
     options.recalc_timestamp = False
     options.drop_tables += ["FFTM", "GDEF", "GPOS", "GSUB", "fpgm", "prep", "cvt ", "gasp"]
 
-    font = subset.load_font(SOURCE, options)
+    font = subset.load_font(source, options)
     subsetter = subset.Subsetter(options)
     subsetter.populate(unicodes=CODEPOINTS)
     subsetter.subset(font)
@@ -72,7 +80,9 @@ def make_no_head(subset_bytes):
 
 
 def main():
-    subset_bytes = make_subset()
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    subset_bytes = make_subset(sys.argv[1])
     no_head_bytes = make_no_head(subset_bytes)
 
     # Check that both parse.

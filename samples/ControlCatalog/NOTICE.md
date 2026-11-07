@@ -7,13 +7,19 @@ This sample is a port of the ControlCatalog sample of the upstream project
   `scripts/convert_catalog_xaml.py`; the conversion changes names only.
 - The Rust sources are ports of the upstream C# sources of the sample, file by file.
 - The files under `Assets/` and `Pages/teapot.bin` are copied unchanged from the upstream
-  repository (`samples/ControlCatalog/Assets`, `samples/ControlCatalog/Pages/teapot.bin` and the
-  application icons `build/Assets/icon.ico`, `build/Assets/icon-32.png`) by
-  `scripts/sync-control-catalog.sh`.
-- The files under `PlaceholderAssets/` are original artwork of this project, drawn by
-  `scripts/browser/render-placeholder-assets.mjs`: the mark, word mark and banner of this project,
-  which the sample embeds in place of the assets that carry the brand of the upstream project
-  (feature `placeholder-branding`, on by default; see `PlaceholderAssets/README.md`).
+  repository (`samples/ControlCatalog/Assets` and `samples/ControlCatalog/Pages/teapot.bin`) by
+  `scripts/sync-control-catalog.sh`, but for the files below, which are this project's own, and for
+  what the catalog leaves out: the photographs of the sample applications of the NavigationPage,
+  CarouselPage and DrawerPage galleries, which the catalog does not have, and the whole CJK font.
+- The artwork of the catalog is original artwork of this project, drawn by
+  `scripts/browser/render-placeholder-assets.mjs` in place of the upstream assets of the same names,
+  which carry the brand of the upstream project: `Assets/icon.ico` and `Assets/icon-32.png` (the
+  mark of this project, `samples/ControlCatalog.Browser/wwwroot/favicon.svg`: the letter F and a
+  spark on a rounded square), `Assets/banner-logo.png` (the mark and the name of the project),
+  `Assets/banner-bg.png` (steel blue with the glow of heated iron) and `Assets/logo1.png` to
+  `logo4.png` (a crystal, a plate, a ring and a spark, which float on the banner of the home page).
+  The resource `AppIcon` of `App.xaml`, the logo at the top of the navigation pane, is the same mark
+  as path data.
 
 - `Assets/Fonts/FerroUICatalogSymbols.ttf` is this project's own, MIT like the rest of it: the
   symbol font of the WinUI controls of the catalog off Windows (`app.rs`), written by
@@ -133,7 +139,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### WenQuanYi Micro Hei
 
-`Assets/Fonts/WenQuanYiMicroHei-01.ttf`, and its subset `Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf`. The font states "Licensed under the Apache License,
+`Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf`, a subset of WenQuanYi Micro Hei 0.2.0-beta
+(https://downloads.sourceforge.net/project/wqy/wqy-microhei/0.2.0-beta/wqy-microhei-0.2.0-beta.tar.gz)
+to the CJK characters of the catalog. The upstream sample ships the whole font
+(`Assets/Fonts/WenQuanYiMicroHei-01.ttf`, 4.5 MB); this sample ships the subset only. The font
+states "Licensed under the Apache License,
 Version 2.0" (http://www.apache.org/licenses/LICENSE-2.0) in its name table; it derives from
 Droid Sans Fallback (Copyright Google, Apache License 2.0) and is published by the WenQuanYi
 project (Copyright WenQuanYi Board of Trustees) under the Apache License 2.0 or the GPL version 3
@@ -152,10 +162,9 @@ text is above (section Source Sans Pro). The Noto fonts declare no Reserved Font
 
 ## Images
 
-The images under `Assets/` (the photographs of the demo applications in `Assets/CurvedHeader`,
-`Assets/ModernApp`, `Assets/Movies`, `Assets/Pulse`, `Assets/Restaurant`, `Assets/RetroGaming`,
-`Assets/Sanctuary`, and the pictures and logos directly under `Assets/`) are part of the upstream
-repository, which records no separate origin or licence for them; they are redistributed here as
-part of the upstream sample under the upstream licence. Three of the pictures
+The pictures directly under `Assets/` (`image1.jpg` to `image7.jpg`, the three photographs below
+and `github_icon.png`) are part of the upstream repository, which records no separate origin or
+licence for them; they are redistributed here as part of the upstream sample under the upstream
+licence. Three of the pictures
 (`delicate-arch-896885_640.jpg`, `hirsch-899118_640.jpg`, `maple-leaf-888807_640.jpg`) carry
 Pixabay file names.

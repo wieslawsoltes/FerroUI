@@ -2555,25 +2555,23 @@ mod bitmaps {
         let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../samples/ControlCatalog/Assets");
         let mut decoded_files = 0;
 
-        for folder in ["CurvedHeader", "ModernApp"] {
-            for entry in std::fs::read_dir(directory.join(folder)).expect("the assets of the catalog") {
-                let path = entry.unwrap().path();
-                if path.extension().is_none_or(|extension| extension != "jpg") {
-                    continue;
-                }
-
-                let bitmap = render_interface()
-                    .load_bitmap_from_file(path.to_str().expect("a path that is text"))
-                    .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
-                let size = bitmap.pixel_size();
-                assert!(size.width >= 16 && size.height >= 16, "{}: {size:?}", path.display());
-
-                // A photograph is opaque and not one color.
-                let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
-                let (first, middle) = (read_pixel(readable, 1, 1), read_pixel(readable, size.width / 2, size.height / 2));
-                assert_eq!((255, 255), (first.3, middle.3), "{}", path.display());
-                decoded_files += 1;
+        for entry in std::fs::read_dir(&directory).expect("the assets of the catalog") {
+            let path = entry.unwrap().path();
+            if path.extension().is_none_or(|extension| extension != "jpg") {
+                continue;
             }
+
+            let bitmap = render_interface()
+                .load_bitmap_from_file(path.to_str().expect("a path that is text"))
+                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+            let size = bitmap.pixel_size();
+            assert!(size.width >= 16 && size.height >= 16, "{}: {size:?}", path.display());
+
+            // A photograph is opaque and not one color.
+            let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
+            let (first, middle) = (read_pixel(readable, 1, 1), read_pixel(readable, size.width / 2, size.height / 2));
+            assert_eq!((255, 255), (first.3, middle.3), "{}", path.display());
+            decoded_files += 1;
         }
 
         assert!(decoded_files >= 10, "{decoded_files}");

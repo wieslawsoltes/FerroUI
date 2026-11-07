@@ -11,14 +11,17 @@ browser host. Each is a subset of an open font, small enough to load at start-up
     NotoColorEmoji-Catalog.ttf          Noto Color Emoji (COLRv1, vector), the emoji the catalog
                                         shows, with their skin tone and ZWJ sequences (SIL OFL 1.1)
     NotoSansArabic-Catalog.ttf          Noto Sans Arabic, the Arabic block (SIL OFL 1.1)
-    WenQuanYiMicroHei-Catalog.ttf       WenQuanYi Micro Hei (`Assets/Fonts/WenQuanYiMicroHei-01.ttf`),
-                                        the CJK characters of the catalog's sources (Apache 2.0)
+    WenQuanYiMicroHei-Catalog.ttf       WenQuanYi Micro Hei 0.2.0-beta, the CJK characters of the
+                                        catalog's sources (Apache 2.0)
     FerroUICatalogSymbolsFallback.ttf   the symbols of the catalog's sources that Inter lacks, from
                                         Noto Sans Math, Noto Sans Symbols and Noto Sans Symbols 2
                                         (SIL OFL 1.1)
 
 The source fonts are not in the repository; download them into a directory first:
 
+    https://downloads.sourceforge.net/project/wqy/wqy-microhei/0.2.0-beta/wqy-microhei-0.2.0-beta.tar.gz
+        (extract `wqy-microhei.ttc`: its first font is the family "WenQuanYi Micro Hei"; the same font
+        as a single file, `WenQuanYiMicroHei-01.ttf`, as the reference's sample ships it, does too)
     https://github.com/googlefonts/noto-emoji/raw/main/2D/fonts/Noto-COLRv1.ttf
     https://github.com/notofonts/notofonts.github.io/raw/main/fonts/NotoSansArabic/unhinted/ttf/NotoSansArabic-Regular.ttf
     https://github.com/notofonts/notofonts.github.io/raw/main/fonts/NotoSansMath/unhinted/ttf/NotoSansMath-Regular.ttf
@@ -41,7 +44,9 @@ from fontTools.ttLib import TTFont
 REPOSITORY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CATALOG = os.path.join(REPOSITORY, "samples/ControlCatalog")
 OUTPUT = os.path.join(CATALOG, "Assets/FallbackFonts")
-WENQUANYI = os.path.join(CATALOG, "Assets/Fonts/WenQuanYiMicroHei-01.ttf")
+# The file names WenQuanYi Micro Hei can have in the directory of the source fonts: the collection
+# of the release of the WenQuanYi project, or its first font as a single file.
+WENQUANYI = ("wqy-microhei.ttc", "WenQuanYiMicroHei-01.ttf")
 
 # The emoji of the catalog's pages, the skin tone modifiers, ZWJ, the emoji presentation selector,
 # and the symbols with an emoji presentation the pages show (heavy plus and minus, star, crab).
@@ -74,8 +79,20 @@ def catalog_cjk():
     return sorted(found)
 
 
+def wenquanyi(sources):
+    """The path of WenQuanYi Micro Hei in the directory of the source fonts."""
+    for name in WENQUANYI:
+        path = os.path.join(sources, name)
+        if os.path.exists(path):
+            return path
+    sys.exit(f"no WenQuanYi Micro Hei in {sources}: expected one of {', '.join(WENQUANYI)}")
+
+
 def subset_font(source, unicodes, output, layout=True):
     options = subset.Options()
+    # The first font of a collection (WenQuanYi Micro Hei of `wqy-microhei.ttc`); a single font
+    # ignores the number.
+    options.font_number = 0
     options.layout_features = ["*"] if layout else []
     options.hinting = False
     options.desubroutinize = True
@@ -101,7 +118,7 @@ def main():
                 os.path.join(OUTPUT, "NotoColorEmoji-Catalog.ttf"))
     subset_font(os.path.join(sources, "NotoSansArabic-Regular.ttf"), ARABIC,
                 os.path.join(OUTPUT, "NotoSansArabic-Catalog.ttf"))
-    subset_font(WENQUANYI, catalog_cjk(), os.path.join(OUTPUT, "WenQuanYiMicroHei-Catalog.ttf"))
+    subset_font(wenquanyi(sources), catalog_cjk(), os.path.join(OUTPUT, "WenQuanYiMicroHei-Catalog.ttf"))
 
     # The symbols come from three fonts of the same em: subsets without layout and vertical
     # metrics, merged into one font with a family of its own.

@@ -6,7 +6,7 @@
     <ScrollViewer x:Name="InfoPanel" DockPanel.Dock="Right" Width="300">
       <StackPanel Margin="16" Spacing="16">
 
-        <TextBlock Text="Curved Header Shop App" FontSize="16" FontWeight="SemiBold"
+        <TextBlock Text="Curved Header" FontSize="16" FontWeight="SemiBold"
                    Foreground="{DynamicResource SystemControlHighlightAccentBrush}" />
 
         <TextBlock TextWrapping="Wrap" FontSize="12" Opacity="0.7"
@@ -20,7 +20,7 @@
           <TextBlock FontSize="12" TextWrapping="Wrap" Text="• Avatar: Canvas overlay, centered at dome Y" />
           <TextBlock FontSize="12" TextWrapping="Wrap" Text="• Home: SetHasNavigationBar(page, false)" />
           <TextBlock FontSize="12" TextWrapping="Wrap" Text="• Profile: BarLayoutBehavior.Overlay (transparent bar)" />
-          <TextBlock FontSize="12" TextWrapping="Wrap" Text="• Tap a featured card or recommended item to open the profile page" />
+          <TextBlock FontSize="12" TextWrapping="Wrap" Text="• Tap the button of the featured card or the avatar to open the profile page" />
         </StackPanel>
 
         <Separator />

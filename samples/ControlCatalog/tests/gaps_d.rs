@@ -18,7 +18,7 @@ fn gap_c400_image_brush_source_from_text() {
     let border = from_markup_value::<Ref<Border>>(&Some(load_text(&format!(
         "<Border {XMLNS}>\
            <Border.Background>\
-             <ImageBrush Source='ferres://ControlCatalog/Assets/CurvedHeader/featured.jpg' Stretch='UniformToFill'/>\
+             <ImageBrush Source='ferres://ControlCatalog/Assets/delicate-arch-896885_640.jpg' Stretch='UniformToFill'/>\
            </Border.Background>\
          </Border>"
     ))))

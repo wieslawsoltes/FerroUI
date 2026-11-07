@@ -188,10 +188,29 @@ class AcknowledgedOutputChangeTests(unittest.TestCase):
             self.assertFalse(result["same_generated_rust_and_metadata"])
 
     def test_a_changed_graph_still_fails(self):
+        # An acknowledged output change does not hide other units or other profiles.
         with tempfile.TemporaryDirectory() as directory:
             base = self.pair(directory, "baseline", {"a.rs": ["1"]})
             other = record()
-            other["units"][1]["features"] = ["extra"]
+            other["units"][1]["profile"] = {"opt_level": "3"}
             cand = self.pair(directory, "candidate", {"a.rs": ["1"]}, other)
             result = catalog.compare_evidence(base, cand, catalog.first_of_revision([base, cand], "candidate"))
             self.assertFalse(result["same_units_features_profiles"])
+
+    def test_an_acknowledged_feature_change_is_compared_within_its_revision(self):
+        # A pull request that removes a feature of the catalog builds its units with other
+        # features: accepted with the acknowledgement, as long as each pair of the revision
+        # repeats the graph of the revision's first pair.
+        with tempfile.TemporaryDirectory() as directory:
+            base = self.pair(directory, "baseline", {"a.rs": ["1"]})
+            other = record()
+            other["units"][0]["features"] = ["default"]
+            cand = self.pair(directory, "candidate", {"a.rs": ["1"]}, other)
+            first = catalog.first_of_revision([base, cand], "candidate")
+            self.assertTrue(catalog.compare_evidence(base, cand, first)["same_units_features_profiles"])
+            drift = record()
+            drift["units"][0]["features"] = ["default", "extra"]
+            again = self.pair(directory, "candidate", {"a.rs": ["1"]}, drift)
+            self.assertFalse(catalog.compare_evidence(base, again, first)["same_units_features_profiles"])
+            # Without the acknowledgement the feature change fails.
+            self.assertFalse(catalog.compare_evidence(base, cand)["same_units_features_profiles"])
