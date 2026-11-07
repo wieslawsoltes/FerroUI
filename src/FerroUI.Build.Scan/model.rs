@@ -723,6 +723,13 @@ pub struct TypeModel {
     pub property_attributes: Vec<(String, Vec<AttributeModel>)>,
     /// `notify_property_changed: T`.
     pub notify_property_changed: Option<RustType>,
+    /// The classes the code of the class constructs (#568, step 4 of
+    /// docs/porting/theme-trimming.md): the namespace-qualified names of the classes of the
+    /// object model, of this crate or of the crates it is built on, that the file of the class
+    /// or an `impl` block of it constructs by `X::new`, `X::new_..`, `X::builder` or
+    /// `X::default`; sorted, the class itself left out. They keep the control themes of what a
+    /// class creates in code (`ListBox` creates `ListBoxItem` containers). Absent in a file: none.
+    pub creates: Vec<String>,
 }
 
 impl TypeModel {
@@ -765,6 +772,7 @@ impl TypeModel {
             attributes: Vec::new(),
             property_attributes: Vec::new(),
             notify_property_changed: None,
+            creates: Vec::new(),
         }
     }
 
@@ -933,7 +941,8 @@ impl TypeModel {
                 .list("property_attributes", &self.property_attributes, |(name, attributes)| {
                     Json::Array(vec![Json::string(name), Json::Array(attributes.iter().map(AttributeModel::to_json).collect())])
                 })
-                .optional("notify_property_changed", optional_type(&self.notify_property_changed)),
+                .optional("notify_property_changed", optional_type(&self.notify_property_changed))
+                .list("creates", &self.creates, |name| Json::string(name)),
         )
     }
 
@@ -988,6 +997,7 @@ impl TypeModel {
                 _ => Err("the attributes of a registered property are not a pair".to_string()),
             })?,
             notify_property_changed: fields.optional("notify_property_changed", RustType::from_json)?,
+            creates: fields.list("creates", |name| text_of(name, "a class a type creates"))?,
         })
     }
 }
@@ -1623,6 +1633,7 @@ mod tests {
         type_.attributes = vec![attribute.clone()];
         type_.property_attributes = vec![("Row".to_string(), vec![attribute])];
         type_.notify_property_changed = Some(unresolved);
+        type_.creates = vec!["Fixture.Controls.Item".to_string(), "Other.Handle".to_string()];
 
         let mut model = AssemblyModel::new("\u{30a2}\u{30bb}\u{30f3}\u{30d6}\u{30ea}", "fixture");
         model.xmlns_definitions = vec![XmlnsDefinitionModel { xml_namespace: "https://example.org/fixture".to_string(), namespace: "Fixture".to_string() }];
@@ -1685,6 +1696,26 @@ mod tests {
         let empty = AssemblyModel::new("A", "a");
         assert_eq!(AssemblyModel::parse(&empty.to_json()), Ok(empty.clone()));
         assert_eq!(empty.to_json(), "{\n  \"format\": 2,\n  \"name\": \"A\",\n  \"crate_name\": \"a\",\n  \"documents\": [],\n  \"dependencies\": []\n}\n");
+    }
+
+    /// Not from upstream: the classes a type creates (#568, step 4) are written only when there
+    /// are some, and a file written before they existed reads as a type that creates nothing.
+    #[test]
+    fn creates_edges_are_optional_in_the_file() {
+        let mut model = AssemblyModel::new("A", "a");
+        let mut list = TypeModel::new("List", TypeKind::Class, RustType::resolved("::a::List"), "a");
+        list.object_model = true;
+        list.creates = vec!["A.Item".to_string()];
+        model.types = vec![list, TypeModel::new("Item", TypeKind::Class, RustType::resolved("::a::Item"), "a")];
+        let text = model.to_json();
+        assert_eq!(text.matches("\"creates\"").count(), 1, "{text}");
+        assert_eq!(AssemblyModel::parse(&text), Ok(model.clone()));
+        // A file of an earlier scanner: its types have no member "creates".
+        let older = r#"{"format": 2, "name": "A", "crate_name": "a", "documents": [], "dependencies": [],
+            "types": [{"name": "List", "kind": "class", "object_model": true, "rust_path": "::a::List", "module": "a"}]}"#;
+        let read = AssemblyModel::parse(older).expect("a file without creates edges");
+        assert_eq!(read.types.len(), 1);
+        assert!(read.types.iter().all(|type_| type_.creates.is_empty()));
     }
 
     /// Not from upstream: the reader of format 1 (the compiler's) reads a file of format 2

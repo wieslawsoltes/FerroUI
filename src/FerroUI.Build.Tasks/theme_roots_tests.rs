@@ -2,6 +2,7 @@
 //! fake units, rooted the ways an application roots them.
 
 use super::*;
+use ferroui_build_scan::model::{RustType, TypeModel};
 use ferroui_build_scan::xaml_metadata::ThemeUnitModel;
 
 fn strings(items: &[&str]) -> Vec<String> {
@@ -48,7 +49,7 @@ fn theme() -> ThemeUnitsModel {
 }
 
 fn kept(roots: &Roots) -> Vec<u32> {
-    kept_units(&theme(), roots, &BaseClasses::default(), false)
+    kept_units(&theme(), roots, &TypeGraph::default(), false)
 }
 
 #[test]
@@ -86,7 +87,7 @@ fn types_templates_construct_root_their_own_control_themes() {
 
 #[test]
 fn a_subclass_roots_the_themes_of_its_base_classes() {
-    let bases = BaseClasses::from_pairs(&[("MyButton", "Button"), ("Button", "ButtonBase")]);
+    let bases = TypeGraph::from_pairs(&[("MyButton", "Button"), ("Button", "ButtonBase")]);
     assert_eq!(bases.chain("MyButton"), ["MyButton", "Button", "ButtonBase"]);
     let roots = Roots { types: set(&["MyButton"]), ..Roots::default() };
     assert_eq!(kept_units(&theme(), &roots, &bases, false), [0, 1, 2, 3]);
@@ -104,7 +105,7 @@ fn explicit_roots_name_units_types_or_keys() {
 fn every_unit_is_kept_for_all_or_with_the_tables_of_types() {
     let all = Roots { all: true, ..Roots::default() };
     assert_eq!(kept(&all), (0..9).collect::<Vec<u32>>());
-    assert_eq!(kept_units(&theme(), &Roots::default(), &BaseClasses::default(), true), (0..9).collect::<Vec<u32>>());
+    assert_eq!(kept_units(&theme(), &Roots::default(), &TypeGraph::default(), true), (0..9).collect::<Vec<u32>>());
 }
 
 #[test]
@@ -157,4 +158,66 @@ group = "samples"
         ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-roots = 3\n"),
         Err("[package.metadata.ferroui] theme-roots must be \"all\" or an array of names".to_string())
     );
+}
+
+/// A class of a model: its name, its base and the classes it creates.
+fn class(name: &str, base: Option<&str>, creates: &[&str]) -> TypeModel {
+    let mut type_ = TypeModel::new(name, TypeKind::Class, RustType::resolved(&format!("::tests::{name}")), "tests");
+    type_.namespace = "Tests.Controls".to_string();
+    type_.object_model = true;
+    type_.base = base.map(|base| RustType::resolved(&format!("::tests::{base}")));
+    type_.creates = strings(creates);
+    type_
+}
+
+#[test]
+fn a_live_type_makes_the_classes_it_creates_live_transitively() {
+    // A list creates its items, the items a toggle button; a subclass of the list creates them
+    // through its base class.
+    let graph = TypeGraph::from_pairs(&[("MyList", "List")]).with_creates(&[("List", "Item"), ("Item", "ToggleButton")]);
+    assert_eq!(graph.live("MyList"), set(&["Item", "List", "MyList", "ToggleButton"]));
+    assert_eq!(graph.live("Item"), set(&["Item", "ToggleButton"]));
+    // A cycle of edges ends.
+    let cycle = TypeGraph::default().with_creates(&[("A", "B"), ("B", "A")]);
+    assert_eq!(cycle.live("A"), set(&["A", "B"]));
+
+    // The toggle button keeps its own control theme and, through its `BasedOn`, the button's.
+    let roots = Roots { types: set(&["MyList"]), ..Roots::default() };
+    assert_eq!(kept_units(&theme(), &roots, &graph, false), [0, 1, 2, 3, 6]);
+    // A type a kept unit constructs makes what it creates live too: the calendar view's buttons
+    // create a popup.
+    let graph = TypeGraph::default().with_creates(&[("Button", "Popup")]);
+    let roots = Roots { types: set(&["CalendarView"]), ..Roots::default() };
+    assert_eq!(kept_units(&theme(), &roots, &graph, false), [0, 1, 2, 3, 7, 8]);
+}
+
+#[test]
+fn the_type_graph_reads_bases_and_creates_from_the_models() {
+    let mut model = AssemblyModel::new("Tests", "tests");
+    model.types = vec![
+        class("List", Some("Control"), &["Tests.Controls.Item"]),
+        class("Item", Some("ContentControl"), &["Other.Primitives.Handle", "Tests.Controls.Item"]),
+        class("MyList", Some("List"), &[]),
+    ];
+    let graph = TypeGraph::from_models([&model]);
+    assert_eq!(graph.chain("MyList"), ["MyList", "List", "Control"]);
+    // By local name, the class itself left out.
+    assert_eq!(graph.live("MyList"), set(&["Control", "ContentControl", "Handle", "Item", "List", "MyList"]));
+    assert!(graph.is_class("Item") && !graph.is_class("Handle"));
+}
+
+#[test]
+fn the_sources_root_type_keys_classes_and_keys() {
+    let graph = TypeGraph::default().with_creates(&[("Canvas", "Popup")]);
+    let references = SourceReferences {
+        // A type key, a class of the models that is no type key, and names that are neither.
+        names: set(&["CalendarView", "Canvas", "Orientation", "Vertical"]),
+        // A key, and strings that are none.
+        strings: set(&["CaptionTextBlockStyle", "Hello, World!", "CalendarView"]),
+    };
+    let theme = theme();
+    let roots = source_roots(&references, [&theme], &graph);
+    assert_eq!(roots, Roots { types: set(&["CalendarView", "Canvas"]), keys: set(&["CaptionTextBlockStyle"]), ..Roots::default() });
+    // The calendar view and its buttons, the popup the canvas creates, the caption style.
+    assert_eq!(kept_units(&theme, &roots, &graph, false), [0, 1, 2, 3, 4, 7, 8]);
 }

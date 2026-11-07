@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Steps 1, 2 and 3 of the plan are implemented (sections 8, 9 and 10); the rest is not yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Steps 1 to 4 of the plan are implemented (sections 8 to 11); the rest is not yet. Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -686,14 +686,15 @@ theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
 
 `ferroui-build` reads the table from `Cargo.toml` in the crate directory with a small reader of
 these three forms (`theme_roots::ThemeTrimming::from_manifest`). A value in any other form fails the
-build and names the key. A build script can add roots with `Build::theme_roots(&[..])`, which is
-also where step 4 adds the roots it reads from sources. The roots are:
+build and names the key. A build script can add roots with `Build::theme_roots(&[..])`; step 4
+adds the roots it reads from sources beside them, through `Roots::extend` (section 11.2). The
+roots are:
 
 - the types the compiled documents of the application construct, select or name in `{x:Type}`
   (elements, template content included, `TargetType`, the type selectors of selectors). The unit
   graph reads them with the rules it uses for theme documents
   (`rust_emitter::document_references`). Each type comes with its base classes, which the type
-  models give (`theme_roots::BaseClasses`, by the Rust name of the base). That covers a subclass
+  models give (`theme_roots::BaseClasses`, by the Rust name of the base; `TypeGraph` since step 4). That covers a subclass
   that does not override its style key;
 - every identifier token of the attribute values and text of the documents, and the argument of
   every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`. A token that is a key of the theme
@@ -709,8 +710,10 @@ defines a live key or the type key of a live type, or when it is named. A kept u
 of a key of the group). It makes its `types` live types, with their base classes, so the controls
 its templates construct root their own control themes. The result is the canonical indices,
 ascending. Every definition of a live key is kept: overrides and the theme dictionaries of every
-variant. A control that only Rust code creates is not a root until step 4, so it needs a
-`theme-roots` entry for now (see 10.5).
+variant. A control that only Rust code creates was not a root in step 3 and needed a
+`theme-roots` entry (see 10.5). Since step 4 the names of the application's sources and the
+creates edges of the type models root it (section 11); only a name built at run time still needs
+`theme-roots`.
 
 ### 10.2 The type tables switch
 
@@ -799,6 +802,9 @@ include of the theme constructs it with `new()`, and every run-time loader links
 
 ### 10.5 Limits until step 4
 
+Step 4 (section 11) removes the first two limits for every control or key the sources name or the
+code of a live class creates. What is left is in 11.5.
+
 - Controls created only from Rust code (`Button::new()` in code-behind, the containers a
   `ListBox` creates when no document names `ListBoxItem`, the selection handles of a `TextBox`)
   are not roots. The closure reaches many of them through the templates of the controls the
@@ -836,3 +842,109 @@ include of the theme constructs it with `new()`, and every run-time loader links
 | `dist`, `theme-roots = "all"` | 37.98 MB |
 
 Screenshots of the trimmed build and of `theme-roots = "all"` (macOS, `fast-release`, the window captured after 3.5 s): the same picture; the only difference is one grey level in the antialiasing of the window title. The trimmed `dist` build opens, renders and closes with no diagnostic. Applications that do not opt in are unchanged: the control catalog's 14 screenshots are byte-identical to step 2 (except its animated home banner, which differs between any two runs), its page tour selects all 127 pages and logs the same lines, and the include fixture that loads the Simple and Fluent themes by URI passes.
+
+## 11. Step 4 as implemented: roots from code
+
+The roots of step 3 come from the documents. Step 4 adds what Rust code creates or names: the
+"creates" edges of the type models, read from the sources of every crate the scanner reads, and
+the names and string literals of the application's own sources. Both apply only to an application
+that opts in (`theme-trimming = true`); the theme crates still compile once, and their output and
+their checked-in references do not change. Step 3 added no hand list of companions (the controls a
+control creates in code): the only stopgap was the advice to name them in `theme-roots`, and the
+edges replace it.
+
+### 11.1 Creates edges in the type models
+
+`ferroui-build-scan` records, for each class of the object model, the classes its code constructs:
+`TypeModel::creates`, the namespace-qualified names of the created classes, sorted, the class
+itself left out (`FerroUI.Controls.ListBox` creates `FerroUI.Controls.ListBoxItem`). In the
+`.xamlmeta` it is the list `"creates"` of a type, written only when it has items. A file without it
+reads as a type that creates nothing, so files of earlier scans and the readers of format 1 are
+unaffected, and the format stays 2.
+
+The scan rules (`scanner/source.rs`, `Code`; `scanner/mod.rs`, `Builder::creates`):
+
+- **What is a construction.** A path whose last segment is `new`, `builder`, `default` or starts
+  with `new_` (`new_with_size`), called or handed on as a function value. The constructed type is
+  the path before the function: `ListBoxItem::new()`, `TextSelectionHandle::new()`,
+  `crate::primitives::Thumb::new_with(..)`, `Flyout::builder()`, `Marker::default()`, and the
+  qualified forms `<X>::new()` and `<X as Default>::default()`.
+- **Where.** In the code of every item of a file that is not test code (`#[cfg(test)]` items and
+  members are left out, as everywhere in the scanner), read from the syntax tree for expressions and
+  from the tokens for the bodies of macro invocations (`vec![X::new()]`, `rsx! { .. }`). Comments
+  are no tokens, attributes (documentation included) are skipped, and string literals and the paths
+  of types (`Ref<X>`) are no constructions.
+- **Whose edge.** A construction is an edge of every class declared in the file it is written in,
+  and of the class of the `impl` block it is written in, wherever that block is (an `impl Separator`
+  in another file). `Self::..` is the class itself and makes no edge.
+- **Which class.** Only a path whose last segment names a class of the object model, of the crate
+  or of a crate it is built on (the models of its dependencies), is resolved; everything else
+  (`Rc::new`, `Thickness::default`, a name of no class) is dropped before resolution, which keeps
+  the scan cheap. The created class is the one the path resolves to through the `use` items and
+  modules of the crate. A path that resolves into another crate and to no class of it (a facade's
+  re-export), and a path the modules do not resolve (a name a function imports for itself), stand
+  for every class of that name. An extra edge keeps a control theme the application does not need;
+  a missing one trims a theme it shows, so the rules err on the side of the edge.
+
+The edges of the framework crates come with their `.xamlmeta` (their build scripts scan them with
+`Export`), so an application's build has the edges of every crate it is built on.
+
+### 11.2 Roots from the application's sources
+
+When the application trims, `ferroui-build` scans its sources with
+`ScanOptions::source_references` on (only then: the framework crates collect nothing). The scan
+returns `Scan::references` (`SourceReferences`):
+
+- `names`: every identifier that starts with an upper-case letter, in expressions, types, `use`
+  items and the bodies of macro invocations;
+- `strings`: the value of every string literal up to 256 bytes, in code and in macro bodies.
+
+Test code, comments and attributes (documentation) are left out. `theme_roots::source_roots` turns
+them into roots: a name that is a type key of a unit of the themes, or a class of the type models,
+is a type root (`CalendarView::new()`, `let list: Ref<ListBox>`, `use ..::CalendarView`); a string
+that equals a key a unit defines is a key root (`"AccentButtonStyle"`,
+`TryFindResource("TextFillColorPrimaryBrush")`). They join the other roots through `Roots::extend`.
+This is the conservative scan of string literals of question 5 of section 7: a string that matches
+a key keeps its unit whatever the code does with it.
+
+### 11.3 The closure
+
+`theme_roots::BaseClasses` became `TypeGraph`: the base class of each class and the classes each
+class creates, by local name, read from all the type models available to the build (the
+dependencies' and the application's own). Every type that becomes live (a root, a name of
+`theme-roots`, a type a kept unit constructs or selects) makes `TypeGraph::live` live: the type, its
+base classes, the classes any of them creates, and so on, transitively, before types are mapped to
+their type-keyed units. A created class therefore roots its own control theme, and the types that
+theme's templates construct root theirs.
+
+### 11.4 Tests
+
+- `ferroui-build-scan`: the fixture `tests/fixtures/creates` (a list that creates its items by
+  `new`, a spacer by a path with its module and `new_with_width`, a separator through `<X>::default`,
+  an item that creates a handle by `builder` and markers by `default` in a macro body, a block of a
+  class in another file, a class of the crate it is built on), with negatives (comments,
+  documentation, string literals, types, other functions, names of no class, `Self`, test code);
+  the border of the scanner fixture creating its brush; the names and strings of the sources; the
+  round trip of `creates` through the `.xamlmeta`, and a file without it.
+- `ferroui-build`, `theme_roots_tests.rs`: transitive creates (through a base class and a cycle),
+  creates of a type a kept unit constructs, the type graph read from models, and the roots of the
+  sources (type keys, classes, keys; names and strings that match nothing).
+
+### 11.5 Limits
+
+- A name built at run time (`format!("{name}Style")`, a type looked up by a name read from a file)
+  matches nothing and still needs `theme-roots`. The debug diagnostic of 10.4 names each such control
+  the first time it is looked up.
+- A construction through a function of another name (`X::create()`, a factory trait) or through a
+  generic `T::new()` makes no edge.
+- Only the sources the scanner reads are scanned: the files reached from the crate's root along its
+  `mod` items. An application whose build does not scan its sources (neither `export_metadata` nor
+  `TypeSystem::Model`) gets no roots from code.
+- The edges are per file, not per function: a class whose file constructs another class for a
+  feature the application does not use still keeps that class's theme.
+
+### 11.6 Measurements
+
+Measured: (pending). To be measured as for step 3: `samples/HelloWorld` (`dist`, macOS ARM64, the
+number of kept units in `$OUT_DIR/xaml/theme_parts.txt`), the catalog, and every compiled desktop
+sample with computed and `all` roots (no new missing-theme diagnostic, identical screenshots).
