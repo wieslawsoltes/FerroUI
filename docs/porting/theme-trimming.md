@@ -982,5 +982,28 @@ Opting the desktop samples in (the gate of 11.6) found two gaps.
   loader, hot reload, the designer, DevTools, Inspect, Diagnostics, and the unit-test builds of
   `ferroui-controls` and `ferroui-markup-xaml`), and the switch of 10.2 reads it.
 
-Measurements: see 11.8.
+### 11.8 Trimming by default
+
+With the two gaps closed, trimming is the default: an application whose compiled markup
+constructs a theme is trimmed unless its manifest says `theme-trimming = false`
+(`ThemeTrimming::default()`); `theme-roots` and `"all"` keep their meaning. `samples/HelloWorld`
+no longer states the opt-in.
+
+Validated on macOS ARM64 (debug builds, a smoke run of each, and screenshots against
+`theme-roots = "all"`):
+
+- the 14 desktop samples of the opt-in run (11.6), with the four of 11.7 rerun: every one opens,
+  renders and closes with no "was trimmed" diagnostic. Kept units: AppWithoutLifetime 7 of 75,
+  BindingDemo 29, GpuInterop 10, IntegrationTestApp 29, Sandbox 5, TextTestApp 32,
+  TreeDataGridDemo 30, RenderDemo 33, VirtualizationDemo 32, BehaviorsGallery 45 (Fluent);
+  ProTranslateDemo 34 of 164, ReactiveDemo 45, ReactiveUIExample 49, HelloWorld.ComponentHost 30
+  (WinUI). Screenshots of the four of 11.7 match `"all"` (HelloWorld.ComponentHost identical; the
+  others differ only in the title bar's active state, an animation frame or a scroll bar's fade);
+- with the default and no manifest entry: WinUIThemeGallery, MaterialThemeGallery,
+  PlatformSanityChecks, ViewInterop, HelloWorld, the hot reload demo (which keeps every unit:
+  `full-themes`), FerroDockReactiveUISample, SingleProjectSandbox, ChartsDemo and LiveChartsDemo
+  (which has no smoke exit; its window was captured and closed): no diagnostic, no panic;
+- the ControlCatalog (desktop): it links `ferroui-diagnostics`, so it keeps every unit by design;
+  its tour selects all 127 pages with no diagnostic, and 12 of its 14 screenshots are identical to
+  `"all"` (the home page differs in its animated banner, as between two runs of `main`).
 

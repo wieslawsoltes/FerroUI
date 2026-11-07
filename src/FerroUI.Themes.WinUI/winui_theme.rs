@@ -153,7 +153,8 @@ impl WinUITheme {
     ///
     /// `parts` are units of `crate::compiled_xaml::THEME_UNITS`, in canonical order (ascending
     /// indices), with the ambient unit (index 0) first: the table an application's build writes
-    /// when it trims its themes (`[package.metadata.ferroui] theme-trimming = true`). The theme
+    /// when it trims its themes (the default; `[package.metadata.ferroui] theme-trimming = false`
+    /// turns it off). The theme
     /// applies those units, at the places of the full theme and in its order; a unit that `parts`
     /// leaves out adds nothing. Only the units named are linked into the application. In debug
     /// builds a lookup of a control theme that `parts` left out logs once that it was trimmed.

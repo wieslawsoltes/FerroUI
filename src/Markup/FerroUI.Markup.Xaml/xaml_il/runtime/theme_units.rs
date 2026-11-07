@@ -115,7 +115,8 @@ pub fn active_theme_units(class: &str) -> ThemeParts {
 /// Registers `parts` as the units of the theme `class` (its full name) that the application
 /// keeps: the table a load of the theme by URI and the constructors of the type information
 /// apply. Replaces an earlier registration. Called by the generated `register()` of an
-/// application that trims its themes (`[package.metadata.ferroui] theme-trimming = true`).
+/// application that trims its themes (the default; `theme-trimming = false` in
+/// `[package.metadata.ferroui]` turns it off).
 pub fn register_theme_parts(class: &'static str, parts: ThemeParts) {
     let mut registered = REGISTERED.write().unwrap_or_else(|error| error.into_inner());
     match registered.iter_mut().find(|(known, _)| *known == class) {

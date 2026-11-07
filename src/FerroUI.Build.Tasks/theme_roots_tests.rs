@@ -133,7 +133,7 @@ ferroui-base = { workspace = true, features = ["markup-functions"] }
 
 [package.metadata.ferroui]
 # Trim the themes.
-theme-trimming = true # the opt-in
+theme-trimming = true # the default, stated
 theme-roots = [
     "CalendarView", # created in code
     'AccentButtonStyle',
@@ -148,8 +148,11 @@ group = "samples"
     let all = ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-trimming = true\ntheme-roots = \"all\"\n").expect("a manifest");
     assert_eq!(all, ThemeTrimming { enabled: true, all: true, roots: Vec::new() });
 
-    // Without the table, nothing is trimmed.
+    // Without the table, the themes are trimmed (the default); `false` turns it off.
     assert_eq!(ThemeTrimming::from_manifest("[package]\nname = \"app\"\n"), Ok(ThemeTrimming::default()));
+    assert!(ThemeTrimming::default().enabled);
+    let off = ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-trimming = false\n").expect("a manifest");
+    assert_eq!(off, ThemeTrimming { enabled: false, all: false, roots: Vec::new() });
     assert_eq!(
         ThemeTrimming::from_manifest("[package.metadata.ferroui]\ntheme-trimming = \"yes\"\n"),
         Err("[package.metadata.ferroui] theme-trimming must be true or false".to_string())

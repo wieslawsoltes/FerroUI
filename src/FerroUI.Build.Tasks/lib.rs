@@ -155,8 +155,8 @@
 //!
 //! # Theme trimming
 //!
-//! An application whose manifest opts in (`[package.metadata.ferroui] theme-trimming = true`)
-//! constructs the themes its documents construct (`<WinUITheme />`) from the units of their
+//! An application (unless its manifest turns it off: `[package.metadata.ferroui]
+//! theme-trimming = false`) constructs the themes its documents construct (`<WinUITheme />`) from the units of their
 //! compiled markup it needs (#568, step 3 of docs/porting/theme-trimming.md). The emitter writes
 //! the construction as `WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_..)`;
 //! after every group is compiled, the build computes the units from the roots of the documents,
@@ -166,7 +166,7 @@
 //! `register()` registers it for loads of the theme by URI. The compiled documents of the
 //! dependencies root what they name (the `references` of their `.xamlmeta`). A build that links
 //! what can show any control (`ferroui-base/full-themes`, `DEP_FERROUI_BASE_XAML_FULL_THEMES`)
-//! keeps every unit. Without the opt-in nothing of this is written.
+//! keeps every unit. With the trimming off nothing of this is written.
 //!
 //! # The GLSL of the runtime shader effects
 //!
@@ -405,7 +405,7 @@ impl Build {
 
     /// Roots of the themes the application trims, beside its documents and the `theme-roots` of
     /// its manifest (#568, step 3): units by the path of their document, types or keys. Nothing
-    /// without the opt-in of the manifest (`[package.metadata.ferroui] theme-trimming = true`).
+    /// when the manifest turns the trimming off (`[package.metadata.ferroui] theme-trimming = false`).
     pub fn theme_roots(mut self, names: &[&str]) -> Self {
         self.theme_roots.names.extend(names.iter().map(|name| name.to_string()));
         self
@@ -608,8 +608,8 @@ impl Build {
             }
         };
 
-        // The trimming of the themes the documents construct (#568, step 3): the opt-in and the
-        // roots of the manifest.
+        // The trimming of the themes the documents construct (#568, step 3; on by default): the
+        // switch and the roots of the manifest.
         let manifest = self.manifest_dir.join("Cargo.toml");
         let trimming = match fs::read_to_string(&manifest) {
             Ok(text) => match ThemeTrimming::from_manifest(&text) {

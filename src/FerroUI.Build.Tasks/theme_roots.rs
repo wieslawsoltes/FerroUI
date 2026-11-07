@@ -4,8 +4,8 @@
 //!
 //! Not a port of an upstream file. A theme whose compiled markup is partitioned into units states
 //! its unit graph in its `.xamlmeta` (`theme_units`: for each unit the keys and type keys it
-//! defines, the keys it references and the types it constructs or selects). An application that
-//! opts in (`[package.metadata.ferroui] theme-trimming = true` in its manifest) constructs the
+//! defines, the keys it references and the types it constructs or selects). An application (unless
+//! `[package.metadata.ferroui] theme-trimming = false` in its manifest turns it off) constructs the
 //! theme from the units its build computes here:
 //!
 //! - **Roots.** The types the compiled documents of the application construct, select or name in
@@ -34,19 +34,21 @@ use ferroui_build_scan::model::{AssemblyModel, TypeKind};
 use ferroui_build_scan::scanner::SourceReferences;
 use ferroui_build_scan::xaml_metadata::ThemeUnitsModel;
 
-/// The key of the manifest table the opt-in is read from.
+/// The key of the manifest table the trimming is read from.
 pub const MANIFEST_TABLE: &str = "package.metadata.ferroui";
 
-/// The opt-in of the manifest (`theme-trimming = true`).
+/// The switch of the manifest (`theme-trimming = false` turns the trimming off; it is on by
+/// default).
 pub const TRIMMING_KEY: &str = "theme-trimming";
 
 /// The explicit roots of the manifest (`theme-roots = ["Name", ..]` or `"all"`).
 pub const ROOTS_KEY: &str = "theme-roots";
 
 /// What the manifest of an application states about the trimming of its themes.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ThemeTrimming {
-    /// `theme-trimming = true`: the application constructs its themes from the units it needs.
+    /// The application constructs its themes from the units it needs: the default, and
+    /// `theme-trimming = true`; `theme-trimming = false` turns it off.
     pub enabled: bool,
     /// `theme-roots = "all"`: every unit is kept (the trimmed construction, with the full table).
     pub all: bool,
@@ -54,9 +56,16 @@ pub struct ThemeTrimming {
     pub roots: Vec<String>,
 }
 
+impl Default for ThemeTrimming {
+    /// Trimming on, with the roots the build computes.
+    fn default() -> Self {
+        Self { enabled: true, all: false, roots: Vec::new() }
+    }
+}
+
 impl ThemeTrimming {
     /// The trimming the manifest `text` states in its table `[package.metadata.ferroui]`; the
-    /// default (no trimming) when it has none. An error names the key whose value is not one of
+    /// default (trimming on) when it has none. An error names the key whose value is not one of
     /// the forms above.
     pub fn from_manifest(text: &str) -> Result<Self, String> {
         let mut trimming = ThemeTrimming::default();
