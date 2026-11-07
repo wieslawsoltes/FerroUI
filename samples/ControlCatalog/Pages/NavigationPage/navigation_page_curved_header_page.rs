@@ -1,20 +1,22 @@
 //! Port of `Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml.cs`: the class of the
 //! document `Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml`.
+//!
+//! The catalog shows the control, not a sample application: the content below the headers
+//! (the two scroll views of the original, with their photographs) is a few plain cards drawn
+//! with gradients and text, built here, and the avatars are filled with gradients. The page
+//! needs no image file.
 
-use super::{CurvedHeaderHomeScrollView, CurvedHeaderProfileScrollView};
 use crate::markup::xaml_class;
-use crate::pages::navigation_demo_helper::parse_color;
+use crate::pages::navigation_demo_helper::{boxed_text, parse_color};
 use ferroui_base::input::{Cursor, InputElement, InputElementImpl, PointerReleasedEventArgs, StandardCursorType};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs};
-use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, VerticalAlignment};
-use ferroui_base::media::imaging::Bitmap;
+use ferroui_base::layout::{HorizontalAlignment, Layoutable, LayoutableImpl, Orientation, VerticalAlignment};
 use ferroui_base::media::{
-    Brushes, Color, Colors, FontWeight, GradientStop, IBrush, IImageBrushSource, ImageBrush, LinearGradientBrush,
-    SolidColorBrush, StreamGeometry, Stretch, SweepDirection, TextAlignment,
+    Brushes, Color, Colors, FontWeight, GradientStop, IBrush, LinearGradientBrush, SolidColorBrush, StreamGeometry,
+    SweepDirection, TextAlignment, TextWrapping,
 };
-use ferroui_base::platform::{AssetLoader, IGeometryContext};
+use ferroui_base::platform::IGeometryContext;
 use ferroui_base::styling::{Selectors, Setter, Style};
-use ferroui_base::utilities::UriRef;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, CornerRadius, FerroObjectImpl, FerroObjectImplExt,
     FerroPropertyChangedEventArgs, Point, Ref, RelativePoint, RelativeUnit, Size, StyledElementImpl, Thickness, Visual,
@@ -23,8 +25,8 @@ use ferroui_base::{
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::shapes::{Ellipse, Path};
 use ferroui_controls::{
-    BarLayoutBehavior, Canvas, ContentControlImpl, ContentPage, Control, ControlImpl, ControlImplExt, NavigationPage,
-    Panel, ScrollViewer, StackPanel, TextBlock, TextBox, UserControl,
+    BarLayoutBehavior, Border, Button, Canvas, ContentControlImpl, ContentPage, Control, ControlImpl, ControlImplExt,
+    NavigationPage, Panel, ScrollViewer, StackPanel, TextBlock, TextBox, UserControl,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -49,7 +51,12 @@ const PROFILE_HEADER_FLAT_H: f64 = 110.0;
 const AVATAR_HOME_SIZE: f64 = 72.0;
 const AVATAR_PROFILE_SIZE: f64 = 88.0;
 
-const ASSET_BASE: &str = "ferres://ControlCatalog/Assets/CurvedHeader/";
+/// The height of the space the content leaves for the header of the home page:
+/// 130 (flat) + 32 (dome) + 36 (half the avatar) + 16.
+const HOME_CONTENT_TOP: f64 = 214.0;
+/// The height of the space the content leaves for the header of the profile page:
+/// 110 (flat) + 32 (dome) + 44 (half the avatar) + 16.
+const PROFILE_CONTENT_TOP: f64 = 202.0;
 
 /// `new SolidColorBrush(color)` as the value of a brush property.
 fn solid(color: Color) -> Option<Rc<dyn IBrush>> {
@@ -66,24 +73,74 @@ fn transparent() -> Option<Rc<dyn IBrush>> {
     Some(transparent)
 }
 
-/// The bitmap of the asset `name`; `None` when the asset cannot be opened or decoded (the
-/// `catch` of the original).
-fn load_img(name: &str) -> Option<Rc<Bitmap>> {
-    let uri = UriRef::parse(&format!("{ASSET_BASE}{name}")).ok()?;
-    let mut stream = AssetLoader::open(&uri, None).ok()?;
-    Some(Rc::new(Bitmap::from_stream(&mut stream).ok()?))
+/// A gradient from the colour `from` at the top left to the colour `to` at the bottom right:
+/// what the page draws in place of a photograph.
+fn gradient(from: &str, to: &str) -> Option<Rc<dyn IBrush>> {
+    let brush = LinearGradientBrush::new();
+    brush.set_start_point(RelativePoint::new(0.0, 0.0, RelativeUnit::Relative));
+    brush.set_end_point(RelativePoint::new(1.0, 1.0, RelativeUnit::Relative));
+    brush.gradient_stops().add(GradientStop::with_color_and_offset(parse_color(from), 0.0));
+    brush.gradient_stops().add(GradientStop::with_color_and_offset(parse_color(to), 1.0));
+    Some(brush.into())
 }
 
-fn img_brush(name: &str, fallback: Option<Rc<dyn IBrush>>) -> Option<Rc<dyn IBrush>> {
-    match load_img(name) {
-        Some(bmp) => {
-            let source: Rc<dyn IImageBrushSource> = bmp;
-            let brush = ImageBrush::with_source(Some(source));
-            brush.set_stretch(Stretch::UniformToFill);
-            Some(brush.into())
-        }
-        None => fallback,
-    }
+fn text(content: &str, size: f64, weight: FontWeight, color: Color) -> Ref<TextBlock> {
+    let block = TextBlock::new();
+    block.set_text(Some(content));
+    block.set_font_size(size);
+    block.set_font_weight(weight);
+    block.set_foreground(solid(color));
+    block
+}
+
+/// The title of a section of the content.
+fn heading(content: &str, margin: Thickness) -> Ref<TextBlock> {
+    let block = text(content, 18.0, FontWeight::Bold, text_dark());
+    block.set_margin(margin);
+    block
+}
+
+/// An empty border of the given height: the room the content leaves for a header.
+fn spacer(height: f64) -> Ref<Border> {
+    let spacer = Border::new();
+    spacer.set_height(height);
+    spacer
+}
+
+/// A card of the list of the home page: a tile of colour and two lines of text.
+fn list_card(title: &str, detail: &str, from: &str, to: &str) -> Ref<Border> {
+    let tile = Border::new();
+    tile.set_width(52.0);
+    tile.set_height(52.0);
+    tile.set_corner_radius(CornerRadius::uniform(10.0));
+    tile.set_margin(Thickness::new(0.0, 0.0, 12.0, 0.0));
+    tile.set_vertical_alignment(VerticalAlignment::Center);
+    tile.set_background(gradient(from, to));
+
+    let lines = StackPanel::new();
+    lines.set_vertical_alignment(VerticalAlignment::Center);
+    lines.set_spacing(1.0);
+    lines.children().add(text(title, 14.0, FontWeight::SemiBold, text_dark()));
+    lines.children().add(text(detail, 12.0, FontWeight::Normal, text_muted()));
+
+    let row = StackPanel::new();
+    row.set_orientation(Orientation::Horizontal);
+    row.children().add(tile);
+    row.children().add(lines);
+
+    let card = Border::new();
+    card.set_corner_radius(CornerRadius::uniform(12.0));
+    card.set_background(white());
+    card.set_padding(Thickness::uniform(14.0));
+    card.set_child(row);
+    card
+}
+
+/// A scroll viewer of the content of a page, below the header that overlaps it.
+fn content_scroll(content: Ref<StackPanel>) -> Ref<ScrollViewer> {
+    let scroll = ScrollViewer::new();
+    scroll.set_content(Some(Control::boxed(content)));
+    scroll
 }
 
 #[repr(C)]
@@ -203,7 +260,7 @@ impl NavigationPageCurvedHeaderPage {
         let avatar = Ellipse::new();
         avatar.set_width(AVATAR_HOME_SIZE);
         avatar.set_height(AVATAR_HOME_SIZE);
-        avatar.set_fill(img_brush("avatar.jpg", solid(parse_color("#93c5fd"))));
+        avatar.set_fill(gradient("#93c5fd", "#137fec"));
         let avatar_ring = Ellipse::new();
         avatar_ring.set_width(AVATAR_HOME_SIZE + 6.0);
         avatar_ring.set_height(AVATAR_HOME_SIZE + 6.0);
@@ -214,15 +271,9 @@ impl NavigationPageCurvedHeaderPage {
         let header_panel = Panel::new();
         header_panel.set_vertical_alignment(VerticalAlignment::Top);
 
-        // The views and the canvas end up in a page of the navigation page of this control:
+        // The content and the canvas end up in a page of the navigation page of this control:
         // their handlers hold the control weakly.
-        let home_scroll = CurvedHeaderHomeScrollView::new();
-        let weak = self.to_ref().downgrade();
-        home_scroll.set_navigate_requested(Some(Rc::new(move || {
-            if let Some(this) = weak.upgrade() {
-                this.push_profile_page();
-            }
-        })));
+        let home_scroll = self.build_home_content();
 
         {
             let (bg_path, avatar, avatar_ring) = (bg_path.clone(), avatar.clone(), avatar_ring.clone());
@@ -301,7 +352,7 @@ impl NavigationPageCurvedHeaderPage {
         let avatar = Ellipse::new();
         avatar.set_width(AVATAR_PROFILE_SIZE);
         avatar.set_height(AVATAR_PROFILE_SIZE);
-        avatar.set_fill(img_brush("avatar.jpg", solid(parse_color("#60a5fa"))));
+        avatar.set_fill(gradient("#bfdbfe", "#60a5fa"));
         let avatar_ring = Ellipse::new();
         avatar_ring.set_width(AVATAR_PROFILE_SIZE + 6.0);
         avatar_ring.set_height(AVATAR_PROFILE_SIZE + 6.0);
@@ -312,7 +363,7 @@ impl NavigationPageCurvedHeaderPage {
         let header_panel = Panel::new();
         header_panel.set_vertical_alignment(VerticalAlignment::Top);
 
-        let profile_scroll = CurvedHeaderProfileScrollView::new();
+        let profile_scroll = Self::build_profile_content();
 
         {
             let (bg_path, avatar, avatar_ring) = (bg_path.clone(), avatar.clone(), avatar_ring.clone());
@@ -350,6 +401,117 @@ impl NavigationPageCurvedHeaderPage {
         page.set_content(Some(Control::boxed(root)));
         NavigationPage::set_bar_layout_behavior(&page, Some(BarLayoutBehavior::Overlay));
         page
+    }
+
+    /// The content of the home page below its header: a featured card with the button that
+    /// opens the profile page, and a list of cards.
+    fn build_home_content(&self) -> Ref<ScrollViewer> {
+        let open_profile = Button::new();
+        open_profile.set_content(Some(boxed_text("Open the profile page")));
+        open_profile.set_background(solid(Color::from_argb(60, 255, 255, 255)));
+        open_profile.set_foreground(white());
+        open_profile.set_border_brush(solid(Color::from_argb(120, 255, 255, 255)));
+        open_profile.set_border_thickness(Thickness::uniform(1.0));
+        open_profile.set_corner_radius(CornerRadius::uniform(8.0));
+        open_profile.set_height(40.0);
+        open_profile.set_padding(Thickness::symmetric(24.0, 0.0));
+        open_profile.set_horizontal_alignment(HorizontalAlignment::Center);
+        open_profile.set_horizontal_content_alignment(HorizontalAlignment::Center);
+        open_profile.set_vertical_content_alignment(VerticalAlignment::Center);
+        let weak = self.to_ref().downgrade();
+        open_profile.click(move |_, _| {
+            if let Some(this) = weak.upgrade() {
+                this.push_profile_page();
+            }
+        });
+
+        let featured_title = text("A curved header", 18.0, FontWeight::Bold, Colors::WHITE);
+        featured_title.set_text_alignment(TextAlignment::Center);
+        let featured_detail = text(
+            "The header is page content; the bar is hidden.",
+            13.0,
+            FontWeight::Normal,
+            Color::from_argb(210, 255, 255, 255),
+        );
+        featured_detail.set_text_alignment(TextAlignment::Center);
+        featured_detail.set_text_wrapping(TextWrapping::Wrap);
+        featured_detail.set_margin(Thickness::new(0.0, 0.0, 0.0, 6.0));
+
+        let featured_content = StackPanel::new();
+        featured_content.set_vertical_alignment(VerticalAlignment::Bottom);
+        featured_content.set_horizontal_alignment(HorizontalAlignment::Center);
+        featured_content.set_margin(Thickness::new(16.0, 0.0, 16.0, 16.0));
+        featured_content.set_spacing(4.0);
+        featured_content.children().add(featured_title);
+        featured_content.children().add(featured_detail);
+        featured_content.children().add(open_profile);
+
+        let featured = Border::new();
+        featured.set_height(200.0);
+        featured.set_margin(Thickness::symmetric(16.0, 0.0));
+        featured.set_corner_radius(CornerRadius::uniform(16.0));
+        featured.set_background(gradient("#137fec", "#6d28d9"));
+        featured.set_child(featured_content);
+
+        let list = StackPanel::new();
+        list.set_spacing(10.0);
+        list.set_margin(Thickness::symmetric(16.0, 0.0));
+        list.children().add(list_card("Hidden bar", "SetHasNavigationBar(page, false) on this page.", "#22c55e", "#15803d"));
+        list.children().add(list_card("Dome", "StreamGeometry ArcTo, rebuilt on SizeChanged.", "#137fec", "#0a4fa8"));
+        list.children().add(list_card("Avatar", "A canvas overlay centred on the tip of the dome.", "#f59e0b", "#b45309"));
+
+        let content = StackPanel::new();
+        content.children().add(spacer(HOME_CONTENT_TOP));
+        content.children().add(heading("Featured", Thickness::new(16.0, 16.0, 16.0, 12.0)));
+        content.children().add(featured);
+        content.children().add(heading("How it is built", Thickness::new(16.0, 20.0, 16.0, 12.0)));
+        content.children().add(list);
+        content.children().add(spacer(24.0));
+        content_scroll(content)
+    }
+
+    /// The content of the profile page below its header: a text and a grid of tiles.
+    fn build_profile_content() -> Ref<ScrollViewer> {
+        let about = text(
+            "This page keeps its navigation bar in the Overlay layout: the bar is transparent over the curved header, and the back button stays usable.",
+            13.0,
+            FontWeight::Normal,
+            text_muted(),
+        );
+        about.set_text_wrapping(TextWrapping::Wrap);
+        about.set_text_alignment(TextAlignment::Center);
+        about.set_margin(Thickness::new(24.0, 0.0, 24.0, 20.0));
+
+        let tiles = StackPanel::new();
+        tiles.set_spacing(4.0);
+        tiles.set_margin(Thickness::symmetric(16.0, 0.0));
+        const TILE_ROWS: [[(&str, &str); 3]; 2] = [
+            [("#137fec", "#0a4fa8"), ("#22c55e", "#15803d"), ("#f59e0b", "#b45309")],
+            [("#ec4899", "#be185d"), ("#8b5cf6", "#6d28d9"), ("#14b8a6", "#0f766e")],
+        ];
+        for colors in TILE_ROWS {
+            let row = StackPanel::new();
+            row.set_orientation(Orientation::Horizontal);
+            row.set_horizontal_alignment(HorizontalAlignment::Center);
+            row.set_spacing(4.0);
+            for (from, to) in colors {
+                let tile = Border::new();
+                tile.set_width(100.0);
+                tile.set_height(100.0);
+                tile.set_corner_radius(CornerRadius::uniform(6.0));
+                tile.set_background(gradient(from, to));
+                row.children().add(tile);
+            }
+            tiles.children().add(row);
+        }
+
+        let content = StackPanel::new();
+        content.children().add(spacer(PROFILE_CONTENT_TOP));
+        content.children().add(about);
+        content.children().add(heading("Tiles", Thickness::new(16.0, 0.0, 16.0, 12.0)));
+        content.children().add(tiles);
+        content.children().add(spacer(24.0));
+        content_scroll(content)
     }
 
     fn build_dome_geometry(w: f64, flat_h: f64, dome_h: f64) -> Ref<StreamGeometry> {

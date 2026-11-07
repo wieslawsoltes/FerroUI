@@ -3,9 +3,8 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    CareCompanionAppPage, PipsPagerCarouselPage, PipsPagerCustomButtonThemesPage, PipsPagerCustomColorsPage,
-    PipsPagerCustomTemplatesPage, PipsPagerEventsPage, PipsPagerGettingStartedPage, PipsPagerLargeCollectionPage,
-    SanctuaryShowcasePage,
+    PipsPagerCarouselPage, PipsPagerCustomButtonThemesPage, PipsPagerCustomColorsPage, PipsPagerCustomTemplatesPage,
+    PipsPagerEventsPage, PipsPagerGettingStartedPage, PipsPagerLargeCollectionPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -55,18 +54,6 @@ const DEMOS: &[Demo] = &[
         "Custom Templates",
         "Override pip item templates to create squares, pills, numbers, or any custom shape.",
         || PipsPagerCustomTemplatesPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Care Companion",
-        "A health care onboarding flow using PipsPager as the page indicator for a CarouselPage.",
-        || CareCompanionAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Sanctuary",
-        "A travel discovery app using PipsPager as the page indicator for a CarouselPage.",
-        || SanctuaryShowcasePage::new().upcast(),
     ),
 ];
 

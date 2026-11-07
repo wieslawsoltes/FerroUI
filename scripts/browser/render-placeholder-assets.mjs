@@ -2,21 +2,21 @@
 //
 //   node scripts/browser/render-placeholder-assets.mjs       (CHROME=<path of a Chrome or Chromium binary>)
 //
-// The sample must not show the brand assets of the upstream project, and its published browser site must
-// not carry them. With the feature `placeholder-branding` of the crate `control-catalog` (on by default;
-// the browser host samples/ControlCatalog.Browser names it too) the build script of the sample embeds the file of the same name from
-// samples/ControlCatalog/PlaceholderAssets in place of each such asset. This script draws those files: the
-// mark of the project in samples/ControlCatalog.Browser/wwwroot/favicon.svg (the letter F and a spark on a
-// rounded square, original artwork), a word mark, a banner background and four shapes, each at the
-// pixel size of the asset it replaces, rasterised by headless Chrome. The output is committed; run the
-// script again only when the artwork changes.
+// The sample shows the artwork of this project, not the brand assets of the upstream project, and its
+// published browser site must not carry those. This script draws the artwork into samples/ControlCatalog/Assets,
+// each file at the pixel size of the upstream asset of the same name it stands in for: the application icon
+// (the mark of the project in samples/ControlCatalog.Browser/wwwroot/favicon.svg, the letter F and a spark on a
+// rounded square, original artwork), a word mark, a banner background and the four shapes that float on the
+// banner, rasterised by headless Chrome. The mark as path
+// data is the resource `AppIcon` of samples/ControlCatalog/App.xaml (48 units square, even-odd fill), which
+// is written by hand. The output is committed; run the script again only when the artwork changes.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { open } from "./harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const out = path.join(root, "samples", "ControlCatalog", "PlaceholderAssets");
+const out = path.join(root, "samples", "ControlCatalog", "Assets");
 const mark = fs.readFileSync(path.join(root, "samples", "ControlCatalog.Browser", "wwwroot", "favicon.svg"), "utf8");
 const markBody = mark.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
 

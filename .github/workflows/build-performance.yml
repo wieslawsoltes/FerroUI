@@ -8,7 +8,6 @@ on:
       - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
       - 'samples/SampleBuild/**'
       - 'samples/ControlCatalog/build.rs'
-      - 'samples/ControlCatalog/build/placeholder_geometry.rs'
       - 'scripts/build-perf/**'
       - 'scripts/build-browser.sh'
       - 'scripts/browser/build-webapp.mjs'
@@ -94,10 +93,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config libfontconfig1-dev libfreetype6-dev
-      - name: Source, geometry, asset and generated-intermediate regression controls
-        run: >-
-          python3 candidate/scripts/build-perf/catalog-inputs.py
-          --baseline baseline --candidate candidate --output results/catalog-inputs
       - name: Three population and immediate-repeat pairs of the real catalog
         run: >-
           python3 candidate/scripts/build-perf/catalog-freshness.py
