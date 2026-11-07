@@ -440,16 +440,23 @@ without running destructors.
   way the original rethrows an exception of a handler.
 - The development tools that isolate the code of the application they inspect (the Designer, the
   previewer of `DesignerSupport`, hot reload, DevTools) need unwinding. They are built with `dev`,
-  `release` or `dist-unwind`.
+  `fast-release`, `release-unwind` or `dist-unwind`.
 
-`dist-unwind` is `dist` with unwinding, for an application that catches panics to carry on.
-`release` keeps unwinding: it is the profile of development builds that run the tools above, and
-of the benchmarks. Cargo ignores `panic` for tests, benches, build scripts and procedural macros.
+`release` aborts on panic as well (owner decision of 2026-11-07, #567): it is what
+`cargo build --release` gives an application, and the unwind tables are as large there as in
+`dist`. `release-unwind` and `dist-unwind` are the same profiles with unwinding, for a program that
+catches panics to carry on. `fast-release`, the profile for running an application or a tool
+locally, keeps unwinding so the Designer and the previewer isolate the code they preview. The
+browser profile inherits `release` and aborts too; the threaded module rebuilds the standard library
+with `panic_abort` (`scripts/build-browser.sh`). Cargo ignores `panic` for tests, benches, build
+scripts and procedural macros, so the tests and benchmarks are unchanged.
+
+RELEASE_TABLE_PLACEHOLDER
 
 Workspace profiles do not reach an application in a workspace of its own: its root `Cargo.toml`
 states its own. The application templates (the `FerroUI/templates` repository) and the shared
 workspace settings that `scripts/apps/sync-workspace.py` writes carry `panic = "abort"` in their
-`dist` profile. An application that wants a report of a panic before the process ends installs a
+`release` and `dist` profiles. An application that wants a report of a panic before the process ends installs a
 panic hook (`std::panic::set_hook`), which runs before the abort, as the Android and browser
 platforms do for their crash reports.
 
