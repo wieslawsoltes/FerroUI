@@ -43,3 +43,9 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
 # The URI context of the include tests holds the URL of a document (C5 of #423).
 url = { workspace = true }
+
+[package.metadata.ferroui]
+# The tests compare the build script's output with the emitter run in the tests, which constructs
+# the themes whole: the fixture is about includes, not the theme trimming (#568), which is on by
+# default and covered by the tests of ferroui-build and the samples.
+theme-trimming = false
