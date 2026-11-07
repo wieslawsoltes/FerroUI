@@ -1047,7 +1047,7 @@ impl PreviewStageBoard {
     ) -> Result<ferroui_base::Rect, String> {
         // Boundary (#567): a guard while the native graph of the previewed document is read;
         // every expected failure is an `Err` of the resolver. Isolating a panic needs a build
-        // that unwinds (`dev` or `release-unwind` profile).
+        // that unwinds (`dev`, `release` or `dist-unwind` profile).
         std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             self.resolve_prototype_hotspot_bounds(id, anchor)
         }))

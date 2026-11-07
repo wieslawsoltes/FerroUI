@@ -6,9 +6,9 @@ clean (section 5); the rest is deferred with its reason (section 6).
 
 Issue #567 replaces panics that carry an error between framework functions with `Result`, and
 keeps `catch_unwind` only at true boundaries. The owner decided (issue #567, 2026-11-06) that the
-shipped build aborts on panic, fully supported: `dist`, and likely `release`, use
-`panic = "abort"`, with `dist-unwind` and `release-unwind` profiles for applications that host
-plugins and for the development tools. So no production code path may rely on catching a panic
+shipped build aborts on panic, fully supported: `dist` uses `panic = "abort"` (since part 5 of
+#567), with `dist-unwind` for applications that host plugins; `release` keeps unwinding for
+development builds and the development tools. So no production code path may rely on catching a panic
 to work correctly. With abort, `catch_unwind` never returns `Err`: a panic runs the panic hook
 and ends the process. Cargo ignores `panic` for tests, benches, build scripts and proc macros, so
 the test suites always unwind.
@@ -98,7 +98,7 @@ Breaks with abort (an expected error travels as a panic), production paths:
 | `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.5) |
 | `ferroui-reactiveui` `binding/bindings/binding_errors.rs:47` | a fault of a binding source aborts instead of reaching `ThrownExceptions` |
 
-Breaks with abort, development tools only (built with `dev` or `release-unwind`): hot reload
+Breaks with abort, development tools only (built with `dev`, `release` or `dist-unwind`): hot reload
 (the `panic_any(ReloadError)` flows and `catch_reload`, 5 sites; the crate is
 `cfg(debug_assertions)` and never in `release` or `dist`), the previewer of `DesignerSupport`
 (the load and show of the edited document), and the Designer (the animation preview and the
@@ -453,7 +453,7 @@ conversion, or that the panic comes from a third-party crate.
 The Designer, `DesignerSupport` (the previewer), hot reload (`ferroui-hot-reload`, debug builds
 only), hot patch, DevTools, MCP and Inspect isolate the code of the previewed or inspected
 application with `catch_unwind`, and three of them still turn expected errors into values with
-it (section 10). They are built with the `dev` profile or a `release-unwind` profile. Not
+it (section 10). They are built with the `dev` or `release` profile or `dist-unwind`. Not
 converted, as decided for this step:
 
 - hot reload: the `panic_any(ReloadError)` of the resource lookups of a candidate and
@@ -1057,7 +1057,7 @@ comment `error_boundary.rs:6` of `ferroui-view` (it names `catch_unwind`, it is 
 `root_binding_tests.rs:288` of `ferroui-hot-reload` (a `_tests.rs` file the grep leaves out; T).
 
 Most sites are development tools. A (B) site of a tool that isolates user code is marked as
-needing a build that unwinds (`dev` or `release-unwind` profile). Three (E) families reach the
+needing a build that unwinds (`dev`, `release` or `dist-unwind` profile). Three (E) families reach the
 catches of this group: the `panic_any(ReloadError)` of hot reload, the validation panics of
 `Animation::apply_for_preview` and the animators (`ferroui-base`), and the "throw" of the XAML
 runtime of `ferroui-markup-xaml` (`crate::throw`, `xaml_error_scope::throw`: a failing deferred
