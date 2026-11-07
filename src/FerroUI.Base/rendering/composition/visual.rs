@@ -389,6 +389,10 @@ impl CompositionVisual {
 }
 
 impl CompositionVisualHooks for CompositionVisual {
+    fn on_animated_property_assigned(&self, property_name: &str) {
+        self.object.note_animation_property_assigned(property_name);
+    }
+
     fn on_root_changed(&self) {
         // OnRootChangedCore of the container visual.
         let root = self.root();

@@ -99,6 +99,13 @@ impl CompositionObject {
         self.animation_controllers.borrow_mut().retain(|(name, _)| name != property_name);
     }
 
+    /// A direct property reset replaces both whole-property and subchannel animations.
+    pub(crate) fn note_animation_property_assigned(&self, property_name: &str) {
+        self.animation_controllers.borrow_mut().retain(|(name, _)| {
+            name != property_name && !name.strip_prefix(property_name).is_some_and(|suffix| suffix.starts_with('.'))
+        });
+    }
+
     /// The controller of the animation started on `property_name`: `None`
     /// when no animation was started on it, `Some(None)` when it was started
     /// without a controller.

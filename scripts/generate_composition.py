@@ -750,6 +750,9 @@ class Generator:
             unit.emit("    fn base_serialize_changes_core(&self, writer: &mut BatchStreamWriter<'_>);")
             unit.emit()
         unit.emit("    fn initialize_defaults_extra(&self) {}")
+        if cl.name == "CompositionVisual":
+            unit.emit("    /// A direct assignment replaces whole-property and subchannel animations.")
+            unit.emit("    fn on_animated_property_assigned(&self, _property_name: &str) {}")
         for prop in props:
             info = self.get_type_info(prop.type)
             unit.use(*info.imports)
@@ -946,6 +949,16 @@ class Generator:
         unit.emit("    pub fn set_%s(&self, host: &dyn %s, value: %s) {" % (accessor, hooks, info.client_type))
         unit.emit("        let mut changed = false;")
         unit.emit("        let old_value = %s;" % self.field_get(info, field))
+        if cl.name == "CompositionVisual" and prop.animated:
+            # An API assignment is a command even when its API-side value is unchanged:
+            # WinUI resets indicator animations with ordinary property setters.
+            unit.emit('        CompositionVisualHooks::on_animated_property_assigned(host, "%s");' % prop.name)
+            unit.emit("        if !old_value.differs(&value) {")
+            unit.emit("            host.pending_animations().remove(%s);" % self.client_property_ref(unit, cl, prop))
+            unit.emit("            self.%s.set((self.%s.get() | %s::%s) & !%s::%s_ANIMATED);" % (
+                changed_field, changed_field, changed_type, flag, changed_type, flag))
+            unit.emit("            host.register_for_serialization();")
+            unit.emit("        }")
         unit.emit("        if old_value.differs(&value) {")
         if info.is_copy:
             unit.emit("            %s::validate_%s_change(host, old_value, value);" % (hooks, field))

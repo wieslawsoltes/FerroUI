@@ -638,6 +638,7 @@ mod list_box_item;
 mod navigable_containers;
 mod selection_changed_event_args;
 mod selection_mode;
+mod selection_indicator_animation;
 mod tab_control;
 mod tab_item;
 mod tree_view;
