@@ -132,7 +132,7 @@ impl Header {
     }
 
     fn on_its_thread(&self) -> bool {
-        self.thread.get() == Some(&std::thread::current().id())
+        try_thread_id().is_some_and(|current| self.thread.get() == Some(&current))
     }
 
     /// Queues a poll of the task: in the queue of its thread, or on its schedule unless one is
@@ -211,6 +211,32 @@ crate::ferro_thread_local! {
     static CURRENT: Cell<Option<u64>> = const { Cell::new(None) };
     /// The schedule of the work that runs on the thread ([`current_schedule`]).
     static CURRENT_SCHEDULE: RefCell<Option<Arc<dyn Schedule>>> = const { RefCell::new(None) };
+    /// The id of the thread, kept once known ([`thread_id`]).
+    static THREAD_ID: Cell<Option<ThreadId>> = const { Cell::new(None) };
+}
+
+/// The id of the calling thread, kept in a variable of the thread the first time it is asked
+/// for. Taking it from `std::thread::current` again while the thread ends panics once the
+/// standard library has destroyed its own data of the thread, and the values of the thread
+/// (a dispatcher with its queued work) are destroyed after that: the work they drop forgets its
+/// callbacks and compares threads (#567).
+fn thread_id() -> ThreadId {
+    try_thread_id().unwrap_or_else(|| std::thread::current().id())
+}
+
+/// The id of the calling thread when it is known without `std::thread::current`, or can still be
+/// taken from it; `None` once the variables of the thread are destroyed, as the thread ends.
+fn try_thread_id() -> Option<ThreadId> {
+    THREAD_ID
+        .try_with(|id| match id.get() {
+            Some(id) => id,
+            None => {
+                let current = std::thread::current().id();
+                id.set(Some(current));
+                current
+            }
+        })
+        .ok()
 }
 
 /// The ids of the tasks and of the callbacks, unique in the process so that a poll or a request
@@ -321,7 +347,7 @@ fn local_route() -> Route {
 }
 
 fn spawn_routed(future: LocalFuture, route: Route, first_poll: FirstPoll, on_failure: OnFailure) -> Arc<Header> {
-    let header = Header::new(route, Some(std::thread::current().id()));
+    let header = Header::new(route, Some(thread_id()));
     start_task(header.clone(), future, on_failure, first_poll);
     header
 }
@@ -496,7 +522,7 @@ impl<C, T: 'static> Start<C, T> {
     {
         let Some(create) = self.create.take() else { return };
         let header = self.header.clone();
-        let _ = header.thread.set(std::thread::current().id());
+        let _ = header.thread.set(thread_id());
         header.scheduled.store(false, Ordering::Release);
         if header.aborted.load(Ordering::Acquire) {
             header.finished.store(true, Ordering::Release);
@@ -668,7 +694,7 @@ impl LocalCallback {
     pub(crate) fn register(callback: LocalCallbackFn) -> Self {
         let id = NEXT_CALLBACK.fetch_add(1, Ordering::Relaxed);
         CALLBACKS.with_borrow_mut(|callbacks| callbacks.insert(id, callback));
-        Self { id, thread: std::thread::current().id(), inbox: INBOX.with(Arc::clone), _thread_bound: std::marker::PhantomData }
+        Self { id, thread: thread_id(), inbox: INBOX.with(Arc::clone), _thread_bound: std::marker::PhantomData }
     }
 
     /// The part that crosses threads.
@@ -691,7 +717,7 @@ pub(crate) struct LocalCallbackHandle {
 
 impl LocalCallbackHandle {
     pub(crate) fn run(&self) {
-        if std::thread::current().id() == self.thread {
+        if try_thread_id() == Some(self.thread) {
             run_callback(self.id);
         } else {
             self.inbox.push(Pending::Callback(self.id));
@@ -700,12 +726,16 @@ impl LocalCallbackHandle {
 
     /// Forgets the callback unless it ran, from any thread: at once on the thread of the
     /// callback; from another thread through the queue of the callback's thread, which drops the
-    /// callback there (it need not be `Send`).
+    /// callback there (it need not be `Send`). On a thread whose variables are already destroyed
+    /// (it is ending, and its dispatcher with the work it drops is being destroyed) nothing is
+    /// done: a callback of this thread went with the thread's variables, and queuing would ask
+    /// the schedule of a dispatcher that is being destroyed to run. A callback of another thread
+    /// then stays registered until that thread ends.
     pub(crate) fn forget(&self) {
-        if std::thread::current().id() == self.thread {
-            forget_callback(self.id);
-        } else {
-            self.inbox.push(Pending::Forget(self.id));
+        match try_thread_id() {
+            Some(current) if current == self.thread => forget_callback(self.id),
+            Some(_) => self.inbox.push(Pending::Forget(self.id)),
+            None => {}
         }
     }
 }
