@@ -42,6 +42,7 @@ use crate::media::{
     TextOptions,
 };
 use crate::platform::IGeometryImpl;
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::utilities::MathUtilities;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
@@ -97,6 +98,13 @@ pub trait IDrawingContextCore {
 
     /// Draws a custom drawing operation.
     fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>);
+
+    /// Draws a 3D scene over `bounds` (#608, `docs/porting/media3d.md`). The
+    /// recording core records the operation `DrawScene3D`, the platform core
+    /// hands the scene to the 3D capability of its backend; a core that has
+    /// no use for scenes (a drawing group, a test recorder) ignores it, the
+    /// default.
+    fn draw_scene_3d_core(&mut self, _scene: &Arc<Scene3DSnapshot>, _bounds: Rect) {}
 
     /// Draws a glyph run.
     fn draw_glyph_run(&mut self, foreground: Option<&Rc<dyn IBrush>>, glyph_run: &Rc<GlyphRun>);
@@ -373,6 +381,15 @@ impl<'a> DrawingContext<'a> {
     /// Draws a custom drawing operation.
     pub fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         self.core().custom(custom);
+    }
+
+    /// Draws a 3D scene over `bounds`, in the current coordinates: what a
+    /// `Viewport3D` draws (#608). A scene that draws nothing (no camera, no
+    /// model with a material) or an empty area is not recorded.
+    pub fn draw_scene_3d(&mut self, scene: &Arc<Scene3DSnapshot>, bounds: Rect) {
+        if bounds.width > 0.0 && bounds.height > 0.0 && scene.draws_anything() {
+            self.core().draw_scene_3d_core(scene, bounds);
+        }
     }
 
     /// Draws text. `origin` is the upper-left corner of the text.

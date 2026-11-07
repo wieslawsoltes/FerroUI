@@ -1,6 +1,7 @@
 use super::{IRenderDataVisitor, RenderDataStream};
 use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
 use crate::platform::{IGeometryImpl, IGlyphRunImpl};
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::{ICustomDrawOperation, LineBoundsHelper};
 use crate::{Matrix, Point, Rect, RoundedRect, Thickness};
 use std::sync::Arc;
@@ -92,6 +93,13 @@ impl IRenderDataVisitor for BoundsVisitor {
 
     fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>) {
         self.union(operation.map(|o| o.bounds()));
+    }
+
+    /// A scene draws at most its viewport (WPF clips a `Viewport3D` to it).
+    fn on_draw_scene_3d(&mut self, scene: Option<&Arc<Scene3DSnapshot>>, bounds: Rect) {
+        if scene.is_some_and(|scene| scene.draws_anything()) {
+            self.union(Some(bounds));
+        }
     }
 
     fn on_push_clip(&mut self, _clip: RoundedRect) -> BoundsScope {

@@ -1670,6 +1670,17 @@ The framework part of the FerroDesign editor (pull request 358, split from 254).
 | Skia builds a bold-simulated glyph path at the canonical size 64 and scales it. | Vello's `glyph_path` does the same (it expanded the outline at the requested size before); unhinted text is drawn from the same outlines as its geometry. | Behaviour | Outlines of text match Skia's and the drawn text. | #358 |
 | `ferroui-browser` always links Skia. | The feature `skia` (a default) links it; a module built with `vello` alone draws with Vello. | Design | A Vello-only module is smaller. | #358 |
 
+### WPF-style 3D (`src/FerroUI.Media3D/`, `src/FerroUI.Rendering3D/`, `src/Skia/`, `src/Vello/`)
+
+The 3D scenes of #608 ([media3d.md](media3d.md)) are not part of the reference: their API and behaviour follow WPF, their GPU renderer ProGPU. The rows record where the rendering differs from WPF's documented behaviour, by the decisions of media3d.md, section 6.1.
+
+| WPF | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| Lighting is evaluated per vertex and interpolated (the reason WPF advises tessellating meshes under point and spot lights). | Lighting is evaluated per pixel, by the CPU reference (`lighting.rs`) and by `scene3d.wgsl` alike (decision A). | Behaviour | Better highlights and point and spot light falloff at the same GPU cost; a per-vertex variant stays possible as a bit of the pipeline key if exact parity is needed. | D3 (CPU reference), D4 (GPU) |
+| No fixed number of lights. | The first 16 lights of a viewport in tree order light it; the others are left out, counted (`ferroui_render3d::lights_left_out`) and reported once (decision L). | Behaviour | One pass with the lights in one uniform block, the block every target (WebGL2, OpenGL ES 3.0) takes. | D3 |
+| A specular or emissive material over a transparent part of the viewport. | The layer adds its colour with alpha 0, and the resolve raises the alpha of a pixel to its largest colour channel (decision N). | Behaviour | The output stays a valid premultiplied image for the 2D compositor; over the viewport's own opaque geometry nothing changes. | D3 (CPU reference), D4 (GPU) |
+| Antialiasing of 3D edges by the composition engine. | 4x MSAA where the formats take it (4x ordered-grid supersampling in the CPU reference), one sample for `RenderOptions.EdgeMode` `Aliased` (decision F). | Behaviour | Edge quality equal at every scale; ProGPU's one sample at a scale of 1.5 or more stays an option. | D3, D4 |
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

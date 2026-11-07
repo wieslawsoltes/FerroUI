@@ -7,7 +7,7 @@ use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Color, IBrush, IExperimentalAcrylicMaterial, IPen, RenderOptions, TextOptions};
 use crate::platform::{
     IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments,
-    IDrawingContextLayerImpl, IDrawingFragment,
+    IDrawingContextImplWithScene3D, IDrawingContextLayerImpl, IDrawingFragment,
     IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, IPlatformRenderInterfaceRegion,
 };
 use crate::{Matrix, PixelSize, Point, Rect, RoundedRect};
@@ -396,6 +396,13 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         }
     }
 
+    fn as_drawing_context_impl_with_scene_3d(&mut self) -> Option<&mut dyn IDrawingContextImplWithScene3D> {
+        match self.inner.as_drawing_context_impl_with_scene_3d() {
+            Some(_) => Some(self),
+            None => None,
+        }
+    }
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
@@ -404,6 +411,13 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         self.flush();
         debug_assert!(self.transform_stack.is_empty());
         self.transform_stack.clear();
+    }
+}
+
+impl IDrawingContextImplWithScene3D for CompositorDrawingContextProxy {
+    fn draw_scene_3d(&mut self, frame: &crate::rendering::scene3d::Scene3DFrame) -> bool {
+        self.flush();
+        self.inner.as_drawing_context_impl_with_scene_3d().is_some_and(|scenes| scenes.draw_scene_3d(frame))
     }
 }
 

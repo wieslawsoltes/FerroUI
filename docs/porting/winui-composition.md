@@ -686,3 +686,14 @@ FERROUI_SMOKE_PAGES=22000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-cata
 ```
 
 `FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then selects the page "Implicit animations", hides and shows its box, selects the page "Parallax" and scrolls its scroller (`steps-<ms>.png`). From 5.4 s it selects the pages of the demos of the later phases in turn, runs each demo as its buttons do half a second after the selection (the springs, the easings, the group, a bigger shadow, a fling of the tracker, a stronger blur) and saves the window (`section-N-<ms>.png`, N from 0 for Visuals to 9 for the zoom, in the order of the sections of the earlier single page: Visuals, Composition brushes, Spring and key frame animations, Shadows and lights, InteractionTracker, Effect brushes, Reveal, Alpha mask shadows, ThemeShadow, Zoom and manipulation; `control_catalog::pages::smoke_section_header`). `FERROUI_SMOKE_WINUI_SECTION_MS` sets the time between two pages (1600 ms by default, at least 1400, with `FERROUI_SMOKE_PAGES` raised to match) and `FERROUI_SMOKE_WINUI_FIRST_SECTION` the first one shown (7 for the pages of phase 7). The pictures the screenshot run takes at the end of the interval of its first page show the last page the flight selected. The sections were checked this way on macOS with Skia (a debug build) and with Vello (a release build: in a debug build each saved Vello frame holds the compositor up for seconds, so the user interface falls behind the timers and the later frames repeat the same state), when they were sections of the single page. `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.
+
+### Direct visual property assignment during animation
+
+Visual property setters replace whole-property and subchannel animations even when the API-side
+value being assigned has not changed. This is required by WinUI NavigationView's
+`ResetElementAnimationProperties`, which restores indicators using ordinary `Offset`, `Scale`
+and `Opacity` assignments. The direct value and any later `StartAnimation` retain their order in
+the serialized property stream. Same-value assignments do not trigger an implicit animation,
+matching [Microsoft's contract](https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.implicitanimationcollection).
+The element renderer forwards actual framework changes, preserving an application's animation
+on an unrelated repaint. See [selection indicator motion](selection-indicator-animations.md).

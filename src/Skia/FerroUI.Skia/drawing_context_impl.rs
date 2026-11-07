@@ -1851,6 +1851,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
         Some(self)
     }
 
+    #[cfg(feature = "media3d")]
+    fn as_drawing_context_impl_with_scene_3d(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithScene3D> {
+        Some(self)
+    }
+
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             let surface = self.surface.clone()?;
@@ -1897,6 +1904,22 @@ impl IDrawingContextImpl for DrawingContextImpl {
         {
             on_finished(recorder.finish_recording_as_picture(None));
         }
+    }
+}
+
+/// 3D scenes: the CPU reference drawn as an image (`scene3d.rs`, #608).
+#[cfg(feature = "media3d")]
+impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
+    fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
+        self.check_lease();
+        let mut device = self.current_transform.unwrap_or(Matrix::IDENTITY);
+        if let Some(post_transform) = self.post_transform {
+            device *= post_transform;
+        }
+        let antialiased = self.render_options.edge_mode != EdgeMode::Aliased;
+        let opacity = self.current_opacity;
+        let gr_context = self.gr_context.clone();
+        crate::scene3d::draw_scene_3d(self.canvas.get(), gr_context.as_deref(), device, opacity, antialiased, frame)
     }
 }
 

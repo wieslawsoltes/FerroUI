@@ -29405,7 +29405,7 @@ fn build_controls_fluentcontrols_xaml_deferred_295(
     let selector_10 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_9), "PART_SelectedPipe");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_10.clone()));
     // Controls/FluentControls.xaml(65,8) Content
-    rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&true)));
+    rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 64, 6)?);
     // Controls/FluentControls.xaml(69,6) Content
     // Controls/FluentControls.xaml(69,6) Style
@@ -29692,9 +29692,9 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabItemHeaderSelectedPipeFill", 46, 21)?;
     // Controls/FluentControls.xaml(47,21) CornerRadius
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 47, 21)?;
-    // Controls/FluentControls.xaml(45,14) IsVisible
+    // Controls/FluentControls.xaml(45,14) Opacity
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_1);
+    border_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_1);
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 45, 14)?;
     context.pop_parent();

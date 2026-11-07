@@ -1,7 +1,10 @@
 use crate::i_selectable::{register_selectable, ISelectable};
 use crate::metadata::PseudoClassesAttribute;
 use crate::mixins::{PressedMixin, SelectableMixin};
-use crate::primitives::{HeaderedContentControl, SelectingItemsControl, TemplatedControl, TemplatedControlImpl};
+use crate::primitives::{
+    HeaderedContentControl, SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControl,
+    TemplatedControlImpl, TemplatedControlImplExt,
+};
 use crate::templates::IDataTemplate;
 use crate::{ContentControlImpl, Control, ControlImpl, Dock, IconElement};
 use ferroui_base::input::{
@@ -15,7 +18,7 @@ use ferroui_base::{
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement, StyledElementImpl,
     StyledProperty, VisualImpl,
 };
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// An item in a `TabControl`.
@@ -23,6 +26,7 @@ use std::rc::Rc;
 pub struct TabItem {
     base: HeaderedContentControl,
     tab_strip_placement: Cell<Option<Dock>>,
+    selection_indicator: RefCell<Option<Ref<Control>>>,
 }
 
 ferro_class!(TabItem: HeaderedContentControl);
@@ -32,7 +36,6 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    TemplatedControlImpl,
     ContentControlImpl
 );
 
@@ -49,6 +52,8 @@ impl FerroObjectImpl for TabItem {
             || change.property() == Self::icon_property().as_property()
         {
             this.update_icon_foreground();
+        } else if change.property() == Self::is_selected_property().as_property() {
+            this.update_selection_indicator();
         }
     }
 }
@@ -144,7 +149,11 @@ impl TabItem {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: HeaderedContentControl::construct(), tab_strip_placement: Cell::new(None) }
+        Self {
+            base: HeaderedContentControl::construct(),
+            tab_strip_placement: Cell::new(None),
+            selection_indicator: RefCell::new(None),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -250,3 +259,23 @@ impl TabItem {
     }
 }
 
+impl TemplatedControlImpl for TabItem {
+    fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
+        Self::parent_on_apply_template(this, e);
+        *this.selection_indicator.borrow_mut() = e.name_scope().find_as("SelectionIndicator")
+            .or_else(|| e.name_scope().find_as("PART_SelectedPipe"));
+        this.update_selection_indicator();
+    }
+}
+
+impl TabItem {
+    fn update_selection_indicator(&self) {
+        if let Some(indicator) = self.selection_indicator() {
+            indicator.set_opacity(if self.is_selected() { 1.0 } else { 0.0 });
+        }
+    }
+
+    pub(crate) fn selection_indicator(&self) -> Option<Ref<Control>> {
+        self.selection_indicator.borrow().clone()
+    }
+}
