@@ -160,6 +160,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `browser` | `ferroui-browser`, with Skia and HarfBuzz | `browser`, `skia`, `harfbuzz` | no |
   | `vello`, `vello-hybrid`, `vello-gpu` | `ferroui-vello`; the second and third turn on its features `hybrid` and `gpu` | `vello` | no |
   | `headless` | `ferroui-headless` | `headless` | no |
+  | `media3d` | `ferroui-media3d` (WPF-style 3D: `Viewport3D` and the Media3D scene model, #608, added for 0.5) | `media3d` | no |
   | `opengl`, `metal`, `vulkan` | the platform graphics contracts `ferroui-opengl`, `ferroui-metal`, `ferroui-vulkan` | `opengl`, `metal`, `vulkan` | no |
 
   The last row was not in the proposal. The contracts are what an application names when a control of its own draws with the graphics API (an OpenGL control, the import of external objects), and upstream's meta package brings them; they are small and of Rust alone, so they are features and not defaults. An application for the browser turns the default features off and names `browser` and a theme.

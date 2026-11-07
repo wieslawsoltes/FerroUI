@@ -142,7 +142,10 @@ the 3D executor of this design closes it later (step D13).
 - **`ferroui-media3d`** (`src/FerroUI.Media3D`): the public model. The values (step D1, section
   3.12), the scene objects (`ferro_class!` types with styled properties, as `Rotate3DTransform` and
   the brushes), the snapshot compiler that flattens a tree into an immutable `Scene3DSnapshot`, the
-  hit testing of section 3.8, and optional mesh builders (box, sphere, cylinder) for samples.
+  hit testing of section 3.8, and optional mesh builders (box, sphere, cylinder) for samples. The
+  snapshot types themselves (`Scene3DSnapshot`, `MeshData`, the layers, lights and camera) are in
+  the base library (`ferroui_base::rendering::scene3d`, section 3.13), beside the render-data
+  operation that carries them, so the backends read them without depending on this crate.
 - **`ferroui-render3d`** (`src/FerroUI.Rendering3D`): `scene3d.wgsl`, the CPU reference rasterizer
   (`cpu`), the `IScene3DExecutor` trait, the uniform layouts (`#[repr(C)]` with std140 asserts), the
   pipeline key and the mesh, material and texture cache logic every executor shares. Its build
@@ -160,7 +163,8 @@ the 3D executor of this design closes it later (step D13).
 
 ### 3.3 Public API
 
-Module `ferroui::media::media3d` (the crate `ferroui_media3d`), namespace `FerroUI.Media.Media3D`;
+Module `ferroui::media3d` of the facade (the crate `ferroui_media3d`, feature `media3d`), namespace
+`FerroUI.Media.Media3D` (and `FerroUI.Controls` for `Viewport3D`);
 WPF's names, Rust types underneath: `f64` values, `Vec`, `Rc` for resources shared on the UI thread
 (a mesh used by many models; the snapshot holds `Arc` copies), `Result` where WPF throws, and
 generation counters rather than events on the hot path.
@@ -447,12 +451,108 @@ the components as read-only properties and the static `Identity` and `Empty`;
 `ferroui_media3d::register_types()` registers the table, the namespace, the assembly
 (`FerroUI.Media3D`) and the nullable forms, and the build script exports the type model for the
 markup compiler of dependent crates (`links = "ferroui_media3d_xaml"`). A property of one of these
-types therefore takes `Position="0,0,5"` from markup. Two points wait for the scene objects of D2:
-mapping `FerroUI.Media.Media3D` into the framework's XML namespace (the base library's composition
-`Vector3D` already has that name there, so the mapping needs a rule for the clash, for example the
-3D namespace first for the 3D types' properties), and the collections with their text forms
-(`Point3DCollection`, `Int32Collection`). The constructor of the 16 elements of `Matrix3D` is not
-declared for markup, which writes a matrix as text.
+types therefore takes `Position="0,0,5"` from markup. The two points that waited for the scene
+objects (the XML namespace and the collections) are settled by D2 (section 3.13). The constructor of
+the 16 elements of `Matrix3D` is not declared for markup, which writes a matrix as text.
+
+### 3.13 The scene model as built (D2)
+
+**Classes.** The scene objects are classes of FerroUI's object model (`ferro_class!`, styled
+properties, `ferro_class_info!` for markup), one file per family: `transform_3d.rs`
+(`Transform3D` with the virtual `value`, `TranslateTransform3D`, `ScaleTransform3D`,
+`RotateTransform3D`, `MatrixTransform3D`, `Transform3DGroup`), `rotation_3d.rs` (`Rotation3D` with
+the virtual `internal_quaternion`, `AxisAngleRotation3D`, `QuaternionRotation3D`), `camera.rs`
+(`Camera` with the virtuals `get_view_matrix` and `get_projection_matrix`, `ProjectionCamera`,
+`PerspectiveCamera`, `OrthographicCamera`, `MatrixCamera`), `model_3d.rs` (`Model3D` with the
+virtual `bounds_core`, `GeometryModel3D`, `Model3DGroup`), `light.rs` (`Light`, `AmbientLight`,
+`DirectionalLight`, `PointLightBase`, `PointLight`, `SpotLight`), `geometry_3d.rs` (`Geometry3D`
+with the virtual `bounds`, `MeshGeometry3D`), `material.rs` (`Material`, `DiffuseMaterial`,
+`SpecularMaterial`, `EmissiveMaterial`, `MaterialGroup`), `visual_3d.rs` (`Visual3D`,
+`ModelVisual3D`), `viewport_3d_visual.rs` and `controls/viewport_3d.rs`. The freezables of WPF
+derive from `Animatable`, `Visual3D` and `Viewport3DVisual` from `FerroObject` (WPF's
+`DependencyObject`), `Viewport3D` from `Control` (FerroUI has no `FrameworkElement`; `Control` is
+its counterpart). The defaults are WPF's: the cameras at the origin looking along (0, 0, -1) with
+(0, 1, 0) up, `NearPlaneDistance` 0.125, `FarPlaneDistance` infinite, `FieldOfView` 45 (horizontal),
+`Width` 2; the colours of the materials and lights white, `SpecularPower` 40; `DirectionalLight` and
+`SpotLight` along (0, 0, -1); `Range` infinite with the attenuations 1, 0, 0; `InnerConeAngle` 180
+and `OuterConeAngle` 90; `AxisAngleRotation3D` about (0, 1, 0) by 0 degrees. A transform, a rotation,
+a geometry or a material property that WPF defaults to `Identity` or `null` is `None` (the identity,
+or nothing), and the collections of a mesh and the children of the groups are empty collections
+created with the object.
+
+**Collections.** `Point3DCollection`, `Vector3DCollection`, `Int32Collection`,
+`Model3DCollection`, `Transform3DCollection`, `MaterialCollection` and `Visual3DCollection` are
+named shared handles over the base library's observable `MediaCollection` (`collections.rs`),
+the form of the collections of the 2D media classes; the texture coordinates are the base
+library's `Points` (WPF's `PointCollection`). The value collections parse and write WPF's text
+forms in the invariant culture: numbers separated by commas, white space or both, three per item
+for the 3D values (`Positions="0,0,0 1,0,0 0,1,0"`, `TriangleIndices="0 1 2"`), the items written
+separated by a space; a malformed text is a `FormatError` ("Invalid Point3DCollection.").
+
+**Change notification and generations.** Each scene object has a notifier (`change.rs`). A
+change of a property raises a `Scene3DChange` of one of three kinds, and an owner forwards the
+changes of the objects it holds (a property value, the items of a collection) to its own notifier,
+so a change anywhere reaches the `Viewport3DVisual`, which bumps the generation of that kind and
+drops its snapshot. The rules: a mesh (any collection or property of it), a model, light or visual
+added, removed or replaced, a geometry or material replaced, a new brush of a material (or none)
+and the children of a `MaterialGroup` are the **structure**; a transform (of a model, a visual or a
+light, including the children of a `Transform3DGroup`), a rotation, any property of a light, a colour or the specular power of a material and a
+change of the values of its brush (the brush's own invalidation) are a **record**; any property of
+the camera, its transform and the `Viewport` (the arranged size) are the **camera**. Each change
+bumps exactly one generation. A removed object is no longer followed. A mesh has an id for the
+process and a version that every change bumps; its `MeshData` is made once per version and shared
+by every model and snapshot that draws it.
+
+**The snapshot** (`scene_compiler.rs`) flattens the visuals in tree order: the world matrix of a
+model is its transform, then those of its groups, then those of its visuals (row vectors), narrowed
+element by element to `numerics::Matrix4x4`. A `GeometryModel3D` is a record when its geometry is a
+`MeshGeometry3D` and one of its materials has a layer; a `MaterialGroup` is flattened into its
+layers in order; a material without a brush is no layer (WPF draws nothing with it); a brush is kept
+in its shared form (`SharedBrush`), or as `None` when it has none yet (a visual or drawing brush,
+D6). The lights are in world space (positions transformed, directions transformed and normalized;
+`Range` is not scaled). The tree is followed to a depth of 256, so a tree that holds itself ends.
+The snapshot keeps, for the 3D hit testing of D10, the world matrices, the meshes in the
+coordinates of their models, which materials a model has on each side, and in the
+`Viewport3DVisual` (UI thread only) the visual and the model of each record by its index
+(`model_source`).
+
+**The camera and the planes.** The view matrix is WPF's look-at matrix with the inverse of the
+camera's transform before it (a transform without an inverse gives no camera: nothing is drawn, as
+WPF draws nothing). The projections are WPF's, to a clip depth between 0 and `w`, with the aspect
+ratio of the viewport. When `FarPlaneDistance` is infinite (the default) the snapshot fits both
+planes to the depths of the corners of the world bounds of the drawn models in the coordinates of
+the camera, widened by a thousandth of the depth range, the near plane never closer than the
+camera's `NearPlaneDistance` (and in front of a perspective camera); a finite far plane keeps the
+camera's planes, and an empty scene, or a scene entirely behind the near plane, keeps the infinite
+far plane (WPF's infinite-far projection). `MatrixCamera` takes its matrices as they are.
+
+**Rendering.** `Viewport3D` records one operation, `DrawScene3D { scene, bounds }`: the opcode
+`RenderDataOpcode::DrawScene3D` (appended, so earlier byte values stay), the payload
+`DrawScene3DPayload { scene: i32, bounds: Rect }` and the resource `RenderDataResource::Scene3D`,
+sent to the render thread as the shared snapshot (not copied). The replay hands it to the optional
+capability `IDrawingContextImplWithScene3D::draw_scene_3d(&Scene3DFrame) -> bool`
+(`src/FerroUI.Base/platform/i_drawing_context_impl_with_scene_3d.rs`), reached through
+`IDrawingContextImpl::as_drawing_context_impl_with_scene_3d` and forwarded by the compositor's
+proxy, as the effect and layer capabilities are. No backend implements it in D2: a scene then draws
+nothing, `rendering::scene3d::scenes_not_drawn()` counts it, and the first one is logged (area
+`Visual`, warning), the way the gaps of the GPU features are reported; D3 adds the CPU reference
+and D4 the first GPU route. The bounds of the operation are the viewport (a scene draws at most
+there); the 2D hit test does not hit a scene (D10 hits its models).
+
+**XML namespace.** `FerroUI.Media.Media3D` and `FerroUI.Controls` are mapped into the framework's
+XML namespace by the assembly of the crate (`markup_types.rs`), so markup names
+`<Viewport3D>`, `<PerspectiveCamera>` or `<MeshGeometry3D>` without a prefix, as WPF's default
+namespace does. The name both namespaces of the mapping have, `Vector3D` (the 3D vector here, the
+composition vector of the base library in `FerroUI`), is settled by how markup resolves names: a
+property declares its type, so `LookDirection="0,0,-1"` or `Axis="0,1,0"` reads the 3D vector
+whatever the mapping, and only a type named in markup by its name (an element `<Vector3D>`,
+`x:Type`, `x:DataType`) is looked up in the XML namespace, where the first mapped namespace with the
+name wins: the base library's, registered first, so existing markup keeps its meaning. The 3D
+vector is named there through its namespace (`xmlns:media3d="using:FerroUI.Media.Media3D"`,
+`<media3d:Vector3D>`). Neither type is renamed and nothing in the base library changes.
+
+**Facade.** The feature `media3d` of the crate `ferroui` (off by default) re-exports the crate as
+`ferroui::media3d`, the naming rule of the facade (docs/release.md, section 2.1).
 
 ## 4. Steps
 
@@ -464,7 +564,7 @@ this page.
 |---|---|---|---|---|
 | D0 | #608; this page; section 8 of the media specification; the row of gpu-rendering.md | none | none | in review |
 | D1 | The values (section 3.12) and their markup converters, with tests: inversion and determinant against hand values, append and prepend, `RotateAt`, axis and angle round trips, slerp, `Rect3D` union and intersection with `Empty`, points against vectors, the projective `Point4D`, the text forms | additions (a new crate) | low | in review |
-| D2 | The scene model: transforms, rotations, cameras, lights, materials, `Geometry3D` and `MeshGeometry3D` with the collections, models, `Visual3D`, `ModelVisual3D`, `Viewport3DVisual`, the control `Viewport3D`; `Scene3DSnapshot` with the fitted planes and the generations; XAML registration and the namespace mapping. Tests: the snapshot of nested `Model3DGroup`s with transforms, a camera change bumping only `camera_generation`, a mesh edit bumping the structure, a cube scene loaded from XAML, `Bounds` | additions | medium: the namespace clash of `Vector3D`; the shape of the snapshot fixes every executor's input | planned |
+| D2 | The scene model (section 3.13): transforms, rotations, cameras, lights, materials, `Geometry3D` and `MeshGeometry3D` with the collections, models, `Visual3D`, `ModelVisual3D`, `Viewport3DVisual`, the control `Viewport3D`; `Scene3DSnapshot` with the fitted planes and the generations; the render-data operation `DrawScene3D` and the capability `IDrawingContextImplWithScene3D`; XAML registration and the namespace mapping; the facade feature `media3d`. Tests: the snapshot of nested `Model3DGroup`s with transforms, a camera change bumping only `camera_generation`, a mesh edit bumping the structure, a light colour bumping the records, the fitted planes, `Bounds`, the text forms of the collections, a cube scene loaded from XAML, the operation recorded, sent and replayed with and without the capability | additions | medium: the namespace clash of `Vector3D`; the shape of the snapshot fixes every executor's input | in review |
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | planned |
 | D4 | `scene3d.wgsl` and the wgpu executor in Vello (hybrid and GPU, Metal first): the pipeline cache, the mesh cache, the depth and MSAA pools, the composition by `paint_device_layer`, the reuse of the cached output; `IDrawingContextImplWithScene3D`. Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode`, `the_backends_draw_every_scene_3d_alike`, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation of the shader; `vello.yml` on Metal, lavapipe in `ci.yml` | addition (a capability trait) | high: the first GPU route; the uniform layout and alignment (256-byte dynamic offsets) | planned |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
@@ -506,6 +606,11 @@ Taken with #608, open to change by the owner.
 | D | Video on 3D | **Both**: a FerroUI `VideoBrush` over a `FrameMailbox`, and a fast path for a `VisualBrush` over a `MediaPlayerElement` or `CameraPreview` | WPF code keeps working and gets the zero-copy path; new code names the source directly |
 | E | ProGPU's CAD extras | **Out of scope** for the WPF port | They are not WPF; a separate crate can add them |
 | F | Default MSAA | **4x where supported**, 1x for `EdgeMode` `Aliased` | Edge quality equal at every scale; ProGPU's scale heuristic stays an option |
+| G | Where the snapshot types live (D2) | **The base library** (`ferroui_base::rendering::scene3d`), the compiler in `ferroui-media3d` | The render-data operation is in the base library and the backends depend on it, not on this crate; the snapshot is plain data |
+| H | The clash of `Vector3D` in the XML namespace (D2) | **Both namespaces mapped; the first mapping (the base library's) wins for a name written in markup**; properties read their declared type | Attribute values, the common case, need no rule; nothing is renamed and existing markup keeps its meaning; the 3D vector is named with a `using:` prefix where an element is needed |
+| I | `Viewport3DVisual` (D2) | **The scene object of the viewport, not a 2D visual**; `Viewport3D` hosts one and records its snapshot | A 2D visual without layout would need its own bounds and arrangement for nothing; the render-data operation is written by the control |
+| J | The fitted planes (D2) | **Only for an infinite `FarPlaneDistance`**, both planes fitted to the scene with a margin, never closer than `NearPlaneDistance` | What the ticket asks; a finite far plane is the application's choice; to check against WPF (section 6.2) |
+| K | Generations (D2) | **One kind per change**; a structure change does not bump the records | An executor compares all three; a new structure rewrites the records anyway |
 
 Open for D4: what a viewport with more lights than the GPU takes (16) draws. WPF has no fixed
 count; whichever rule is chosen (for example a second pass for the further lights, or the lights
