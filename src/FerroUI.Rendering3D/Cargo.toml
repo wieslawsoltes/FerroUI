@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-render3d"
+description = "The renderer of FerroUI's 3D scenes: the CPU reference rasterizer, the shared uniform layouts and the output cache of Viewport3D"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# Unit tests live next to the code (`#[path = "..._tests.rs"]` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The base library: the compiled form of a scene (`rendering::scene3d`), the numerics, the
+# brushes of the material layers and the logger.
+ferroui-base.workspace = true
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "rendering"
