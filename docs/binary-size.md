@@ -431,8 +431,9 @@ What changes with `dist-abort`: a panic ends the process at once, without runnin
   original rethrows an exception of a handler.
 - The render loop no longer survives a panicking frame.
 - Compiled markup throws a markup error as a panic (`ferroui_markup_xaml::throw`). That is already
-  fatal outside an error scope. The error scope of the WinUI importer (`with_xaml_errors`) can no
-  longer turn such a throw into `Err`.
+  fatal outside an error scope. The error scope of the WinUI importer (`with_xaml_errors`) does
+  not unwind: the members a load reaches report their error to the scope, which returns it as
+  `Err` with abort too (`docs/porting/panics-as-exceptions.md`).
 - The Designer reports invalid animations by catching their panics, so it is not built with this
   profile.
 

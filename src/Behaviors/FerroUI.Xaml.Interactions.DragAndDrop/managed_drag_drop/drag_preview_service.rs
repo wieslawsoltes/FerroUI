@@ -81,6 +81,7 @@ impl DragPreviewService {
         let window = WINDOW.with(|current| current.borrow_mut().take());
         if let Some(window) = window {
             // The reference ignores a failure to close the window.
+            // Boundary (#567): closing runs the closing handlers of the application.
             let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| window.close()));
         }
     }

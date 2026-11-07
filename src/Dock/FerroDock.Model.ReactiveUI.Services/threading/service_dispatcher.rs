@@ -22,6 +22,8 @@ impl ServiceDispatcher {
     ) -> super::DispatcherInvocation {
         let (completion, task) = ferroui_system::task::Shared::channel();
         self.post(move || {
+            // Boundary (#567): the dispatched action is caller code on the scheduler; its panic
+            // faults the invocation task, as `InvokeAsync` of the reference does.
             let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(action));
             match outcome {
                 Ok(()) => completion.send(Ok(())),

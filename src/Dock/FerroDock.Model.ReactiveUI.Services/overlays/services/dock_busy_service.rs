@@ -119,6 +119,8 @@ impl DockBusyService {
     /// Runs work eagerly, retaining its scope until completion. Cleanup occurs
     /// before the returned task ends, and a cleanup failure supersedes a work failure.
     pub fn run_async(&self, message: String, action: BusyAction) -> Shared<Result<(), ObservableError>> {
+        // Boundary (#567): as the reference's async method, a failure of `begin` (which runs a
+        // global busy service and change observers) faults the returned task.
         let handle = match catch_unwind(AssertUnwindSafe(|| self.begin(message))) {
             Ok(handle) => handle,
             Err(payload) => return Shared::ready(Err(panic_error(payload))),
@@ -139,6 +141,8 @@ impl DockBusyService {
         handle: Rc<dyn IDisposable>,
         outcome: Result<(), ObservableError>,
     ) {
+        // Boundary (#567): the finally of the reference; a failure of the scope cleanup (change
+        // observers, the global busy service) faults the task in place of the work outcome.
         let outcome = match catch_unwind(AssertUnwindSafe(|| handle.dispose())) {
             Ok(()) => outcome,
             Err(payload) => Err(panic_error(payload)),

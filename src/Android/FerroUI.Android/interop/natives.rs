@@ -78,6 +78,8 @@ pub(crate) fn sdk_int() -> i32 {
 /// Runs the body of a native method; a panic becomes a Java exception and
 /// `default` is returned.
 fn guard<T>(default: T, body: impl FnOnce() -> T) -> T {
+    // Boundary (#567): the body of a JNI native method, which a panic must not unwind
+    // through; the panic becomes a Java exception.
     match catch_unwind(AssertUnwindSafe(body)) {
         Ok(value) => value,
         Err(panic) => {
@@ -103,12 +105,16 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
     // SAFETY: the contract of this function.
     unsafe { super::java::initialize(vm) };
 
+    // Boundary (#567): a crash reporter: every panic is written to the log of the system. A
+    // hook runs before the process aborts, so it reports with `panic = "abort"` too.
     let default_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |info| {
         log::write(LogPriority::Error, log::TAG, &info.to_string());
         default_hook(info);
     }));
 
+    // Boundary (#567): the body of `JNI_OnLoad`, which a panic must not unwind through; the
+    // panic makes the load fail.
     let result = catch_unwind(|| {
         FerroAndroidApplication::set_builder(build);
         // The classes of the application are found on this thread, now: a thread the

@@ -33,6 +33,8 @@ pub fn guard<R>(default: R, body: impl FnOnce() -> R) -> R {
         return default;
     }
 
+    // Boundary (#567): the body of a window procedure the system calls, which a panic must not
+    // unwind through. The panic is kept and raised again by `resume_pending` in the loop.
     match catch_unwind(AssertUnwindSafe(body)) {
         Ok(result) => result,
         Err(payload) => {

@@ -1,6 +1,6 @@
 use crate::animation::AnimationTask;
 use crate::threading::{CancellationToken, Dispatcher, DispatcherPriority};
-use ferroui_system::task::JoinHandle;
+use ferroui_system::task::{self, FirstPoll, JoinError, JoinHandle};
 use std::future::Future;
 use crate::{Ref, Visual};
 
@@ -59,15 +59,18 @@ pub(crate) fn continuation_priority() -> DispatcherPriority {
 
 /// Runs the body of an asynchronous page transition: synchronously up to its
 /// first pending await, then resumed by the dispatcher at the priority it
-/// started at.
-pub(crate) fn start_async(future: impl Future<Output = ()> + 'static) -> JoinHandle<()> {
-    Dispatcher::current_dispatcher().start_local_with_priority(future, continuation_priority())
+/// started at. An `Err` of the body is the failure of the handle
+/// (`JoinError::Panicked` when an animation could not be run), without a
+/// panic (#567).
+pub(crate) fn start_async(future: impl Future<Output = Result<(), JoinError>> + 'static) -> JoinHandle<()> {
+    let dispatcher = Dispatcher::current_dispatcher();
+    dispatcher.verify_access();
+    task::spawn_local_on_result(future, dispatcher.task_schedule(continuation_priority()), FirstPoll::Now)
 }
 
 /// Awaits the animations of a page transition. A failure to run one of them
-/// fails the transition.
-pub(crate) async fn when_all(tasks: Vec<AnimationTask>) {
-    if let Err(error) = AnimationTask::when_all(tasks).await {
-        panic!("{error}");
-    }
+/// fails the transition: `JoinError::Panicked` with the message of the error
+/// (the payload a `panic!` with it had, before #567).
+pub(crate) async fn when_all(tasks: Vec<AnimationTask>) -> Result<(), JoinError> {
+    AnimationTask::when_all(tasks).await.map_err(|error| JoinError::Panicked(Box::new(error.to_string())))
 }

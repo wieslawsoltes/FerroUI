@@ -107,6 +107,8 @@ impl PeriodicThread {
                     return;
                 }
 
+                // Boundary (#567): the top of the update thread; as in the reference, an exception
+                // of the action ends the thread instead of taking the process down.
                 if catch_unwind(AssertUnwindSafe(&action)).is_err() {
                     return;
                 }
