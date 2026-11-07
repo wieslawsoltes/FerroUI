@@ -109,6 +109,61 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(121,6) Key
     let value_2 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 121, 6)?, rt::cast(::core::clone::Clone::clone(&value_2), 121, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 1, 0, &context, &resource_dictionary_1)?;
+    let namespace_scope_1 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
+    // FluentTheme.xaml(5,6) Key
+    let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 5, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 5, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 2, 0, &context, &resource_dictionary_1)?;
+    ::core::mem::drop(namespace_scope_1);
+    context.pop_parent();
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_1), rt::cast(resource_dictionary_1.clone(), 121, 6)?), 121, 6)?;
+    // FluentTheme.xaml(282,6) ThemeDictionaries
+    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
+    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    // FluentTheme.xaml(282,6) ResourceDictionary
+    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
+    context.push_parent(rt::to_value(resource_dictionary_2.clone()));
+    let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
+    if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 282, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 282, 6)?, count_2.wrapping_add(736_i32));
+    }
+    // FluentTheme.xaml(282,6) Key
+    let value_10 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 282, 6)?, rt::cast(::core::clone::Clone::clone(&value_10), 282, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 1, 1, &context, &resource_dictionary_2)?;
+    let namespace_scope_2 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
+    // FluentTheme.xaml(853,6) Key
+    let value_11 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 853, 6)?, rt::cast(::core::clone::Clone::clone(&value_11), 853, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 2, 1, &context, &resource_dictionary_2)?;
+    ::core::mem::drop(namespace_scope_2);
+    context.pop_parent();
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_9), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
+    rt::apply_theme_unit(THEME_UNITS, 1, 2, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_0);
+    let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
+    rt::apply_theme_unit(THEME_UNITS, 3, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_3);
+    context.pop_parent();
+    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 7, 6)?), 7, 6)?;
+    // FluentTheme.xaml(26,4) Content
+    let service_provider_1 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
+    let value_17 = build_controls_fluentcontrols_xaml(rt::cast(service_provider_1.clone(), 26, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_17.clone(), 26, 4)?), 26, 4)?;
+    context.pop_parent();
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 0 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Accents/BaseResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_0(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(122,8) Content (resource)
     rt::add_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_0)?;
     // FluentTheme.xaml(123,8) Content (resource)
@@ -181,10 +236,16 @@ pub fn populate_fluenttheme_xaml(
     rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_25)?;
     // FluentTheme.xaml(280,8) Content (resource)
     rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_26)?;
-    let namespace_scope_1 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
-    // FluentTheme.xaml(5,6) Key
-    let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 5, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 5, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 1 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Accents/FluentControlResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_1(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(7,8) Content (resource)
     rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_27)?;
     // FluentTheme.xaml(8,8) Content (resource)
@@ -428,23 +489,16 @@ pub fn populate_fluenttheme_xaml(
     rt::add_deferred_resource(&resource_dictionary_1, "TableViewRowBackgroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_670, 839, 63)?;
     // FluentTheme.xaml(840,8) Content (resource)
     rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_107)?;
-    ::core::mem::drop(namespace_scope_1);
-    context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_1), rt::cast(resource_dictionary_1.clone(), 121, 6)?), 121, 6)?;
-    // FluentTheme.xaml(282,6) ThemeDictionaries
-    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    // FluentTheme.xaml(282,6) ResourceDictionary
-    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
-    context.push_parent(rt::to_value(resource_dictionary_2.clone()));
-    let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
-    if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 282, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 282, 6)?, count_2.wrapping_add(736_i32));
-    }
-    // FluentTheme.xaml(282,6) Key
-    let value_10 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 282, 6)?, rt::cast(::core::clone::Clone::clone(&value_10), 282, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 2 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Accents/BaseResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_2(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(283,8) Content (resource)
     rt::add_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_108)?;
     // FluentTheme.xaml(284,8) Content (resource)
@@ -519,10 +573,16 @@ pub fn populate_fluenttheme_xaml(
     rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_134)?;
     // FluentTheme.xaml(440,8) Content (resource)
     rt::add_static_brushes(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_135)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
-    // FluentTheme.xaml(853,6) Key
-    let value_11 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 853, 6)?, rt::cast(::core::clone::Clone::clone(&value_11), 853, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 3 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Accents/FluentControlResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_3(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(855,8) Content (resource)
     rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_136)?;
     // FluentTheme.xaml(856,8) Content (resource)
@@ -778,9 +838,16 @@ pub fn populate_fluenttheme_xaml(
     rt::add_deferred_resource(&resource_dictionary_2, "TableViewRowBackgroundDisabled", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1351, 1691, 63)?;
     // FluentTheme.xaml(1692,8) Content (resource)
     rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, POPULATE_FLUENTTHEME_XAML_ROWS_218)?;
-    ::core::mem::drop(namespace_scope_2);
-    context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_9), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 4 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Accents/BaseResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_4(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(6,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1363, 6, 53)?;
     // FluentTheme.xaml(7,51) Content (resource)
@@ -835,19 +902,17 @@ pub fn populate_fluenttheme_xaml(
     rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_232)?;
     // FluentTheme.xaml(112,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_233)?;
-    ::core::mem::drop(namespace_scope_0);
-    let namespace_scope_3 = rt::push_namespace_scope(&context, POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 5 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`): entries of the unit `Strings/InvariantResources.xaml` (#568).
+fn populate_fluenttheme_xaml_unit_5(
+    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(5,52) Content (resource)
     rt::add_string_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_234)?;
-    ::core::mem::drop(namespace_scope_3);
-    context.pop_parent();
-    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 7, 6)?), 7, 6)?;
-    // FluentTheme.xaml(26,4) Content
-    let service_provider_1 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_17 = build_controls_fluentcontrols_xaml(rt::cast(service_provider_1.clone(), 26, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_17.clone(), 26, 4)?), 26, 4)?;
-    context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4302,115 +4367,599 @@ pub fn build_controls_fluentcontrols_xaml(
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 7, 10)?);
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 7, 10)?, count_0.wrapping_add(286_i32));
     }
+    rt::apply_theme_unit(THEME_UNITS, 4, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 6, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 7, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_0);
+    rt::apply_theme_unit(THEME_UNITS, 14, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_0);
+    rt::apply_theme_unit(THEME_UNITS, 16, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 17, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 19, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 21, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 25, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 27, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 28, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 29, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    rt::apply_theme_unit(THEME_UNITS, 31, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_1);
+    rt::apply_theme_unit(THEME_UNITS, 35, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_2);
+    rt::apply_theme_unit(THEME_UNITS, 36, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_2);
+    rt::apply_theme_unit(THEME_UNITS, 0, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 37, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 39, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 41, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 42, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 51, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 54, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 57, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 58, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 60, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 1, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 2, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 72, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 73, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 4, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 5, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 8, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 9, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 10, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 11, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 12, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    rt::apply_theme_unit(THEME_UNITS, 13, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_3);
+    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3);
+    rt::apply_theme_unit(THEME_UNITS, 15, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_4);
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 18, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 20, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_5);
+    rt::apply_theme_unit(THEME_UNITS, 22, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 23, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_5);
+    rt::apply_theme_unit(THEME_UNITS, 24, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_6);
+    rt::apply_theme_unit(THEME_UNITS, 26, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 30, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 32, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6);
+    rt::apply_theme_unit(THEME_UNITS, 33, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_7);
+    rt::apply_theme_unit(THEME_UNITS, 34, 0, &context, &resource_dictionary_0)?;
+    // Controls/FluentControls.xaml(264,6) ThemeDictionaries
+    let theme_dictionaries_collection_0 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
+    let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    // Controls/FluentControls.xaml(264,6) ResourceDictionary
+    let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();
+    let resources_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_1.clone());
+    if rt::is_instance(&resources_1, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_1: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 264, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 264, 6)?, count_1.wrapping_add(27_i32));
+    }
+    // Controls/FluentControls.xaml(264,6) Key
+    let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 264, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 264, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 38, 0, &context, &resource_dictionary_1)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 264, 6)?), 264, 6)?;
+    // Controls/FluentControls.xaml(293,6) ThemeDictionaries
+    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
+    let value_2 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
+    // Controls/FluentControls.xaml(293,6) ResourceDictionary
+    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
+    let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
+    if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 293, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 293, 6)?, count_2.wrapping_add(27_i32));
+    }
+    // Controls/FluentControls.xaml(293,6) Key
+    let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 293, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 293, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 38, 1, &context, &resource_dictionary_2)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_2), rt::cast(resource_dictionary_2.clone(), 293, 6)?), 293, 6)?;
+    // Controls/FluentControls.xaml(322,6) ThemeDictionaries
+    let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
+    let value_4 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    // Controls/FluentControls.xaml(322,6) ResourceDictionary
+    let resource_dictionary_3 = ::ferroui_base::controls::ResourceDictionary::new();
+    let resources_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_3.clone());
+    if rt::is_instance(&resources_3, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_3: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 322, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 322, 6)?, count_3.wrapping_add(27_i32));
+    }
+    // Controls/FluentControls.xaml(322,6) Key
+    let value_5 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 322, 6)?, rt::cast(::core::clone::Clone::clone(&value_5), 322, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 38, 2, &context, &resource_dictionary_3)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_4), rt::cast(resource_dictionary_3.clone(), 322, 6)?), 322, 6)?;
+    rt::apply_theme_unit(THEME_UNITS, 38, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 40, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    rt::apply_theme_unit(THEME_UNITS, 43, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_8);
+    let namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 44, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_9);
+    rt::apply_theme_unit(THEME_UNITS, 45, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 46, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 47, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 48, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 49, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 50, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 52, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 53, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 55, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 56, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_10);
+    let namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    rt::apply_theme_unit(THEME_UNITS, 59, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_11);
+    rt::apply_theme_unit(THEME_UNITS, 0, 5, &context, &resource_dictionary_0)?;
+    let namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 61, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_12);
+    rt::apply_theme_unit(THEME_UNITS, 63, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
+    rt::apply_theme_unit(THEME_UNITS, 64, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_13);
+    rt::apply_theme_unit(THEME_UNITS, 65, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 66, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 67, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_14);
+    rt::apply_theme_unit(THEME_UNITS, 68, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(THEME_UNITS, 69, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_15);
+    let namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8);
+    rt::apply_theme_unit(THEME_UNITS, 70, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_16);
+    rt::apply_theme_unit(THEME_UNITS, 71, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 74, 0, &context, &resource_dictionary_0)?;
+    context.pop_parent();
+    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 7, 10)?), 7, 10)?;
+    context.pop_parent();
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    ::core::result::Result::Ok(styles_0)
+}
+
+/// Run 0 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Button.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_0(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(13,4) Content (resource)
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_0, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 1 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_1(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(17,4) Content (resource)
     let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_2, 17, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CarouselPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 2 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_2(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(12,4) Content (resource)
     let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_4, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContentPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
-    let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_0);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 3 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/AutoCompleteBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_3(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(24,6) Content (resource)
     let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_6, 24, 6)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 6)?;
-    ::core::mem::drop(namespace_scope_0);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 4 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_4(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(17,4) Content (resource)
     let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_8, 17, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Calendar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 5 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_5(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(18,4) Content (resource)
     let deferred_5 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_10, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_5) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 6 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_6(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(18,4) Content (resource)
     let deferred_6 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_12, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarDayButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_6) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 7 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Carousel.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_7(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_7 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_14, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Carousel as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_7) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 8 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/GridSplitter.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_8(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,6) Content (resource)
     let deferred_8 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_16, 4, 6)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridSplitter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_8) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 6)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 9 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ItemsControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_9(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_9 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_19, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ItemsControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_9) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 10 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Label.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_10(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(5,4) Content (resource)
     let deferred_10 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_21, 5, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Label as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_10) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 11 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ListBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_11(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(15,4) Content (resource)
     let deferred_11 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_23, 15, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_11) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
-    let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 12 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuScrollViewer.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_12(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(22,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentMenuScrollViewer", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_25, 22, 4)?;
-    ::core::mem::drop(namespace_scope_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 13 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_13(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(9,4) Content (resource)
     let deferred_13 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_27, 9, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NotificationCard as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_13) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 9, 4)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_2);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 14 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_14(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(52,4) Content (resource)
     let deferred_14 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_29, 52, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_14) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 52, 4)?;
-    ::core::mem::drop(namespace_scope_2);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 15 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_15(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_15 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_31, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_15) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_16 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_33, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_16) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 16 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_16(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(12,4) Content (resource)
     let deferred_17 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_35, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_17) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 17 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_17(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,4) Content (resource)
     let deferred_18 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_37, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_18) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 18 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_18(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(22,4) Content (resource)
     let deferred_19 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_39, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_19) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 19 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_19(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_20 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_41, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Separator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_20) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 20 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_20(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,4) Content (resource)
     let deferred_21 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_43, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStrip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_21) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 21 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_21(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,4) Content (resource)
     let deferred_22 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_46, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_22) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 22 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_22(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_23 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_48, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TransitioningContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_23) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 23 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_23(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(17,4) Content (resource)
     let deferred_24 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_50, 17, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_24) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 24 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_24(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(5,4) Content (resource)
     let deferred_25 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_52, 5, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::WindowNotificationManager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_25) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 25 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_25(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_26 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_56, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_26) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 26 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_26(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(18,4) Content (resource)
     let deferred_27 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_58, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_27) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 27 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_27(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_28 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_60, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_28) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 28 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_28(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_62, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 29 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_29(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_30 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_64, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_30) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_31 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_67, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_31) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 30 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_30(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_32 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_68, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::HeaderedContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_32) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 31 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_31(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,53) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0)?;
     // Controls/FluentControls.xaml(8,4) Content (resource)
     let deferred_33 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_70, 8, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_33) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 32 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_32(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(30,4) Content (resource)
     let deferred_34 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_72, 30, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_34) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 30, 4)?;
@@ -4423,6 +4972,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(251,4) Content (resource)
     let deferred_37 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_78, 251, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_37) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 251, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 33 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_33(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,48) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DrawerPaneButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_82, 14, 48)?;
     // Controls/FluentControls.xaml(16,51) Content (resource)
@@ -4432,6 +4991,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(19,4) Content (resource)
     let deferred_40 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_84, 19, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_40) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 34 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_34(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_86, 10, 50)?;
     // Controls/FluentControls.xaml(12,50) Content (resource)
@@ -4443,6 +5012,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(22,4) Content (resource)
     let deferred_46 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_91, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_46) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 35 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_35(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(21,4) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3)?;
     // Controls/FluentControls.xaml(23,4) Content (resource)
@@ -4486,11 +5065,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(249,4) Content (resource)
     let deferred_61 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_113, 249, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_61) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 249, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 36 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_36(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 42)?, rt::string_object("RadioButtonMinHeight"), rt::to_object(32.0_f64)), 14, 42)?;
     // Controls/FluentControls.xaml(16,4) Content (resource)
     let deferred_62 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_115, 16, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_62) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 37 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_37(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(49,39) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 49, 39)?, rt::string_object("ExpanderMinHeight"), rt::to_object(48.0_f64)), 49, 39)?;
     // Controls/FluentControls.xaml(52,73) Content (resource)
@@ -4516,14 +5115,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(215,4) Content (resource)
     let deferred_68 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_123, 215, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_68) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 215, 4)?;
-    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 38 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_38(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(26,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_125, 26, 4)?;
     // Controls/FluentControls.xaml(28,4) Content (resource)
     let deferred_70 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_126, 28, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_70) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
-    ::core::mem::drop(namespace_scope_3);
-    let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 39 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_39(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(39,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerLeftThickness", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_128, 39, 4)?;
     // Controls/FluentControls.xaml(40,4) Content (resource)
@@ -4537,8 +5153,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(73,4) Content (resource)
     let deferred_76 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_134, 73, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_76) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 73, 4)?;
-    ::core::mem::drop(namespace_scope_4);
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 40 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_40(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(11,58) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_17)?;
     // Controls/FluentControls.xaml(14,4) Content (resource)
@@ -4546,12 +5170,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(63,4) Content (resource)
     let deferred_78 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_138, 63, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_78) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 63, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 41 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_41(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(27,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentCalendarButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_140, 27, 4)?;
     // Controls/FluentControls.xaml(57,4) Content (resource)
     let deferred_80 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_142, 57, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_80) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 57, 4)?;
-    ::core::mem::drop(namespace_scope_5);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 42 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_42(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(15,45) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CheckMarkPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_145, 15, 45)?;
     // Controls/FluentControls.xaml(16,39) Content (resource)
@@ -4559,28 +5202,76 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(18,4) Content (resource)
     let deferred_82 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_146, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_82) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 43 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_43(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 4, 49)?, rt::string_object("FlyoutBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 4, 49)?;
     // Controls/FluentControls.xaml(5,4) Content (resource)
     let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_148, 5, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
-    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_5);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 44 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_44(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "BorderGapMaskConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_150, 10, 4)?;
     // Controls/FluentControls.xaml(12,4) Content (resource)
     let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_151, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
-    ::core::mem::drop(namespace_scope_6);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 45 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_45(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(13,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 13, 58)?, rt::string_object("HyperlinkButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 13, 58)?;
     // Controls/FluentControls.xaml(15,4) Content (resource)
     let deferred_86 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_153, 15, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_86) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 46 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_46(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(16,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 41)?, rt::string_object("ListBoxItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 9.0_f64, 12.0_f64, 12.0_f64))), 16, 41)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
     let deferred_87 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_155, 17, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_87) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 47 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_47(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,35) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 35)?, rt::string_object("MenuBarHeight"), rt::to_object(32.0_f64)), 14, 35)?;
     // Controls/FluentControls.xaml(16,4) Content (resource)
@@ -4588,7 +5279,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(94,4) Content (resource)
     let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_159, 94, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
-    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 48 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_48(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(52,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_161, 52, 4)?;
     // Controls/FluentControls.xaml(53,60) Content (resource)
@@ -4604,60 +5304,67 @@ pub fn build_controls_fluentcontrols_xaml(
     rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_168, 239, 4)?;
     // Controls/FluentControls.xaml(244,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentMenuItemIconTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_169, 244, 4)?;
-    ::core::mem::drop(namespace_scope_7);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 49 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_49(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_171, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     // Controls/FluentControls.xaml(35,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuFlyoutPresenter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_173, 35, 4)?;
-    // Controls/FluentControls.xaml(264,6) ThemeDictionaries
-    let theme_dictionaries_collection_0 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    // Controls/FluentControls.xaml(264,6) ResourceDictionary
-    let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();
-    let resources_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_1.clone());
-    if rt::is_instance(&resources_1, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_1: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 264, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 264, 6)?, count_1.wrapping_add(27_i32));
-    }
-    // Controls/FluentControls.xaml(264,6) Key
-    let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 264, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 264, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 50 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_50(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(265,8) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_1, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19)?;
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 264, 6)?), 264, 6)?;
-    // Controls/FluentControls.xaml(293,6) ThemeDictionaries
-    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_2 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    // Controls/FluentControls.xaml(293,6) ResourceDictionary
-    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
-    let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
-    if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 293, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 293, 6)?, count_2.wrapping_add(27_i32));
-    }
-    // Controls/FluentControls.xaml(293,6) Key
-    let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 293, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 293, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 51 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_51(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(294,8) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_2, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20)?;
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_2), rt::cast(resource_dictionary_2.clone(), 293, 6)?), 293, 6)?;
-    // Controls/FluentControls.xaml(322,6) ThemeDictionaries
-    let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_4 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    // Controls/FluentControls.xaml(322,6) ResourceDictionary
-    let resource_dictionary_3 = ::ferroui_base::controls::ResourceDictionary::new();
-    let resources_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_3.clone());
-    if rt::is_instance(&resources_3, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_3: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 322, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 322, 6)?, count_3.wrapping_add(27_i32));
-    }
-    // Controls/FluentControls.xaml(322,6) Key
-    let value_5 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 322, 6)?, rt::cast(::core::clone::Clone::clone(&value_5), 322, 6)?);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 52 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_52(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(323,8) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_3, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21)?;
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_4), rt::cast(resource_dictionary_3.clone(), 322, 6)?), 322, 6)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 53 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_53(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,59) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_256, 10, 59)?;
     // Controls/FluentControls.xaml(11,55) Content (resource)
@@ -4677,6 +5384,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(160,4) Content (resource)
     let deferred_186 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_266, 160, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_186) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 160, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 54 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_54(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(21,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "VerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_269, 21, 4)?;
     // Controls/FluentControls.xaml(34,4) Content (resource)
@@ -4690,7 +5407,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(132,4) Content (resource)
     let deferred_192 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_277, 132, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_192) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 132, 4)?;
-    let namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 55 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_55(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(34,50) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22)?;
     // Controls/FluentControls.xaml(39,4) Content (resource)
@@ -4704,8 +5430,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(120,4) Content (resource)
     let deferred_197 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_285, 120, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_197) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 120, 4)?;
-    ::core::mem::drop(namespace_scope_8);
-    let namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 56 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_56(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(19,50) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_23)?;
     // Controls/FluentControls.xaml(21,60) Content (resource)
@@ -4719,27 +5453,76 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(25,4) Content (resource)
     let deferred_199 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_288, 25, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_199) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 25, 4)?;
-    ::core::mem::drop(namespace_scope_9);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 57 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_57(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(20,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 55)?, rt::string_object("TabControlTopPlacementItemMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64))), 20, 55)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
     let deferred_200 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_293, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_200) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 58 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_58(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(15,38) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_24)?;
     // Controls/FluentControls.xaml(19,4) Content (resource)
     let deferred_201 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_295, 19, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_201) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 59 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_59(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_297, 17, 4)?;
     // Controls/FluentControls.xaml(79,4) Content (resource)
     let deferred_203 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_299, 79, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_203) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 60 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_60(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(5,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 43)?, rt::string_object("TableViewCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64))), 5, 43)?;
     // Controls/FluentControls.xaml(7,4) Content (resource)
     let deferred_204 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_301, 7, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewCell as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_204) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 61 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_61(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(11,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 11, 49)?, rt::string_object("TableViewColumnResizerWidth"), rt::to_object(12.0_f64)), 11, 49)?;
     // Controls/FluentControls.xaml(12,51) Content (resource)
@@ -4749,16 +5532,46 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(22,4) Content (resource)
     let deferred_206 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_304, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewColumnHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_206) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 62 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_62(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(5,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 42)?, rt::string_object("TableViewRowPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(6.0_f64, 9.0_f64, 6.0_f64, 12.0_f64))), 5, 42)?;
     // Controls/FluentControls.xaml(7,4) Content (resource)
     let deferred_207 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_306, 7, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewRow as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_207) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 63 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_63(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(15,43) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_25)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
     let deferred_208 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_308, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_208) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 64 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_64(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(19,45) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 19, 45)?, rt::string_object("TextBoxTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 19, 45)?;
     // Controls/FluentControls.xaml(20,50) Content (resource)
@@ -4778,6 +5591,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(96,4) Content (resource)
     let deferred_216 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_319, 96, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_216) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 96, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 65 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_65(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(19,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 19, 50)?, rt::string_object("ToggleSwitchTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 6.0_f64))), 19, 50)?;
     // Controls/FluentControls.xaml(20,52) Content (resource)
@@ -4789,14 +5612,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(24,4) Content (resource)
     let deferred_217 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_323, 24, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_217) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
-    let namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 66 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_66(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(20,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 46)?, rt::string_object("ToolTipContentMaxWidth"), rt::to_object(320.0_f64)), 20, 46)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
     let deferred_218 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_325, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_218) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
-    ::core::mem::drop(namespace_scope_10);
-    let namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 67 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_67(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(23,40) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_26)?;
     // Controls/FluentControls.xaml(25,62) Content (resource)
@@ -4810,7 +5650,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(55,4) Content (resource)
     let deferred_222 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_331, 55, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_222) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 55, 4)?;
-    ::core::mem::drop(namespace_scope_11);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 68 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_68(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(5,40) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_27)?;
     // Controls/FluentControls.xaml(7,67) Content (resource)
@@ -4823,7 +5672,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(36,4) Content (resource)
     let deferred_226 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_337, 36, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_226) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
-    let namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 69 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_69(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(52,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 46)?, rt::string_object("ComboBoxTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 52, 46)?;
     // Controls/FluentControls.xaml(53,50) Content (resource)
@@ -4837,19 +5695,46 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(60,4) Content (resource)
     let deferred_227 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_339, 60, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_227) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 60, 4)?;
-    ::core::mem::drop(namespace_scope_12);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 70 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_70(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(34,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 47)?, rt::string_object("MenuFlyoutScrollerMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64))), 34, 47)?;
     // Controls/FluentControls.xaml(36,4) Content (resource)
     let deferred_228 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_343, 36, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_228) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
-    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 71 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_71(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(28,4) Content (resource)
     let deferred_229 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_345, 28, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_229) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
     // Controls/FluentControls.xaml(65,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TooltipDataValidationErrors", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_348, 65, 4)?;
-    ::core::mem::drop(namespace_scope_13);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 72 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_72(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(24,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_351, 24, 4)?;
     // Controls/FluentControls.xaml(46,4) Content (resource)
@@ -4858,7 +5743,16 @@ pub fn build_controls_fluentcontrols_xaml(
     rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_354, 86, 4)?;
     // Controls/FluentControls.xaml(102,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_356, 102, 4)?;
-    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 73 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_73(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(31,62) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_30)?;
     // Controls/FluentControls.xaml(36,59) Content (resource)
@@ -4873,6 +5767,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(151,4) Content (resource)
     let deferred_237 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_362, 151, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_237) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 151, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 74 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_74(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(31,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_32)?;
     // Controls/FluentControls.xaml(33,53) Content (resource)
@@ -4889,13 +5793,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(191,4) Content (resource)
     let deferred_240 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_368, 191, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_240) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 191, 4)?;
-    ::core::mem::drop(namespace_scope_14);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 75 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_75(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(13,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 13, 47)?, rt::string_object("DropDownButtonMinHeight"), rt::to_object(32.0_f64)), 13, 47)?;
     // Controls/FluentControls.xaml(15,6) Content (resource)
     let deferred_241 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_370, 15, 6)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_241) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 6)?;
-    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 76 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_76(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(37,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 44)?, rt::string_object("SliderTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 37, 44)?;
     // Controls/FluentControls.xaml(38,46) Content (resource)
@@ -4917,8 +5839,16 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(90,4) Content (resource)
     let deferred_245 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_378, 90, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_245) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
-    ::core::mem::drop(namespace_scope_15);
-    let namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 77 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_77(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(7,61) Content (resource)
     let value_9 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("inset -6 0 3 -3 #20000000")), 7, 61)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 61)?, rt::string_object("ManagedFileChooserQuickLinksBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_9))), 7, 61)?;
@@ -4928,12 +5858,31 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(350,4) Content (resource)
     let deferred_247 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_392, 350, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_247) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 350, 4)?;
-    ::core::mem::drop(namespace_scope_16);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 78 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SelectableTextBlock.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_78(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(8,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SelectableTextBlockContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_394, 8, 4)?;
     // Controls/FluentControls.xaml(13,4) Content (resource)
     let deferred_249 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_395, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_249) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 79 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_79(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(16,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 42)?, rt::string_object("TextSelectHandleSize"), rt::to_object(32.0_f64)), 16, 42)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
@@ -4947,11 +5896,7 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(74,4) Content (resource)
     let deferred_254 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_400, 74, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_254) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
-    context.pop_parent();
-    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 7, 10)?), 7, 10)?;
-    context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
-    ::core::result::Result::Ok(styles_0)
+    ::core::result::Result::Ok(())
 }
 
 /// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
@@ -42393,6 +43338,235 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CommandBarMinHeight", value: 40.0_f64, line: 41, position: 41 },
     rt::ValueRow { key: "PipsPagerNavigationButtonSize", value: 20.0_f64, line: 42, position: 51 },
 ];
+
+/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_15, build_controls_fluentcontrols_xaml_unit_25, build_controls_fluentcontrols_xaml_unit_27, build_controls_fluentcontrols_xaml_unit_29, build_controls_fluentcontrols_xaml_unit_31, build_controls_fluentcontrols_xaml_unit_68] };
+
+/// The unit `Accents/BaseResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/BaseResources.xaml", index: 1, runs: &[populate_fluenttheme_xaml_unit_0, populate_fluenttheme_xaml_unit_2, populate_fluenttheme_xaml_unit_4] };
+
+/// The unit `Accents/FluentControlResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/FluentControlResources.xaml", index: 2, runs: &[populate_fluenttheme_xaml_unit_1, populate_fluenttheme_xaml_unit_3] };
+
+/// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 3, runs: &[populate_fluenttheme_xaml_unit_5] };
+
+/// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 4, runs: &[build_controls_fluentcontrols_xaml_unit_0] };
+
+/// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 5, runs: &[build_controls_fluentcontrols_xaml_unit_32] };
+
+/// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 6, runs: &[build_controls_fluentcontrols_xaml_unit_1] };
+
+/// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 7, runs: &[build_controls_fluentcontrols_xaml_unit_2] };
+
+/// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 8, runs: &[build_controls_fluentcontrols_xaml_unit_33] };
+
+/// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 9, runs: &[build_controls_fluentcontrols_xaml_unit_34] };
+
+/// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 10, runs: &[build_controls_fluentcontrols_xaml_unit_35] };
+
+/// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 11, runs: &[build_controls_fluentcontrols_xaml_unit_36] };
+
+/// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 12, runs: &[build_controls_fluentcontrols_xaml_unit_37] };
+
+/// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 13, runs: &[build_controls_fluentcontrols_xaml_unit_38] };
+
+/// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 14, runs: &[build_controls_fluentcontrols_xaml_unit_3] };
+
+/// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 15, runs: &[build_controls_fluentcontrols_xaml_unit_39] };
+
+/// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 16, runs: &[build_controls_fluentcontrols_xaml_unit_4] };
+
+/// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 17, runs: &[build_controls_fluentcontrols_xaml_unit_5] };
+
+/// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 18, runs: &[build_controls_fluentcontrols_xaml_unit_40] };
+
+/// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 19, runs: &[build_controls_fluentcontrols_xaml_unit_6] };
+
+/// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 20, runs: &[build_controls_fluentcontrols_xaml_unit_41] };
+
+/// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 21, runs: &[build_controls_fluentcontrols_xaml_unit_7] };
+
+/// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 22, runs: &[build_controls_fluentcontrols_xaml_unit_42] };
+
+/// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 23, runs: &[build_controls_fluentcontrols_xaml_unit_43] };
+
+/// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_fluentcontrols_xaml_unit_44] };
+
+/// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 25, runs: &[build_controls_fluentcontrols_xaml_unit_8] };
+
+/// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_fluentcontrols_xaml_unit_45] };
+
+/// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 27, runs: &[build_controls_fluentcontrols_xaml_unit_9] };
+
+/// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 28, runs: &[build_controls_fluentcontrols_xaml_unit_10] };
+
+/// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 29, runs: &[build_controls_fluentcontrols_xaml_unit_11] };
+
+/// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 30, runs: &[build_controls_fluentcontrols_xaml_unit_46] };
+
+/// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 31, runs: &[build_controls_fluentcontrols_xaml_unit_12] };
+
+/// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 32, runs: &[build_controls_fluentcontrols_xaml_unit_47] };
+
+/// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 33, runs: &[build_controls_fluentcontrols_xaml_unit_48] };
+
+/// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 34, runs: &[build_controls_fluentcontrols_xaml_unit_49] };
+
+/// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 35, runs: &[build_controls_fluentcontrols_xaml_unit_13] };
+
+/// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 36, runs: &[build_controls_fluentcontrols_xaml_unit_14] };
+
+/// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 37, runs: &[build_controls_fluentcontrols_xaml_unit_16] };
+
+/// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 38, runs: &[build_controls_fluentcontrols_xaml_unit_50, build_controls_fluentcontrols_xaml_unit_51, build_controls_fluentcontrols_xaml_unit_52, build_controls_fluentcontrols_xaml_unit_53] };
+
+/// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 39, runs: &[build_controls_fluentcontrols_xaml_unit_17] };
+
+/// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 40, runs: &[build_controls_fluentcontrols_xaml_unit_54] };
+
+/// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 41, runs: &[build_controls_fluentcontrols_xaml_unit_18] };
+
+/// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 42, runs: &[build_controls_fluentcontrols_xaml_unit_19] };
+
+/// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 43, runs: &[build_controls_fluentcontrols_xaml_unit_55] };
+
+/// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 44, runs: &[build_controls_fluentcontrols_xaml_unit_56] };
+
+/// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 45, runs: &[build_controls_fluentcontrols_xaml_unit_57] };
+
+/// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 46, runs: &[build_controls_fluentcontrols_xaml_unit_58] };
+
+/// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 47, runs: &[build_controls_fluentcontrols_xaml_unit_59] };
+
+/// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 48, runs: &[build_controls_fluentcontrols_xaml_unit_60] };
+
+/// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 49, runs: &[build_controls_fluentcontrols_xaml_unit_61] };
+
+/// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 50, runs: &[build_controls_fluentcontrols_xaml_unit_62] };
+
+/// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 51, runs: &[build_controls_fluentcontrols_xaml_unit_20] };
+
+/// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 52, runs: &[build_controls_fluentcontrols_xaml_unit_63] };
+
+/// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 53, runs: &[build_controls_fluentcontrols_xaml_unit_64] };
+
+/// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 54, runs: &[build_controls_fluentcontrols_xaml_unit_21] };
+
+/// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 55, runs: &[build_controls_fluentcontrols_xaml_unit_65] };
+
+/// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 56, runs: &[build_controls_fluentcontrols_xaml_unit_66] };
+
+/// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 57, runs: &[build_controls_fluentcontrols_xaml_unit_22] };
+
+/// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 58, runs: &[build_controls_fluentcontrols_xaml_unit_23] };
+
+/// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 59, runs: &[build_controls_fluentcontrols_xaml_unit_67] };
+
+/// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24] };
+
+/// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
+
+/// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_26] };
+
+/// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
+
+/// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
+
+/// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
+
+/// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
+
+/// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
+
+/// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
+
+/// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
+
+/// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
+
+/// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
+
+/// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_28] };
+
+/// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_30] };
+
+/// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
+
+/// Every unit of the theme, in canonical order: the table the builds of its dictionaries
+/// apply the units through (#568).
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,

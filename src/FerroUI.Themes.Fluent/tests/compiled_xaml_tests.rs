@@ -87,6 +87,8 @@ fn build_script_output_is_the_checked_in_reference() {
     let (built, checked_in) = (read(env!("FERROUI_XAMLMETA")), read(METADATA_PATH));
     assert_eq!((&built.name, &built.crate_name), (&checked_in.name, &checked_in.crate_name));
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
+    // The unit graph of the theme (#568) is the same.
+    assert!(built.theme_units == checked_in.theme_units, "the theme units of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
 #[test]

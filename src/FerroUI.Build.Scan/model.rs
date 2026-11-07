@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{DocumentModel, XamlMetadata};
+pub use crate::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -1226,6 +1226,8 @@ pub struct AssemblyModel {
     /// The `.xamlmeta` files of the crates this crate is built on, relative to the
     /// directory of this file or absolute.
     pub dependencies: Vec<String>,
+    /// The units of the compiled themes of the classes of the crate (#568).
+    pub theme_units: Vec<ThemeUnitsModel>,
 }
 
 impl AssemblyModel {
@@ -1249,6 +1251,7 @@ impl AssemblyModel {
             functions: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
+            theme_units: Vec::new(),
         }
     }
 
@@ -1257,6 +1260,7 @@ impl AssemblyModel {
         let mut model = Self::new(&metadata.name, &metadata.crate_name);
         model.documents = metadata.documents;
         model.dependencies = metadata.dependencies;
+        model.theme_units = metadata.theme_units;
         model
     }
 
@@ -1267,6 +1271,7 @@ impl AssemblyModel {
             crate_name: self.crate_name.clone(),
             documents: self.documents.clone(),
             dependencies: self.dependencies.clone(),
+            theme_units: self.theme_units.clone(),
         }
     }
 
@@ -1354,7 +1359,8 @@ impl AssemblyModel {
                 let rules = exported.rules.iter().map(|(matcher, transcriber)| pair_to_json(matcher, transcriber)).collect();
                 Json::Array(vec![Json::string(&exported.name), Json::Array(rules)])
             })
-            .list("functions", &self.functions, FunctionsModel::to_json);
+            .list("functions", &self.functions, FunctionsModel::to_json)
+            .list("theme_units", &self.theme_units, theme_units_to_json);
         Json::object(members).to_text()
     }
 
@@ -1429,8 +1435,52 @@ impl AssemblyModel {
             functions: fields.list("functions", FunctionsModel::from_json)?,
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
+            theme_units: fields.list("theme_units", theme_units_from_json)?,
         })
     }
+}
+
+/// The units of the compiled theme of a class (#568) as an item of `"theme_units"`: the
+/// members the reader of format 1 reads ([`XamlMetadata::parse`]), every list written even when
+/// empty.
+fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
+    let strings = |items: &[String]| Json::Array(items.iter().map(|item| Json::string(item)).collect());
+    let unit = |unit: &ThemeUnitModel| {
+        Json::Object(vec![
+            ("name".to_string(), Json::string(&unit.name)),
+            ("index".to_string(), Json::Integer(i64::from(unit.index))),
+            ("documents".to_string(), strings(&unit.documents)),
+            ("keys".to_string(), strings(&unit.keys)),
+            ("type_keys".to_string(), strings(&unit.type_keys)),
+            ("references".to_string(), strings(&unit.references)),
+            ("types".to_string(), strings(&unit.types)),
+        ])
+    };
+    Json::Object(vec![
+        ("class".to_string(), Json::string(&units.class)),
+        ("table_path".to_string(), Json::string(&units.table_path)),
+        ("units".to_string(), Json::Array(units.units.iter().map(unit).collect())),
+    ])
+}
+
+/// Reads an item of `"theme_units"` ([`theme_units_to_json`]).
+fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
+    let fields = Fields::of(value, "the units of a class")?;
+    let units = fields.list("units", |unit| {
+        let unit = Fields::of(unit, "a unit")?;
+        let strings = |name: &str| unit.list(name, |item| text_of(item, name));
+        let index = unit.optional_integer("index")?.ok_or_else(|| "\"index\" is missing in a unit".to_string())?;
+        Ok(ThemeUnitModel {
+            name: unit.text("name")?,
+            index: u32::try_from(index).map_err(|_| "the index of a unit is not an unsigned integer".to_string())?,
+            documents: strings("documents")?,
+            keys: strings("keys")?,
+            type_keys: strings("type_keys")?,
+            references: strings("references")?,
+            types: strings("types")?,
+        })
+    })?;
+    Ok(ThemeUnitsModel { class: fields.text("class")?, table_path: fields.text("table_path")?, units })
 }
 
 #[cfg(test)]
@@ -1605,6 +1655,22 @@ mod tests {
             public: true,
         }];
         model.dependencies = vec!["../Other/compiled_xaml.xamlmeta".to_string()];
+        model.theme_units = vec![ThemeUnitsModel {
+            class: "Fixture.Main".to_string(),
+            table_path: "::fixture::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![
+                ThemeUnitModel { name: "ambient".to_string(), documents: vec!["Main.xaml".to_string()], ..ThemeUnitModel::default() },
+                ThemeUnitModel {
+                    name: "Controls/Panel.xaml".to_string(),
+                    index: 1,
+                    documents: vec!["Controls/Panel.xaml".to_string()],
+                    keys: vec!["PanelBackground".to_string()],
+                    type_keys: vec!["Panel".to_string()],
+                    references: vec!["Accent".to_string()],
+                    types: vec!["Border".to_string(), "Panel".to_string()],
+                },
+            ],
+        }];
         model
     }
 

@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Step 1 of the plan is implemented (section 8); the rest is not yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Steps 1 and 2 of the plan are implemented (sections 8 and 9); the rest is not yet. Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -544,3 +544,121 @@ Measured on macOS ARM64 against main at 2f8e8c192:
   It opens, renders and closes with no diagnostic.
 - Theme load (`tests/load_time.rs`, release, WinUI, three runs each, alternated): first load about
   7.0 ms with the rows and 7.1 ms before, second load 6.1 ms and 6.2 ms. No change beyond noise.
+
+## 9. Step 2 as implemented: units and the unit graph
+
+The emitter partitions the compiled markup of a class whose documents merge other documents
+(`MergeResourceInclude`, inlined by `XamlMergeResourceGroupTransformer`) into units. Behaviour
+does not change: the whole theme applies every unit, at the places its entries had, in the same
+order. Nothing chooses a subset yet (`with_parts`, the root computation and the application
+tables are step 3).
+
+### 9.1 Units
+
+- **One unit per merged document.** A control document (`Controls/Button.xaml`: its control
+  themes, type-keyed and text-keyed, and its local resources, theme dictionaries included) and a
+  resource document (`Resources/Button_themeresources.xaml`: its resources and those of its theme
+  dictionaries) are each a unit, named by the path of the document below the root of the
+  assembly.
+- **The ambient unit**, index 0, named `ambient`, is always kept: the documents that are not merged
+  (the document of the class, `Controls/WinUIControls.xaml` with its global `Style` elements,
+  `DensityStyles/Compact.xaml`, which `CompactStyles` includes), the structure of the builds (the
+  dictionaries, `SystemAccentColors`, the theme variants, `CompactStyles`), the documents that define
+  the theme of a host the framework creates (`Window`, `PopupRoot`, `OverlayPopupHost`,
+  `AdornerLayer`, `EmbeddableControlRoot`, `ThemeVariantScope`), and the documents with an entry no
+  root can name (an entry without a key, with a key that is neither text nor `{x:Type}`, or one that
+  registers a name in the scope of the document; in WinUI only `Controls/WindowDrawnDecorations.xaml`).
+- **Canonical order** is the order of the documents of the group: the class document, then its
+  includes in the order they are met. The ambient unit is first.
+- **Resources are grouped by document.** The unit graph links the units through their keys, and step
+  3 keeps every unit that defines a live key (every definition: overrides and the theme variants).
+  Grouping the resources of the shared documents finer (open questions 3 and 4) splits a resource
+  unit without changing the format.
+
+### 9.2 Generated code
+
+- `MergedEntryOrigins` (an extra of the transformer configuration that only the transform of the
+  emitter adds) records, for each entry a merge inlines, the URI of the document it comes from.
+  `rust_emitter/theme_unit_graph.rs` plans the units from the documents and those URIs.
+- While the function of a document is written, each entry of a dictionary that comes from a document
+  of a unit is written between two marker comments with the index of the unit. Only entries at the
+  top level of the function are marked, never those of deferred content. The runs of rows of step 1
+  end where the unit changes.
+- `rust_emitter/theme_units.rs` then takes each run (consecutive entries of one unit added to one
+  dictionary) out of the body into `<function>_unit_<n>(context, dictionary)`, and writes
+  `rt::apply_theme_unit(THEME_UNITS, <unit>, <run>, &context, &<dictionary>)?` in its place. An entry
+  stays in the body when it is not complete statements at the top level, names a local of the body
+  other than the context and its dictionary, or declares a local that is named after it. Row tables
+  and deferred build functions stay statics and functions of their own, referred to only by the
+  run. The markers never reach the file.
+- The file ends with one `static THEME_UNIT_<index>: rt::ThemeUnit` per unit and
+  `pub static THEME_UNITS: &[&rt::ThemeUnit]`, in canonical order. Nothing else refers to a run.
+- The runtime (`xaml_il/runtime/theme_units.rs`, re-exported by `rt`):
+  `ThemeUnit { name, index, runs: &'static [ThemeUnitRun] }`,
+  `ThemeUnitRun = fn(&Rc<XamlIlContext>, &Ref<ResourceDictionary>) -> Result<(), XamlLoadError>`,
+  `apply_theme_unit(units, index, run, context, dictionary)` (a unit the table does not have adds
+  nothing) and `find_theme_unit(units, name)`.
+- `WinUITheme::new()`, `with_service_provider()` and `try_load` are unchanged: they populate the
+  class, whose builds apply every run through `THEME_UNITS`.
+
+### 9.3 The `.xamlmeta`
+
+`XamlMetadata` and `AssemblyModel` (format 2) gain `theme_units`, written only when a class has
+units, and ignored by a reader that does not know it (abridged; the indices follow the order of the group):
+
+```text
+"theme_units": [
+  {
+    "class": "FerroUI.Themes.WinUI.WinUITheme",
+    "table_path": "::ferroui_themes_winui::compiled_xaml::THEME_UNITS",
+    "units": [
+      {
+        "name": "Controls/Button.xaml",
+        "index": 12,
+        "documents": ["Controls/Button.xaml"],
+        "keys": ["AccentButtonStyle", ...],
+        "type_keys": ["Button"],
+        "references": ["AccentButtonBackground", ...],
+        "types": ["Border", "Button", "ContentPresenter", ...]
+      }
+    ]
+  }
+]
+```
+
+- `keys` and `type_keys`: the text keys and the `{x:Type}` keys (by local name) of the outermost
+  entries of the dictionaries of the documents of the unit. The entries of a dictionary nested in an
+  entry belong to the entry.
+- `references`: every key of the group the text of the unit names. That is every identifier token
+  of its attribute values and text that is a key (conservative, as in #496), and the argument of
+  every `{StaticResource}`, `{DynamicResource}` and `ResourceKey`, which may be any key.
+- `types`: the local names of its elements (template content included), of its `TargetType`s, of
+  the type selectors of its selectors and of its `{x:Type}`s.
+- The `Source` of an include and the content of `Design.PreviewWith` are not read. A group with a
+  document that is not plain XML (a DTD) has no units.
+
+Build scripts receive the file through `DEP_<CRATE>_XAML_XAMLMETA` as before; `ferroui-build`
+copies the units of a class into the `.xamlmeta` it writes. The checked-in `.xamlmeta` of a theme
+is regenerated by the same ignored test as its `compiled_xaml.rs` (`regenerate_compiled_xaml`), and
+`build_script_output_is_the_checked_in_reference` compares the units of the build with it.
+
+### 9.4 Measurements
+
+Measured on macOS ARM64 against step 1 (section 8):
+
+| Theme | Generated text | Units |
+|---|---:|---:|
+| WinUI | 10.08 MB to 10.36 MB | 164 |
+| macOS | 9.16 MB to 9.44 MB | 164 |
+| Fluent | 4.47 MB to 4.55 MB | 75 |
+| Simple | 3.10 MB to 3.17 MB | 72 |
+
+- Hello world `dist`: 37.73 MB to 37.98 MB (+0.25 MB). The unit functions and the table of all units
+  cost this while every unit is still applied; step 3 removes the units an application does not
+  reach.
+- Theme load (`tests/load_time.rs`, release, WinUI, alternated with step 1): second load 6.2 ms and
+  6.6 ms against 6.1 ms and 6.0 ms, first load 6.7 ms and 7.2 ms against 6.8 ms and 6.7 ms. Within
+  the noise of these runs, possibly up to 0.3 ms for the extra calls through the table.
+- Catalog (`fast-release`): the 14 screenshots are byte-identical to step 1 except the home page,
+  whose animated banner differs between any two runs; the page tour selects all 127 pages and logs
+  the same lines.

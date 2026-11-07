@@ -59,6 +59,10 @@ use super::source::rust_string_literal;
 #[path = "theme_rows.rs"]
 mod theme_rows;
 
+/// The runs of the units of a compiled theme (#568).
+#[path = "theme_units.rs"]
+pub(crate) mod theme_units;
+
 /// Why a document is not eligible for emission: the first node (or member)
 /// the emitter has no exact Rust for.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -759,6 +763,9 @@ struct Emitter<'a> {
     row_statements: HashMap<String, theme_rows::RowStatement>,
     /// The row tables of the runs written as rows, in the order of their calls.
     row_tables: Vec<String>,
+    /// How deep the content being written is in deferred content: the entries of units are
+    /// marked only at the top level, in the function of the document ([`theme_units`]).
+    deferred_depth: usize,
 }
 
 struct ScopedNamespaceTable {
@@ -1967,7 +1974,20 @@ impl<'a> Emitter<'a> {
             return self.adder_assignment(node, assignment, adder, target);
         }
         if let Some(adder) = setter.as_any().downcast_ref::<ResourceAdderSetter>() {
-            return self.resource_assignment(node, assignment, adder, target);
+            // An entry a merge inlined from a document of a unit of the theme (#568) is written
+            // between the markers of its unit.
+            let unit = match self.deferred_depth {
+                0 => self.documents.units().and_then(|units| units.unit_of(node)),
+                _ => None,
+            };
+            if let Some(unit) = unit {
+                self.lines.push(theme_units::begin_marker(unit));
+            }
+            let result = self.resource_assignment(node, assignment, adder, target);
+            if unit.is_some() {
+                self.lines.push(format!("    {}", theme_units::END_MARKER));
+            }
+            return result;
         }
         // The value of an unset-value assignment is not evaluated at all.
         if setter.as_any().is::<UnsetValueSetter>() {
@@ -2859,7 +2879,9 @@ impl<'a> Emitter<'a> {
         let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
             .unwrap_or_else(|| self.namespace_aliases.clone());
         let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
+        self.deferred_depth += 1;
         let body = self.deferred_body(deferred);
+        self.deferred_depth -= 1;
         self.namespace_aliases = outer_aliases;
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
@@ -4563,6 +4585,8 @@ pub struct DocumentFunctions<'a> {
     builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
+    /// The units of the theme the documents are partitioned into (#568), when they have them.
+    units: Option<theme_units::UnitEmission>,
 }
 
 impl<'a> DocumentFunctions<'a> {
@@ -4583,6 +4607,16 @@ impl<'a> DocumentFunctions<'a> {
     /// The functions the documents emitted so far call.
     pub fn called(&self) -> Vec<String> {
         self.called.borrow().clone()
+    }
+
+    /// Partitions the documents emitted from now on into the units `units` (#568).
+    pub(crate) fn set_units(&mut self, units: theme_units::UnitEmission) {
+        self.units = Some(units);
+    }
+
+    /// The units of the documents, if they are partitioned.
+    pub(crate) fn units(&self) -> Option<&theme_units::UnitEmission> {
+        self.units.as_ref()
     }
 }
 
@@ -4663,6 +4697,7 @@ pub fn emit_function<'a>(
         deferred_rows: HashMap::new(),
         row_statements: HashMap::new(),
         row_tables: Vec::new(),
+        deferred_depth: 0,
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -4734,6 +4769,20 @@ pub fn emit_function<'a>(
     local_types.insert(created.expr.clone(), root_type);
     let lines = std::mem::take(&mut emitter.lines);
     let lines = emitter.apply_row_runs(lines);
+    // The entries of the units of a theme, taken out into the functions of their runs (#568).
+    let (lines, unit_runs) = match (documents.units(), types.framework_path(FrameworkType::ResourceDictionary)) {
+        (Some(units), Some(dictionary)) => theme_units::extract_runs(
+            function_name,
+            &document_text,
+            lines,
+            &local_types,
+            &format!("::ferroui_base::Ref<{}>", absolute(&dictionary)),
+            units,
+        ),
+        // Without the units there are no markers, and without the path of the dictionary they
+        // are dropped.
+        _ => (lines.into_iter().filter(|line| theme_units::unit_marker(line).is_none()).collect(), Vec::new()),
+    };
     let (body, parts) = split_into_parts(function_name, &document_text, &lines, &local_types);
     for line in &body {
         source.push_str(line);
@@ -4743,6 +4792,10 @@ pub fn emit_function<'a>(
     for part in &parts {
         source.push('\n');
         source.push_str(part);
+    }
+    for run in &unit_runs {
+        source.push('\n');
+        source.push_str(run);
     }
     for table in &emitter.row_tables {
         source.push('\n');

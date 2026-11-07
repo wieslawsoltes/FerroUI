@@ -111,6 +111,8 @@ mod runtime_host;
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 pub mod runtime_types;
 mod source;
+/// The units of a compiled theme and their graph (#568).
+mod theme_unit_graph;
 mod transform;
 
 pub use compiled::{
@@ -125,5 +127,5 @@ pub use transform::{transform_group, DiagnosticHandler, DocumentSource, Namespac
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
-pub use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
+pub use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 pub use source::{function_name_of, rust_string_literal};

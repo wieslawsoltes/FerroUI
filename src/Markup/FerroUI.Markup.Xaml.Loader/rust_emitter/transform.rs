@@ -27,7 +27,7 @@ use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::{TransformerConfiguration, XamlDiagnosticsHandler};
 use xamlx::type_system::{IXamlAssembly, IXamlMethod, IXamlType, IXamlTypeSystem};
 
-use crate::compiler_extensions::group_transformers::XamlRuntimeIncludeFallback;
+use crate::compiler_extensions::group_transformers::{MergedEntryOrigins, XamlRuntimeIncludeFallback};
 use crate::compiler_extensions::{
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage, IXamlCompileTimeValueParser,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlCompileTimeValueParsers, XamlDocumentResource,
@@ -182,6 +182,9 @@ pub fn transform_group(
         value_parsers.add(parser.clone());
     }
     transformer_configuration.get_or_create_extra::<XamlRuntimeIncludeFallback>().set(None);
+    // The documents the merged entries come from, which the units of a compiled theme are made
+    // of (#568, `MergedEntryOrigins`).
+    transformer_configuration.add_extra(Rc::new(MergedEntryOrigins::default()));
 
     let compiler = FerroXamlIlCompiler::new(transformer_configuration.clone())?;
     compiler.set_default_compile_bindings(options.use_compiled_bindings_by_default);

@@ -77,14 +77,7 @@ pub fn populate_simpletheme_xaml(
     // SimpleTheme.xaml(6,6) Key
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 6, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 6, 6)?);
-    // SimpleTheme.xaml(7,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
-    // SimpleTheme.xaml(24,8) Content (resource)
-    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
-    // SimpleTheme.xaml(41,8) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_2)?;
-    // SimpleTheme.xaml(49,8) Content (resource)
-    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_3)?;
+    rt::apply_theme_unit(THEME_UNITS, 1, 0, &context, &resource_dictionary_1)?;
     context.pop_parent();
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 6, 6)?), 6, 6)?;
     // SimpleTheme.xaml(52,6) ThemeDictionaries
@@ -101,6 +94,48 @@ pub fn populate_simpletheme_xaml(
     // SimpleTheme.xaml(52,6) Key
     let value_19 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 52, 6)?, rt::cast(::core::clone::Clone::clone(&value_19), 52, 6)?);
+    rt::apply_theme_unit(THEME_UNITS, 1, 1, &context, &resource_dictionary_2)?;
+    context.pop_parent();
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_18), rt::cast(resource_dictionary_2.clone(), 52, 6)?), 52, 6)?;
+    rt::apply_theme_unit(THEME_UNITS, 1, 2, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_0);
+    rt::apply_theme_unit(THEME_UNITS, 2, 0, &context, &resource_dictionary_0)?;
+    context.pop_parent();
+    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 5, 6)?), 5, 6)?;
+    // SimpleTheme.xaml(13,4) Content
+    let service_provider_0 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
+    let value_44 = build_controls_simplecontrols_xaml(rt::cast(service_provider_0.clone(), 13, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_44.clone(), 13, 4)?), 13, 4)?;
+    context.pop_parent();
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 0 of `populate_simpletheme_xaml` (`SimpleTheme.xaml`): entries of the unit `Accents/Base.xaml` (#568).
+fn populate_simpletheme_xaml_unit_0(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
+    // SimpleTheme.xaml(7,43) Content (resource)
+    rt::add_color_resources(&resource_dictionary_1, POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
+    // SimpleTheme.xaml(24,8) Content (resource)
+    rt::add_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
+    // SimpleTheme.xaml(41,8) Content (resource)
+    rt::add_literal_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_2)?;
+    // SimpleTheme.xaml(49,8) Content (resource)
+    rt::add_resource_aliases(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_3)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 1 of `populate_simpletheme_xaml` (`SimpleTheme.xaml`): entries of the unit `Accents/Base.xaml` (#568).
+fn populate_simpletheme_xaml_unit_1(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(53,43) Content (resource)
     rt::add_color_resources(&resource_dictionary_2, POPULATE_SIMPLETHEME_XAML_ROWS_4)?;
     // SimpleTheme.xaml(70,8) Content (resource)
@@ -109,8 +144,16 @@ pub fn populate_simpletheme_xaml(
     rt::add_literal_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_6)?;
     // SimpleTheme.xaml(95,8) Content (resource)
     rt::add_resource_aliases(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, POPULATE_SIMPLETHEME_XAML_ROWS_7)?;
-    context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_18), rt::cast(resource_dictionary_2.clone(), 52, 6)?), 52, 6)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 2 of `populate_simpletheme_xaml` (`SimpleTheme.xaml`): entries of the unit `Accents/Base.xaml` (#568).
+fn populate_simpletheme_xaml_unit_2(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(98,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_44, 98, 53)?;
     // SimpleTheme.xaml(99,35) Content (resource)
@@ -139,17 +182,17 @@ pub fn populate_simpletheme_xaml(
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 147, 43)?, rt::string_object("ThemeBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 147, 43)?;
     // SimpleTheme.xaml(148,44) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_12)?;
-    ::core::mem::drop(namespace_scope_0);
+    ::core::result::Result::Ok(())
+}
+
+/// Run 3 of `populate_simpletheme_xaml` (`SimpleTheme.xaml`): entries of the unit `Strings/InvariantResources.xaml` (#568).
+fn populate_simpletheme_xaml_unit_3(
+    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(5,52) Content (resource)
     rt::add_string_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_13)?;
-    context.pop_parent();
-    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(resource_dictionary_0.clone(), 5, 6)?), 5, 6)?;
-    // SimpleTheme.xaml(13,4) Content
-    let service_provider_0 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_44 = build_controls_simplecontrols_xaml(rt::cast(service_provider_0.clone(), 13, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_44.clone(), 13, 4)?), 13, 4)?;
-    context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(())
 }
 
@@ -542,358 +585,87 @@ pub fn build_controls_simplecontrols_xaml(
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 6, 6)?);
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 6, 6)?, count_0.wrapping_add(214_i32));
     }
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_0, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_2, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_4, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_6, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_8, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_5 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_10, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_5) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_6 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_12, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_6) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_7 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_14, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_7) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_8 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_16, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_8) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_9 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_18, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Label as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_9) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_10 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_20, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_10) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_11 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_22, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_11) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_12 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_26, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_12) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_13 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_28, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Carousel as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_13) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_14 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_30, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_14) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_15 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_32, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_15) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_16 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_35, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_16) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_17 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_37, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_17) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_18 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_39, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridSplitter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_18) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(13,4) Content (resource)
-    let deferred_19 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_42, 13, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_19) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_20 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_44, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ItemsControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_20) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_21 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_46, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_21) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_22 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_48, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_22) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_23 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_50, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStrip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_23) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_24 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_53, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_24) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_25 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_55, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_25) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_26 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_57, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_26) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(8,4) Content (resource)
-    let deferred_27 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_59, 8, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_27) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_28 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_63, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_28) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_65, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_30 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_67, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::WindowNotificationManager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_30) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_31 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_71, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_31) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_32 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_73, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TransitioningContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_32) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_33 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_75, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_33) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_34 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_77, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Separator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_34) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_35 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_79, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_35) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(11,4) Content (resource)
-    let deferred_36 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_81, 11, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_36) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
-    // Controls/SimpleControls.xaml(11,4) Content (resource)
-    let deferred_37 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_83, 11, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarDayButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_37) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
-    // Controls/SimpleControls.xaml(14,4) Content (resource)
-    let deferred_38 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_85, 14, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_38) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
-    // Controls/SimpleControls.xaml(11,4) Content (resource)
-    let deferred_39 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_88, 11, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Calendar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_39) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 3, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 4, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 6, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 9, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 10, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 11, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 12, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 13, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 14, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 15, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 16, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 1, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 17, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 19, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 20, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 21, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 22, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 24, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 25, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 26, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 27, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 28, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 31, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 32, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 33, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 34, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 35, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 2, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 36, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 37, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 38, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 41, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 44, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 45, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 46, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 47, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 48, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
-    // Controls/SimpleControls.xaml(12,4) Content (resource)
-    let deferred_40 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_90, 12, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_40) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 49, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_0);
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_41 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_93, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NotificationCard as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_41) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_42 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_95, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_42) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_43 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_97, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_43) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_44 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_99, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_44) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_45 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_102, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_45) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    let deferred_46 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_103, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::HeaderedContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_46) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
-    // Controls/SimpleControls.xaml(12,4) Content (resource)
-    let deferred_47 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_105, 12, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContentPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_47) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
-    // Controls/SimpleControls.xaml(17,4) Content (resource)
-    let deferred_48 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_107, 17, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CarouselPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_48) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
-    // Controls/SimpleControls.xaml(48,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_109, 48, 4)?;
-    // Controls/SimpleControls.xaml(84,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonUpTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_111, 84, 4)?;
-    // Controls/SimpleControls.xaml(93,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonDownTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_112, 93, 4)?;
-    // Controls/SimpleControls.xaml(102,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonLeftTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_113, 102, 4)?;
-    // Controls/SimpleControls.xaml(111,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonRightTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_114, 111, 4)?;
-    // Controls/SimpleControls.xaml(121,4) Content (resource)
-    let deferred_54 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_115, 121, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_54) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 121, 4)?;
-    // Controls/SimpleControls.xaml(34,50) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 50)?, rt::string_object("ToggleSwitchTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 6.0_f64))), 34, 50)?;
-    // Controls/SimpleControls.xaml(35,52) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 52)?, rt::string_object("ToggleSwitchPreContentMargin"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(6.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 35, 52)?;
-    // Controls/SimpleControls.xaml(36,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 53)?, rt::string_object("ToggleSwitchPostContentMargin"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(6.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 36, 53)?;
-    // Controls/SimpleControls.xaml(37,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 47)?, rt::string_object("ToggleSwitchThemeMinWidth"), rt::to_object(0.0_f64)), 37, 47)?;
-    // Controls/SimpleControls.xaml(38,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0)?;
-    // Controls/SimpleControls.xaml(41,4) Content (resource)
-    let deferred_55 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_120, 41, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_55) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 41, 4)?;
-    // Controls/SimpleControls.xaml(5,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleButtonSpinnerRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_122, 5, 4)?;
-    // Controls/SimpleControls.xaml(16,4) Content (resource)
-    let deferred_57 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_123, 16, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_57) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
-    // Controls/SimpleControls.xaml(5,40) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1)?;
-    // Controls/SimpleControls.xaml(7,67) Content (resource)
-    let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
-    // Controls/SimpleControls.xaml(8,4) Content (resource)
-    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
-    // Controls/SimpleControls.xaml(11,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_127, 11, 4)?;
-    // Controls/SimpleControls.xaml(36,4) Content (resource)
-    let deferred_61 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_129, 36, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_61) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
-    // Controls/SimpleControls.xaml(4,50) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextBoxClearButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_131, 4, 50)?;
-    // Controls/SimpleControls.xaml(5,55) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_132, 5, 55)?;
-    // Controls/SimpleControls.xaml(6,53) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxHideButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_133, 6, 53)?;
-    // Controls/SimpleControls.xaml(8,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_134, 8, 4)?;
-    // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxClearButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_135, 17, 4)?;
-    // Controls/SimpleControls.xaml(41,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimplePasswordBoxRevealButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_137, 41, 4)?;
-    // Controls/SimpleControls.xaml(82,4) Content (resource)
-    let deferred_68 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_139, 82, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_68) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 82, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 51, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 52, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 59, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 4, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 60, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 63, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 64, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 5, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 7, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 8, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 5, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 18, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1);
-    // Controls/SimpleControls.xaml(10,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BorderGapMaskConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_143, 10, 4)?;
-    // Controls/SimpleControls.xaml(12,4) Content (resource)
-    let deferred_70 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_144, 12, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_70) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 23, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleVerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_146, 4, 4)?;
-    // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleHorizontalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_147, 17, 4)?;
-    // Controls/SimpleControls.xaml(30,4) Content (resource)
-    let deferred_73 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_148, 30, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_73) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 30, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 29, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
-    // Controls/SimpleControls.xaml(5,4) Content (resource)
-    let deferred_74 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_153, 5, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_74) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
-    // Controls/SimpleControls.xaml(43,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleMenuScrollViewer", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_155, 43, 4)?;
-    // Controls/SimpleControls.xaml(5,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 40)?, rt::string_object("TreeViewItemIndent"), rt::to_object(16.0_f64)), 5, 40)?;
-    // Controls/SimpleControls.xaml(7,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTreeViewItemToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_157, 7, 4)?;
-    // Controls/SimpleControls.xaml(31,4) Content (resource)
-    let deferred_77 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_159, 31, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_77) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 31, 4)?;
-    // Controls/SimpleControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_161, 17, 4)?;
-    // Controls/SimpleControls.xaml(19,4) Content (resource)
-    let deferred_79 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_162, 19, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_79) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 30, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 39, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 40, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
     let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
-    // Controls/SimpleControls.xaml(6,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTopLevelMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_164, 6, 4)?;
-    // Controls/SimpleControls.xaml(64,4) Content (resource)
-    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_167, 64, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 64, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 42, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_3);
     let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3);
-    // Controls/SimpleControls.xaml(6,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_169, 6, 4)?;
-    // Controls/SimpleControls.xaml(8,4) Content (resource)
-    let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_170, 8, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 43, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_4);
-    // Controls/SimpleControls.xaml(4,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SliderRepeatTrackTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_176, 4, 4)?;
-    // Controls/SimpleControls.xaml(16,4) Content (resource)
-    let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_178, 16, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
-    // Controls/SimpleControls.xaml(24,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
-    // Controls/SimpleControls.xaml(29,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_183, 29, 4)?;
-    // Controls/SimpleControls.xaml(53,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_184, 53, 4)?;
-    // Controls/SimpleControls.xaml(97,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_186, 97, 4)?;
-    // Controls/SimpleControls.xaml(120,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_188, 120, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 50, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 53, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0);
-    // Controls/SimpleControls.xaml(33,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
-    // Controls/SimpleControls.xaml(38,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
-    // Controls/SimpleControls.xaml(42,48) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 42, 48)?;
-    // Controls/SimpleControls.xaml(44,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDatePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_190, 44, 4)?;
-    // Controls/SimpleControls.xaml(80,4) Content (resource)
-    let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_192, 80, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
-    // Controls/SimpleControls.xaml(172,4) Content (resource)
-    let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_194, 172, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 172, 4)?;
-    // Controls/SimpleControls.xaml(33,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6)?;
-    // Controls/SimpleControls.xaml(35,53) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 53)?;
-    // Controls/SimpleControls.xaml(36,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
-    // Controls/SimpleControls.xaml(40,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
-    // Controls/SimpleControls.xaml(43,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_196, 43, 4)?;
-    // Controls/SimpleControls.xaml(79,4) Content (resource)
-    let deferred_94 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_198, 79, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_94) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
-    // Controls/SimpleControls.xaml(205,4) Content (resource)
-    let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_200, 205, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 205, 4)?;
-    // Controls/SimpleControls.xaml(19,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9)?;
-    // Controls/SimpleControls.xaml(21,60) Content (resource)
-    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 60)?, rt::string_object("SplitViewPaneAnimationOpenDuration"), rt::to_object(::core::clone::Clone::clone(&value_1))), 21, 60)?;
-    // Controls/SimpleControls.xaml(22,61) Content (resource)
-    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 61)?, rt::string_object("SplitViewPaneAnimationCloseDuration"), rt::to_object(::core::clone::Clone::clone(&value_2))), 22, 61)?;
-    // Controls/SimpleControls.xaml(23,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitViewPaneAnimationEasing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_202, 23, 48)?;
-    // Controls/SimpleControls.xaml(27,4) Content (resource)
-    let deferred_97 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_203, 27, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_97) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 27, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 54, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 55, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 56, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_5);
     let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4);
-    // Controls/SimpleControls.xaml(7,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_208, 7, 4)?;
-    // Controls/SimpleControls.xaml(16,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "Refresh", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_209, 16, 4)?;
-    // Controls/SimpleControls.xaml(22,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_210, 22, 4)?;
-    // Controls/SimpleControls.xaml(50,4) Content (resource)
-    let deferred_101 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_211, 50, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_101) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 50, 4)?;
-    // Controls/SimpleControls.xaml(246,4) Content (resource)
-    let deferred_102 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_215, 246, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_102) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 246, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 57, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_6);
     let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2);
-    // Controls/SimpleControls.xaml(14,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
-    // Controls/SimpleControls.xaml(18,54) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 18, 54)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 54)?;
-    // Controls/SimpleControls.xaml(20,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PrimaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_217, 20, 4)?;
-    // Controls/SimpleControls.xaml(22,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SecondaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_218, 22, 4)?;
-    // Controls/SimpleControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SeparatorBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_219, 24, 4)?;
-    // Controls/SimpleControls.xaml(25,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TopCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_220, 25, 4)?;
-    // Controls/SimpleControls.xaml(26,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "RightCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_221, 26, 4)?;
-    // Controls/SimpleControls.xaml(27,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BottomCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_222, 27, 4)?;
-    // Controls/SimpleControls.xaml(28,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LeftCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_223, 28, 4)?;
-    // Controls/SimpleControls.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SimpleSplitButtonComponent", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_224, 30, 4)?;
-    // Controls/SimpleControls.xaml(116,4) Content (resource)
-    let deferred_111 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_226, 116, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_111) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 116, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 58, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_7);
     // Controls/SimpleControls.xaml(8,4) Content (resource)
     // Controls/SimpleControls.xaml(8,4) MenuFlyout
@@ -935,9 +707,1040 @@ pub fn build_controls_simplecontrols_xaml(
     rt::invoked(menu_item_0.try_end_init(), 9, 6)?;
     context.pop_parent();
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 8, 4)?, rt::string_object("SelectableTextBlockContextFlyout"), rt::to_object(::core::clone::Clone::clone(&menu_flyout_0))), 8, 4)?;
+    rt::apply_theme_unit(THEME_UNITS, 0, 6, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 61, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 65, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 66, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 67, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 68, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 69, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 70, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(THEME_UNITS, 71, 0, &context, &resource_dictionary_0)?;
+    context.pop_parent();
+    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 6, 6)?), 6, 6)?;
+    context.pop_parent();
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(styles_0)
+}
+
+/// Run 0 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_0(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_0, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 1 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Button.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_1(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_2, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 2 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_2(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_4, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 3 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_3(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_6, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 4 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_4(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_8, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 5 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_5(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_5 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_10, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_5) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 6 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_6(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_6 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_12, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PathIcon as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_6) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 7 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_7(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_7 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_14, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_7) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 8 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_8(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_8 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_16, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_8) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 9 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Label.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_9(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_9 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_18, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Label as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_9) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 10 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_10(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_10 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_20, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_10) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 11 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_11(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_11 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_22, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_11) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 12 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_12(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_12 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_26, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Window as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_12) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 13 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Carousel.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_13(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_13 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_28, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Carousel as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_13) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 14 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/AutoCompleteBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_14(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_14 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_30, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_14) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 15 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_15(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_15 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_32, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_15) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 16 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_16(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_16 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_35, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_16) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 17 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_17(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_17 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_37, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_17) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 18 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/GridSplitter.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_18(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_18 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_39, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridSplitter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_18) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 19 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_19(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(13,4) Content (resource)
+    let deferred_19 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_42, 13, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_19) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 20 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ItemsControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_20(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_20 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_44, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ItemsControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_20) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 21 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_21(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_21 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_46, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_21) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 22 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ListBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_22(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_22 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_48, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_22) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 23 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_23(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_23 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_50, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStrip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_23) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 24 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_24(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_24 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_53, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_24) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 25 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_25(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_25 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_55, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_25) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 26 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_26(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_26 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_57, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_26) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 27 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_27(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(8,4) Content (resource)
+    let deferred_27 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_59, 8, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_27) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 28 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_28(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_28 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_63, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_28) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_29 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_65, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_29) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 29 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_29(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_30 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_67, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::WindowNotificationManager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_30) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 30 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_30(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_31 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_71, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_31) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 31 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_31(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_32 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_73, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TransitioningContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_32) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 32 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_32(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_33 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_75, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_33) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 33 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_33(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_34 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_77, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Separator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_34) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 34 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_34(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_35 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_79, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_35) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 35 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_35(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(11,4) Content (resource)
+    let deferred_36 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_81, 11, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_36) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 36 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_36(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(11,4) Content (resource)
+    let deferred_37 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_83, 11, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarDayButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_37) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 37 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_37(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(14,4) Content (resource)
+    let deferred_38 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_85, 14, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_38) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 38 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_38(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(11,4) Content (resource)
+    let deferred_39 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_88, 11, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Calendar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_39) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 39 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_39(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(12,4) Content (resource)
+    let deferred_40 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_90, 12, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_40) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 40 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_40(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_41 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_93, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NotificationCard as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_41) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 41 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_41(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_42 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_95, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_42) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 42 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_42(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_43 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_97, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_43) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 43 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_43(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_44 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_99, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshVisualizer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_44) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_45 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_102, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_45) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 44 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_44(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    let deferred_46 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_103, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::HeaderedContentControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_46) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 45 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_45(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(12,4) Content (resource)
+    let deferred_47 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_105, 12, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContentPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_47) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 46 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_46(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(17,4) Content (resource)
+    let deferred_48 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_107, 17, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CarouselPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_48) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 47 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_47(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(48,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_109, 48, 4)?;
+    // Controls/SimpleControls.xaml(84,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonUpTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_111, 84, 4)?;
+    // Controls/SimpleControls.xaml(93,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonDownTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_112, 93, 4)?;
+    // Controls/SimpleControls.xaml(102,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonLeftTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_113, 102, 4)?;
+    // Controls/SimpleControls.xaml(111,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleExpanderToggleButtonRightTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_114, 111, 4)?;
+    // Controls/SimpleControls.xaml(121,4) Content (resource)
+    let deferred_54 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_115, 121, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_54) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 121, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 48 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_48(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(34,50) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 50)?, rt::string_object("ToggleSwitchTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 6.0_f64))), 34, 50)?;
+    // Controls/SimpleControls.xaml(35,52) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 52)?, rt::string_object("ToggleSwitchPreContentMargin"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(6.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 35, 52)?;
+    // Controls/SimpleControls.xaml(36,53) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 53)?, rt::string_object("ToggleSwitchPostContentMargin"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(6.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 36, 53)?;
+    // Controls/SimpleControls.xaml(37,47) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 47)?, rt::string_object("ToggleSwitchThemeMinWidth"), rt::to_object(0.0_f64)), 37, 47)?;
+    // Controls/SimpleControls.xaml(38,52) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0)?;
+    // Controls/SimpleControls.xaml(41,4) Content (resource)
+    let deferred_55 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_120, 41, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_55) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 41, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 49 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_49(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(5,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleButtonSpinnerRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_122, 5, 4)?;
+    // Controls/SimpleControls.xaml(16,4) Content (resource)
+    let deferred_57 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_123, 16, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_57) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 50 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_50(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(5,40) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1)?;
+    // Controls/SimpleControls.xaml(7,67) Content (resource)
+    let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 10 2 #80000000")), 7, 67)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 67)?, rt::string_object("WindowDrawnDecorationsWindowBorderBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_0))), 7, 67)?;
+    // Controls/SimpleControls.xaml(8,4) Content (resource)
+    rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2)?;
+    // Controls/SimpleControls.xaml(11,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_127, 11, 4)?;
+    // Controls/SimpleControls.xaml(36,4) Content (resource)
+    let deferred_61 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_129, 36, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_61) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 51 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_51(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,50) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "TextBoxClearButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_131, 4, 50)?;
+    // Controls/SimpleControls.xaml(5,55) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_132, 5, 55)?;
+    // Controls/SimpleControls.xaml(6,53) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxHideButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_133, 6, 53)?;
+    // Controls/SimpleControls.xaml(8,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_134, 8, 4)?;
+    // Controls/SimpleControls.xaml(17,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTextBoxClearButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_135, 17, 4)?;
+    // Controls/SimpleControls.xaml(41,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimplePasswordBoxRevealButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_137, 41, 4)?;
+    // Controls/SimpleControls.xaml(82,4) Content (resource)
+    let deferred_68 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_139, 82, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_68) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 82, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 52 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_52(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(10,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "BorderGapMaskConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_143, 10, 4)?;
+    // Controls/SimpleControls.xaml(12,4) Content (resource)
+    let deferred_70 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_144, 12, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_70) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 53 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_53(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleVerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_146, 4, 4)?;
+    // Controls/SimpleControls.xaml(17,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleHorizontalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_147, 17, 4)?;
+    // Controls/SimpleControls.xaml(30,4) Content (resource)
+    let deferred_73 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_148, 30, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_73) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 30, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 54 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_54(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(5,4) Content (resource)
+    let deferred_74 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_153, 5, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_74) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
+    // Controls/SimpleControls.xaml(43,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleMenuScrollViewer", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_155, 43, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 55 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_55(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(5,40) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 40)?, rt::string_object("TreeViewItemIndent"), rt::to_object(16.0_f64)), 5, 40)?;
+    // Controls/SimpleControls.xaml(7,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTreeViewItemToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_157, 7, 4)?;
+    // Controls/SimpleControls.xaml(31,4) Content (resource)
+    let deferred_77 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_159, 31, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_77) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 31, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 56 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_56(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(17,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_161, 17, 4)?;
+    // Controls/SimpleControls.xaml(19,4) Content (resource)
+    let deferred_79 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_162, 19, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_79) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 57 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_57(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(6,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTopLevelMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_164, 6, 4)?;
+    // Controls/SimpleControls.xaml(64,4) Content (resource)
+    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_167, 64, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 64, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 58 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_58(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(6,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_169, 6, 4)?;
+    // Controls/SimpleControls.xaml(8,4) Content (resource)
+    let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_170, 8, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 59 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_59(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(4,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SliderRepeatTrackTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_176, 4, 4)?;
+    // Controls/SimpleControls.xaml(16,4) Content (resource)
+    let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_178, 16, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 60 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_60(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(24,58) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
+    // Controls/SimpleControls.xaml(29,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_183, 29, 4)?;
+    // Controls/SimpleControls.xaml(53,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_184, 53, 4)?;
+    // Controls/SimpleControls.xaml(97,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_186, 97, 4)?;
+    // Controls/SimpleControls.xaml(120,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_188, 120, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 61 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_61(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(33,62) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
+    // Controls/SimpleControls.xaml(38,59) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
+    // Controls/SimpleControls.xaml(42,48) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 42, 48)?;
+    // Controls/SimpleControls.xaml(44,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleDatePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_190, 44, 4)?;
+    // Controls/SimpleControls.xaml(80,4) Content (resource)
+    let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_192, 80, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
+    // Controls/SimpleControls.xaml(172,4) Content (resource)
+    let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_194, 172, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 172, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 62 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_62(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(33,57) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6)?;
+    // Controls/SimpleControls.xaml(35,53) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 53)?;
+    // Controls/SimpleControls.xaml(36,62) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
+    // Controls/SimpleControls.xaml(40,59) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
+    // Controls/SimpleControls.xaml(43,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_196, 43, 4)?;
+    // Controls/SimpleControls.xaml(79,4) Content (resource)
+    let deferred_94 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_198, 79, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_94) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
+    // Controls/SimpleControls.xaml(205,4) Content (resource)
+    let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_200, 205, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 205, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 63 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_63(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(19,50) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9)?;
+    // Controls/SimpleControls.xaml(21,60) Content (resource)
+    let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(2000000_i64);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 60)?, rt::string_object("SplitViewPaneAnimationOpenDuration"), rt::to_object(::core::clone::Clone::clone(&value_1))), 21, 60)?;
+    // Controls/SimpleControls.xaml(22,61) Content (resource)
+    let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 61)?, rt::string_object("SplitViewPaneAnimationCloseDuration"), rt::to_object(::core::clone::Clone::clone(&value_2))), 22, 61)?;
+    // Controls/SimpleControls.xaml(23,48) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitViewPaneAnimationEasing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_202, 23, 48)?;
+    // Controls/SimpleControls.xaml(27,4) Content (resource)
+    let deferred_97 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_203, 27, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_97) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 27, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 64 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_64(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(7,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_208, 7, 4)?;
+    // Controls/SimpleControls.xaml(16,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "Refresh", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_209, 16, 4)?;
+    // Controls/SimpleControls.xaml(22,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_210, 22, 4)?;
+    // Controls/SimpleControls.xaml(50,4) Content (resource)
+    let deferred_101 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_211, 50, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_101) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 50, 4)?;
+    // Controls/SimpleControls.xaml(246,4) Content (resource)
+    let deferred_102 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_215, 246, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_102) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 246, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 65 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_65(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
+    // Controls/SimpleControls.xaml(14,50) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
+    // Controls/SimpleControls.xaml(18,54) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 18, 54)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 54)?;
+    // Controls/SimpleControls.xaml(20,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "PrimaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_217, 20, 4)?;
+    // Controls/SimpleControls.xaml(22,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SecondaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_218, 22, 4)?;
+    // Controls/SimpleControls.xaml(24,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SeparatorBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_219, 24, 4)?;
+    // Controls/SimpleControls.xaml(25,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "TopCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_220, 25, 4)?;
+    // Controls/SimpleControls.xaml(26,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "RightCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_221, 26, 4)?;
+    // Controls/SimpleControls.xaml(27,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "BottomCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_222, 27, 4)?;
+    // Controls/SimpleControls.xaml(28,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "LeftCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_223, 28, 4)?;
+    // Controls/SimpleControls.xaml(30,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "SimpleSplitButtonComponent", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_224, 30, 4)?;
+    // Controls/SimpleControls.xaml(116,4) Content (resource)
+    let deferred_111 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_226, 116, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_111) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 116, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 66 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_simplecontrols_xaml_unit_66(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(13,4) Content (resource)
     let deferred_112 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_228, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_112) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 67 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_67(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(4,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 4, 42)?, rt::string_object("TextSelectHandleSize"), rt::to_object(24.0_f64)), 4, 42)?;
     // Controls/SimpleControls.xaml(5,4) Content (resource)
@@ -951,6 +1754,16 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(62,4) Content (resource)
     let deferred_117 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_233, 62, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_117) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 62, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 68 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_68(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(24,4) Content (resource)
     let deferred_118 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_235, 24, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_118) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
@@ -963,6 +1776,16 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(246,4) Content (resource)
     let deferred_121 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_241, 246, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_121) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 246, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 69 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_69(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(14,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 51)?, rt::string_object("NavigationControlNavBarHeight"), rt::to_object(48.0_f64)), 14, 51)?;
     // Controls/SimpleControls.xaml(16,48) Content (resource)
@@ -970,6 +1793,16 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(18,4) Content (resource)
     let deferred_123 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_246, 18, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_123) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 70 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_70(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(10,50) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_248, 10, 50)?;
     // Controls/SimpleControls.xaml(12,50) Content (resource)
@@ -981,6 +1814,16 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(22,4) Content (resource)
     let deferred_129 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_253, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_129) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 71 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_71(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12)?;
     // Controls/SimpleControls.xaml(19,4) Content (resource)
@@ -1022,16 +1865,46 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(246,4) Content (resource)
     let deferred_144 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_275, 246, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_144) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 246, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 72 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_72(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(17,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_277, 17, 4)?;
     // Controls/SimpleControls.xaml(65,4) Content (resource)
     let deferred_146 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_279, 65, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_146) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 65, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 73 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_73(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(5,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 43)?, rt::string_object("TableViewCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64))), 5, 43)?;
     // Controls/SimpleControls.xaml(7,4) Content (resource)
     let deferred_147 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_281, 7, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewCell as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_147) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 74 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_74(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(11,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 11, 49)?, rt::string_object("TableViewColumnResizerWidth"), rt::to_object(4.0_f64)), 11, 49)?;
     // Controls/SimpleControls.xaml(12,51) Content (resource)
@@ -1041,16 +1914,22 @@ pub fn build_controls_simplecontrols_xaml(
     // Controls/SimpleControls.xaml(22,4) Content (resource)
     let deferred_149 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_284, 22, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewColumnHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_149) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 75 of `build_controls_simplecontrols_xaml` (`Controls/SimpleControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
+fn build_controls_simplecontrols_xaml_unit_75(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(5,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 42)?, rt::string_object("TableViewRowPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 1.0_f64, 2.0_f64, 1.0_f64))), 5, 42)?;
     // Controls/SimpleControls.xaml(7,4) Content (resource)
     let deferred_150 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_286, 7, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewRow as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_150) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
-    context.pop_parent();
-    rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 6, 6)?), 6, 6)?;
-    context.pop_parent();
-    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
-    ::core::result::Result::Ok(styles_0)
+    ::core::result::Result::Ok(())
 }
 
 /// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
@@ -30430,6 +31309,226 @@ fn build_controls_simplecontrols_xaml_deferred_287(
     rt::invoked(border_0.try_end_init(), 12, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
+
+/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_simplecontrols_xaml_unit_0, build_controls_simplecontrols_xaml_unit_12, build_controls_simplecontrols_xaml_unit_28, build_controls_simplecontrols_xaml_unit_30, build_controls_simplecontrols_xaml_unit_43, build_controls_simplecontrols_xaml_unit_50, build_controls_simplecontrols_xaml_unit_66] };
+
+/// The unit `Accents/Base.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/Base.xaml", index: 1, runs: &[populate_simpletheme_xaml_unit_0, populate_simpletheme_xaml_unit_1, populate_simpletheme_xaml_unit_2] };
+
+/// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 2, runs: &[populate_simpletheme_xaml_unit_3] };
+
+/// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 3, runs: &[build_controls_simplecontrols_xaml_unit_1] };
+
+/// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 4, runs: &[build_controls_simplecontrols_xaml_unit_2] };
+
+/// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 5, runs: &[build_controls_simplecontrols_xaml_unit_47] };
+
+/// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 6, runs: &[build_controls_simplecontrols_xaml_unit_3] };
+
+/// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 7, runs: &[build_controls_simplecontrols_xaml_unit_48] };
+
+/// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 8, runs: &[build_controls_simplecontrols_xaml_unit_49] };
+
+/// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 9, runs: &[build_controls_simplecontrols_xaml_unit_4] };
+
+/// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 10, runs: &[build_controls_simplecontrols_xaml_unit_5] };
+
+/// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 11, runs: &[build_controls_simplecontrols_xaml_unit_6] };
+
+/// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 12, runs: &[build_controls_simplecontrols_xaml_unit_7] };
+
+/// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 13, runs: &[build_controls_simplecontrols_xaml_unit_8] };
+
+/// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 14, runs: &[build_controls_simplecontrols_xaml_unit_9] };
+
+/// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 15, runs: &[build_controls_simplecontrols_xaml_unit_10] };
+
+/// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 16, runs: &[build_controls_simplecontrols_xaml_unit_11] };
+
+/// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 17, runs: &[build_controls_simplecontrols_xaml_unit_13] };
+
+/// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 18, runs: &[build_controls_simplecontrols_xaml_unit_51] };
+
+/// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 19, runs: &[build_controls_simplecontrols_xaml_unit_14] };
+
+/// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 20, runs: &[build_controls_simplecontrols_xaml_unit_15] };
+
+/// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 21, runs: &[build_controls_simplecontrols_xaml_unit_16] };
+
+/// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 22, runs: &[build_controls_simplecontrols_xaml_unit_17] };
+
+/// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 23, runs: &[build_controls_simplecontrols_xaml_unit_52] };
+
+/// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 24, runs: &[build_controls_simplecontrols_xaml_unit_18] };
+
+/// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 25, runs: &[build_controls_simplecontrols_xaml_unit_19] };
+
+/// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 26, runs: &[build_controls_simplecontrols_xaml_unit_20] };
+
+/// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 27, runs: &[build_controls_simplecontrols_xaml_unit_21] };
+
+/// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 28, runs: &[build_controls_simplecontrols_xaml_unit_22] };
+
+/// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 29, runs: &[build_controls_simplecontrols_xaml_unit_53] };
+
+/// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 30, runs: &[build_controls_simplecontrols_xaml_unit_54] };
+
+/// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 31, runs: &[build_controls_simplecontrols_xaml_unit_23] };
+
+/// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 32, runs: &[build_controls_simplecontrols_xaml_unit_24] };
+
+/// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 33, runs: &[build_controls_simplecontrols_xaml_unit_25] };
+
+/// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 34, runs: &[build_controls_simplecontrols_xaml_unit_26] };
+
+/// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 35, runs: &[build_controls_simplecontrols_xaml_unit_27] };
+
+/// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 36, runs: &[build_controls_simplecontrols_xaml_unit_29] };
+
+/// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 37, runs: &[build_controls_simplecontrols_xaml_unit_31] };
+
+/// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 38, runs: &[build_controls_simplecontrols_xaml_unit_32] };
+
+/// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 39, runs: &[build_controls_simplecontrols_xaml_unit_55] };
+
+/// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 40, runs: &[build_controls_simplecontrols_xaml_unit_56] };
+
+/// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 41, runs: &[build_controls_simplecontrols_xaml_unit_33] };
+
+/// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 42, runs: &[build_controls_simplecontrols_xaml_unit_57] };
+
+/// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 43, runs: &[build_controls_simplecontrols_xaml_unit_58] };
+
+/// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 44, runs: &[build_controls_simplecontrols_xaml_unit_34] };
+
+/// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 45, runs: &[build_controls_simplecontrols_xaml_unit_35] };
+
+/// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 46, runs: &[build_controls_simplecontrols_xaml_unit_36] };
+
+/// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 47, runs: &[build_controls_simplecontrols_xaml_unit_37] };
+
+/// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 48, runs: &[build_controls_simplecontrols_xaml_unit_38] };
+
+/// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 49, runs: &[build_controls_simplecontrols_xaml_unit_39] };
+
+/// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 50, runs: &[build_controls_simplecontrols_xaml_unit_59] };
+
+/// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 51, runs: &[build_controls_simplecontrols_xaml_unit_40] };
+
+/// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 52, runs: &[build_controls_simplecontrols_xaml_unit_41] };
+
+/// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 53, runs: &[build_controls_simplecontrols_xaml_unit_60] };
+
+/// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 54, runs: &[build_controls_simplecontrols_xaml_unit_61] };
+
+/// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 55, runs: &[build_controls_simplecontrols_xaml_unit_62] };
+
+/// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 56, runs: &[build_controls_simplecontrols_xaml_unit_63] };
+
+/// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 57, runs: &[build_controls_simplecontrols_xaml_unit_64] };
+
+/// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 58, runs: &[build_controls_simplecontrols_xaml_unit_65] };
+
+/// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 59, runs: &[build_controls_simplecontrols_xaml_unit_42] };
+
+/// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 60, runs: &[build_controls_simplecontrols_xaml_unit_44] };
+
+/// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 61, runs: &[build_controls_simplecontrols_xaml_unit_67] };
+
+/// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 62, runs: &[build_controls_simplecontrols_xaml_unit_68] };
+
+/// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 63, runs: &[build_controls_simplecontrols_xaml_unit_45] };
+
+/// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 64, runs: &[build_controls_simplecontrols_xaml_unit_46] };
+
+/// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 65, runs: &[build_controls_simplecontrols_xaml_unit_69] };
+
+/// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 66, runs: &[build_controls_simplecontrols_xaml_unit_70] };
+
+/// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 67, runs: &[build_controls_simplecontrols_xaml_unit_71] };
+
+/// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 68, runs: &[build_controls_simplecontrols_xaml_unit_72] };
+
+/// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 69, runs: &[build_controls_simplecontrols_xaml_unit_73] };
+
+/// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 70, runs: &[build_controls_simplecontrols_xaml_unit_74] };
+
+/// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
+static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 71, runs: &[build_controls_simplecontrols_xaml_unit_75] };
+
+/// Every unit of the theme, in canonical order: the table the builds of its dictionaries
+/// apply the units through (#568).
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,

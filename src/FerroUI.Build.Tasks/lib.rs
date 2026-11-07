@@ -685,6 +685,7 @@ impl Build {
             crate_name: self.crate_name.clone(),
             documents: Vec::new(),
             dependencies: self.dependencies.iter().map(|path| path.display().to_string()).collect(),
+            theme_units: Vec::new(),
         };
         let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
@@ -753,6 +754,9 @@ impl Build {
                         if group.exported {
                             compiled_documents.extend(class_metadata.documents.iter().filter_map(|document| document_path(&document.uri)));
                             metadata.documents.extend(class_metadata.documents);
+                            // The unit graph of the theme of the class (#568), for the builds of
+                            // the applications that construct it.
+                            metadata.theme_units.extend(class_metadata.theme_units);
                         }
                     }
                     // The class is not found, or its group does not transform: an error of the
@@ -827,7 +831,10 @@ impl Build {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
             match read {
-                Ok(read) if read.name == assembly_name => metadata.documents.extend(read.documents),
+                Ok(read) if read.name == assembly_name => {
+                    metadata.documents.extend(read.documents);
+                    metadata.theme_units.extend(read.theme_units);
+                }
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
                     path.display(),
@@ -864,6 +871,7 @@ impl Build {
                 model.crate_name = metadata.crate_name;
                 model.documents = metadata.documents;
                 model.dependencies = metadata.dependencies;
+                model.theme_units = metadata.theme_units;
                 model.to_json()
             }
             None => metadata.to_json(),
