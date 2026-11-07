@@ -629,17 +629,7 @@ pub fn build_native_controls_xaml(
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FontSource"));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::InfoBadge::icon_source_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 39)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property());
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property(), value_1.clone(), 32, 39)?;
-    } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE)) {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else if value_1.is_none() {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("IconSource", &value_1, 32, 39));
-    }
+    rt::assign_resource_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property(), value_1, &rt::ResourceChoice { name: "IconSource", member: "FerroUI.Controls.InfoBadge.set_IconSource", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE), null: true, line: 32, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     rt::invoked(info_badge_0.try_end_init(), 32, 4)?;
     // native_controls.xaml(33,4) Children

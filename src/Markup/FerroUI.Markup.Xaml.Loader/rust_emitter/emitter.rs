@@ -59,6 +59,11 @@ use super::source::rust_string_literal;
 #[path = "theme_rows.rs"]
 mod theme_rows;
 
+/// Control themes, selector chains, resource setter choices and template bindings written as
+/// tables (#568, step 5).
+#[path = "theme_styles.rs"]
+mod theme_styles;
+
 /// The runs of the units of a compiled theme (#568).
 #[path = "theme_units.rs"]
 pub(crate) mod theme_units;
@@ -766,6 +771,9 @@ struct Emitter<'a> {
     /// How deep the content being written is in deferred content: the entries of units are
     /// marked only at the top level, in the function of the document ([`theme_units`]).
     deferred_depth: usize,
+    /// The tables of control themes and template bindings and the items they share (#568,
+    /// [`theme_styles`]).
+    theme_styles: theme_styles::StylePool,
 }
 
 struct ScopedNamespaceTable {
@@ -2689,6 +2697,11 @@ impl<'a> Emitter<'a> {
             ));
         }
         lines.push("}".to_string());
+        // The choice of a `{StaticResource}` value as one call of the shared helper (#568, step 5).
+        if let Some(call) = theme_styles::resource_choice(&local, &lines) {
+            self.line(call);
+            return Ok(());
+        }
         for line in lines {
             self.line(line);
         }
@@ -2897,6 +2910,8 @@ impl<'a> Emitter<'a> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
         let body_lines = self.apply_row_runs(body_lines);
+        // Runs of template bindings on one object, as tables (#568, step 5).
+        let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         let context_name = if uses_context { "context" } else { "_context" };
@@ -2927,12 +2942,26 @@ impl<'a> Emitter<'a> {
         // The shared helper accepts the declaration's DocumentInfo as well as the root's.
         // Retain the fused resource fast path when a dictionary imports another lexical scope.
         let fused = fused_static_resource_content(self.types, &body_lines, &returned, &document_info);
-        match fused {
-            Some(fused) if !uses_name_scope => {
+        // A control theme whose members a table holds is built from its table (#568, step 5).
+        let theme = match uses_name_scope {
+            true => None,
+            false => theme_styles::parse_theme(&body_lines, &returned),
+        };
+        match (fused, theme) {
+            (Some(fused), _) if !uses_name_scope => {
                 for line in fused {
                     text.push_str(&line);
                     text.push('\n');
                 }
+            }
+            (_, Some(theme)) => {
+                let call = theme_styles::control_theme_table(&mut self.theme_styles, &function, &theme);
+                text.push_str(&format!("    let context = rt::deferred_context(service_provider, &{document_info});\n"));
+                if let Some(marker) = body_lines.first().filter(|line| line.trim_start().starts_with("//")) {
+                    text.push_str(marker);
+                    text.push('\n');
+                }
+                text.push_str(&format!("    {call}\n"));
             }
             _ => {
                 text.push_str(&format!("    let {context_name} = rt::deferred_context(service_provider, &{document_info});\n"));
@@ -4705,6 +4734,7 @@ pub fn emit_function<'a>(
         row_statements: HashMap::new(),
         row_tables: Vec::new(),
         deferred_depth: 0,
+        theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -4807,6 +4837,11 @@ pub fn emit_function<'a>(
     for table in &emitter.row_tables {
         source.push('\n');
         source.push_str(table);
+    }
+    // The tables of control themes and template bindings and the items they share.
+    for item in &emitter.theme_styles.items {
+        source.push('\n');
+        source.push_str(item);
     }
     // The build functions of deferred rows were cleared: their rows build them.
     for function in emitter.deferred_functions.iter().filter(|function| !function.is_empty()) {

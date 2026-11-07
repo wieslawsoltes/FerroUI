@@ -73,6 +73,11 @@ impl KnownPlatformGraphicsExternalImageHandleTypes {
     /// A borrowed GL_TEXTURE_2D name, usable only with its owning immutable
     /// frame lease and admitted context/share-group identity and generation.
     pub const SHARED_GL_TEXTURE: &'static str = "SharedFrameGlTexture2D";
+    /// A browser media frame (a WebCodecs `VideoFrame`) transferred from the page's thread to the
+    /// render worker of a module with threads; the handle is the number of the transfer. The
+    /// compositor uploads it into a texture of its own context when it imports the image, and
+    /// the image owns that texture (#601).
+    pub const BROWSER_TRANSFERRED_FRAME: &'static str = "BrowserTransferredVideoFrame";
     /// An DXGI global shared handle returned by IDXGIResource::GetSharedHandle D3D11_RESOURCE_MISC_SHARED or D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX flag.
     /// The handle does not own the reference to the underlying video memory, so the provider should make sure that the resource is valid until
     /// the handle has been successfully imported

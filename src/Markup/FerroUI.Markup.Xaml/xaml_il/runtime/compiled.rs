@@ -50,6 +50,13 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, ValueRow,
 };
+// The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
+// run-time choice of the setter of a resource value and a run of template bindings as data.
+pub use super::theme_styles::{
+    assign_resource_value, bind_template_bindings, build_control_theme, build_selector, ControlThemeTable, PropertyFn,
+    ResourceChoice, SelectorStep, SetterForm, StyleMember, TemplateBindingRow, ThemeKey, ThemeSetter, ThemeTemplate, ThemeValue,
+    ThemeValueFn, ValueHandle,
+};
 // The units of a compiled theme (#568, `theme_units.rs`): a unit, its runs and the function the
 // builds of the dictionaries apply them with.
 pub use super::theme_units::{
