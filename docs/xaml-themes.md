@@ -98,6 +98,16 @@ needs. The build computes the table from the roots:
 From the roots, the closure follows the unit graph. The kept units are listed in
 `$OUT_DIR/xaml/theme_parts.txt`.
 
+**Reflection-binding paths follow their unit.** A path such as
+`{Binding (controls:TextBox.Text)}` names a class. The generated code yields it through a function
+in a namespace table, so the class (its initialisation, constructor and markup) is linked wherever
+the table is reachable. The table of the document carries only the classes named by paths
+outside every unit. Each unit whose documents have such paths gets a table of its own, which its
+entries push around their code and give to their templates and deferred resources. A unit the
+application trims takes the classes its paths name with it (#612, root D: hello world no longer
+links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
+that no table naming classes is reachable from code outside the units.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.
@@ -260,6 +270,7 @@ application's setting, so it binds the same way.
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
+| Namespace tables of reflection-binding paths per unit (root D) | #612 | In review |
 | Units for the Material theme (step 6) | #568, #603 | Planned |
 | Compiled bindings in all themes | #603 | Planned |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | Planned |
@@ -267,5 +278,6 @@ application's setting, so it binds the same way.
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | `rt::clr_property_info` resolved at compile time; remaining reflection paths parsed at compile time | #603 | Planned |
 | Path data converted at compile time instead of at load | #603 | Planned |
-| `panic = "abort"` in `dist` | #595 | In review |
+| `panic = "abort"` in `dist` | #595 | On `main` |
+| `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | Planned |

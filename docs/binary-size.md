@@ -67,6 +67,16 @@ No functionality was removed, no executable packer is used, and the panic strate
   "resident" is the maximum resident set size, "footprint" the peak memory footprint, which on
   macOS includes the memory of the GPU driver.
 
+- **Finding what roots code**: why the linker keeps a function or a static. A fat-LTO build that
+  also emits IR (`cargo rustc --release -p hello-world --bin hello-world -- -C lto=fat
+  --emit=llvm-ir,link`) gives the whole program as one module,
+  `<target>/release/deps/hello_world-<hash>.ll`. `scripts/irpaths.py <module.ll> <regex>...` builds
+  the graph from every function and global to the globals it names, searches it breadth-first
+  from `main` and the constructor lists, and prints one shortest chain to each symbol that
+  matches, for example `'NavigationView\$u20\$as.*StaticType.*TYPE'` for the `TypeInfo` of a
+  control. Apple's linker ignores `-why_live`, and the chains often run through anonymous tables
+  that a linker reports only by address.
+
 Every number below comes from this procedure; the commands are in section 9.
 
 ## 3. Measurements, before and after
@@ -606,6 +616,37 @@ when something uses it.
 The next steps of #612 keep the initialisation, the constructor and the markup metadata of a class
 reachable from its `TypeInfo` only with the tables of types (reflection), and remove the other
 defaults that construct what an application does not use.
+
+### 4.13 Trimmed theme units take the classes of their binding paths with them (#612, root D)
+
+With theme trimming on, `samples/HelloWorld` (WinUI theme, XAML) kept 30 of the theme's 164 units,
+none of them for NavigationView, InfoBar or RichEditBox, yet it still initialised those classes. The
+chains of the IR trace (section 2, "Finding what roots code") all ran:
+
+`WinUITheme::with_parts` → `build_controls_winuicontrols_xaml` → the namespace table of the
+document → the cast-target functions of its reflection-binding paths →
+`NavigationView::TYPE`, `RichEditBox::TYPE`, `InfoBar::TYPE`, `ProgressBar::TYPE`,
+`SplitView::TYPE`, `NavigationPage::TYPE` (and from NavigationPage's virtual table, DrawerPage and
+its automation peer).
+
+A path such as `(controls:TextBox.Text)` names a class, which the generated code yields through a
+function in the document's namespace table. The table carried every class any path of the merged
+theme names, and every unit's code reaches it, so dropping a unit left its controls linked. The
+emitter now collects the path types per unit: the document's table keeps the paths outside every
+unit, and an entry of a unit with paths pushes a table of the unit around its code, which its
+templates and deferred resources build with ([xaml-themes.md](xaml-themes.md), section 3). A test
+of the WinUI theme checks that no table naming classes is reachable from code outside the units.
+
+One more chain led from `register_value_types` to `XBinding::create_instance`, whose default
+update trigger for `TextBox.Text` called `TextBox::text_property()`, the accessor that registers
+the property for `TextBox`. `TextBox.Text` is `TextBlock.Text` with TextBox as another owner, so
+x:Bind compares with `TextBlock::text_property()` and checks the target by identity (4.12).
+
+| `samples/HelloWorld`, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| `dist` executable | 22.13 MB | 19.45 MB | -2.67 MB (-12.1 %) |
+| fat LTO `release` (the build of the trace) | 38.55 MB | 33.66 MB | -4.89 MB (-12.7 %) |
+| Unused controls reachable from `main` | NavigationView, RichEditBox, InfoBar, ProgressBar, SplitView, NavigationPage, DrawerPage, TextBox | none of these | |
 
 ## 5. What an executable is made of
 
