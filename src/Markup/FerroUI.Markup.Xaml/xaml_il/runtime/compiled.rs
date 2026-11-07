@@ -43,6 +43,14 @@ use crate::converters::ITypeDescriptorContext;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::{ServiceProviderExtensions, XamlLoadError};
 
+// The row tables of theme resources (#568, `theme_resources.rs`): the rows and the builders of
+// the shapes generated code writes as rows.
+pub use super::theme_resources::{
+    add_color_resources, add_corner_radius_resources, add_double_resources, add_dynamic_brushes, add_literal_brushes,
+    add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
+    LiteralBrushRow, ResourceAliasRow, StaticBrushRow, ValueRow,
+};
+
 /// The exception a step of generated code failed with: the type name of the
 /// exception the managed original throws there (the name the run-time
 /// loader gives its error as well, `XamlError::type_name` of the loader

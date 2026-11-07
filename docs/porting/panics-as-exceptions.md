@@ -50,15 +50,16 @@ Per crate, after the conversions of section 5. The (T) column counts the sites o
 | `ferroui-base` | 15 | 14 | 0 | 75 | 104 |
 | `ferroui-system` | 3 | 4 | 0 | 6 | 13 |
 | `ferroui-markup`, `ferroui-markup-xaml`, `-loader`, `-winui` | 0 | 0 | 0 | 9 | 9 |
-| platform crates (section 8) | 24 | 13 | 5 | 36 | 78 |
-| libraries: Headless, Dock, Behaviors, Controls, Rx, ReactiveUI, Splat (section 9) | 37 | 21 | 5 | 220 | 283 |
+| platform crates (section 8) | 25 | 13 | 4 | 36 | 78 |
+| libraries: Headless, Dock, Behaviors, Controls, Rx, ReactiveUI, Splat (section 9) | 37 | 21 | 5 | 214 | 277 |
 | tools: View, Remote, Inspect, MCP, DevTools, HotReload, HotPatch, Designer (section 10) | 14 | 1 | 9 | 6 | 30 |
-| **All** | **93** | **53** | **19** | **352** | **517** |
+| **All** | **94** | **53** | **18** | **346** | **511** |
 
 The (E) sites before this step were 23: the throw and the error scope of the markup runtime (2,
 with the 2 (R) of the scope, `xaml_error_scope.rs`), the failure of a composite page transition
-(1, `composite_page_transition.rs:58`) and the deferred resources the Designer reads (1,
-`animation_runtime.rs:190`, now a (B)) are converted (section 5).
+(1, `composite_page_transition.rs:58`), the deferred resources the Designer reads (1,
+`animation_runtime.rs:190`, now a (B)) and the UI Automation calls of Win32 (1,
+`automation_node.rs:578`, now a (B)) are converted (section 5).
 
 ## 3. What works and what breaks with `panic = "abort"`
 
@@ -77,22 +78,24 @@ Works with abort since this step (section 5):
 - the failure of a page transition (`CrossFade`, `PageSlide`, `Rotate3DTransition`,
   `CompositePageTransition`): `JoinError::Panicked` of the handle of `IPageTransition::start`;
 - the deferred animation resources of the Designer that fail to build: left out;
-- a missing required OpenGL or EGL entry point (5.4): the creation of the context, display or
+- a missing required OpenGL or EGL entry point (5.5): the creation of the context, display or
   platform graphics fails with an `OpenGlError`, and the WGL start falls back to the next
   rendering mode;
-- a GL context that cannot be made current while Skia releases a snapshot (5.4):
+- a GL context that cannot be made current while Skia releases a snapshot (5.5):
   `IGlContext::try_ensure_current` fails and the image is released without it;
-- the page transitions of the control catalog (5.4): `JoinError::Panicked` of their handles;
+- the page transitions of the control catalog (5.5): `JoinError::Panicked` of their handles;
 - the Vello combined geometry of a path whose coordinates are not finite (empty, without
-  reaching the sweep) and the swap chain of a lost device (left, without releasing it) (5.4).
+  reaching the sweep) and the swap chain of a lost device (left, without releasing it) (5.5).
+- a UI Automation call the state of a control refuses (`set_value` on a read-only progress bar,
+  scrolling a direction that cannot scroll, expanding a menu item without a submenu, ...): the
+  provider returns an `AutomationError` and the Win32 node answers its result code (5.4).
 
 Breaks with abort (an expected error travels as a panic), production paths:
 
 | Site | What breaks |
 |---|---|
-| `ferroui-win32` `automation/automation_node.rs:552` | a UI Automation call the state of a control refuses (12 `panic!` sites of the automation peers of `ferroui-controls`) aborts instead of returning `E_FAIL` |
-| `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` of finite paths that the third-party sweep (`linesweeper`) still gives up on aborts instead of drawing nothing (paths that are not finite are refused before the sweep, 5.4) |
-| `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.4) |
+| `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` of finite paths that the third-party sweep (`linesweeper`) still gives up on aborts instead of drawing nothing (paths that are not finite are refused before the sweep, 5.5) |
+| `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.5) |
 | `ferroui-reactiveui` `binding/bindings/binding_errors.rs:47` | a fault of a binding source aborts instead of reaching `ThrownExceptions` |
 
 Breaks with abort, development tools only (built with `dev`, `release` or `dist-unwind`): hot reload
@@ -301,7 +304,7 @@ under unwinding: the panic hook no longer prints these failures. The signature o
 `a_task_on_a_schedule_takes_its_outcome_from_the_result_of_its_future_without_a_panic`.
 
 The six page transitions of the control catalog (`samples/ControlCatalog`) that panicked with
-the error of `AnimationTask::when_all` are converted too (5.4).
+the error of `AnimationTask::when_all` are converted too (5.5).
 
 ### 5.3 The deferred animation resources of the Designer
 
@@ -311,7 +314,67 @@ fails to build is left out. It now reads them inside `with_xaml_errors`: the fai
 scope (5.1) and the key is left out without unwinding. The catch stays as the boundary of the
 constructors of the previewed application that the builder runs (a development tool).
 
-### 5.4 OpenGL loading, making a context current, Vello and the catalog transitions
+### 5.4 UI Automation calls the state of a control refuses (`ferroui-controls`, the platform bridges)
+
+Before: the automation peers rejected a call of a client that the state of the control does not
+allow with `panic!`, the exceptions of the reference: `set_value` on a read-only progress bar
+(`InvalidOperationException`), `scroll` and `set_scroll_percent` of a scroll viewer in a
+direction that cannot scroll (`InvalidOperationException`) or with a percentage out of range
+(`ArgumentOutOfRangeException`), `add_to_selection`, `remove_from_selection` and `select` of a
+radio button (`InvalidOperationException`), `expand` and `collapse` of a menu item without a
+submenu (`InvalidOperationException`), `set_value` of a combo box that is not editable
+(`InvalidOperationException`) and of a calendar (`NotSupportedException`); in
+`ferroui-controls-treedatagrid` also `set_value` of a row and `toggle` of a read-only check box
+cell (`NotSupportedException`). `AutomationNode::invoke_sync` of `ferroui-win32` caught the panic
+and answered `E_FAIL`; with abort a UI Automation client (Narrator, Inspect, UI tests) ended the
+application.
+
+After: one error type, `ferroui_controls::automation::AutomationError`:
+
+```rust
+#[non_exhaustive]
+pub enum AutomationError {
+    ElementNotEnabled(ElementNotEnabledError),
+    InvalidOperation(String),
+    ArgumentOutOfRange(String), // the name of the parameter
+    NotSupported(String),
+}
+```
+
+with `From<ElementNotEnabledError>`, so that `ensure_enabled()?` keeps working. The members that
+can be refused return it: `IRangeValueProvider::set_value`, `IScrollProvider::scroll` and
+`set_scroll_percent`, `ISelectionItemProvider::add_to_selection`, `remove_from_selection` and
+`select`, `IExpandCollapseProvider::expand` and `collapse`, and `IToggleProvider::toggle`
+(`Result<(), AutomationError>`; they returned `Result<(), ElementNotEnabledError>`).
+`IInvokeProvider::invoke` keeps `ElementNotEnabledError` (nothing refuses it otherwise), and
+`IValueProvider::set_value` keeps `ProviderError`, which now carries an `AutomationError` for the
+combo box, the calendar and the rows. The 14 throw sites return the error.
+
+The bridges: the Win32 nodes (`AutomationNode::enabled`, `automation_node_value.rs`,
+`text_pattern_marshalling.rs`) and the WinUI proxies map it to the result code the runtime of
+the reference returns for the exception:
+
+| Error | Result code |
+|---|---|
+| `ElementNotEnabled` | `UIA_E_ELEMENTNOTENABLED` (0x80040200), as before |
+| `InvalidOperation` | `COR_E_INVALIDOPERATION` (0x80131509, the value of `UIA_E_INVALIDOPERATION`) |
+| `ArgumentOutOfRange` | `COR_E_ARGUMENTOUTOFRANGE` (0x80131502) |
+| `NotSupported` | `COR_E_NOTSUPPORTED` (0x80131515) |
+
+The other bridges keep their outcome for a refusal: macOS hands the error to the dispatcher
+(`raise_on_error`), which raises it from its run loop as the reference does, Android answers "not performed" (`From<AutomationError> for
+NodeActionError`), AT-SPI fails the D-Bus call, iOS answers false and the browser ignores it.
+The catch of `invoke_sync` stays, marked `// Boundary (#567)`.
+
+Under unwinding the refused calls of a client answered `E_FAIL` (the panic); they now answer
+the code of the table, the one the reference answers. The ink toolbar peers, which refused
+selection operations with an `ElementNotEnabledError` for want of another error type, now
+refuse them with `InvalidOperation` (`COR_E_INVALIDOPERATION`, as the native peers of WinUI).
+Tests: `a_refused_call_answers_the_result_code_of_the_exception_of_the_reference` (Win32), and
+the peer tests of the scroll viewer, menu item, combo box, calendar and TreeDataGrid, which
+asserted a panic and now assert the error.
+
+### 5.5 OpenGL loading, making a context current, Vello and the catalog transitions
 
 - **Entry points** (`ferroui-opengl` `entry_points.rs`): the generated `load` of a table returns
   `Result<_, OpenGlError>`; a required entry point that does not resolve is
@@ -365,13 +428,9 @@ step for the designer.
 Each is described with its site in sections 8 and 9; the reason for deferring is the size of the
 conversion, or that the panic comes from a third-party crate.
 
-- **UI Automation peers** (`ferroui-win32` `automation_node.rs:552`, the 12 `panic!` sites of the
-  peers of `ferroui-controls`): the provider interfaces would need a wider error type
-  (invalid operation, argument, not supported) and the Win32 nodes a mapping to `HRESULT`, about
-  56 calls in 9 files. A change of the public provider traits; its own step.
 - **Panics of third-party crates** (`ferroui-vello` `combined_geometry_impl.rs:133`,
   `linesweeper`; `window_surface.rs:166`, the `Drop` of a `wgpu::Surface`): no `Result` exists on
-  our side. Mitigated (5.4): paths that are not finite are refused before the sweep and the
+  our side. Mitigated (5.5): paths that are not finite are refused before the sweep and the
   surface of a lost device is left. What remains is a finite input the sweep still gives up on,
   and a surface that cannot be released while its device is not known to be lost.
 - **The fault of a ReactiveUI binding source** (`ferroui-reactiveui` `binding_errors.rs:47`):
@@ -445,7 +504,7 @@ Tests (T), 9 sites: `ferroui-markup-xaml`: `xaml_error_scope.rs` 3, `source_over
 |---|---:|---:|---:|---:|---:|
 | `ferroui-x11` | 9 | 2 | 0 | 1 | 12 |
 | `ferroui-wayland` | 1 | 2 | 0 | 0 | 3 |
-| `ferroui-win32` | 4 | 2 | 2 | 5 | 13 |
+| `ferroui-win32` | 5 | 2 | 1 | 5 | 13 |
 | `ferroui-android` | 5 | 2 | 0 | 3 | 10 |
 | `ferroui-native` | 2 | 4 | 0 | 10 | 16 |
 | `ferroui-browser` | 2 | 0 | 0 | 1 | 3 |
@@ -454,7 +513,7 @@ Tests (T), 9 sites: `ferroui-markup-xaml`: `xaml_error_scope.rs` 3, `source_over
 | `ferroui-opengl` | 0 | 1 | 0 | 0 | 1 |
 | `ferroui-media-video` | 1 | 0 | 0 | 0 | 1 |
 | `ferroui-vulkan` | 0 | 0 | 0 | 7 | 7 |
-| **All** | **24** | **13** | **5** | **36** | **78** |
+| **All** | **25** | **13** | **4** | **36** | **78** |
 
 Sites are counted per line, `use` lines left out. (T) includes the sites of `*_tests.rs` files,
 which the site list leaves out. No sites: `src/Windows/FerroUI.WinUI` (its handlers run under the
@@ -496,33 +555,24 @@ Tests (T): `dispatching/glib_dispatcher_impl_base.rs:550` (`cfg(test)` module), 
 | `wnd_proc_guard.rs:77` | `resume_pending` | raises the kept panic once the system has returned to the loop | R | no change (belongs to :38) |
 | `win32_storage_provider.rs:232` | `Win32StorageProvider::show_file_picker_async` (dialog thread) | catches a panic of `show_dialog` at the top of the dialog thread and fails the picker | B | no change: the dialog reports its errors as values; a bug aborts instead of failing the picker |
 | `automation/text_range_node.rs:196` | `TextRangeNode::invoke` | catches a panic of a text range provider called by a UI Automation client, returns `E_FAIL` | B | no change: the framework providers report errors as values; a panicking custom provider aborts |
-| `automation/automation_node.rs:552` | `AutomationNode::invoke_sync` | catches a panic of the peer code a UI Automation client calls, returns `E_FAIL` | E | breaks: a client call the state of the control refuses aborts the application (see below) |
+| `automation/automation_node.rs:578` | `AutomationNode::invoke_sync` | catches a panic of the peer code a UI Automation client calls, returns `E_FAIL` | B | no change since 5.4: a call the state of the control refuses is an `AutomationError` of the provider, mapped to its result code; a bug or a panicking application handler (a button's click under `invoke`) aborts |
 | `win32_native_control_host.rs:102` | `Win32NativeControlHost::create_new_attachment_with` | catches a panic of the application callback that creates the child | B | no change: a panicking callback aborts before the holder window is destroyed |
 | `win32_native_control_host.rs:117` | `Win32NativeControlHost::create_new_attachment_with` | raises it again after the holder and the attachment are disposed of | R | no change (belongs to :102) |
-| `open_gl/wgl_platform_open_gl_interface.rs:90` | `WglPlatformOpenGlInterface::try_create_with_profiles` | caught the panic of a missing required OpenGL entry point and reported WGL as not available | E | converted (5.4): the creation of the context fails with the error, which is logged, and the start falls back to the next rendering mode; no catch |
+| `open_gl/wgl_platform_open_gl_interface.rs:90` | `WglPlatformOpenGlInterface::try_create_with_profiles` | caught the panic of a missing required OpenGL entry point and reported WGL as not available | E | converted (5.5): the creation of the context fails with the error, which is logged, and the start falls back to the next rendering mode; no catch |
 
 Tests (T), 5 sites: `examples/win32_window.rs:2228`, `:2229` (a hook of the smoke run that ends
 the process with code 101 after the default hook; it behaves the same with abort),
 `input/imm32_context_tests.rs` 1, `automation/marshalling/safe_array_ref_tests.rs` 2.
 
-**`automation/automation_node.rs:552`.** The automation peers of `ferroui-controls` reject
-client calls the state of the control does not allow with `panic!`, the exceptions of the
-reference: `progress_bar_automation_peer.rs:46` (`set_value` on a read-only bar),
-`scroll_viewer_automation_peer.rs:186`, `:233`, `:240`, `:244` (scrolling a direction that
-cannot scroll, a percentage out of range), `radio_button_automation_peer.rs:129`, `:142`, `:154`,
-`menu_item_automation_peer.rs:249`, `:265` (expand or collapse without a submenu),
-`combo_box_automation_peer.rs:204` and `calendar_automation_peer.rs:147`. `invoke_sync` turns the
-panic into `E_FAIL` for the client. A `Result` conversion: the provider methods already return
-`Result<(), ElementNotEnabledError>` (`IValueProvider::set_value` returns `ProviderError`); the
-error type of `IRangeValueProvider::set_value`, `IScrollProvider::scroll` and
-`set_scroll_percent`, `ISelectionItemProvider::select`, `add_to_selection` and
-`remove_from_selection`, and `IExpandCollapseProvider::expand` and `collapse` widens to a
-provider error that also carries invalid-operation, argument and not-supported errors, the 12
-throw sites return it, and the Win32 nodes map it to an `HRESULT` (56 calls of `invoke_sync` and
-`invoke_sync_provider` in 9 files of `automation/`). The catch stays afterwards as a boundary:
-`invoke` runs application handlers (a button's click). Production path: any UI Automation
-client (Narrator, Inspect, UI tests). On macOS the same panics reach the `guard` of
-`ferroui-native` and end the run loop, so they are a crash there in both modes.
+**`automation/automation_node.rs:578`** (resolved, section 5.4). The automation peers of
+`ferroui-controls` rejected client calls the state of the control does not allow with `panic!`,
+the exceptions of the reference, and `invoke_sync` turned the panic into `E_FAIL` for the client;
+with abort a screen reader query ended the application. The providers now return an
+`AutomationError`, which the nodes map to the result code of the exception of the reference.
+The catch stays as the boundary: `invoke` runs application handlers (a button's click). On
+macOS the refusal is handed to the dispatcher as an error value (`raise_on_error` of
+`frn_automation_peer.rs`), no longer as a panic through the `guard` of `ferroui-native`; the
+dispatcher raises it from its run loop, as the reference rethrows an exception of a callback.
 
 **`open_gl/wgl_platform_open_gl_interface.rs:90`.** `gl_entry_points!` of `ferroui-opengl`
 (`entry_points.rs`, the `@check required` arm) calls `entry_point_not_found`, a `panic!`, when a
@@ -532,7 +582,7 @@ as the reference catches every exception of the creation. A `Result` conversion:
 load returns `Result<_, OpenGlError>` and `GlInterface::new` becomes fallible; it has 14
 non-test call sites in 10 files (WGL, GLX, EGL, the macOS native GL, EAGL, WebGL, Skia). The
 panics of the `@call` arms (calling an optional entry point that is absent) are bugs and stay.
-Production path: the Windows start in an OpenGL mode. Done as described in 5.4.
+Production path: the Windows start in an OpenGL mode. Done as described in 5.5.
 
 ### FerroUI.Android (`src/Android/FerroUI.Android`)
 
@@ -577,7 +627,7 @@ catches panics), 1 site. It needs a build that unwinds.
 
 | File:line | Function | Catches or raises | Class | With abort |
 |---|---|---|---|---|
-| `gpu/open_gl/gl_skia_external_objects_feature.rs:479` | `GlSkiaImportedImage::take_snapshot` (dispose callback of the snapshot bitmap) | caught the panic of `ensure_current` on a context that cannot be made current and dropped the image without it | E | converted (5.4): `try_ensure_current` fails and the image is dropped without a current context; no catch |
+| `gpu/open_gl/gl_skia_external_objects_feature.rs:479` | `GlSkiaImportedImage::take_snapshot` (dispose callback of the snapshot bitmap) | caught the panic of `ensure_current` on a context that cannot be made current and dropped the image without it | E | converted (5.5): `try_ensure_current` fails and the image is dropped without a current context; no catch |
 
 Tests (T), 6 sites: `tests.rs` 1, `gpu/metal/tests.rs` 3, `unit_tests/media/font_manager_tests.rs`
 1, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs` 1.
@@ -591,14 +641,14 @@ context that is likely dead. A `Result` conversion: a fallible `try_ensure_curre
 `try_make_current`) on the GL contexts returning `Result<Rc<dyn IDisposable>, OpenGlError>`;
 GLX and WGL already have `make_current_with(..) -> Result`, so the EGL, the macOS native GL and
 EAGL contexts need one. This is the only catch of that panic in the listed crates. Production
-path: the Skia OpenGL backend after a context loss. Done as described in 5.4.
+path: the Skia OpenGL backend after a context loss. Done as described in 5.5.
 
 ### FerroUI.Vello (`src/Vello/FerroUI.Vello`)
 
 | File:line | Function | Catches or raises | Class | With abort |
 |---|---|---|---|---|
-| `combined_geometry_impl.rs:133` | `binary_op` | catches a panic of `linesweeper::binary_op` (the sweep gives up on an input) and makes the empty geometry | E | mitigated (5.4): paths that are not finite are refused first; a finite input the sweep gives up on still aborts (see below) |
-| `gpu/window_surface.rs:166` | `VelloSurfaceGpu::drop_retired` | catches a panic of dropping a `wgpu` surface whose context cannot be made current, logs it | E | mitigated (5.4): the surface of a lost device is left without releasing it; a surface that cannot be released otherwise still aborts (see below) |
+| `combined_geometry_impl.rs:133` | `binary_op` | catches a panic of `linesweeper::binary_op` (the sweep gives up on an input) and makes the empty geometry | E | mitigated (5.5): paths that are not finite are refused first; a finite input the sweep gives up on still aborts (see below) |
+| `gpu/window_surface.rs:166` | `VelloSurfaceGpu::drop_retired` | catches a panic of dropping a `wgpu` surface whose context cannot be made current, logs it | E | mitigated (5.5): the surface of a lost device is left without releasing it; a surface that cannot be released otherwise still aborts (see below) |
 
 Tests (T), 3 sites: `effect_tests.rs` 1, `unit_tests/media/font_manager_tests.rs` 1,
 `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs` 1.
@@ -608,7 +658,7 @@ Tests (T), 3 sites: `effect_tests.rs` 1, `unit_tests/media/font_manager_tests.rs
 empty geometry of the contract. No `Result` is available from the library; keeping the
 behaviour with abort takes an upstream fix, a check of the inputs that the sweep refuses, or
 another implementation of the boolean operations. One caller, `combine_paths`, with
-up to three calls. Production path: every `CombinedGeometry` drawn with Vello. Mitigated as described in 5.4.
+up to three calls. Production path: every `CombinedGeometry` drawn with Vello. Mitigated as described in 5.5.
 
 **`gpu/window_surface.rs:166`.** The error is a panic inside the `Drop` of a `wgpu::Surface`
 (third party) when its context cannot be made current. The catch logs it and goes on; it also
@@ -616,7 +666,7 @@ runs from `<VelloSurfaceGpu as Drop>::drop`. No `Result` is available from a `Dr
 behaviour takes leaking the surface (`std::mem::forget`) when the context is known to be lost,
 or an upstream fix. Callers: `drop_retired` from the frame start (`window_surface.rs:475`) and
 from `Drop`. Production path: closing a window of the Vello backend on Linux or Windows after a
-device or context loss. Mitigated as described in 5.4.
+device or context loss. Mitigated as described in 5.5.
 
 ### FerroUI.OpenGL (`src/FerroUI.OpenGL`)
 
@@ -656,7 +706,7 @@ Tests (T): `live_tests.rs` 7 sites. No other sites.
 | `ferroui-xaml-interactions-responsive` | 0 | 0 | 0 | 1 | 1 |
 | `ferroui-xaml-interactions-reactiveui` | 0 | 0 | 0 | 1 | 1 |
 | `ferroui-xaml-behaviors-animations` | 0 | 0 | 0 | 1 | 1 |
-| `ferroui-controls` | 1 | 2 | 0 | 52 | 55 |
+| `ferroui-controls` | 1 | 2 | 0 | 46 | 49 |
 | `ferroui-controls-repeater` | 0 | 0 | 0 | 25 | 25 |
 | `ferroui-dynamic-data` | 1 | 0 | 0 | 2 | 3 |
 | `ferroui-reactive` | 0 | 0 | 0 | 1 | 1 |
@@ -666,7 +716,7 @@ Tests (T): `live_tests.rs` 7 sites. No other sites.
 | `ferroui-splat` | 4 | 1 | 2 | 1 | 8 |
 | `ferroui-controls-treedatagrid` | 0 | 0 | 0 | 1 | 1 |
 | `ferroui-treedatagrid-core` | 0 | 0 | 0 | 1 | 1 |
-| **All** | **37** | **21** | **5** | **220** | **283** |
+| **All** | **37** | **21** | **5** | **214** | **277** |
 
 Sites found with `grep -rn "catch_unwind\|resume_unwind\|panic_any\|set_hook(\|take_hook("` over
 the crates of this group, test files included, `use` lines (also the entries of multi-line `use`

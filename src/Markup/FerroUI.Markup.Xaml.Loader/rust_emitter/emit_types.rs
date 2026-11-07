@@ -371,6 +371,16 @@ pub enum FrameworkType {
     DynamicResourceExtension,
     /// `FerroUI.Data.TemplateBinding`.
     TemplateBinding,
+    /// `FerroUI.Controls.IResourceDictionary`.
+    IResourceDictionary,
+    /// `FerroUI.Media.SolidColorBrush`.
+    SolidColorBrush,
+    /// `FerroUI.Media.Color`.
+    Color,
+    /// `FerroUI.Thickness`.
+    Thickness,
+    /// `FerroUI.CornerRadius`.
+    CornerRadius,
 }
 
 /// The part of a type system the emitter of Rust source reads; see the module.

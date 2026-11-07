@@ -1,5 +1,7 @@
 use crate::data::{BindingPriority, BindingValue};
-use crate::ferro_property::{convert_property_value, FerroPropertyInit, PropertyRoutes};
+use crate::ferro_property::{
+    convert_property_value, take_boxed_value, unpack_binding_value, FerroPropertyInit, PropertyRoutes,
+};
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
@@ -263,13 +265,19 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
     }
 
-    fn route_create_binding_entry(
-        &'static self,
-        _o: &FerroObject,
-        _frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
-        _source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
-        panic!("direct properties have no value entries");
+    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool> {
+        self.get_metadata_for(owner).enable_data_validation()
+    }
+
+    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+        unpack_binding_value::<T>(value)
+    }
+
+    fn route_set_direct_binding_value(&'static self, o: &FerroObject, value: BindingValue<BoxedValue>) {
+        let kind = value.value_type();
+        let (value, error) = value.into_value_and_error();
+        let value = value.and_then(take_boxed_value::<T>);
+        o.set_direct_value_unchecked(self, BindingValue::from_notification_parts(kind, value, error));
     }
 }
 

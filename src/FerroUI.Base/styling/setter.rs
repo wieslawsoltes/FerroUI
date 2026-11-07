@@ -5,7 +5,7 @@ use super::{
 };
 use crate::data::core::SinkRef;
 use crate::data::{BindingBase, BindingPriority};
-use crate::property_store::{IValueEntry, ValueFrame};
+use crate::property_store::{BoxedBindingEntry, IValueEntry, ValueFrame};
 use crate::reactive::IObservable;
 use crate::{AnyValue, BoxedValue, FerroProperty, PropertyValue, StyledElement, StyledProperty};
 use std::any::Any;
@@ -184,7 +184,7 @@ impl Setter {
     ) -> SetterInstance {
         if !property.is_direct() {
             let frame: Rc<dyn ValueFrame> = instance.clone();
-            let entry = property.routes().route_create_binding_entry(target, Rc::downgrade(&frame), source);
+            let entry = BoxedBindingEntry::new(target, Rc::downgrade(&frame), property, source);
             SetterInstance { kind: SetterInstanceKind::Entry(entry), is_setter: false }
         } else {
             target.bind_property_untyped(property, source, BindingPriority::LocalValue);

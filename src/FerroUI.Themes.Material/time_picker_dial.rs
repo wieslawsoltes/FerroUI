@@ -40,7 +40,7 @@ use ferroui_controls::automation::peers::{
 use ferroui_controls::automation::provider::{
     IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
 };
-use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledError};
+use ferroui_controls::automation::{AutomationError, AutomationProperties, ElementNotEnabledError};
 use ferroui_controls::primitives::{
     TemplatedControl, TemplatedControlImpl, ToggleButton, ToggleButtonImpl,
 };
@@ -881,13 +881,13 @@ impl ISelectionItemProvider for TimeNumberProvider {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         None
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn add_to_selection(&self) -> Result<(), AutomationError> {
         self.0.add_to_selection()
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
+    fn remove_from_selection(&self) -> Result<(), AutomationError> {
         self.0.remove_from_selection()
     }
-    fn select(&self) -> Result<(), ElementNotEnabledError> {
-        self.0.activate(false)
+    fn select(&self) -> Result<(), AutomationError> {
+        self.0.activate(false).map_err(Into::into)
     }
 }
