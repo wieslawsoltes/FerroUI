@@ -340,7 +340,8 @@
       <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel3}" />
     </Style>
     <Style Selector="^:pressed /template/ Border#MaterialIconContainer, ^:checked /template/ Border#MaterialIconContainer">
-      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="CornerRadius" Value="{ReflectionBinding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#MaterialIconContainer">
       <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel4}" />
@@ -357,7 +358,8 @@
     <Style Selector="^.small /template/ Border#MaterialIconContainer">
       <Setter Property="Width" Value="40" />
       <Setter Property="Height" Value="40" />
-      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="CornerRadius" Value="{ReflectionBinding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
     </Style>
     <Style Selector="^.small /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Width" Value="24" />
@@ -372,7 +374,8 @@
     <Style Selector="^.medium /template/ Border#MaterialIconContainer">
       <Setter Property="Width" Value="80" />
       <Setter Property="Height" Value="80" />
-      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="CornerRadius" Value="{ReflectionBinding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
     </Style>
     <Style Selector="^.medium /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Width" Value="28" />
@@ -387,7 +390,8 @@
     <Style Selector="^.large /template/ Border#MaterialIconContainer">
       <Setter Property="Width" Value="96" />
       <Setter Property="Height" Value="96" />
-      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="CornerRadius" Value="{ReflectionBinding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
     </Style>
     <Style Selector="^.large /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Width" Value="36" />

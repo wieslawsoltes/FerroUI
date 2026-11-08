@@ -224,16 +224,20 @@
       </Style>
     </Style>
     <Style Selector="^:left:open /template/ Panel#PART_PaneRoot, ^:right:open /template/ Panel#PART_PaneRoot">
-      <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=OpenPaneLength}"/>
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="Width" Value="{ReflectionBinding RelativeSource={RelativeSource TemplatedParent}, Path=OpenPaneLength}"/>
     </Style>
     <Style Selector="^:left:closed /template/ Panel#PART_PaneRoot, ^:right:closed /template/ Panel#PART_PaneRoot">
-      <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClosedPaneWidth}"/>
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="Width" Value="{ReflectionBinding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClosedPaneWidth}"/>
     </Style>
     <Style Selector="^:top:open /template/ Panel#PART_PaneRoot, ^:bottom:open /template/ Panel#PART_PaneRoot">
-      <Setter Property="Height" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=OpenPaneLength}"/>
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="Height" Value="{ReflectionBinding RelativeSource={RelativeSource TemplatedParent}, Path=OpenPaneLength}"/>
     </Style>
     <Style Selector="^:top:closed /template/ Panel#PART_PaneRoot, ^:bottom:closed /template/ Panel#PART_PaneRoot">
-      <Setter Property="Height" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClosedPaneHeight}"/>
+      <!-- Styles a part of the template from outside a ControlTemplate: a compiled binding cannot know the templated parent there, so it stays a reflection binding (#603). -->
+      <Setter Property="Height" Value="{ReflectionBinding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClosedPaneHeight}"/>
     </Style>
     <Style Selector="^:inline:open /template/ Panel#PART_PaneRoot, ^:compactinline:open /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
