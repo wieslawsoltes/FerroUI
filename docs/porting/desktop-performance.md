@@ -636,3 +636,16 @@ ancestor changed). A change of the value itself needs no new lookup: the store k
 effective value, which holds the current value. Tests: `ferro_object_tests_inheritance.rs`, the
 last two. Local gate (section 8.1), three rounds: gauntlet UI thread 44.90 to 43.46 ms a frame
 (-3.2 %), still wall UI thread -5.9 %.
+
+### 9.4 The font manager keeps the glyph typefaces it found
+
+Every text line asks for the glyph typeface of its run's typeface, and a run's properties keep the
+answer only for themselves; a text block creates its run properties with each layout, so in the
+gauntlet every line of every text built a `FontFamily` from its name and looked it up in the
+collections again, every frame. `FontManager::try_get_glyph_typeface` now keeps what it found, by
+typeface, until the thread's glyph typeface generation changes: a font collection deriving from
+`FontCollectionBase` gaining a glyph typeface, or a collection added, replaced or removed. A
+collection that implements `IFontCollection` directly and changes what it returns calls
+`FontManager::invalidate_glyph_typefaces`. Local gate, three rounds: gauntlet UI thread 45.09 to
+43.15 ms a frame (-4.3 %; the render thread, which the change does not touch, -1.8 % in the same
+rounds).

@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::cell::{OnceCell, RefCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -34,6 +34,21 @@ pub struct FontManager {
     font_family_mappings: Option<Vec<(String, FontFamily)>>,
     platform_impl: Rc<dyn IFontManagerImpl>,
     default_font_family: OnceCell<FontFamily>,
+    /// The glyph typefaces [`try_get_glyph_typeface`](Self::try_get_glyph_typeface) found, by
+    /// typeface, valid while the thread's glyph typeface generation is `resolved_generation`
+    /// (FerroUI deviation, docs/porting/desktop-performance.md, section 9.4).
+    resolved_glyph_typefaces: RefCell<HashMap<Typeface, Rc<GlyphTypeface>>>,
+    resolved_generation: Cell<u64>,
+}
+
+thread_local! {
+    static GLYPH_TYPEFACE_GENERATION: Cell<u64> = const { Cell::new(1) };
+}
+
+/// Makes every font manager of the thread look its glyph typefaces up again: a font collection's
+/// set of glyph typefaces or the set of collections changed.
+pub(crate) fn advance_glyph_typeface_generation() {
+    GLYPH_TYPEFACE_GENERATION.with(|generation| generation.set(generation.get().wrapping_add(1)));
 }
 
 /// Font managers compare by reference, so that a handle can be an untyped
@@ -78,6 +93,8 @@ impl FontManager {
             ),
             platform_impl,
             default_font_family: OnceCell::new(),
+            resolved_glyph_typefaces: RefCell::new(HashMap::new()),
+            resolved_generation: Cell::new(0),
         };
 
         let default_font_family_name = font_manager.get_default_font_family_name(options.as_deref());
@@ -173,7 +190,37 @@ impl FontManager {
     ///
     /// Returns the glyph typeface if the font manager could create it,
     /// `None` otherwise.
+    ///
+    /// The glyph typeface found for a typeface is kept until a font collection gains a glyph
+    /// typeface or a collection is added or removed; a collection that does not derive from
+    /// [`FontCollectionBase`](crate::media::fonts::FontCollectionBase) and changes what it returns
+    /// calls [`invalidate_glyph_typefaces`](Self::invalidate_glyph_typefaces).
     pub fn try_get_glyph_typeface(&self, typeface: &Typeface) -> Option<Rc<GlyphTypeface>> {
+        let generation = GLYPH_TYPEFACE_GENERATION.with(Cell::get);
+        if self.resolved_generation.get() == generation {
+            if let Some(found) = self.resolved_glyph_typefaces.borrow().get(typeface) {
+                return Some(found.clone());
+            }
+        } else {
+            self.resolved_glyph_typefaces.borrow_mut().clear();
+            self.resolved_generation.set(generation);
+        }
+        let found = self.resolve_glyph_typeface(typeface)?;
+        // The generation of the lookup: a collection that gained a glyph typeface while it ran
+        // made the result stale already.
+        if self.resolved_generation.get() == GLYPH_TYPEFACE_GENERATION.with(Cell::get) {
+            self.resolved_glyph_typefaces.borrow_mut().insert(typeface.clone(), found.clone());
+        }
+        Some(found)
+    }
+
+    /// Makes this font manager look every glyph typeface up again: for a font collection that
+    /// does not derive from `FontCollectionBase` and whose glyph typefaces changed.
+    pub fn invalidate_glyph_typefaces(&self) {
+        advance_glyph_typeface_generation();
+    }
+
+    fn resolve_glyph_typeface(&self, typeface: &Typeface) -> Option<Rc<GlyphTypeface>> {
         let font_family = self
             .try_get_font_family_mapping(typeface.font_family().family_names().primary_family_name())
             .unwrap_or(typeface.font_family());
@@ -326,6 +373,7 @@ impl FontManager {
         key.set_fragment(None);
 
         let old_collection = self.font_collections.borrow_mut().insert(key, font_collection);
+        advance_glyph_typeface_generation();
 
         if let Some(old_collection) = old_collection {
             old_collection.dispose();
@@ -335,6 +383,7 @@ impl FontManager {
     /// Removes the font collection that corresponds to specified key.
     pub fn remove_font_collection(&self, key: &url::Url) {
         let font_collection = self.font_collections.borrow_mut().remove(&*collection_key(key));
+        advance_glyph_typeface_generation();
 
         if let Some(font_collection) = font_collection {
             font_collection.dispose();
@@ -582,6 +631,7 @@ impl FontManager {
         let candidate = factory(key);
 
         let winner = self.font_collections.borrow_mut().entry(key.clone()).or_insert_with(|| candidate.clone()).clone();
+        advance_glyph_typeface_generation();
 
         if !Rc::ptr_eq(&winner, &candidate) {
             // Our candidate lost - dispose it to avoid the leak.
