@@ -270,7 +270,7 @@ application's setting, so it binds the same way.
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
-| Namespace tables of reflection-binding paths per unit (root D) | #612 | In review |
+| Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Units for the Material theme (step 6) | #568, #603 | Planned |
 | Compiled bindings in all themes | #603 | Planned |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | Planned |
@@ -280,4 +280,4 @@ application's setting, so it binds the same way.
 | Path data converted at compile time instead of at load | #603 | Planned |
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
-| Theme crates at `opt-level = "z"` in `dist` | #581 | Planned |
+| Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
