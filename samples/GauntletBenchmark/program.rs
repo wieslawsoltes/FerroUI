@@ -11,14 +11,9 @@
 //! output. With the feature `vello`, `FERROUI_RENDERER=vello` (or `vello-hybrid`, `vello-gpu`,
 //! `vello-cpu`) renders with the Vello backend.
 
-mod app;
-mod gauntlet;
-mod perf_data;
-mod wall;
-
-use app::{App, Launch};
 use ferroui_controls::AppBuilder;
 use ferroui_desktop::AppBuilderDesktopExtensions;
+use gauntlet_benchmark::{App, Launch};
 
 fn variable(name: &str, fallback: i32) -> i32 {
     std::env::var(name).ok().and_then(|value| value.trim().parse().ok()).unwrap_or(fallback)

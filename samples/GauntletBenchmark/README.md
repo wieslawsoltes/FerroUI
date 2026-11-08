@@ -21,7 +21,9 @@ attribution and the MIT license of the original.
   line whose text changes every frame and a cursor outline moved by a `TranslateTransform`. A frame
   changes those two things and nothing else.
 
-Frames are driven by `TopLevel::request_animation_frame`, one frame index step per callback. The
+Frames are driven by `TopLevel::request_animation_frame`, one frame index step per callback.
+The screens and the application are the library of the crate (`lib.rs`); the program
+`perf-compare-ferroui` (`program.rs`) and the frame gate use them. The
 window is 1280 x 820 logical points, not resizable, in the light Fluent theme, with Roboto loaded
 from files as a font collection of its own (`fonts:Device#Roboto`).
 
@@ -46,6 +48,30 @@ The renderer is chosen with the features of the crate, as in the other desktop s
 default; `--features vello` adds the Vello backend, which `FERROUI_RENDERER=vello` (or
 `vello-hybrid`, `vello-gpu`, `vello-cpu`) selects at start; on macOS `--features quartz` and
 `--features quartz-metal` use the Quartz backend.
+
+## The frame gate
+
+`tests/frame_gate.rs` shows both screens in a headless window (1280 x 820 points at a scaling of
+2, no pointer device) and renders them through the compositor into a raster Skia framebuffer, in
+the render-thread mode of the desktop. The screens drive their frames as in the program; after
+`GATE_WARMUP` frames (60) it measures `GATE_FRAMES` frames (240) and prints, per scenario, a line
+for the local performance gate and a summary:
+
+```text
+GATE {"bench":"gauntlet/16","frames":240,"warmup":60,"ui_ms_per_frame":...,"render_ms_per_frame":...,"wall_ms_per_frame":...,"rendered":...}
+GATE {"bench":"wall/20",...}
+```
+
+The times are milliseconds per frame of the UI thread's busy time, of the render thread's ticks
+and of wall time. The tests are ignored by default; run them in an optimised build, alone:
+
+```sh
+cargo test -p gauntlet-benchmark --release --test frame_gate -- --ignored --nocapture --test-threads=1
+```
+
+`PERF_FONTS` defaults to the Roboto files of the Material theme in this checkout. The gate that
+compares a base commit with the working tree is `scripts/perf/gate.py`; see
+`docs/porting/desktop-performance.md`, section 8.1.
 
 ## In the benchmark's desktop harness
 
