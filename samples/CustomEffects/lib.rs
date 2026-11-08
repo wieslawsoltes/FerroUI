@@ -30,5 +30,5 @@ mod tests;
 
 pub use families::{Family, PRESENTER_MS};
 pub use gallery::{authoring_tiles, gallery, main_window, AUTHORING_TITLE, GLOW_MS, TINT_MARKUP};
-pub use tiles::{label_of, markup_of, EffectTile, SWEEP_MS, TRANSITION_MS};
-pub use transition_images::{TransitionImages, PAGE_HEIGHT, PAGE_WIDTH};
+pub use tiles::{label_of, markup_of, EffectTile, CAPTION_MS, SWEEP_MS, TRANSITION_MS};
+pub use transition_images::{Picture, TransitionImages, PAGE_HEIGHT, PAGE_WIDTH};

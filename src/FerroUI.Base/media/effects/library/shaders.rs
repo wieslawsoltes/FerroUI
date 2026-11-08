@@ -8,14 +8,21 @@
 //!   pixel at its centre (Effector's pixelation, a nearest scale down and up).
 //! - [`ScanlineShaderEffect`] is an overlay drawn over the content: dark bands
 //!   across it.
+//! - [`GridShaderEffect`] is an overlay drawn over the content: grid lines.
 //! - [`SpotlightShaderEffect`] is an overlay screened over the content: a
 //!   coloured light fading from a point of the area.
+//!
+//! The overlays are masked by the content (#580,
+//! [`ShaderEffectDescription::masked_by_content`]): their output is multiplied
+//! by the alpha of the content under it before it is blended, so they draw
+//! nothing over transparent content, as Effector's overlays do.
 //!
 //! The arithmetic of the programs follows Effector's shaders and filters
 //! (`samples/Effector.Sample.Effects`, `ShaderEffects.cs` and
 //! `ImageEffects.cs`, with the clamps of its factories), in the coordinates
 //! of the convention: device pixels of the layer, lengths in device
-//! independent pixels scaled by `layer_scale`.
+//! independent pixels scaled by `layer_scale` (Effector's lengths are device
+//! pixels; the two agree at a scale of 1, docs/porting/DEVIATIONS.md).
 
 use super::super::{CustomEffect, EffectParameterValue, ShaderEffectDescription};
 use super::{area, clamp, unit};
@@ -176,10 +183,12 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
 /// Dark scan lines over the content (Effector's `ScanlineShaderEffect`):
 /// bands of `spacing` device independent pixels (clamped to 2..32) from the
 /// top of the area, the lower half of each black at the opacity `strength`
-/// (clamped to 0..1), drawn source over the content.
+/// (clamped to 0..1) times the alpha of the content, drawn source over the
+/// content.
 ///
-/// `scanline(spacing=8, strength=0.24)`. An overlay shader effect; a
-/// strength of 0 (the neutral value) leaves the content unchanged.
+/// `scanline(spacing=8, strength=0.24)`. An overlay shader effect masked by
+/// the content; a strength of 0 (the neutral value) leaves the content
+/// unchanged.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ScanlineShaderEffect {
     /// The height of a band, in device independent pixels (default 8).
@@ -215,7 +224,10 @@ impl CustomEffect for ScanlineShaderEffect {
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
-        Some(ShaderEffectDescription::overlay(SCANLINE_SKSL, SCANLINE_WGSL, BitmapBlendingMode::SourceOver))
+        Some(
+            ShaderEffectDescription::overlay(SCANLINE_SKSL, SCANLINE_WGSL, BitmapBlendingMode::SourceOver)
+                .with_content_mask(),
+        )
     }
 
     fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
@@ -227,16 +239,143 @@ impl CustomEffect for ScanlineShaderEffect {
             if ((y as f32 + 0.5) / span).fract() < 0.5 {
                 continue;
             }
-            // Black at `alpha` over the pixel: each premultiplied channel
-            // times 1 - alpha, the alpha plus alpha times what it lacks.
+            // Black at `alpha` times the alpha of the content (the mask)
+            // over the pixel: each premultiplied channel times 1 - that, the
+            // alpha plus that times what it lacks.
             for pixel in row.chunks_exact_mut(4) {
-                let over = |value: u8, source: f32| {
-                    ((source + f32::from(value) / 255.0 * (1.0 - alpha)) * 255.0).round().clamp(0.0, 255.0) as u8
+                let source = alpha * (f32::from(pixel[3]) / 255.0);
+                let over = |value: u8, source_channel: f32| {
+                    ((source_channel + f32::from(value) / 255.0 * (1.0 - source)) * 255.0).round().clamp(0.0, 255.0) as u8
                 };
                 for channel in 0..3 {
                     pixel[channel] = over(pixel[channel], 0.0);
                 }
-                pixel[3] = over(pixel[3], alpha);
+                pixel[3] = over(pixel[3], source);
+            }
+        }
+        true
+    }
+}
+
+// --- grid ----------------------------------------------------------------------
+
+const GRID_SKSL: &str = r#"
+uniform float2 layer_size;
+uniform float layer_scale;
+uniform float cell_size;
+uniform float strength;
+uniform float4 color;
+
+half4 main(float2 coord) {
+    // The lines: 6 percent of each cell, along its top and its left.
+    float span = max(clamp(cell_size, 8.0, 64.0) * layer_scale, 1.0);
+    float2 cell = coord - floor(coord / span) * span;
+    float alpha = (cell.x < 0.06 * span || cell.y < 0.06 * span) ? clamp(strength, 0.0, 1.0) : 0.0;
+    return half4(color * alpha);
+}
+"#;
+
+const GRID_WGSL: &str = r#"
+struct Uniforms {
+    layer_size: vec2<f32>,
+    layer_scale: f32,
+    cell_size: f32,
+    strength: f32,
+    color: vec4<f32>,
+}
+
+fn effect(coord: vec2<f32>) -> vec4<f32> {
+    // The lines: 6 percent of each cell, along its top and its left.
+    let span = max(clamp(uniforms.cell_size, 8.0, 64.0) * uniforms.layer_scale, 1.0);
+    let cell = coord - floor(coord / span) * span;
+    let alpha = select(0.0, clamp(uniforms.strength, 0.0, 1.0), cell.x < 0.06 * span || cell.y < 0.06 * span);
+    return uniforms.color * alpha;
+}
+"#;
+
+/// Grid lines over the content (Effector's `GridShaderEffect`): lines along
+/// the top and the left of each cell of `cell-size` device independent pixels
+/// (clamped to 8..64) from the top left corner of the area, 6 percent of the
+/// cell wide, in the colour at the opacity `strength` (clamped to 0..1) times
+/// the alpha of the content, drawn source over the content.
+///
+/// `grid(cell-size=22, strength=0.22, color=#3FC3FF)`. An overlay shader
+/// effect masked by the content; a strength of 0 (the neutral value) leaves
+/// the content unchanged. [`ReactiveGridShaderEffect`](super::ReactiveGridShaderEffect)
+/// is the grid that follows the pointer.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GridShaderEffect {
+    /// The side of a cell, in device independent pixels (default 22).
+    pub cell_size: f64,
+    /// The opacity of the lines, 0 to 1 (default 0.22).
+    pub strength: f64,
+    /// The colour of the lines (default #3FC3FF).
+    pub color: Color,
+}
+
+impl Default for GridShaderEffect {
+    fn default() -> Self {
+        Self { cell_size: 22.0, strength: 0.22, color: Color::from_rgb(0x3F, 0xC3, 0xFF) }
+    }
+}
+
+impl GridShaderEffect {
+    /// The width of a line, a fraction of the side of a cell.
+    pub const LINE_WIDTH: f32 = 0.06;
+}
+
+impl CustomEffect for GridShaderEffect {
+    const NAME: &'static str = "grid";
+
+    fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        f("cell-size", self.cell_size.into());
+        f("strength", self.strength.into());
+        f("color", self.color.into());
+    }
+
+    fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+        match name {
+            "cell-size" => value.as_float().map(|size| self.cell_size = size).is_some(),
+            "strength" => value.as_float().map(|strength| self.strength = strength).is_some(),
+            "color" => value.as_color().map(|color| self.color = color).is_some(),
+            _ => false,
+        }
+    }
+
+    fn neutral() -> Option<Self> {
+        Some(Self { strength: 0.0, ..Self::default() })
+    }
+
+    fn shader() -> Option<ShaderEffectDescription> {
+        Some(ShaderEffectDescription::overlay(GRID_SKSL, GRID_WGSL, BitmapBlendingMode::SourceOver).with_content_mask())
+    }
+
+    fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
+        let pixels = area(pixels, width, height);
+        let scale = if scale > 0.0 && scale.is_finite() { scale as f32 } else { 1.0 };
+        let span = (clamp(self.cell_size, 8.0, 64.0) as f32 * scale).max(1.0);
+        let line = Self::LINE_WIDTH * span;
+        let strength = unit(self.strength) as f32;
+        // The colour premultiplied, as the uniform of the convention.
+        let alpha = f32::from(self.color.a) / 255.0;
+        let color = [self.color.r, self.color.g, self.color.b].map(|channel| f32::from(channel) / 255.0 * alpha);
+        let color = [color[0], color[1], color[2], alpha];
+        if strength <= 0.0 {
+            return true;
+        }
+        for (index, pixel) in pixels.chunks_exact_mut(4).enumerate() {
+            let (x, y) = ((index % width) as f32 + 0.5, (index / width) as f32 + 0.5);
+            let cell = [x - (x / span).floor() * span, y - (y / span).floor() * span];
+            if !(cell[0] < line || cell[1] < line) {
+                continue;
+            }
+            // Source over, the source masked by the alpha of the content.
+            let mask = f32::from(pixel[3]) / 255.0;
+            let source = color.map(|channel| channel * strength * mask);
+            for channel in 0..4 {
+                let destination = f32::from(pixel[channel]) / 255.0;
+                let value = source[channel] + destination * (1.0 - source[3]);
+                pixel[channel] = (value * 255.0).round().clamp(0.0, 255.0) as u8;
             }
         }
         true
@@ -290,11 +429,13 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
 /// area (fractions of its width and height, clamped to 0..1), fading linearly
 /// to nothing at the distance `radius` (a fraction of the area, measured in
 /// the fractions of each axis, clamped to 0.05..1), the colour at the opacity
-/// `strength` (clamped to 0..1) times its own at the centre.
+/// `strength` (clamped to 0..1) times its own at the centre, times the alpha
+/// of the content.
 ///
 /// `spotlight(center-x=0.55, center-y=0.4, radius=0.42, strength=0.35,
-/// color=#FFD26B)`. An overlay shader effect with the blend mode `Screen`; a
-/// strength of 0 (the neutral value) leaves the content unchanged.
+/// color=#FFD26B)`. An overlay shader effect with the blend mode `Screen`,
+/// masked by the content; a strength of 0 (the neutral value) leaves the
+/// content unchanged.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SpotlightShaderEffect {
     /// The horizontal position of the centre, 0 (left) to 1 (right) (default
@@ -344,7 +485,10 @@ impl CustomEffect for SpotlightShaderEffect {
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
-        Some(ShaderEffectDescription::overlay(SPOTLIGHT_SKSL, SPOTLIGHT_WGSL, BitmapBlendingMode::Screen))
+        Some(
+            ShaderEffectDescription::overlay(SPOTLIGHT_SKSL, SPOTLIGHT_WGSL, BitmapBlendingMode::Screen)
+                .with_content_mask(),
+        )
     }
 
     fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
@@ -367,9 +511,11 @@ impl CustomEffect for SpotlightShaderEffect {
             if factor <= 0.0 {
                 continue;
             }
-            // Screen, premultiplied: source + destination - source * destination.
+            // Screen, premultiplied: source + destination - source *
+            // destination, the source masked by the alpha of the content.
+            let mask = f32::from(pixel[3]) / 255.0;
             for channel in 0..4 {
-                let source = color[channel] * factor;
+                let source = color[channel] * factor * mask;
                 let destination = f32::from(pixel[channel]) / 255.0;
                 let value = source + destination - source * destination;
                 pixel[channel] = (value * 255.0).round().clamp(0.0, 255.0) as u8;

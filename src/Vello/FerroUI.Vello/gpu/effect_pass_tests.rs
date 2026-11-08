@@ -633,7 +633,7 @@ fn steady_frames_of_the_layers_allocate_no_texture() {
 // --- runtime shader effects (#455, E5) -----------------------------------------------------
 
 use super::effect_passes::{check_shader_module, shader_failure_reports};
-use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+use ferroui_base::media::effects::library::{GridShaderEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
 use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription};
 use ferroui_base::media::imaging::BitmapBlendingMode;
 
@@ -655,6 +655,8 @@ fn library_shader_effects() -> Vec<(ImmutableCustomEffect, u8)> {
             }),
             3,
         ),
+        // The grid (#580), masked by the content as the other overlays.
+        (ImmutableCustomEffect::new(GridShaderEffect { cell_size: 12.0, strength: 0.6, ..GridShaderEffect::default() }), 2),
     ]
 }
 
@@ -680,6 +682,7 @@ fn the_shader_modules_of_the_library_are_checked_by_naga() {
         (vec![0, 8, 12, 16, 20, 24, 32], 48),
         layout(ImmutableCustomEffect::new(SpotlightShaderEffect::default()))
     );
+    assert_eq!((vec![0, 8, 12, 16, 32], 48), layout(ImmutableCustomEffect::new(GridShaderEffect::default())));
 }
 
 /// A shader effect of the tests with the parameters `amount` (a number) and

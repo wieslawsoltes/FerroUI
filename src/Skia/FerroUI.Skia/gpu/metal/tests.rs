@@ -1607,7 +1607,9 @@ fn graphite_draws_the_library_effects_as_their_cpu_references() {
 /// scene drawn plain by Graphite.
 #[test]
 fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
-    use ferroui_base::media::effects::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+    use ferroui_base::media::effects::library::{
+        GridShaderEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+    };
     use ferroui_base::media::effects::ImmutableCustomEffect;
 
     let Some(device) = TestMetalDevice::try_new() else {
@@ -1647,6 +1649,8 @@ fn graphite_draws_the_library_shader_effects_as_their_cpu_references() {
         (ImmutableCustomEffect::new(PixelateEffect { cell_size: 6.0 }), 3u8),
         (ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 0.5 }), 3),
         (ImmutableCustomEffect::new(spotlight), 4),
+        // The grid (#580), masked by the content as the other overlays.
+        (ImmutableCustomEffect::new(GridShaderEffect { cell_size: 8.0, strength: 0.6, ..GridShaderEffect::default() }), 3),
     ];
     for (effect, largest) in effects {
         assert!(effect.has_shader(), "{effect}");
@@ -1943,9 +1947,9 @@ mod custom_effect_validation {
     use super::*;
     use ferroui_base::media::effects::library::{
         BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
-        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
-        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
-        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+        GrayscaleEffect, GridShaderEffect, InvertEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect,
+        SharpenEffect, SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
     };
     use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
     use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
@@ -2049,6 +2053,10 @@ mod custom_effect_validation {
                     color: Colors::ORANGE,
                 }),
                 Tolerance::Largest(4),
+            ),
+            (
+                ImmutableCustomEffect::new(GridShaderEffect { cell_size: 8.0, strength: 0.6, ..GridShaderEffect::default() }),
+                Tolerance::Largest(3),
             ),
             (
                 ImmutableCustomEffect::new(DissolveTransitionEffect {
@@ -2244,6 +2252,7 @@ mod custom_effect_validation {
                 of::<PixelateEffect>(),
                 of::<ScanlineShaderEffect>(),
                 of::<SpotlightShaderEffect>(),
+                of::<GridShaderEffect>(),
                 of::<DissolveTransitionEffect>(),
                 of::<MaskTransitionEffect>(),
                 of::<PointerSpotlightShaderEffect>(),
@@ -2273,7 +2282,7 @@ mod custom_effect_validation {
         assert_eq!(2, presented.load(std::sync::atomic::Ordering::SeqCst), "a prewarm presents nothing");
         let compiled = crate::runtime_effects::compilation_count();
         let shaders = registered.iter().filter(|effect| effect.has_shader()).count() as u64;
-        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert_eq!(10, shaders, "the runtime shaders of the library");
         assert!(compiled - before >= shaders, "the prewarm compiled {} programs", compiled - before);
 
         // The frame that shows the library compiles nothing.

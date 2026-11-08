@@ -102,13 +102,19 @@ pub trait IEffectInputHandler {
 /// - the host's own coordinates ([`get_position`](Self::get_position)), device independent pixels
 ///   from the top left corner of the host, through every render transform up to the root;
 /// - the normalized coordinates ([`get_normalized_position`](Self::get_normalized_position)), 0 to
-///   1 across the [input bounds](Self::input_bounds), the host's own size, which is what the
-///   interactive effects of the library pass as uniforms: independent of the scale, they need no
-///   conversion on the render thread;
+///   1 across the [input bounds](Self::input_bounds), which is what the interactive effects of the
+///   library pass as uniforms: independent of the scale, they need no conversion on the render
+///   thread;
 /// - the coordinates of the program ([`get_effect_position`](Self::get_effect_position)): device
-///   pixels from the top left corner of the area of the effect, the host's bounds inflated by the
-///   padding of the effect, at [`layer_scale`](Self::layer_scale) (section 3.4 of the plan, the
-///   `coord` a program is given, when the content of the host lies within its bounds).
+///   pixels from the top left corner of the [area of the effect](Self::effect_bounds), at
+///   [`layer_scale`](Self::layer_scale) (section 3.4 of the plan, the `coord` a program is given).
+///
+/// The area of the effect is the rectangle the renderer draws the effect over (#580): the bounds
+/// of the content of the host's subtree, with the padding of the effect, as the compositor last
+/// drew them ([`render_bounds`](Self::render_bounds)), so that a normalized position of 0.5 is the
+/// middle of what the program draws, also when the content does not fill the host or reaches
+/// beyond it. Before the host was drawn (or without a compositor), the area is the host's own
+/// bounds with the padding.
 pub struct EffectHostContext<'a> {
     effect: &'a Effect,
     host: &'a InputElement,
@@ -144,14 +150,41 @@ impl<'a> EffectHostContext<'a> {
         self.bounds().size()
     }
 
-    /// The bounds the pointer is normalized to: the host's own size, from its top left corner.
+    /// The bounds the pointer is normalized to, in the host's coordinates: the
+    /// [area the renderer drew the effect over](Self::render_bounds) without the padding of the
+    /// effect, so that the input and the program agree (#580; Effector normalizes to the content
+    /// of the host within its bounds and draws over the same rectangle); the host's own size, from
+    /// its top left corner, before the host was drawn.
     pub fn input_bounds(&self) -> Rect {
-        Rect::from_position_size(Point::default(), self.size())
+        let host = Rect::from_position_size(Point::default(), self.size());
+        match self.render_bounds() {
+            Some(area) => {
+                let content = area.deflate_thickness(self.padding());
+                if content.width > 0.0 && content.height > 0.0 {
+                    content
+                } else {
+                    host
+                }
+            }
+            None => host,
+        }
     }
 
     /// The input size: the size of the [input bounds](Self::input_bounds).
     pub fn input_size(&self) -> Size {
-        self.size()
+        self.input_bounds().size()
+    }
+
+    /// The rectangle the renderer drew the effect over in the last frame, in the host's
+    /// coordinates (#580): the bounds of the subtree of the host, the padding of the effect
+    /// included, as the compositor read them back. `None` before the host was drawn, for a host
+    /// that is not shown, and without a compositor.
+    pub fn render_bounds(&self) -> Option<Rect> {
+        let composition = self.visual().composition_visual()?;
+        let readback = composition.try_get_valid_readback()?;
+        let bounds = readback.subtree_bounds?.to_rect();
+        (bounds.width > 0.0 && bounds.height > 0.0 && bounds.width.is_finite() && bounds.height.is_finite())
+            .then_some(bounds)
     }
 
     /// The padding of the effect: how far its area reaches beyond the host's bounds.
@@ -160,7 +193,8 @@ impl<'a> EffectHostContext<'a> {
     }
 
     /// The area of the effect in the host's coordinates: the input bounds inflated by the padding
-    /// of the effect.
+    /// of the effect (the [rectangle the renderer drew the effect over](Self::render_bounds), once
+    /// the host was drawn).
     pub fn effect_bounds(&self) -> Rect {
         self.input_bounds().inflate_thickness(self.padding())
     }
@@ -188,8 +222,8 @@ impl<'a> EffectHostContext<'a> {
     }
 
     /// The position of the pointer of `e` normalized to the input bounds: 0 to 1 from the left
-    /// to the right and from the top to the bottom of the host, clamped to 0..1 when `clamp` is
-    /// set (Effector's `GetNormalizedPosition`).
+    /// to the right and from the top to the bottom of the area the effect is drawn over, clamped
+    /// to 0..1 when `clamp` is set (Effector's `GetNormalizedPosition`).
     pub fn get_normalized_position(&self, e: &PointerEventArgs, clamp: bool) -> Point {
         self.normalize(self.get_position(e), clamp)
     }

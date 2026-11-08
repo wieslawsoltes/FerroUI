@@ -5,8 +5,9 @@
 //! handled unless it asks for handled events, wherever the pointer is while the host captures it,
 //! and the loss of the capture reaches it; the positions are those of the host, normalized to it
 //! and in the coordinates of the program, through a render transform; and the interactive effects
-//! of the library follow the pointer, the burn-away button takes the handled press of its button,
-//! and the water ripple makes ripples and stops animating when it is detached.
+//! of the library follow the pointer and take the presses their hosts handled (the burn-away button
+//! the press of its button), and the water ripple makes ripples and stops animating when it is
+//! detached.
 
 use super::*;
 use crate::media::effects::library::{
@@ -443,10 +444,12 @@ fn the_burn_away_button_takes_the_press_its_button_handled() {
     tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, Point::new(150.0, 100.0), 1);
     assert!(!flame.value().is_pressed);
 
-    // The spotlight does not take handled presses.
+    // The spotlight takes handled presses too (#580): every input effect of the library does, as
+    // Effector's use `handledEventsToo`.
     tree.root.host.pointer(&device, RawPointerEventType::LeftButtonDown, OVER_CANVAS, 2);
-    assert!(!spotlight.value().is_pressed);
+    assert!(spotlight.value().is_pressed);
     tree.root.host.pointer(&device, RawPointerEventType::LeftButtonUp, OVER_CANVAS, 3);
+    assert!(!spotlight.value().is_pressed);
 
     // Detached, the flame stops.
     tree.border.set_effect(None);

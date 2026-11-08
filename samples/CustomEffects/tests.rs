@@ -12,14 +12,15 @@ use crate::{
 use ferroui_base::animation::{IClock, SignedDuration};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::effects::library::{
-    DissolveTransitionEffect, GlowEffect, InteractivePointerSpotlightEffect, TintEffect,
+    DissolveTransitionEffect, GlowEffect, InteractivePointerSpotlightEffect, InteractiveWaterRippleEffect, TintEffect,
 };
 use ferroui_base::media::effects::{Effect, EffectExtensions, ImmutableCustomEffect};
 use ferroui_base::media::Color;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::PixelSize;
+use ferroui_controls::primitives::UniformGrid;
 use ferroui_controls::testing::{UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::Button;
+use ferroui_controls::{Border, Button, Control, Image};
 use sample_testing::TestGlobalClock;
 use std::rc::Rc;
 
@@ -66,7 +67,7 @@ fn every_family_has_a_tile_per_effect_of_the_library() {
     let expected: [(Family, &[&str]); 5] = [
         (Family::Colour, &["tint", "grayscale", "sepia", "saturation", "brightness-contrast", "invert"]),
         (Family::Image, &["glow", "sharpen", "edge-detect", "pixelate"]),
-        (Family::Shader, &["scanline", "reactive-grid", "spotlight", "spotlight"]),
+        (Family::Shader, &["scanline", "grid", "spotlight", "spotlight"]),
         (Family::Interactive, &["pointer-spotlight", "reactive-grid", "water-ripple", "burning-flame"]),
         (Family::Transitions, &["dissolve-transition", "mask-transition", "dissolve-transition"]),
     ];
@@ -282,4 +283,54 @@ fn the_gallery_has_the_ways_of_setting_an_effect_and_a_section_per_family() {
         .expect("the panel of the sections");
     // The header, the ways of setting an effect and the families.
     assert_eq!(2 + Family::ALL.len(), content.children().count());
+}
+
+/// The burn-away button is opaque, as Effector's (#580): the flame burns the content in
+/// proportion to its alpha, so on a translucent button it would show on the text only.
+#[test]
+fn the_burn_away_button_is_opaque() {
+    let _app = start();
+    let burn = tile(Family::Interactive, &TransitionImages::default(), "Burn-away button");
+    let button = burn.host.cast::<Button>().expect("the host is a button");
+    let face = button
+        .content()
+        .and_then(|content| Control::from_boxed(&content))
+        .and_then(|content| content.cast::<Border>())
+        .expect("the face of the button");
+    let color = face.background().and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color()));
+    assert_eq!(Some(Color::from_rgb(0x1E, 0x23, 0x28)), color);
+    assert_eq!(Some(Color::from_rgb(0x1E, 0x23, 0x28)), button.background().and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color())));
+}
+
+/// The water ripple bends image content (#580): the picture of the images it is given, or a
+/// picture the gallery draws, never a flat panel.
+#[test]
+fn the_water_ripple_bends_a_picture() {
+    let _app = start();
+    let child = |images: &TransitionImages| {
+        let ripple = tile(Family::Interactive, images, "Water ripple");
+        assert!(ripple.host.interactive_effect().is_some(), "the picture takes the pointer");
+        ripple.host.cast::<Border>().and_then(|host| host.child()).expect("the picture")
+    };
+    assert!(child(&TransitionImages::default()).cast::<UniformGrid>().is_some(), "the picture the gallery draws");
+    let images = TransitionImages::render();
+    assert!(images.picture.image().is_some());
+    assert!(child(&images).cast::<Image>().is_some(), "the picture it is given");
+}
+
+/// The caption of an interactive tile shows the first change at once and is not rewritten on
+/// every frame of an animation (#580): changes within an interval wait for its end.
+#[test]
+fn the_caption_of_an_interactive_tile_is_throttled() {
+    let _app = start();
+    let ripple = tile(Family::Interactive, &TransitionImages::default(), "Water ripple");
+    let effect = ripple.host.interactive_effect().expect("the interactive effect");
+    let class = effect.cast::<InteractiveWaterRippleEffect>().expect("the water ripple");
+    class.update(|value| value.pointer_x = 0.25);
+    let first = ripple.markup.text().expect("the effect string");
+    assert!(first.contains("pointer-x=0.25"), "{first}");
+    // The next frames within the interval leave the caption as it is.
+    class.update(|value| value.pointer_x = 0.5);
+    class.update(|value| value.pointer_x = 0.75);
+    assert_eq!(Some(first), ripple.markup.text());
 }

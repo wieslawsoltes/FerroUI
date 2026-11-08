@@ -43,6 +43,11 @@ pub struct ReadbackData {
     pub target_id: i64,
     pub visible: bool,
     pub transformed_subtree_bounds: Option<LtrbRect>,
+    /// The bounds of the subtree in the coordinates of the visual, before its
+    /// own transform (not from upstream, #580): the area the renderer drew the
+    /// effect of the visual over, its padding included, which the interactive
+    /// effects normalize the pointer to.
+    pub subtree_bounds: Option<LtrbRect>,
 }
 
 struct Slot {
@@ -60,6 +65,7 @@ impl Slot {
                 target_id: 0,
                 visible: false,
                 transformed_subtree_bounds: None,
+                subtree_bounds: None,
             }),
         }
     }
@@ -154,6 +160,7 @@ impl ServerCompositionVisual {
                 revision: writer_revision,
                 target_id: self.root().map_or(-1, |root| root.id()),
                 transformed_subtree_bounds: self.transformed_sub_tree_bounds.get(),
+                subtree_bounds: self.sub_tree_bounds.get(),
                 visible: self.visible(),
             },
         );

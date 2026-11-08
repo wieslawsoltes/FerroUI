@@ -216,7 +216,7 @@ pub fn write_shader_effect_glsl<T: CustomEffect>() -> Result<Option<ShaderEffect
 mod tests {
     use super::*;
     use ferroui_base::media::effects::library::{
-        BurningFlameShaderEffect, DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect,
+        BurningFlameShaderEffect, DissolveTransitionEffect, GridShaderEffect, MaskTransitionEffect, PixelateEffect,
         PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect, TintEffect,
         WaterRippleShaderEffect,
     };
@@ -244,6 +244,7 @@ mod tests {
             ("pixelate", shader_effect_glsl::<PixelateEffect>()),
             ("scanline", shader_effect_glsl::<ScanlineShaderEffect>()),
             ("spotlight", shader_effect_glsl::<SpotlightShaderEffect>()),
+            ("grid", shader_effect_glsl::<GridShaderEffect>()),
             // The interactive effects (E7).
             ("pointer-spotlight", shader_effect_glsl::<PointerSpotlightShaderEffect>()),
             ("reactive-grid", shader_effect_glsl::<ReactiveGridShaderEffect>()),

@@ -2868,7 +2868,8 @@ mod custom_effect_graphs {
 mod custom_shader_effects {
     use super::*;
     use ferroui_base::media::effects::library::{
-        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        DissolveTransitionEffect, GridShaderEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect,
+        SpotlightShaderEffect,
     };
     use ferroui_base::media::effects::{
         CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
@@ -2963,6 +2964,9 @@ mod custom_shader_effects {
             let spotlight =
                 SpotlightShaderEffect { center_x: 0.4, center_y: 0.5, radius: 0.5, strength: 0.8, color: Colors::ORANGE };
             assert_matches_reference(ImmutableCustomEffect::new(spotlight), scale, 3);
+            // The grid (#580), masked by the content as the other overlays.
+            let grid = GridShaderEffect { cell_size: 12.0, strength: 0.6, ..GridShaderEffect::default() };
+            assert_matches_reference(ImmutableCustomEffect::new(grid), scale, 1);
         }
     }
 
@@ -2972,6 +2976,7 @@ mod custom_shader_effects {
             ImmutableCustomEffect::new(PixelateEffect { cell_size: 0.0 }),
             ImmutableCustomEffect::new(ScanlineShaderEffect { strength: 0.0, ..ScanlineShaderEffect::default() }),
             ImmutableCustomEffect::new(SpotlightShaderEffect { strength: 0.0, ..SpotlightShaderEffect::default() }),
+            ImmutableCustomEffect::new(GridShaderEffect { strength: 0.0, ..GridShaderEffect::default() }),
         ] {
             let plain = target(1);
             plain.draw(scene);
@@ -2984,21 +2989,28 @@ mod custom_shader_effects {
 
     #[test]
     fn a_shader_effect_is_drawn_inside_its_area_only() {
-        // An overlay over the right half of the target: nothing outside it.
+        // An overlay over the right half of the target, over white content there: nothing
+        // outside it. The overlay is masked by the content (#580): where there is none it draws
+        // nothing.
         let effect = ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 1.0 });
         let drawn = target(1);
         drawn.draw(|context| {
             let bounds = Rect::new(50.0, 0.0, 50.0, 100.0);
             context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::WHITE)), None, rect(50.0, 0.0, 40.0, 100.0), &no_shadows());
+            context.pop_render_options();
             context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
             // After the pop, drawing is plain again.
             context.push_render_options(aliased());
             context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.0, 0.0, 5.0, 5.0), &no_shadows());
             context.pop_render_options();
         });
-        // Rows 2 and 3 of each band of 4 are black inside the area.
+        // Rows 2 and 3 of each band of 4 are black inside the area, over the content.
         assert_eq!((0, 0, 0, 255), drawn.pixel(60, 2));
-        assert_eq!(TRANSPARENT, drawn.pixel(60, 1));
+        assert_eq!((255, 255, 255, 255), drawn.pixel(60, 1));
+        // Inside the area beside the content, nothing.
+        assert_eq!(TRANSPARENT, drawn.pixel(95, 2));
         assert_eq!(TRANSPARENT, drawn.pixel(40, 2));
         assert_eq!(RED, drawn.pixel(2, 2));
     }
@@ -3391,9 +3403,9 @@ mod custom_effect_steady_state {
     use super::*;
     use ferroui_base::media::effects::library::{
         BrightnessContrastEffect, BurningFlameShaderEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect,
-        GrayscaleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, PointerSpotlightShaderEffect,
-        ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect,
-        SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
+        GrayscaleEffect, GridShaderEffect, InvertEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, SaturationEffect, ScanlineShaderEffect, SepiaEffect,
+        SharpenEffect, SpotlightShaderEffect, TintEffect, WaterRippleShaderEffect,
     };
     use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
     use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
@@ -3481,6 +3493,7 @@ mod custom_effect_steady_state {
                 strength: 0.8,
                 ..SpotlightShaderEffect::default()
             }),
+            ImmutableCustomEffect::new(GridShaderEffect { cell_size: 10.0 + 8.0 * t, strength: 0.2 + 0.6 * t, ..GridShaderEffect::default() }),
             ImmutableCustomEffect::new(DissolveTransitionEffect {
                 from_page: pages.from.clone(),
                 to_page: pages.to.clone(),
@@ -3537,6 +3550,7 @@ mod custom_effect_steady_state {
             of::<PixelateEffect>(),
             of::<ScanlineShaderEffect>(),
             of::<SpotlightShaderEffect>(),
+            of::<GridShaderEffect>(),
             of::<DissolveTransitionEffect>(),
             of::<MaskTransitionEffect>(),
             of::<PointerSpotlightShaderEffect>(),
@@ -3628,7 +3642,7 @@ mod custom_effect_steady_state {
         });
         let prewarmed = crate::runtime_effects::compilation_count();
         let shaders = values.iter().filter(|effect| effect.has_shader()).count() as u64;
-        assert_eq!(9, shaders, "the runtime shaders of the library");
+        assert_eq!(10, shaders, "the runtime shaders of the library");
         assert!(prewarmed - before >= shaders, "the prewarm compiled {} programs", prewarmed - before);
 
         // The first frame of the library compiles nothing.

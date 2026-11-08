@@ -922,6 +922,9 @@ fn readback_reports_the_transform_and_bounds_of_the_last_frame() {
     let readback = visual.try_get_valid_readback().expect("the visual was rendered");
     assert_eq!(Matrix::create_translation(30.0, 50.0), readback.matrix);
     assert_eq!(Some(LtrbRect::new(30.0, 50.0, 50.0, 60.0)), readback.transformed_subtree_bounds);
+    // The bounds before the transform of the visual: the area an effect of the visual is drawn
+    // over, in its own coordinates, which its interactive effect normalizes the pointer to (#580).
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 20.0, 10.0)), readback.subtree_bounds);
     assert!(readback.visible);
     assert_eq!(s.renderer.composition_target().id(), readback.target_id);
 
