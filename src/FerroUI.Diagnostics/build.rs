@@ -62,8 +62,6 @@ fn main() {
 
     let mut build = Build::from_env()
         .type_system(TypeSystem::Model)
-        // The upstream project is built with compiled bindings as the default of its documents.
-        .default_compile_bindings(true)
         .embed_assets(&["Assets"]);
     for (path, text) in &all {
         // A document that includes another one of the crate (by its absolute URI, or by a path

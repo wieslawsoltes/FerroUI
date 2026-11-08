@@ -1,7 +1,9 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
              x:Class="TreeDataGridDemo.Views.CoreDemoPage"
-             x:CompileBindings="False">
+             x:DataType="vm:CoreDemoViewModel">
   <DockPanel Margin="12">
     <Border DockPanel.Dock="Top" Background="#182D89EF" CornerRadius="8" Padding="12" Margin="0 0 0 10">
       <StackPanel>
@@ -34,7 +36,7 @@
             <TextBlock DockPanel.Dock="Bottom" Margin="0 6 0 0" Text="{Binding FindStatus}" TextWrapping="Wrap"/>
             <ListBox ItemsSource="{Binding CountryItems}" SelectionChanged="FindCountry">
               <ListBox.ItemTemplate>
-                <DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate>
+                <DataTemplate x:DataType="m:Country"><TextBlock Text="{Binding Name}"/></DataTemplate>
               </ListBox.ItemTemplate>
             </ListBox>
           </DockPanel>
@@ -46,7 +48,7 @@
         <Grid RowDefinitions="180,*">
           <ListBox ItemsSource="{Binding VariableCountryItems}" SelectionChanged="BringCountryIntoView">
             <ListBox.ItemTemplate>
-              <DataTemplate><TextBlock Text="{Binding Region}"/></DataTemplate>
+              <DataTemplate x:DataType="m:Country"><TextBlock Text="{Binding Region}"/></DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
           <TreeDataGrid Grid.Row="1" Name="VariableGrid" Model="{Binding VariableCountriesSource}"/>

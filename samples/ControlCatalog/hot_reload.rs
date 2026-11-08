@@ -50,11 +50,10 @@ pub(crate) fn session_release_check() -> impl Fn() -> bool {
     move || session.upgrade().is_none()
 }
 
+/// The reloaded documents bind as the build compiles the catalog: compiled bindings, unless its
+/// assembly says otherwise (#604).
 fn configuration() -> RuntimeXamlLoaderConfiguration {
-    let mut configuration = RuntimeXamlLoaderConfiguration::default();
-    configuration.local_assembly = Some(&crate::register_types::ASSEMBLY);
-    configuration.use_compiled_bindings_by_default = true;
-    configuration
+    RuntimeXamlLoaderConfiguration::for_assembly(&crate::register_types::ASSEMBLY)
 }
 pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str) {
     if ![

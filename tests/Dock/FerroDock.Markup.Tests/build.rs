@@ -9,7 +9,6 @@ fn main() {
     native_json_properties::emit();
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true)
         .compile_xaml()
         .run();
 }

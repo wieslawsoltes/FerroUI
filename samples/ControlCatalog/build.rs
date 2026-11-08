@@ -220,8 +220,6 @@ fn compile_documents(out_dir: &Path, documents: &[(String, String)], catalog_app
         named.iter().copied().filter(|(name, _)| !compiled_documents::REFUSED.iter().any(|(refused, _)| refused == name)).collect();
     let mut build = Build::from_env()
         .type_system(TypeSystem::Model)
-        // The upstream sample is built with compiled bindings as the default of its documents.
-        .default_compile_bindings(true)
         .input("build/compiled_documents.rs");
     for (name, text) in &compiled {
         // A document that includes another one of the sample is given every document, of

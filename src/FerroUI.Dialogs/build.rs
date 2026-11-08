@@ -36,8 +36,6 @@ fn main() {
 
     Build::from_env()
         .type_system(TypeSystem::Model)
-        // The upstream project is built with compiled bindings as the default of its documents.
-        .default_compile_bindings(true)
         .embed_assets(&["Assets"])
         .compile_group(
             XamlGroup::new("compiled_about_ferro_dialog")

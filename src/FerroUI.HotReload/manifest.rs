@@ -8,7 +8,69 @@ pub struct ReloadManifest {
     pub files: BTreeMap<String, PathBuf>,
     pub sources: BTreeMap<String, String>,
     pub dependencies: BTreeMap<String, Vec<String>>,
+    /// Whether the build compiled `{Binding}` as a compiled binding by default (#603): the
+    /// default of the build, unless the crate opts out with `[package.metadata.ferroui]
+    /// compile-bindings = false` (or `Build::default_compile_bindings(false)`). `true` for a
+    /// manifest that does not state it. [`configuration`](Self::configuration) reloads the
+    /// documents the same way (#604).
+    pub compile_bindings: bool,
     contracts: Option<std::rc::Rc<crate::contract::BuildContracts>>,
+}
+
+#[cfg(test)]
+mod binding_tests {
+    use super::*;
+    fn manifest(compile_bindings: Option<serde_json::Value>) -> Result<ReloadManifest, ReloadError> {
+        let mut value = serde_json::json!({"version": 1, "documents": []});
+        if let Some(compile_bindings) = compile_bindings {
+            value["compile_bindings"] = compile_bindings;
+        }
+        ReloadManifest::parse(&value.to_string())
+    }
+    /// Not from upstream (#604): the documents reload with compiled bindings, the default of
+    /// the build, unless the manifest says the build opted out.
+    #[test]
+    fn documents_reload_with_the_binding_default_of_the_build() {
+        static ASSEMBLY: ferroui_base::metadata::MarkupAssembly = ferroui_base::metadata::MarkupAssembly {
+            name: "Manifest.Bindings",
+            crate_name: "manifest_bindings",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[],
+        };
+        for (stated, compiled) in [(None, true), (Some(serde_json::json!(true)), true), (Some(serde_json::json!(false)), false)] {
+            let manifest = manifest(stated).unwrap();
+            assert_eq!(manifest.compile_bindings, compiled);
+            let configuration = manifest.configuration(Some(&ASSEMBLY));
+            assert_eq!(configuration.use_compiled_bindings_by_default, compiled);
+            assert!(configuration.local_assembly.is_some_and(|assembly| std::ptr::eq(assembly, &ASSEMBLY)));
+            assert!(manifest.configuration(None).local_assembly.is_none());
+        }
+        assert!(manifest(Some(serde_json::json!("false"))).is_err());
+    }
+    /// Not from upstream (#604): a reloaded document that the default of the build compiles is
+    /// refused at run time where it lacks `x:DataType`, as the build refuses it, and binds by
+    /// reflection where the build opted out.
+    #[test]
+    fn a_reloaded_document_binds_as_the_build_compiled_it() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
+        use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+        let _application = UnitTestApplication::start(TestServices::styled_window());
+        ferroui_controls::register_types();
+        ferroui_markup_xaml::register_types();
+        FerroRuntimeXamlLoader::register();
+        let load = |xaml: &str, configuration: RuntimeXamlLoaderConfiguration| {
+            FerroRuntimeXamlLoader::load_document(RuntimeXamlLoaderDocument::new(xaml), Some(configuration))
+        };
+        let untyped = "<TextBlock xmlns='https://github.com/ferroui' Text='{Binding Title}'/>";
+        let typed = "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:DataType='TextBlock' Text='{Binding Text}'/>";
+        let compiled = manifest(None).unwrap().configuration(None);
+        assert!(load(untyped, compiled.clone()).is_err(), "a compiled binding needs x:DataType");
+        assert!(load(typed, compiled).is_ok());
+        let opted_out = manifest(Some(serde_json::json!(false))).unwrap().configuration(None);
+        assert!(load(untyped, opted_out).is_ok(), "a reflection binding needs no data type");
+    }
 }
 
 #[cfg(test)]
@@ -99,10 +161,17 @@ impl ReloadManifest {
         let documents = value["documents"]
             .as_array()
             .ok_or_else(|| ReloadError::Failed("Missing documents".into()))?;
+        let compile_bindings = match value.get("compile_bindings") {
+            None => true,
+            Some(value) => value
+                .as_bool()
+                .ok_or_else(|| ReloadError::Failed("compile_bindings must be a boolean".into()))?,
+        };
         let mut manifest = Self {
             files: BTreeMap::new(),
             sources: BTreeMap::new(),
             dependencies: BTreeMap::new(),
+            compile_bindings,
             contracts: None,
         };
         if let Some(contracts) = value.get("type_contracts") {
@@ -150,6 +219,19 @@ impl ReloadManifest {
             manifest.dependencies.insert(uri, includes);
         }
         Ok(manifest)
+    }
+    /// The configuration of the run-time loader for the documents of the manifest: `{Binding}`
+    /// compiles as the build compiled it ([`compile_bindings`](Self::compile_bindings)), so a
+    /// reloaded document binds the way the built application does (#604). `assembly` is the
+    /// assembly of the documents, the local assembly of the loader.
+    pub fn configuration(
+        &self,
+        assembly: Option<&'static ferroui_base::metadata::MarkupAssembly>,
+    ) -> ferroui_markup_xaml::RuntimeXamlLoaderConfiguration {
+        let mut configuration = ferroui_markup_xaml::RuntimeXamlLoaderConfiguration::new();
+        configuration.local_assembly = assembly;
+        configuration.use_compiled_bindings_by_default = self.compile_bindings;
+        configuration
     }
     pub fn session(&self) -> Result<HotReloadSession, ReloadError> {
         let mut session = HotReloadSession::new();

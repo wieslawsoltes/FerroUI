@@ -38,7 +38,7 @@
   </UserControl.Styles>
   <ListBox ItemsSource="{Binding Items}" Classes="EditableDragList">
     <ListBox.ItemTemplate>
-      <DataTemplate DataType="vm:DragItemViewModel" x:CompileBindings="False">
+      <DataTemplate DataType="vm:DragItemViewModel">
         <Panel Background="Transparent">
           <Interaction.Behaviors>
             <InlineEditBehavior DisplayControl="DisplayPanel" EditControl="EditBox" />

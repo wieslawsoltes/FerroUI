@@ -66,6 +66,19 @@ impl MarkupAssembly {
         self.metadata.iter().find(|(k, _)| *k == key).map(|(_, value)| *value)
     }
 
+    /// Whether `{Binding}` in markup of the assembly is a compiled binding by default, as the
+    /// build compiles it: the entry [`USE_COMPILED_BINDINGS_BY_DEFAULT`](Self::USE_COMPILED_BINDINGS_BY_DEFAULT)
+    /// (`true` for `"True"` in any casing, with surrounding white space, and `false` for any
+    /// other value), and compiled bindings, the default of the build (#603), without the entry.
+    ///
+    /// Not from upstream (#604): upstream reads `false` without the entry, which its build
+    /// always writes. The previewer of the designer and `RuntimeXamlLoaderConfiguration::for_assembly`
+    /// read this, so a previewed or reloaded document binds the way the built application does.
+    pub fn compiles_bindings_by_default(&self) -> bool {
+        self.metadata_value(Self::USE_COMPILED_BINDINGS_BY_DEFAULT)
+            .is_none_or(|value| value.trim().eq_ignore_ascii_case("true"))
+    }
+
     /// Adds an assembly to the process-wide table of assemblies.
     /// Registering an assembly again does nothing.
     ///
@@ -124,4 +137,27 @@ impl MarkupAssembly {
 fn assemblies() -> &'static RwLock<Vec<&'static MarkupAssembly>> {
     static ASSEMBLIES: OnceLock<RwLock<Vec<&'static MarkupAssembly>>> = OnceLock::new();
     ASSEMBLIES.get_or_init(Default::default)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// An assembly with `metadata`.
+    const fn assembly(metadata: &'static [(&'static str, &'static str)]) -> MarkupAssembly {
+        MarkupAssembly { name: "Tests.Bindings", crate_name: "tests_bindings", xmlns_definitions: &[], xmlns_prefixes: &[], metadata }
+    }
+
+    /// Not from upstream (#604): an assembly compiles its bindings unless its metadata says
+    /// otherwise, as the build does.
+    #[test]
+    fn bindings_compile_by_default_unless_the_metadata_says_otherwise() {
+        assert!(assembly(&[]).compiles_bindings_by_default());
+        assert!(assembly(&[("Other", "False")]).compiles_bindings_by_default());
+        assert!(assembly(&[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "True")]).compiles_bindings_by_default());
+        assert!(assembly(&[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, " true ")]).compiles_bindings_by_default());
+        assert!(!assembly(&[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "False")]).compiles_bindings_by_default());
+        // A value that is not a boolean is `false`, as `bool.TryParse(..) && value` reads it.
+        assert!(!assembly(&[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "yes")]).compiles_bindings_by_default());
+    }
 }

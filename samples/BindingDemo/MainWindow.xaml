@@ -80,6 +80,9 @@
           <TextBlock FontSize="16" Text="Multiple"/>
           <ListBox ItemsSource="{Binding Items}" SelectionMode="Multiple" Selection="{Binding Selection}"/>
         </StackPanel>
+        <!-- A reflection binding, as upstream: the selection reaches markup as the contract
+             ISelectionModel, whose markup metadata declares no member, so a compiled path cannot
+             read SelectedItems or index it (GAPS.md, B002). -->
         <ContentControl Content="{ReflectionBinding Selection.SelectedItems[0]}">
           <ContentControl.DataTemplates>
             <DataTemplate x:DataType="{x:Type vm:MainWindowViewModel+TestItem, x:TypeArguments=x:String}">

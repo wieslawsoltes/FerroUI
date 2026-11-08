@@ -12,7 +12,6 @@ use ferroui_hot_reload::{ComponentReloadTarget, ReloadManifest, ReloadTarget};
 mod development;
 mod refresh;
 mod view_builder;
-use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -174,7 +173,8 @@ impl ApplicationImpl for App {
                 &host,
                 uri.clone(),
                 source.clone(),
-                RuntimeXamlLoaderConfiguration::default(),
+                // The documents bind as the build compiles bindings (#604).
+                manifest.configuration(None),
             )
             .with_refresh(references),
             uri: uri.clone(),

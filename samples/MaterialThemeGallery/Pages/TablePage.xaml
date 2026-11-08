@@ -1,28 +1,31 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pages="using:MaterialThemeGallery.Pages"
              x:Class="MaterialThemeGallery.Pages.TablePage">
   <!-- TableView with its column headers, rows and cells, a selected row, and the same table
        disabled. The rows are set by the class of the page (table_page.rs): the rows of the
        native counterpart, TablePage.winui.xml, which is a ListView under a row of headers
-       (TableView of WinUI is not in the Windows App SDK release the comparison runs with). -->
+       (TableView of WinUI is not in the Windows App SDK release the comparison runs with). The
+       columns compile their bindings against the row type, TableRow, with x:DataType: the items
+       are set from code, so the type cannot be inferred from an ItemsSource binding. -->
   <StackPanel Margin="24" Spacing="12">
     <TextBlock Text="Table view" FontSize="28" FontWeight="SemiBold" />
 
     <TextBlock Text="TableView" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
     <TableView x:Name="Table" Width="560" Height="260" HorizontalAlignment="Left">
       <TableView.Columns>
-        <TableViewColumn Header="Name" Binding="{ReflectionBinding Name}" Width="2*" />
-        <TableViewColumn Header="Kind" Binding="{ReflectionBinding Kind}" Width="*" />
-        <TableViewColumn Header="Size" Binding="{ReflectionBinding Size}" Width="*" />
+        <TableViewColumn Header="Name" x:DataType="pages:TableRow" Binding="{Binding Name}" Width="2*" />
+        <TableViewColumn Header="Kind" x:DataType="pages:TableRow" Binding="{Binding Kind}" Width="*" />
+        <TableViewColumn Header="Size" x:DataType="pages:TableRow" Binding="{Binding Size}" Width="*" />
       </TableView.Columns>
     </TableView>
 
     <TextBlock Text="Disabled TableView" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
     <TableView x:Name="DisabledTable" Width="560" Height="180" HorizontalAlignment="Left" IsEnabled="False">
       <TableView.Columns>
-        <TableViewColumn Header="Name" Binding="{ReflectionBinding Name}" Width="2*" />
-        <TableViewColumn Header="Kind" Binding="{ReflectionBinding Kind}" Width="*" />
-        <TableViewColumn Header="Size" Binding="{ReflectionBinding Size}" Width="*" />
+        <TableViewColumn Header="Name" x:DataType="pages:TableRow" Binding="{Binding Name}" Width="2*" />
+        <TableViewColumn Header="Kind" x:DataType="pages:TableRow" Binding="{Binding Kind}" Width="*" />
+        <TableViewColumn Header="Size" x:DataType="pages:TableRow" Binding="{Binding Size}" Width="*" />
       </TableView.Columns>
     </TableView>
   </StackPanel>

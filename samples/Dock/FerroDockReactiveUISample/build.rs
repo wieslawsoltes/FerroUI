@@ -57,8 +57,7 @@ fn main() {
         ("App.xaml", include_str!("App.xaml")),
     ];
     let mut build = ferroui_build::Build::from_env()
-        .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true);
+        .type_system(ferroui_build::TypeSystem::Model);
     for (module, path) in [
         ("compiled_dashboard_view", "views/views/DashboardView.xaml"),
         ("compiled_home_view", "views/views/HomeView.xaml"),

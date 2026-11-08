@@ -79,8 +79,7 @@ fn main() {
         ),
     ];
     let mut build = ferroui_build::Build::from_env()
-        .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true);
+        .type_system(ferroui_build::TypeSystem::Model);
     for (module, path) in [
         ("compiled_root_dock_debug", "controls/RootDockDebug.xaml"),
         (

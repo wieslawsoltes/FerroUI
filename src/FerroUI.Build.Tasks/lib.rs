@@ -174,7 +174,9 @@
 //! (`x:CompileBindings`), for every crate (#603, docs/xaml-themes.md section 5). A crate opts out
 //! with `[package.metadata.ferroui] compile-bindings = false` in its manifest, or with
 //! [`Build::default_compile_bindings`]`(false)` in its build script; the manifest key, when it is
-//! there, wins over the call.
+//! there, wins over the call. The hot-reload manifest ([`Build::hot_reload_manifest`]) records the
+//! setting (`"compile_bindings"`), so a reloaded document compiles its bindings as the build did
+//! (#604).
 //!
 //! # The GLSL of the runtime shader effects
 //!
@@ -767,7 +769,7 @@ impl Build {
                 #[cfg(not(feature = "runtime-host"))]
                 { ModelTypeSystem::new(manifest_models) as Rc<dyn IXamlTypeSystem> }
             });
-            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name, system) {
+            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name, system, default_compile_bindings) {
                 Ok(path) => lines.push(format!("cargo::rustc-env=FERROUI_HOT_RELOAD_MANIFEST={}", path.display())),
                 Err(error) => errors.push(error),
             }

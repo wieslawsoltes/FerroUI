@@ -168,11 +168,9 @@ mod run_time {
     }
 
     fn configuration() -> RuntimeXamlLoaderConfiguration {
-        let mut configuration = RuntimeXamlLoaderConfiguration::new();
-        configuration.local_assembly = Some(&ASSEMBLY);
-        // The upstream sample is built with compiled bindings as the default of its documents.
-        configuration.use_compiled_bindings_by_default = true;
-        configuration
+        // The documents bind as the build compiles them: compiled bindings, unless the assembly
+        // says otherwise (#604).
+        RuntimeXamlLoaderConfiguration::for_assembly(&ASSEMBLY)
     }
 
     pub(crate) fn embedded_text(path: &str) -> Result<&'static str, XamlLoadError> {
