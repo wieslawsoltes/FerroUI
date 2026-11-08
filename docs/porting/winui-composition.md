@@ -22,7 +22,7 @@ Tracking issue: [#303](https://github.com/wieslawsoltes/FerroUI/issues/303). Pul
   with UI-thread animations. The WinUI port replaces its engine with the composition engine of
   WinUI and keeps its public members (section 5.1).
 - **microsoft-ui-xaml**, branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`
-  (local checkout `/Users/wieslawsoltes/GitHub/microsoft-ui-xaml`, read-only, MIT). The XAML-side
+  (local checkout `../microsoft-ui-xaml`, read-only, MIT). The XAML-side
   code is ported from it:
   - `dxaml/xcp/components/animation/ConnectedAnimation.cpp`, `ConnectedAnimationService.cpp` and
     their headers: the state machine, the rectangles, the snapshot brushes and the sprite

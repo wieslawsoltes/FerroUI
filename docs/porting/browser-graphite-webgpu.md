@@ -153,7 +153,7 @@ That last constraint fits the render worker as it is: the worker already owns th
 
 ### Upstream
 
-`/Users/wieslawsoltes/GitHub/Avalonia` at `16572aeff1` (2026-10-07): `src/Browser/Avalonia.Browser/BrowserAppBuilder.cs:13-30` has `Software2D`, `WebGL1`, `WebGL2` and the default order WebGL2, WebGL1, Software2D; the script enum is the same three; a search of `src/Browser` for `webgpu` and `wgpu` finds nothing. **[R]** A WebGPU mode is therefore an addition of this port: a row in `DEVIATIONS.md` (the mode, its number, the asynchronous creation of the target, the loss handling), and `browser-platform.md:102-106` and item 11 of its list (which say the browser needs Ganesh on GL and that Graphite must not leak above `FerroUI.Skia`) stay true and gain a second case.
+`../Avalonia` at `16572aeff1` (2026-10-07): `src/Browser/Avalonia.Browser/BrowserAppBuilder.cs:13-30` has `Software2D`, `WebGL1`, `WebGL2` and the default order WebGL2, WebGL1, Software2D; the script enum is the same three; a search of `src/Browser` for `webgpu` and `wgpu` finds nothing. **[R]** A WebGPU mode is therefore an addition of this port: a row in `DEVIATIONS.md` (the mode, its number, the asynchronous creation of the target, the loss handling), and `browser-platform.md:102-106` and item 11 of its list (which say the browser needs Ganesh on GL and that Graphite must not leak above `FerroUI.Skia`) stay true and gain a second case.
 
 ## 5. Costs and risks
 

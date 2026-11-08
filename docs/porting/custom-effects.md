@@ -42,7 +42,7 @@ the reference, not the target.
 
 ## 2. How WinUI's effect factory works
 
-WinUI (`/Users/wieslawsoltes/GitHub/microsoft-ui-xaml`) separates the description of an effect
+WinUI (`../microsoft-ui-xaml`) separates the description of an effect
 from its compiled program and from the per-element values:
 
 - **The description** is a graph of Direct2D effects known by GUID, each a COM object implementing

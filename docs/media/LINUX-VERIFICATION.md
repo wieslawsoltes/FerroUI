@@ -1,8 +1,8 @@
 # Linux native verification — 2026-11-01
 
 Starting revision: `6aac17e56e81e3ecd2b14113fc02ea0979be0f59` from
-`origin/codex/portable-media-framework`. Work is isolated on
-`codex/portable-media-linux`. Native compilation is enabled throughout; the
+`origin/media/portable-media-framework`. Work is isolated on
+`media/portable-media-linux`. Native compilation is enabled throughout; the
 binding-check-only switch is unset.
 
 ## Environment
@@ -53,7 +53,7 @@ compiler, libclang, CMake and Ninja. No codec is silently downloaded by the app.
 From the worktree root in Ubuntu:
 
 ```sh
-export CARGO_TARGET_DIR=/home/danw/build-cache/ferroui-portable-media
+export CARGO_TARGET_DIR=~/build-cache/ferroui-portable-media
 export CARGO_BUILD_JOBS=4 CARGO_PROFILE_DEV_DEBUG=0
 cargo build --locked -p portable-media
 cargo test --locked -p ferroui-media-linux --features controls,native-frame-tests --lib -- --nocapture
@@ -70,7 +70,7 @@ When launching from PowerShell use `wsl -d Ubuntu --exec bash -lc '…'`, so the
 requested Bash owns expansion and exit-status reporting.
 
 Raw logs are outside Git, beside this worktree in
-`C:\Users\Dan\.codex\worktrees\portable-media-linux\`: `linux-build-final.log`,
+`<checkout>\`: `linux-build-final.log`,
 `linux-native-frames-final.log`, `linux-media-contracts.log`,
 `linux-playback-d3d12.log`, `linux-software-rejection.log`,
 `linux-camera-discovery.log` and `linux-environment.log`.

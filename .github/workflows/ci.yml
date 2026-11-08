@@ -104,6 +104,8 @@ jobs:
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      - name: No private references (home directories, local tools, other hosts, tokens)
+        run: python3 scripts/conventions/private-references.py
       # The types and mechanisms of the API become idiomatic Rust and std, under the .NET names of
       # the control API (docs/idiomatic-rust.md, #423): a new declaration of a .NET-shaped
       # infrastructure type (a `...Exception`, or a port of a `System.*` type such as `TimeSpan`,

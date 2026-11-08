@@ -10,7 +10,7 @@ platform draws it, and every place where the result differs from WinUI. It conti
 ## 1. Sources
 
 - **microsoft-ui-xaml**, branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`
-  (local checkout `/Users/wieslawsoltes/GitHub/microsoft-ui-xaml`, read-only, MIT):
+  (local checkout `../microsoft-ui-xaml`, read-only, MIT):
   - `controls/dev/Materials/Acrylic/AcrylicBrush.{idl,h,cpp}`: the members, the effective tint and
     luminosity colours (`GetEffectiveTintColor`, `GetTintOpacityModifier`, `GetLuminosityColor`), the
     effect graph (the "shadow-friendly luminosity-based recipe"), the fallback rules and the

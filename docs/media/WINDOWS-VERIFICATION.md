@@ -1,8 +1,8 @@
 # Windows native verification — 2026-11-01
 
 Starting revision: `6aac17e56e81e3ecd2b14113fc02ea0979be0f59` from
-`origin/codex/portable-media-framework`. Platform work is isolated on
-`codex/portable-media-windows`. All 19 existing media-branch commits already use
+`origin/media/portable-media-framework`. Platform work is isolated on
+`media/portable-media-windows`. All 19 existing media-branch commits already use
 `Wiesław Šoltés <wieslawsoltes@users.noreply.github.com>` as committer; no history
 rewrite was needed. Authors remain unchanged.
 
@@ -72,7 +72,7 @@ not an audit of native MFT/codec/driver internals or proof of hardware decoding.
 From the worktree root in PowerShell:
 
 ```powershell
-$env:PATH = "C:\Users\Dan\.cargo\bin;" + $env:PATH
+$env:PATH = "$env:USERPROFILE\.cargo\bin;" + $env:PATH
 $env:CARGO_TARGET_DIR = 'F:\build-cache\ferroui-portable-media-windows'
 cargo build --locked -p portable-media --target x86_64-pc-windows-msvc
 cargo test --locked -p ferroui-media-windows --features native-frame-tests --target x86_64-pc-windows-msvc --lib -- --nocapture
@@ -85,7 +85,7 @@ $app = Join-Path $env:CARGO_TARGET_DIR 'x86_64-pc-windows-msvc\debug\portable-me
 ```
 
 Raw logs are outside Git beside the Windows worktree in
-`C:\Users\Dan\.codex\worktrees\native-desktop-platforms\`:
+`<checkout>\`:
 `windows-build-final.log`, `windows-native-frames-final.log`,
 `windows-media-contracts.log`, `windows-final-resource.log`,
 `windows-final-renderer-recovery.log`, `windows-final-ended-restart.log`,
@@ -165,7 +165,7 @@ cargo test --locked -p ferroui-media-windows --features controls,native-frame-te
 ```
 
 Logs for this follow-up are beside the combined worktree in
-`C:\Users\Dan\.codex\worktrees\portable-media-linux\`:
+`<checkout>\`:
 `windows-synthetic-build-final.log`, `windows-synthetic-camera.log`,
 `windows-synthetic-camera-repeat.log`, `windows-synthetic-camera-repeat-2.log`,
 `windows-synthetic-native-tests.log`,
@@ -190,7 +190,7 @@ four-colour pattern. No OS device is registered.
 
 ```powershell
 cargo build --locked -p portable-media --features synthetic-camera --target x86_64-pc-windows-msvc
-$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\camera-recovery-evidence'
+$env:FERROUI_MEDIA_EVIDENCE = '<checkout>\camera-recovery-evidence'
 & $app --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer
 cargo test --locked -p ferroui-media-camera-controls --target x86_64-pc-windows-msvc --lib
 ```
@@ -296,7 +296,7 @@ copies remain zero; native RGB conversion and explicit diagnostics are counted.
 cargo build --locked -p portable-media --features synthetic-camera --target x86_64-pc-windows-msvc
 node tests/media/make-windows-geometry-fixtures.mjs ..\windows-geometry-variants
 $app = 'F:\build-cache\ferroui-portable-media-windows\x86_64-pc-windows-msvc\debug\portable-media.exe'
-$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\video-geometry-evidence'
+$env:FERROUI_MEDIA_EVIDENCE = '<checkout>\video-geometry-evidence'
 foreach ($crop in @($false, $true)) {
     foreach ($orientation in 0..7) {
         $suffix = if ($crop) { '-crop' } else { '' }
@@ -348,7 +348,7 @@ establish completion or release quarantine. See Microsoft's
 and [Source Reader transform configuration](https://learn.microsoft.com/en-us/windows/win32/api/mfreadwrite/nf-mfreadwrite-imfsourcereaderex-gettransformforstream).
 
 ```powershell
-$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\camera-stress-evidence'
+$env:FERROUI_MEDIA_EVIDENCE = '<checkout>\camera-stress-evidence'
 & $app --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer --camera-stress-cycles=120
 ```
 
@@ -499,7 +499,7 @@ mixing old pass markers into a new run. The runner restores environment settings
 Optional arguments include `-MemoryCycles`, `-RaceCycles`, `-StressCycles`,
 `-EndedRestartRuns` (five by default),
 `-Section Memory`, `-Section HarnessSelfTest`, `-OutputDirectory`, `-Node`, and
-`-IncludeWsl -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media`.
+`-IncludeWsl -WslTargetDirectory ~/build-cache/ferroui-portable-media`.
 WSL inclusion builds the native Linux sample and runs shared video-control
 contracts; it does not claim DMA-BUF pixels.
 Use the WSL cache path appropriate to the host. The default workload counts are
@@ -537,7 +537,7 @@ partial-run successes do not turn the original failed report into a pass.
 ```powershell
 ./tests/media/verify-windows.ps1 -MemoryCycles 6 -StressCycles 6 -RaceCycles 3 `
   -EndedRestartRuns 5 -IncludeWsl `
-  -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media `
+  -WslTargetDirectory ~/build-cache/ferroui-portable-media `
   -TargetDirectory F:\build-cache\ferroui-portable-media-windows `
   -OutputDirectory '..\windows verification final'
 ```
@@ -676,7 +676,7 @@ framework CPU preview attempts/bytes remain zero.
 ```powershell
 ./tests/media/verify-windows.ps1 -MemoryCycles 6 -StressCycles 20 -RaceCycles 3 `
   -EndedRestartRuns 5 -IncludeWsl `
-  -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media `
+  -WslTargetDirectory ~/build-cache/ferroui-portable-media `
   -TargetDirectory F:\build-cache\ferroui-portable-media-windows `
   -OutputDirectory '../windows verification native memory final'
 ```

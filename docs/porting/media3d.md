@@ -46,7 +46,7 @@ them.
 
 ### 1.2 ProGPU
 
-ProGPU (`/Users/wieslawsoltes/GitHub/ProGPU`, read on `origin/main` at `23f686151`) has two 3D
+ProGPU (`../ProGPU`, read on `origin/main` at `23f686151`) has two 3D
 implementations. It is a good source for the GPU half (lighting, material and video sampling,
 retained uploads, pipelines created on demand) and a weak source for the API half: its managed
 `Viewport3D` is a CAD-oriented subset of WPF.
