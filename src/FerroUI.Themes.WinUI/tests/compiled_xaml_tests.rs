@@ -223,7 +223,9 @@ fn the_classes_of_reflection_paths_are_reached_only_through_their_units() {
         .filter(|(_, (_, text))| text.contains("rt::XmlNamespaceTable") && text.contains("CastTarget::Class("))
         .map(|(name, _)| name.as_str())
         .collect();
-    assert!(!class_tables.is_empty(), "the theme has reflection-binding paths that name classes");
+    // Since #603 the bindings of the theme are compiled: their paths name their classes as typed
+    // path elements, and a reflection binding is only an explicit `{ReflectionBinding}`, so the
+    // theme may have no such table at all. The check below holds for the tables there are.
     let mut reached: BTreeSet<String> = BTreeSet::new();
     let mut pending: Vec<String> = items.iter().filter(|(_, (public, _))| *public).map(|(name, _)| name.clone()).collect();
     pending.retain(|name| !selective(name));
