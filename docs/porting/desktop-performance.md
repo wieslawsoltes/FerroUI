@@ -622,3 +622,17 @@ checks a bucket again when the readback revision changed. Checking a bucket took
 whole collection, so a hit test over a collection of thousands of children was quadratic (97 % of
 the UI thread on the still wall with the pointer in the window). A bucket now reads its own 32
 children by index.
+
+### 9.3 A store keeps the results of its inherited lookups
+
+A read of an inherited property the object does not hold walks its inheritance ancestors to the
+nearest one that holds it, as upstream does. A layout pass reads inherited properties about
+400,000 times a frame in the gauntlet (`UseLayoutRounding`, `FlowDirection` and the text
+properties, nearly all of them held by no ancestor), each walk two to three ancestors long. A store
+now keeps what each lookup found, or that it found nothing, tagged with the thread's inheritance
+generation; the generation changes whenever the holder of an inherited value can change (an
+inheriting property's effective value added to or removed from any store, an inheritance parent or
+ancestor changed). A change of the value itself needs no new lookup: the store keeps the holder's
+effective value, which holds the current value. Tests: `ferro_object_tests_inheritance.rs`, the
+last two. Local gate (section 8.1), three rounds: gauntlet UI thread 44.90 to 43.46 ms a frame
+(-3.2 %), still wall UI thread -5.9 %.
