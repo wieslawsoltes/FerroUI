@@ -162,6 +162,13 @@ impl Geometry {
         Ok(StreamGeometry::parse(s)?.upcast())
     }
 
+    /// Creates a geometry from path data the compiler of the markup parsed
+    /// ([`PathCommand::record`](crate::media::PathCommand::record)): the geometry
+    /// [`parse`](Self::parse) makes of the same text (#603).
+    pub fn from_commands(commands: &[crate::media::PathCommand]) -> Ref<Geometry> {
+        StreamGeometry::from_commands(commands).upcast()
+    }
+
     /// Exports the backend's actual fill and stroke curves, including this
     /// geometry's transform, without flattening Beziers into line segments.
     /// Returns `None` when the active backend cannot expose its path data.

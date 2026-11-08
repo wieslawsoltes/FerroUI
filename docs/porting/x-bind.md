@@ -692,7 +692,7 @@ deviations in sections 3.9 to 3.13.
 | `{Binding #name.Text}`, `{Binding Text, ElementName=name}` | `{x:Bind name.Text}`: a first step that is an `x:Name` of the document is the element |
 | The default mode is the target property's (often `OneWay`, `TwoWay` for editable properties) | `OneTime`, unless `Mode` or an `x:DefaultBindMode` around it says otherwise |
 | Values follow the source from the start | The bindings of a root read when they are initialized (on attach), and `OneTime` again on `Update` |
-| `x:CompileBindings` and `x:DataType` choose compiled or reflection paths | Always compiled; a member that does not resolve is an error |
+| `x:CompileBindings` and `x:DataType` choose compiled or reflection paths (compiled by default in every crate since #603; `compile-bindings = false` in `[package.metadata.ferroui]` turns the default off) | Always compiled; a member that does not resolve is an error |
 | `$parent`, `$self`, `#name`, `!`, `^` | Not x:Bind syntax (an error); WinUI's grammar instead: casts, indexers, `path.(Owner.Prop)`, static `ns:Type.Member`, functions and `BindBack` |
 | `Converter`, `ConverterParameter`, `FallbackValue`, `TargetNullValue`, `UpdateSourceTrigger` | The same names; `ConverterLanguage` instead of `ConverterCulture`; `UpdateSourceTrigger` needs `TwoWay`, `Explicit` is an error; `TextBox.Text` writes back on `LostFocus` by default |
 | A command property for a click (`Command="{Binding Save}"`) | Also an event bound to a method: `Click="{x:Bind Save}"` |

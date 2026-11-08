@@ -2259,7 +2259,7 @@ fn main() {
 
 The three free functions of section 5 (`compile_xaml()`, `embed_assets()`, `export_metadata()`) are thin wrappers that run one step with defaults. A framework crate without XAML calls only `export_metadata()`.
 
-`[package.metadata.ferroui]` keys: `assembly` (assembly name, default: package name in PascalCase), `xaml-root`, `assets`, `compile-bindings-default`, `create-source-info`, `warnings-as-errors`, `no-warn` (`XamlCompilerDiagnosticsFilter` port), `links-name`.
+`[package.metadata.ferroui]` keys: `assembly` (assembly name, default: package name in PascalCase), `xaml-root`, `assets`, `compile-bindings` (compiled bindings are the default; `false` turns them off for the crate, #603), `create-source-info`, `warnings-as-errors`, `no-warn` (`XamlCompilerDiagnosticsFilter` port), `links-name`.
 
 #### 9.6.2 Inputs, outputs, `OUT_DIR` layout
 

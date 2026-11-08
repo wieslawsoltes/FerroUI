@@ -1253,6 +1253,8 @@ fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
 /// (`compile-bindings`), else what its build script states ([`Build::default_compile_bindings`]),
 /// else compiled bindings, the default.
 fn compile_bindings_by_default(manifest: Option<bool>, build_script: Option<bool>) -> bool {
+    // Deviation (DEVIATIONS.md, Build integration of markup): upstream's build task compiles
+    // reflection bindings unless the project sets the default; compiled bindings are the default.
     manifest.or(build_script).unwrap_or(true)
 }
 

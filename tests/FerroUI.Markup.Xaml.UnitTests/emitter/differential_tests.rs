@@ -130,6 +130,33 @@ fn a_resolvable_binding_path_emits_no_clr_property_info() {
     assert!(reflection.contains("rt::clr_property_info("), "{reflection}");
 }
 
+/// Not from upstream (#603): path data is parsed when the markup is compiled. The geometry is
+/// built from a constant table of the commands the parser records, so the text is not parsed
+/// when the document is loaded; text the parser refuses is still parsed at load, which reports
+/// the error as the load error it is.
+#[test]
+fn path_data_is_parsed_when_the_markup_is_compiled() {
+    let _app = xaml_test_base();
+    let emitted = |data: &str| {
+        let xaml = format!("<Path xmlns='https://github.com/ferroui' Data='{data}'/>");
+        let document = ("path_data.xaml", xaml.as_str());
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+        generated.source
+    };
+    let compiled = emitted("F1 M 0,0 L 10,10 A 5,5 0 1 0 20,0 Z");
+    assert!(compiled.contains("const COMMANDS: &[::ferroui_base::media::PathCommand] = &["), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 10.0_f64), true)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::SweepDirection::CounterClockwise"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::EndFigure(true)"), "{compiled}");
+    assert!(compiled.contains("::from_commands(COMMANDS)"), "{compiled}");
+    assert!(!compiled.contains("__markup_parse"), "{compiled}");
+    let refused = emitted("M 0,0 X 10");
+    assert!(refused.contains("Geometry::__markup_parse("), "{refused}");
+}
+
 #[test]
 fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     let _app = xaml_test_base();

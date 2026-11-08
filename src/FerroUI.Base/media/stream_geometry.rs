@@ -1,4 +1,4 @@
-use crate::media::{FillRule, Geometry, GeometryImpl, PathMarkupParser, StreamGeometryContext, SweepDirection};
+use crate::media::{FillRule, Geometry, GeometryImpl, PathCommand, PathMarkupParser, StreamGeometryContext, SweepDirection};
 use crate::platform::{self, IGeometryContext, IGeometryImpl, IStreamGeometryBuilder};
 use crate::utilities::FormatError;
 use crate::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Ref, Size};
@@ -77,6 +77,17 @@ impl StreamGeometry {
         *stream_geometry.impl_.borrow_mut() = Some(builder.to_geometry());
 
         Ok(stream_geometry)
+    }
+
+    /// Creates a stream geometry from path data the compiler of the markup parsed
+    /// ([`PathCommand::record`]): the geometry [`parse`](Self::parse) makes of the same text,
+    /// without parsing it when the document is loaded (#603).
+    pub fn from_commands(commands: &[PathCommand]) -> Ref<StreamGeometry> {
+        let stream_geometry = StreamGeometry::new();
+        let mut builder = Self::create_builder(None);
+        PathCommand::replay(commands, &mut *builder);
+        *stream_geometry.impl_.borrow_mut() = Some(builder.to_geometry());
+        stream_geometry
     }
 
     /// Opens the geometry to start defining it.
