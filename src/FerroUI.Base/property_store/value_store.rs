@@ -571,16 +571,8 @@ impl ValueStore {
     }
 
     pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
-        let effective = self.find_effective_value(property)?;
+        let effective = self.get_effective_value(property)?;
         cast_effective_value::<T>(&*effective).try_get_base_value()
-    }
-
-    /// [`get_effective_value`](Self::get_effective_value) for the typed reads
-    /// that are not on the path of every frame: one lookup compiled once
-    /// instead of in every value type (#576).
-    #[inline(never)]
-    fn find_effective_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
-        self.get_effective_value(property)
     }
 
     /// Finds the effective value of an inherited property on the nearest

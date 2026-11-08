@@ -693,11 +693,30 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         unsafe { downcast_metadata(self.core.default_metadata.clone()) }
     }
 
-    #[inline]
+    /// The metadata for `type_`. Typed, as before the untyped core: the
+    /// lookup runs when an effective value is made (the first write of a
+    /// property on an object), so it stays a direct, typed path; only the
+    /// cache miss of a property with several registrations is shared.
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
+        let core = &self.core;
+        let mut inner = core.inner.borrow_mut();
+        let value: &Rc<dyn ErasedMetadata> = match &mut *inner {
+            MetadataEntries::Single(Some((host, value))) => {
+                if Rc::ptr_eq(value, &core.default_metadata) || host.is_assignable_from(type_) {
+                    &*value
+                } else {
+                    &core.default_metadata
+                }
+            }
+            MetadataEntries::Single(None) => &core.default_metadata,
+            MetadataEntries::Multiple(table) => {
+                let slot = table.hosts.resolve(type_);
+                table.values.get(slot).unwrap_or(&core.default_metadata)
+            }
+        };
         // SAFETY: every value of the core is an `M` (the constructors and
-        // `override_metadata`).
-        unsafe { downcast_metadata(self.core.get(type_)) }
+        // `override_metadata`); the clone keeps the count of the original.
+        unsafe { downcast_metadata(value.clone()) }
     }
 
     pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
@@ -716,7 +735,8 @@ impl<M: PropertyMetadata> MetadataTable<M> {
 
 impl MetadataTableCore {
     /// The metadata for `type_`: the registration of its nearest class, else
-    /// the default metadata.
+    /// the default metadata. The untyped lookup of the routes (metadata,
+    /// data validation); the typed one is [`MetadataTable::get`].
     pub(crate) fn get(&self, type_: &'static TypeInfo) -> Rc<dyn ErasedMetadata> {
         let mut inner = self.inner.borrow_mut();
         let table = match &mut *inner {

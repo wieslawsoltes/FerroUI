@@ -753,11 +753,13 @@ value, the inherited value, else the default).
 
 The metadata table is a typed facade (`MetadataTable<M>`) over one untyped table
 (`MetadataTableCore`) whose values are `Rc<dyn ErasedMetadata>`, the metadata types viewed through
-the metadata common to all property kinds. The lookup with its cache, the registration of an
-override and unregistration are compiled once; construction, the merge of an override and the cast
-of a result stay typed. The routes read the untyped table directly.
+the metadata common to all property kinds. The registration of an override, unregistration and the
+untyped lookup of the routes are compiled once. The typed lookup (`MetadataTable<M>::get`) stays a
+typed function over the same storage, as construction and the merge of an override do: it runs when
+an effective value is made, the first write of a property on an object.
 
-The typed read of a base value looks up the effective value through one non-generic function.
+The route that makes an effective value is held in the routes themselves, so it is one indirect call,
+as the method of the former trait object was.
 
 Left generic for speed, because they are on the path of every frame and an indirect call per copy or
 comparison would cost more than the code it saves:
@@ -769,7 +771,9 @@ comparison would cost more than the code it saves:
   validated writes and 6 to 15 % slower binding delivery, observers and style activation, and is not
   kept;
 - the write of a value with a priority other than the local value (`ValueStore::set_value`), with
-  its entry and its application;
+  its entry and its application, the typed lookup of the metadata and the typed read of a base value
+  (`ValueStore::get_base_value`). A second version shared those two lookups and measured 14 to 17 %
+  slower writes of a new object's property (`StyledPropertyBenchmarks.set_*_local_value`);
 - the typed read of a property (`ValueStore::get_value`): the found effective value and the default of
   a property that does not inherit are read inline, as before;
 - the typed entries and observers (`ImmediateValueEntry<T>`, `BindingEntry<T>`, the typed binding

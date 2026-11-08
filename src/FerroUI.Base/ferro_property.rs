@@ -387,7 +387,15 @@ pub(crate) struct PropertyRoutes {
     property: &'static FerroProperty,
     typed: &'static dyn Any,
     metadata: &'static MetadataTableCore,
+    // The route of the first write of a property on an object, held here so
+    // that it is one indirect call, as the method of the former trait object
+    // was, without a match on the kind.
+    create_effective_value: fn(&'static dyn Any, &FerroObject) -> Rc<dyn EffectiveValueDyn>,
     kind: RoutesKind,
+}
+
+fn no_effective_value(_: &'static dyn Any, _: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
+    panic!("direct properties have no effective value")
 }
 
 impl PropertyRoutes {
@@ -400,7 +408,13 @@ impl PropertyRoutes {
         metadata: &'static MetadataTableCore,
         routes: &'static StyledRoutes,
     ) -> Self {
-        Self { property, typed, metadata, kind: RoutesKind::Styled(routes) }
+        Self {
+            property,
+            typed,
+            metadata,
+            create_effective_value: routes.create_effective_value,
+            kind: RoutesKind::Styled(routes),
+        }
     }
 
     /// The routes of a direct property: `property` is the base of `typed`,
@@ -412,14 +426,12 @@ impl PropertyRoutes {
         metadata: &'static MetadataTableCore,
         routes: &'static DirectRoutes,
     ) -> Self {
-        Self { property, typed, metadata, kind: RoutesKind::Direct(routes) }
+        Self { property, typed, metadata, create_effective_value: no_effective_value, kind: RoutesKind::Direct(routes) }
     }
 
+    #[inline]
     pub(crate) fn create_effective_value(&self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
-        match self.kind {
-            RoutesKind::Styled(routes) => (routes.create_effective_value)(self.typed, o),
-            RoutesKind::Direct(_) => panic!("direct properties have no effective value"),
-        }
+        (self.create_effective_value)(self.typed, o)
     }
 
     pub(crate) fn route_clear_value(&self, o: &FerroObject) {
