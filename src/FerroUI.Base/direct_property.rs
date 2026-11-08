@@ -1,13 +1,11 @@
-use crate::data::{BindingPriority, BindingValue};
-use crate::ferro_property::{
-    convert_property_value, take_boxed_value, unpack_binding_value, FerroPropertyInit, PropertyRoutes,
-};
+use crate::data::BindingValue;
+use crate::ferro_property::{convert_property_value, take_boxed_value, DirectRoutes, FerroPropertyInit, PropertyRoutes};
 use crate::ferro_property_metadata::MetadataTable;
-use crate::property_store::{EffectiveValueDyn, IValueEntry};
+use crate::property_store::IValueEntry;
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
-    BoxedValue, ObjectType, DirectPropertyMetadata, DoNothingType, FerroObject, FerroProperty,
-    FerroPropertyMetadata, FerroPropertyRegistry, PropertyValue, TypeInfo, UnsetValueType,
+    BoxedValue, ObjectType, DirectPropertyMetadata, FerroObject, FerroProperty, FerroPropertyRegistry, PropertyValue,
+    TypeInfo, UnsetValueType,
 };
 use std::any::Any;
 use std::cell::OnceCell;
@@ -151,133 +149,92 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
         self.metadata.unregister(type_);
     }
 
-    #[track_caller]
-    fn invalid_value(&self) -> ! {
-        self.base.invalid_value_type()
+    /// Gives the base of the property its routes: the shared routes over
+    /// this property, its metadata and the typed operations of `T`.
+    fn install_routes(&'static self) {
+        self.base.set_routes(PropertyRoutes::direct(&self.base, self, self.metadata.core(), Self::ROUTES));
     }
 }
 
-impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
-    fn create_effective_value(&'static self, _o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
-        panic!("direct properties have no effective value");
+// The typed operations of the routes (`DirectRoutes`): what calls the
+// accessors. Everything else of a route is shared (`PropertyRoutes`).
+impl<T: PropertyValue> DirectPropertyBase<T> {
+    const ROUTES: &'static DirectRoutes = &DirectRoutes {
+        clear_value: Self::route_clear_value,
+        get_value: Self::route_get_value,
+        get_default_value: Self::route_get_default_value,
+        set_value: Self::route_set_value,
+        set_direct_value_unchecked: Self::route_set_direct_value_unchecked,
+        bind: Self::route_bind,
+        set_direct_binding_value: Self::route_set_direct_binding_value,
+    };
+
+    /// The property of a route.
+    #[inline]
+    fn of_routes(typed: &'static dyn Any) -> &'static Self {
+        debug_assert!(typed.is::<Self>());
+        // SAFETY: the routes of a direct property are made only by
+        // `install_routes`, with the property itself as their typed view, and
+        // a property holds the routes of its own value type.
+        unsafe { &*(typed as *const dyn Any as *const Self) }
     }
 
-    fn route_clear_value(&'static self, o: &FerroObject) {
-        o.clear_direct_value(self);
+    fn route_clear_value(typed: &'static dyn Any, o: &FerroObject) {
+        o.clear_direct_value(Self::of_routes(typed));
     }
 
-    fn route_coerce_default_value(&'static self, _o: &FerroObject) {
-        // Direct properties are not coerced.
+    fn route_get_value(typed: &'static dyn Any, o: &FerroObject) -> BoxedValue {
+        Rc::new(o.get_direct_value(Self::of_routes(typed)))
     }
 
-    fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
-        Rc::new(o.get_direct_value(self))
+    fn route_get_default_value(typed: &'static dyn Any, type_: &'static TypeInfo) -> BoxedValue {
+        Rc::new(Self::of_routes(typed).get_unset_value(type_))
     }
 
-    fn route_get_base_value(&'static self, o: &FerroObject) -> BoxedValue {
-        Rc::new(o.get_direct_value(self))
+    fn route_set_value(typed: &'static dyn Any, o: &FerroObject, value: &dyn Any) {
+        let this = Self::of_routes(typed);
+        let value = match value.downcast_ref::<T>() {
+            Some(value) => value.clone(),
+            None => match convert_property_value::<T>(this, value) {
+                Some(value) => value,
+                None => this.base.invalid_value_type(),
+            },
+        };
+        o.set_direct_value(this, value);
     }
 
-    fn route_get_default_value(&'static self, type_: &'static TypeInfo) -> BoxedValue {
-        Rc::new(self.get_unset_value(type_))
-    }
-
-    fn route_set_value(
-        &'static self,
-        o: &FerroObject,
-        value: &dyn Any,
-        _priority: BindingPriority,
-    ) -> Option<Rc<dyn IDisposable>> {
-        let this = self;
-        if value.is::<UnsetValueType>() {
-            o.clear_direct_value(this);
-        } else if value.is::<DoNothingType>() {
-        } else if let Some(v) = value.downcast_ref::<T>() {
-            o.set_direct_value(this, v.clone());
-        } else if let Some(v) = convert_property_value::<T>(self, value) {
-            o.set_direct_value(this, v);
-        } else {
-            self.invalid_value();
-        }
-        None
-    }
-
-    fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
-        self.route_set_value(o, value, BindingPriority::LocalValue);
-    }
-
-    fn route_set_direct_value_unchecked(&'static self, o: &FerroObject, entry: &dyn IValueEntry) {
+    fn route_set_direct_value_unchecked(typed: &'static dyn Any, o: &FerroObject, entry: &dyn IValueEntry) {
+        let this = Self::of_routes(typed);
         let mut value: Option<T> = None;
         if entry.try_get_value(&mut value) {
             if let Some(value) = value {
-                o.set_direct_value_unchecked(self, BindingValue::new(value));
+                o.set_direct_value_unchecked(this, BindingValue::new(value));
             }
         } else if let Some(boxed) = entry.get_value_boxed() {
             // An untyped entry (a binding expression): the value is already
             // converted to the property type, or is a marker. Data validation
             // is reported separately by the expression's sink.
             if let Some(value) = boxed.downcast_ref::<T>() {
-                self.invoke_setter(o, BindingValue::new(value.clone()));
+                this.invoke_setter(o, BindingValue::new(value.clone()));
             } else if boxed.is::<UnsetValueType>() {
-                self.invoke_setter(o, BindingValue::new(self.get_unset_value_for(o)));
+                this.invoke_setter(o, BindingValue::new(this.get_unset_value_for(o)));
             }
         }
     }
 
     fn route_bind(
-        &'static self,
+        typed: &'static dyn Any,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
-        _priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
-        o.bind_direct_untyped(self, source)
+        o.bind_direct_untyped(Self::of_routes(typed), source)
     }
 
-    fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata {
-        let metadata = self.get_metadata(type_);
-        let base: &FerroPropertyMetadata = &metadata;
-        base.clone()
-    }
-
-    fn route_unregister(&'static self, type_: &'static TypeInfo) {
-        self.unregister(type_)
-    }
-
-    fn route_is_valid_value(&'static self, value: &dyn Any) -> bool {
-        value.is::<T>()
-    }
-
-    fn as_any(&'static self) -> &'static dyn Any {
-        self
-    }
-
-    fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool {
-        match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T>>()) {
-            (Some(value), Some(out)) => {
-                *out = Some(value.clone());
-                true
-            }
-            _ => false,
-        }
-    }
-
-    fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue> {
-        value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
-    }
-
-    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool> {
-        self.get_metadata_for(owner).enable_data_validation()
-    }
-
-    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
-        unpack_binding_value::<T>(value)
-    }
-
-    fn route_set_direct_binding_value(&'static self, o: &FerroObject, value: BindingValue<BoxedValue>) {
+    fn route_set_direct_binding_value(typed: &'static dyn Any, o: &FerroObject, value: BindingValue<BoxedValue>) {
         let kind = value.value_type();
         let (value, error) = value.into_value_and_error();
         let value = value.and_then(take_boxed_value::<T>);
-        o.set_direct_value_unchecked(self, BindingValue::from_notification_parts(kind, value, error));
+        o.set_direct_value_unchecked(Self::of_routes(typed), BindingValue::from_notification_parts(kind, value, error));
     }
 }
 
@@ -314,7 +271,7 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
     fn leak(property: Self) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(property));
         let _ = property.base.accessor.set(property);
-        property.base.base.set_routes(&property.base);
+        property.base.install_routes();
         property
     }
 

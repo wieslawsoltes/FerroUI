@@ -711,9 +711,22 @@ impl FerroObject {
     }
 
     /// Binds a property to an observable of untyped values.
+    #[inline]
     pub fn bind_untyped<T: PropertyValue>(
         &self,
         property: &'static StyledProperty<T>,
+        source: Rc<dyn IObservable<BoxedValue>>,
+        priority: BindingPriority,
+    ) -> Rc<dyn IDisposable> {
+        self.bind_boxed(property, source, priority)
+    }
+
+    /// [`bind_untyped`](Self::bind_untyped) of the base of a styled property:
+    /// the boxed source needs no typed observer or entry, so this is compiled
+    /// once, and the untyped routes of every styled property use it.
+    pub(crate) fn bind_boxed(
+        &self,
+        property: &'static FerroProperty,
         source: Rc<dyn IObservable<BoxedValue>>,
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {

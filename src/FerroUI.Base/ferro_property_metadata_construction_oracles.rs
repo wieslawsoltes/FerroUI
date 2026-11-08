@@ -10,14 +10,12 @@ static HOST: TypeInfo = TypeInfo::new("CoercionConstructionHost", None);
 
 impl<M: PropertyMetadata> MetadataTable<M> {
     // The original constructor, including the metadata owner and field order.
+    // The fields are those of the shared core (#576), in the original order.
     fn original_new_for_construction(host_type: &'static TypeInfo, mut metadata: M) -> Self {
         metadata.freeze();
         let metadata = Rc::new(metadata);
         let default_metadata = M::generate_type_safe_metadata(&metadata);
-        Self {
-            default_metadata,
-            inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
-        }
+        Self::from_parts(host_type, metadata, default_metadata)
     }
 }
 
@@ -213,7 +211,7 @@ fn run_table(original: bool, has_default: bool, has_coercer: bool, failure: Fail
         };
         {
             let registered = table.get(&HOST);
-            snapshots.push(snapshot(&registered, table.default_metadata()));
+            snapshots.push(snapshot(&registered, &table.default_metadata()));
         }
         drop(table);
     })).is_err();

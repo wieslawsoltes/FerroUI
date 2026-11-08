@@ -1,7 +1,8 @@
-use crate::data::BindingMode;
+use crate::data::{BindingMode, BindingPriority};
 use crate::property_store::{EffectiveValue, UncommonFields};
 use crate::{FerroObject, TypeInfo};
 use std::cell::RefCell;
+use std::marker::PhantomData;
 use std::rc::Rc;
 
 /// Metadata common to all property kinds.
@@ -74,6 +75,18 @@ pub(crate) struct DefaultCoercionOperations<T> {
     pub(crate) set_default: fn(&EffectiveValue<T>, &FerroObject, T),
 }
 
+/// A write of a value to an effective value whose metadata has a coercer: the
+/// value, how it is written and the typed operations of the write. The typed
+/// write of the store hands it to the coercion, so the coercing variant of the
+/// write is compiled only for value types whose properties coerce (#576).
+pub(crate) struct CoercedWrite<T> {
+    /// The value to write; the write takes it.
+    pub(crate) value: Option<T>,
+    pub(crate) priority: BindingPriority,
+    pub(crate) is_overridden_current_value: bool,
+    pub(crate) operations: CoercionOperations<T>,
+}
+
 /// The factory borrows the store, owner and typed property. Keeping that
 /// PropertyValue-specific construction outside the algorithm lets public
 /// Clone-only metadata retain its existing bounds.
@@ -110,6 +123,11 @@ enum CoercionRequest<'a, T> {
         callback: &'a CoerceValueCallback<T>,
         value: &'a T,
         result: &'a mut Option<UncommonFields<T>>,
+    },
+    SetAndRaise {
+        target: &'a EffectiveValue<T>,
+        owner: &'a FerroObject,
+        write: &'a mut CoercedWrite<T>,
     },
 }
 
@@ -174,6 +192,12 @@ impl<T> Coercion<T> {
         });
         result.expect("coercion dispatch initializes uncommon fields")
     }
+
+    /// Writes a value to an effective value of this coercion's metadata,
+    /// coercing it first (the coercing branch of `SetAndRaiseCore`).
+    pub(crate) fn set_and_raise(&self, target: &EffectiveValue<T>, owner: &FerroObject, write: &mut CoercedWrite<T>) {
+        (self.apply)(CoercionRequest::SetAndRaise { target, owner, write });
+    }
 }
 
 impl<T: Clone + 'static> Coercion<T> {
@@ -198,6 +222,7 @@ impl<T: Clone + 'static> Coercion<T> {
             CoercionRequest::InitializeUncommon { callback, value, result } => {
                 *result = Some(UncommonFields::new(callback, value));
             }
+            CoercionRequest::SetAndRaise { target, owner, write } => target.set_and_raise_coerced(owner, write),
         }
     }
 
@@ -487,12 +512,50 @@ impl<T: Clone + 'static> PropertyMetadata for DirectPropertyMetadata<T> {
     }
 }
 
+/// The untyped view of the metadata of a property, whatever its kind and value
+/// type: what the shared metadata table and the untyped routes of a property
+/// read. Implemented for every metadata type.
+pub(crate) trait ErasedMetadata: 'static {
+    /// The metadata common to all property kinds.
+    fn erased_base(&self) -> &FerroPropertyMetadata;
+}
+
+impl<M: PropertyMetadata> ErasedMetadata for M {
+    #[inline]
+    fn erased_base(&self) -> &FerroPropertyMetadata {
+        PropertyMetadata::base(self)
+    }
+}
+
+/// The metadata of `value`, which must be an `M`, as its type.
+///
+/// # Safety
+///
+/// `value` must have been made from an `Rc<M>`.
+#[inline]
+unsafe fn downcast_metadata<M: 'static>(value: Rc<dyn ErasedMetadata>) -> Rc<M> {
+    // SAFETY: the data pointer of the box is that of the `Rc<M>` it was made
+    // from (the caller's contract); the cast drops only the vtable.
+    unsafe { Rc::from_raw(Rc::into_raw(value) as *const M) }
+}
+
 /// Per-host-type metadata storage of a property, with the lookup rules of the
 /// property system: the metadata registered for the nearest base class of the
 /// queried type wins, falling back to the type-safe default metadata.
+///
+/// The typed facade of [`MetadataTableCore`]: the lookups, the registrations
+/// and their cache are compiled once for every metadata type (#576); only the
+/// construction, the merge of an override and the cast of a result are typed.
 pub(crate) struct MetadataTable<M> {
-    default_metadata: Rc<M>,
-    inner: RefCell<MetadataEntries<M>>,
+    core: MetadataTableCore,
+    _metadata: PhantomData<Rc<M>>,
+}
+
+/// The metadata of a property per host type, untyped: every value is the
+/// metadata type of the [`MetadataTable`] that owns the core.
+pub(crate) struct MetadataTableCore {
+    default_metadata: Rc<dyn ErasedMetadata>,
+    inner: RefCell<MetadataEntries>,
 }
 
 // The normal property has only its registration. Do not allocate the host
@@ -500,19 +563,19 @@ pub(crate) struct MetadataTable<M> {
 // The cache of the metadata of every type it was asked for is a hash table by
 // the address of the type, as the reference's `_metadataCache` dictionary
 // (DEVIATIONS.md, corrected divergences); its hierarchy traversal is shared by
-// every metadata type and only the cached values stay typed.
-enum MetadataEntries<M> {
-    Single(Option<(&'static TypeInfo, Rc<M>)>),
-    Multiple(Box<MetadataOverrides<M>>),
+// every metadata type, and so are the cached values, untyped.
+enum MetadataEntries {
+    Single(Option<(&'static TypeInfo, Rc<dyn ErasedMetadata>)>),
+    Multiple(Box<MetadataOverrides>),
 }
 
-struct MetadataOverrides<M> {
+struct MetadataOverrides {
     hosts: MetadataHosts,
-    values: Vec<Rc<M>>,
+    values: Vec<Rc<dyn ErasedMetadata>>,
 }
 
 // Slots are stable until a registration changes. All metadata types share the
-// hierarchy lookup and its cache, while the values stay strongly typed.
+// hierarchy lookup and its cache.
 struct MetadataHosts {
     owners: Vec<&'static TypeInfo>,
     // Each key is a non-null, process-lifetime TypeInfo address. The cache grows
@@ -609,27 +672,76 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         metadata.freeze();
         let metadata = Rc::new(metadata);
         let default_metadata = M::generate_frozen_type_safe_metadata(&metadata);
+        Self::from_parts(host_type, metadata, default_metadata)
+    }
+
+    /// The table of the registration of `metadata` for `host_type`, with
+    /// `default_metadata` for every other type.
+    fn from_parts(host_type: &'static TypeInfo, metadata: Rc<M>, default_metadata: Rc<M>) -> Self {
+        let metadata: Rc<dyn ErasedMetadata> = metadata;
+        let default_metadata: Rc<dyn ErasedMetadata> = default_metadata;
         Self {
-            default_metadata,
-            inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
+            core: MetadataTableCore {
+                default_metadata,
+                inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
+            },
+            _metadata: PhantomData,
         }
     }
 
     /// A table for a property that shares its identity with `source` (added
     /// owner) and optionally carries metadata for the new owner.
     pub fn for_added_owner(source: &Self, owner_type: &'static TypeInfo, metadata: Option<M>) -> Self {
+        let metadata = metadata.map(|m| {
+            let m: Rc<dyn ErasedMetadata> = Rc::new(m);
+            (owner_type, m)
+        });
         Self {
-            default_metadata: source.default_metadata.clone(),
-            inner: RefCell::new(MetadataEntries::Single(metadata.map(|m| (owner_type, Rc::new(m))))),
+            core: MetadataTableCore {
+                default_metadata: source.core.default_metadata.clone(),
+                inner: RefCell::new(MetadataEntries::Single(metadata)),
+            },
+            _metadata: PhantomData,
         }
     }
 
+    /// The untyped table, which the routes of the property read.
     #[inline]
-    pub fn default_metadata(&self) -> &Rc<M> {
-        &self.default_metadata
+    pub(crate) fn core(&self) -> &MetadataTableCore {
+        &self.core
     }
 
+    #[cfg(test)]
+    pub fn default_metadata(&self) -> Rc<M> {
+        // SAFETY: every value of the core is an `M` (the constructors).
+        unsafe { downcast_metadata(self.core.default_metadata.clone()) }
+    }
+
+    #[inline]
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
+        // SAFETY: every value of the core is an `M` (the constructors and
+        // `override_metadata`).
+        unsafe { downcast_metadata(self.core.get(type_)) }
+    }
+
+    pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
+        self.core.ensure_not_registered(property_name, type_);
+        let base = self.get(type_);
+        metadata.merge(&base);
+        metadata.freeze();
+        self.core.insert(type_, Rc::new(metadata));
+    }
+
+    #[inline]
+    pub fn unregister(&self, type_: &'static TypeInfo) {
+        self.core.unregister(type_);
+    }
+}
+
+impl MetadataTableCore {
+    /// The metadata for `type_`: the registration of its nearest class, else
+    /// the default metadata.
+    pub(crate) fn get(&self, type_: &'static TypeInfo) -> Rc<dyn ErasedMetadata> {
         let mut inner = self.inner.borrow_mut();
         let table = match &mut *inner {
             MetadataEntries::Single(Some((host, value))) => {
@@ -646,7 +758,8 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         table.values.get(slot).unwrap_or(&self.default_metadata).clone()
     }
 
-    pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
+    /// Panics if metadata is registered for exactly `type_`.
+    fn ensure_not_registered(&self, property_name: &str, type_: &'static TypeInfo) {
         let exists = match &*self.inner.borrow() {
             MetadataEntries::Single(existing) => existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)),
             MetadataEntries::Multiple(table) => host_index(&table.hosts.owners, type_).is_some(),
@@ -654,10 +767,10 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         if exists {
             panic!("Metadata is already set for {property_name} on {type_}.");
         }
-        let base = self.get(type_);
-        metadata.merge(&base);
-        metadata.freeze();
-        let value = Rc::new(metadata);
+    }
+
+    /// Registers `value` for `type_`, which has no registration.
+    fn insert(&self, type_: &'static TypeInfo, value: Rc<dyn ErasedMetadata>) {
         let mut inner = self.inner.borrow_mut();
         match &mut *inner {
             MetadataEntries::Single(existing) => {
@@ -678,7 +791,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         }
     }
 
-    pub fn unregister(&self, type_: &'static TypeInfo) {
+    pub(crate) fn unregister(&self, type_: &'static TypeInfo) {
         let mut inner = self.inner.borrow_mut();
         match &mut *inner {
             MetadataEntries::Single(existing) => {

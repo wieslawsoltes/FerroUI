@@ -724,6 +724,80 @@ trims of this section had already removed most of the classes they reach; what r
 constructors of the classes an application links for other reasons. The `dist` build ran its smoke
 run to a clean exit.
 
+### 4.17 Type-erased property routes and values (#576, part 2)
+
+The property core was still compiled once per value type of a registered property where the type
+only matters for copying, comparing, boxing and dropping a value (section 5.4: about 1 MB of hello
+world). Each value type had the routes of the property as a trait object implemented by
+`StyledProperty<T>` and `DirectPropertyBase<T>` (about twenty functions per kind, most of them the
+same algorithm around one typed call), its own copy of the metadata table (`MetadataTable<M>::get`,
+`unregister` and the cache), and the whole write of an effective value, coercion and notification
+included, for every value type whether its properties coerce or not.
+
+What depends on the value type is now in tables of `fn` pointers, one static table per value type,
+shared by all the properties of that type:
+
+- **`ValueTable`** (`ferro_property.rs`), held by every `FerroProperty`: the copy of a value into a
+  box (`box_value`), into an `Option` (`copy_value`, `clone_into`) and the unpacking of a
+  `BindingValue<T>`. Styled, attached and direct properties of one value type share it, so these
+  functions exist once per value type instead of once per kind.
+- **`StyledRoutes` and `DirectRoutes`**: the typed reads and writes of the store or the accessors
+  that a route calls (create the effective value, write a value of the type or one that converts to
+  it, read the default or the base value, validate). One static table per value type and kind.
+
+`PropertyRoutes` is no longer a trait: it is a record of the property, its typed view, its metadata
+and one of the two tables, and every route is one non-generic function over it. What does not
+depend on the value type is done there once: the unset and do-nothing markers, the metadata of a
+type, data validation and unregistration (through the untyped metadata table below), clearing a
+styled property, binding a boxed source, and the untyped read of a styled property (the effective
+value, the inherited value, else the default).
+
+The metadata table is a typed facade (`MetadataTable<M>`) over one untyped table
+(`MetadataTableCore`) whose values are `Rc<dyn ErasedMetadata>`, the metadata types viewed through
+the metadata common to all property kinds. The lookup with its cache, the registration of an
+override and unregistration are compiled once; construction, the merge of an override and the cast
+of a result stay typed. The routes read the untyped table directly.
+
+The write of an effective value (`set_and_raise_core`) is split by demand. Its coercing branch is
+reached through the dispatch of a registered coercer, as the recoercion already was (section 4.4,
+`CoercionRequest::SetAndRaise`), so a value type whose properties never coerce no longer compiles
+it. The change notification (`notifying` callbacks, the change on the owner, the change of the
+inheritance children) is one non-generic function; the two copies of the new value it needs are made
+by the `clone_into` of the table into slots in the frame of the typed caller, so they drop where and
+in the order they did. A value set with a priority other than the local value is applied by one
+non-generic function after its typed entry is made, and the typed read of a base value looks up the
+effective value through one non-generic function.
+
+Left generic for speed, because they are on the path of every frame and an indirect call per copy or
+comparison would cost more than the code it saves:
+
+- the uncoerced write of an effective value (copy of the old value, comparison, the two replacements),
+  which is the write of every local value, style value and animation value;
+- the typed read of a property (`ValueStore::get_value`): the found effective value and the default of
+  a property that does not inherit are read inline, as before;
+- the typed entries and observers (`ImmediateValueEntry<T>`, `BindingEntry<T>`, the typed binding
+  observers), whose typed fast path #565 measured.
+
+Behaviour is unchanged: precedence, coercion, validation, notification order, the copies of a value
+and the order in which they drop, including under panics, as the regressions of section 4.4 check.
+One corner case is more permissive: the untyped read of a styled property (`get_value_untyped`) no
+longer holds the list of effective values borrowed while it copies the value, as `with_value` already
+did; a copy that writes another property of the same object no longer panics there.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after | Change |
+|---|---:|---:|---:|
+| `release` executable | TBD | TBD | TBD |
+| `dist` executable | TBD | TBD | TBD |
+| Property core per value type (`set_and_raise_core`, `ValueStore::set_value`, `get_base_value`, `MetadataTable<_>::get`, `unregister`, the routes), `release` | TBD | TBD | TBD |
+
+| Property benchmarks (`base::` of `ferroui-benchmarks`, release) | before | after | Change |
+|---|---:|---:|---:|
+| `FerroObjectGetValue`, `FerroObjectGetValueInherited` | TBD | TBD | TBD |
+| `FerroObjectSetValue`, `FerroObjectConstruct` | TBD | TBD | TBD |
+| `FerroObjectBinding`, `FerroObjectGetObservable` | TBD | TBD | TBD |
+| `StyledPropertyBenchmarks` (coerced and validated values), `DirectPropertyBenchmark` | TBD | TBD | TBD |
+| `styling::`, `data::` | TBD | TBD | TBD |
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

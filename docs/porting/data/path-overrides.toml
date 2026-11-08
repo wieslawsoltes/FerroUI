@@ -677,7 +677,7 @@ upstream = ["IDirectPropertyAccessor.cs", "IStyledPropertyAccessor.cs"]
 kind = "replaced"
 rust = "ferro_property.rs"
 types = { IDirectPropertyAccessor = "PropertyRoutes", IStyledPropertyAccessor = "PropertyRoutes" }
-reason = "the internal untyped accessor contracts of the property kinds are the crate-internal `PropertyRoutes` trait, which `StyledProperty<T>` and `DirectPropertyBase<T>` implement (`route_get_value`, `route_set_value`, `route_get_default_value` for the default or unset value, `route_is_valid_value`); `is_read_only` and `owner` are members of the property"
+reason = "the internal untyped accessor contracts of the property kinds are the crate-internal `PropertyRoutes`, non-generic routes over the typed operations of `StyledProperty<T>` and `DirectPropertyBase<T>` (`route_get_value`, `route_set_value`, `route_get_default_value` for the default or unset value, `route_is_valid_value`); `is_read_only` and `owner` are members of the property"
 
 [[map]]
 project = "Avalonia.Base"

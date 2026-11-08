@@ -1,5 +1,5 @@
 use crate::data::{BindingMode, BindingPriority, BindingValue};
-use crate::ferro_property_metadata::Coercion;
+use crate::ferro_property_metadata::{Coercion, ErasedMetadata, MetadataTableCore};
 use crate::property_store::{EffectiveValue, EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
 use crate::utilities::HandlerList;
@@ -12,6 +12,7 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell};
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -214,17 +215,17 @@ impl<T: Clone + 'static> PayloadSlot for Option<T> {
 /// The untyped destination of an untyped value: a box of its own, which takes
 /// a copy of the payload when it is of the property's value type. The slot of
 /// the type-erased binding observers, which keep their values boxed; the copy
-/// is the [`route_box_value`](PropertyRoutes::route_box_value) of the
+/// is the [`box_value`](ValueTable::box_value) of the value type of the
 /// property.
 pub(crate) struct BoxedPayloadSlot {
-    routes: &'static dyn PropertyRoutes,
+    table: &'static ValueTable,
     value: Option<BoxedValue>,
 }
 
 impl BoxedPayloadSlot {
     #[inline]
     pub(crate) fn new(property: &FerroProperty) -> Self {
-        Self { routes: property.routes(), value: None }
+        Self { table: property.value_table(), value: None }
     }
 
     /// The copy of the payload, if there is one.
@@ -236,7 +237,7 @@ impl BoxedPayloadSlot {
 
 impl PayloadSlot for BoxedPayloadSlot {
     fn copy_payload(&mut self, value: &dyn Any) -> bool {
-        self.value = self.routes.route_box_value(value);
+        self.value = (self.table.box_value)(value);
         self.value.is_some()
     }
 }
@@ -253,8 +254,8 @@ pub(crate) fn take_boxed_value<T: PropertyValue>(value: BoxedValue) -> Option<T>
 
 /// The parts of `value` if it is a `BindingValue<T>`, with its value copied
 /// into a box of its own: the binding value case of an untyped binding, the
-/// one that names `T` (see
-/// [`route_unpack_binding_value`](PropertyRoutes::route_unpack_binding_value)).
+/// one that names `T` (the [`unpack_binding_value`](ValueTable::unpack_binding_value)
+/// of the value type).
 pub(crate) fn unpack_binding_value<T: PropertyValue>(value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
     let value = value.downcast_ref::<BindingValue<T>>()?;
     let payload = value.has_value().then(|| Rc::new(value.value().clone()) as BoxedValue);
@@ -277,55 +278,355 @@ pub(crate) fn copy_converted_property_value(
     copied
 }
 
+/// The operations on the values of one property value type that the shared
+/// property core needs: one static table per value type, shared by all the
+/// properties of that type, styled, attached and direct (#576). The routes of
+/// a property and the type-erased observers, entries and notifications are
+/// compiled once and use the table; a value type contributes these functions,
+/// not a copy of every algorithm that moves its values.
+pub(crate) struct ValueTable {
+    /// Clones `value` into a box of its own if it holds exactly the value
+    /// type; `None` otherwise.
+    pub(crate) box_value: fn(&dyn Any) -> Option<BoxedValue>,
+    /// Clones `value`, which must hold exactly the value type `T`, into
+    /// `out`, which must be an `&mut Option<T>`. False if either has another
+    /// type.
+    pub(crate) copy_value: fn(&dyn Any, &mut dyn Any) -> bool,
+    /// The parts of `value` if it is a `BindingValue<T>` of the value type
+    /// `T`, with the value in a box of its own; `None` if it is not.
+    pub(crate) unpack_binding_value: fn(&dyn Any) -> Option<BindingValue<BoxedValue>>,
+    /// Clones `value` into `out` and returns the copy. Unchecked: `value`
+    /// must be a `T` and `out` an `Option<T>` of the value type `T`, and the
+    /// copy replaces what `out` held.
+    pub(crate) clone_into: for<'a, 'b> unsafe fn(&'b dyn Any, &'a mut dyn Any) -> &'a dyn Any,
+}
+
+impl ValueTable {
+    /// The table of the value type `T`. Not inlined: the properties of a
+    /// value type a crate registers share one table.
+    #[inline(never)]
+    pub(crate) fn of<T: PropertyValue>() -> &'static ValueTable {
+        TypedValueTable::<T>::TABLE
+    }
+}
+
+struct TypedValueTable<T>(PhantomData<T>);
+
+impl<T: PropertyValue> TypedValueTable<T> {
+    const TABLE: &'static ValueTable = &ValueTable {
+        box_value: box_value::<T>,
+        copy_value: copy_value::<T>,
+        unpack_binding_value: unpack_binding_value::<T>,
+        clone_into: clone_into::<T>,
+    };
+}
+
+fn box_value<T: PropertyValue>(value: &dyn Any) -> Option<BoxedValue> {
+    value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
+}
+
+fn copy_value<T: PropertyValue>(value: &dyn Any, out: &mut dyn Any) -> bool {
+    match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T>>()) {
+        (Some(value), Some(out)) => {
+            *out = Some(value.clone());
+            true
+        }
+        _ => false,
+    }
+}
+
+/// # Safety
+///
+/// `value` must be a `T` and `out` an `Option<T>`.
+unsafe fn clone_into<'a, T: PropertyValue>(value: &dyn Any, out: &'a mut dyn Any) -> &'a dyn Any {
+    debug_assert!(value.is::<T>() && out.is::<Option<T>>());
+    // SAFETY: the types are the caller's contract; the casts drop only the
+    // vtables. The checked downcasts would call through them on a hot path.
+    let (value, out) =
+        unsafe { (&*(value as *const dyn Any as *const T), &mut *(out as *mut dyn Any as *mut Option<T>)) };
+    let copy: &'a T = out.insert(value.clone());
+    copy
+}
+
+/// The typed operations of a styled (or attached) property with value type
+/// `T`: one static table per value type, the part of the routes that reads or
+/// writes the typed store. Each takes the typed property as the
+/// [`typed`](PropertyRoutes::as_any) view of its routes.
+pub(crate) struct StyledRoutes {
+    pub(crate) create_effective_value: fn(&'static dyn Any, &FerroObject) -> Rc<dyn EffectiveValueDyn>,
+    pub(crate) coerce_default_value: fn(&'static dyn Any, &FerroObject),
+    pub(crate) get_base_value: fn(&'static dyn Any, &FerroObject) -> Option<BoxedValue>,
+    pub(crate) get_default_value: fn(&'static dyn Any, &'static TypeInfo) -> BoxedValue,
+    /// Writes a value of the value type, or one that converts to it, with a
+    /// priority; panics for any other value.
+    pub(crate) set_value: fn(&'static dyn Any, &FerroObject, &dyn Any, BindingPriority) -> Option<Rc<dyn IDisposable>>,
+    /// `set_current_value` of a value of the value type, or one that converts
+    /// to it; panics for any other value.
+    pub(crate) set_current_value: fn(&'static dyn Any, &FerroObject, &dyn Any),
+    /// The typed `set_local_value` of the store from a box that holds exactly
+    /// the value type, moved out of the box when no one else holds it.
+    pub(crate) set_local_value: fn(&'static dyn Any, &FerroObject, BoxedValue),
+    pub(crate) is_valid_value: fn(&'static dyn Any, &dyn Any) -> bool,
+}
+
+/// The typed operations of a direct property with value type `T`: one static
+/// table per value type, the part of the routes that calls the accessors of the
+/// property.
+pub(crate) struct DirectRoutes {
+    pub(crate) clear_value: fn(&'static dyn Any, &FerroObject),
+    pub(crate) get_value: fn(&'static dyn Any, &FerroObject) -> BoxedValue,
+    pub(crate) get_default_value: fn(&'static dyn Any, &'static TypeInfo) -> BoxedValue,
+    /// Sets a value of the value type, or one that converts to it; panics for
+    /// any other value.
+    pub(crate) set_value: fn(&'static dyn Any, &FerroObject, &dyn Any),
+    pub(crate) set_direct_value_unchecked: fn(&'static dyn Any, &FerroObject, &dyn IValueEntry),
+    pub(crate) bind: fn(&'static dyn Any, &FerroObject, Rc<dyn IObservable<BoxedValue>>) -> Rc<dyn IDisposable>,
+    pub(crate) set_direct_binding_value: fn(&'static dyn Any, &FerroObject, BindingValue<BoxedValue>),
+}
+
+#[derive(Clone, Copy)]
+enum RoutesKind {
+    Styled(&'static StyledRoutes),
+    Direct(&'static DirectRoutes),
+}
+
 /// Untyped operations that a property routes to its typed implementation.
-pub(crate) trait PropertyRoutes {
-    fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
-    fn route_clear_value(&'static self, o: &FerroObject);
-    fn route_coerce_default_value(&'static self, o: &FerroObject);
-    fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue;
-    fn route_get_base_value(&'static self, o: &FerroObject) -> BoxedValue;
-    fn route_get_default_value(&'static self, type_: &'static TypeInfo) -> BoxedValue;
-    fn route_set_value(&'static self, o: &FerroObject, value: &dyn Any, priority: BindingPriority)
-        -> Option<Rc<dyn IDisposable>>;
-    fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any);
-    fn route_set_direct_value_unchecked(&'static self, o: &FerroObject, entry: &dyn IValueEntry);
-    fn route_bind(
-        &'static self,
+///
+/// The routes of every property are these functions, compiled once (#576): what
+/// does not depend on the value type (the unset and do-nothing markers, the
+/// metadata, the store's lookups and the boxed bindings) is done here, the
+/// copies of values by the [`ValueTable`] of the value type, and the typed reads
+/// and writes of the store or the accessors by the [`StyledRoutes`] or
+/// [`DirectRoutes`] of the value type. A property holds its routes from its
+/// registration.
+#[derive(Clone, Copy)]
+pub(crate) struct PropertyRoutes {
+    property: &'static FerroProperty,
+    typed: &'static dyn Any,
+    metadata: &'static MetadataTableCore,
+    kind: RoutesKind,
+}
+
+impl PropertyRoutes {
+    /// The routes of a styled (or attached) property: `property` is the base of
+    /// `typed`, the `StyledProperty<T>`, `metadata` its metadata and `routes`
+    /// the typed operations of `T`.
+    pub(crate) fn styled(
+        property: &'static FerroProperty,
+        typed: &'static dyn Any,
+        metadata: &'static MetadataTableCore,
+        routes: &'static StyledRoutes,
+    ) -> Self {
+        Self { property, typed, metadata, kind: RoutesKind::Styled(routes) }
+    }
+
+    /// The routes of a direct property: `property` is the base of `typed`,
+    /// the `DirectPropertyBase<T>`, `metadata` its metadata and `routes` the
+    /// typed operations of `T`.
+    pub(crate) fn direct(
+        property: &'static FerroProperty,
+        typed: &'static dyn Any,
+        metadata: &'static MetadataTableCore,
+        routes: &'static DirectRoutes,
+    ) -> Self {
+        Self { property, typed, metadata, kind: RoutesKind::Direct(routes) }
+    }
+
+    pub(crate) fn create_effective_value(&self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
+        match self.kind {
+            RoutesKind::Styled(routes) => (routes.create_effective_value)(self.typed, o),
+            RoutesKind::Direct(_) => panic!("direct properties have no effective value"),
+        }
+    }
+
+    pub(crate) fn route_clear_value(&self, o: &FerroObject) {
+        match self.kind {
+            RoutesKind::Styled(_) => o.values().clear_value(o, self.property),
+            RoutesKind::Direct(routes) => (routes.clear_value)(self.typed, o),
+        }
+    }
+
+    pub(crate) fn route_coerce_default_value(&self, o: &FerroObject) {
+        match self.kind {
+            RoutesKind::Styled(routes) => (routes.coerce_default_value)(self.typed, o),
+            // Direct properties are not coerced.
+            RoutesKind::Direct(_) => {}
+        }
+    }
+
+    /// The value of the property on `o`, in a box of its own. For a styled
+    /// property: the effective value, else the inherited value, else the
+    /// default value for the type of `o`, as the typed read.
+    pub(crate) fn route_get_value(&self, o: &FerroObject) -> BoxedValue {
+        match self.kind {
+            RoutesKind::Styled(routes) => {
+                let values = o.values();
+                if let Some(effective) = values.get_effective_value(self.property) {
+                    return effective.boxed_value();
+                }
+                if self.property.inherits() {
+                    if let Some(inherited) = values.try_get_inherited_value(self.property) {
+                        return inherited.boxed_value();
+                    }
+                }
+                (routes.get_default_value)(self.typed, o.get_type())
+            }
+            RoutesKind::Direct(routes) => (routes.get_value)(self.typed, o),
+        }
+    }
+
+    pub(crate) fn route_get_base_value(&self, o: &FerroObject) -> BoxedValue {
+        match self.kind {
+            RoutesKind::Styled(routes) => match (routes.get_base_value)(self.typed, o) {
+                Some(value) => value,
+                None => FerroProperty::unset_value(),
+            },
+            RoutesKind::Direct(routes) => (routes.get_value)(self.typed, o),
+        }
+    }
+
+    pub(crate) fn route_get_default_value(&self, type_: &'static TypeInfo) -> BoxedValue {
+        match self.kind {
+            RoutesKind::Styled(routes) => (routes.get_default_value)(self.typed, type_),
+            RoutesKind::Direct(routes) => (routes.get_default_value)(self.typed, type_),
+        }
+    }
+
+    pub(crate) fn route_set_value(
+        &self,
+        o: &FerroObject,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Rc<dyn IDisposable>> {
+        match self.kind {
+            RoutesKind::Styled(routes) => {
+                if value.is::<UnsetValueType>() {
+                    if priority == BindingPriority::LocalValue {
+                        o.values().clear_value(o, self.property);
+                    }
+                    None
+                } else if value.is::<DoNothingType>() {
+                    None
+                } else {
+                    (routes.set_value)(self.typed, o, value, priority)
+                }
+            }
+            RoutesKind::Direct(routes) => {
+                if value.is::<UnsetValueType>() {
+                    (routes.clear_value)(self.typed, o);
+                } else if !value.is::<DoNothingType>() {
+                    (routes.set_value)(self.typed, o, value);
+                }
+                None
+            }
+        }
+    }
+
+    pub(crate) fn route_set_current_value(&self, o: &FerroObject, value: &dyn Any) {
+        match self.kind {
+            RoutesKind::Styled(routes) => {
+                if value.is::<UnsetValueType>() {
+                    o.values().clear_value(o, self.property);
+                } else if !value.is::<DoNothingType>() {
+                    (routes.set_current_value)(self.typed, o, value);
+                }
+            }
+            RoutesKind::Direct(_) => {
+                self.route_set_value(o, value, BindingPriority::LocalValue);
+            }
+        }
+    }
+
+    pub(crate) fn route_set_direct_value_unchecked(&self, o: &FerroObject, entry: &dyn IValueEntry) {
+        match self.kind {
+            RoutesKind::Styled(_) => panic!("not supported for styled properties"),
+            RoutesKind::Direct(routes) => (routes.set_direct_value_unchecked)(self.typed, o, entry),
+        }
+    }
+
+    pub(crate) fn route_bind(
+        &self,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
         priority: BindingPriority,
-    ) -> Rc<dyn IDisposable>;
-    fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata;
-    fn route_unregister(&'static self, type_: &'static TypeInfo);
-    fn route_is_valid_value(&'static self, value: &dyn Any) -> bool;
+    ) -> Rc<dyn IDisposable> {
+        match self.kind {
+            RoutesKind::Styled(_) => o.bind_boxed(self.property, source, priority),
+            RoutesKind::Direct(routes) => (routes.bind)(self.typed, o, source),
+        }
+    }
+
+    pub(crate) fn route_get_metadata(&self, type_: &'static TypeInfo) -> FerroPropertyMetadata {
+        let metadata = self.metadata.get(type_);
+        metadata.erased_base().clone()
+    }
+
+    pub(crate) fn route_unregister(&self, type_: &'static TypeInfo) {
+        self.metadata.unregister(type_)
+    }
+
+    pub(crate) fn route_is_valid_value(&self, value: &dyn Any) -> bool {
+        match self.kind {
+            RoutesKind::Styled(routes) => (routes.is_valid_value)(self.typed, value),
+            RoutesKind::Direct(_) => Any::type_id(value) == self.property.property_type(),
+        }
+    }
+
     /// The typed property behind the routes, for downcasting.
-    fn as_any(&'static self) -> &'static dyn Any;
+    #[inline]
+    pub(crate) fn as_any(&self) -> &'static dyn Any {
+        self.typed
+    }
+
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into `out`, which must be an `&mut Option<T>`. Returns false if either
     /// has a different type.
-    fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    #[inline]
+    pub(crate) fn route_copy_value(&self, value: &dyn Any, out: &mut dyn Any) -> bool {
+        (self.property.value_table().copy_value)(value, out)
+    }
+
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
-    fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
+    #[inline]
+    pub(crate) fn route_box_value(&self, value: &dyn Any) -> Option<BoxedValue> {
+        (self.property.value_table().box_value)(value)
+    }
+
     /// Whether the metadata of the property for the type of `owner` enables
-    /// data validation; read without copying the metadata. The binding
-    /// observers of untyped sources read it once, when they are created.
-    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool>;
+    /// data validation. The binding observers of untyped sources read it
+    /// once, when they are created.
+    pub(crate) fn route_enable_data_validation(&self, owner: &FerroObject) -> Option<bool> {
+        let metadata = self.metadata.get(owner.get_type());
+        metadata.erased_base().enable_data_validation()
+    }
+
     /// The parts of `value` if it is a `BindingValue<T>` of the property's
     /// value type `T`, with the value in a box of its own; `None` if it is not.
-    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>>;
+    #[inline]
+    pub(crate) fn route_unpack_binding_value(&self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+        (self.property.value_table().unpack_binding_value)(value)
+    }
+
     /// Sets the local value of a styled property from a box that holds exactly
     /// the property's value type: the typed `set_local_value` of the store,
     /// for an untyped local binding. Only supported by styled properties.
-    fn route_set_local_value(&'static self, _o: &FerroObject, _value: BoxedValue) {
-        panic!("not supported for direct properties");
+    pub(crate) fn route_set_local_value(&self, o: &FerroObject, value: BoxedValue) {
+        match self.kind {
+            RoutesKind::Styled(routes) => (routes.set_local_value)(self.typed, o, value),
+            RoutesKind::Direct(_) => panic!("not supported for direct properties"),
+        }
     }
+
     /// Sets a direct property from an untyped binding value whose value, if
     /// any, holds exactly the property's value type: the typed
     /// `set_direct_value_unchecked` of an untyped direct binding. Only
     /// supported by direct properties.
-    fn route_set_direct_binding_value(&'static self, _o: &FerroObject, _value: BindingValue<BoxedValue>) {
-        panic!("not supported for styled properties");
+    pub(crate) fn route_set_direct_binding_value(&self, o: &FerroObject, value: BindingValue<BoxedValue>) {
+        match self.kind {
+            RoutesKind::Styled(_) => panic!("not supported for styled properties"),
+            RoutesKind::Direct(routes) => (routes.set_direct_binding_value)(self.typed, o, value),
+        }
     }
 }
 
@@ -401,7 +702,8 @@ pub struct FerroProperty {
     host_type: Cell<Option<&'static TypeInfo>>,
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
-    routes: OnceCell<&'static dyn PropertyRoutes>,
+    value_table: &'static ValueTable,
+    routes: OnceCell<PropertyRoutes>,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -412,13 +714,21 @@ pub(crate) struct FerroPropertyInit {
 }
 
 impl FerroProperty {
-    pub(crate) fn new<T: 'static>(
+    pub(crate) fn new<T: PropertyValue>(
         name: &str,
         owner_type: &'static TypeInfo,
         init: FerroPropertyInit,
         notifying: Option<NotifyingCallback>,
     ) -> Self {
-        Self::new_core(name, owner_type, init, notifying, TypeId::of::<T>(), std::any::type_name::<T>())
+        Self::new_core(
+            name,
+            owner_type,
+            init,
+            notifying,
+            TypeId::of::<T>(),
+            std::any::type_name::<T>(),
+            ValueTable::of::<T>(),
+        )
     }
 
     // Identity, allocation and notification setup are independent of the value
@@ -431,6 +741,7 @@ impl FerroProperty {
         notifying: Option<NotifyingCallback>,
         property_type: TypeId,
         property_type_name: &'static str,
+        value_table: &'static ValueTable,
     ) -> Self {
         assert!(!name.contains('.'), "'name' may not contain periods.");
         Self {
@@ -448,6 +759,7 @@ impl FerroProperty {
             host_type: Cell::new(None),
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new()),
+            value_table,
             routes: OnceCell::new(),
         }
     }
@@ -470,11 +782,12 @@ impl FerroProperty {
             host_type: source.host_type.clone(),
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
+            value_table: source.value_table,
             routes: OnceCell::new(),
         }
     }
 
-    pub(crate) fn set_routes(&self, routes: &'static dyn PropertyRoutes) {
+    pub(crate) fn set_routes(&self, routes: PropertyRoutes) {
         if self.routes.set(routes).is_err() {
             panic!("property routes are already set");
         }
@@ -495,8 +808,15 @@ impl FerroProperty {
     }
 
     #[inline]
-    pub(crate) fn routes(&self) -> &'static dyn PropertyRoutes {
-        *self.routes.get().expect("property is not fully registered")
+    pub(crate) fn routes(&self) -> &PropertyRoutes {
+        self.routes.get().expect("property is not fully registered")
+    }
+
+    /// The table of the value type of the property, shared by all the
+    /// properties of that type.
+    #[inline]
+    pub(crate) fn value_table(&self) -> &'static ValueTable {
+        self.value_table
     }
 
     /// The class an attached property is declared for: the `THost` of its
@@ -900,6 +1220,127 @@ mod styled_property_options_tests {
         let registered = options.coerce.as_ref().unwrap().callback().clone();
         let (metadata, _, _, _) = options.into_parts();
         assert!(Rc::ptr_eq(&registered, metadata.coerce_value().unwrap()));
+    }
+}
+
+#[cfg(test)]
+mod value_table_tests {
+    use super::*;
+    use std::cell::RefCell;
+    use std::sync::atomic::AtomicUsize;
+
+    fn unique_name(prefix: &str) -> String {
+        static NEXT: AtomicUsize = AtomicUsize::new(0);
+        format!("{prefix}{}", NEXT.fetch_add(1, Ordering::Relaxed))
+    }
+
+    #[test]
+    fn properties_of_one_value_type_share_one_table() {
+        let plain = FerroProperty::register::<FerroObject, i32>(&unique_name("SharedTablePlain"), 1);
+        let coerced = FerroProperty::register_with::<FerroObject, i32>(
+            &unique_name("SharedTableCoerced"),
+            StyledPropertyOptions::new(2).coerce(|_, n| n),
+        );
+        assert!(std::ptr::eq(plain.value_table(), coerced.value_table()));
+        assert!(std::ptr::eq(plain.value_table(), ValueTable::of::<i32>()));
+    }
+
+    #[test]
+    fn values_of_distinct_types_stay_distinct() {
+        let number = FerroProperty::register::<FerroObject, i32>(&unique_name("DistinctNumber"), 1);
+        let text = FerroProperty::register::<FerroObject, String>(&unique_name("DistinctText"), String::new());
+        assert!(!std::ptr::eq(number.value_table(), text.value_table()));
+
+        let table = number.value_table();
+        assert!((table.box_value)(&String::from("five")).is_none());
+        assert_eq!((table.box_value)(&5_i32).unwrap().downcast_ref::<i32>(), Some(&5));
+        let mut text_out = None::<String>;
+        assert!(!(table.copy_value)(&5_i32, &mut text_out));
+        assert!(text_out.is_none());
+        let mut number_out = None::<i32>;
+        assert!((table.copy_value)(&7_i32, &mut number_out));
+        assert_eq!(number_out, Some(7));
+        assert!(!number.is_valid_value(&String::new()));
+        assert!(text.is_valid_value(&String::new()));
+
+        // Untyped writes and reads go through the shared routes and the table.
+        let o = FerroObject::new();
+        o.set_value_untyped(number, &9_i32, BindingPriority::LocalValue);
+        o.set_value_untyped(text, &String::from("nine"), BindingPriority::LocalValue);
+        assert_eq!(o.get_value_untyped(number).downcast_ref::<i32>(), Some(&9));
+        assert_eq!(o.get_value_untyped(text).downcast_ref::<String>().map(String::as_str), Some("nine"));
+        assert_eq!(o.get_value(number), 9);
+        o.clear_value_untyped(number);
+        assert_eq!(o.get_value(number), 1);
+        assert_eq!(o.get_value_untyped(number).downcast_ref::<i32>(), Some(&1));
+        assert_eq!(o.get_value(text), "nine");
+    }
+
+    #[test]
+    fn coercion_and_change_notifications_through_the_shared_paths() {
+        let calls = Rc::new(Cell::new(0));
+        let counted = calls.clone();
+        let property = FerroProperty::register_with::<FerroObject, i32>(
+            &unique_name("SharedCoercion"),
+            StyledPropertyOptions::new(0)
+                .coerce(move |_, n: i32| {
+                    counted.set(counted.get() + 1);
+                    n.clamp(0, 10)
+                })
+                .inherits(true),
+        );
+        let parent = FerroObject::new();
+        let child = FerroObject::new();
+        child.set_inheritance_parent(&parent);
+
+        type Change = (&'static str, Option<i32>, i32, BindingPriority);
+        let changes: Rc<RefCell<Vec<Change>>> = Rc::new(RefCell::new(Vec::new()));
+        let record = |name: &'static str| {
+            let changes = changes.clone();
+            move |e: &FerroPropertyChangedEventArgs<'_>| {
+                if e.property() == property.as_property() {
+                    changes.borrow_mut().push((name, e.get_old_value::<i32>(), e.get_new_value::<i32>(), e.priority()));
+                }
+            }
+        };
+        let _parent = parent.property_changed(record("parent"));
+        let _child = child.property_changed(record("child"));
+
+        parent.set_value(property, 25);
+        assert_eq!((parent.get_value(property), child.get_value(property)), (10, 10));
+        // Coerced to the value it has: neither the value nor the base value
+        // changes, so nothing is raised.
+        parent.set_value(property, 30);
+        parent.set_value_untyped(property, &-4_i32, BindingPriority::LocalValue);
+        assert_eq!((parent.get_value(property), child.get_value(property)), (0, 0));
+        assert_eq!(calls.get(), 3);
+        assert_eq!(
+            *changes.borrow(),
+            vec![
+                ("parent", Some(0), 10, BindingPriority::LocalValue),
+                ("child", Some(0), 10, BindingPriority::Inherited),
+                ("parent", Some(10), 0, BindingPriority::LocalValue),
+                ("child", Some(10), 0, BindingPriority::Inherited),
+            ]
+        );
+
+        // A value that is not coerced (the coerced default) takes the other
+        // branch of the write and still notifies through the shared path.
+        let plain = FerroProperty::register::<FerroObject, String>(&unique_name("SharedPlain"), String::from("a"));
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let observed = seen.clone();
+        let _plain = parent.property_changed(move |e| {
+            if e.property() == plain.as_property() {
+                observed.borrow_mut().push(e.get_old_and_new_value::<String>());
+            }
+        });
+        parent.set_value(plain, String::from("b"));
+        parent.set_value(plain, String::from("b"));
+        parent.clear_value(plain);
+        assert_eq!(
+            *seen.borrow(),
+            vec![(String::from("a"), String::from("b")), (String::from("b"), String::from("a"))]
+        );
     }
 }
 
