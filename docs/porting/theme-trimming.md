@@ -1263,5 +1263,6 @@ documents) in 9.84 MB of generated text. `samples/MaterialThemeGallery` construc
 (`MaterialTheme::new()`), so it keeps every unit; trimming applies to an application whose compiled
 markup constructs `<MaterialTheme />`, and no sample of the repository does yet. With #633 the
 72 inherited resource documents (the largest part of the ambient unit) are units of their own.
-Hello world with `<MaterialTheme />` (`dist`, macOS ARM64): MEASUREMENT PENDING (the size with the
-inherited documents in the ambient unit, the size with them as units, and the units kept).
+Hello world with `<MaterialTheme />` in place of `<WinUITheme />` (`dist`, macOS ARM64, measured on the
+branch of #633 with main's `MaterialTheme.xaml` for the first number): 19.11 MB with the inherited documents
+in the ambient unit, 18.72 MB with them as units (-0.39 MB, -2.1%); both run.
