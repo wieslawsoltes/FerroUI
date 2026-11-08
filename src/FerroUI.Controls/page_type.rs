@@ -23,9 +23,13 @@ use std::hash::{Hash, Hasher};
 ///
 /// Two page types are equal when they name the same class, whichever way they were made; the hash
 /// follows. The conversion from a `&'static TypeInfo` ([`From`], for the run-time XAML loader, the
-/// designer and the tools) creates a page by reflection, through the default constructor the
-/// [`TypeInfo`] carries; it stays in 0.5 for compatibility and is removed with the other deprecated
-/// forms (#625).
+/// designer and the tools) creates a page by reflection, through the default constructor of the
+/// [`TypeInfo`] ([`TypeInfo::default_constructor`]): the one it carries with the tables of types
+/// (the `ferroui-base` feature `type-tables`), or the one registered for the class with
+/// [`TypeInfo::register_constructor`] (as compiled markup does for `{x:Type local:Page}`). Without
+/// either the navigation fails with [`NavigationError::MissingConstructor`], whose message names
+/// `PageType::of` and the tables. The conversion stays in 0.5 for compatibility and is removed
+/// with the other deprecated forms (#625).
 #[derive(Clone, Copy)]
 pub struct PageType {
     form: Form,
@@ -67,9 +71,9 @@ impl PageType {
     }
 
     /// The page type of the runtime type `type_`. A page of it is created through the default
-    /// constructor its [`TypeInfo`] carries, which builds without the type tables may not keep;
-    /// a type that is not a page fails when the frame navigates to it
-    /// ([`NavigationError::NotAPage`]).
+    /// constructor of its [`TypeInfo`], which builds without the type tables do not keep unless
+    /// code that names the class registers it ([`TypeInfo::register_constructor`]); a type that is
+    /// not a page fails when the frame navigates to it ([`NavigationError::NotAPage`]).
     #[deprecated(
         since = "0.5.0",
         note = "use `PageType::of::<T>()`, which reaches the constructor of the page statically"

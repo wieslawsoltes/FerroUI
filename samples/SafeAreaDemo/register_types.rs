@@ -49,6 +49,10 @@ pub fn register_types() {
         for types in [ROOT_TYPES, views::TYPES, view_models::TYPES] {
             TypeInfo::register_all(types);
         }
+        // The view locator creates the views by reflection (`Activator.CreateInstance`), from
+        // their runtime type: without the tables of types a runtime type names no constructor,
+        // so the constructors of the views are registered here, where the classes are named.
+        views::register_constructors();
         for markup_types in [ROOT_MARKUP_TYPES, view_models::MARKUP_TYPES] {
             MarkupType::register_all(markup_types);
         }

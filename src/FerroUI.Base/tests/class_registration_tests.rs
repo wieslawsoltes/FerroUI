@@ -526,6 +526,9 @@ fn a_type_becomes_known_by_name_when_it_is_initialised() {
     assert!(TypeInfo::registered_types().iter().any(|t| std::ptr::eq(*t, RegLeaf::TYPE)));
 }
 
+/// With the tables of types (`type-tables`) the runtime type of a class carries the constructor of
+/// its `new` (#612, B3).
+#[cfg(feature = "type-tables")]
 #[test]
 fn the_default_constructor_creates_an_instance_of_the_class() {
     let constructor = RegShape::TYPE.default_constructor().expect("declared constructor");
@@ -542,6 +545,45 @@ fn the_default_constructor_creates_an_instance_of_the_class() {
     assert!(RegStatics::TYPE.default_constructor().is_none());
 }
 
+/// Without the tables of types the runtime type of a class names no constructor, so the linker
+/// drops the constructor of a class nothing creates (#612, B3); the class is still created
+/// statically through `DefaultConstructible`.
+#[cfg(not(feature = "type-tables"))]
+#[test]
+fn without_the_type_tables_a_runtime_type_names_no_constructor() {
+    assert!(RegShape::TYPE.default_constructor().is_none());
+    assert!(RegShape::TYPE.create_instance().is_none());
+
+    let shape = <RegShape as DefaultConstructible>::new_instance();
+    assert!(std::ptr::eq(shape.get_type(), RegShape::TYPE));
+
+    assert!(RegCircle::TYPE.default_constructor().is_none());
+    assert!(RegStatics::TYPE.default_constructor().is_none());
+}
+
+test_class!(RegCreatedByReflection: FerroObject);
+ferro_class_info!(RegCreatedByReflection { new: RegCreatedByReflection::new });
+
+/// Code that names a class makes its constructor reachable through its runtime type, with or
+/// without the tables of types: what compiled markup does for `{x:Type local:Page}` given to a
+/// frame.
+#[test]
+fn a_registered_constructor_creates_the_class_by_reflection() {
+    let type_ = TypeInfo::register_constructor::<RegCreatedByReflection>();
+    assert!(std::ptr::eq(type_, RegCreatedByReflection::TYPE));
+
+    let constructor = type_.default_constructor().expect("registered constructor");
+    let a = constructor();
+    let b = type_.create_instance().expect("instance");
+    assert!(a.cast::<RegCreatedByReflection>().is_some());
+    assert!(std::ptr::eq(b.get_type(), RegCreatedByReflection::TYPE));
+    assert!(!a.ptr_eq(&b));
+
+    // Registering again changes nothing.
+    TypeInfo::register_constructor::<RegCreatedByReflection>();
+    assert!(type_.create_instance().is_some_and(|object| object.is::<RegCreatedByReflection>()));
+}
+
 #[test]
 fn a_type_found_by_name_can_be_inspected_and_instantiated_without_naming_the_class() {
     TypeInfo::register_namespaces(&[(module_path!(), "Tests.Registration")]);
@@ -549,9 +591,20 @@ fn a_type_found_by_name_can_be_inspected_and_instantiated_without_naming_the_cla
 
     let type_ = TypeInfo::find("Tests.Registration", "RegBase").unwrap();
     let property = type_.find_property("First").expect("property by name");
-    let object = type_.create_instance().expect("instance");
-
     assert_eq!(property.property_type(), TypeId::of::<i32>());
+
+    // Created by reflection with the tables of types; without them the runtime type names no
+    // constructor, and the class is created statically.
+    let object = match type_.create_instance() {
+        Some(object) => {
+            assert!(cfg!(feature = "type-tables"));
+            object
+        }
+        None => {
+            assert!(!cfg!(feature = "type-tables"));
+            <RegBase as DefaultConstructible>::new_instance().upcast::<FerroObject>()
+        }
+    };
     assert_eq!(object.get_value_untyped(property).downcast_ref::<i32>(), Some(&1));
 }
 

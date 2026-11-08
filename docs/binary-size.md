@@ -680,6 +680,50 @@ already removes the units an application does not use, so what remains to shrink
 keeps. Start-up is within noise in both. The browser profile already builds every crate at `z`
 by default (section 4.1 and the comments of the profile).
 
+### 4.15 The default constructor needs the tables of types (#612, B3)
+
+The `TypeInfo` of a class carried its default constructor (`new` of `ferro_class_info!`). Every
+`TypeInfo` an application reaches is reachable from start-up (a type check of an older form, a
+`TargetType`, a property owner, a base class), so the constructor of every class it names was
+linked, and with it what the constructor alone reaches: the construction of the class, its
+default values and its templates. An application creates only a few of those classes.
+
+The constructor is now in the `TypeInfo` only with the tables of types (the `ferroui-base` feature
+`type-tables`, section 4.6), which the run-time XAML loader, the designer, DevTools, hot reload and
+Inspect enable: those builds still create any class by reflection. `ferro_class!` passes the
+constructor to `TypeInfo::with_constructor`, a `const fn` of `ferroui-base` whose body keeps it or
+drops it by the features of `ferroui-base`, wherever the class is declared; the evaluated `TypeInfo`
+static then holds no pointer to it, and the linker leaves it out. Without the tables,
+`TypeInfo::default_constructor` and `TypeInfo::create_instance` return `None` for a class whose
+constructor nothing registered.
+
+Code that names a class creates it statically:
+- `DefaultConstructible::new_instance()`, implemented by `ferro_class_info!` for every class with
+  `new`; `PageType::of::<T>()` of a frame (B3, part 1), `PageNavigationExtensions::push_async_of`,
+  `replace_async_of` and `push_modal_async_of`, and
+  `ManagedFileDialogExtensions::use_managed_system_dialogs_with` take the constructor this way,
+  with a `DefaultConstructible` bound the compiler checks;
+- `TypeInfo::register_constructor::<T>()`, for code that names a class and hands its runtime type to
+  something that creates it by reflection. Compiled markup does this for `{x:Type local:Page}`
+  given to `Frame.SourcePageType` or `Frame.Navigate`, and an application whose view locator
+  creates its views from their runtime types registers their constructors from its
+  `register_types()` (`samples/SafeAreaDemo`).
+
+The constructor is not registered when a class is initialised: the initialisation is reachable from
+the `TypeInfo` too, and would link every constructor again. Reflection over a class that nothing
+registered fails with an error that names the fix: `NavigationError::MissingConstructor` names
+`PageType::of` and `type-tables`.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after | Change |
+|---|---:|---:|---:|
+| `release` executable | 33.73 MB | 32.87 MB | -0.87 MB (-2.6 %) |
+| `dist` executable | 18.94 MB | 18.53 MB | -0.42 MB (-2.2 %) |
+
+The estimate of 2.4 MB (#612) was the share of the constructors before root D and the other
+trims of this section had already removed most of the classes they reach; what remains is the
+constructors of the classes an application links for other reasons. The `dist` build ran its smoke
+run to a clean exit.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
