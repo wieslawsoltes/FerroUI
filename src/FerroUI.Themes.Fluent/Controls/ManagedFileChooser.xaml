@@ -149,7 +149,7 @@
             <ListBox x:Name="PART_QuickLinks" DockPanel.Dock="Left" ItemsSource="{Binding QuickLinks}" SelectedIndex="{Binding QuickLinksSelectedIndex}" Focusable="False"
                      MaxWidth="200">
               <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="internal:ManagedFileChooserItemViewModel">
                   <StackPanel Spacing="4" Orientation="Horizontal" Background="Transparent">
                     <Image Width="16" Height="16">
                       <Image.Source>

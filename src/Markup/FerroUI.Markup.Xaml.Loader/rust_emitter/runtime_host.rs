@@ -225,6 +225,9 @@ pub fn generate_class_file(
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
+    // `{Binding}` compiles as the build compiles it (#603): compiled bindings, the default of
+    // the build, unless the assembly states otherwise (`FerroUseCompiledBindingsByDefault`).
+    configuration.use_compiled_bindings_by_default = compiles_bindings_by_default(group.assembly);
     let host = EmitterHost::runtime(dependencies).map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let class = ClassGroup {
         class: FerroXamlIlRuntimeCompiler::type_system().type_of_class(class),
@@ -235,10 +238,45 @@ pub fn generate_class_file(
     generate_class_file_with(&host, &class, &TransformOptions::of(&configuration))
 }
 
+/// Whether `{Binding}` is a compiled binding in the documents of `assembly` by default: the
+/// value of its metadata entry `FerroUseCompiledBindingsByDefault` (`"True"` or `"False"`), and
+/// compiled bindings, the default of the build (#603), when it states none.
+fn compiles_bindings_by_default(assembly: Option<&'static ferroui_base::metadata::MarkupAssembly>) -> bool {
+    assembly
+        .and_then(|assembly| assembly.metadata_value(ferroui_base::metadata::MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT))
+        .map_or(true, |value| value.trim().eq_ignore_ascii_case("true"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use ferroui_build_scan::xaml_metadata::DocumentModel;
+
+    /// Not from upstream (#603): the class file of an assembly compiles its bindings unless the
+    /// assembly states otherwise, as the build does.
+    #[test]
+    fn a_class_file_compiles_bindings_unless_the_assembly_says_otherwise() {
+        use ferroui_base::metadata::MarkupAssembly;
+        static STATED_OFF: MarkupAssembly = MarkupAssembly {
+            name: "Off",
+            crate_name: "off",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "False")],
+        };
+        static STATED_ON: MarkupAssembly = MarkupAssembly {
+            name: "On",
+            crate_name: "on",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "True")],
+        };
+        static SILENT: MarkupAssembly = MarkupAssembly { name: "Silent", crate_name: "silent", xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[] };
+        assert!(compiles_bindings_by_default(None));
+        assert!(compiles_bindings_by_default(Some(&SILENT)));
+        assert!(compiles_bindings_by_default(Some(&STATED_ON)));
+        assert!(!compiles_bindings_by_default(Some(&STATED_OFF)));
+    }
 
     fn reason(compiled: &[CompiledDocument], name: &str) -> Option<String> {
         compiled.iter().find(|document| document.name == name).and_then(|document| document.source.clone().err())
