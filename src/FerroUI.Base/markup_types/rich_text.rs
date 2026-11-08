@@ -25,16 +25,85 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TextTabStops as MarkupTyped>::MARKUP,
 ];
 
-pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<FontCapitals>();
-    ValueTypes::register_nullable::<FontEastAsianLanguage>();
-    ValueTypes::register_nullable::<FontEastAsianWidths>();
-    ValueTypes::register_nullable::<FontFraction>();
-    ValueTypes::register_nullable::<FontNumeralAlignment>();
-    ValueTypes::register_nullable::<FontNumeralStyle>();
-    ValueTypes::register_nullable::<FontVariants>();
-    ValueTypes::register_nullable::<InputScopeNameValue>();
-    ValueTypes::register_nullable::<TabAlignment>();
-    ValueTypes::register_nullable::<TabLeader>();
-    ValueTypes::register_nullable::<TextTabStops>();
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<FontCapitals>();
+    ValueTypes::register_used::<FontEastAsianLanguage>();
+    ValueTypes::register_used::<FontEastAsianWidths>();
+    ValueTypes::register_used::<FontFraction>();
+    ValueTypes::register_used::<FontNumeralAlignment>();
+    ValueTypes::register_used::<FontNumeralStyle>();
+    ValueTypes::register_used::<FontVariants>();
+    ValueTypes::register_used::<InputScopeNameValue>();
+    ValueTypes::register_used::<TabAlignment>();
+    ValueTypes::register_used::<TabLeader>();
+    ValueTypes::register_used::<TextTabStops>();
 }
+
+impl crate::data::core::ValueTypeRegistration for FontCapitals {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontCapitals>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontEastAsianLanguage {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontEastAsianLanguage>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontEastAsianWidths {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontEastAsianWidths>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontFraction {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontFraction>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontNumeralAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontNumeralAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontNumeralStyle {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontNumeralStyle>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontVariants {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontVariants>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for InputScopeNameValue {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<InputScopeNameValue>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TabAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TabAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TabLeader {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TabLeader>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextTabStops {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextTabStops>();
+    }
+}
+

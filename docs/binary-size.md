@@ -724,6 +724,97 @@ trims of this section had already removed most of the classes they reach; what r
 constructors of the classes an application links for other reasons. The `dist` build ran its smoke
 run to a clean exit.
 
+### 4.16 Value types registered on first use (#566)
+
+`ferroui-base` registered the nullable forms, texts, casts and conversions of every value type,
+enumeration, contract and collection it declares from one function, `register_value_types`, which
+`register_types()` handed to `ValueTypes::register_global` at start-up whatever the features. That
+list named about 480 types, so each of them was linked into every application with the code of its
+registrations: `nullable_operation` (0.31 MB, 731 instances in hello world), the closures of
+`register_conversion` (0.12 MB, 484 instances) and of `register_cast`, and the `AnyValue` vtable of
+every type the registrations box (`any_value_eq`, 0.33 MB, 1,874 instances). `ferroui-controls` did
+the same for its own types.
+
+**On first use.** A type now states its registrations in an implementation of
+`ValueTypeRegistration` (`register_value_conversions`), next to its metadata in `markup_types/`.
+They are made on every thread, once (`ValueTypes::register_used::<T>()`, which `register_global`
+deduplicates by the address of the function), when the type is first used:
+- a styled, attached or direct property of `T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>` is
+  registered: the declaration macro selects this at compile time, by the probe that #583 uses for
+  the markup metadata of a property's value type;
+- its markup metadata becomes known: `MarkupType::value_types`, which the declaration macros fill
+  for every type they declare, runs when the metadata is first registered (the value type of a
+  property of a registered type, a type an application registers, the tables of types).
+
+A type that no linked code uses this way is not named by anything reachable from start-up, and the
+linker drops its registrations, its `nullable_operation` and the vtables only they create.
+
+**With the tables of types.** Each crate keeps a table, `register_value_type_table`, that makes all
+of its types used. `ValueTypes::register_table` registers it only with the `ferroui-base` feature
+`type-tables` (and in the unit tests of `ferroui-base`), decided by the features of `ferroui-base`
+wherever it is called, as `MarkupType::register_table` is (section 4.6); `ValueTypes::TYPE_TABLES`
+says which. The run-time XAML loader, the designer, DevTools, hot reload and Inspect see every type
+from the start, as before.
+
+**What stays at start-up.** Some registrations are needed before any first use the registry can
+see, and stay in the list each crate registers at start-up (`register_value_types`):
+- the casts and nullable forms of the types that members of markup types hold, such as the
+  converter of a binding (`Rc<dyn IValueConverter>` and the casts of the converters to it), the
+  setters of a style, the routed event of an event trigger, the easing of a transition. Compiled
+  markup converts a value for such a member (`rt::cast::<Option<Rc<dyn IValueConverter>>, _>`)
+  before it calls the typed setter of the member, and setting a member registers nothing. The
+  registrations of a type stay at start-up when `Option<T>` (for its nullable form) or the target
+  of a cast is the type of a property, a constructor parameter or a method parameter of a
+  `ferro_markup_type!` declaration anywhere in the workspace;
+- in `ferroui-controls`, the registrations of instantiations of the generic types of
+  `ferroui-base` with a type of the crate (`RoutedEvent<SpinEventArgs>`, `FerroList<Ref<Page>>`)
+  and the casts to types of `ferroui-base` (a converter to `IValueConverter`): the orphan rule
+  leaves a `ValueTypeRegistration` of a type of another crate to that crate;
+- the defaults of the registry (the primitives, `Duration`, `Uri`, `UriRef`, `Url`, `Locale`, the
+  numeric conversions), which every application converts.
+
+| Registration calls of the lists | on first use | at start-up |
+|---|---:|---:|
+| `ferroui-base` | 352, of 273 types | 112 |
+| `ferroui-controls` | 163, of 150 types | 81 |
+| `ferroui-controls-colorpicker` (the enumerations) | 10, of 10 types | 0 |
+
+The Dock crates register their types on the calling thread from their `register_types()`, mostly
+nullable forms of contracts of the model crates and casts of converters to the contracts of
+`ferroui-base`: a `ValueTypeRegistration` of those would belong to the model crates and to
+`ferroui-base`. They are left as they are; the change of the casts below applies to them.
+
+**Functions, not closures.** `ValueTypes::register_cast`, `register_conversion`,
+`register_try_cast` and `register_parse` take function pointers (a closure that captures nothing
+coerces to one). A registration is data: the typed function and the adapter of its pair of types,
+which downcasts the value, calls the function and boxes the result. The wrap of a nullable form
+and the casts of a reference type are entries of the same kind. No registration makes a closure, a
+vtable with its call shims or drop glue any more. A cast or conversion that captures state
+registers with `register_cast_with` or `register_conversion_with`.
+
+**`nullable_operation` and `any_value_eq`.** `nullable_operation::<T>` boxes and unboxes
+`Option<T>`: it clones the `T`, which only typed code can do, so it stays generic, and is now
+instantiated only for the types that are used. `any_value_eq` is the comparison of the `AnyValue`
+vtable of a type, which every boxed value needs; a comparison shared between plain-old-data types
+would compare bytes, which differs from `PartialEq` for floating point fields (`NaN`, `-0.0`) and
+padding, so it is not shared. Its instances drop with the types that are no longer boxed.
+
+`ferroui-build-scan` reads the registrations of a `ValueTypeRegistration` implementation as it
+reads the body of a function, so the type models of the crates, and the compiled markup made from
+them, are unchanged.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after | Change |
+|---|---:|---:|---:|
+| `release` executable | 32.87 MB | 31.98 MB | -0.89 MB (-2.7 %) |
+| `dist` executable | 18.53 MB | 17.98 MB | -0.55 MB (-3.0 %) |
+| `nullable_operation` (instances) | 731 | 458 | -273 |
+| `register_conversion` closures (instances) | 484 | 0 | -484 (data, `fn` pointers) |
+| `any_value_eq` (instances) | 1,874 | 1,351 | -523 |
+
+The ControlCatalog page tour (127 pages) and the trimmed samples (HelloWorld, RenderDemo,
+VirtualizationDemo, BehaviorsGallery) ran with no conversion or registration error and the same
+binding messages as main; the `dist` build of hello world smoke-runs cleanly.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

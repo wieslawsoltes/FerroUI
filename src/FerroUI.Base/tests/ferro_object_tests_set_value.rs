@@ -166,7 +166,7 @@ fn untyped_conversion_temporary_drops_before_validation_or_coercion() {
             let writes = Rc::new(Cell::new(0));
             let conversion_dropped = dropped.clone();
             let conversion_writes = writes.clone();
-            ValueTypes::register_cast::<Input, Output>(move |_| Output {
+            ValueTypes::register_cast_with::<Input, Output>(move |_| Output {
                 number: 29,
                 temporary: true,
                 dropped: conversion_dropped.clone(),
@@ -248,7 +248,7 @@ fn untyped_conversion_releases_its_temporary_when_value_clone_panics() {
             let writes = Rc::new(Cell::new(0));
             let conversion_drops = drops.clone();
             let conversion_writes = writes.clone();
-            ValueTypes::register_cast::<Input, Output>(move |_| Output {
+            ValueTypes::register_cast_with::<Input, Output>(move |_| Output {
                 temporary: true,
                 drops: conversion_drops.clone(),
                 writes: conversion_writes.clone(),

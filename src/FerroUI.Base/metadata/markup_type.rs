@@ -944,6 +944,13 @@ pub struct MarkupType {
     /// It can differ from `this`/`value` for external-model descriptor carriers.
     /// Compiler-only, like the typed function and public-path tables.
     pub owner_rust_name: CompilerMetadata<Option<fn() -> &'static str>>,
+    /// Registers the declared type with the untyped value conversions when the metadata
+    /// becomes known (#566): the [`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)
+    /// of the type, when it has one, made a used type ([`ValueTypes::register_used`](crate::data::core::ValueTypes::register_used)).
+    /// The declaration macros state it; it does nothing for a type without registrations. It
+    /// runs once, when the metadata is first registered: as the value type of a property of a
+    /// registered type, as a type of an application, or with the tables of types.
+    pub value_types: Option<fn()>,
 }
 
 impl MarkupType {
@@ -980,6 +987,7 @@ impl MarkupType {
             this: not_recorded(),
             value: not_recorded(),
             owner_rust_name: not_recorded(),
+            value_types: None,
         }
     }
 
@@ -1350,6 +1358,11 @@ impl MarkupRegistry {
         }
         if let Some(nullable) = type_.nullable {
             self.by_nullable_handle.entry(nullable().id()).or_insert(type_);
+        }
+        // The value type is known, so it is used: its registrations with the untyped value
+        // conversions are made on every thread (#566).
+        if let Some(value_types) = type_.value_types {
+            value_types();
         }
         // Trimmed, the metadata of the value types of the properties is not in a table: it
         // is registered with the type, as a binding through a property finds it by handle.

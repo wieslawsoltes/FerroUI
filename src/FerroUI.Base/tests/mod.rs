@@ -63,6 +63,7 @@ mod ferro_property_tests;
 mod property_registration_tests;
 mod property_store;
 mod styled_property_tests;
+mod value_type_first_use_tests;
 mod virtual_dispatch_tests;
 
 /// Declares a test class without fields or overrides.

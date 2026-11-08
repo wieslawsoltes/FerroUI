@@ -212,25 +212,17 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::ItemsSource as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the contract handles that can be held in
-/// untyped values with the untyped value conversions of the current thread.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<Rc<dyn crate::notifications::INotification>>();
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Control>>>>();
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Inline>>>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IControlTemplate>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplateComponent>>();
     ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Ref<Control>>>>();
-    ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>();
-    ValueTypes::register_nullable::<Rc<dyn IWindowDrawnDecorationsTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ISelectionModel>>();
-    ValueTypes::register_nullable::<Rc<dyn IPopupHost>>();
-    // The data template contracts derive from the data template.
-    ValueTypes::register_nullable::<Rc<dyn ITreeDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn IRecyclingDataTemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn ITypedDataTemplate>>();
     ValueTypes::register_cast::<Rc<dyn ITreeDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());
     ValueTypes::register_cast::<Rc<dyn IRecyclingDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());
     ValueTypes::register_cast::<Rc<dyn ITypedDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());
@@ -239,3 +231,80 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<dyn ITemplateOf<Ref<Control>>>, Rc<dyn ITemplate>>(|t| t.clone());
     ValueTypes::register_cast::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>, Rc<dyn ITemplate>>(|t| t.clone());
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<dyn crate::notifications::INotification>();
+    ValueTypes::register_used::<dyn IControlTemplate>();
+    ValueTypes::register_used::<dyn ITemplateOf<Ref<Control>>>();
+    ValueTypes::register_used::<dyn ITemplateOf<Option<Ref<Panel>>>>();
+    ValueTypes::register_used::<dyn IWindowDrawnDecorationsTemplate>();
+    ValueTypes::register_used::<dyn ISelectionModel>();
+    ValueTypes::register_used::<dyn IPopupHost>();
+    ValueTypes::register_used::<dyn ITreeDataTemplate>();
+    ValueTypes::register_used::<dyn IRecyclingDataTemplate>();
+    ValueTypes::register_used::<dyn ITypedDataTemplate>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn crate::notifications::INotification {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::notifications::INotification>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn IControlTemplate {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IControlTemplate>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn ITemplateOf<Ref<Control>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Ref<Control>>>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn ITemplateOf<Option<Ref<Panel>>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Panel>>>>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn IWindowDrawnDecorationsTemplate {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IWindowDrawnDecorationsTemplate>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn ISelectionModel {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn ISelectionModel>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn IPopupHost {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IPopupHost>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn ITreeDataTemplate {
+    fn register_value_conversions() {
+        // The data template contracts derive from the data template.
+        ValueTypes::register_nullable::<Rc<dyn ITreeDataTemplate>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn IRecyclingDataTemplate {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IRecyclingDataTemplate>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn ITypedDataTemplate {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn ITypedDataTemplate>>();
+    }
+}
+

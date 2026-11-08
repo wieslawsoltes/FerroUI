@@ -402,78 +402,505 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <PopupPositionerConstraintAdjustment as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable form of each enumeration with the untyped value
-/// conversions of the current thread.
-pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<AccessibilityView>();
-    ValueTypes::register_nullable::<AutomationLiveSetting>();
-    ValueTypes::register_nullable::<ExpandCollapseState>();
-    ValueTypes::register_nullable::<IsOffscreenBehavior>();
-    ValueTypes::register_nullable::<AutomationControlType>();
-    ValueTypes::register_nullable::<AutomationLandmarkType>();
-    ValueTypes::register_nullable::<AutoCompleteFilterMode>();
-    ValueTypes::register_nullable::<BarLayoutBehavior>();
-    ValueTypes::register_nullable::<CalendarDatePickerFormat>();
-    ValueTypes::register_nullable::<CalendarMode>();
-    ValueTypes::register_nullable::<CalendarSelectionMode>();
-    ValueTypes::register_nullable::<ClickMode>();
-    ValueTypes::register_nullable::<CommandBarDefaultLabelPosition>();
-    ValueTypes::register_nullable::<CommandBarOverflowButtonVisibility>();
-    ValueTypes::register_nullable::<Dock>();
-    ValueTypes::register_nullable::<DrawerBehavior>();
-    ValueTypes::register_nullable::<DrawerLayoutBehavior>();
-    ValueTypes::register_nullable::<DrawerPlacement>();
-    ValueTypes::register_nullable::<ExpandDirection>();
-    ValueTypes::register_nullable::<FeedbackType>();
-    ValueTypes::register_nullable::<FlexAlignContent>();
-    ValueTypes::register_nullable::<FlexAlignItems>();
-    ValueTypes::register_nullable::<FlexBasisKind>();
-    ValueTypes::register_nullable::<FlexDirection>();
-    ValueTypes::register_nullable::<FlexJustifyContent>();
-    ValueTypes::register_nullable::<FlexWrap>();
-    ValueTypes::register_nullable::<FlyoutShowMode>();
-    ValueTypes::register_nullable::<GridResizeBehavior>();
-    ValueTypes::register_nullable::<GridResizeDirection>();
-    ValueTypes::register_nullable::<GridUnitType>();
-    ValueTypes::register_nullable::<InputPaneAwareBehavior>();
-    ValueTypes::register_nullable::<Location>();
-    ValueTypes::register_nullable::<MenuItemToggleType>();
-    ValueTypes::register_nullable::<NavigationType>();
-    ValueTypes::register_nullable::<PlacementMode>();
-    ValueTypes::register_nullable::<PlatformInhibitionType>();
-    ValueTypes::register_nullable::<RefreshVisualizerOrientation>();
-    ValueTypes::register_nullable::<RefreshVisualizerState>();
-    ValueTypes::register_nullable::<SelectionMode>();
-    ValueTypes::register_nullable::<ShutdownMode>();
-    ValueTypes::register_nullable::<SizeToContent>();
-    ValueTypes::register_nullable::<SpinDirection>();
-    ValueTypes::register_nullable::<SplitViewDisplayMode>();
-    ValueTypes::register_nullable::<SplitViewPanePlacement>();
-    ValueTypes::register_nullable::<TabPlacement>();
-    ValueTypes::register_nullable::<TickBarPlacement>();
-    ValueTypes::register_nullable::<TickPlacement>();
-    ValueTypes::register_nullable::<ValidSpinDirections>();
-    ValueTypes::register_nullable::<Win32HitTestValue>();
-    ValueTypes::register_nullable::<WindowCloseReason>();
-    ValueTypes::register_nullable::<WindowClosingBehavior>();
-    ValueTypes::register_nullable::<WindowCornerPreference>();
-    ValueTypes::register_nullable::<WindowDecorations>();
-    ValueTypes::register_nullable::<WindowEdge>();
-    ValueTypes::register_nullable::<WindowResizeReason>();
-    ValueTypes::register_nullable::<WindowStartupLocation>();
-    ValueTypes::register_nullable::<WindowState>();
-    ValueTypes::register_nullable::<WrapPanelItemsAlignment>();
-    ValueTypes::register_nullable::<TitleBarDecorations>();
-    ValueTypes::register_nullable::<Corners>();
-    ValueTypes::register_nullable::<NotificationPosition>();
-    ValueTypes::register_nullable::<NotificationType>();
-    ValueTypes::register_nullable::<X11NetWmWindowType>();
-    ValueTypes::register_nullable::<DateTimePickerPanelType>();
-    ValueTypes::register_nullable::<ScrollBarVisibility>();
-    ValueTypes::register_nullable::<ScrollEventType>();
-    ValueTypes::register_nullable::<SnapPointsAlignment>();
-    ValueTypes::register_nullable::<SnapPointsType>();
-    ValueTypes::register_nullable::<PopupAnchor>();
-    ValueTypes::register_nullable::<PopupGravity>();
-    ValueTypes::register_nullable::<PopupPositionerConstraintAdjustment>();
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<AccessibilityView>();
+    ValueTypes::register_used::<AutomationLiveSetting>();
+    ValueTypes::register_used::<ExpandCollapseState>();
+    ValueTypes::register_used::<IsOffscreenBehavior>();
+    ValueTypes::register_used::<AutomationControlType>();
+    ValueTypes::register_used::<AutomationLandmarkType>();
+    ValueTypes::register_used::<AutoCompleteFilterMode>();
+    ValueTypes::register_used::<BarLayoutBehavior>();
+    ValueTypes::register_used::<CalendarDatePickerFormat>();
+    ValueTypes::register_used::<CalendarMode>();
+    ValueTypes::register_used::<CalendarSelectionMode>();
+    ValueTypes::register_used::<ClickMode>();
+    ValueTypes::register_used::<CommandBarDefaultLabelPosition>();
+    ValueTypes::register_used::<CommandBarOverflowButtonVisibility>();
+    ValueTypes::register_used::<Dock>();
+    ValueTypes::register_used::<DrawerBehavior>();
+    ValueTypes::register_used::<DrawerLayoutBehavior>();
+    ValueTypes::register_used::<DrawerPlacement>();
+    ValueTypes::register_used::<ExpandDirection>();
+    ValueTypes::register_used::<FeedbackType>();
+    ValueTypes::register_used::<FlexAlignContent>();
+    ValueTypes::register_used::<FlexAlignItems>();
+    ValueTypes::register_used::<FlexBasisKind>();
+    ValueTypes::register_used::<FlexDirection>();
+    ValueTypes::register_used::<FlexJustifyContent>();
+    ValueTypes::register_used::<FlexWrap>();
+    ValueTypes::register_used::<FlyoutShowMode>();
+    ValueTypes::register_used::<GridResizeBehavior>();
+    ValueTypes::register_used::<GridResizeDirection>();
+    ValueTypes::register_used::<GridUnitType>();
+    ValueTypes::register_used::<InputPaneAwareBehavior>();
+    ValueTypes::register_used::<Location>();
+    ValueTypes::register_used::<MenuItemToggleType>();
+    ValueTypes::register_used::<NavigationType>();
+    ValueTypes::register_used::<PlacementMode>();
+    ValueTypes::register_used::<PlatformInhibitionType>();
+    ValueTypes::register_used::<RefreshVisualizerOrientation>();
+    ValueTypes::register_used::<RefreshVisualizerState>();
+    ValueTypes::register_used::<SelectionMode>();
+    ValueTypes::register_used::<ShutdownMode>();
+    ValueTypes::register_used::<SizeToContent>();
+    ValueTypes::register_used::<SpinDirection>();
+    ValueTypes::register_used::<SplitViewDisplayMode>();
+    ValueTypes::register_used::<SplitViewPanePlacement>();
+    ValueTypes::register_used::<TabPlacement>();
+    ValueTypes::register_used::<TickBarPlacement>();
+    ValueTypes::register_used::<TickPlacement>();
+    ValueTypes::register_used::<ValidSpinDirections>();
+    ValueTypes::register_used::<Win32HitTestValue>();
+    ValueTypes::register_used::<WindowCloseReason>();
+    ValueTypes::register_used::<WindowClosingBehavior>();
+    ValueTypes::register_used::<WindowCornerPreference>();
+    ValueTypes::register_used::<WindowDecorations>();
+    ValueTypes::register_used::<WindowEdge>();
+    ValueTypes::register_used::<WindowResizeReason>();
+    ValueTypes::register_used::<WindowStartupLocation>();
+    ValueTypes::register_used::<WindowState>();
+    ValueTypes::register_used::<WrapPanelItemsAlignment>();
+    ValueTypes::register_used::<TitleBarDecorations>();
+    ValueTypes::register_used::<Corners>();
+    ValueTypes::register_used::<NotificationPosition>();
+    ValueTypes::register_used::<NotificationType>();
+    ValueTypes::register_used::<X11NetWmWindowType>();
+    ValueTypes::register_used::<DateTimePickerPanelType>();
+    ValueTypes::register_used::<ScrollBarVisibility>();
+    ValueTypes::register_used::<ScrollEventType>();
+    ValueTypes::register_used::<SnapPointsAlignment>();
+    ValueTypes::register_used::<SnapPointsType>();
+    ValueTypes::register_used::<PopupAnchor>();
+    ValueTypes::register_used::<PopupGravity>();
+    ValueTypes::register_used::<PopupPositionerConstraintAdjustment>();
 }
+
+impl ferroui_base::data::core::ValueTypeRegistration for AccessibilityView {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AccessibilityView>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AutomationLiveSetting {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AutomationLiveSetting>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ExpandCollapseState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ExpandCollapseState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for IsOffscreenBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<IsOffscreenBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AutomationControlType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AutomationControlType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AutomationLandmarkType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AutomationLandmarkType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AutoCompleteFilterMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AutoCompleteFilterMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for BarLayoutBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BarLayoutBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CalendarDatePickerFormat {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CalendarDatePickerFormat>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CalendarMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CalendarMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CalendarSelectionMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CalendarSelectionMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ClickMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ClickMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CommandBarDefaultLabelPosition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CommandBarDefaultLabelPosition>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CommandBarOverflowButtonVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CommandBarOverflowButtonVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Dock {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Dock>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DrawerBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DrawerBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DrawerLayoutBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DrawerLayoutBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DrawerPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DrawerPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ExpandDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ExpandDirection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FeedbackType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FeedbackType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexAlignContent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexAlignContent>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexAlignItems {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexAlignItems>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexBasisKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexBasisKind>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexDirection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexJustifyContent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexJustifyContent>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlexWrap {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlexWrap>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlyoutShowMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlyoutShowMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for GridResizeBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GridResizeBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for GridResizeDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GridResizeDirection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for GridUnitType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GridUnitType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for InputPaneAwareBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<InputPaneAwareBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Location {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Location>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for MenuItemToggleType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<MenuItemToggleType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PlacementMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlacementMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PlatformInhibitionType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlatformInhibitionType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RefreshVisualizerOrientation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RefreshVisualizerOrientation>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RefreshVisualizerState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RefreshVisualizerState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SelectionMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SelectionMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ShutdownMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ShutdownMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SizeToContent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SizeToContent>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SpinDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SpinDirection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SplitViewDisplayMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SplitViewDisplayMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SplitViewPanePlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SplitViewPanePlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TabPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TabPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TickBarPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TickBarPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TickPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TickPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ValidSpinDirections {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ValidSpinDirections>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Win32HitTestValue {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Win32HitTestValue>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowCloseReason {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowCloseReason>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowClosingBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowClosingBehavior>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowCornerPreference {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowCornerPreference>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowDecorations {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowDecorations>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowEdge {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowEdge>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowResizeReason {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowResizeReason>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowStartupLocation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowStartupLocation>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WrapPanelItemsAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WrapPanelItemsAlignment>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TitleBarDecorations {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TitleBarDecorations>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Corners {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Corners>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NotificationPosition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NotificationPosition>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NotificationType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NotificationType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for X11NetWmWindowType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<X11NetWmWindowType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DateTimePickerPanelType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DateTimePickerPanelType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ScrollBarVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ScrollBarVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ScrollEventType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ScrollEventType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SnapPointsAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SnapPointsAlignment>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SnapPointsType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SnapPointsType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PopupAnchor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PopupAnchor>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PopupGravity {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PopupGravity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PopupPositionerConstraintAdjustment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PopupPositionerConstraintAdjustment>();
+    }
+}
+

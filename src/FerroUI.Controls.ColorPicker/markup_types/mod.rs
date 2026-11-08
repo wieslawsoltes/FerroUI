@@ -23,13 +23,14 @@ pub(crate) fn register() {
         MarkupType::register_table(types);
     }
     ValueTypes::register_global(register_value_types);
+    ValueTypes::register_table(enums::register_value_type_table);
     palettes::PaletteColorList::register();
 }
 
 /// Registers what the untyped value conversions need to know about the
-/// types declared in this module.
+/// types declared in this module. The enumerations register when they are first used
+/// (`enums.rs`, #566); with the tables of types, all of them at start-up.
 fn register_value_types() {
-    enums::register_value_types();
     classes::register_value_types();
     converters::register_value_types();
     palettes::register_value_types();

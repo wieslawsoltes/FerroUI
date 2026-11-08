@@ -1060,97 +1060,20 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>> as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the types that can be held in untyped
-/// values with the untyped value conversions of the current thread.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<&'static TypeInfo>();
     ValueTypes::register_nullable::<&'static FerroProperty>();
-    // The vectors of the element types markup has arrays of (the elements of the runtime
-    // library and the values the markup compiler parses a list of): a property that holds
-    // one is null without it (`Option<Vec<T>>`). The run-time XAML loader states the same
-    // nine when its type system is created; a process that loads compiled markup alone
-    // never creates one, and reads such a property all the same.
-    ValueTypes::register_nullable::<Vec<bool>>();
-    ValueTypes::register_nullable::<Vec<u8>>();
-    ValueTypes::register_nullable::<Vec<i32>>();
-    ValueTypes::register_nullable::<Vec<i64>>();
-    ValueTypes::register_nullable::<Vec<f32>>();
-    ValueTypes::register_nullable::<Vec<f64>>();
-    ValueTypes::register_nullable::<Vec<String>>();
-    ValueTypes::register_nullable::<Vec<Point>>();
-    ValueTypes::register_nullable::<Vec<BoxedValue>>();
-    ValueTypes::register_nullable::<Rc<NumberFormatInfo>>();
-    ValueTypes::register_nullable::<Transitions>();
-    ValueTypes::register_nullable::<GradientStops>();
-    ValueTypes::register_nullable::<PathFigures>();
-    ValueTypes::register_nullable::<PathSegments>();
-    ValueTypes::register_nullable::<Points>();
-    ValueTypes::register_nullable::<GeometryCollection>();
-    ValueTypes::register_nullable::<Transforms>();
-    ValueTypes::register_nullable::<DrawingCollection>();
     ValueTypes::register_nullable::<MediaCollection<f64>>();
     ValueTypes::register_nullable::<RoutedEvent>();
-    ValueTypes::register_nullable::<FerroList<Point>>();
-    ValueTypes::register_nullable::<FerroList<String>>();
-    ValueTypes::register_nullable::<FerroList<Ref<GradientStop>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn ITransition>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<KeyFrame>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<InputScopeName>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<PathFigure>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<PathSegment>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Drawing>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Transform>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<Geometry>>>();
     ValueTypes::register_nullable::<Selector>();
     ValueTypes::register_nullable::<StyleQuery>();
-    ValueTypes::register_nullable::<StyleChildren>();
-    ValueTypes::register_nullable::<KeyFrames>();
-    ValueTypes::register_nullable::<GestureRecognizerCollection>();
-    ValueTypes::register_nullable::<Rc<Setter>>();
-    ValueTypes::register_nullable::<Rc<TargetPropertyPath>>();
     ValueTypes::register_nullable::<Rc<RelativeSource>>();
-    ValueTypes::register_nullable::<Rc<CompiledBinding>>();
-    ValueTypes::register_nullable::<Rc<ReflectionBinding>>();
-    ValueTypes::register_nullable::<Rc<MultiBinding>>();
-    ValueTypes::register_nullable::<Rc<TemplateBinding>>();
-    ValueTypes::register_nullable::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimationSetter>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IResourceProvider>>>();
-    ValueTypes::register_nullable::<FerroList<Ref<KeyBinding>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn SetterBase>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimation>>>();
-    ValueTypes::register_nullable::<FerroList<Rc<dyn BindingBase>>>();
-    // A named collection is the list it derives from: the same list, so that the members
-    // of the list (`Capacity`) are reached through the collection.
-    ValueTypes::register_cast::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| (**c).clone());
-    ValueTypes::register_cast::<Transitions, FerroList<Rc<dyn ITransition>>>(|c| (**c).clone());
-    ValueTypes::register_cast::<GradientStops, FerroList<Ref<GradientStop>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<PathFigures, FerroList<Ref<PathFigure>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<PathSegments, FerroList<Ref<PathSegment>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<Points, FerroList<Point>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<GeometryCollection, FerroList<Ref<Geometry>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<Transforms, FerroList<Ref<Transform>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<DrawingCollection, FerroList<Ref<Drawing>>>(|c| (**c.list()).clone());
-    ValueTypes::register_cast::<crate::media::FontFeatureCollection, FerroList<crate::media::FontFeature>>(|c| {
-        (**c.list()).clone()
-    });
-    ValueTypes::register_cast::<crate::media::TextDecorationCollection, FerroList<Ref<crate::media::TextDecoration>>>(
-        |c| (**c.list()).clone(),
-    );
-    // The named collections whose Rust type dereferences to the list: generated code
-    // passes a reference to such a collection where a member of the list takes the list.
-    ValueTypes::register_deref::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| c);
-    ValueTypes::register_deref::<Transitions, FerroList<Rc<dyn ITransition>>>(|c| c);
-    ValueTypes::register_nullable::<FerroList<crate::media::FontFeature>>();
-    ValueTypes::register_nullable::<FerroList<Ref<crate::media::TextDecoration>>>();
-    // A list of transform operations is a transform.
-    ValueTypes::register_nullable::<Rc<TransformOperations>>();
-    ValueTypes::register_nullable::<Rc<crate::media::FontManager>>();
     ValueTypes::register_cast::<Rc<TransformOperations>, Rc<dyn crate::media::ITransform>>(|operations| operations.clone());
-    // A converter is a converter contract.
-    ValueTypes::register_nullable::<Rc<DefaultValueConverter>>();
-    ValueTypes::register_nullable::<Rc<StringFormatValueConverter>>();
-    ValueTypes::register_nullable::<Rc<StringFormatMultiValueConverter>>();
     ValueTypes::register_cast::<Rc<DefaultValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     ValueTypes::register_cast::<Rc<StringFormatValueConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     ValueTypes::register_cast::<Rc<StringFormatMultiValueConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
@@ -1163,3 +1086,413 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<MultiBinding>, Rc<dyn BindingBase>>(|binding| binding.clone());
     ValueTypes::register_cast::<Rc<TemplateBinding>, Rc<dyn BindingBase>>(|binding| binding.clone());
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<Vec<bool>>();
+    ValueTypes::register_used::<Vec<u8>>();
+    ValueTypes::register_used::<Vec<i32>>();
+    ValueTypes::register_used::<Vec<i64>>();
+    ValueTypes::register_used::<Vec<f32>>();
+    ValueTypes::register_used::<Vec<f64>>();
+    ValueTypes::register_used::<Vec<String>>();
+    ValueTypes::register_used::<Vec<Point>>();
+    ValueTypes::register_used::<Vec<BoxedValue>>();
+    ValueTypes::register_used::<NumberFormatInfo>();
+    ValueTypes::register_used::<Transitions>();
+    ValueTypes::register_used::<GradientStops>();
+    ValueTypes::register_used::<PathFigures>();
+    ValueTypes::register_used::<PathSegments>();
+    ValueTypes::register_used::<Points>();
+    ValueTypes::register_used::<GeometryCollection>();
+    ValueTypes::register_used::<Transforms>();
+    ValueTypes::register_used::<DrawingCollection>();
+    ValueTypes::register_used::<FerroList<Point>>();
+    ValueTypes::register_used::<FerroList<String>>();
+    ValueTypes::register_used::<FerroList<Ref<GradientStop>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn ITransition>>>();
+    ValueTypes::register_used::<FerroList<Ref<KeyFrame>>>();
+    ValueTypes::register_used::<FerroList<Ref<InputScopeName>>>();
+    ValueTypes::register_used::<FerroList<Ref<PathFigure>>>();
+    ValueTypes::register_used::<FerroList<Ref<PathSegment>>>();
+    ValueTypes::register_used::<FerroList<Ref<Drawing>>>();
+    ValueTypes::register_used::<FerroList<Ref<Transform>>>();
+    ValueTypes::register_used::<FerroList<Ref<Geometry>>>();
+    ValueTypes::register_used::<StyleChildren>();
+    ValueTypes::register_used::<KeyFrames>();
+    ValueTypes::register_used::<GestureRecognizerCollection>();
+    ValueTypes::register_used::<Setter>();
+    ValueTypes::register_used::<TargetPropertyPath>();
+    ValueTypes::register_used::<CompiledBinding>();
+    ValueTypes::register_used::<ReflectionBinding>();
+    ValueTypes::register_used::<MultiBinding>();
+    ValueTypes::register_used::<TemplateBinding>();
+    ValueTypes::register_used::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn IAnimationSetter>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn IResourceProvider>>>();
+    ValueTypes::register_used::<FerroList<Ref<KeyBinding>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn SetterBase>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn IAnimation>>>();
+    ValueTypes::register_used::<FerroList<Rc<dyn BindingBase>>>();
+    ValueTypes::register_used::<crate::media::FontFeatureCollection>();
+    ValueTypes::register_used::<crate::media::TextDecorationCollection>();
+    ValueTypes::register_used::<FerroList<crate::media::FontFeature>>();
+    ValueTypes::register_used::<FerroList<Ref<crate::media::TextDecoration>>>();
+    ValueTypes::register_used::<TransformOperations>();
+    ValueTypes::register_used::<crate::media::FontManager>();
+    ValueTypes::register_used::<DefaultValueConverter>();
+    ValueTypes::register_used::<StringFormatValueConverter>();
+    ValueTypes::register_used::<StringFormatMultiValueConverter>();
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<bool> {
+    fn register_value_conversions() {
+        // The vectors of the element types markup has arrays of (the elements of the runtime
+        // library and the values the markup compiler parses a list of): a property that holds
+        // one is null without it (`Option<Vec<T>>`). The run-time XAML loader states the same
+        // nine when its type system is created; a process that loads compiled markup alone
+        // never creates one, and reads such a property all the same.
+        ValueTypes::register_nullable::<Vec<bool>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<u8> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<u8>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<i32> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<i32>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<i64> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<i64>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<f32> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<f32>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<f64> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<f64>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<String> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<String>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<Point> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<Point>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vec<BoxedValue> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vec<BoxedValue>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for NumberFormatInfo {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<NumberFormatInfo>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Transitions {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Transitions>();
+        ValueTypes::register_cast::<Transitions, FerroList<Rc<dyn ITransition>>>(|c| (**c).clone());
+        ValueTypes::register_deref::<Transitions, FerroList<Rc<dyn ITransition>>>(|c| c);
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GradientStops {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GradientStops>();
+        ValueTypes::register_cast::<GradientStops, FerroList<Ref<GradientStop>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PathFigures {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PathFigures>();
+        ValueTypes::register_cast::<PathFigures, FerroList<Ref<PathFigure>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PathSegments {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PathSegments>();
+        ValueTypes::register_cast::<PathSegments, FerroList<Ref<PathSegment>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Points {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Points>();
+        ValueTypes::register_cast::<Points, FerroList<Point>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GeometryCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GeometryCollection>();
+        ValueTypes::register_cast::<GeometryCollection, FerroList<Ref<Geometry>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Transforms {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Transforms>();
+        ValueTypes::register_cast::<Transforms, FerroList<Ref<Transform>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DrawingCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DrawingCollection>();
+        ValueTypes::register_cast::<DrawingCollection, FerroList<Ref<Drawing>>>(|c| (**c.list()).clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Point> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Point>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<String> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<String>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<GradientStop>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<GradientStop>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn ITransition>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn ITransition>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<KeyFrame>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<KeyFrame>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<InputScopeName>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<InputScopeName>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<PathFigure>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<PathFigure>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<PathSegment>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<PathSegment>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<Drawing>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<Drawing>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<Transform>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<Transform>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<Geometry>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<Geometry>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StyleChildren {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<StyleChildren>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyFrames {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<KeyFrames>();
+        // A named collection is the list it derives from: the same list, so that the members
+        // of the list (`Capacity`) are reached through the collection.
+        ValueTypes::register_cast::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| (**c).clone());
+        // The named collections whose Rust type dereferences to the list: generated code
+        // passes a reference to such a collection where a member of the list takes the list.
+        ValueTypes::register_deref::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| c);
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GestureRecognizerCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GestureRecognizerCollection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Setter {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<Setter>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TargetPropertyPath {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<TargetPropertyPath>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CompiledBinding {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CompiledBinding>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ReflectionBinding {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ReflectionBinding>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for MultiBinding {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<MultiBinding>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TemplateBinding {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<TemplateBinding>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn IAnimationSetter>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimationSetter>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn IResourceProvider>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn IResourceProvider>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<KeyBinding>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<KeyBinding>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn SetterBase>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn SetterBase>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn IAnimation>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn IAnimation>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Rc<dyn BindingBase>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Rc<dyn BindingBase>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::media::FontFeatureCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_cast::<crate::media::FontFeatureCollection, FerroList<crate::media::FontFeature>>(|c| {
+            (**c.list()).clone()
+        });
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::media::TextDecorationCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_cast::<crate::media::TextDecorationCollection, FerroList<Ref<crate::media::TextDecoration>>>(
+            |c| (**c.list()).clone(),
+        );
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<crate::media::FontFeature> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<crate::media::FontFeature>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FerroList<Ref<crate::media::TextDecoration>> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FerroList<Ref<crate::media::TextDecoration>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TransformOperations {
+    fn register_value_conversions() {
+        // A list of transform operations is a transform.
+        ValueTypes::register_nullable::<Rc<TransformOperations>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::media::FontManager {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<crate::media::FontManager>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DefaultValueConverter {
+    fn register_value_conversions() {
+        // A converter is a converter contract.
+        ValueTypes::register_nullable::<Rc<DefaultValueConverter>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StringFormatValueConverter {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<StringFormatValueConverter>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StringFormatMultiValueConverter {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<StringFormatMultiValueConverter>>();
+    }
+}
+

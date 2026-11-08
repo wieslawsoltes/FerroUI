@@ -50,17 +50,89 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <LetterCase as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types of [`MARKUP_TYPES`].
-pub(crate) fn register_value_types() {
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(crate) fn register_value_type_table() {
     use ferroui_base::data::core::ValueTypes;
-    ValueTypes::register_nullable::<RichEditClipboardFormat>();
-    ValueTypes::register_nullable::<FindOptions>();
-    ValueTypes::register_nullable::<RangeGravity>();
-    ValueTypes::register_nullable::<SelectionOptions>();
-    ValueTypes::register_nullable::<SelectionType>();
-    ValueTypes::register_nullable::<TextGetOptions>();
-    ValueTypes::register_nullable::<TextSetOptions>();
-    ValueTypes::register_nullable::<TextStreamEncoding>();
-    ValueTypes::register_nullable::<TextRangeUnit>();
-    ValueTypes::register_nullable::<LetterCase>();
+    ValueTypes::register_used::<RichEditClipboardFormat>();
+    ValueTypes::register_used::<FindOptions>();
+    ValueTypes::register_used::<RangeGravity>();
+    ValueTypes::register_used::<SelectionOptions>();
+    ValueTypes::register_used::<SelectionType>();
+    ValueTypes::register_used::<TextGetOptions>();
+    ValueTypes::register_used::<TextSetOptions>();
+    ValueTypes::register_used::<TextStreamEncoding>();
+    ValueTypes::register_used::<TextRangeUnit>();
+    ValueTypes::register_used::<LetterCase>();
 }
+
+impl ferroui_base::data::core::ValueTypeRegistration for RichEditClipboardFormat {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<RichEditClipboardFormat>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FindOptions {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<FindOptions>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RangeGravity {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<RangeGravity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SelectionOptions {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<SelectionOptions>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SelectionType {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<SelectionType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextGetOptions {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextGetOptions>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextSetOptions {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextSetOptions>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextStreamEncoding {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextStreamEncoding>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextRangeUnit {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextRangeUnit>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for LetterCase {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<LetterCase>();
+    }
+}
+
