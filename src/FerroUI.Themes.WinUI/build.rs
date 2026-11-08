@@ -137,9 +137,6 @@ fn main() {
     let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        // Every `{Binding}` of the theme is a compiled binding (#603, docs/xaml-themes.md 4.5):
-        // a binding whose source type cannot be known is an explicit `{ReflectionBinding}`.
-        .default_compile_bindings(true)
         .compile_group(
             ferroui_build::XamlGroup::new("compiled_xaml")
                 .documents(&documents)

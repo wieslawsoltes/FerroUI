@@ -62,7 +62,9 @@ const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build"];
 /// The build of a sample.
 pub struct SampleBuild {
     assembly_name: String,
-    default_compile_bindings: bool,
+    /// What the sample states for compiled bindings ([`Self::default_compile_bindings`]); the
+    /// default of the build without the call.
+    default_compile_bindings: Option<bool>,
     not_compared: Vec<(String, String)>,
     refused: Vec<(String, String)>,
     feature_documents: Vec<(String, String)>,
@@ -74,7 +76,7 @@ impl SampleBuild {
     pub fn new(assembly_name: &str) -> Self {
         Self {
             assembly_name: assembly_name.to_string(),
-            default_compile_bindings: true,
+            default_compile_bindings: None,
             not_compared: Vec::new(),
             refused: Vec::new(),
             feature_documents: Vec::new(),
@@ -82,10 +84,12 @@ impl SampleBuild {
     }
 
     /// Whether the bindings of a document are compiled when the document does not say
-    /// (the compiled-bindings default of the upstream project file; true by default, as the
-    /// samples of the upstream repository are built).
+    /// (the compiled-bindings default of the upstream project file). Without the call the
+    /// default of the build applies: compiled bindings (#603), as the samples of the upstream
+    /// repository are built, unless the manifest of the sample says
+    /// `[package.metadata.ferroui] compile-bindings = false`, which wins over this call.
     pub fn default_compile_bindings(mut self, value: bool) -> Self {
-        self.default_compile_bindings = value;
+        self.default_compile_bindings = Some(value);
         self
     }
 
@@ -219,7 +223,10 @@ impl SampleBuild {
         let every: Vec<(&str, &str)> = documents.iter().map(|(path, text)| (path.trim_start_matches('/'), text.as_str())).collect();
         let named: Vec<(&str, &str)> =
             every.iter().copied().filter(|(name, _)| !self.refused.iter().any(|(refused, _)| refused == name)).collect();
-        let mut build = Build::from_env().type_system(TypeSystem::Model).default_compile_bindings(self.default_compile_bindings);
+        let mut build = Build::from_env().type_system(TypeSystem::Model);
+        if let Some(value) = self.default_compile_bindings {
+            build = build.default_compile_bindings(value);
+        }
         for (name, text) in &named {
             // A document that includes another one of the sample is given every document, of
             // which the compiler takes the ones it includes.

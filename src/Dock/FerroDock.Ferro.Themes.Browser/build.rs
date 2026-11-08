@@ -38,7 +38,6 @@ fn main() {
         .collect();
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true)
         .compile_group(
             ferroui_build::XamlGroup::new("compiled_xaml")
                 .documents(&source)

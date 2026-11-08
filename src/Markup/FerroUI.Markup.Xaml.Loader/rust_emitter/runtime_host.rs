@@ -242,9 +242,7 @@ pub fn generate_class_file(
 /// value of its metadata entry `FerroUseCompiledBindingsByDefault` (`"True"` or `"False"`), and
 /// compiled bindings, the default of the build (#603), when it states none.
 fn compiles_bindings_by_default(assembly: Option<&'static ferroui_base::metadata::MarkupAssembly>) -> bool {
-    assembly
-        .and_then(|assembly| assembly.metadata_value(ferroui_base::metadata::MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT))
-        .map_or(true, |value| value.trim().eq_ignore_ascii_case("true"))
+    assembly.is_none_or(ferroui_base::metadata::MarkupAssembly::compiles_bindings_by_default)
 }
 
 #[cfg(test)]

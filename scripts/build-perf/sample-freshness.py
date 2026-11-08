@@ -307,8 +307,18 @@ def main() -> int:
 
     save()
     try:
-        if report["sources"]["baseline"]["sample_inputs"] != report["sources"]["candidate"]["sample_inputs"]:
-            raise RuntimeError("Sample input files differ between revisions; select equivalent workloads")
+        baseline_inputs = report["sources"]["baseline"]["sample_inputs"]
+        candidate_inputs = report["sources"]["candidate"]["sample_inputs"]
+        if baseline_inputs != candidate_inputs:
+            # A change that acknowledges its output changes may change the samples it builds; the
+            # report names the files, and the repeated builds still compare unchanged rebuilds.
+            changed = sorted(path for path in baseline_inputs.keys() | candidate_inputs.keys()
+                             if baseline_inputs.get(path) != candidate_inputs.get(path))
+            report["changed_sample_inputs"] = changed
+            save()
+            if not args.accept_output_changes:
+                raise RuntimeError("Sample input files differ between revisions; select equivalent workloads "
+                                   "or acknowledge the output changes: " + ", ".join(changed))
         if not args.offline:
             for source in sources.values():
                 subprocess.run(["cargo", "fetch", "--locked"], cwd=source, env=env, check=True)

@@ -29,8 +29,8 @@ the documents of the theme and a Rust class (`WinUITheme`). Its `build.rs` does 
 
 1. **Embeds the documents that are not compiled** as assets. `Controls/excluded.txt` lists the
    control documents that are not merged into the theme yet, and why.
-2. **Compiles the theme** with `ferroui_build::Build::from_env().type_system(TypeSystem::Model)`
-   and `.default_compile_bindings(true)` (every `{Binding}` is a compiled binding, section 4.5).
+2. **Compiles the theme** with `ferroui_build::Build::from_env().type_system(TypeSystem::Model)`.
+   Every `{Binding}` is a compiled binding, the default of the build (section 4.5).
    It compiles one group: the document of the class (`WinUITheme.xaml`) and every document it
    includes. The compilation runs against type models, not a running program. The models are the
    scan of the crate's own sources and the `.xamlmeta` files of the crates it depends on. The
@@ -238,8 +238,22 @@ and the templates of `FerroUI/templates`. Opt out per crate with
 `ferroui_build::Build::default_compile_bindings(false)` (the manifest key, when it is there, wins
 over the call of the build script), and per element with `x:CompileBindings="False"`. The class
 file the reference tests of a theme generate (`generate_class_file`) compiles bindings unless the
-assembly states `FerroUseCompiledBindingsByDefault = False` in its metadata. Hot reload and the
-designer compile a reloaded document with the application's setting, so it binds the same way.
+assembly states `FerroUseCompiledBindingsByDefault = False` in its metadata. A build script
+does not call `default_compile_bindings(true)`: it is the default.
+
+Documents loaded at run time bind the way the built application does (#604):
+
+- **Hot reload.** The hot-reload manifest the build writes records the setting of the build
+  (`"compile_bindings"`), and `ReloadManifest::configuration(assembly)` is the configuration of the
+  run-time loader for the reloaded documents.
+- **The previewer of the designer** (`DesignWindowLoader`) and other run-time loads of the
+  documents of an application (`RuntimeXamlLoaderConfiguration::for_assembly`) read the metadata
+  of the application's assembly (`MarkupAssembly::compiles_bindings_by_default`): compiled
+  bindings, unless `FerroUseCompiledBindingsByDefault` is `False`. The build does not write the
+  `MarkupAssembly` static of a crate, so a crate that opts out with `compile-bindings = false`
+  states `False` in its metadata as well, for the previewer to follow it.
+- A configuration made with `RuntimeXamlLoaderConfiguration::new()` keeps upstream's default
+  (reflection bindings), for documents that belong to no application.
 
 ## 6. Porting a theme from upstream
 
@@ -294,7 +308,7 @@ designer compile a reloaded document with the application's setting, so it binds
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, inherited resource documents as units | #568 | In review |
 | Compiled bindings in all themes | #603 | In review |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |
-| Samples, sample apps and component samples on compiled bindings | #604 | Planned |
+| Samples, sample apps and component samples on compiled bindings; no explicit `default_compile_bindings(true)`; hot reload and the previewer follow the application's setting | #604 | In review |
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
 | `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |

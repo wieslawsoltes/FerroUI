@@ -1,7 +1,6 @@
 fn main() {
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true)
         .compile_group(ferroui_build::XamlGroup::new("compiled_app").class_document("App.xaml"))
         .compile_group(
             ferroui_build::XamlGroup::new("compiled_main_window").class_document("MainWindow.xaml"),

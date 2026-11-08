@@ -43,7 +43,6 @@ fn main() {
         .collect();
     ferroui_build::Build::from_env()
         .type_system(ferroui_build::TypeSystem::Model)
-        .default_compile_bindings(true)
         .embed_assets(&["Assets"])
         .compile_group(
             ferroui_build::XamlGroup::new("compiled_xaml")

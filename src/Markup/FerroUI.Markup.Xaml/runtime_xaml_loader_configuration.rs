@@ -17,7 +17,9 @@ pub struct RuntimeXamlLoaderConfiguration {
     pub local_assembly: Option<&'static MarkupAssembly>,
 
     /// Whether `{Binding}` is a compiled binding unless the document says
-    /// otherwise. Default is `false`.
+    /// otherwise. Default is `false`, as upstream; a configuration for the
+    /// documents of an application ([`for_assembly`](Self::for_assembly))
+    /// takes it from the assembly, as the build does.
     pub use_compiled_bindings_by_default: bool,
 
     /// Whether the document is loaded for a designer. Default is `false`.
@@ -32,6 +34,24 @@ pub struct RuntimeXamlLoaderConfiguration {
 impl RuntimeXamlLoaderConfiguration {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// A configuration for the documents of `assembly` (its
+    /// [`local_assembly`](Self::local_assembly)), whose `{Binding}` compiles as
+    /// the build compiles the documents of the assembly: compiled bindings,
+    /// unless the metadata of the assembly states otherwise
+    /// ([`MarkupAssembly::compiles_bindings_by_default`]).
+    ///
+    /// Not from upstream (#604): the configuration a run-time load of a
+    /// document of an application starts from (hot reload, the previewer of
+    /// the designer, a test that loads the documents of a sample), so that the
+    /// document binds as the built application does.
+    pub fn for_assembly(assembly: &'static MarkupAssembly) -> Self {
+        Self {
+            local_assembly: Some(assembly),
+            use_compiled_bindings_by_default: assembly.compiles_bindings_by_default(),
+            ..Self::default()
+        }
     }
 
     /// Whether source information (document, line, position) is attached to
@@ -160,6 +180,37 @@ mod tests {
         configuration.local_assembly = Some(&DISABLED);
         configuration.set_create_source_info(true);
         assert!(configuration.create_source_info());
+    }
+
+    /// Not from upstream (#604): a configuration for an assembly compiles its
+    /// bindings as the build does, unless the assembly opts out.
+    #[test]
+    fn a_configuration_for_an_assembly_compiles_bindings_as_the_build_does() {
+        static SILENT: MarkupAssembly = MarkupAssembly {
+            name: "Tests.Bindings.Silent",
+            crate_name: "tests_bindings_silent",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[],
+        };
+        static OPTED_OUT: MarkupAssembly = MarkupAssembly {
+            name: "Tests.Bindings.OptedOut",
+            crate_name: "tests_bindings_opted_out",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "False")],
+        };
+
+        let configuration = RuntimeXamlLoaderConfiguration::for_assembly(&SILENT);
+        assert!(std::ptr::eq(configuration.local_assembly.expect("the assembly"), &SILENT));
+        assert!(configuration.use_compiled_bindings_by_default);
+        assert!(!configuration.design_mode);
+
+        let configuration = RuntimeXamlLoaderConfiguration::for_assembly(&OPTED_OUT);
+        assert!(!configuration.use_compiled_bindings_by_default);
+
+        // Without an assembly the default stays upstream's.
+        assert!(!RuntimeXamlLoaderConfiguration::new().use_compiled_bindings_by_default);
     }
 
     #[test]

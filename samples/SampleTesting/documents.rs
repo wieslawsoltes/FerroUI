@@ -32,11 +32,9 @@ fn document(sample: &Sample, xaml: &str, path: Option<&str>) -> Result<RuntimeXa
 }
 
 fn configuration(sample: &'static Sample) -> RuntimeXamlLoaderConfiguration {
-    let mut configuration = RuntimeXamlLoaderConfiguration::new();
-    configuration.local_assembly = Some(sample.assembly);
-    // The upstream samples are built with compiled bindings as the default of their documents.
-    configuration.use_compiled_bindings_by_default = true;
-    configuration
+    // The documents bind as the build of the sample compiles them: compiled bindings, unless its
+    // assembly says otherwise (#604).
+    RuntimeXamlLoaderConfiguration::for_assembly(sample.assembly)
 }
 
 fn embedded_text(sample: &Sample, path: &str) -> Result<&'static str, XamlLoadError> {
