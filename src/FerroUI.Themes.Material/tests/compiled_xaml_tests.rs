@@ -56,7 +56,7 @@ fn without(name: &str) -> &'static [&'static ThemeUnit] {
 fn the_whole_theme_applies_every_unit() {
     let _app = start();
     let units = crate::compiled_xaml::THEME_UNITS;
-    assert!(units.len() > 150, "{} units", units.len());
+    assert!(units.len() > 100, "{} units", units.len());
     for (position, unit) in units.iter().enumerate() {
         assert_eq!(unit.index as usize, position, "{unit:?}");
     }
@@ -122,37 +122,6 @@ fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
     assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
-/// An inherited resource document is a unit of its own: a theme without it has none of its keys,
-/// in any variant, and the color schemes and the motion resources are set as in the full theme.
-#[test]
-fn a_theme_with_parts_leaves_out_an_inherited_resource_document() {
-    let _app = start();
-    let key = ResourceKey::from("RatingControlSelectedForeground");
-    // The trimmed theme is checked before the full one is constructed: the populate of the class
-    // makes its table the active one (#568, step 3).
-    let trimmed = MaterialTheme::with_parts(None, without("Resources/RatingControl_themeresources.xaml"));
-    for variant in variants() {
-        assert!(trimmed.try_get_resource(&key, Some(&variant)).is_none(), "{key:?} in {variant:?} is left out");
-    }
-    let primary = trimmed.try_get_resource(&ResourceKey::from("MaterialPrimaryColor"), Some(&ThemeVariant::light())).flatten();
-    assert_eq!(
-        from_markup_value::<ferroui_base::media::Color>(&primary),
-        Some(MaterialColorScheme::expressive_light().color(MaterialColorRole::Primary))
-    );
-    assert!(trimmed.try_get_resource(&ResourceKey::from("MaterialReducedMotion"), None).is_some());
-    let full = MaterialTheme::with_parts(None, crate::compiled_xaml::THEME_UNITS);
-    for variant in variants() {
-        assert!(full.try_get_resource(&key, Some(&variant)).is_some(), "{key:?} in {variant:?} is in the full theme");
-    }
-}
-
-/// Each inherited resource document is a dictionary of its own (MaterialTheme.xaml), as before it
-/// was a unit: a `{StaticResource}` of one document that names a key of another document, which the
-/// color schemes of the theme override, resolves to the theme's value. `RadioButtonsHeaderForeground`
-/// of `RadioButtons_themeresources.xaml` is `TextFillColorPrimaryBrush` of
-/// `Common_themeresources_any.xaml` (`#E4000000` in the light variant), which the color schemes
-/// replace with the on-surface role. A dictionary that held both documents would resolve it to the
-/// inherited brush.
 #[test]
 fn an_inherited_resource_resolves_the_overrides_of_the_theme() {
     let _app = start();

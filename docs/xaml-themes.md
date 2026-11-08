@@ -137,12 +137,11 @@ name, the first time the control looks for its theme. Release builds do not chec
 - **Name every entry.** An entry without a key, or with a key that is neither text nor
   `{x:Type}`, cannot be rooted, so its whole document stays in the ambient unit.
 - **No `ResourceInclude` for a document that should be trimmed.** A `ResourceInclude` is not
-  inlined, so the document it includes is part of the ambient unit. When a document must stay a
+  inlined, so the document it includes is part of the ambient unit. A document that must stay a
   dictionary of its own (its `{StaticResource}` references must find the theme's overrides after
-  their own document, as for the inherited documents of the Material theme), merge it into an
-  inline merged dictionary of its own:
-  `<ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source=".." /></ResourceDictionary.MergedDictionaries></ResourceDictionary>`.
-  It is a unit, and the dictionaries and their order are what the `ResourceInclude` gave.
+  their own document, as for the inherited documents of the Material theme) stays a
+  `ResourceInclude` for now: a `MergeResourceInclude` inside an inline dictionary is not compiled
+  yet (#633).
 - **Mark every document but the class document internal** (`x:ClassModifier="internal"`). The
   loader table answers the URI of a public document and so keeps its build function, and its unit,
   linked in every application.

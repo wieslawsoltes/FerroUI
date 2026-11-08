@@ -1164,18 +1164,18 @@ the Material theme cannot, for three reasons found by reading the documents:
   brushes) the value would change.
 
 The inherited documents define no key twice among themselves, and none of them has an entry
-without a key. So each is merged, with `MergeResourceInclude`, into a merged dictionary of its own,
+without a key. So each is to be merged, with `MergeResourceInclude`, into a merged dictionary of its own,
 written inline in `MaterialTheme.xaml`:
 
 ```xml
 <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/Button_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
 ```
 
-The theme's dictionary has the same 72 merged dictionaries in the same order, each with the same
-entries and theme dictionaries, and a `{StaticResource}` of one of them resolves as before: its own
-dictionary, then the theme's. Each document is a unit (72 more, about 179 in all), and the inline
-dictionaries are the structure of the ambient unit, as the theme dictionaries of the WinUI theme
-are. The keys of the theme do not change.
+Not done in #568 step 6: the compiler does not inline a `MergeResourceInclude` that sits inside
+an inline dictionary (`InjectServiceProviderNode: no emitter for this value node`). The 72
+documents stay `ResourceInclude`s in the ambient unit, as before, and #633 tracks the compiler
+support and the change of the theme. The control documents are units, and the theme has
+`with_parts`.
 
 ### 13.2 The class and the documents
 
