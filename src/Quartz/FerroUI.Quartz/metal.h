@@ -1,28 +1,12 @@
 #pragma once
 #include <CoreGraphics/CoreGraphics.h>
 #include <stdint.h>
-
-// Status codes of the GPU renderer. Nothing in this interface throws: a
-// failure is a returned status or a NULL handle.
-enum {
-  QM_OK = 0,
-  QM_NO_DEVICE = 1,
-  QM_UNSUPPORTED_DEVICE = 2,
-  QM_SHADER_FAILED = 3,
-  QM_OUT_OF_MEMORY = 4,
-  QM_INVALID_SIZE = 5,
-  QM_DEVICE_MISMATCH = 6,
-  QM_GPU_FAILED = 7,
-  QM_INVALID_ARGUMENT = 8,
-};
-
-int qm_is_surface(void *p);
-int qm_status(void);
-size_t qm_max_texture_size(void);
 void *qm_surface(size_t w, size_t h);
-int qm_configure(void *device);
-int qm_read_pixels(void *surface, uint8_t *out, size_t length);
-int qm_write_pixels(void *surface, const uint8_t *data, size_t length);
+uint64_t qm_configure(void *device);
+uint64_t qm_generation(void);
+int qm_is_lost(uint64_t generation);
+void qm_read_pixels(void *surface, uint8_t *out, size_t length);
+void qm_write_pixels(void *surface, const uint8_t *data, size_t length);
 void *qm_snapshot(void *surface);
 void qm_save(void *surface);
 void qm_restore(void *surface);
@@ -49,8 +33,7 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
                double a);
 void qm_shadow(void *surface, double x, double y, double blur, double r,
                double g, double b, double a);
-int qm_present(void *surface, void *texture, void *platform_queue,
-               int flipped);
+int qm_present(void *surface, void *texture, void *platform_queue, int flipped);
 void qm_statistics(uint64_t *out, size_t count);
 int qm_convert_frame(void *surface, void *texture, int rec709, int flipped,
                      int opaque, void *context, void (*completed)(void *, int));
@@ -77,3 +60,9 @@ void qm_acrylic(void *surface, const double *colors, void *noise, int replace);
 int qm_snapshot_external(void *surface, void *source, int flipped, void *wait,
                          uint64_t waitValue, void *signal,
                          uint64_t signalValue);
+
+void qm_text_options(void *surface, int hinting);
+
+void qm_finish_context(uint64_t generation);
+
+void qm_reset_effect_input_clip(void *surface);

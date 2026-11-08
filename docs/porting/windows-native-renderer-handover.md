@@ -264,8 +264,30 @@ versions, OS requirements and synchronization semantics before implementation.
 
 ## Handover snapshot checks
 
-Before publishing this handover, the macOS native backend passed 36 Metal tests (including
-all nine library shader programs, GPU timeline snapshots, media-frame retirement, sampling,
-resource reuse and text regressions) and 11 CPU-reference tests. These checks do not establish
-Windows compatibility or completion of the broader macOS gap goal. Latest full-catalog and
-binary-size validation for the gap work is still pending.
+The completed macOS gap implementation passes 42 Metal tests, 12 CPU-reference tests,
+10 shared context-manager tests and 13 native Metal-device tests. Fifteen original Skia and
+Quartz Metal catalog pages were compared using both drawing paths. Video and synthetic
+camera presentation pass without CPU media-frame transfers; physical camera capture is
+unverified because no webcam is available. Current HelloWorld saves 16.66% with native GPU
+rendering, or 11.63% with the optional runtime WGSL compiler enabled. See
+[the macOS report](quartz-prototype.md) and [recorded results](quartz-prototype-results.json)
+for exact feature graphs, measurements, evidence and hardware limits. These checks do not
+establish Windows compatibility; Windows needs its own runtime and size validation.
+
+
+## Latest macOS contract audit
+
+The follow-up [Quartz/Skia audit](quartz-skia-parity.md) and
+[recorded results](quartz-parity-results.json) supersede the earlier macOS size checkpoint
+above. The audit adds native writable pixel/alpha formats, exact lock behavior, PNG settings,
+geometry edge cases, isolated clip coverage, bitmap-only blend state and ranged OpenType
+features. It also catches the extra coordinate flip that inverted standalone hinted and color
+glyph images. These are useful DirectWrite/Direct2D acceptance cases; preserve native text
+quality instead of matching Skia's text pixels.
+
+The backend-neutral **Renderer parity** catalog page exercises geometry, writable inputs, mixed
+scripts, RTL selection, replacement, undo and text hit testing. Run its **Run text checks**
+action on Windows, or set `FERROUI_SMOKE_RENDERER_PARITY=1` for the catalog smoke runner. The
+macOS evidence is 58 Metal tests, 24 CPU tests and 16 pages captured through both drawing
+paths on each backend; it does not establish Windows compatibility. Physical webcam capture
+still needs hardware.

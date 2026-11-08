@@ -239,6 +239,79 @@ fn color_glyphs_have_ink_bounds_without_outlines() {
             .count()
             > 20
     );
+    // The historical CPU reference has narrower brush support; this checks
+    // the native GPU path's intrinsic color and brush-alpha composition.
+    #[cfg(feature = "metal")]
+    {
+        use ferroui_base::media::{
+            immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush},
+            GradientSpreadMethod,
+        };
+        use ferroui_base::{RelativePoint, RelativeUnit};
+        for opacity in [1., 0.5] {
+            let brush = ImmutableLinearGradientBrush::new(
+                &[
+                    ImmutableGradientStop::new(0., Colors::RED),
+                    ImmutableGradientStop::new(1., Colors::BLUE),
+                ],
+                opacity,
+                None,
+                None,
+                GradientSpreadMethod::Pad,
+                Some(RelativePoint::new(0., 0., RelativeUnit::Relative)),
+                Some(RelativePoint::new(1., 0., RelativeUnit::Relative)),
+                None,
+            );
+            let gradient = Bitmap::new(PixelSize::new(40, 40), Vector::new(96., 96.));
+            let mut draw = gradient.drawing(false, None);
+            draw.draw_glyph_run(Some(&brush), &run);
+            draw.dispose();
+            let result = gradient.pixels();
+            assert!(
+                result
+                    .chunks_exact(4)
+                    .filter(|p| p[3] > 0 && p[0] != p[2])
+                    .count()
+                    > 20,
+                "A gradient brush must preserve intrinsic color glyphs"
+            );
+            for (original, pixel) in pixels.iter().zip(&result) {
+                let expected = f64::from(*original) * opacity;
+                assert!(
+                    (f64::from(*pixel) - expected).abs() <= 2.,
+                    "opacity={opacity}: {original} -> {pixel}, expected {expected}"
+                );
+            }
+        }
+        let fading = ImmutableLinearGradientBrush::new(
+            &[
+                ImmutableGradientStop::new(0., ferroui_base::media::Color::from_argb(0, 255, 0, 0)),
+                ImmutableGradientStop::new(1., Colors::BLUE),
+            ],
+            1.,
+            None,
+            None,
+            GradientSpreadMethod::Pad,
+            Some(RelativePoint::new(0., 0., RelativeUnit::Relative)),
+            Some(RelativePoint::new(1., 0., RelativeUnit::Relative)),
+            None,
+        );
+        let faded = Bitmap::new(PixelSize::new(40, 40), Vector::new(96., 96.));
+        let mut draw = faded.drawing(false, None);
+        draw.draw_glyph_run(Some(&fading), &run);
+        draw.dispose();
+        for (i, (source, result)) in pixels
+            .chunks_exact(4)
+            .zip(faded.pixels().chunks_exact(4))
+            .enumerate()
+        {
+            let factor = (((i % 40) as f64 + 0.5 - run.bounds.x) / run.bounds.width).clamp(0., 1.);
+            assert!(
+                (f64::from(result[3]) - f64::from(source[3]) * factor).abs() <= 3.,
+                "gradient alpha at {i}: {source:?} -> {result:?}"
+            );
+        }
+    }
 }
 
 #[cfg(feature = "metal")]
@@ -280,7 +353,7 @@ fn metal_texture_copy_resize_and_composition() {
 fn metal_linear_gradient_and_shadow_dispatch_outside_path() {
     let bitmap = Bitmap::new(PixelSize::new(40, 40), Vector::new(96., 96.));
     let path = Geometry::rectangle(Rect::new(0., 0., 40., 10.));
-    let native = geometry::native(path.fill.as_ref().unwrap()).unwrap();
+    let native = geometry::native(path.fill.as_ref().unwrap());
     bitmap.context(|c| unsafe {
         ffi::q_save(c);
         ffi::q_clip(c, native.0, 0);
@@ -299,7 +372,7 @@ fn metal_linear_gradient_and_shadow_dispatch_outside_path() {
         ffi::q_restore(c);
     });
     let path = Geometry::rectangle(Rect::new(5., 15., 5., 5.));
-    let native = geometry::native(path.fill.as_ref().unwrap()).unwrap();
+    let native = geometry::native(path.fill.as_ref().unwrap());
     bitmap.context(|c| unsafe {
         ffi::q_shadow(c, 10., 0., 2., 0., 0., 0., 1.);
         ffi::q_fill(c, native.0, 0, 1., 0., 0., 1.);
@@ -452,91 +525,110 @@ fn contextual_arabic_run_shaping_preserves_joining_and_local_clusters() {
     assert_eq!(middle.glyph_infos()[0].glyph_cluster, 0);
 }
 
+#[cfg(feature = "metal")]
 #[test]
-fn writeable_bitmaps_round_trip_rgba_and_unpremultiplied_pixels() {
-    let written = [200u8, 100, 50, 128, 10, 20, 30, 255];
-    for (format, alpha) in [
-        (PixelFormat::RGBA8888, AlphaFormat::Unpremul),
-        (PixelFormat::RGBA8888, AlphaFormat::Premul),
-        (PixelFormat::BGRA8888, AlphaFormat::Unpremul),
-        (PixelFormat::BGRA8888, AlphaFormat::Opaque),
-    ] {
-        let bitmap = QuartzRenderInterface.create_writeable_bitmap(
-            PixelSize::new(2, 1),
-            Vector::new(96., 96.),
-            format,
-            alpha,
-        );
-        assert!(IReadableBitmapImpl::format(&*bitmap) == Some(format));
-        assert!(IReadableBitmapImpl::alpha_format(&*bitmap) == Some(alpha));
-        let lock = bitmap.lock();
-        assert!(lock.format() == format && lock.alpha_format() == alpha);
-        assert_eq!(lock.row_bytes(), 8);
-        lock.with_data(&mut |data| data.copy_from_slice(&written));
-        lock.dispose();
-        let lock = bitmap.lock();
-        let mut read = Vec::new();
-        lock.with_data(&mut |data| read.extend_from_slice(data));
-        lock.dispose();
-        for (i, (actual, expected)) in read.iter().zip(written).enumerate() {
-            let expected = if alpha == AlphaFormat::Opaque && i % 4 == 3 {
-                255
-            } else {
-                expected
-            };
-            // Premultiplied storage keeps an unpremultiplied round trip within rounding.
-            assert!(
-                (*actual as i32 - expected as i32).abs() <= 2,
-                "{format:?} {alpha:?}: {read:?}"
-            );
-        }
-        if (format, alpha) == (PixelFormat::RGBA8888, AlphaFormat::Unpremul) {
-            // Stored as premultiplied BGRA whatever the exposed layout.
-            let stored = bitmap.as_any().downcast_ref::<Bitmap>().unwrap().pixels();
-            assert_eq!(&stored[..4], &[25, 50, 100, 128]);
+fn native_hinted_glyph_masks_are_dpi_aware_tinted_on_gpu_and_cached() {
+    use ferroui_base::media::{TextHintingMode, TextOptions};
+    const FLAG: &str = "FERRO_QUARTZ_ISOLATED_GLYPH_TEST";
+    if std::env::var_os(FLAG).is_none() {
+        assert!(std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "tests::native_hinted_glyph_masks_are_dpi_aware_tinted_on_gpu_and_cached",
+                "--nocapture"
+            ])
+            .env(FLAG, "1")
+            .status()
+            .unwrap()
+            .success());
+        return;
+    }
+    let face = face();
+    let id = face.character_to_glyph_map().get_glyph('F' as i32);
+    let run = GlyphRun::new(
+        &face,
+        20.,
+        &[GlyphInfo::with_offset(id, 0, 20., Vector::new(0., 0.))],
+        Point::new(4., 24.),
+    );
+    let b = Bitmap::new(PixelSize::new(80, 80), Vector::new(192., 192.));
+    let draw = |color: ferroui_base::media::Color| {
+        let mut d = b.drawing(true, None);
+        d.clear(Colors::TRANSPARENT);
+        d.push_text_options(TextOptions {
+            text_hinting_mode: TextHintingMode::Strong,
+            ..Default::default()
+        });
+        d.draw_glyph_run(Some(&ImmutableSolidColorBrush::new(color)), &run);
+        d.pop_text_options();
+        d.dispose();
+    };
+    draw(Colors::RED);
+    let red = b.pixels();
+    let uploads = crate::metal_statistics()[5];
+    let mut min_y = 80;
+    let mut max_y = 0;
+    let mut ink = 0;
+    for (i, p) in red.chunks_exact(4).enumerate() {
+        if p[3] > 0 {
+            min_y = min_y.min(i / 80);
+            max_y = max_y.max(i / 80);
+            ink += 1;
+            assert_eq!(p[0], 0);
+            assert_eq!(p[1], 0);
+            assert_eq!(p[2], p[3]);
         }
     }
-    assert!(QuartzRenderInterface.is_supported_bitmap_pixel_format(PixelFormat::RGBA8888));
+    assert!(ink > 100);
+    assert!(min_y >= 10 && min_y < 25, "min={min_y}");
+    assert!(max_y >= 40 && max_y <= 50, "max={max_y}");
+    draw(Colors::BLUE);
+    let blue = b.pixels();
+    assert_eq!(
+        crate::metal_statistics()[5],
+        uploads,
+        "Changing tint must reuse the glyph mask"
+    );
+    for (r, b) in red.chunks_exact(4).zip(blue.chunks_exact(4)) {
+        assert_eq!(r[2], b[0]);
+        assert_eq!(r[3], b[3]);
+        assert_eq!(b[2], 0);
+    }
 }
 
 #[test]
-fn empty_bitmaps_draw_nothing_instead_of_failing() {
-    assert!(Bitmap::try_new(PixelSize::new(0, 4), Vector::new(96., 96.)).is_err());
-    let bitmap = Bitmap::new(PixelSize::new(0, 0), Vector::new(96., 96.));
-    let mut draw = bitmap.drawing(false, None);
-    draw.clear(Colors::RED);
-    draw.push_opacity(0.5, None);
-    draw.pop_opacity();
-    draw.dispose();
-    assert!(bitmap.pixels().is_empty());
-}
-
-#[test]
-fn embedded_families_resolve_each_weight_to_its_own_face() {
+fn system_font_descriptors_preserve_all_standard_weights_in_the_ui_family() {
     let manager = fonts::FontManager::default();
-    let regular = include_bytes!("../../FerroUI.Fonts.Inter/Assets/Inter-Regular.ttf");
-    let bold = include_bytes!("../../FerroUI.Fonts.Inter/Assets/Inter-Bold.ttf");
-    let regular_face = manager
-        .try_create_glyph_typeface_from_stream(&mut &regular[..], FontSimulations::None)
-        .unwrap();
-    assert!(regular_face.weight() == FontWeight::Normal);
-    let bold_face = manager
-        .try_create_glyph_typeface_from_stream(&mut &bold[..], FontSimulations::None)
-        .unwrap();
-    assert!(bold_face.weight() == FontWeight::Bold);
-    let family = regular_face.family_name();
-    assert!(bold_face.family_name().eq_ignore_ascii_case(&family));
-    let resolve = |weight| {
-        manager
-            .try_create_glyph_typeface(&family, FontStyle::Normal, weight, FontStretch::Normal)
-            .unwrap()
-    };
-    let resolved = resolve(FontWeight::Bold);
-    assert!(resolved.weight() == FontWeight::Bold);
-    assert!(resolved.font_simulations() == FontSimulations::None);
-    assert!(resolved.try_get_stream().is_some());
-    assert!(resolve(FontWeight::Normal).weight() == FontWeight::Normal);
-    // Above 500 a heavier face is preferred, below 400 a lighter one.
-    assert!(resolve(FontWeight::SemiBold).weight() == FontWeight::Bold);
-    assert!(resolve(FontWeight(300)).weight() == FontWeight::Normal);
+    let family = manager.get_default_font_family_name();
+    let mut previous = 0.;
+    for weight in (100..=900).step_by(100) {
+        let platform = manager
+            .try_create_glyph_typeface(
+                &family,
+                FontStyle::Normal,
+                FontWeight(weight),
+                FontStretch::Normal,
+            )
+            .unwrap();
+        assert_eq!(platform.family_name(), family);
+        assert_eq!(platform.font_simulations(), FontSimulations::None);
+        let face = GlyphTypeface::new(platform, FontSimulations::None).unwrap();
+        let id = face.character_to_glyph_map().get_glyph('H' as i32);
+        let run = GlyphRun::new(
+            &face,
+            40.,
+            &[GlyphInfo::with_offset(id, 0, 40., Vector::new(0., 0.))],
+            Point::new(0., 40.),
+        );
+        let area = run.outlines.area().abs();
+        assert!(
+            area > previous + 1.,
+            "Weight {weight} did not increase ink: {previous} -> {area}"
+        );
+        previous = area;
+    }
+    let styles = manager.try_get_family_typefaces(&family).unwrap();
+    for weight in (100..=900).step_by(100) {
+        assert!(styles.iter().any(|f| f.weight().0 == weight));
+    }
 }

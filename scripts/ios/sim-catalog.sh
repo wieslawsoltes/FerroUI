@@ -11,6 +11,7 @@
 #
 #   --pages      the headers of the pages to show, in order     (default: Home,Buttons,TextBox,ListBox)
 #   --page-ms    how long a page is shown, in milliseconds      (default: 5000)
+#   --backend <name> skia (default), quartz-metal, quartz-runtime-shaders
 #   --keep       leave the device booted and the application installed
 #   --timeout    how long the application may run               (default: 240)
 #   --no-build   bundle the executable that is already built
@@ -26,6 +27,7 @@
 set -uo pipefail
 
 device=
+backend=skia
 pages="Home,Buttons,TextBox,ListBox"
 page_ms=5000
 keep=0
@@ -37,6 +39,7 @@ while [ $# -gt 0 ]; do
     --pages) pages="$2"; shift 2 ;;
     --page-ms) page_ms="$2"; shift 2 ;;
     --keep) keep=1; shift ;;
+    --backend) backend="$2"; shift 2 ;;
     --timeout) timeout="$2"; shift 2 ;;
     --no-build) build_args+=(--no-build); shift ;;
     -h|--help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -44,6 +47,12 @@ while [ $# -gt 0 ]; do
     *) device="$1"; shift ;;
   esac
 done
+
+case "$backend" in
+  skia) ;;
+  quartz-metal|quartz-runtime-shaders) ;;
+  *) echo "Unknown renderer: $backend (skia, quartz-metal, quartz-runtime-shaders)" >&2; exit 2 ;;
+esac
 
 if [ -z "$device" ]; then
   echo "usage: scripts/ios/sim-catalog.sh <device name or udid> [--pages <a,b,c>] [--page-ms <n>] [--keep] [--timeout <seconds>] [--no-build]" >&2
@@ -55,6 +64,12 @@ target_dir="${CARGO_TARGET_DIR:-$root/target}"
 out="$target_dir/ios-smoke"
 shots="$HOME/Library/Caches/ferroui-ios-smoke"
 bundle_id=org.ferroui.control-catalog
+if [ "$backend" != skia ]; then
+  bundle_id="$bundle_id-$backend"
+  out="$out/$backend"
+  shots="$shots/$backend"
+  build_args+=(--no-default-features --features "$backend")
+fi
 console="$out/catalog-console.log"
 udid_pattern='[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'
 
@@ -118,7 +133,7 @@ fi
 
 echo "Launching $bundle_id: the pages $pages, $page_ms ms each (at most $timeout seconds)..."
 SIMCTL_CHILD_FERROUI_SMOKE_PAGES="$page_ms" SIMCTL_CHILD_FERROUI_SMOKE_PAGE_NAMES="$pages" \
-  SIMCTL_CHILD_RUST_BACKTRACE=1 \
+  SIMCTL_CHILD_FERROUI_SMOKE_RENDERER_PARITY=1 SIMCTL_CHILD_RUST_BACKTRACE=1 \
   xcrun simctl launch --console-pty --terminate-running-process "$udid" "$bundle_id" \
   > "$console" 2>&1 &
 launch=$!
@@ -174,8 +189,18 @@ written="$(ls "$shots"/catalog-*.png 2>/dev/null | wc -l | tr -d ' ')"
 echo "Screenshots ($written of $expected pages) in $shots:"
 ls -l "$shots"/catalog-*.png 2>/dev/null
 
+native_pass=1
+if [ "$backend" != skia ] && ! tr -d '\r' < "$console" | grep -Eq '^IOS_QUARTZ_GPU_STATS \[[0-9]+, [0-9]+, [0-9]+, [1-9][0-9]*, [0-9]+, [0-9]+, 0\]$'; then
+  native_pass=0
+fi
+case ",$pages," in
+  *",Renderer parity,"*)
+    if ! grep -q 'CATALOG_RENDERER_PARITY_PASS' "$console"; then native_pass=0; fi ;;
+esac
 status=1
-if [ "$timed_out" = 1 ]; then
+if [ "$native_pass" = 0 ]; then
+  echo "RESULT: native GPU or renderer parity checks did not pass"
+elif [ "$timed_out" = 1 ]; then
   echo "RESULT: the application did not exit within $timeout seconds"
 elif [ "$written" -ge "$expected" ] && tr -d '\r' < "$console" | grep -q '^Selected every page'; then
   echo "RESULT: CATALOG SHOWN ($written pages; simctl launch exited with $launch_status)"

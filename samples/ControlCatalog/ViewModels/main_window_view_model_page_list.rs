@@ -145,6 +145,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
+            s.add_page(|| crate::pages::renderer_parity_page::page().upcast(), "Renderer parity", Icons::BRUSH, "Drawing contracts, native text selection and bitmap inputs");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");

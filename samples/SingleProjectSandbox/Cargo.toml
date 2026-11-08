@@ -63,7 +63,7 @@ ferroui-harfbuzz = { workspace = true }
 ferroui-android = { workspace = true }
 
 [target.'cfg(target_os = "ios")'.dependencies]
-ferroui-ios = { workspace = true }
+ferroui-ios = { workspace = true, features = ["skia"] }
 
 [build-dependencies]
 sample-build = { path = "../SampleBuild" }

@@ -147,6 +147,7 @@ fn imported_frames_validate_convert_on_gpu_once_and_retire_after_completion() {
                 let imported = ImportedImage {
                     device: device.clone(),
                     generation: 7,
+                    backend_generation: unsafe { ffi::qm_generation() },
                     device_luid: Some(vec![7]),
                     imported: Rc::new(Texture(texture.clone())),
                     properties: PlatformGraphicsExternalImageProperties {
@@ -273,7 +274,7 @@ fn imported_frames_validate_convert_on_gpu_once_and_retire_after_completion() {
 fn dropping_an_undrawn_shared_frame_releases_without_submitting_gpu_work() {
     let source = Bitmap::new(PixelSize::new(8, 8), ferroui_base::Vector::new(96., 96.));
     // No sampling occurs; the opaque retained handle only checks the undrawn lifetime path.
-    let handle = source.retained_surface().unwrap();
+    let handle = source.retained_surface();
     let budget = FrameBudget::new(Default::default());
     let drops = Arc::new(AtomicUsize::new(0));
     let frame = budget
@@ -282,7 +283,7 @@ fn dropping_an_undrawn_shared_frame_releases_without_submitting_gpu_work() {
             Storage(drops.clone()),
         )
         .unwrap();
-    let bitmap = SharedFrameBitmap::new(handle.0, frame);
+    let bitmap = SharedFrameBitmap::new(handle.0, frame, unsafe { ffi::qm_generation() });
     drop(bitmap);
     assert_eq!(drops.load(Ordering::SeqCst), 1);
     assert_eq!(budget.usage().frames, 0);
@@ -339,21 +340,35 @@ fn timeline_snapshot_waits_for_producer_then_signals_after_an_independent_gpu_co
             32,
         )
     };
-    let imported = ImportedImage {
-        device: Rc::new(Device { device, queue }),
-        generation: 7,
-        device_luid: Some(vec![7]),
-        imported: Rc::new(Texture(texture.clone())),
-        properties: PlatformGraphicsExternalImageProperties {
-            width: 8,
-            height: 8,
-            format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
-            top_left_origin: false,
-            ..Default::default()
-        },
+    let properties = PlatformGraphicsExternalImageProperties {
+        width: 8,
+        height: 8,
         format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
         top_left_origin: false,
+        ..Default::default()
     };
+    let raw = Retained::as_ptr(&texture).cast_mut().cast();
+    let shared = unsafe { SharedMetalImage::from_raw_texture(raw, properties.clone()) }.unwrap();
+    let mut wrong = properties.clone();
+    wrong.width = 7;
+    assert!(matches!(
+        unsafe { SharedMetalImage::from_raw_texture(raw, wrong) },
+        Err(FrameError::InvalidDimensions)
+    ));
+    let mut wrong = properties;
+    wrong.format = PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm;
+    assert!(matches!(
+        unsafe { SharedMetalImage::from_raw_texture(raw, wrong) },
+        Err(FrameError::UnsupportedFormat)
+    ));
+    let external = ExternalObjects::new(
+        Rc::new(Device { device, queue }),
+        7,
+        unsafe { ffi::qm_generation() },
+        Rc::new(IdentityFeature),
+    );
+    let imported = external.import_shared_image(shared.clone());
+    shared.dispose(); // Import owns its texture independently of the producer wrapper.
     let a: Rc<dyn IPlatformRenderInterfaceImportedSemaphore> = Rc::new(ImportedSemaphore {
         event: Rc::new(Event(wait.clone())),
     });
@@ -391,4 +406,152 @@ fn timeline_snapshot_waits_for_producer_then_signals_after_an_independent_gpu_co
     let pixels = snapshot.as_any().downcast_ref::<Bitmap>().unwrap().pixels();
     assert_eq!(&pixels[..4], &[20, 40, 60, 255]);
     assert_eq!(&pixels[7 * 32..7 * 32 + 4], &[200, 100, 50, 255]);
+}
+
+#[test]
+fn renderer_queue_faults_invalidate_generations_and_recover_without_releasing_old_faults_into_new_contexts(
+) {
+    const FLAG: &str = "FERRO_QUARTZ_ISOLATED_RECOVERY_TEST";
+    if std::env::var_os(FLAG).is_none() {
+        assert!(std::process::Command::new(std::env::current_exe().unwrap()).args(["--exact","external_objects::tests::renderer_queue_faults_invalidate_generations_and_recover_without_releasing_old_faults_into_new_contexts","--nocapture"]).env(FLAG,"1").status().unwrap().success());
+        return;
+    }
+    let device = MTLCreateSystemDefaultDevice().unwrap();
+    let pointer = Retained::as_ptr(&device).cast_mut().cast();
+    let old = unsafe { ffi::qm_configure(pointer) };
+    let old_storage = Bitmap::new(PixelSize::new(37, 37), ferroui_base::Vector::new(96., 96.));
+
+    let desc = unsafe {
+        MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
+            MTLPixelFormat::BGRA8Unorm,
+            8,
+            8,
+            false,
+        )
+    };
+    desc.setUsage(MTLTextureUsage::ShaderRead);
+    let source = device.newTextureWithDescriptor(&desc).unwrap();
+    let budget = FrameBudget::new(Default::default());
+    let drops = Arc::new(AtomicUsize::new(0));
+    let frame = budget
+        .lease(
+            metadata(FrameColor::Srgb, FrameFormat::Bgra8, true),
+            Storage(drops.clone()),
+        )
+        .unwrap();
+    let bitmap = SharedFrameBitmap::new(Retained::as_ptr(&source).cast_mut().cast(), frame, old);
+    assert_eq!(unsafe { ffi::qm_is_lost(old) }, 0);
+    unsafe { ffi::qm_record_fault(old) };
+    assert_ne!(unsafe { ffi::qm_is_lost(old) }, 0);
+    let new = unsafe { ffi::qm_configure(pointer) };
+    assert!(new > old);
+    assert_ne!(unsafe { ffi::qm_is_lost(old) }, 0);
+    assert_eq!(unsafe { ffi::qm_is_lost(new) }, 0);
+    assert!(
+        bitmap.bitmap().is_none(),
+        "An undrawn old-generation frame cannot enter the recovered queue"
+    );
+    drop(bitmap);
+    assert_eq!(drops.load(Ordering::SeqCst), 1);
+    assert_eq!(budget.gpu_reads(), 0);
+    unsafe { ffi::qm_record_fault(old) }; // Late completion from the failed queue.
+    assert_eq!(unsafe { ffi::qm_is_lost(new) }, 0);
+    drop(old_storage); // An owner from the failed queue dies after recovery.
+    let mut before = [0u64; 9];
+    unsafe { ffi::qm_statistics(before.as_mut_ptr(), before.len()) };
+    let fresh = Bitmap::new(PixelSize::new(37, 37), ferroui_base::Vector::new(96., 96.));
+    let mut after = [0u64; 9];
+    unsafe { ffi::qm_statistics(after.as_mut_ptr(), after.len()) };
+    assert_eq!(
+        after[8],
+        before[8] + 1,
+        "Old-generation storage must not enter the replacement queue's pool"
+    );
+    drop(fresh);
+    let b = Bitmap::new(PixelSize::new(8, 8), ferroui_base::Vector::new(96., 96.));
+    let mut draw = b.drawing(false, None);
+    draw.clear(ferroui_base::media::Colors::RED);
+    draw.dispose();
+    assert_eq!(&b.pixels()[..4], &[0, 0, 255, 255]);
+    assert_eq!(unsafe { ffi::qm_is_lost(new) }, 0);
+}
+
+struct IdentityFeature;
+impl IMetalExternalObjectsFeature for IdentityFeature {
+    fn supported_image_handle_types(&self) -> Vec<String> {
+        vec![]
+    }
+    fn supported_semaphore_types(&self) -> Vec<String> {
+        vec![]
+    }
+    fn device_luid(&self) -> Option<Vec<u8>> {
+        Some(vec![7])
+    }
+    fn get_synchronization_capabilities(
+        &self,
+        _: &str,
+    ) -> CompositionGpuImportedImageSynchronizationCapabilities {
+        CompositionGpuImportedImageSynchronizationCapabilities::TIMELINE_SEMAPHORES
+    }
+    fn import_image(
+        &self,
+        _: Rc<dyn IPlatformHandle>,
+        _: PlatformGraphicsExternalImageProperties,
+    ) -> Rc<dyn IMetalExternalTexture> {
+        unreachable!()
+    }
+    fn import_shared_event(&self, _: Rc<dyn IPlatformHandle>) -> Rc<dyn IMetalSharedEvent> {
+        unreachable!()
+    }
+    fn submit_wait(&self, _: &dyn IMetalSharedEvent, _: u64) {
+        unreachable!()
+    }
+    fn submit_signal(&self, _: &dyn IMetalSharedEvent, _: u64) {
+        unreachable!()
+    }
+}
+
+#[test]
+#[cfg(feature = "media-test-fixtures")]
+fn native_exceptions_are_contained_and_the_gpu_context_recovers() {
+    const FLAG: &str = "FERRO_QUARTZ_ISOLATED_EXCEPTION_TEST";
+    if std::env::var_os(FLAG).is_none() {
+        assert!(std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "external_objects::tests::native_exceptions_are_contained_and_the_gpu_context_recovers", "--nocapture"])
+            .env(FLAG, "1").status().unwrap().success());
+        return;
+    }
+    extern "C" {
+        fn qm_fixture_exception() -> i32;
+        fn qm_fixture_fail_allocation();
+    }
+    let device = MTLCreateSystemDefaultDevice().unwrap();
+    let raw = Retained::as_ptr(&device).cast_mut().cast();
+    let old = unsafe { ffi::qm_configure(raw) };
+    assert_ne!(old, 0);
+    assert_eq!(unsafe { qm_fixture_exception() }, 0);
+    assert_ne!(unsafe { ffi::qm_is_lost(old) }, 0);
+    let new = unsafe { ffi::qm_configure(raw) };
+    assert!(new > old);
+    assert_eq!(unsafe { ffi::qm_is_lost(new) }, 0);
+    let bitmap =
+        Bitmap::try_new(PixelSize::new(8, 8), ferroui_base::Vector::new(96., 96.)).unwrap();
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(ferroui_base::media::Colors::RED);
+    draw.dispose();
+    assert_eq!(&bitmap.pixels()[..4], &[0, 0, 255, 255]);
+    // Image upload needs a temporary GPU surface. NULL here formerly reached CFRelease(NULL).
+    let image = bitmap.image();
+    unsafe {
+        qm_fixture_fail_allocation();
+    }
+    bitmap
+        .context(|p| unsafe { ffi::q_draw_image(p, image.0, 0., 0., 8., 8., 0., 0., 8., 8., 1.) });
+    assert_ne!(unsafe { ffi::qm_is_lost(new) }, 0);
+    assert!(unsafe { ffi::qm_configure(raw) } > new);
+    let fresh = Bitmap::try_new(PixelSize::new(8, 8), ferroui_base::Vector::new(96., 96.)).unwrap();
+    let mut draw = fresh.drawing(false, None);
+    draw.clear(ferroui_base::media::Colors::BLUE);
+    draw.dispose();
+    assert_eq!(&fresh.pixels()[..4], &[255, 0, 0, 255]);
 }

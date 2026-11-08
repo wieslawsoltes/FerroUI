@@ -15,10 +15,17 @@ autoexamples = false
 name = "control-catalog-ios"
 path = "main.rs"
 
+[features]
+default = ["skia"]
+skia = ["ferroui-ios/skia"]
+quartz-metal = ["ferroui-ios/quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/metal"]
+quartz-runtime-shaders = ["quartz-metal", "ferroui-ios/quartz-runtime-shaders"]
+
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
-ferroui-ios = { workspace = true }
+ferroui-ios = { workspace = true, default-features = false }
+ferroui-quartz = { workspace = true, optional = true }
 control-catalog = { path = "../ControlCatalog" }
 
 # The native control demo (`embed_sample_ios.rs`) makes a button of UIKit: the crates the platform

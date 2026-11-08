@@ -10,7 +10,7 @@ Marks, as in the other platform documents: **[V]** verified from sources (the up
 |---|---|---|---|
 | `ferroui-ios` | `src/iOS/FerroUI.iOS` | `Avalonia.iOS` | `AppBuilder::use_ios()` / `use_ios_with_delegate(..)` (`IosApplicationExtensions`); an application starts with `ferroui_ios::run_application::<App>()` |
 
-It depends on `ferroui-base`, `ferroui-controls`, `ferroui-metal` and `ferroui-opengl` (the Metal and OpenGL contracts it implements), and on `ferroui-skia` and `ferroui-harfbuzz`, because the platform selects its renderer and its shaper as upstream's `UseiOS` does (`.UseHarfBuzz().UseSkia()`; the upstream project references both).
+It depends on `ferroui-base`, `ferroui-controls`, `ferroui-metal` and `ferroui-opengl` (the Metal and OpenGL contracts it implements). The default `skia` feature selects Skia/HarfBuzz as upstream does. The opt-in `quartz-metal` feature selects the shared Apple Metal/Core Text backend on iOS 16+; use `--no-default-features` to exclude Skia/HarfBuzz. See [native iOS rendering](ios-quartz.md) for simulator evidence, feature selection and current limits.
 
 What is compiled where:
 

@@ -1,0 +1,444 @@
+{
+  "date": "2026-11-08",
+  "status": "working opt-in prototype; simulator validated",
+  "source_base_commit": "dff71074639d56ad20b28cfee9fc959b17a53512",
+  "working_tree_modified_at_validation": true,
+  "source_sha256": {
+    "Cargo.lock": "a1940fb061bf647de166a8fdb1f4e5ad311d404f23ff34b7fc681ed5f2f55beb",
+    "Cargo.toml": "f44695229453f34050d3cfc85a36721a548707d8b7be1a68f64191e277880894",
+    "samples/ControlCatalog.iOS/Cargo.toml": "d2eb5ec1966ba188a2539c39d1467cf9f062236a0d52c85c0310a00b7f259325",
+    "samples/ControlCatalog.iOS/main.rs": "893ae2c1e900960f0b6669b5829b9b67206c9bd6a268b2212cdeed9567e08023",
+    "samples/SafeAreaDemo.iOS/Cargo.toml": "2ecba349323749c0776e97f46709a294d9f8bf31ea1ab6a9e33f70eb8d677185",
+    "samples/SingleProjectSandbox/Cargo.toml": "1cdbbb8285b40dcb748200900640cbfb7dd891db4919246d42363620e3dfae6f",
+    "scripts/ios/bundle.sh": "1795c08479aaf1c0f3d6ef717c421307ec912ad0e15f0251fdb67bfd2d50d0f4",
+    "scripts/ios/sim-catalog.sh": "2ea959b17dd387467e618b19416801735b7dd909c96595c9799da31faed2b1a5",
+    "scripts/ios/sim-smoke.sh": "d87a21496bc2644f219d4bcc7079975d3225df4d20622352c7816d003548f4b4",
+    "src/Quartz/FerroUI.Quartz/Cargo.toml": "a0b668d2fbe50a0a6b9b97d4610a535509ff8115ca8c37ddb6a7d1bf812584f4",
+    "src/Quartz/FerroUI.Quartz/build.rs": "c6517e3fab1e53296b22e261bbf46d618a2deb33859527f9fe9b10a72a7e090a",
+    "src/Quartz/FerroUI.Quartz/external_objects.rs": "88d5ab6bc71440d6bd75231c24e9aa7e089451b72b5de5d3a4edea8659f07dc8",
+    "src/Quartz/FerroUI.Quartz/lib.rs": "c18ece62dc6c68645ffebbb39814eac45493cd831715e50b6eddde3d8f567c06",
+    "src/Quartz/FerroUI.Quartz/metal.m": "59fdf761497ee7398a797e9691528f5f076c92cadbd49b5cef09e16cbe2bf8e6",
+    "src/Quartz/FerroUI.Quartz/metal.rs": "fb7ff561cac34c0896949e80bd5b11d426233b80f53c11ccbbd08870b4e2ef96",
+    "src/Quartz/FerroUI.Quartz/native.m": "2acdd4310defe3413296b2ccfbde0067a4782d77262f24137653e4f75ca3c053",
+    "src/Quartz/FerroUI.Quartz/shaders.metal": "3264c03fd72be6c68dd5bc3d8f0b442838310690368c8a1dafcb7ba200e82fcb",
+    "src/iOS/FerroUI.iOS/Cargo.toml": "0ab59ebcd2a745b5054bdf63c795bb5465c55ff9851c5d26798772f730cdc154",
+    "src/iOS/FerroUI.iOS/examples/ios_view.rs": "ceba8a58888a01cc183d1f3d9cefa3d31faa5a0f7c7eaa7834fe803352b6559d",
+    "src/iOS/FerroUI.iOS/platform.rs": "c8637e1a5a51d7e5cf17f07ab09f4556036d3e126a26966fd843ac3e8f7c48dc"
+  },
+  "simulator": {
+    "device": "iPhone Air",
+    "runtime": "iOS 27.0",
+    "udid": "A784D1E8-20DC-4EC2-B25A-46CDB06A082C",
+    "target": "aarch64-apple-ios-sim",
+    "scaling": 3,
+    "pixel_size": [
+      1260,
+      2736
+    ]
+  },
+  "minimum_os": {
+    "macos": "13.0",
+    "ios": "16.0"
+  },
+  "xcode": "27.2 (27B52)",
+  "native_example": {
+    "result": "PASS",
+    "checks": 39,
+    "report": "target/ios-smoke/quartz-metal/ios_view_smoke.txt",
+    "report_sha256": "b88d58785c564c1d9ae944475e36cf25c740314938523f0e576ccdead2d39327",
+    "quartz_gpu_stats": [
+      3,
+      232,
+      7,
+      8,
+      0,
+      2,
+      0
+    ],
+    "note": "Pixel assertions explicitly capture one platform frame; zero Quartz renderer readbacks is a separate counter."
+  },
+  "catalog": {
+    "result": "PASS",
+    "pages": [
+      "Renderer parity",
+      "TextBox",
+      "TextBlock",
+      "Visuals",
+      "Effect brushes",
+      "Shader effects"
+    ],
+    "rtl_selection_replacement_undo": "PASS",
+    "quartz_gpu_stats": [
+      74,
+      30804,
+      4520,
+      1041,
+      0,
+      31,
+      0
+    ],
+    "console": "target/ios-smoke/quartz-runtime-shaders/catalog-console.log",
+    "console_sha256": "46bb2103fa7452e5ce4b98cf0a6e19ac0ec3c2c03e82f92673c31064526c6bd2",
+    "screenshots": [
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-1-renderer-parity.png",
+        "sha256": "9d0ca14f3acd844978a5d75c3bd84ac072b7f8fada6df5a6c3d04639147b4e64",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      },
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-2-textbox.png",
+        "sha256": "a349efcdfecb57b12de33fc7dd068b6c034185cc399e5e1073e2f225f5cca903",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      },
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-3-textblock.png",
+        "sha256": "c22e7c948cd6a141773d259ebabc6b57b0eb9e1a42574f1ec891b4e253339a95",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      },
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-4-visuals.png",
+        "sha256": "bb97469326097baa67cf8276595529b82fd75363c11a440ea2d5b6a2a1587656",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      },
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-5-effect-brushes.png",
+        "sha256": "d84c079f428babb1087aab78d20a30080dd7d28d60ca801f6782c0dbed9b4bb7",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      },
+      {
+        "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-6-shader-effects.png",
+        "sha256": "28ccac933da8dd45eabccc6bb6eac041c4d4b05ff7c2961b4345873c22ccc825",
+        "pixel_size": [
+          1260,
+          2736
+        ]
+      }
+    ]
+  },
+  "gpu_counter_order": [
+    "surfaces",
+    "compute",
+    "images",
+    "presents",
+    "readbacks",
+    "uploads",
+    "errors"
+  ],
+  "macos_regressions": {
+    "macos-fast-path": {
+      "passed": 58,
+      "failed": 0,
+      "log": "target/ios-quartz/macos-fast-path-tests.log",
+      "sha256": "917971b105bfb2c733c3258e46d841473508eeedaf6d7fa7ecb71a299b98487b"
+    },
+    "separate-destination": {
+      "passed": 58,
+      "failed": 0,
+      "log": "target/ios-quartz/separate-destination-tests.log",
+      "sha256": "410605b80bbbd93b719d706c70a30a13341472e64fc315acaa4ba914ff6a9f83"
+    }
+  },
+  "dependency_graphs": {
+    "minimal": {
+      "path": "target/ios-quartz/view-dependencies.txt",
+      "sha256": "d17cd82eb0a947a0566d55dd9ba4a2bec771eb62f1d6900c659447bf6ea2ab02",
+      "skia_harfbuzz_wgpu_vello_excluded": true,
+      "naga_included": false
+    },
+    "runtime_shaders": {
+      "path": "target/ios-quartz/dependencies.txt",
+      "sha256": "7232cc6f2b16a04272309bc32305751a0321d02852a409084331b301ae7343f8",
+      "skia_harfbuzz_wgpu_vello_excluded": true,
+      "naga_included": true
+    }
+  },
+  "default_skia_behavior_retained": true,
+  "binaries": {
+    "minimal_example": {
+      "path": "/Volumes/SSD/repos/FerroUI/target/aarch64-apple-ios-sim/debug/examples/ios_view",
+      "profile": "dev, not a release-size benchmark",
+      "bytes": 247091656,
+      "sha256": "94e562a6749c4cb3de0eb5bf655be0b3c76f7676479973bd8ab45e0c4b50c315",
+      "dynamic_libraries": [
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/System/Library/Frameworks/AudioToolbox.framework/AudioToolbox (compatibility version 1.0.0, current version 1000.0.0)",
+        "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/OpenGLES.framework/OpenGLES (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.12)",
+        "\t/System/Library/Frameworks/Metal.framework/Metal (compatibility version 1.0.0, current version 383.1.2)",
+        "\t/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 2050.1.6)",
+        "\t/System/Library/Frameworks/CoreText.framework/CoreText (compatibility version 1.0.0, current version 910.0.0)",
+        "\t/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 9127.1.13)",
+        "\t/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1223.10.19)",
+        "\t/System/Library/Frameworks/IOSurface.framework/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)"
+      ]
+    },
+    "runtime_shader_catalog": {
+      "path": "/Volumes/SSD/repos/FerroUI/target/aarch64-apple-ios-sim/debug/control-catalog-ios",
+      "profile": "dev, not a release-size benchmark",
+      "bytes": 545680888,
+      "sha256": "c28f79b5b02736b86524718e0ef676d038d0eb0d9efb7fa58e1a631dd22ea6ed",
+      "dynamic_libraries": [
+        "\t/System/Library/Frameworks/WebKit.framework/WebKit (compatibility version 1.0.0, current version 625.2.8)",
+        "\t/System/Library/Frameworks/AudioToolbox.framework/AudioToolbox (compatibility version 1.0.0, current version 1000.0.0)",
+        "\t/System/Library/Frameworks/UniformTypeIdentifiers.framework/UniformTypeIdentifiers (compatibility version 1.0.0, current version 709.0.0)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/OpenGLES.framework/OpenGLES (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.12)",
+        "\t/System/Library/Frameworks/Metal.framework/Metal (compatibility version 1.0.0, current version 383.1.2)",
+        "\t/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 2050.1.6)",
+        "\t/System/Library/Frameworks/CoreText.framework/CoreText (compatibility version 1.0.0, current version 910.0.0)",
+        "\t/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 5027.1.8)",
+        "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 9127.1.13)",
+        "\t/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1223.10.19)",
+        "\t/System/Library/Frameworks/IOSurface.framework/IOSurface (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)"
+      ]
+    }
+  },
+  "device_sdk_native_syntax": {
+    "target": "arm64-apple-ios16.0",
+    "files": [
+      "native.m",
+      "metal.m"
+    ],
+    "result": "PASS",
+    "full_rust_device_build": false,
+    "physical_device_run": false
+  },
+  "limitations": [
+    "No physical iOS device run or certification.",
+    "No paired release-size benchmark yet.",
+    "Touch/hardware keyboard delivery, rotation, memory pressure and lifecycle need further coverage.",
+    "iOS camera/video and the newer 3D drawing contract are not validated.",
+    "The separate-destination path uses GPU blits and adds bandwidth; no mobile performance claim.",
+    "Simulator GUI viewer could not be selected through CUA; simctl runs, frame readback assertions and simulator screenshots were used."
+  ],
+  "review_fixes": {
+    "date": "2026-11-08",
+    "source_base_commit": "58460442c5a964a1ed111bdf10be529e1a853277",
+    "review_source_commit": "21925eacc0744a2f772c768781ec4235ee0ef4cc",
+    "working_tree_modified_at_validation": true,
+    "source_sha256": {
+      "scripts/ios/bundle.sh": "c5cfb39edcfc75801855ef09afe3138cd34930f511a1438f7643adb26ff30302",
+      "src/Quartz/FerroUI.Quartz/bitmap.rs": "39cc8caf17dbc75bfd103c660acb6eed691a12a9baf43c4c63f5f93b9422ebb7",
+      "src/Quartz/FerroUI.Quartz/build.rs": "bf26c0edd19fde24756f19ce1edc8415451f87f522509a4ef2bb1a429b6bc3d7",
+      "src/Quartz/FerroUI.Quartz/effects.rs": "0c5264d3ab2696b6b0f86725e688e72246e7808fe9e01cfa89327d17f3a281fb",
+      "src/Quartz/FerroUI.Quartz/external_objects_tests.rs": "328133647c645ba48d254ba0eb7658c06c7f9416a48cf882b979d1e8dccc00ff",
+      "src/Quartz/FerroUI.Quartz/ffi.rs": "e6e77615a7f6ce2e6a3815ccf486eb2e225e8345dd47303adc93d20875fb2f7c",
+      "src/Quartz/FerroUI.Quartz/fonts.rs": "db2e4fc695601b6ad119a1f122700bde842bf26550eae619699f92a31b753de6",
+      "src/Quartz/FerroUI.Quartz/lib.rs": "262af72523e1938f43d95e13b1f9b67399e3682e2745b34bb2eae5045d75eed7",
+      "src/Quartz/FerroUI.Quartz/metal.h": "aa2edb4253619fa3bb64d7af5446fccbbd19998de6ef7a7a289cd7680be87519",
+      "src/Quartz/FerroUI.Quartz/metal.m": "6d7ce9e0466c776d9323e55e2d15f2396eb311823c91fba38439bef64b80b3e5",
+      "src/Quartz/FerroUI.Quartz/metal.rs": "f397e4a44a8c0f4ee8730f90de8f1a10480a235c98476207b35dfda637910536",
+      "src/Quartz/FerroUI.Quartz/native.m": "b6400caea25a218e72484d51c558f146c4fd7c24184d98faf88fe86cca6d8ca3",
+      "src/Quartz/FerroUI.Quartz/parity_tests.rs": "7cb110369c266381980f72d73bfb2954d3aabeda6cb79ed66894bbec5bc90b7d",
+      "src/iOS/FerroUI.iOS/examples/ios_view.rs": "2c88569312e6daeda2c10b7f20f4c853b8da10c5c27f6a3cf60d79c89dd9eef1",
+      "src/Quartz/FerroUI.Quartz/NOTICE.md": "e59c0739f1d0dfb729f17e0786fcf9196f8669324e9887e1f28f71295971074c",
+      "src/Quartz/FerroUI.Quartz/assets/noise_asset_256x256_png.png": "4f2aa94a2e345a32dae689176b86c644bef87081ff9daef8c77417731862031b"
+    },
+    "gpu_only": true,
+    "portable_destination_and_hinted_text_preserved": true,
+    "cpu_framebuffer_fallback_added": false,
+    "macos_multi_gpu_cache_ported": false,
+    "mismatched_device_returns_failure": true,
+    "tests": {
+      "metal": {
+        "path": "target/quartz-ios-fixes/macos-tests.log",
+        "bytes": 20765,
+        "sha256": "315d4c5d27f89b15997a4f1eebe00fcf85043199419ee8f2c5608a5ffaca12e2",
+        "passed": 61
+      },
+      "portable_destination": {
+        "path": "target/quartz-ios-fixes/portable-tests.log",
+        "bytes": 6728,
+        "sha256": "25e6eb6534dbad7bca904c9141e854eaf1ae01ea663d501a7f7457fd865cd686",
+        "passed": 61
+      },
+      "cpu": {
+        "path": "target/quartz-ios-fixes/cpu-tests.log",
+        "bytes": 13171,
+        "sha256": "0784014d4b1019d1ddf749c289e9215c76ff39f2d542029a48d6c5f4078eeceb",
+        "passed": 25
+      }
+    },
+    "ios_smoke": {
+      "report": {
+        "path": "target/ios-smoke/quartz-metal/ios_view_smoke.txt",
+        "bytes": 5853,
+        "sha256": "62bd8f4aaba5f66a3a44e2e8e570bef73c847264c3ce045ab6b411f8eeceb1f1"
+      },
+      "runner_log": {
+        "path": "target/quartz-ios-fixes/ios-smoke.log",
+        "bytes": 29304,
+        "sha256": "919f839f701d307200c8780dbdad27d632c4fc7259f9a042eb901e4ab9e458d3"
+      },
+      "checks_passed": 41,
+      "gpu_statistics": [
+        3,
+        232,
+        7,
+        8,
+        0,
+        2,
+        0
+      ]
+    },
+    "ios_catalog": {
+      "log": {
+        "path": "target/quartz-ios-fixes/ios-catalog.log",
+        "bytes": 23731,
+        "sha256": "e71c3d336ffec0c34c143a3eea21c59921af682d34f52cdfc8174e2fa1478596"
+      },
+      "pages_passed": [
+        "Renderer parity",
+        "TextBox",
+        "TextBlock",
+        "Visuals",
+        "Effect brushes",
+        "Shader effects"
+      ],
+      "gpu_statistics": [
+        74,
+        30721,
+        4515,
+        1039,
+        0,
+        31,
+        0
+      ],
+      "screenshots": [
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-1-renderer-parity.png",
+          "bytes": 168354,
+          "sha256": "9ab80f544ec273c45ffd3eb490c4470fe10d170d3540a2df394621ff7fdfac55",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        },
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-2-textbox.png",
+          "bytes": 202409,
+          "sha256": "96408404e3cd07c52549faf2586c173e28fe9d8aeddbba19abe2b27f02fff82a",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        },
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-3-textblock.png",
+          "bytes": 180957,
+          "sha256": "ccacc3c391eccda115e59872c2a22622cd71439063aff481aee02016e807a454",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        },
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-4-visuals.png",
+          "bytes": 165389,
+          "sha256": "5fcba92a90cc3a304035d7641dbe3d605aba8ebafceb281a8a067be25b7137dd",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        },
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-5-effect-brushes.png",
+          "bytes": 195100,
+          "sha256": "2f757b6f421e48de0e72bc23971dbbeb4fbb2d0db835d6766e28ba84453f2449",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        },
+        {
+          "path": "~/Library/Caches/ferroui-ios-smoke/quartz-runtime-shaders/catalog-6-shader-effects.png",
+          "bytes": 178299,
+          "sha256": "7557a681ddcfc7043e27de08b07dc894ca43070a880bdade4b3a83a6a8737cd6",
+          "dimensions": [
+            1260,
+            2736
+          ]
+        }
+      ]
+    },
+    "native_sdk_syntax": [
+      {
+        "path": "target/quartz-ios-fixes/iphoneos-native.m.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true
+      },
+      {
+        "path": "target/quartz-ios-fixes/iphoneos-metal.m.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true
+      },
+      {
+        "path": "target/quartz-ios-fixes/iphonesimulator-native.m.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true
+      },
+      {
+        "path": "target/quartz-ios-fixes/iphonesimulator-metal.m.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true
+      }
+    ],
+    "package_file_list": {
+      "path": "target/quartz-ios-fixes/package-list.txt",
+      "bytes": 418,
+      "sha256": "dcb4f1bd2a74d6dafed58ffc871fee3e06f622cc0806c66f2d4908b902ec95b9"
+    },
+    "package_verification_limit": "Workspace dependency ferroui-base 0.5.0-preview.1 is not published; production noise asset is now inside the package.",
+    "minimal_example_debug_size": {
+      "before": {
+        "path": "target/quartz-ios-fixes/before-ios_view",
+        "bytes": 247091656,
+        "sha256": "94e562a6749c4cb3de0eb5bf655be0b3c76f7676479973bd8ab45e0c4b50c315"
+      },
+      "after": {
+        "path": "target/aarch64-apple-ios-sim/debug/examples/ios_view",
+        "bytes": 247153832,
+        "sha256": "ab3cb0481fa852496ca57d05a228073d148f0fa04bd468bf71dcff4e9ca3305b"
+      },
+      "delta_bytes": 62176,
+      "delta_percent": 0.02516,
+      "profile": "dev, not a release-size benchmark",
+      "includes_added_smoke_checks": true
+    },
+    "limits": [
+      "No physical iOS device run",
+      "No physical multi-GPU Mac test",
+      "Native exceptions and temporary allocation failure injected in isolated macOS fixtures; simulator checks unavailable Metal and over-limit targets"
+    ]
+  }
+}

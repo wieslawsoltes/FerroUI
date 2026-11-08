@@ -117,9 +117,9 @@ mod uikit {
     use ferroui_controls::application_lifetimes::IActivatableLifetime;
     use ferroui_controls::platform::{IPlatformIconLoader, IScreenImpl, IWindowingPlatform};
     use ferroui_controls::AppBuilder;
-    #[cfg(not(ferroui_docsrs))]
+    #[cfg(all(not(ferroui_docsrs), feature = "skia", not(feature = "quartz-metal")))]
     use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
-    #[cfg(not(ferroui_docsrs))]
+    #[cfg(all(not(ferroui_docsrs), feature = "skia", not(feature = "quartz-metal")))]
     use ferroui_skia::SkiaApplicationExtensions;
     use std::cell::RefCell;
     use std::collections::HashMap;
@@ -128,8 +128,8 @@ mod uikit {
 
     /// Selects the iOS platform for an application.
     pub trait IosApplicationExtensions {
-        /// Uses the iOS platform, with the Skia renderer and the HarfBuzz
-        /// text shaper, without an application delegate (an application
+        /// Uses the iOS platform with Skia/HarfBuzz by default, or the opt-in
+        /// Quartz Metal/Core Text backend, without an application delegate (an application
         /// that embeds views in a UIKit application of its own).
         fn use_ios(&self) -> AppBuilder;
 
@@ -142,10 +142,15 @@ mod uikit {
         let builder = builder
             .use_standard_runtime_platform_subsystem()
             .use_windowing_subsystem(move || Platform::register(app_delegate.clone()), "iOS");
-        // The documentation build of docs.rs has neither (the `ferroui_docsrs` configuration of
-        // the manifest); every other build selects both.
-        #[cfg(not(ferroui_docsrs))]
+        #[cfg(all(not(ferroui_docsrs), feature = "quartz-metal"))]
+        let builder = {
+            use ferroui_quartz::QuartzApplicationExtensions;
+            builder.use_quartz()
+        };
+        #[cfg(all(not(ferroui_docsrs), feature = "skia", not(feature = "quartz-metal")))]
         let builder = builder.use_harfbuzz().use_skia();
+        #[cfg(all(not(ferroui_docsrs), not(any(feature = "skia", feature = "quartz-metal"))))]
+        compile_error!("Select an iOS renderer: skia or quartz-metal");
         builder
     }
 
@@ -328,6 +333,7 @@ mod uikit {
             opts: &IosPlatformOptions,
         ) -> (Arc<dyn IPlatformGraphics>, Option<Arc<EaglPlatformGraphics>>, IosRenderingMode) {
             let graphics = initialize_graphics_with(opts, |rendering_mode| match rendering_mode {
+                IosRenderingMode::OpenGl if cfg!(feature = "quartz-metal") => None,
                 IosRenderingMode::OpenGl => EaglPlatformGraphics::try_create().map(|eagl_graphics| {
                     let graphics: Arc<dyn IPlatformGraphics> = eagl_graphics.clone();
                     (graphics, Some(eagl_graphics), rendering_mode)

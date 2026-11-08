@@ -24,7 +24,7 @@ mod tiles;
 
 pub(crate) fn unsupported(feature: &'static str) {
     static WARNED: std::sync::Mutex<Vec<&str>> = std::sync::Mutex::new(Vec::new());
-    let mut warned = WARNED.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let mut warned = WARNED.lock().unwrap();
     if !warned.contains(&feature) {
         eprintln!("Quartz prototype: unsupported {feature}");
         warned.push(feature)
@@ -38,6 +38,8 @@ pub struct GlyphRun {
     pub ids: Vec<u16>,
     pub positions: Vec<f64>,
     pub outlines: BezPath,
+    #[cfg(feature = "metal")]
+    color_indices: Vec<usize>,
     pub bounds: Rect,
 }
 impl GlyphRun {
@@ -47,7 +49,7 @@ impl GlyphRun {
         glyphs: &[text_formatting::GlyphInfo],
         origin: Point,
     ) -> Self {
-        let simulations = face.platform_typeface().font_simulations();
+        let simulations = face.platform_typeface().font_simulations() | face.font_simulations();
         let font = face
             .platform_typeface()
             .as_any()
@@ -58,6 +60,8 @@ impl GlyphRun {
         let mut ids = Vec::new();
         let mut positions = Vec::new();
         let mut outlines = BezPath::new();
+        #[cfg(feature = "metal")]
+        let mut color_indices = Vec::new();
         let mut x = origin.x;
         let mut ink: Option<kurbo::Rect> = None;
         for g in glyphs {
@@ -77,32 +81,28 @@ impl GlyphRun {
                     );
                     ink = Some(ink.map_or(r, |old| old.union(r)));
                 }
-                if let Some(path) =
-                    ffi::Owned::new(ffi::q_glyph_path(font.raw(), g.glyph_index, size))
-                {
+                let raw = ffi::q_glyph_path(font.raw(), g.glyph_index, size);
+                if !raw.is_null() {
+                    let path = ffi::Owned::new(raw);
                     let mut outline = geometry::from_native(path.0);
                     if simulations.contains(FontSimulations::Oblique) {
                         outline = kurbo::Affine::new([1., 0., -0.2, 1., 0., 0.]) * outline;
                     }
                     if simulations.contains(FontSimulations::Bold) {
-                        // Emboldening is skipped, not fatal, when Core Graphics cannot build
-                        // the stroke or the union.
-                        if let Some(raw) = geometry::native(&outline) {
-                            let stroke = ffi::Owned::new(ffi::q_stroke(
-                                raw.0,
-                                size / 24.,
-                                1,
-                                1,
-                                10.,
-                                std::ptr::null(),
-                                0,
-                                0.,
-                            ));
-                            if let Some(union) = stroke.and_then(|stroke| {
-                                ffi::Owned::new(ffi::q_combine(raw.0, stroke.0, 0, 0, 0))
-                            }) {
-                                outline = geometry::from_native(union.0);
-                            }
+                        let raw = geometry::native(&outline);
+                        let stroke = ffi::Owned::new(ffi::q_stroke(
+                            raw.0,
+                            size / 24.,
+                            1,
+                            1,
+                            10.,
+                            std::ptr::null(),
+                            0,
+                            0.,
+                        ));
+                        let union = ffi::q_combine(raw.0, stroke.0, 0, 0, 0);
+                        if !union.is_null() {
+                            outline = geometry::from_native(ffi::Owned::new(union).0);
                         }
                     }
                     outlines.extend(
@@ -111,15 +111,23 @@ impl GlyphRun {
                             .iter()
                             .copied(),
                     );
+                } else if b.iter().all(|v| v.is_finite()) && b[2] > 0. && b[3] > 0. {
+                    #[cfg(feature = "metal")]
+                    color_indices.push(ids.len() - 1);
                 }
             }
             x += g.glyph_advance;
         }
-        let b = if simulations.is_empty() {
-            ink.unwrap_or_else(|| outlines.bounding_box())
-        } else {
-            outlines.bounding_box()
-        };
+        let b = ink.map_or_else(
+            || outlines.bounding_box(),
+            |ink| {
+                if outlines.is_empty() {
+                    ink
+                } else {
+                    ink.union(outlines.bounding_box())
+                }
+            },
+        );
         let bounds = Rect::new(b.x0, b.y0, b.width(), b.height());
         Self {
             font,
@@ -129,8 +137,64 @@ impl GlyphRun {
             ids,
             positions,
             outlines,
+            #[cfg(feature = "metal")]
+            color_indices,
             bounds,
         }
+    }
+}
+#[cfg(feature = "metal")]
+impl DrawingContext {
+    fn draw_color_glyphs(&mut self, brush: &dyn IBrush, run: &GlyphRun, shift: f64) {
+        if run.color_indices.is_empty() || !self.prepare() {
+            return;
+        }
+        let ids: Vec<_> = run.color_indices.iter().map(|i| run.ids[*i]).collect();
+        let positions: Vec<_> = run
+            .color_indices
+            .iter()
+            .flat_map(|i| [run.positions[*i * 2], run.positions[*i * 2 + 1] + shift])
+            .collect();
+        let bounds = run.bounds.translate(Vector::new(0., shift));
+        self.push_layer(bounds);
+        self.bitmap.context(|c| unsafe {
+            ffi::q_save(c);
+            #[cfg(feature = "metal")]
+            ffi::qm_text_options(
+                c,
+                self.text_options
+                    .last()
+                    .copied()
+                    .unwrap_or_default()
+                    .text_hinting_mode as i32,
+            );
+            ffi::q_glyphs(
+                c,
+                run.font.raw(),
+                run.size,
+                ids.as_ptr(),
+                positions.as_ptr(),
+                ids.len(),
+                1.,
+                1.,
+                1.,
+                1.,
+            );
+            ffi::q_restore(c);
+        });
+        // A color font keeps its intrinsic RGB. The brush supplies only alpha,
+        // including gradient stops, tiling and opacity. Pad the mask geometry
+        // for raster coverage while keeping paint coordinates at the run bounds.
+        self.bitmap
+            .context(|c| unsafe { ffi::q_begin_layer(c, 1., 22) });
+        self.fill(
+            &Geometry::rectangle(bounds.inflate(2.)).stroke,
+            FillRule::NonZero,
+            brush,
+            bounds,
+        );
+        self.pop_layer();
+        self.pop_layer();
     }
 }
 impl IGlyphRunImpl for GlyphRun {
@@ -147,14 +211,12 @@ impl IGlyphRunImpl for GlyphRun {
         if !lower.is_finite() || !upper.is_finite() || upper <= lower || self.outlines.is_empty() {
             return vec![];
         }
-        let Some(path) = geometry::native(
+        let path = geometry::native(
             &(kurbo::Affine::translate((-self.origin.x, -self.origin.y)) * self.outlines.clone()),
-        ) else {
-            return vec![];
+        );
+        let bytes = unsafe {
+            ffi::Owned::new(ffi::q_path_intercepts(path.0, lower as f64, upper as f64)).bytes()
         };
-        // SAFETY: q_path_intercepts returns NULL or a +1 CFData.
-        let bytes =
-            unsafe { ffi::owned_bytes(ffi::q_path_intercepts(path.0, lower as f64, upper as f64)) };
         let mut intervals: Vec<_> = bytes
             .chunks_exact(8)
             .map(|p| {
@@ -193,18 +255,40 @@ fn color(c: Color, opacity: f64) -> [f64; 4] {
 fn rounded(r: RoundedRect) -> BezPath {
     let b = r.rect;
     let mut p = BezPath::new();
-    let [tl, tr, br, bl] = [
+    if b.width <= 0. || b.height <= 0. {
+        return p;
+    }
+    let mut radii = [
         r.radii_top_left,
         r.radii_top_right,
         r.radii_bottom_right,
         r.radii_bottom_left,
     ]
     .map(|v| {
-        Vector::new(
-            v.x.max(0.).min(b.width / 2.),
-            v.y.max(0.).min(b.height / 2.),
-        )
+        if !v.x.is_finite() || !v.y.is_finite() || v.x <= 0. || v.y <= 0. {
+            Vector::ZERO
+        } else {
+            v
+        }
     });
+    // Neighboring radii share the available side. Scale all corners together
+    // only when their sums overlap, preserving asymmetric elliptical corners.
+    let [tl, tr, br, bl] = radii;
+    let mut scale = 1.0_f64;
+    for (length, sum) in [
+        (b.width, tl.x + tr.x),
+        (b.width, bl.x + br.x),
+        (b.height, tl.y + bl.y),
+        (b.height, tr.y + br.y),
+    ] {
+        if sum > length {
+            scale = scale.min(length / sum);
+        }
+    }
+    for radius in &mut radii {
+        *radius *= scale;
+    }
+    let [tl, tr, br, bl] = radii;
     let k = 0.5522847498307936;
     p.move_to((b.x + tl.x, b.y));
     p.line_to((b.right() - tr.x, b.y));
@@ -340,9 +424,7 @@ impl DrawingContext {
         if !self.prepare() {
             return;
         }
-        let Some(native) = geometry::native(path) else {
-            return;
-        };
+        let native = geometry::native(path);
         let opacity = brush.opacity();
         if let Some(solid) = brush.as_solid_color_brush() {
             let [r, g, b, a] = color(solid.color(), opacity);
@@ -541,7 +623,11 @@ impl DrawingContext {
         fill: Option<&BezPath>,
         rule: FillRule,
     ) {
-        let b = stroke.bounding_box();
+        let b = match fill.filter(|p| !p.is_empty()) {
+            Some(fill) if stroke.is_empty() => fill.bounding_box(),
+            Some(fill) => stroke.bounding_box().union(fill.bounding_box()),
+            None => stroke.bounding_box(),
+        };
         let bounds = Rect::new(b.x0, b.y0, b.width(), b.height());
         if let (Some(brush), Some(path)) = (brush, fill) {
             self.fill(path, rule, brush, bounds)
@@ -588,7 +674,7 @@ impl IDrawingContextImpl for DrawingContext {
         }
         #[cfg(feature = "metal")]
         let source: &dyn IBitmapImpl = converted.as_ref().map_or(source, |b| b as &dyn IBitmapImpl);
-        let Some(bitmap) = source.as_any().downcast_ref::<Bitmap>() else {
+        let Some(bitmap) = Bitmap::from_impl(source) else {
             unsupported("foreign bitmap");
             return;
         };
@@ -626,9 +712,11 @@ impl IDrawingContextImpl for DrawingContext {
         pen: Option<&dyn IPen>,
         g: &dyn IGeometryImpl,
     ) {
-        if let Some(g) = g.as_any().downcast_ref::<Geometry>() {
-            self.shape(brush, pen, &g.stroke, g.fill.as_ref(), g.rule)
-        }
+        let g = g
+            .as_any()
+            .downcast_ref::<Geometry>()
+            .expect("Quartz drawing requires Quartz geometry");
+        self.shape(brush, pen, &g.stroke, g.fill.as_ref(), g.rule)
     }
     fn draw_rectangle(
         &mut self,
@@ -638,10 +726,8 @@ impl IDrawingContextImpl for DrawingContext {
         shadows: &BoxShadows,
     ) {
         let path = rounded(r);
-        // GPU surfaces draw the shadows with the Metal shadow pass; a CPU surface (always without
-        // `metal`, and the fallback surface with it) uses the shadow of Core Graphics.
         #[cfg(feature = "metal")]
-        if self.bitmap.is_gpu() {
+        {
             for shadow in shadows.iter().filter(|s| !s.is_inset) {
                 self.box_shadow_gpu(r, &shadow);
             }
@@ -652,6 +738,7 @@ impl IDrawingContextImpl for DrawingContext {
             self.shape(None, pen, &path, Some(&path), FillRule::NonZero);
             return;
         }
+        #[cfg(not(feature = "metal"))]
         {
             for shadow in shadows.iter() {
                 if shadow.is_inset {
@@ -735,6 +822,7 @@ impl IDrawingContextImpl for DrawingContext {
                 #[cfg(feature = "metal")]
                 {
                     ffi::q_save(c);
+                    ffi::qm_text_options(c, text.text_hinting_mode as i32);
                     let options = self.options.last().copied().unwrap_or_default();
                     let mode = if text.text_rendering_mode == TextRenderingMode::Unspecified {
                         options.text_rendering_mode
@@ -744,7 +832,8 @@ impl IDrawingContextImpl for DrawingContext {
                     ffi::qm_render_options(
                         c,
                         blend(options.bitmap_blending_mode).unwrap_or(28),
-                        (mode == TextRenderingMode::Alias) as i32,
+                        (mode == TextRenderingMode::Alias || options.edge_mode == EdgeMode::Aliased)
+                            as i32,
                         options.bitmap_interpolation_mode as i32,
                     );
                 }
@@ -768,7 +857,48 @@ impl IDrawingContextImpl for DrawingContext {
                 ffi::q_restore(c);
             })
         } else {
-            self.fill(&run.outlines, FillRule::NonZero, brush, run.bounds)
+            #[cfg(feature = "metal")]
+            {
+                let text = self.text_options.last().copied().unwrap_or_default();
+                let options = self.options.last().copied().unwrap_or_default();
+                let mode = if text.text_rendering_mode == TextRenderingMode::Unspecified {
+                    options.text_rendering_mode
+                } else {
+                    text.text_rendering_mode
+                };
+                let shift = if text.baseline_pixel_alignment != BaselinePixelAlignment::Unaligned
+                    && self.transform.m12 == 0.
+                    && self.transform.m21 == 0.
+                    && self.transform.m22 != 0.
+                {
+                    let baseline =
+                        (run.origin.y * self.transform.m22 + self.transform.m32) * self.scale.y;
+                    (baseline.round() - baseline) / (self.transform.m22 * self.scale.y)
+                } else {
+                    0.
+                };
+                self.options.push(RenderOptions {
+                    edge_mode: if mode == TextRenderingMode::Alias
+                        || options.edge_mode == EdgeMode::Aliased
+                    {
+                        EdgeMode::Aliased
+                    } else {
+                        EdgeMode::Antialias
+                    },
+                    ..options
+                });
+                let path = kurbo::Affine::translate((0., shift)) * run.outlines.clone();
+                self.fill(
+                    &path,
+                    FillRule::NonZero,
+                    brush,
+                    run.bounds.translate(Vector::new(0., shift)),
+                );
+                self.draw_color_glyphs(brush, run, shift);
+                self.options.pop();
+            }
+            #[cfg(not(feature = "metal"))]
+            self.fill(&run.outlines, FillRule::NonZero, brush, run.bounds);
         }
     }
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
@@ -854,22 +984,27 @@ impl IDrawingContextImpl for DrawingContext {
         }
     }
     fn push_geometry_clip(&mut self, g: &dyn IGeometryImpl) {
+        let g = g
+            .as_any()
+            .downcast_ref::<Geometry>()
+            .expect("Quartz geometry clip requires Quartz geometry");
+        let Some(fill) = &g.fill else {
+            // No fill means no additional clip, regardless of the transform.
+            self.bitmap.context(|c| unsafe { ffi::q_save(c) });
+            return;
+        };
         if !self.prepare() {
-            // A NULL path clips everything away on both the GPU and the CPU path.
+            let empty = geometry::native(&BezPath::new());
             self.bitmap.context(|c| unsafe {
                 ffi::q_save(c);
-                ffi::q_clip(c, std::ptr::null_mut(), 0);
+                ffi::q_clip(c, empty.0, 0);
             });
             return;
         }
         self.bitmap.context(|c| unsafe { ffi::q_save(c) });
-        if let Some(g) = g.as_any().downcast_ref::<Geometry>() {
-            let path = geometry::native(g.fill.as_ref().unwrap_or(&g.stroke));
-            let raw = path.as_ref().map_or(std::ptr::null_mut(), |p| p.0);
-            self.bitmap.context(|c| unsafe {
-                ffi::q_clip(c, raw, i32::from(g.rule == FillRule::EvenOdd))
-            })
-        }
+        let path = geometry::native(fill);
+        self.bitmap
+            .context(|c| unsafe { ffi::q_clip(c, path.0, i32::from(g.rule == FillRule::EvenOdd)) })
     }
     fn pop_geometry_clip(&mut self) {
         self.pop_clip()

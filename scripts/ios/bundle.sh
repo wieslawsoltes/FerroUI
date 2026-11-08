@@ -8,6 +8,7 @@
 #   --example <name>       an example of the package                  (default: ios_view)
 #   --bin <name>           a binary of the package, instead of an example
 #   --features <list>      features of the package                    (default: example, for the default example)
+#   --no-default-features  exclude default backend features
 #   --target <triple>      aarch64-apple-ios-sim (default), x86_64-apple-ios or aarch64-apple-ios
 #   --profile <name>       the cargo profile                          (default: dev)
 #   --bundle-id <id>       CFBundleIdentifier                         (default: org.ferroui.<executable with dashes>)
@@ -37,6 +38,7 @@ kind=example
 executable=ios_view
 features=
 features_set=0
+no_default_features=0
 target=aarch64-apple-ios-sim
 profile=dev
 bundle_id=
@@ -52,6 +54,7 @@ while [ $# -gt 0 ]; do
     --example) kind=example; executable="$2"; shift 2 ;;
     --bin) kind=bin; executable="$2"; shift 2 ;;
     --features) features="$2"; features_set=1; shift 2 ;;
+    --no-default-features) no_default_features=1; shift ;;
     --target) target="$2"; shift 2 ;;
     --profile) profile="$2"; shift 2 ;;
     --bundle-id) bundle_id="$2"; shift 2 ;;
@@ -88,7 +91,16 @@ if [ "$build" = 1 ]; then
   args=(build --locked -p "$package" --target "$target" --profile "$profile")
   if [ "$kind" = example ]; then args+=(--example "$executable"); else args+=(--bin "$executable"); fi
   if [ -n "$features" ]; then args+=(--features "$features"); fi
-  (cd "$workspace" && cargo "${args[@]}") >&2
+  if [ "$no_default_features" = 1 ]; then args+=(--no-default-features); fi
+  # Pin the SDK for the target: the default xcrun/cc SDK can be macOS even
+  # with an iOS Rust target, especially after switching Xcode toolchains.
+  case "$target" in
+    *-apple-ios-sim|x86_64-apple-ios) sdk=iphonesimulator ;;
+    *-apple-ios) sdk=iphoneos ;;
+    *) echo "bundle.sh: unsupported iOS target: $target" >&2; exit 2 ;;
+  esac
+  sdk_root="$(xcrun --sdk "$sdk" --show-sdk-path)"
+  (cd "$workspace" && SDKROOT="$sdk_root" cargo "${args[@]}") >&2
 fi
 
 if [ "$kind" = example ]; then
