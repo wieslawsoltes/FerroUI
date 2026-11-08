@@ -4,8 +4,7 @@ Cranpose (<https://github.com/samoylenkodmitry/Cranpose>, MIT or Apache-2.0) bri
 Compose model to Rust and publishes a cross-framework benchmark measured from outside every app
 (<https://samoylenkodmitry.github.io/Cranpose/?tab=performance>). This document records what
 FerroUI can learn from its architecture, how FerroUI does on its benchmark, where FerroUI loses
-time, and the plan to fix it. The work is tracked in the issue linked from the pull request that
-added this document; the fixes and the deviations from upstream they need are in
+time, and the plan to fix it. The work is tracked in #644; the fixes and the deviations from upstream they need are in
 [desktop-performance.md](desktop-performance.md), sections 8 and 9.
 
 ## 1. The benchmark
