@@ -620,42 +620,62 @@ fn parse_icon_contours(svg: &str) -> Option<Vec<std::sync::Arc<dyn IGeometryImpl
     let data = geometry.try_get_path_data()?;
     let source = data.stroke?;
     let backend = FerroLocator::current().get_required_service::<dyn IPlatformRenderInterface>();
-    let mut result = Vec::new();
-    let mut builder: Option<Box<dyn ferroui_base::platform::IStreamGeometryBuilder>> = None;
+    type Builder = Box<dyn ferroui_base::platform::IStreamGeometryBuilder>;
+    /// The figure being built: its builder, its start point, and whether it is still open.
+    struct Figure {
+        builder: Builder,
+        start: Point,
+        open: bool,
+    }
+    let mut result: Vec<std::sync::Arc<dyn IGeometryImpl>> = Vec::new();
+    let mut current: Option<Figure> = None;
+    let finish = |mut figure: Figure, result: &mut Vec<std::sync::Arc<dyn IGeometryImpl>>| {
+        if figure.open {
+            figure.builder.end_figure(false);
+        }
+        result.push(figure.builder.to_geometry());
+    };
+    let begin = |start: Point| {
+        let mut builder = backend.create_stream_geometry_builder(None);
+        builder.begin_figure(start, false);
+        Figure { builder, start, open: true }
+    };
     for segment in source.segments {
         if let Segment::MoveTo(p) = segment {
-            if let Some(mut old) = builder.take() {
-                old.end_figure(false);
-                result.push(old.to_geometry());
+            if let Some(figure) = current.take() {
+                finish(figure, &mut result);
             }
-            let mut next = backend.create_stream_geometry_builder(None);
-            next.begin_figure(p, false);
-            builder = Some(next);
-        } else if let Some(b) = builder.as_mut() {
-            match segment {
-                Segment::LineTo(p) => b.line_to(p, true),
-                Segment::QuadraticTo { control, point } => {
-                    b.quadratic_bezier_to(control, point, true)
-                }
-                Segment::CubicTo {
-                    control1,
-                    control2,
-                    point,
-                } => b.cubic_bezier_to(control1, control2, point, true),
-                Segment::Close => b.end_figure(true),
-                Segment::MoveTo(_) => unreachable!(),
+            current = Some(begin(p));
+            continue;
+        }
+        // A drawing segment after a close starts a new contour at the start of the closed one.
+        if let Some(figure) = current.take_if(|f| !f.open && !matches!(segment, Segment::Close)) {
+            let start = figure.start;
+            finish(figure, &mut result);
+            current = Some(begin(start));
+        }
+        let Some(figure) = current.as_mut() else { continue };
+        match segment {
+            Segment::LineTo(p) => figure.builder.line_to(p, true),
+            Segment::QuadraticTo { control, point } => figure.builder.quadratic_bezier_to(control, point, true),
+            Segment::CubicTo { control1, control2, point } => {
+                figure.builder.cubic_bezier_to(control1, control2, point, true)
             }
+            Segment::Close if figure.open => {
+                figure.builder.end_figure(true);
+                figure.open = false;
+            }
+            Segment::Close | Segment::MoveTo(_) => {}
         }
     }
-    if let Some(mut last) = builder {
-        result.push(last.to_geometry());
+    if let Some(figure) = current {
+        finish(figure, &mut result);
     }
     Some(result)
 }
 
 /// The parsed icon paths, shared with the draw operations. An operation is
-/// rendered on the render thread, and a Skia path may be sent to another
-/// thread but not shared by reference, hence the lock.
+/// rendered on the render thread, hence the lock.
 type SharedPaths =
     std::sync::Arc<std::sync::Mutex<Vec<Option<Vec<std::sync::Arc<dyn IGeometryImpl>>>>>>;
 

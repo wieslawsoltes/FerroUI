@@ -247,8 +247,8 @@ at seven and uploads at eleven, with zero GPU errors throughout. Those existing 
 occurred before media playback; media added neither readbacks nor uploads. The later QR image
 demo adds unrelated image processing.
 
-**A physical camera preview has not been verified:** this Mac reports zero cameras, permission
-is granted, and the user confirmed no webcam is available. The synthetic test establishes the
+**A physical camera preview has not been verified:** the test Mac has no camera (it reports
+zero devices with permission granted). The synthetic test establishes the
 camera presentation path, not AVFoundation hardware acquisition. The fixture is explicit,
 development-only and absent from ordinary `quartz-metal` and HelloWorld builds:
 

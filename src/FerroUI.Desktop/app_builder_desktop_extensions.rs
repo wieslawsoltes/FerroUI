@@ -81,10 +81,7 @@ fn load_x11(builder: &AppBuilder) {
     builder.use_x11();
 }
 
-#[cfg(all(
-    feature = "skia",
-    any(target_os = "macos", windows, target_os = "linux")
-))]
+#[cfg(all(feature = "skia", any(target_os = "macos", windows, target_os = "linux")))]
 fn load_skia(builder: &AppBuilder) {
     use ferroui_skia::SkiaApplicationExtensions;
     builder.use_skia();
@@ -105,19 +102,10 @@ mod tests {
     fn platform_detect_selects_the_mac_os_subsystems() {
         let builder = AppBuilder::configure::<Application>().use_platform_detect();
 
-        assert_eq!(
-            builder.text_shaping_subsystem_name().as_deref(),
-            Some("HarfBuzz")
-        );
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
         assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Skia"));
-        assert_eq!(
-            builder.windowing_subsystem_name().as_deref(),
-            Some("FerroNative")
-        );
-        assert_eq!(
-            builder.runtime_platform_services_name().as_deref(),
-            Some("StandardRuntimePlatform")
-        );
+        assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("FerroNative"));
+        assert_eq!(builder.runtime_platform_services_name().as_deref(), Some("StandardRuntimePlatform"));
         assert!(builder.text_shaping_subsystem_initializer().is_some());
         assert!(builder.rendering_subsystem_initializer().is_some());
         assert!(builder.windowing_subsystem_initializer().is_some());
@@ -137,16 +125,10 @@ mod linux_tests {
     fn platform_detect_selects_the_linux_subsystems() {
         let builder = AppBuilder::configure::<Application>().use_platform_detect();
 
-        assert_eq!(
-            builder.text_shaping_subsystem_name().as_deref(),
-            Some("HarfBuzz")
-        );
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
         assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Skia"));
         assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("X11"));
-        assert_eq!(
-            builder.runtime_platform_services_name().as_deref(),
-            Some("StandardRuntimePlatform")
-        );
+        assert_eq!(builder.runtime_platform_services_name().as_deref(), Some("StandardRuntimePlatform"));
         // Nothing is initialized until the application is set up: no connection to a server is made.
         assert!(builder.instance().is_none());
     }
@@ -161,16 +143,10 @@ mod windows_tests {
     fn platform_detect_selects_the_windows_subsystems() {
         let builder = AppBuilder::configure::<Application>().use_platform_detect();
 
-        assert_eq!(
-            builder.text_shaping_subsystem_name().as_deref(),
-            Some("HarfBuzz")
-        );
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
         assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Skia"));
         assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("Win32"));
-        assert_eq!(
-            builder.runtime_platform_services_name().as_deref(),
-            Some("StandardRuntimePlatform")
-        );
+        assert_eq!(builder.runtime_platform_services_name().as_deref(), Some("StandardRuntimePlatform"));
         assert!(builder.text_shaping_subsystem_initializer().is_some());
         assert!(builder.rendering_subsystem_initializer().is_some());
         assert!(builder.windowing_subsystem_initializer().is_some());

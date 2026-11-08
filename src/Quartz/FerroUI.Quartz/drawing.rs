@@ -638,8 +638,10 @@ impl IDrawingContextImpl for DrawingContext {
         shadows: &BoxShadows,
     ) {
         let path = rounded(r);
+        // GPU surfaces draw the shadows with the Metal shadow pass; a CPU surface (always without
+        // `metal`, and the fallback surface with it) uses the shadow of Core Graphics.
         #[cfg(feature = "metal")]
-        {
+        if self.bitmap.is_gpu() {
             for shadow in shadows.iter().filter(|s| !s.is_inset) {
                 self.box_shadow_gpu(r, &shadow);
             }
@@ -650,7 +652,6 @@ impl IDrawingContextImpl for DrawingContext {
             self.shape(None, pen, &path, Some(&path), FillRule::NonZero);
             return;
         }
-        #[cfg(not(feature = "metal"))]
         {
             for shadow in shadows.iter() {
                 if shadow.is_inset {

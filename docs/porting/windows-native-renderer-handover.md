@@ -13,16 +13,15 @@ ControlCatalog coverage, including GPU video/camera interop. Do not stop after r
 text shaper or after drawing text into a CPU framebuffer. Measure both complete executables
 and any additional shipped DLLs/assets before claiming a size reduction.
 
-The user asked for this handover on `codex/native-rendering-investigation` in GitLab:
-`git@gitlab.com:ferro-group2/FerroUI.git`. Branch your Windows work from the pushed snapshot,
-for example `codex/windows-native-renderer`. The macOS agent is continuing on the source
-branch; keep Windows changes isolated and coordinate edits to shared feature/configuration
-files. No Windows implementation is included in this handover snapshot.
+Branch the Windows work from `main` once this prototype has merged, for example
+`render/windows-native-renderer`. The macOS prototype continues in its own branch; keep Windows
+changes isolated and coordinate edits to shared feature and configuration files. No Windows
+implementation is part of this document.
 
 ## Background and current branch
 
 Ferro is a Rust port of Avalonia. The original investigation compared GPUI's platform backends
-and the user's Avalonia native-text prototypes:
+and two native-text prototypes written for Avalonia:
 
 - [GPUI](https://github.com/zed-industries/zed/tree/main/crates/gpui)
 - [DirectWrite.Avalonia](https://github.com/wieslawsoltes/DirectWrite.Avalonia)
@@ -34,7 +33,7 @@ approach is useful evidence for DirectWrite plus native Direct3D; it is not a co
 Direct2D implementation to copy. Direct2D is the proposed Ferro-specific route to broader
 Avalonia-style drawing/effects coverage with system components.
 
-The base of the investigation was upstream GitHub main at
+The investigation started from `main` at
 `97653e5036db8c25baf51fc38da08b4a468e7696`. This branch adds the macOS prototype and shared
 backend-selection changes. Read [quartz-prototype.md](quartz-prototype.md) and
 [quartz-prototype-results.json](quartz-prototype-results.json) for architecture and evidence.
@@ -54,7 +53,7 @@ has been verified through its preview path. Windows needs its own hardware check
 
 ## Read these repository contracts first
 
-Paths below are relative to the checkout root. Check applicable `AGENTS.md` files before edits.
+Paths below are relative to the checkout root.
 
 | Area | Starting points |
 |---|---|
