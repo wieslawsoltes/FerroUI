@@ -324,6 +324,7 @@ impl GauntletView {
             Launch::log("PERF first_frame");
         }
         let frame = Clock::advance();
+        report_frame_rate();
         let visual: &Visual = self;
         let top_level = TopLevel::get_top_level(Some(visual));
         let scaling = top_level.as_ref().map_or(1.0, |top_level| top_level.render_scaling());
@@ -340,6 +341,25 @@ impl GauntletView {
             top_level.request_animation_frame(move |_| view.on_frame());
         }
     }
+}
+
+/// With `PERF_REPORT=1`, prints `PERF fps N` once a second: the frames the animation frame callback
+/// ran, for comparing builds of FerroUI (the harness counts presented frames from outside instead).
+pub(crate) fn report_frame_rate() {
+    thread_local! {
+        static REPORT: Option<(Cell<std::time::Instant>, Cell<u32>)> =
+            std::env::var_os("PERF_REPORT").map(|_| (Cell::new(std::time::Instant::now()), Cell::new(0)));
+    }
+    REPORT.with(|report| {
+        let Some((since, frames)) = report else { return };
+        frames.set(frames.get() + 1);
+        let elapsed = since.get().elapsed();
+        if elapsed.as_secs_f64() >= 1.0 {
+            println!("PERF fps {:.1}", f64::from(frames.get()) / elapsed.as_secs_f64());
+            since.set(std::time::Instant::now());
+            frames.set(0);
+        }
+    });
 }
 
 fn avatar(index: usize) -> Rc<dyn IImage> {

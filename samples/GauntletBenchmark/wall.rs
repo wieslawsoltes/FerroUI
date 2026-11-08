@@ -207,6 +207,7 @@ impl WallView {
     }
 
     fn on_frame(&self) {
+        crate::gauntlet::report_frame_rate();
         if !self.first_frame_logged.get() {
             self.first_frame_logged.set(true);
             Launch::log("PERF first_frame");
