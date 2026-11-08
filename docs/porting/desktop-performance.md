@@ -663,3 +663,22 @@ framework reads the visual's own transform or opacity (checked over every `rende
 Changes of `Bounds` still record the drawing: `TextPresenter::render` tracks its position for the
 caret of input methods. Tests: `visual_render_tests.rs`. Local gate, three rounds: gauntlet UI
 thread -0.5 %, still wall UI thread -5.2 % (its cursor moves by a transform).
+
+### 9.6 The hit-test tree compares readback revisions before reading readbacks
+
+With the pointer in a window, pointer-over and tooltips hit-test the pointer after every frame, and
+each hit test checks the children of every collection it passes through: the readback revision
+changes with every frame, so every bucket of the collection is checked again. Checking a child read
+its whole readback (a lock and a copy, and clones of its root and of the compositor's readback
+indices) only to find, for nearly every child, the revision the tree already has. A child is now
+checked by the revision of the readback slot it would read, from the slots' atomics, and its
+readback is read only when that revision differs; the tree is unchanged for every child whose
+revision it already has, as before. Local gate, three rounds, with the frame gate's scenario of the
+still wall with the pointer in the window (`wall/20+pointer`): UI thread 3.59 to 1.64 ms a frame
+(-54.4 %); gauntlet UI thread -4.1 %.
+
+A first attempt skipped the whole check while no child's readback had been written since the last
+one (a revision of the children kept by each server visual); the gate refused it (+17.8 % on
+`wall/20+pointer`): the still wall's container holds the changing clock and cursor beside its
+static tiles, so the revision of its children changes with every frame and the bookkeeping only
+added cost.

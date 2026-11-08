@@ -258,6 +258,11 @@ impl CompositionHitTestAabbTree {
         for index in (bucket_index * ORDER_BUCKET_SIZE as usize)..end {
             let visual = self.children.get(index);
             let Some(mut entry) = self.entries.get(&key(&visual)).copied() else { continue };
+            // A child whose readback is the one the entry was made from is unchanged: compare the
+            // revisions before reading the readback itself (desktop-performance.md, section 9.6).
+            if entry.revision != 0 && visual.readback_revision(readback_revision) == Some(entry.revision) {
+                continue;
+            }
             let (state, bounds, revision) = Self::get_bounds_state(&visual);
             if entry.revision != revision {
                 self.update_bounds(&visual, &mut entry, state, bounds, revision);
