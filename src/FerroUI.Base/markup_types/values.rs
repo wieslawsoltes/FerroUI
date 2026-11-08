@@ -676,89 +676,340 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::media::AcrylicBrushBackgroundSource as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types with the untyped value
-/// conversions of the current thread.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Thickness>();
-    ValueTypes::register_nullable::<Point>();
-    ValueTypes::register_nullable::<Vector>();
-    ValueTypes::register_nullable::<Size>();
     ValueTypes::register_nullable::<Rect>();
-    ValueTypes::register_nullable::<Matrix>();
-    ValueTypes::register_nullable::<CornerRadius>();
-    ValueTypes::register_nullable::<RelativePoint>();
-    ValueTypes::register_nullable::<RelativeRect>();
-    ValueTypes::register_nullable::<RelativeScalar>();
-    ValueTypes::register_nullable::<PixelPoint>();
-    ValueTypes::register_nullable::<PixelSize>();
-    ValueTypes::register_nullable::<PixelRect>();
-    ValueTypes::register_nullable::<PixelVector>();
-    ValueTypes::register_nullable::<Vector3D>();
-    ValueTypes::register_nullable::<RoundedRect>();
-    ValueTypes::register_nullable::<Color>();
-    ValueTypes::register_nullable::<HslColor>();
-    ValueTypes::register_nullable::<HsvColor>();
-    ValueTypes::register_nullable::<FontWeight>();
-    ValueTypes::register_nullable::<FontFamily>();
-    ValueTypes::register_nullable::<FontFeature>();
     ValueTypes::register_nullable::<FontFeatureCollection>();
     ValueTypes::register_nullable::<TextDecorationCollection>();
-    ValueTypes::register_nullable::<BoxShadow>();
-    ValueTypes::register_nullable::<BoxShadows>();
     ValueTypes::register_nullable::<KeyGesture>();
-    ValueTypes::register_nullable::<Cue>();
-    ValueTypes::register_nullable::<IterationCount>();
     ValueTypes::register_nullable::<Easing>();
     ValueTypes::register_nullable::<ThemeVariant>();
-    ValueTypes::register_nullable::<SignedDuration>();
-    ValueTypes::register_nullable::<Uri>();
     ValueTypes::register_nullable::<CultureInfo>();
-    ValueTypes::register_nullable::<Rc<Cursor>>();
-    ValueTypes::register_nullable::<TextLineBounds>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::MicaKind>();
-    ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>();
-    ValueTypes::register_nullable::<crate::media::AcrylicBrushBackgroundSource>();
-
-    // The text of a value (its `ToString()` in the managed original, what a string format
-    // or a binding to text shows): the value types that define one.
-    ValueTypes::register_display::<Thickness>();
-    ValueTypes::register_display::<Point>();
-    ValueTypes::register_display::<Vector>();
-    ValueTypes::register_display::<Size>();
-    ValueTypes::register_display::<Rect>();
-    ValueTypes::register_display::<Matrix>();
-    ValueTypes::register_display::<CornerRadius>();
-    ValueTypes::register_display::<RelativePoint>();
-    ValueTypes::register_display::<RelativeScalar>();
-    ValueTypes::register_display::<PixelPoint>();
-    ValueTypes::register_display::<PixelSize>();
-    ValueTypes::register_display::<PixelRect>();
-    ValueTypes::register_display::<PixelVector>();
-    ValueTypes::register_display::<Vector3D>();
-    ValueTypes::register_display::<Color>();
-    ValueTypes::register_display::<HslColor>();
-    ValueTypes::register_display::<HsvColor>();
-    ValueTypes::register_display::<FontWeight>();
-    ValueTypes::register_display::<FontFamily>();
-    ValueTypes::register_display::<FontFeature>();
-    ValueTypes::register_display::<BoxShadow>();
-    ValueTypes::register_display::<BoxShadows>();
-    ValueTypes::register_display::<KeyGesture>();
-    ValueTypes::register_display::<IterationCount>();
-    ValueTypes::register_display::<ThemeVariant>();
-    ValueTypes::register_display::<SignedDuration>();
-    ValueTypes::register_display::<DateTime>();
-    ValueTypes::register_display::<DateTimeOffset>();
-    ValueTypes::register_display::<Decimal>();
-    ValueTypes::register_nullable::<DateTime>();
-    ValueTypes::register_nullable::<DateTimeOffset>();
-    ValueTypes::register_nullable::<Decimal>();
-    ValueTypes::register_nullable::<NumberStyles>();
-    ValueTypes::register_display::<Uri>();
-    ValueTypes::register_display::<CultureInfo>();
-    ValueTypes::register_display::<Rc<Cursor>>();
-    // The text of a text trimming is the name it parses from (`CharacterEllipsis`, `None`, ...),
-    // as the `ToString()` of the trimmings of the managed original.
-    ValueTypes::register_display::<Rc<dyn crate::media::TextTrimming>>();
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<Point>();
+    ValueTypes::register_used::<Vector>();
+    ValueTypes::register_used::<Size>();
+    ValueTypes::register_used::<Matrix>();
+    ValueTypes::register_used::<CornerRadius>();
+    ValueTypes::register_used::<RelativePoint>();
+    ValueTypes::register_used::<RelativeRect>();
+    ValueTypes::register_used::<RelativeScalar>();
+    ValueTypes::register_used::<PixelPoint>();
+    ValueTypes::register_used::<PixelSize>();
+    ValueTypes::register_used::<PixelRect>();
+    ValueTypes::register_used::<PixelVector>();
+    ValueTypes::register_used::<Vector3D>();
+    ValueTypes::register_used::<RoundedRect>();
+    ValueTypes::register_used::<Color>();
+    ValueTypes::register_used::<HslColor>();
+    ValueTypes::register_used::<HsvColor>();
+    ValueTypes::register_used::<FontWeight>();
+    ValueTypes::register_used::<FontFamily>();
+    ValueTypes::register_used::<FontFeature>();
+    ValueTypes::register_used::<BoxShadow>();
+    ValueTypes::register_used::<BoxShadows>();
+    ValueTypes::register_used::<Cue>();
+    ValueTypes::register_used::<IterationCount>();
+    ValueTypes::register_used::<SignedDuration>();
+    ValueTypes::register_used::<Uri>();
+    ValueTypes::register_used::<Cursor>();
+    ValueTypes::register_used::<TextLineBounds>();
+    ValueTypes::register_used::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
+    ValueTypes::register_used::<crate::rendering::composition::system_backdrops::MicaKind>();
+    ValueTypes::register_used::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>();
+    ValueTypes::register_used::<crate::media::AcrylicBrushBackgroundSource>();
+    ValueTypes::register_used::<Thickness>();
+    ValueTypes::register_used::<Rect>();
+    ValueTypes::register_used::<KeyGesture>();
+    ValueTypes::register_used::<ThemeVariant>();
+    ValueTypes::register_used::<DateTime>();
+    ValueTypes::register_used::<DateTimeOffset>();
+    ValueTypes::register_used::<Decimal>();
+    ValueTypes::register_used::<NumberStyles>();
+    ValueTypes::register_used::<CultureInfo>();
+}
+
+impl crate::data::core::ValueTypeRegistration for Point {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Point>();
+        ValueTypes::register_display::<Point>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vector {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vector>();
+        ValueTypes::register_display::<Vector>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Size {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Size>();
+        ValueTypes::register_display::<Size>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Matrix {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Matrix>();
+        ValueTypes::register_display::<Matrix>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CornerRadius {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CornerRadius>();
+        ValueTypes::register_display::<CornerRadius>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RelativePoint {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RelativePoint>();
+        ValueTypes::register_display::<RelativePoint>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RelativeRect {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RelativeRect>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RelativeScalar {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RelativeScalar>();
+        ValueTypes::register_display::<RelativeScalar>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PixelPoint {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PixelPoint>();
+        ValueTypes::register_display::<PixelPoint>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PixelSize {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PixelSize>();
+        ValueTypes::register_display::<PixelSize>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PixelRect {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PixelRect>();
+        ValueTypes::register_display::<PixelRect>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PixelVector {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PixelVector>();
+        ValueTypes::register_display::<PixelVector>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Vector3D {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Vector3D>();
+        ValueTypes::register_display::<Vector3D>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RoundedRect {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RoundedRect>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Color {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Color>();
+        ValueTypes::register_display::<Color>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for HslColor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<HslColor>();
+        ValueTypes::register_display::<HslColor>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for HsvColor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<HsvColor>();
+        ValueTypes::register_display::<HsvColor>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontWeight {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontWeight>();
+        ValueTypes::register_display::<FontWeight>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontFamily {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontFamily>();
+        ValueTypes::register_display::<FontFamily>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontFeature {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontFeature>();
+        ValueTypes::register_display::<FontFeature>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BoxShadow {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BoxShadow>();
+        ValueTypes::register_display::<BoxShadow>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BoxShadows {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BoxShadows>();
+        ValueTypes::register_display::<BoxShadows>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Cue {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Cue>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for IterationCount {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<IterationCount>();
+        ValueTypes::register_display::<IterationCount>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SignedDuration {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SignedDuration>();
+        ValueTypes::register_display::<SignedDuration>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Uri {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Uri>();
+        ValueTypes::register_display::<Uri>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Cursor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<Cursor>>();
+        ValueTypes::register_display::<Rc<Cursor>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextLineBounds {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextLineBounds>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::rendering::composition::system_backdrops::SystemBackdropTheme {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::rendering::composition::system_backdrops::MicaKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::MicaKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::rendering::composition::system_backdrops::DesktopAcrylicKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::media::AcrylicBrushBackgroundSource {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::media::AcrylicBrushBackgroundSource>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Thickness {
+    fn register_value_conversions() {
+        // The text of a value (its `ToString()` in the managed original, what a string format
+        // or a binding to text shows): the value types that define one.
+        ValueTypes::register_display::<Thickness>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Rect {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<Rect>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyGesture {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<KeyGesture>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ThemeVariant {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<ThemeVariant>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DateTime {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<DateTime>();
+        ValueTypes::register_nullable::<DateTime>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DateTimeOffset {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<DateTimeOffset>();
+        ValueTypes::register_nullable::<DateTimeOffset>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Decimal {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<Decimal>();
+        ValueTypes::register_nullable::<Decimal>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for NumberStyles {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NumberStyles>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CultureInfo {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<CultureInfo>();
+    }
+}
+

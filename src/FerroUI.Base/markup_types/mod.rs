@@ -38,19 +38,36 @@ pub(crate) fn register() {
         MarkupType::register_table(types);
     }
     ValueTypes::register_global(register_value_types);
+    ValueTypes::register_table(register_value_type_table);
 }
 
-/// Registers what the untyped value conversions need to know about the
-/// types declared in this module (nullable forms, reference types). The
-/// conversions are per thread: this runs on every thread, when the thread
-/// next converts an untyped value ([`ValueTypes::register_global`]).
+/// Registers what the untyped value conversions need of the types declared in this module
+/// that no first use shows (#566): the casts and the nullable forms that compiled markup
+/// performs for the members of markup types (a converter of a binding, the setters of a
+/// style), which register nothing when they are set. The conversions are per thread: this
+/// runs on every thread, when the thread next converts an untyped value
+/// ([`ValueTypes::register_global`]).
+///
+/// Every other type of this module registers when it is first used: with the first property
+/// of the type, and when its metadata becomes known ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 fn register_value_types() {
-    enums::register_value_types();
     values::register_value_types();
     contracts::register_value_types();
     plain::register_value_types();
     classes::register_value_types();
     well_known::register_value_types();
     animation::register_value_types();
-    rich_text::register_value_types();
+}
+
+/// Registers every type of this module that registers when it is first used: what the
+/// tables of types register at start-up ([`ValueTypes::register_table`], the feature
+/// `type-tables`), for what looks types up by name.
+pub(crate) fn register_value_type_table() {
+    enums::register_value_type_table();
+    values::register_value_type_table();
+    contracts::register_value_type_table();
+    plain::register_value_type_table();
+    well_known::register_value_type_table();
+    animation::register_value_type_table();
+    rich_text::register_value_type_table();
 }

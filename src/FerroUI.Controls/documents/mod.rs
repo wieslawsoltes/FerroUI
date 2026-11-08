@@ -86,19 +86,92 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <TextHighlighterCollection as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types of [`MARKUP_TYPES`].
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(crate) fn register_value_types() {
     use ferroui_base::data::core::ValueTypes;
-    ValueTypes::register_nullable::<BlockCollection>();
-    ValueTypes::register_nullable::<RichTextDocument>();
-    ValueTypes::register_nullable::<LineStackingStrategy>();
-    ValueTypes::register_nullable::<LineSpacingRule>();
-    ValueTypes::register_nullable::<TextGravity>();
-    ValueTypes::register_nullable::<UnderlineStyle>();
-    ValueTypes::register_nullable::<TextHighlightRange>();
     ValueTypes::register_reference::<TextHighlightRange>();
-    ValueTypes::register_nullable::<TextRangeCollection>();
-    ValueTypes::register_nullable::<TextHighlighterCollection>();
+}
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(crate) fn register_value_type_table() {
+    use ferroui_base::data::core::ValueTypes;
+    ValueTypes::register_used::<BlockCollection>();
+    ValueTypes::register_used::<RichTextDocument>();
+    ValueTypes::register_used::<LineStackingStrategy>();
+    ValueTypes::register_used::<LineSpacingRule>();
+    ValueTypes::register_used::<TextGravity>();
+    ValueTypes::register_used::<UnderlineStyle>();
+    ValueTypes::register_used::<TextHighlightRange>();
+    ValueTypes::register_used::<TextRangeCollection>();
+    ValueTypes::register_used::<TextHighlighterCollection>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for BlockCollection {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<BlockCollection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RichTextDocument {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<RichTextDocument>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for LineStackingStrategy {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<LineStackingStrategy>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for LineSpacingRule {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<LineSpacingRule>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextGravity {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextGravity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for UnderlineStyle {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<UnderlineStyle>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextHighlightRange {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextHighlightRange>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextRangeCollection {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextRangeCollection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextHighlighterCollection {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<TextHighlighterCollection>();
+    }
 }
 
 #[cfg(test)]

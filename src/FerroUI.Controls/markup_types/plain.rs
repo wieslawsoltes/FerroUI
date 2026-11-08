@@ -576,18 +576,14 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the types that can be held in untyped
-/// values with the untyped value conversions of the current thread.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_cast::<RoutedEvent<ScrollChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
-    ValueTypes::register_nullable::<Rc<dyn crate::ICommandBarElement>>();
     ValueTypes::register_nullable::<FerroList<Rc<dyn crate::ICommandBarElement>>>();
-    ValueTypes::register_nullable::<Controls>();
-    ValueTypes::register_nullable::<RowDefinitions>();
-    ValueTypes::register_nullable::<ColumnDefinitions>();
-    ValueTypes::register_nullable::<ItemCollection>();
-    ValueTypes::register_nullable::<InlineCollection>();
-    ValueTypes::register_nullable::<DataTemplates>();
     ValueTypes::register_nullable::<FerroList<Ref<Control>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Inline>>>();
     ValueTypes::register_nullable::<FerroList<Rc<dyn IDataTemplate>>>();
@@ -599,18 +595,12 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
-    ValueTypes::register_nullable::<Rc<WindowIcon>>();
     ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
-    ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
-    // The delegate of a method named in markup is a callback: the value of a
-    // `CustomPopupPlacementCallback` property.
-    ValueTypes::register_cast::<MarkupDelegate, CustomPopupPlacementCallbackValue>(custom_popup_placement_callback);
     // A named collection is the list it derives from: the same list, so that the members
     // of the list (`Capacity`) are reached through the collection.
     // The collection handles of items controls: a property that holds one takes the handle
     // (and null) from an untyped value, and a binding delivers a handle to it.
     ValueTypes::register_nullable::<crate::ItemsSource>();
-    ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
     // A notification is a reference type, boxed as itself, and a notification of the contract.
     crate::notifications::Notification::ensure_registered();
     crate::ItemsSource::register_binding_conversion::<crate::ItemsSource>();
@@ -658,19 +648,104 @@ pub(super) fn register_value_types() {
     ValueTypes::register_conversion::<Rc<ItemsSourceView>, Option<crate::ItemsSource>>(|view| {
         Some(Some(crate::ItemsSource::from(view.clone())))
     });
-    ValueTypes::register_nullable::<Rc<TrayIcons>>();
     ValueTypes::register_nullable::<FerroList<Ref<TrayIcon>>>();
-    ValueTypes::register_cast::<Rc<TrayIcons>, FerroList<Ref<TrayIcon>>>(|c| (***c).clone());
-    ValueTypes::register_cast::<Controls, FerroList<Ref<Control>>>(|c| (**c).clone());
-    ValueTypes::register_cast::<InlineCollection, FerroList<Ref<Inline>>>(|c| (**c).clone());
-    ValueTypes::register_cast::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| (**c).clone());
-    ValueTypes::register_cast::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| (***c).clone());
-    ValueTypes::register_cast::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| (***c).clone());
-    // The named collections whose Rust type dereferences to the list: generated code
-    // passes a reference to such a collection where a member of the list takes the list.
-    ValueTypes::register_deref::<Controls, FerroList<Ref<Control>>>(|c| c);
-    ValueTypes::register_deref::<InlineCollection, FerroList<Ref<Inline>>>(|c| c);
-    ValueTypes::register_deref::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| c);
-    ValueTypes::register_deref::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| c);
-    ValueTypes::register_deref::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| c);
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<dyn crate::ICommandBarElement>();
+    ValueTypes::register_used::<Controls>();
+    ValueTypes::register_used::<RowDefinitions>();
+    ValueTypes::register_used::<ColumnDefinitions>();
+    ValueTypes::register_used::<ItemCollection>();
+    ValueTypes::register_used::<InlineCollection>();
+    ValueTypes::register_used::<DataTemplates>();
+    ValueTypes::register_used::<WindowIcon>();
+    ValueTypes::register_used::<CustomPopupPlacementCallbackValue>();
+    ValueTypes::register_used::<crate::primitives::SelectedItemsList>();
+    ValueTypes::register_used::<TrayIcons>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for dyn crate::ICommandBarElement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::ICommandBarElement>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Controls {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Controls>();
+        ValueTypes::register_cast::<Controls, FerroList<Ref<Control>>>(|c| (**c).clone());
+        // The named collections whose Rust type dereferences to the list: generated code
+        // passes a reference to such a collection where a member of the list takes the list.
+        ValueTypes::register_deref::<Controls, FerroList<Ref<Control>>>(|c| c);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RowDefinitions {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RowDefinitions>();
+        ValueTypes::register_cast::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| (***c).clone());
+        ValueTypes::register_deref::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| c);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColumnDefinitions {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColumnDefinitions>();
+        ValueTypes::register_cast::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| (***c).clone());
+        ValueTypes::register_deref::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| c);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ItemCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ItemCollection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for InlineCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<InlineCollection>();
+        ValueTypes::register_cast::<InlineCollection, FerroList<Ref<Inline>>>(|c| (**c).clone());
+        ValueTypes::register_deref::<InlineCollection, FerroList<Ref<Inline>>>(|c| c);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DataTemplates {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DataTemplates>();
+        ValueTypes::register_cast::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| (**c).clone());
+        ValueTypes::register_deref::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| c);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowIcon {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<WindowIcon>>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for CustomPopupPlacementCallbackValue {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
+        // The delegate of a method named in markup is a callback: the value of a
+        // `CustomPopupPlacementCallback` property.
+        ValueTypes::register_cast::<MarkupDelegate, CustomPopupPlacementCallbackValue>(custom_popup_placement_callback);
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::primitives::SelectedItemsList {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TrayIcons {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<TrayIcons>>();
+        ValueTypes::register_cast::<Rc<TrayIcons>, FerroList<Ref<TrayIcon>>>(|c| (***c).clone());
+    }
+}
+

@@ -1023,13 +1023,21 @@ macro_rules! ferro_property {
 /// the probe resolves to: the implementation for a value type with metadata (on `&Probe`) takes
 /// that receiver as it is and is found first; the one of every type (on `Probe`) is found after
 /// one dereference.
+///
+/// In the same way it makes the value type a used type of the untyped value conversions
+/// ([`ValueTypes::register_used`](crate::data::core::ValueTypes::register_used)) when the type
+/// (`T`, `Option<T>`, `Rc<T>`, `Option<Rc<T>>`) has registrations
+/// ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration), #566): its nullable
+/// form and its casts are registered with its first property.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __register_value_markup {
     ($property:expr) => {{
         #[allow(unused_imports)]
-        use $crate::{__NoValueMarkup as _, __RegisterValueMarkup as _};
-        (&&$crate::__ValueMarkupProbe($property)).__register_value_markup();
+        use $crate::{__NoPropertyValueType as _, __NoValueMarkup as _, __RegisterPropertyValueType as _, __RegisterValueMarkup as _};
+        let probe = $crate::__ValueMarkupProbe($property);
+        (&&probe).__register_value_markup();
+        (&&probe).__register_property_value_type();
     }};
 }
 
@@ -1103,6 +1111,142 @@ pub trait __NoValueMarkup {
 }
 
 impl<P: ?Sized> __NoValueMarkup for __ValueMarkupProbe<'_, P> {}
+
+/// The registration of the value type of a property with the untyped value conversions
+/// ([`__register_value_markup!`](crate::__register_value_markup)): for a property of `T`,
+/// `Option<T>`, `Rc<T>` or `Option<Rc<T>>` of a type `T` with registrations.
+#[doc(hidden)]
+pub trait __RegisterPropertyValueType {
+    fn __register_property_value_type(&self);
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoPropertyValueType {
+    #[inline(always)]
+    fn __register_property_value_type(&self) {}
+}
+
+impl<P: ?Sized> __NoPropertyValueType for __ValueMarkupProbe<'_, P> {}
 
 /// Declares the property definitions of a type: the accessors, as
 /// [`ferro_property!`] declares them one by one, and their registration as

@@ -254,10 +254,36 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <NavigationViewItemCollapsedEventArgs as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the enumerations of this module.
-pub(crate) fn register_value_types() {
-    ValueTypes::register_nullable::<NavigationViewDisplayMode>();
-    ValueTypes::register_nullable::<NavigationViewPaneDisplayMode>();
-    ValueTypes::register_nullable::<NavigationViewBackButtonVisible>();
-    ValueTypes::register_nullable::<NavigationViewSelectionFollowsFocus>();
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(crate) fn register_value_type_table() {
+    ValueTypes::register_used::<NavigationViewDisplayMode>();
+    ValueTypes::register_used::<NavigationViewPaneDisplayMode>();
+    ValueTypes::register_used::<NavigationViewBackButtonVisible>();
+    ValueTypes::register_used::<NavigationViewSelectionFollowsFocus>();
 }
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewDisplayMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationViewDisplayMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewPaneDisplayMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationViewPaneDisplayMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewBackButtonVisible {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationViewBackButtonVisible>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewSelectionFollowsFocus {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationViewSelectionFollowsFocus>();
+    }
+}
+

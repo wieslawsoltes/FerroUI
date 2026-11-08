@@ -491,93 +491,610 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <CalendarWeekRule as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable form of each enumeration with the untyped value
-/// conversions of the current thread.
-pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<RelativeUnit>();
-    ValueTypes::register_nullable::<FillMode>();
-    ValueTypes::register_nullable::<IterationType>();
-    ValueTypes::register_nullable::<PlayState>();
-    ValueTypes::register_nullable::<PlaybackBehavior>();
-    ValueTypes::register_nullable::<PlaybackDirection>();
-    ValueTypes::register_nullable::<SlideAxis>();
-    ValueTypes::register_nullable::<ResetBehavior>();
-    ValueTypes::register_nullable::<BindingErrorType>();
-    ValueTypes::register_nullable::<BindingMode>();
-    ValueTypes::register_nullable::<BindingPriority>();
-    ValueTypes::register_nullable::<BindingValueType>();
-    ValueTypes::register_nullable::<RelativeSourceMode>();
-    ValueTypes::register_nullable::<TreeType>();
-    ValueTypes::register_nullable::<UpdateSourceTrigger>();
-    ValueTypes::register_nullable::<DataFormatKind>();
-    ValueTypes::register_nullable::<DragDropEffects>();
-    ValueTypes::register_nullable::<HoldingState>();
-    ValueTypes::register_nullable::<Key>();
-    ValueTypes::register_nullable::<KeyDeviceType>();
-    ValueTypes::register_nullable::<KeyModifiers>();
-    ValueTypes::register_nullable::<KeyStates>();
-    ValueTypes::register_nullable::<KeyboardNavigationMode>();
-    ValueTypes::register_nullable::<MouseButton>();
-    ValueTypes::register_nullable::<NavigationDirection>();
-    ValueTypes::register_nullable::<NavigationMethod>();
-    ValueTypes::register_nullable::<PhysicalKey>();
-    ValueTypes::register_nullable::<PointerType>();
-    ValueTypes::register_nullable::<PointerUpdateKind>();
-    ValueTypes::register_nullable::<PullDirection>();
-    ValueTypes::register_nullable::<RawInputModifiers>();
-    ValueTypes::register_nullable::<StandardCursorType>();
-    ValueTypes::register_nullable::<SwipeDirection>();
-    ValueTypes::register_nullable::<WindowDecorationsElementRole>();
-    ValueTypes::register_nullable::<XYFocusNavigationModes>();
-    ValueTypes::register_nullable::<XYFocusNavigationStrategy>();
-    ValueTypes::register_nullable::<ContextMenuAction>();
-    ValueTypes::register_nullable::<TextInputContentType>();
-    ValueTypes::register_nullable::<TextInputReturnKeyType>();
-    ValueTypes::register_nullable::<RoutingStrategies>();
-    ValueTypes::register_nullable::<HorizontalAlignment>();
-    ValueTypes::register_nullable::<Orientation>();
-    ValueTypes::register_nullable::<VerticalAlignment>();
-    ValueTypes::register_nullable::<ChildIndexChangedAction>();
-    ValueTypes::register_nullable::<AcrylicBackgroundSource>();
-    ValueTypes::register_nullable::<AlignmentX>();
-    ValueTypes::register_nullable::<AlignmentY>();
-    ValueTypes::register_nullable::<BackgroundSizing>();
-    ValueTypes::register_nullable::<BaselineAlignment>();
-    ValueTypes::register_nullable::<BaselinePixelAlignment>();
-    ValueTypes::register_nullable::<BrushMappingMode>();
-    ValueTypes::register_nullable::<EdgeMode>();
-    ValueTypes::register_nullable::<FillRule>();
-    ValueTypes::register_nullable::<FlowDirection>();
-    ValueTypes::register_nullable::<FontSimulations>();
-    ValueTypes::register_nullable::<FontStretch>();
-    ValueTypes::register_nullable::<FontStyle>();
-    ValueTypes::register_nullable::<GeometryCombineMode>();
-    ValueTypes::register_nullable::<GlyphDrawingType>();
-    ValueTypes::register_nullable::<GradientSpreadMethod>();
-    ValueTypes::register_nullable::<IntersectionResult>();
-    ValueTypes::register_nullable::<PenLineCap>();
-    ValueTypes::register_nullable::<PenLineJoin>();
-    ValueTypes::register_nullable::<Stretch>();
-    ValueTypes::register_nullable::<StretchDirection>();
-    ValueTypes::register_nullable::<SweepDirection>();
-    ValueTypes::register_nullable::<TextAlignment>();
-    ValueTypes::register_nullable::<TextDecorationLocation>();
-    ValueTypes::register_nullable::<TextDecorationUnit>();
-    ValueTypes::register_nullable::<TextHintingMode>();
-    ValueTypes::register_nullable::<TextRenderingMode>();
-    ValueTypes::register_nullable::<TextWrapping>();
-    ValueTypes::register_nullable::<TileMode>();
-    ValueTypes::register_nullable::<BitmapBlendingMode>();
-    ValueTypes::register_nullable::<BitmapInterpolationMode>();
-    ValueTypes::register_nullable::<OperationType>();
-    ValueTypes::register_nullable::<FormFactorType>();
-    ValueTypes::register_nullable::<PlatformThemeVariant>();
-    ValueTypes::register_nullable::<WellKnownFolder>();
-    ValueTypes::register_nullable::<RendererDebugOverlays>();
-    ValueTypes::register_nullable::<ContainerSizing>();
-    ValueTypes::register_nullable::<StyleQueryComparisonOperator>();
-    ValueTypes::register_nullable::<DateTimeKind>();
-    ValueTypes::register_nullable::<DayOfWeek>();
-    ValueTypes::register_nullable::<UriKind>();
-    ValueTypes::register_nullable::<CalendarWeekRule>();
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<RelativeUnit>();
+    ValueTypes::register_used::<FillMode>();
+    ValueTypes::register_used::<IterationType>();
+    ValueTypes::register_used::<PlayState>();
+    ValueTypes::register_used::<PlaybackBehavior>();
+    ValueTypes::register_used::<PlaybackDirection>();
+    ValueTypes::register_used::<SlideAxis>();
+    ValueTypes::register_used::<ResetBehavior>();
+    ValueTypes::register_used::<BindingErrorType>();
+    ValueTypes::register_used::<BindingMode>();
+    ValueTypes::register_used::<BindingPriority>();
+    ValueTypes::register_used::<BindingValueType>();
+    ValueTypes::register_used::<RelativeSourceMode>();
+    ValueTypes::register_used::<TreeType>();
+    ValueTypes::register_used::<UpdateSourceTrigger>();
+    ValueTypes::register_used::<DataFormatKind>();
+    ValueTypes::register_used::<DragDropEffects>();
+    ValueTypes::register_used::<HoldingState>();
+    ValueTypes::register_used::<Key>();
+    ValueTypes::register_used::<KeyDeviceType>();
+    ValueTypes::register_used::<KeyModifiers>();
+    ValueTypes::register_used::<KeyStates>();
+    ValueTypes::register_used::<KeyboardNavigationMode>();
+    ValueTypes::register_used::<MouseButton>();
+    ValueTypes::register_used::<NavigationDirection>();
+    ValueTypes::register_used::<NavigationMethod>();
+    ValueTypes::register_used::<PhysicalKey>();
+    ValueTypes::register_used::<PointerType>();
+    ValueTypes::register_used::<PointerUpdateKind>();
+    ValueTypes::register_used::<PullDirection>();
+    ValueTypes::register_used::<RawInputModifiers>();
+    ValueTypes::register_used::<StandardCursorType>();
+    ValueTypes::register_used::<SwipeDirection>();
+    ValueTypes::register_used::<WindowDecorationsElementRole>();
+    ValueTypes::register_used::<XYFocusNavigationModes>();
+    ValueTypes::register_used::<XYFocusNavigationStrategy>();
+    ValueTypes::register_used::<ContextMenuAction>();
+    ValueTypes::register_used::<TextInputContentType>();
+    ValueTypes::register_used::<TextInputReturnKeyType>();
+    ValueTypes::register_used::<RoutingStrategies>();
+    ValueTypes::register_used::<HorizontalAlignment>();
+    ValueTypes::register_used::<Orientation>();
+    ValueTypes::register_used::<VerticalAlignment>();
+    ValueTypes::register_used::<ChildIndexChangedAction>();
+    ValueTypes::register_used::<AcrylicBackgroundSource>();
+    ValueTypes::register_used::<AlignmentX>();
+    ValueTypes::register_used::<AlignmentY>();
+    ValueTypes::register_used::<BackgroundSizing>();
+    ValueTypes::register_used::<BaselineAlignment>();
+    ValueTypes::register_used::<BaselinePixelAlignment>();
+    ValueTypes::register_used::<BrushMappingMode>();
+    ValueTypes::register_used::<EdgeMode>();
+    ValueTypes::register_used::<FillRule>();
+    ValueTypes::register_used::<FlowDirection>();
+    ValueTypes::register_used::<FontSimulations>();
+    ValueTypes::register_used::<FontStretch>();
+    ValueTypes::register_used::<FontStyle>();
+    ValueTypes::register_used::<GeometryCombineMode>();
+    ValueTypes::register_used::<GlyphDrawingType>();
+    ValueTypes::register_used::<GradientSpreadMethod>();
+    ValueTypes::register_used::<IntersectionResult>();
+    ValueTypes::register_used::<PenLineCap>();
+    ValueTypes::register_used::<PenLineJoin>();
+    ValueTypes::register_used::<Stretch>();
+    ValueTypes::register_used::<StretchDirection>();
+    ValueTypes::register_used::<SweepDirection>();
+    ValueTypes::register_used::<TextAlignment>();
+    ValueTypes::register_used::<TextDecorationLocation>();
+    ValueTypes::register_used::<TextDecorationUnit>();
+    ValueTypes::register_used::<TextHintingMode>();
+    ValueTypes::register_used::<TextRenderingMode>();
+    ValueTypes::register_used::<TextWrapping>();
+    ValueTypes::register_used::<TileMode>();
+    ValueTypes::register_used::<BitmapBlendingMode>();
+    ValueTypes::register_used::<BitmapInterpolationMode>();
+    ValueTypes::register_used::<OperationType>();
+    ValueTypes::register_used::<FormFactorType>();
+    ValueTypes::register_used::<PlatformThemeVariant>();
+    ValueTypes::register_used::<WellKnownFolder>();
+    ValueTypes::register_used::<RendererDebugOverlays>();
+    ValueTypes::register_used::<ContainerSizing>();
+    ValueTypes::register_used::<StyleQueryComparisonOperator>();
+    ValueTypes::register_used::<DateTimeKind>();
+    ValueTypes::register_used::<DayOfWeek>();
+    ValueTypes::register_used::<UriKind>();
+    ValueTypes::register_used::<CalendarWeekRule>();
 }
+
+impl crate::data::core::ValueTypeRegistration for RelativeUnit {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RelativeUnit>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FillMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FillMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for IterationType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<IterationType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PlayState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlayState>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PlaybackBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlaybackBehavior>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PlaybackDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlaybackDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SlideAxis {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SlideAxis>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ResetBehavior {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ResetBehavior>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BindingErrorType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BindingErrorType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BindingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BindingMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BindingPriority {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BindingPriority>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BindingValueType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BindingValueType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RelativeSourceMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RelativeSourceMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TreeType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TreeType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for UpdateSourceTrigger {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<UpdateSourceTrigger>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DataFormatKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DataFormatKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DragDropEffects {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DragDropEffects>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for HoldingState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<HoldingState>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Key {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Key>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyDeviceType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<KeyDeviceType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyModifiers {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<KeyModifiers>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyStates {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<KeyStates>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for KeyboardNavigationMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<KeyboardNavigationMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for MouseButton {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<MouseButton>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for NavigationDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for NavigationMethod {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationMethod>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PhysicalKey {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PhysicalKey>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PointerType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PointerType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PointerUpdateKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PointerUpdateKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PullDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PullDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RawInputModifiers {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RawInputModifiers>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StandardCursorType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<StandardCursorType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SwipeDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SwipeDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for WindowDecorationsElementRole {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowDecorationsElementRole>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for XYFocusNavigationModes {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<XYFocusNavigationModes>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for XYFocusNavigationStrategy {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<XYFocusNavigationStrategy>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ContextMenuAction {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ContextMenuAction>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextInputContentType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextInputContentType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextInputReturnKeyType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextInputReturnKeyType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RoutingStrategies {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RoutingStrategies>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for HorizontalAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<HorizontalAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Orientation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Orientation>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for VerticalAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<VerticalAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ChildIndexChangedAction {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ChildIndexChangedAction>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for AcrylicBackgroundSource {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AcrylicBackgroundSource>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for AlignmentX {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AlignmentX>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for AlignmentY {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AlignmentY>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackgroundSizing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BackgroundSizing>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BaselineAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BaselineAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BaselinePixelAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BaselinePixelAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BrushMappingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BrushMappingMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for EdgeMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<EdgeMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FillRule {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FillRule>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FlowDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlowDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontSimulations {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontSimulations>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontStretch {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontStretch>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontStyle {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontStyle>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GeometryCombineMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GeometryCombineMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GlyphDrawingType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GlyphDrawingType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for GradientSpreadMethod {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<GradientSpreadMethod>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for IntersectionResult {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<IntersectionResult>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PenLineCap {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PenLineCap>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PenLineJoin {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PenLineJoin>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Stretch {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Stretch>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StretchDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<StretchDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SweepDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SweepDirection>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextAlignment {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextAlignment>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextDecorationLocation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextDecorationLocation>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextDecorationUnit {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextDecorationUnit>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextHintingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextHintingMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextRenderingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextRenderingMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TextWrapping {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextWrapping>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for TileMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TileMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BitmapBlendingMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BitmapBlendingMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BitmapInterpolationMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BitmapInterpolationMode>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for OperationType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<OperationType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FormFactorType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FormFactorType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PlatformThemeVariant {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PlatformThemeVariant>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for WellKnownFolder {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WellKnownFolder>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RendererDebugOverlays {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RendererDebugOverlays>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ContainerSizing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ContainerSizing>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for StyleQueryComparisonOperator {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<StyleQueryComparisonOperator>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DateTimeKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DateTimeKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for DayOfWeek {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<DayOfWeek>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for UriKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<UriKind>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CalendarWeekRule {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CalendarWeekRule>();
+    }
+}
+

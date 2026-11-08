@@ -530,12 +530,21 @@ def generate_enums(sources, crate, report):
     out.append("\n/// The enumerations declared in this file.\npub(super) const TYPES: &[&MarkupType] = &[\n")
     out.extend("    <%s as MarkupTyped>::MARKUP,\n" % name for name in names)
     out.append("];\n")
+    # The nullable form of each enumeration registers when the enumeration is first used
+    # (#566): with its first property, or when its metadata becomes known. The table lists them
+    # all for the tables of types (`type-tables`).
+    trait_path = "crate::data::core::" if crate == "FerroUI.Base" else "ferroui_base::data::core::"
     out.append(
-        "\n/// Registers the nullable form of each enumeration with the untyped value\n"
-        "/// conversions of the current thread.\npub(super) fn register_value_types() {\n"
+        "\n/// Registers every type of this file that registers when it is first used: what the\n"
+        "/// tables of types (`type-tables`) register at start-up.\npub(super) fn register_value_type_table() {\n"
     )
-    out.extend("    ValueTypes::register_nullable::<%s>();\n" % name for name in names)
+    out.extend("    ValueTypes::register_used::<%s>();\n" % name for name in names)
     out.append("}\n")
+    for name in names:
+        out.append(
+            "\nimpl %sValueTypeRegistration for %s {\n    fn register_value_conversions() {\n"
+            "        ValueTypes::register_nullable::<%s>();\n    }\n}\n" % (trait_path, name, name)
+        )
     return "".join(out)
 
 

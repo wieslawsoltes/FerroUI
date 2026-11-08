@@ -790,6 +790,12 @@ impl Source {
                         site: site_at(member.sig.ident.span().start().line, &member_cfg),
                     });
                 }
+                // What a type registers with the untyped value conversions when it is first
+                // used (#566): the registrations of its `ValueTypeRegistration`, read as the
+                // body of a function is.
+                (syn::ImplItem::Fn(member), _, Some(trait_)) if trait_ == "ValueTypeRegistration" => {
+                    self.read_registrations(&member.block, context, &member_cfg);
+                }
                 (syn::ImplItem::Const(member), Some(owner), None) => {
                     if let Text::Literal(text) = text_of_expression(&member.expr) {
                         self.associated_constants.insert((owner.clone(), member.ident.to_string()), text);
@@ -2070,5 +2076,28 @@ mod boxed_cast_tests {
         source.read_registrations_of_tokens(&tokens,&site);
         assert_eq!(source.casts.len(),casts+1);assert_eq!(source.value_types.len(),values);
         assert_eq!(source.value_calls.get("cast").unwrap().1,read+1);
+    }
+    /// Not from upstream (#566): a type that registers when it is first used states its
+    /// registrations in its `ValueTypeRegistration`; they are read as the body of a function is.
+    #[test]
+    fn the_registrations_of_a_value_type_registration_are_read() {
+        let directory = std::env::temp_dir().join(format!("ferroui-scan-value-type-registration-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let lib = directory.join("lib.rs");
+        let text = "use ferroui_base::data::core::{ValueTypeRegistration, ValueTypes};\n\
+            pub struct Size;\n\
+            pub struct Other;\n\
+            impl ValueTypeRegistration for Size {\n\
+                fn register_value_conversions() {\n\
+                    ValueTypes::register_nullable::<Size>();\n\
+                    ValueTypes::register_cast::<Other, Size>(|_| Size);\n\
+                }\n\
+            }\n";
+        std::fs::write(&lib, text).unwrap();
+        let source = Source::read(&ScanOptions::new("value_type_registration", lib));
+        let _ = std::fs::remove_dir_all(&directory);
+        assert!(source.value_types.iter().any(|value| value.value.registration == "nullable" && text_of(&value.value.types[0]) == "Size"));
+        assert!(source.casts.iter().any(|cast| text_of(&cast.value.from) == "Other" && text_of(&cast.value.to) == "Size"));
+        assert_eq!(source.value_calls.get("nullable").map_or(0, |calls| calls.1), 1);
     }
 }

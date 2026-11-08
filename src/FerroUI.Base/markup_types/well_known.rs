@@ -483,45 +483,165 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListConverter<Option<BoxedValue>> as MarkupTyped>::MARKUP,
 ];
 
-/// Registers what the untyped value conversions need to know about the
-/// types declared in this file.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::data::BindingError>();
     // A data validation exception is an exception: the error that wraps it.
-    ValueTypes::register_nullable::<crate::data::DataValidationError>();
     ValueTypes::register_cast::<crate::data::DataValidationError, crate::data::BindingError>(|error| {
         crate::data::BindingError::new(error.clone())
     });
-    // A bitmap is an image and a source of image brushes.
-    ValueTypes::register_nullable::<Rc<Bitmap>>();
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImage>>(|bitmap| bitmap.clone());
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImageBrushSource>>(|bitmap| bitmap.clone());
-    ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::imaging::IBitmap>>(|bitmap| bitmap.clone());
-    ValueTypes::register_nullable::<UnsetValueType>();
-    ValueTypes::register_nullable::<EventArgs>();
-    ValueTypes::register_nullable::<CancelEventArgs>();
-    ValueTypes::register_nullable::<OwnedFerroPropertyChangedEventArgs>();
-    ValueTypes::register_nullable::<RuntimePlatformInfo>();
     ValueTypes::register_nullable::<CompiledBindingPath>();
-    ValueTypes::register_nullable::<CompiledBindingPathBuilder>();
-    ValueTypes::register_nullable::<Rc<dyn IPropertyInfo>>();
-    ValueTypes::register_nullable::<Rc<dyn IPropertyAccessor>>();
-    ValueTypes::register_nullable::<Rc<dyn IRoutedEventArgs>>();
-    ValueTypes::register_nullable::<Rc<dyn IRuntimePlatform>>();
-    ValueTypes::register_nullable::<Rc<dyn ISupportInitialize>>();
-    ValueTypes::register_nullable::<Rc<dyn BindingExpressionBase>>();
-    ValueTypes::register_nullable::<Rc<dyn IDisposable>>();
-    // A binding expression is disposable.
-    ValueTypes::register_cast::<Rc<dyn BindingExpressionBase>, Rc<dyn IDisposable>>(|expression| expression.clone());
-    ValueTypes::register_nullable::<Classes>();
-    ValueTypes::register_nullable::<Rc<ImmutableSolidColorBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<BoxedValue>>>();
-    ValueTypes::register_nullable::<Rc<dyn IAddChild<String>>>();
     // An immutable brush is a brush.
     ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn IBrush>>(|brush| brush.clone());
     ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableSolidColorBrush>>(
         |brush| brush.clone(),
     );
-    ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn crate::media::ISolidColorBrush>>(|brush| brush.clone());
-    ValueTypes::register_cast::<Rc<ImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableBrush>>(|brush| brush.clone());
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<crate::data::DataValidationError>();
+    ValueTypes::register_used::<Bitmap>();
+    ValueTypes::register_used::<UnsetValueType>();
+    ValueTypes::register_used::<EventArgs>();
+    ValueTypes::register_used::<CancelEventArgs>();
+    ValueTypes::register_used::<OwnedFerroPropertyChangedEventArgs>();
+    ValueTypes::register_used::<RuntimePlatformInfo>();
+    ValueTypes::register_used::<CompiledBindingPathBuilder>();
+    ValueTypes::register_used::<dyn IPropertyInfo>();
+    ValueTypes::register_used::<dyn IPropertyAccessor>();
+    ValueTypes::register_used::<dyn IRoutedEventArgs>();
+    ValueTypes::register_used::<dyn IRuntimePlatform>();
+    ValueTypes::register_used::<dyn ISupportInitialize>();
+    ValueTypes::register_used::<dyn BindingExpressionBase>();
+    ValueTypes::register_used::<dyn IDisposable>();
+    ValueTypes::register_used::<Classes>();
+    ValueTypes::register_used::<ImmutableSolidColorBrush>();
+    ValueTypes::register_used::<dyn IAddChild<BoxedValue>>();
+    ValueTypes::register_used::<dyn IAddChild<String>>();
+}
+
+impl crate::data::core::ValueTypeRegistration for crate::data::DataValidationError {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::data::DataValidationError>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Bitmap {
+    fn register_value_conversions() {
+        // A bitmap is an image and a source of image brushes.
+        ValueTypes::register_nullable::<Rc<Bitmap>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for UnsetValueType {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<UnsetValueType>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for EventArgs {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<EventArgs>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CancelEventArgs {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CancelEventArgs>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for OwnedFerroPropertyChangedEventArgs {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<OwnedFerroPropertyChangedEventArgs>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for RuntimePlatformInfo {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RuntimePlatformInfo>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CompiledBindingPathBuilder {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<CompiledBindingPathBuilder>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IPropertyInfo {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IPropertyInfo>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IPropertyAccessor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IPropertyAccessor>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IRoutedEventArgs {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IRoutedEventArgs>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IRuntimePlatform {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IRuntimePlatform>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn ISupportInitialize {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn ISupportInitialize>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn BindingExpressionBase {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn BindingExpressionBase>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IDisposable {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IDisposable>>();
+        // A binding expression is disposable.
+        ValueTypes::register_cast::<Rc<dyn BindingExpressionBase>, Rc<dyn IDisposable>>(|expression| expression.clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Classes {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Classes>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ImmutableSolidColorBrush {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ImmutableSolidColorBrush>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IAddChild<BoxedValue> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IAddChild<BoxedValue>>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IAddChild<String> {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IAddChild<String>>>();
+    }
+}
+

@@ -1130,3 +1130,20 @@ fn the_storage_provider_of_a_top_level_is_read_through_its_metadata() {
     let provider = unbox::<Rc<dyn IStorageProvider>>(&value);
     assert!(std::ptr::addr_eq(Rc::as_ptr(&provider), Rc::as_ptr(&window.storage_provider())));
 }
+
+/// Not from upstream (#566): the enumerations of the crate register their nullable forms when
+/// they are first used (with the first property of the type), and the tables of types register
+/// every one of them at start-up.
+#[test]
+fn enumerations_register_their_nullable_forms_on_first_use_and_with_the_tables() {
+    use crate::{Button, ClickMode, WindowResizeReason};
+
+    let _ = Button::click_mode_property();
+    assert_eq!(ValueTypes::nullable_inner(ValueType::of::<Option<ClickMode>>()), Some(ValueType::of::<ClickMode>()));
+
+    // No property holds a reason of a resize: with the tables of types it is registered all the
+    // same.
+    crate::register_types();
+    let registered = ValueTypes::nullable_inner(ValueType::of::<Option<WindowResizeReason>>()).is_some();
+    assert!(registered || !ValueTypes::TYPE_TABLES);
+}

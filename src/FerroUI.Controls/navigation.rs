@@ -582,19 +582,58 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <NavigationStack as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types of this module, and the journal as an items
-/// source and a notifying collection of bindings.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(crate) fn register_value_types() {
-    ValueTypes::register_nullable::<NavigationMode>();
-    ValueTypes::register_nullable::<NavigationCacheMode>();
-    ValueTypes::register_nullable::<NavigationStack>();
-    ValueTypes::register_nullable::<FrameNavigationOptions>();
     // A page type is the value of `SourcePageType` and the argument of `Navigate`: markup gives
     // them `{x:Type local:Page}`, which the run-time loader holds as the runtime type of the class
     // and converts with this cast (B3 of #612).
     ValueTypes::register_nullable::<PageType>();
     ValueTypes::register_cast::<&'static TypeInfo, PageType>(|type_| PageType::from(*type_));
-    ValueTypes::register_display::<PageType>();
     ItemsSource::register_binding_conversion::<NavigationStack>();
     ferroui_base::data::model::ModelTypes::register_notifying_collection::<NavigationStack>();
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(crate) fn register_value_type_table() {
+    ValueTypes::register_used::<NavigationMode>();
+    ValueTypes::register_used::<NavigationCacheMode>();
+    ValueTypes::register_used::<NavigationStack>();
+    ValueTypes::register_used::<FrameNavigationOptions>();
+    ValueTypes::register_used::<PageType>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationCacheMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationCacheMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationStack {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationStack>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FrameNavigationOptions {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FrameNavigationOptions>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PageType {
+    fn register_value_conversions() {
+        ValueTypes::register_display::<PageType>();
+    }
+}
+

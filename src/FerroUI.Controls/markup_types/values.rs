@@ -129,33 +129,148 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::ZoomMode as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types with the untyped value
-/// conversions of the current thread.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<GridLength>();
-    ValueTypes::register_nullable::<WindowTransparencyLevel>();
-    ValueTypes::register_nullable::<WindowTransparencyLevelCollection>();
-    ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
-    ValueTypes::register_nullable::<TickList>();
-    ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
-    ValueTypes::register_nullable::<Symbol>();
-    ValueTypes::register_nullable::<InfoBarSeverity>();
-    ValueTypes::register_nullable::<crate::ZoomMode>();
-    ValueTypes::register_nullable::<InfoBarCloseReason>();
-    ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
-    ValueTypes::register_nullable::<NumberBoxValidationMode>();
-    ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
-    ValueTypes::register_nullable::<crate::PagerControlDisplayMode>();
-    ValueTypes::register_nullable::<crate::PagerControlButtonVisibility>();
-    crate::navigation::register_value_types();
-    crate::navigation_view_events::register_value_types();
-    ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
-    ValueTypes::register_nullable::<crate::media::RevealBrushState>();
-    ValueTypes::register_nullable::<crate::media::FocusVisualKind>();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));
-    // The text of a value (its `ToString()` in the managed original).
-    ValueTypes::register_display::<GridLength>();
-    ValueTypes::register_display::<WindowTransparencyLevel>();
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<WindowTransparencyLevel>();
+    ValueTypes::register_used::<WindowTransparencyLevelCollection>();
+    ValueTypes::register_used::<AcrylicPlatformCompensationLevels>();
+    ValueTypes::register_used::<TickList>();
+    ValueTypes::register_used::<TextLayoutRoundingPlacement>();
+    ValueTypes::register_used::<Symbol>();
+    ValueTypes::register_used::<InfoBarSeverity>();
+    ValueTypes::register_used::<crate::ZoomMode>();
+    ValueTypes::register_used::<InfoBarCloseReason>();
+    ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
+    ValueTypes::register_used::<NumberBoxValidationMode>();
+    ValueTypes::register_used::<AutoSuggestionBoxTextChangeReason>();
+    ValueTypes::register_used::<crate::PagerControlDisplayMode>();
+    ValueTypes::register_used::<crate::PagerControlButtonVisibility>();
+    ValueTypes::register_used::<crate::media::ApplicationTheme>();
+    ValueTypes::register_used::<crate::media::RevealBrushState>();
+    ValueTypes::register_used::<crate::media::FocusVisualKind>();
+    ValueTypes::register_used::<GridLength>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowTransparencyLevel {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowTransparencyLevel>();
+        ValueTypes::register_display::<WindowTransparencyLevel>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WindowTransparencyLevelCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WindowTransparencyLevelCollection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AcrylicPlatformCompensationLevels {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TickList {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TickList>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TextLayoutRoundingPlacement {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for Symbol {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Symbol>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for InfoBarSeverity {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<InfoBarSeverity>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ZoomMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ZoomMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for InfoBarCloseReason {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<InfoBarCloseReason>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NumberBoxSpinButtonPlacementMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NumberBoxValidationMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NumberBoxValidationMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for AutoSuggestionBoxTextChangeReason {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::PagerControlDisplayMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::PagerControlDisplayMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::PagerControlButtonVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::PagerControlButtonVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::media::ApplicationTheme {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::media::RevealBrushState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::media::RevealBrushState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::media::FocusVisualKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::media::FocusVisualKind>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for GridLength {
+    fn register_value_conversions() {
+        // The text of a value (its `ToString()` in the managed original).
+        ValueTypes::register_display::<GridLength>();
+    }
+}
+

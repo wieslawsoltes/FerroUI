@@ -129,9 +129,142 @@ impl Hasher for IdHasher {
 
 type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 
-type ConvertFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
-type AnyConvertFn = Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
+
+/// A registered conversion between two value types: data, not a closure (rule 2 of the
+/// porting guide's "Binary size", #566). A registration stores the typed function it is
+/// given and the adapter of its pair of types, which downcasts the value, calls the function
+/// and boxes the result: no closure type, vtable or drop glue per registration. Only what
+/// captures state ([`ValueTypes::register_cast_with`], the boxed casts) is a closure.
+#[derive(Clone)]
+enum Convert {
+    /// A typed function with its adapter ([`TypedConvert`]).
+    Typed(TypedConvert),
+    /// The wrap of a value of the inner type of a nullable form (`T` to `Option<T>`).
+    Nullable(NullableOperation),
+    /// One of the casts between the forms of a reference type ([`ValueTypes::register_reference`]).
+    Reference(fn(ReferenceCastKind, &BoxedValue) -> Option<BoxedValue>, ReferenceCastKind),
+    /// A closure of a borrowed value.
+    AnyClosure(Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>),
+    /// A closure that needs the shared box itself ([`ValueTypes::register_boxed_cast`]).
+    BoxedClosure(Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>),
+}
+
+impl Convert {
+    /// `value` converted, or `None` when it does not convert.
+    fn apply(&self, value: &BoxedValue) -> Option<BoxedValue> {
+        match self {
+            Convert::Typed(typed) => typed.apply(value.as_any()),
+            Convert::Nullable(operation) => operation(NullableRequest::Wrap(value.as_any())),
+            Convert::Reference(cast, kind) => cast(*kind, value),
+            Convert::AnyClosure(convert) => convert(value.as_any()),
+            Convert::BoxedClosure(convert) => convert(value),
+        }
+    }
+
+    /// A borrowed value converted. The conversions that need the shared box (the casts of a
+    /// reference type, the boxed casts) are never registered for borrowed values.
+    fn apply_any(&self, value: &dyn std::any::Any) -> Option<BoxedValue> {
+        match self {
+            Convert::Typed(typed) => typed.apply(value),
+            Convert::Nullable(operation) => operation(NullableRequest::Wrap(value)),
+            Convert::AnyClosure(convert) => convert(value),
+            Convert::Reference(..) | Convert::BoxedClosure(_) => None,
+        }
+    }
+}
+
+/// A typed conversion function with its type erased, and the adapter compiled once for its
+/// pair of types that calls it. Made only by the constructors below, each of which pairs a
+/// function with the adapter of its own type.
+#[derive(Clone, Copy)]
+struct TypedConvert {
+    adapter: unsafe fn(*const (), &dyn std::any::Any) -> Option<BoxedValue>,
+    typed: *const (),
+}
+
+impl TypedConvert {
+    /// A cast: `fn(&TFrom) -> TTo`.
+    fn cast<TFrom: 'static, TTo: PropertyValue>(cast: fn(&TFrom) -> TTo) -> Self {
+        /// # Safety
+        /// `typed` is a `fn(&TFrom) -> TTo`.
+        unsafe fn adapter<TFrom: 'static, TTo: PropertyValue>(typed: *const (), value: &dyn std::any::Any) -> Option<BoxedValue> {
+            // SAFETY: the constructor stored a function of this type.
+            let cast = unsafe { std::mem::transmute::<*const (), fn(&TFrom) -> TTo>(typed) };
+            value.downcast_ref::<TFrom>().map(|value| Rc::new(cast(value)) as BoxedValue)
+        }
+        Self { adapter: adapter::<TFrom, TTo>, typed: cast as *const () }
+    }
+
+    /// A conversion: `fn(&TFrom) -> Option<TTo>`.
+    fn conversion<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> Option<TTo>) -> Self {
+        /// # Safety
+        /// `typed` is a `fn(&TFrom) -> Option<TTo>`.
+        unsafe fn adapter<TFrom: 'static, TTo: PropertyValue>(typed: *const (), value: &dyn std::any::Any) -> Option<BoxedValue> {
+            // SAFETY: the constructor stored a function of this type.
+            let convert = unsafe { std::mem::transmute::<*const (), fn(&TFrom) -> Option<TTo>>(typed) };
+            value.downcast_ref::<TFrom>().and_then(convert).map(|value| Rc::new(value) as BoxedValue)
+        }
+        Self { adapter: adapter::<TFrom, TTo>, typed: convert as *const () }
+    }
+
+    /// A cast that holds for some values only: `fn(&TFrom) -> Result<TTo, String>`.
+    fn try_cast<TFrom: 'static, TTo: PropertyValue>(cast: fn(&TFrom) -> Result<TTo, String>) -> Self {
+        /// # Safety
+        /// `typed` is a `fn(&TFrom) -> Result<TTo, String>`.
+        unsafe fn adapter<TFrom: 'static, TTo: PropertyValue>(typed: *const (), value: &dyn std::any::Any) -> Option<BoxedValue> {
+            // SAFETY: the constructor stored a function of this type.
+            let cast = unsafe { std::mem::transmute::<*const (), fn(&TFrom) -> Result<TTo, String>>(typed) };
+            value.downcast_ref::<TFrom>().and_then(|value| cast(value).ok()).map(|value| Rc::new(value) as BoxedValue)
+        }
+        Self { adapter: adapter::<TFrom, TTo>, typed: cast as *const () }
+    }
+
+    /// The conversion of text: `fn(&str) -> Option<T>` applied to a `String`.
+    fn parse<T: PropertyValue>(parse: fn(&str) -> Option<T>) -> Self {
+        /// # Safety
+        /// `typed` is a `fn(&str) -> Option<T>`.
+        unsafe fn adapter<T: PropertyValue>(typed: *const (), value: &dyn std::any::Any) -> Option<BoxedValue> {
+            // SAFETY: the constructor stored a function of this type.
+            let parse = unsafe { std::mem::transmute::<*const (), fn(&str) -> Option<T>>(typed) };
+            value.downcast_ref::<String>().and_then(|text| parse(text)).map(|value| Rc::new(value) as BoxedValue)
+        }
+        Self { adapter: adapter::<T>, typed: parse as *const () }
+    }
+
+    #[inline]
+    fn apply(self, value: &dyn std::any::Any) -> Option<BoxedValue> {
+        // SAFETY: `adapter` was made for `typed` by the constructor that paired them.
+        unsafe { (self.adapter)(self.typed, value) }
+    }
+}
+
+/// Why a value is refused by a cast that holds for some values of its type only: the error
+/// of the typed function of [`ValueTypes::register_try_cast`], with its type erased as in
+/// [`TypedConvert`].
+#[derive(Clone, Copy)]
+struct TypedCastError {
+    adapter: unsafe fn(*const (), &dyn AnyValue) -> Option<String>,
+    typed: *const (),
+}
+
+impl TypedCastError {
+    fn new<TFrom: 'static, TTo: 'static>(cast: fn(&TFrom) -> Result<TTo, String>) -> Self {
+        /// # Safety
+        /// `typed` is a `fn(&TFrom) -> Result<TTo, String>`.
+        unsafe fn adapter<TFrom: 'static, TTo: 'static>(typed: *const (), value: &dyn AnyValue) -> Option<String> {
+            // SAFETY: the constructor stored a function of this type.
+            let cast = unsafe { std::mem::transmute::<*const (), fn(&TFrom) -> Result<TTo, String>>(typed) };
+            cast(value.downcast_ref::<TFrom>()?).err()
+        }
+        Self { adapter: adapter::<TFrom, TTo>, typed: cast as *const () }
+    }
+
+    fn apply(self, value: &dyn AnyValue) -> Option<String> {
+        // SAFETY: `adapter` was made for `typed` by the constructor that paired them.
+        unsafe { (self.adapter)(self.typed, value) }
+    }
+}
 
 // The request borrows its input: the caller retains the original owning box
 // through conversion and unwinding. Each nullable type supplies one operation
@@ -165,7 +298,6 @@ type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
-type CastErrorFn = Rc<dyn Fn(&dyn AnyValue) -> Option<String>>;
 
 #[derive(Default)]
 struct Registry {
@@ -182,13 +314,13 @@ struct Registry {
     reference_objects: IdMap<TypeId, TypeId>,
     /// Typed interface/class views of an enclosing reference object's identity.
     reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
-    conversions: IdMap<(TypeId, TypeId), ConvertFn>,
+    conversions: IdMap<(TypeId, TypeId), Convert>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
-    casts: IdMap<(TypeId, TypeId), ConvertFn>,
+    casts: IdMap<(TypeId, TypeId), Convert>,
     /// Why a value is refused by a cast that holds for some values of its
     /// type only ([`ValueTypes::register_try_cast`]).
-    cast_errors: IdMap<(TypeId, TypeId), CastErrorFn>,
+    cast_errors: IdMap<(TypeId, TypeId), TypedCastError>,
     /// `Option<T>` → the type of the value it unwraps to.
     nullable_inner: IdMap<TypeId, ValueType>,
     /// `ElementRef<T>` and `Option<ElementRef<T>>` → the class `T` and
@@ -206,7 +338,7 @@ struct Registry {
     element_ref_objects: IdMap<TypeId, (ObjectFn, FromObjectFn)>,
     /// Conversions applied to borrowed untyped values when a property is
     /// set with a value that is not of its exact type.
-    any_conversions: IdMap<(TypeId, TypeId), AnyConvertFn>,
+    any_conversions: IdMap<(TypeId, TypeId), Convert>,
     /// Interface handle type → the classes whose handles convert to it.
     interfaces: IdMap<TypeId, Vec<(&'static TypeInfo, InterfaceFn)>>,
     /// Interface handle type → the object of the object model behind a
@@ -220,7 +352,7 @@ struct Registry {
 /// the source or of the target: the cast between the forms of the source
 /// (if needed), the registered cast, the cast between the forms of the
 /// target (if needed).
-type ReferenceCast = (Option<ConvertFn>, ConvertFn, Option<ConvertFn>);
+type ReferenceCast = (Option<Convert>, Convert, Option<Convert>);
 
 impl Registry {
     /// The other form of a reference type: the handle `Rc<T>` of the object
@@ -277,8 +409,16 @@ crate::ferro_thread_local! {
     static DEFERRED: RefCell<Vec<fn()>> = const { RefCell::new(Vec::new()) };
 }
 
-/// Registration functions that apply to every thread ([`ValueTypes::register_global`]).
-static GLOBAL: std::sync::Mutex<Vec<fn()>> = std::sync::Mutex::new(Vec::new());
+/// Registration functions that apply to every thread ([`ValueTypes::register_global`]), in
+/// the order they were added, and the addresses of the ones added (a type registers once
+/// however many of its properties are registered).
+struct GlobalRegistrations {
+    functions: Vec<fn()>,
+    known: Option<std::collections::HashSet<usize>>,
+}
+
+static GLOBAL: std::sync::Mutex<GlobalRegistrations> =
+    std::sync::Mutex::new(GlobalRegistrations { functions: Vec::new(), known: None });
 /// The length of [`GLOBAL`], readable without the lock.
 static GLOBAL_LEN: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
@@ -292,9 +432,10 @@ crate::ferro_thread_local! {
 fn apply_global(applied: usize) {
     let pending: Vec<fn()> = {
         let global = GLOBAL.lock().unwrap_or_else(|e| e.into_inner());
+        let functions = &global.functions;
         // Set first: a registration uses the table itself.
-        GLOBAL_APPLIED.set(global.len());
-        global[applied.min(global.len())..].to_vec()
+        GLOBAL_APPLIED.set(functions.len());
+        functions[applied.min(functions.len())..].to_vec()
     };
     for register in pending {
         register();
@@ -310,8 +451,13 @@ fn with_registry<R>(f: impl FnOnce(&mut Registry) -> R) -> R {
             register();
         }
     }
-    let applied = GLOBAL_APPLIED.get();
-    if applied != GLOBAL_LEN.load(std::sync::atomic::Ordering::Acquire) {
+    // A registration may add others (a table registers each of its types as used): they
+    // run before the table is used.
+    loop {
+        let applied = GLOBAL_APPLIED.get();
+        if applied == GLOBAL_LEN.load(std::sync::atomic::Ordering::Acquire) {
+            break;
+        }
         apply_global(applied);
     }
     REGISTRY.with(|r| f(r.borrow_mut().as_mut().expect("registry is initialized")))
@@ -333,37 +479,38 @@ fn insert_display(id: TypeId, display: DisplayFn) {
 #[inline(never)]
 fn insert_nullable(id: TypeId, inner: ValueType, operation: NullableOperation) {
     let key = (inner.id(), id);
-    let wrap: ConvertFn = Rc::new(move |v: &BoxedValue| operation(NullableRequest::Wrap(v.as_any())));
-    let wrap_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| operation(NullableRequest::Wrap(v)));
     with_registry(|r| {
         r.nullable.insert(id, operation);
         r.nullable_inner.insert(id, inner);
-        r.conversions.insert(key, wrap.clone());
-        r.casts.insert(key, wrap);
-        r.any_conversions.insert(key, wrap_any);
+        r.conversions.insert(key, Convert::Nullable(operation));
+        r.casts.insert(key, Convert::Nullable(operation));
+        r.any_conversions.insert(key, Convert::Nullable(operation));
     });
 }
 
-fn insert_cast(key: (TypeId, TypeId), cast: ConvertFn) {
+/// Registers the cast `key` of a boxed value only (the boxed casts).
+#[inline(never)]
+fn insert_cast(key: (TypeId, TypeId), cast: Convert) {
     with_registry(|r| {
         r.conversions.insert(key, cast.clone());
         r.casts.insert(key, cast);
     });
 }
 
-/// Registers the cast `key` from its form for a borrowed value: the cast of a
-/// boxed value is the cast of the value it holds, through the one adapter
-/// below for every cast (a typed cast is compiled once, not once per form).
+/// Registers the cast `key` of a boxed value and of a borrowed one: the cast of a
+/// boxed value is the cast of the value it holds, through the same entry (a typed
+/// cast is compiled once, not once per form).
 #[inline(never)]
-fn insert_any_cast(key: (TypeId, TypeId), cast: AnyConvertFn) {
-    let borrowed = cast.clone();
-    insert_cast(key, Rc::new(move |v: &BoxedValue| borrowed(v.as_any())));
+fn insert_any_cast(key: (TypeId, TypeId), cast: Convert) {
     with_registry(|r| {
+        r.conversions.insert(key, cast.clone());
+        r.casts.insert(key, cast.clone());
         r.any_conversions.insert(key, cast);
     });
 }
 
-fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
+#[inline(never)]
+fn insert_conversion(key: (TypeId, TypeId), convert: Convert) {
     with_registry(|r| {
         r.conversions.insert(key, convert);
     });
@@ -373,7 +520,7 @@ fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
 /// derives from the entries of the registry.
 enum Conversion {
     /// Registered with [`ValueTypes::register_conversion`] (or a cast, which is also a conversion).
-    Registered(ConvertFn),
+    Registered(Convert),
     /// The root handle (`Ref<FerroObject>`) to the handle of a class: the object, when it is of
     /// the class. Derived from the object entry of the class ([`ValueTypes::register_object`]).
     RootToHandle(FromObjectFn),
@@ -404,7 +551,7 @@ impl Conversion {
     /// `value` converted, or `None` when it does not convert.
     fn apply(&self, value: &BoxedValue) -> Option<BoxedValue> {
         match self {
-            Conversion::Registered(convert) => convert(value),
+            Conversion::Registered(convert) => convert.apply(value),
             Conversion::RootToHandle(from_object) => from_object(value.downcast_ref::<Ref<FerroObject>>()?.clone()),
             Conversion::RootToNullableHandle(from_object, nullable) => {
                 let handle = from_object(value.downcast_ref::<Ref<FerroObject>>()?.clone())?;
@@ -471,9 +618,8 @@ fn insert_reference(entry: ReferenceEntry) {
             ((handle, object.id()), ReferenceCastKind::HandleToObject),
             ((handle, nullable), ReferenceCastKind::HandleToNullable),
         ] {
-            let f: ConvertFn = Rc::new(move |v: &BoxedValue| cast(kind, v));
-            r.conversions.insert(key, f.clone());
-            r.casts.insert(key, f);
+            r.conversions.insert(key, Convert::Reference(cast, kind));
+            r.casts.insert(key, Convert::Reference(cast, kind));
         }
     });
 }
@@ -483,6 +629,71 @@ fn insert_ordering(id: TypeId, compare: OrderingFn) {
         r.orderings.insert(id, compare);
     });
 }
+
+/// What the untyped value conversions need to know about a type that registers when it is
+/// first used (#566): its nullable form, its text, the casts and conversions to it.
+///
+/// A crate implements it for its value types, enumerations, contracts (`dyn Trait`, for the
+/// handle `Rc<dyn Trait>`) and reference types (`T`, for `Rc<T>`), never for an `Option<_>` or
+/// an `Rc<_>`: the uses below cover those forms. The registrations run on every thread,
+/// once ([`ValueTypes::register_used`]), when the type is first used:
+/// - a property of the type is registered: `T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>` as the
+///   value type of a styled, attached or direct property ([`ferro_property!`](crate::ferro_property));
+/// - its markup metadata becomes known ([`MarkupType::value_types`](crate::metadata::MarkupType::value_types)):
+///   the value type of a property of a registered type, a type an application registers, every
+///   type of the tables of types.
+///
+/// With the tables of types (`type-tables`) each crate registers all of its types at start-up
+/// ([`ValueTypes::register_table`]). What a crate cannot register on first use stays in the
+/// list it registers at start-up ([`ValueTypes::register_global`]): the casts and nullable
+/// forms of the types that members of markup types hold, which compiled markup converts a
+/// value for before it sets the member.
+///
+/// ```ignore
+/// impl ValueTypeRegistration for Thickness {
+///     fn register_value_conversions() {
+///         ValueTypes::register_nullable::<Thickness>();
+///         ValueTypes::register_display::<Thickness>();
+///     }
+/// }
+/// ```
+pub trait ValueTypeRegistration: 'static {
+    /// Makes the registrations of the type with the table of the calling thread.
+    fn register_value_conversions();
+}
+
+/// The registration of a type when its markup metadata becomes known
+/// ([`MarkupType::value_types`](crate::metadata::MarkupType::value_types)): chosen where the
+/// metadata is declared, by the method that a reference to a reference to the probe resolves
+/// to. The implementation for a type with registrations (on `&Probe`) takes that receiver as
+/// it is and is found first; the one of every type (on `Probe`) after one dereference.
+#[doc(hidden)]
+pub struct __ValueTypeProbe<T: ?Sized>(std::marker::PhantomData<fn() -> *const T>);
+
+impl<T: ?Sized> __ValueTypeProbe<T> {
+    #[doc(hidden)]
+    pub const NEW: Self = Self(std::marker::PhantomData);
+}
+
+#[doc(hidden)]
+pub trait __ValueTypeRegistrationOf {
+    fn __register_value_type(&self);
+}
+
+impl<T: ?Sized + ValueTypeRegistration> __ValueTypeRegistrationOf for &__ValueTypeProbe<T> {
+    #[inline(always)]
+    fn __register_value_type(&self) {
+        ValueTypes::register_used::<T>();
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoValueTypeRegistration {
+    #[inline(always)]
+    fn __register_value_type(&self) {}
+}
+
+impl<T: ?Sized> __NoValueTypeRegistration for __ValueTypeProbe<T> {}
 
 /// The per-thread table of value type knowledge used by untyped bindings.
 pub struct ValueTypes;
@@ -511,10 +722,46 @@ impl ValueTypes {
     /// per-thread call.
     pub fn register_global(register: fn()) {
         let mut global = GLOBAL.lock().unwrap_or_else(|e| e.into_inner());
-        if !global.iter().any(|f| std::ptr::fn_addr_eq(*f, register)) {
-            global.push(register);
-            GLOBAL_LEN.store(global.len(), std::sync::atomic::Ordering::Release);
+        let global = &mut *global;
+        if global.known.get_or_insert_with(Default::default).insert(register as usize) {
+            global.functions.push(register);
+            GLOBAL_LEN.store(global.functions.len(), std::sync::atomic::Ordering::Release);
         }
+    }
+
+    /// Registers what the untyped value conversions need to know about the type `T` (its
+    /// nullable form, its text, the casts to it: [`ValueTypeRegistration`]) on every thread,
+    /// once (#566). Called when the type is first used: with the first property of the type
+    /// (`T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>`, see [`ferro_property!`](crate::ferro_property))
+    /// and when its markup metadata becomes known ([`MarkupType::value_types`](crate::metadata::MarkupType::value_types)).
+    /// A type nothing uses is not registered, and the code of its registrations is not linked.
+    #[inline]
+    pub fn register_used<T: ?Sized + ValueTypeRegistration>() {
+        Self::register_global(<T as ValueTypeRegistration>::register_value_conversions);
+    }
+
+    /// Whether the tables of types are kept: the feature `type-tables` of this crate (and its
+    /// own unit tests), decided where this crate is built, whatever crate asks.
+    pub const TYPE_TABLES: bool = cfg!(any(feature = "type-tables", test));
+
+    /// Registers the table of value types of a crate of the framework (`register`, a function
+    /// that registers every type of the crate that registers on first use, with
+    /// [`register_used`](Self::register_used)) at start-up from the crate's `register_types()`,
+    /// with the feature `type-tables` (section 4.6 of `docs/binary-size.md`): what looks types
+    /// up by name finds every type converted from the start. Without the feature the table is
+    /// trimmed: this does nothing, and what only the table reaches is left out of the binary;
+    /// a type registers when it is first used (#566).
+    #[cfg(any(feature = "type-tables", test))]
+    #[inline(always)]
+    pub fn register_table(register: fn()) {
+        Self::register_global(register);
+    }
+
+    /// Trimmed (without `type-tables`): the table is not kept.
+    #[cfg(not(any(feature = "type-tables", test)))]
+    #[inline(always)]
+    pub fn register_table(register: fn()) {
+        let _ = register;
     }
 
     /// Registers `T` as convertible to text through its [`fmt::Display`]
@@ -536,13 +783,23 @@ impl ValueTypes {
     /// Registers an assignability cast: values of `TFrom` are values of
     /// `TTo` (the same value, seen as a wider type), as opposed to values
     /// that can merely be converted to it. A cast is also a conversion.
-    pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
+    ///
+    /// The cast is a function (a closure that captures nothing coerces to one): the
+    /// registration stores it as data, with the adapter of its pair of types. A cast that
+    /// captures state registers with [`register_cast_with`](Self::register_cast_with).
+    pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: fn(&TFrom) -> TTo) {
         // The cast of a value that is only borrowed (the untyped property routes are
-        // handed `&dyn Any`, see `try_convert_implicit`); the cast of a boxed value
-        // is derived from it.
-        let convert_any: AnyConvertFn =
+        // handed `&dyn Any`, see `try_convert_implicit`) and of a boxed value, through the
+        // same entry.
+        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::cast(cast)));
+    }
+
+    /// Registers an assignability cast as [`register_cast`](Self::register_cast) does, with a
+    /// cast that captures state: a closure stored for the pair of types.
+    pub fn register_cast_with<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
+        let convert: Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>> =
             Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
+        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::AnyClosure(convert));
     }
 
     /// Registers an assignability cast that holds for some values of `TFrom`
@@ -555,15 +812,10 @@ impl ValueTypes {
     /// perform it); a refused value is a value that does not convert, which a
     /// binding reports as a conversion error and a markup loader as a load
     /// error, and [`cast_error`](Self::cast_error) gives the error of `cast`.
-    pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> Result<TTo, String> + 'static) {
+    pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: fn(&TFrom) -> Result<TTo, String>) {
         let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
-        let cast = Rc::new(cast);
-        let borrowed = cast.clone();
-        let convert_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| {
-            v.downcast_ref::<TFrom>().and_then(|v| borrowed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
-        });
-        insert_any_cast(key, convert_any);
-        let error: CastErrorFn = Rc::new(move |v: &dyn AnyValue| cast(v.downcast_ref::<TFrom>()?).err());
+        insert_any_cast(key, Convert::Typed(TypedConvert::try_cast(cast)));
+        let error = TypedCastError::new(cast);
         with_registry(|r| {
             r.cast_errors.insert(key, error);
         });
@@ -577,9 +829,9 @@ impl ValueTypes {
     /// the type, which the cast to the nullable form performs.
     pub fn cast_error(value: &BoxedValue, target: ValueType) -> Option<String> {
         let key = (value_type_id(&**value), target.id());
-        let (error, inner) = with_registry(|r| (r.cast_errors.get(&key).cloned(), r.nullable_inner.get(&target.id()).copied()));
+        let (error, inner) = with_registry(|r| (r.cast_errors.get(&key).copied(), r.nullable_inner.get(&target.id()).copied()));
         match error {
-            Some(error) => error(&**value),
+            Some(error) => error.apply(&**value),
             None => Self::cast_error(value, inner?),
         }
     }
@@ -619,17 +871,29 @@ impl ValueTypes {
 
     /// Registers a conversion between two value types. Returning `None`
     /// means the value cannot be converted.
-    pub fn register_conversion<TFrom: 'static, TTo: PropertyValue>(convert: impl Fn(&TFrom) -> Option<TTo> + 'static) {
-        insert_conversion(
-            (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().and_then(&convert).map(|v| Rc::new(v) as BoxedValue)),
-        );
+    ///
+    /// The conversion is a function (a closure that captures nothing coerces to one), stored
+    /// as data; one that captures state registers with
+    /// [`register_conversion_with`](Self::register_conversion_with).
+    pub fn register_conversion<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> Option<TTo>) {
+        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::conversion(convert)));
+    }
+
+    /// Registers a conversion as [`register_conversion`](Self::register_conversion) does, with
+    /// a conversion that captures state: a closure stored for the pair of types.
+    pub fn register_conversion_with<TFrom: 'static, TTo: PropertyValue>(
+        convert: impl Fn(&TFrom) -> Option<TTo> + 'static,
+    ) {
+        let convert: Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>> = Rc::new(move |v: &dyn std::any::Any| {
+            v.downcast_ref::<TFrom>().and_then(&convert).map(|v| Rc::new(v) as BoxedValue)
+        });
+        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::AnyClosure(convert));
     }
 
     /// Registers the conversion of text to `T` through `parse`, the
     /// equivalent of a type converter from string.
     pub fn register_parse<T: PropertyValue>(parse: fn(&str) -> Option<T>) {
-        Self::register_conversion::<String, T>(move |s| parse(s));
+        insert_conversion((TypeId::of::<String>(), TypeId::of::<T>()), Convert::Typed(TypedConvert::parse(parse)));
     }
 
     /// Registers the handle type of class `T` (`Ref<T>`), so that untyped
@@ -685,11 +949,8 @@ impl ValueTypes {
         Self::register_cast::<ElementRef<T>, Option<Ref<T>>>(|e| e.get());
         Self::register_cast::<Option<ElementRef<T>>, Option<Ref<T>>>(|e| ElementRef::resolve(e));
 
-        fn any<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> TTo) -> ((TypeId, TypeId), AnyConvertFn) {
-            (
-                (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-                Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(convert(v)) as BoxedValue)),
-            )
+        fn any<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> TTo) -> ((TypeId, TypeId), Convert) {
+            ((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::cast(convert)))
         }
         with_registry(|r| {
             r.any_conversions.extend([
@@ -707,7 +968,7 @@ impl ValueTypes {
     pub fn try_convert_for_property(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
         let key = (<dyn std::any::Any>::type_id(value), target);
         let f = with_registry(|r| r.any_conversions.get(&key).cloned());
-        f.and_then(|f| f(value))
+        f.and_then(|f| f.apply_any(value))
     }
 
     /// Converts a borrowed untyped value to the value type `target` with the
@@ -759,7 +1020,7 @@ impl ValueTypes {
         });
         let value = cast?(object)?;
         match wrap {
-            Some(wrap) => wrap(&value),
+            Some(wrap) => wrap.apply(&value),
             None if value_type_id(&*value) == target => Some(value),
             None => None,
         }
@@ -881,7 +1142,7 @@ impl ValueTypes {
         let cast = with_registry(|r| {
             r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
         })?;
-        cast(value)
+        cast.apply(value)
     }
 
     /// Registers the enclosing object identity of a typed view. `identity`
@@ -1375,7 +1636,7 @@ impl ValueTypes {
                     r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
                 });
                 if let Some(cast) = cast {
-                    untyped = cast(v);
+                    untyped = cast.apply(v);
                 }
             }
             return if target.is::<Option<BoxedValue>>() {
@@ -1394,16 +1655,16 @@ impl ValueTypes {
             )
         });
         if let Some(cast) = direct {
-            return cast(value);
+            return cast.apply(value);
         }
         if let Some((before, cast, after)) = with_registry(|r| r.reference_cast(id, target.id())) {
             let source = match before {
-                Some(before) => before(value)?,
+                Some(before) => before.apply(value)?,
                 None => value.clone(),
             };
-            let result = cast(&source)?;
+            let result = cast.apply(&source)?;
             return match after {
-                Some(after) => after(&result),
+                Some(after) => after.apply(&result),
                 None => Some(result),
             };
         }
@@ -1428,7 +1689,7 @@ impl ValueTypes {
         }
         let contents = Self::try_cast(value, inner)?;
         let wrap = with_registry(|r| r.casts.get(&(inner.id(), target.id())).cloned())?;
-        wrap(&contents)
+        wrap.apply(&contents)
     }
 
     /// Compares two untyped values: nulls are equal to each other, values are
@@ -2086,8 +2347,8 @@ impl ValueTypes {
     /// object to the handle of a contract it implements). A cast is also a
     /// conversion.
     pub fn register_boxed_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&BoxedValue) -> Option<TTo> + 'static) {
-        let cast: ConvertFn = Rc::new(move |v: &BoxedValue| cast(v).map(|v| Rc::new(v) as BoxedValue));
-        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), cast);
+        let cast: Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>> = Rc::new(move |v: &BoxedValue| cast(v).map(|v| Rc::new(v) as BoxedValue));
+        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::BoxedClosure(cast));
     }
 
     pub fn register_boxed_conversion<TFrom: 'static, TTo: PropertyValue>(
@@ -2095,7 +2356,7 @@ impl ValueTypes {
     ) {
         insert_conversion(
             (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-            Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue)),
+            Convert::BoxedClosure(Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue))),
         );
     }
 }

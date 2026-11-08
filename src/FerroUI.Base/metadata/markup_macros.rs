@@ -228,6 +228,7 @@ macro_rules! ferro_markup_type {
                         ::std::module_path!(),
                     );
                     $crate::ferro_markup_type!(@nullable $kind markup, $this, $form, { $($body)* });
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     $crate::__ferro_compiler_metadata!(
                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
@@ -256,6 +257,24 @@ macro_rules! ferro_markup_type {
     };
     (@impl $kind:ident $type_:ty, $name:expr, $default:ident, { $($body:tt)* }) => {
         $crate::ferro_markup_type!(@scan $kind $type_, $name, $default, [] $($body)*);
+    };
+}
+
+/// The [`MarkupType::value_types`](crate::metadata::MarkupType::value_types) of a declared
+/// type: a function that makes the type a used type of the untyped value conversions
+/// ([`ValueTypes::register_used`](crate::data::core::ValueTypes::register_used)) when it has
+/// registrations ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)), and does
+/// nothing otherwise. The choice is made where the type is declared, by the method a reference
+/// to a reference to the probe resolves to.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_value_types {
+    ($type_:ty) => {
+        ::std::option::Option::Some(|| {
+            #[allow(unused_imports)]
+            use $crate::data::core::{__NoValueTypeRegistration as _, __ValueTypeRegistrationOf as _};
+            (&&$crate::data::core::__ValueTypeProbe::<$type_>::NEW).__register_value_type();
+        })
     };
 }
 
@@ -296,6 +315,7 @@ macro_rules! ferro_markup_enum {
                     );
                     markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
                     markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
@@ -340,6 +360,7 @@ macro_rules! ferro_markup_enum {
                     markup.is_flags = true;
                     markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
                     markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
