@@ -350,6 +350,39 @@ mod tests {
 
     /// Not from upstream: documents whose build functions would have the same name are
     /// reported as a diagnostic of the later document, not left to rustc.
+    /// Not from upstream (#633): a `MergeResourceInclude` in the merged dictionaries of an
+    /// inline dictionary is compiled into that dictionary: the document compiles (the include
+    /// is not left as an object that needs a service provider at run time) with the entries of
+    /// the included document.
+    #[test]
+    fn merge_resource_include_in_an_inline_dictionary_is_compiled_into_it() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let root = format!(
+            "<ResourceDictionary {namespaces}>\
+             <ResourceDictionary.MergedDictionaries>\
+             <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='/Included.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>\
+             </ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='OwnEntry'>own</x:String>\
+             </ResourceDictionary>"
+        );
+        let included = format!(
+            "<ResourceDictionary {namespaces} x:ClassModifier='internal'>\
+             <x:String x:Key='IncludedEntry1'>1</x:String><x:String x:Key='IncludedEntry2'>2</x:String>\
+             </ResourceDictionary>"
+        );
+        let compiled = compile_documents(
+            &[("Root.xaml", &root), ("Included.xaml", &included)],
+            Some("ferres://App/"),
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let source = compiled[0].source.clone().unwrap_or_else(|reason| panic!("Root.xaml is not eligible: {reason}"));
+        assert!(!source.contains("MergeResourceInclude"), "{source}");
+        for key in ["OwnEntry", "IncludedEntry1", "IncludedEntry2"] {
+            assert!(source.contains(key), "{key} is not compiled: {source}");
+        }
+    }
+
     #[test]
     fn colliding_function_names_are_reported() {
         let xaml = "<Border xmlns='https://github.com/ferroui'/>";

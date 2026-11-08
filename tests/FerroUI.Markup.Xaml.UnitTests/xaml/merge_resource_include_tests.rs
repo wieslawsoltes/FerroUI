@@ -276,6 +276,88 @@ fn merge_resource_include_works_with_theme_dictionaries() {
     assert_eq!(Colors::RED, get("brush4", ThemeVariant::dark()));
 }
 
+/// Not from upstream (#633): a `MergeResourceInclude` in the merged dictionaries of an inline
+/// dictionary is inlined into that dictionary, which stays a merged dictionary at the place of
+/// the include. Lookups find the entries as with a `ResourceInclude`: the own resources of the
+/// root first, then the merged dictionaries from the last one, each with its theme dictionaries.
+#[test]
+fn merge_resource_include_works_in_an_inline_dictionary() {
+    let _base = xaml_test_base();
+    let documents = vec![
+        document(
+            "ferres://Tests/Resources1.xaml",
+            "
+<ResourceDictionary xmlns='https://github.com/ferroui'
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+    <SolidColorBrush x:Key='brush1'>Red</SolidColorBrush>
+    <SolidColorBrush x:Key='shared'>Red</SolidColorBrush>
+    <SolidColorBrush x:Key='overridden'>Yellow</SolidColorBrush>
+</ResourceDictionary>",
+        ),
+        document(
+            "ferres://Tests/Resources2.xaml",
+            "
+<ResourceDictionary xmlns='https://github.com/ferroui'
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key='Light'>
+            <SolidColorBrush x:Key='brush2'>White</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key='Dark'>
+            <SolidColorBrush x:Key='brush2'>Black</SolidColorBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+    <SolidColorBrush x:Key='shared'>Blue</SolidColorBrush>
+</ResourceDictionary>",
+        ),
+        document_without_uri(
+            "
+<ResourceDictionary xmlns='https://github.com/ferroui'
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source='ferres://Tests/Resources1.xaml'/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source='ferres://Tests/Resources2.xaml'/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ResourceDictionary.MergedDictionaries>
+    <SolidColorBrush x:Key='overridden'>Black</SolidColorBrush>
+</ResourceDictionary>",
+        ),
+    ];
+
+    let objects = load_group(documents, None);
+    let resources = assert_value_is_type::<ResourceDictionary>(&objects[2]);
+    let merged = resources.merged_dictionaries();
+    assert_eq!(merged.count(), 2, "each included document is a merged dictionary of its own");
+    for index in 0..2 {
+        let provider = merged.get(index);
+        let dictionary = provider
+            .as_object()
+            .and_then(|object| object.downcast_ref::<ResourceDictionary>())
+            .expect("the merged dictionary is a ResourceDictionary");
+        assert!(dictionary.merged_dictionaries().is_empty(), "the include of merged dictionary {index} is inlined");
+    }
+
+    let get = |key: &str, theme_variant: ThemeVariant| -> Color {
+        match resources.try_get_resource(&key.into(), Some(&theme_variant)) {
+            Some(res) => solid_color(&res),
+            None => panic!("The given key '{key}' was not present in the dictionary."),
+        }
+    };
+    assert_eq!(Colors::RED, get("brush1", ThemeVariant::light()));
+    // The later merged dictionary is looked up first, the own resources before both.
+    assert_eq!(Colors::BLUE, get("shared", ThemeVariant::light()));
+    assert_eq!(Colors::BLACK, get("overridden", ThemeVariant::light()));
+    assert_eq!(Colors::WHITE, get("brush2", ThemeVariant::light()));
+    assert_eq!(Colors::BLACK, get("brush2", ThemeVariant::dark()));
+}
+
 #[test]
 fn merge_resource_include_fails_with_theme_dictionaries_duplicate_resources() {
     let _base = xaml_test_base();

@@ -139,10 +139,12 @@ name, the first time the control looks for its theme. Release builds do not chec
   `{x:Type}`, cannot be rooted, so its whole document stays in the ambient unit.
 - **No `ResourceInclude` for a document that should be trimmed.** A `ResourceInclude` is not
   inlined, so the document it includes is part of the ambient unit. A document that must stay a
-  dictionary of its own (its `{StaticResource}` references must find the theme's overrides after
-  their own document, as for the inherited documents of the Material theme) stays a
-  `ResourceInclude` for now: a `MergeResourceInclude` inside an inline dictionary is not compiled
-  yet (#633).
+  dictionary of its own (its keys repeat keys of the theme's dictionary, or its `{StaticResource}`
+  references must find the theme's overrides after their own document, as for the inherited
+  documents of the Material theme) is merged into an inline dictionary of its own (#633):
+  `<ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="…" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>`
+  as a merged dictionary of the theme's dictionary, where the `ResourceInclude` was. The lookups
+  find its entries in the same order, and the document is a unit.
 - **Mark every document but the class document internal** (`x:ClassModifier="internal"`). The
   loader table answers the URI of a public document and so keeps its build function, and its unit,
   linked in every application.
@@ -305,7 +307,8 @@ Documents loaded at run time bind the way the built application does (#604):
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
-| Units for the Material theme (step 6): `MaterialTheme::with_parts`, inherited resource documents as units | #568 | In review |
+| Units for the Material theme (step 6): `MaterialTheme::with_parts`, control documents as units | #568 | In review |
+| `MergeResourceInclude` inside an inline dictionary; the Material theme's inherited resource documents as units | #633 | In review |
 | Compiled bindings in all themes | #603 | In review |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |
 | Samples, sample apps and component samples on compiled bindings; no explicit `default_compile_bindings(true)`; hot reload and the previewer follow the application's setting | #604 | In review |

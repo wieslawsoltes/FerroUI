@@ -94,6 +94,48 @@ fn every_merged_document_is_a_unit_and_the_rest_is_the_ambient_unit() {
     assert_eq!(plan.unit_of_uri.get(&uri("Theme.xaml")), None);
 }
 
+/// #633: a document merged into an inline dictionary of the class document (a dictionary of its
+/// own among the merged dictionaries of the theme) is a unit as a document merged into the
+/// dictionary of the theme is; the inline dictionary is not an entry of the theme, so the class
+/// document stays an ambient document with no entry that no root can name.
+#[test]
+fn a_document_merged_into_an_inline_dictionary_is_a_unit() {
+    let documents = vec![
+        document(
+            "Theme.xaml",
+            format!(
+                r#"<Styles {NAMESPACES} x:Class="Tests.Theme"><Styles.Resources><ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                  <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/Inherited.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
+                  <MergeResourceInclude Source="/Resources/Base.xaml" />
+                </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary></Styles.Resources>
+                </Styles>"#
+            ),
+        ),
+        document(
+            "Resources/Inherited.xaml",
+            dictionary(
+                r#"<ResourceDictionary.ThemeDictionaries>
+                  <ResourceDictionary x:Key="Light"><StaticResource x:Key="InheritedBrush" ResourceKey="AccentBrush" /></ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>"#,
+            ),
+        ),
+        document("Resources/Base.xaml", dictionary(r#"<SolidColorBrush x:Key="AccentBrush" Color="Blue" />"#)),
+    ];
+    let merged = vec![uri("Resources/Inherited.xaml"), uri("Resources/Base.xaml")];
+    let plan = plan(&documents, &merged).expect("units");
+    let names: Vec<(&str, u32)> = plan.units.iter().map(|unit| (unit.name.as_str(), unit.index)).collect();
+    assert_eq!(names, [(AMBIENT, 0), ("Resources/Inherited.xaml", 1), ("Resources/Base.xaml", 2)]);
+    let ambient = unit(&plan, AMBIENT);
+    assert_eq!(ambient.documents, strings(&["Theme.xaml"]));
+    assert!(ambient.keys.is_empty(), "{:?}", ambient.keys);
+    let inherited = unit(&plan, "Resources/Inherited.xaml");
+    assert_eq!(inherited.keys, strings(&["InheritedBrush"]));
+    assert_eq!(inherited.references, strings(&["AccentBrush"]));
+    assert_eq!(plan.unit_of_uri.get(&uri("Resources/Inherited.xaml")), Some(&1));
+}
+
 #[test]
 fn a_unit_defines_its_keys_and_type_keys_and_references_the_keys_it_names() {
     let plan = plan(&theme(), &merged()).expect("units");
