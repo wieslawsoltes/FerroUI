@@ -957,7 +957,9 @@ fn batches_and_texture_pool_bound_submissions_and_retain_snapshot_aliases() {
     let mut d = b.drawing(false, None);
     rectangle(&mut d, Colors::RED, Rect::new(0., 0., 64., 64.));
     d.dispose();
-    let alias = b.context(|p| unsafe { ffi::Owned::new(ffi::qm_layer_snapshot(p)) });
+    let alias = b
+        .context(|p| unsafe { ffi::Owned::new(ffi::qm_layer_snapshot(p)) })
+        .unwrap();
     drop(b);
     for _ in 0..8 {
         let b = bitmap();

@@ -61,10 +61,28 @@ extern "C" {
         phase: f64,
     ) -> Ptr;
     pub fn q_surface(w: usize, h: usize) -> Ptr;
-    pub fn q_read_pixels(ctx: Ptr, out: *mut u8, len: usize);
-    pub fn q_write_pixels(ctx: Ptr, data: *const u8, len: usize);
-    #[cfg(feature = "metal")]
+    /// Returns 0 on success, or a status code.
+    pub fn q_read_pixels(ctx: Ptr, out: *mut u8, len: usize) -> i32;
+    /// Returns 0 on success, or a status code.
+    pub fn q_write_pixels(ctx: Ptr, data: *const u8, len: usize) -> i32;
     pub fn q_retain(p: Ptr) -> Ptr;
+    /// Whether a drawing context is a GPU surface (always 0 without `metal`).
+    pub fn q_is_gpu(ctx: Ptr) -> i32;
+    /// A +1 drawable source of a drawing context, for `q_draw_source`.
+    pub fn q_source(ctx: Ptr) -> Ptr;
+    pub fn q_draw_source(
+        ctx: Ptr,
+        source: Ptr,
+        sx: f64,
+        sy: f64,
+        sw: f64,
+        sh: f64,
+        dx: f64,
+        dy: f64,
+        dw: f64,
+        dh: f64,
+        alpha: f64,
+    );
     pub fn q_snapshot(ctx: Ptr) -> Ptr;
     pub fn q_save(ctx: Ptr);
     pub fn q_restore(ctx: Ptr);
@@ -119,17 +137,21 @@ extern "C" {
 /// fonts/paths/images are immutable; bitmap contexts are only used under Surface's mutex.
 pub struct Owned(pub Ptr);
 impl Owned {
-    pub unsafe fn new(p: Ptr) -> Self {
-        assert!(!p.is_null(), "Apple framework could not allocate resource");
-        Self(p)
+    /// Takes ownership of a +1 reference; `None` when the framework returned NULL.
+    ///
+    /// # Safety
+    /// `p` is NULL or a +1 Core Foundation (or Objective-C) reference that nothing else releases.
+    pub unsafe fn new(p: Ptr) -> Option<Self> {
+        (!p.is_null()).then_some(Self(p))
     }
     pub fn bytes(&self) -> Vec<u8> {
         unsafe {
             let length = q_data_len(self.0);
-            if length == 0 {
+            let bytes = q_data_bytes(self.0);
+            if length == 0 || bytes.is_null() {
                 Vec::new()
             } else {
-                std::slice::from_raw_parts(q_data_bytes(self.0), length).to_vec()
+                std::slice::from_raw_parts(bytes, length).to_vec()
             }
         }
     }
@@ -141,6 +163,33 @@ impl Drop for Owned {
 }
 // SAFETY: ownership can move between threads; mutable CGContext access is mutex protected.
 unsafe impl Send for Owned {}
+
+/// The bytes of a +1 CFData, empty for NULL.
+///
+/// # Safety
+/// As [`Owned::new`].
+pub unsafe fn owned_bytes(p: Ptr) -> Vec<u8> {
+    Owned::new(p).map(|data| data.bytes()).unwrap_or_default()
+}
+
+/// Status codes returned by the native layer (`metal.h`).
+pub const STATUS_OK: i32 = 0;
+
+/// What a native status code means.
+pub fn status_message(status: i32) -> &'static str {
+    match status {
+        0 => "success",
+        1 => "no Metal device",
+        2 => "the Metal device lacks tier-2 read/write texture support",
+        3 => "Metal shader compilation failed",
+        4 => "out of GPU memory",
+        5 => "size beyond the device limit",
+        6 => "the Metal objects belong to another GPU",
+        7 => "the GPU command failed",
+        8 => "invalid argument",
+        _ => "unknown native status",
+    }
+}
 extern "C" {
     pub fn q_set_transform(
         ctx: Ptr,
@@ -158,7 +207,14 @@ extern "C" {
 
 #[cfg(feature = "metal")]
 extern "C" {
-    pub fn qm_configure(device: Ptr);
+    /// Makes `device` the GPU of new surfaces. Returns 0, or why it cannot be used.
+    pub fn qm_configure(device: Ptr) -> i32;
+    /// 0 when a GPU renderer is available for new surfaces, or why not.
+    pub fn qm_status() -> i32;
+    /// The largest GPU surface side, 0 without a GPU renderer.
+    pub fn qm_max_texture_size() -> usize;
+    /// A GPU surface, or NULL (no renderer, empty or oversized, out of memory).
+    pub fn qm_surface(w: usize, h: usize) -> Ptr;
     pub fn qm_draw_surface(
         ctx: Ptr,
         source: Ptr,
@@ -173,7 +229,8 @@ extern "C" {
         alpha: f64,
     );
     pub fn qm_copy_surface(ctx: Ptr, source: Ptr);
-    pub fn qm_present(ctx: Ptr, texture: Ptr, platform_queue: Ptr, flipped: i32);
+    /// Returns 0 on success, or a status code.
+    pub fn qm_present(ctx: Ptr, texture: Ptr, platform_queue: Ptr, flipped: i32) -> i32;
     pub fn qm_snapshot_external(
         surface: Ptr,
         source: Ptr,

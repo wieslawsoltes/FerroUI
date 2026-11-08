@@ -24,7 +24,7 @@ mod tiles;
 
 pub(crate) fn unsupported(feature: &'static str) {
     static WARNED: std::sync::Mutex<Vec<&str>> = std::sync::Mutex::new(Vec::new());
-    let mut warned = WARNED.lock().unwrap();
+    let mut warned = WARNED.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
     if !warned.contains(&feature) {
         eprintln!("Quartz prototype: unsupported {feature}");
         warned.push(feature)
@@ -77,28 +77,32 @@ impl GlyphRun {
                     );
                     ink = Some(ink.map_or(r, |old| old.union(r)));
                 }
-                let raw = ffi::q_glyph_path(font.raw(), g.glyph_index, size);
-                if !raw.is_null() {
-                    let path = ffi::Owned::new(raw);
+                if let Some(path) =
+                    ffi::Owned::new(ffi::q_glyph_path(font.raw(), g.glyph_index, size))
+                {
                     let mut outline = geometry::from_native(path.0);
                     if simulations.contains(FontSimulations::Oblique) {
                         outline = kurbo::Affine::new([1., 0., -0.2, 1., 0., 0.]) * outline;
                     }
                     if simulations.contains(FontSimulations::Bold) {
-                        let raw = geometry::native(&outline);
-                        let stroke = ffi::Owned::new(ffi::q_stroke(
-                            raw.0,
-                            size / 24.,
-                            1,
-                            1,
-                            10.,
-                            std::ptr::null(),
-                            0,
-                            0.,
-                        ));
-                        let union = ffi::q_combine(raw.0, stroke.0, 0, 0, 0);
-                        if !union.is_null() {
-                            outline = geometry::from_native(ffi::Owned::new(union).0);
+                        // Emboldening is skipped, not fatal, when Core Graphics cannot build
+                        // the stroke or the union.
+                        if let Some(raw) = geometry::native(&outline) {
+                            let stroke = ffi::Owned::new(ffi::q_stroke(
+                                raw.0,
+                                size / 24.,
+                                1,
+                                1,
+                                10.,
+                                std::ptr::null(),
+                                0,
+                                0.,
+                            ));
+                            if let Some(union) = stroke.and_then(|stroke| {
+                                ffi::Owned::new(ffi::q_combine(raw.0, stroke.0, 0, 0, 0))
+                            }) {
+                                outline = geometry::from_native(union.0);
+                            }
                         }
                     }
                     outlines.extend(
@@ -143,12 +147,14 @@ impl IGlyphRunImpl for GlyphRun {
         if !lower.is_finite() || !upper.is_finite() || upper <= lower || self.outlines.is_empty() {
             return vec![];
         }
-        let path = geometry::native(
+        let Some(path) = geometry::native(
             &(kurbo::Affine::translate((-self.origin.x, -self.origin.y)) * self.outlines.clone()),
-        );
-        let bytes = unsafe {
-            ffi::Owned::new(ffi::q_path_intercepts(path.0, lower as f64, upper as f64)).bytes()
+        ) else {
+            return vec![];
         };
+        // SAFETY: q_path_intercepts returns NULL or a +1 CFData.
+        let bytes =
+            unsafe { ffi::owned_bytes(ffi::q_path_intercepts(path.0, lower as f64, upper as f64)) };
         let mut intervals: Vec<_> = bytes
             .chunks_exact(8)
             .map(|p| {
@@ -334,7 +340,9 @@ impl DrawingContext {
         if !self.prepare() {
             return;
         }
-        let native = geometry::native(path);
+        let Some(native) = geometry::native(path) else {
+            return;
+        };
         let opacity = brush.opacity();
         if let Some(solid) = brush.as_solid_color_brush() {
             let [r, g, b, a] = color(solid.color(), opacity);
@@ -846,18 +854,19 @@ impl IDrawingContextImpl for DrawingContext {
     }
     fn push_geometry_clip(&mut self, g: &dyn IGeometryImpl) {
         if !self.prepare() {
-            let empty = geometry::native(&BezPath::new());
+            // A NULL path clips everything away on both the GPU and the CPU path.
             self.bitmap.context(|c| unsafe {
                 ffi::q_save(c);
-                ffi::q_clip(c, empty.0, 0);
+                ffi::q_clip(c, std::ptr::null_mut(), 0);
             });
             return;
         }
         self.bitmap.context(|c| unsafe { ffi::q_save(c) });
         if let Some(g) = g.as_any().downcast_ref::<Geometry>() {
             let path = geometry::native(g.fill.as_ref().unwrap_or(&g.stroke));
+            let raw = path.as_ref().map_or(std::ptr::null_mut(), |p| p.0);
             self.bitmap.context(|c| unsafe {
-                ffi::q_clip(c, path.0, i32::from(g.rule == FillRule::EvenOdd))
+                ffi::q_clip(c, raw, i32::from(g.rule == FillRule::EvenOdd))
             })
         }
     }

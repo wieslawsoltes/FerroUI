@@ -10,6 +10,9 @@ fn main() {
             println!("cargo:rerun-if-changed={file}");
         }
         let source = std::fs::read_to_string("shaders.metal").unwrap();
+        // A CRLF checkout must not leave a raw carriage return inside the C
+        // string literal; lone CRs are line breaks too.
+        let source = source.replace("\r\n", "\n").replace('\r', "\n");
         let escaped = source
             .replace('\\', "\\\\")
             .replace('"', "\\\"")

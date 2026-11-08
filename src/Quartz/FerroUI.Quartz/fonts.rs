@@ -16,15 +16,19 @@ pub struct NativeFont {
 // SAFETY: a CTFont is immutable and Core Text permits concurrent access to font objects.
 unsafe impl Sync for NativeFont {}
 impl NativeFont {
-    pub unsafe fn from_raw(p: ffi::Ptr) -> Arc<Self> {
-        let handle = Owned::new(p);
+    /// Takes ownership of a +1 CTFont; `None` for NULL.
+    ///
+    /// # Safety
+    /// `p` is NULL or a +1 CTFont reference that nothing else releases.
+    pub unsafe fn from_raw(p: ffi::Ptr) -> Option<Arc<Self>> {
+        let handle = Owned::new(p)?;
         let mut name = vec![0; 4096];
         ffi::q_font_name(p, name.as_mut_ptr(), name.len());
         name.truncate(name.iter().position(|b| *b == 0).unwrap_or(name.len()));
-        Arc::new(Self {
+        Some(Arc::new(Self {
             handle,
             name: String::from_utf8_lossy(&name).into_owned(),
-        })
+        }))
     }
     pub fn raw(&self) -> ffi::Ptr {
         self.handle.0
@@ -36,7 +40,7 @@ pub struct Typeface {
     style: FontStyle,
     stretch: FontStretch,
     simulations: FontSimulations,
-    data: Option<Vec<u8>>,
+    data: Option<Arc<[u8]>>,
 }
 impl Typeface {
     fn new(
@@ -57,10 +61,9 @@ impl Typeface {
 }
 impl IFontMemory for Typeface {
     fn try_get_table(&self, tag: OpenTypeTag) -> Option<ReadOnlyMemory<u8>> {
-        unsafe {
-            let p = ffi::q_font_table(self.font.raw(), tag.value());
-            (!p.is_null()).then(|| ReadOnlyMemory::from_vec(Owned::new(p).bytes()))
-        }
+        // SAFETY: q_font_table returns NULL or a +1 CFData.
+        let table = unsafe { Owned::new(ffi::q_font_table(self.font.raw(), tag.value())) }?;
+        Some(ReadOnlyMemory::from_vec(table.bytes()))
     }
     fn dispose(&self) {}
 }
@@ -89,9 +92,63 @@ impl IPlatformTypeface for Typeface {
         self
     }
 }
+/// The weight, style and stretch a face declares in its OS/2 table.
+fn face_traits(font: &NativeFont) -> (FontWeight, FontStyle, FontStretch) {
+    // SAFETY: q_font_table returns NULL or a +1 CFData.
+    let os2 = unsafe { ffi::owned_bytes(ffi::q_font_table(font.raw(), u32::from_be_bytes(*b"OS/2"))) };
+    let read = |at: usize| os2.get(at..at + 2).map(|b| u16::from_be_bytes([b[0], b[1]]));
+    let weight = read(4)
+        .filter(|w| *w > 0)
+        .map_or(FontWeight::Normal, |w| FontWeight(i32::from(w).clamp(1, 1000)));
+    let stretch = read(6)
+        .and_then(|w| FontStretch::from_i32(i32::from(w)))
+        .unwrap_or(FontStretch::Normal);
+    let selection = read(62).unwrap_or(0);
+    let style = if selection & 1 != 0 {
+        FontStyle::Italic
+    } else if selection & (1 << 9) != 0 {
+        FontStyle::Oblique
+    } else {
+        FontStyle::Normal
+    };
+    (weight, style, stretch)
+}
+/// How far `actual` is from `desired` under CSS font matching: below 400 lighter weights come
+/// first, above 500 heavier ones, and from 400 to 500 weights up to 500, then lighter, then
+/// heavier.
+fn weight_cost(desired: i32, actual: i32) -> i32 {
+    let distance = (actual - desired).abs();
+    let tier = if desired < 400 {
+        i32::from(actual > desired)
+    } else if desired > 500 {
+        i32::from(actual < desired)
+    } else if actual >= desired && actual <= 500 {
+        0
+    } else if actual < desired {
+        1
+    } else {
+        2
+    };
+    tier * 10_000 + distance
+}
+fn style_cost(desired: FontStyle, actual: FontStyle) -> i32 {
+    match (desired, actual) {
+        (a, b) if a == b => 0,
+        (FontStyle::Normal, _) | (_, FontStyle::Normal) => 2,
+        _ => 1, // Italic and oblique stand in for each other.
+    }
+}
+/// A face loaded from a stream, kept for lookups by family name.
+struct EmbeddedFace {
+    font: Arc<NativeFont>,
+    weight: FontWeight,
+    style: FontStyle,
+    stretch: FontStretch,
+    data: Arc<[u8]>,
+}
 #[derive(Default)]
 pub struct FontManager {
-    embedded: RefCell<Vec<Arc<NativeFont>>>,
+    embedded: RefCell<Vec<EmbeddedFace>>,
 }
 impl FontManager {
     /// Loads a variable font using public Core Text axis identifiers (OpenType tags).
@@ -106,29 +163,47 @@ impl FontManager {
         stream.read_to_end(&mut data).ok()?;
         let tags: Vec<_> = variations.iter().map(|(t, _)| t.value()).collect();
         let values: Vec<_> = variations.iter().map(|(_, v)| *v).collect();
-        unsafe {
-            let raw = ffi::q_font_data(data.as_ptr(), data.len());
-            if raw.is_null() {
-                return None;
-            }
-            let original = Owned::new(raw);
-            let raw =
-                ffi::q_font_variations(original.0, tags.as_ptr(), values.as_ptr(), tags.len());
-            if raw.is_null() {
-                return None;
-            }
-            let font = NativeFont::from_raw(raw);
-            self.embedded.borrow_mut().push(font.clone());
-            let mut face = Typeface::new(
-                font,
-                FontWeight::Normal,
-                FontStyle::Normal,
-                FontStretch::Normal,
-            );
-            face.simulations = simulations;
-            face.data = Some(data);
-            Some(Rc::new(face))
+        // SAFETY: q_font_data and q_font_variations return NULL or a +1 CTFont.
+        let font = unsafe {
+            let original = Owned::new(ffi::q_font_data(data.as_ptr(), data.len()))?;
+            NativeFont::from_raw(ffi::q_font_variations(
+                original.0,
+                tags.as_ptr(),
+                values.as_ptr(),
+                tags.len(),
+            ))?
+        };
+        let (mut weight, style, stretch) = face_traits(&font);
+        // A weight axis instance is that weight, whatever the default instance declares.
+        if let Some((_, value)) = variations
+            .iter()
+            .find(|(tag, _)| tag.value() == u32::from_be_bytes(*b"wght"))
+        {
+            weight = FontWeight((value.round() as i32).clamp(1, 1000));
         }
+        let data: Arc<[u8]> = data.into();
+        {
+            let mut embedded = self.embedded.borrow_mut();
+            let known = embedded.iter().any(|face| {
+                face.font.name.eq_ignore_ascii_case(&font.name)
+                    && face.weight == weight
+                    && face.style == style
+                    && face.stretch == stretch
+            });
+            if !known {
+                embedded.push(EmbeddedFace {
+                    font: font.clone(),
+                    weight,
+                    style,
+                    stretch,
+                    data: data.clone(),
+                });
+            }
+        }
+        let mut face = Typeface::new(font, weight, style, stretch);
+        face.simulations = simulations;
+        face.data = Some(data);
+        Some(Rc::new(face))
     }
     fn system(
         name: &str,
@@ -144,8 +219,34 @@ impl FontManager {
                 i32::from(style != FontStyle::Normal),
                 stretch as i32,
             );
-            (!p.is_null()).then(|| NativeFont::from_raw(p))
+            NativeFont::from_raw(p)
         }
+    }
+    /// The embedded face of `name` nearest to the request: stretch first, then style, then
+    /// weight, as CSS font matching orders them.
+    fn nearest_embedded(
+        &self,
+        name: &str,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Option<Typeface> {
+        let embedded = self.embedded.borrow();
+        let face = embedded
+            .iter()
+            .filter(|face| face.font.name.eq_ignore_ascii_case(name))
+            .min_by_key(|face| {
+                (
+                    (face.stretch as i32 - stretch as i32).abs(),
+                    style_cost(style, face.style),
+                    weight_cost(weight.0, face.weight.0),
+                )
+            })?;
+        // The face's own traits: the font collection simulates bold or oblique only when the
+        // family has no face of the requested weight or style.
+        let mut typeface = Typeface::new(face.font.clone(), face.weight, face.style, face.stretch);
+        typeface.data = Some(face.data.clone());
+        Some(typeface)
     }
 }
 impl IFontManagerImpl for FontManager {
@@ -156,17 +257,15 @@ impl IFontManagerImpl for FontManager {
             FontStyle::Normal,
             FontStretch::Normal,
         )
-        .unwrap()
-        .name
-        .clone()
+        .map_or_else(|| "Helvetica".to_owned(), |font| font.name.clone())
     }
     fn get_installed_font_family_names(&self, _: bool) -> Vec<String> {
-        unsafe {
-            String::from_utf8_lossy(&Owned::new(ffi::q_font_names()).bytes())
-                .lines()
-                .map(str::to_owned)
-                .collect()
-        }
+        // SAFETY: q_font_names returns NULL or a +1 CFData.
+        let names = unsafe { ffi::owned_bytes(ffi::q_font_names()) };
+        String::from_utf8_lossy(&names)
+            .lines()
+            .map(str::to_owned)
+            .collect()
     }
     fn try_create_glyph_typeface(
         &self,
@@ -175,13 +274,10 @@ impl IFontManagerImpl for FontManager {
         weight: FontWeight,
         stretch: FontStretch,
     ) -> Option<Rc<dyn IPlatformTypeface>> {
-        let font = self
-            .embedded
-            .borrow()
-            .iter()
-            .find(|f| f.name.eq_ignore_ascii_case(name))
-            .cloned()
-            .or_else(|| Self::system(name, weight, style, stretch))?;
+        if let Some(face) = self.nearest_embedded(name, style, weight, stretch) {
+            return Some(Rc::new(face));
+        }
+        let font = Self::system(name, weight, style, stretch)?;
         // CTFont creation silently substitutes an unknown family. Preserve the
         // font manager contract so Ferro can try the next requested family.
         if !name.is_empty()
@@ -208,11 +304,8 @@ impl IFontManagerImpl for FontManager {
         let font = Self::system(name.unwrap_or(""), weight, style, stretch)?;
         unsafe {
             let p = ffi::q_font_match(font.raw(), text.as_ptr(), text.len());
-            if p.is_null() {
-                return None;
-            }
             Some(Rc::new(Typeface::new(
-                NativeFont::from_raw(p),
+                NativeFont::from_raw(p)?,
                 weight,
                 style,
                 stretch,
@@ -229,7 +322,8 @@ impl IFontManagerImpl for FontManager {
 
     fn try_get_family_typefaces(&self, name: &str) -> Option<Vec<ferroui_base::media::Typeface>> {
         let family = CString::new(name).ok()?;
-        let bytes = unsafe { Owned::new(ffi::q_font_family_faces(family.as_ptr())).bytes() };
+        // SAFETY: q_font_family_faces returns NULL or a +1 CFData.
+        let bytes = unsafe { ffi::owned_bytes(ffi::q_font_family_faces(family.as_ptr())) };
         let faces: Vec<_> = String::from_utf8_lossy(&bytes)
             .lines()
             .filter_map(|line| {
@@ -269,11 +363,16 @@ impl ITextShaperImpl for TextShaper {
         options: &TextShaperOptions,
     ) -> Rc<ShapedBuffer> {
         let face = options.glyph_typeface();
-        let native = face
-            .platform_typeface()
-            .as_any()
-            .downcast_ref::<Typeface>()
-            .expect("Core Text requires a Quartz typeface");
+        let Some(native) = face.platform_typeface().as_any().downcast_ref::<Typeface>() else {
+            crate::warn_once("text shaped with a typeface of another backend is not shown");
+            return ShapedBuffer::new(
+                text.clone(),
+                0,
+                face.clone(),
+                options.font_rendering_em_size(),
+                options.bidi_level(),
+            );
+        };
         let mut glyphs: Vec<ffi::Glyph> = Vec::new();
         extern "C" fn emit(p: ffi::Ptr, g: ffi::Glyph) {
             unsafe { (&mut *(p as *mut Vec<ffi::Glyph>)).push(g) }
@@ -297,7 +396,7 @@ impl ITextShaperImpl for TextShaper {
                 .map(ToString::to_string)
                 .unwrap_or_default(),
         )
-        .unwrap();
+        .unwrap_or_default();
         for u in &mut units {
             if *u == 10 || *u == 13 {
                 *u = 0x200c;

@@ -96,7 +96,9 @@ impl DrawingContext {
         if paint.try_invert().is_none() {
             return;
         }
-        let tile = tile.retained_surface();
+        let Some(tile) = tile.retained_surface() else {
+            return;
+        };
         self.bitmap.context(|c| unsafe {
             ffi::q_set_transform(
                 c,

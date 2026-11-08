@@ -21,7 +21,8 @@ fn rect(r: kurbo::Rect) -> Rect {
 pub fn affine(m: Matrix) -> Affine {
     Affine::new([m.m11, m.m12, m.m21, m.m22, m.m31, m.m32])
 }
-pub fn native(path: &BezPath) -> Owned {
+/// The path as a Core Graphics path; `None` only when Core Graphics cannot allocate one.
+pub fn native(path: &BezPath) -> Option<Owned> {
     let commands: Vec<Command> = path
         .elements()
         .iter()
@@ -48,6 +49,7 @@ pub fn native(path: &BezPath) -> Owned {
             },
         })
         .collect();
+    // SAFETY: q_path returns NULL or a +1 CGPath built from `commands`.
     unsafe { Owned::new(ffi::q_path(commands.as_ptr(), commands.len())) }
 }
 pub fn from_native(p: ffi::Ptr) -> BezPath {
@@ -122,31 +124,39 @@ impl Geometry {
             return Self::new(BezPath::new(), FillRule::NonZero);
         };
         let empty = BezPath::new();
-        let na = native(a.fill.as_ref().unwrap_or(&empty));
-        let nb = native(b.fill.as_ref().unwrap_or(&empty));
+        let (Some(na), Some(nb)) = (
+            native(a.fill.as_ref().unwrap_or(&empty)),
+            native(b.fill.as_ref().unwrap_or(&empty)),
+        ) else {
+            return Self::new(BezPath::new(), FillRule::NonZero);
+        };
         let op = match mode {
             GeometryCombineMode::Union => 0,
             GeometryCombineMode::Intersect => 1,
             GeometryCombineMode::Xor => 2,
             GeometryCombineMode::Exclude => 3,
         };
-        unsafe {
-            let p = ffi::q_combine(
+        // SAFETY: q_combine returns NULL or a +1 CGPath.
+        let combined = unsafe {
+            Owned::new(ffi::q_combine(
                 na.0,
                 nb.0,
                 op,
                 i32::from(a.rule == FillRule::EvenOdd),
                 i32::from(b.rule == FillRule::EvenOdd),
-            );
-            if p.is_null() {
-                return Self::new(BezPath::new(), FillRule::NonZero);
-            }
-            let p = Owned::new(p);
-            Self::new(from_native(p.0), FillRule::NonZero)
+            ))
+        };
+        match combined {
+            Some(p) => Self::new(from_native(p.0), FillRule::NonZero),
+            None => Self::new(BezPath::new(), FillRule::NonZero),
         }
     }
+    /// The outline of `path` stroked with `pen`; empty for a degenerate pen or when Core
+    /// Graphics cannot stroke it.
     pub fn stroked(path: &BezPath, pen: &dyn IPen) -> BezPath {
-        let p = native(path);
+        let Some(p) = native(path) else {
+            return BezPath::new();
+        };
         let cap = match pen.line_cap() {
             PenLineCap::Flat => 0,
             PenLineCap::Round => 1,
@@ -169,8 +179,10 @@ impl Geometry {
             })
             .unwrap_or_default();
         let offset = dash.as_ref().map_or(0., |d| d.offset() * pen.thickness());
-        unsafe {
-            let p = Owned::new(ffi::q_stroke(
+        // SAFETY: q_stroke never returns NULL in practice (an empty path for degenerate
+        // input); a NULL is still handled as an empty outline.
+        let stroked = unsafe {
+            Owned::new(ffi::q_stroke(
                 p.0,
                 pen.thickness(),
                 cap,
@@ -179,9 +191,9 @@ impl Geometry {
                 values.as_ptr(),
                 values.len(),
                 offset,
-            ));
-            from_native(p.0)
-        }
+            ))
+        };
+        stroked.map_or_else(BezPath::new, |p| from_native(p.0))
     }
 }
 impl IGeometryImpl for Geometry {

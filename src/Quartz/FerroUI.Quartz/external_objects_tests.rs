@@ -273,7 +273,7 @@ fn imported_frames_validate_convert_on_gpu_once_and_retire_after_completion() {
 fn dropping_an_undrawn_shared_frame_releases_without_submitting_gpu_work() {
     let source = Bitmap::new(PixelSize::new(8, 8), ferroui_base::Vector::new(96., 96.));
     // No sampling occurs; the opaque retained handle only checks the undrawn lifetime path.
-    let handle = source.retained_surface();
+    let handle = source.retained_surface().unwrap();
     let budget = FrameBudget::new(Default::default());
     let drops = Arc::new(AtomicUsize::new(0));
     let frame = budget

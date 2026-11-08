@@ -280,7 +280,7 @@ fn metal_texture_copy_resize_and_composition() {
 fn metal_linear_gradient_and_shadow_dispatch_outside_path() {
     let bitmap = Bitmap::new(PixelSize::new(40, 40), Vector::new(96., 96.));
     let path = Geometry::rectangle(Rect::new(0., 0., 40., 10.));
-    let native = geometry::native(path.fill.as_ref().unwrap());
+    let native = geometry::native(path.fill.as_ref().unwrap()).unwrap();
     bitmap.context(|c| unsafe {
         ffi::q_save(c);
         ffi::q_clip(c, native.0, 0);
@@ -299,7 +299,7 @@ fn metal_linear_gradient_and_shadow_dispatch_outside_path() {
         ffi::q_restore(c);
     });
     let path = Geometry::rectangle(Rect::new(5., 15., 5., 5.));
-    let native = geometry::native(path.fill.as_ref().unwrap());
+    let native = geometry::native(path.fill.as_ref().unwrap()).unwrap();
     bitmap.context(|c| unsafe {
         ffi::q_shadow(c, 10., 0., 2., 0., 0., 0., 1.);
         ffi::q_fill(c, native.0, 0, 1., 0., 0., 1.);
@@ -450,4 +450,93 @@ fn contextual_arabic_run_shaping_preserves_joining_and_local_clusters() {
         .glyph_index;
     assert_eq!(middle.glyph_infos()[0].glyph_index, expected);
     assert_eq!(middle.glyph_infos()[0].glyph_cluster, 0);
+}
+
+#[test]
+fn writeable_bitmaps_round_trip_rgba_and_unpremultiplied_pixels() {
+    let written = [200u8, 100, 50, 128, 10, 20, 30, 255];
+    for (format, alpha) in [
+        (PixelFormat::RGBA8888, AlphaFormat::Unpremul),
+        (PixelFormat::RGBA8888, AlphaFormat::Premul),
+        (PixelFormat::BGRA8888, AlphaFormat::Unpremul),
+        (PixelFormat::BGRA8888, AlphaFormat::Opaque),
+    ] {
+        let bitmap = QuartzRenderInterface.create_writeable_bitmap(
+            PixelSize::new(2, 1),
+            Vector::new(96., 96.),
+            format,
+            alpha,
+        );
+        assert!(IReadableBitmapImpl::format(&*bitmap) == Some(format));
+        assert!(IReadableBitmapImpl::alpha_format(&*bitmap) == Some(alpha));
+        let lock = bitmap.lock();
+        assert!(lock.format() == format && lock.alpha_format() == alpha);
+        assert_eq!(lock.row_bytes(), 8);
+        lock.with_data(&mut |data| data.copy_from_slice(&written));
+        lock.dispose();
+        let lock = bitmap.lock();
+        let mut read = Vec::new();
+        lock.with_data(&mut |data| read.extend_from_slice(data));
+        lock.dispose();
+        for (i, (actual, expected)) in read.iter().zip(written).enumerate() {
+            let expected = if alpha == AlphaFormat::Opaque && i % 4 == 3 {
+                255
+            } else {
+                expected
+            };
+            // Premultiplied storage keeps an unpremultiplied round trip within rounding.
+            assert!(
+                (*actual as i32 - expected as i32).abs() <= 2,
+                "{format:?} {alpha:?}: {read:?}"
+            );
+        }
+        if (format, alpha) == (PixelFormat::RGBA8888, AlphaFormat::Unpremul) {
+            // Stored as premultiplied BGRA whatever the exposed layout.
+            let stored = bitmap.as_any().downcast_ref::<Bitmap>().unwrap().pixels();
+            assert_eq!(&stored[..4], &[25, 50, 100, 128]);
+        }
+    }
+    assert!(QuartzRenderInterface.is_supported_bitmap_pixel_format(PixelFormat::RGBA8888));
+}
+
+#[test]
+fn empty_bitmaps_draw_nothing_instead_of_failing() {
+    assert!(Bitmap::try_new(PixelSize::new(0, 4), Vector::new(96., 96.)).is_err());
+    let bitmap = Bitmap::new(PixelSize::new(0, 0), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::RED);
+    draw.push_opacity(0.5, None);
+    draw.pop_opacity();
+    draw.dispose();
+    assert!(bitmap.pixels().is_empty());
+}
+
+#[test]
+fn embedded_families_resolve_each_weight_to_its_own_face() {
+    let manager = fonts::FontManager::default();
+    let regular = include_bytes!("../../FerroUI.Fonts.Inter/Assets/Inter-Regular.ttf");
+    let bold = include_bytes!("../../FerroUI.Fonts.Inter/Assets/Inter-Bold.ttf");
+    let regular_face = manager
+        .try_create_glyph_typeface_from_stream(&mut &regular[..], FontSimulations::None)
+        .unwrap();
+    assert!(regular_face.weight() == FontWeight::Normal);
+    let bold_face = manager
+        .try_create_glyph_typeface_from_stream(&mut &bold[..], FontSimulations::None)
+        .unwrap();
+    assert!(bold_face.weight() == FontWeight::Bold);
+    let family = regular_face.family_name();
+    assert!(bold_face.family_name().eq_ignore_ascii_case(&family));
+    let resolve = |weight| {
+        manager
+            .try_create_glyph_typeface(&family, FontStyle::Normal, weight, FontStretch::Normal)
+            .unwrap()
+    };
+    let resolved = resolve(FontWeight::Bold);
+    assert!(resolved.weight() == FontWeight::Bold);
+    assert!(resolved.font_simulations() == FontSimulations::None);
+    assert!(resolved.try_get_stream().is_some());
+    assert!(resolve(FontWeight::Normal).weight() == FontWeight::Normal);
+    // Above 500 a heavier face is preferred, below 400 a lighter one.
+    assert!(resolve(FontWeight::SemiBold).weight() == FontWeight::Bold);
+    assert!(resolve(FontWeight(300)).weight() == FontWeight::Normal);
 }

@@ -64,7 +64,9 @@ impl DrawingContext {
         });
     }
     fn finish_filter(&mut self) {
-        let state = self.effects.pop().expect("Unbalanced Quartz effect layer");
+        let Some(state) = self.effects.pop() else {
+            return; // Unbalanced pop: nothing was pushed.
+        };
         if state.input_clip {
             self.pop_clip();
         }
@@ -86,19 +88,21 @@ impl DrawingContext {
                     offset,
                     color,
                 } => {
-                    let original = ffi::Owned::new(ffi::qm_layer_snapshot(c));
-                    ffi::qm_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
-                    let data = [
-                        offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
-                    ];
-                    ffi::qm_filter(c, 2, data.as_ptr(), data.len(), original.0);
+                    // Without a snapshot of the unblurred content the shadow is skipped.
+                    if let Some(original) = ffi::Owned::new(ffi::qm_layer_snapshot(c)) {
+                        ffi::qm_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
+                        let data = [
+                            offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
+                        ];
+                        ffi::qm_filter(c, 2, data.as_ptr(), data.len(), original.0);
+                    }
                 }
                 Filter::Kernel {
                     kind,
                     data,
                     secondary,
                 } => {
-                    let secondary = secondary.map(|b| b.retained_surface());
+                    let secondary = secondary.and_then(|b| b.retained_surface());
                     ffi::qm_filter(
                         c,
                         kind,
@@ -346,16 +350,21 @@ impl IDrawingContextImplWithLayerEffects for DrawingContext {
         true
     }
     fn next_pixel_operation_source(&mut self) {
-        let state = self.pixels.last_mut().expect("Unbalanced pixel operation");
+        let Some(state) = self.pixels.last_mut() else {
+            return;
+        };
         self.bitmap.context(|c| unsafe {
             if let Some(previous) = state.accumulated.take() {
                 ffi::qm_filter(c, 7, state.data.as_ptr(), state.data.len(), previous.0);
             }
-            state.accumulated = Some(ffi::Owned::new(ffi::qm_take_layer(c)));
+            // Without a new texture the layer keeps accumulating into the current one.
+            state.accumulated = ffi::Owned::new(ffi::qm_take_layer(c));
         });
     }
     fn pop_pixel_operation(&mut self) {
-        let state = self.pixels.pop().expect("Unbalanced pixel operation");
+        let Some(state) = self.pixels.pop() else {
+            return;
+        };
         if let Some(previous) = state.accumulated {
             self.bitmap.context(|c| unsafe {
                 ffi::qm_filter(c, 7, state.data.as_ptr(), state.data.len(), previous.0)
@@ -487,7 +496,10 @@ impl DrawingContext {
             );
             draw.dispose();
         }
-        let mask = mask.retained_surface();
+        let (Some(mask), Some(cast_surface)) = (mask.retained_surface(), cast.retained_surface())
+        else {
+            return;
+        };
         let [r, g, b, a] = color(shadow.color, 1.);
         cast.context(|c| unsafe {
             ffi::qm_blur(c, sigma(shadow.blur), axes[0], axes[1], axes[2], axes[3]);
@@ -503,7 +515,7 @@ impl DrawingContext {
             ];
             ffi::qm_filter(c, 5, data.as_ptr(), data.len(), mask.0);
         });
-        let cast = cast.retained_surface();
+        let cast = cast_surface;
         self.bitmap.context(|c| unsafe {
             ffi::q_save(c);
             ffi::q_set_transform(c, 1., 0., 0., 1., 0., 0., 1., 1.);
@@ -532,7 +544,9 @@ pub(super) struct PixelState {
 }
 impl DrawingContext {
     fn blit_device_bitmap(&self, image: &Bitmap) {
-        let source = image.retained_surface();
+        let Some(source) = image.retained_surface() else {
+            return;
+        };
         let size = image.pixel_size();
         self.bitmap.context(|c| unsafe {
             ffi::q_save(c);
@@ -683,19 +697,22 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContext {
         if rect.rect.width <= 0. || rect.rect.height <= 0. || !self.prepare() {
             return;
         }
-        static NOISE: std::sync::OnceLock<Bitmap> = std::sync::OnceLock::new();
-        // Shared theme asset, not a dependency on the Skia renderer. ImageIO decodes it once.
+        static NOISE: std::sync::OnceLock<Option<Bitmap>> = std::sync::OnceLock::new();
+        // The crate's copy of the acrylic noise asset (NOTICE.md). ImageIO decodes it once.
         let noise = NOISE.get_or_init(|| {
             Bitmap::decode(&mut std::io::Cursor::new(include_bytes!(
-                "../../Skia/FerroUI.Skia/assets/noise_asset_256x256_png.png"
+                "assets/noise_asset_256x256_png.png"
             )))
-            .expect("Built-in acrylic noise PNG")
+            .ok()
         });
+        let Some(source) = noise.as_ref().and_then(Bitmap::retained_surface) else {
+            crate::warn_once("the acrylic noise texture is unavailable; acrylic is not drawn");
+            return;
+        };
         self.push_clip_rounded(rect);
         let base = color(material.material_color(), 1.);
         let tint = color(material.tint_color(), 1.);
         let data: Vec<f64> = base.into_iter().chain(tint).collect();
-        let source = noise.retained_surface();
         self.bitmap.context(|c| unsafe {
             ffi::qm_acrylic(
                 c,
