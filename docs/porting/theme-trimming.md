@@ -1216,7 +1216,9 @@ and `FERROUI_XAMLMETA`):
 
 ### 13.4 Measurements
 
-To be filled in after the build: the units of the theme, the generated text, and the units
-`samples/MaterialThemeGallery` and a hello world on the Material theme keep (`theme_parts.txt`).
-The gallery constructs its theme in Rust (`MaterialTheme::new()`), so it keeps every unit; trimming
-applies to an application whose compiled markup constructs `<MaterialTheme />`.
+The theme has 107 units (the ambient unit, five of its own resource documents and the control
+documents) in 9.84 MB of generated text. `samples/MaterialThemeGallery` constructs its theme in Rust
+(`MaterialTheme::new()`), so it keeps every unit; trimming applies to an application whose compiled
+markup constructs `<MaterialTheme />`, and no sample of the repository does yet. The size of a
+trimmed application on the Material theme is measured with #633, which also moves the inherited
+resource documents (the largest part of the ambient unit) into units.

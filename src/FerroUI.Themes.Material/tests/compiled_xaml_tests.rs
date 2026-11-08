@@ -75,14 +75,9 @@ fn the_whole_theme_applies_every_unit() {
     let button = unit("Controls/Button.xaml");
     assert!(button.type_keys.iter().any(|type_key| type_key == "Button"), "{button:?}");
     assert!(button.keys.iter().any(|key| key == "AccentButtonStyle"), "{button:?}");
-    // The inherited resource documents are units, each of one document (MaterialTheme.xaml
-    // merges each into a merged dictionary of its own).
-    for name in ["Resources/Common_themeresources.xaml", "Resources/Button_themeresources.xaml", "Resources/RatingControl_themeresources.xaml"] {
-        let resources = unit(name);
-        assert_eq!(resources.documents, [name], "{resources:?}");
-        assert!(!resources.keys.is_empty(), "{resources:?}");
-    }
-    assert!(unit("Resources/RatingControl_themeresources.xaml").keys.iter().any(|key| key == "RatingControlSelectedForeground"));
+    // The inherited resource documents are included with ResourceInclude and belong to the ambient
+    // unit until a MergeResourceInclude inside an inline dictionary is compiled (#633).
+    assert!(graph.units.iter().all(|unit| !unit.name.starts_with("Resources/Common_themeresources")), "{names:?}");
     for name in ["Resources/MaterialColors.xaml", "Resources/MaterialCompatibility.xaml", "Controls/MaterialBottomSheet.xaml"] {
         unit(name);
     }
