@@ -462,30 +462,16 @@ impl ValueStore {
         }
 
         if priority != BindingPriority::LocalValue {
-            // Only the entry holds a typed value; its application is shared.
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_value(property, value);
-            self.apply_immediate_value(owner, property, result.clone(), priority);
+            let entry: Rc<dyn IValueEntry> = result.clone();
+            let effective = self.get_or_add_effective_value(owner, property);
+            effective.set_and_raise(owner, &entry, priority);
             Some(result)
         } else {
             self.set_local_value(owner, property, value);
             None
         }
-    }
-
-    /// Applies the entry of a value set with a priority other than the local
-    /// value: the part of [`set_value`](Self::set_value) that does not depend
-    /// on the value type, compiled once (#576).
-    #[inline(never)]
-    fn apply_immediate_value(
-        &self,
-        owner: &FerroObject,
-        property: &'static FerroProperty,
-        entry: Rc<dyn IValueEntry>,
-        priority: BindingPriority,
-    ) {
-        let effective = self.get_or_add_effective_value(owner, property);
-        effective.set_and_raise(owner, &entry, priority);
     }
 
     pub fn set_current_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {

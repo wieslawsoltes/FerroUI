@@ -281,9 +281,10 @@ pub(crate) fn copy_converted_property_value(
 /// The operations on the values of one property value type that the shared
 /// property core needs: one static table per value type, shared by all the
 /// properties of that type, styled, attached and direct (#576). The routes of
-/// a property and the type-erased observers, entries and notifications are
-/// compiled once and use the table; a value type contributes these functions,
-/// not a copy of every algorithm that moves its values.
+/// a property and the type-erased binding observers are compiled once and use
+/// the table; a value type contributes these functions once, not once per
+/// kind of property. The typed write and notification of an effective value
+/// do not use it: an indirect call per copy would cost on every write.
 pub(crate) struct ValueTable {
     /// Clones `value` into a box of its own if it holds exactly the value
     /// type; `None` otherwise.
@@ -295,10 +296,6 @@ pub(crate) struct ValueTable {
     /// The parts of `value` if it is a `BindingValue<T>` of the value type
     /// `T`, with the value in a box of its own; `None` if it is not.
     pub(crate) unpack_binding_value: fn(&dyn Any) -> Option<BindingValue<BoxedValue>>,
-    /// Clones `value` into `out` and returns the copy. Unchecked: `value`
-    /// must be a `T` and `out` an `Option<T>` of the value type `T`, and the
-    /// copy replaces what `out` held.
-    pub(crate) clone_into: for<'a, 'b> unsafe fn(&'b dyn Any, &'a mut dyn Any) -> &'a dyn Any,
 }
 
 impl ValueTable {
@@ -317,7 +314,6 @@ impl<T: PropertyValue> TypedValueTable<T> {
         box_value: box_value::<T>,
         copy_value: copy_value::<T>,
         unpack_binding_value: unpack_binding_value::<T>,
-        clone_into: clone_into::<T>,
     };
 }
 
@@ -333,19 +329,6 @@ fn copy_value<T: PropertyValue>(value: &dyn Any, out: &mut dyn Any) -> bool {
         }
         _ => false,
     }
-}
-
-/// # Safety
-///
-/// `value` must be a `T` and `out` an `Option<T>`.
-unsafe fn clone_into<'a, T: PropertyValue>(value: &dyn Any, out: &'a mut dyn Any) -> &'a dyn Any {
-    debug_assert!(value.is::<T>() && out.is::<Option<T>>());
-    // SAFETY: the types are the caller's contract; the casts drop only the
-    // vtables. The checked downcasts would call through them on a hot path.
-    let (value, out) =
-        unsafe { (&*(value as *const dyn Any as *const T), &mut *(out as *mut dyn Any as *mut Option<T>)) };
-    let copy: &'a T = out.insert(value.clone());
-    copy
 }
 
 /// The typed operations of a styled (or attached) property with value type
@@ -1324,8 +1307,7 @@ mod value_table_tests {
             ]
         );
 
-        // A value that is not coerced (the coerced default) takes the other
-        // branch of the write and still notifies through the shared path.
+        // A property without a coercer: the plain write, the same notification.
         let plain = FerroProperty::register::<FerroObject, String>(&unique_name("SharedPlain"), String::from("a"));
         let seen = Rc::new(RefCell::new(Vec::new()));
         let observed = seen.clone();

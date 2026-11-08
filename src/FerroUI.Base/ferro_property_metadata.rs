@@ -1,4 +1,4 @@
-use crate::data::{BindingMode, BindingPriority};
+use crate::data::BindingMode;
 use crate::property_store::{EffectiveValue, UncommonFields};
 use crate::{FerroObject, TypeInfo};
 use std::cell::RefCell;
@@ -75,18 +75,6 @@ pub(crate) struct DefaultCoercionOperations<T> {
     pub(crate) set_default: fn(&EffectiveValue<T>, &FerroObject, T),
 }
 
-/// A write of a value to an effective value whose metadata has a coercer: the
-/// value, how it is written and the typed operations of the write. The typed
-/// write of the store hands it to the coercion, so the coercing variant of the
-/// write is compiled only for value types whose properties coerce (#576).
-pub(crate) struct CoercedWrite<T> {
-    /// The value to write; the write takes it.
-    pub(crate) value: Option<T>,
-    pub(crate) priority: BindingPriority,
-    pub(crate) is_overridden_current_value: bool,
-    pub(crate) operations: CoercionOperations<T>,
-}
-
 /// The factory borrows the store, owner and typed property. Keeping that
 /// PropertyValue-specific construction outside the algorithm lets public
 /// Clone-only metadata retain its existing bounds.
@@ -123,11 +111,6 @@ enum CoercionRequest<'a, T> {
         callback: &'a CoerceValueCallback<T>,
         value: &'a T,
         result: &'a mut Option<UncommonFields<T>>,
-    },
-    SetAndRaise {
-        target: &'a EffectiveValue<T>,
-        owner: &'a FerroObject,
-        write: &'a mut CoercedWrite<T>,
     },
 }
 
@@ -192,12 +175,6 @@ impl<T> Coercion<T> {
         });
         result.expect("coercion dispatch initializes uncommon fields")
     }
-
-    /// Writes a value to an effective value of this coercion's metadata,
-    /// coercing it first (the coercing branch of `SetAndRaiseCore`).
-    pub(crate) fn set_and_raise(&self, target: &EffectiveValue<T>, owner: &FerroObject, write: &mut CoercedWrite<T>) {
-        (self.apply)(CoercionRequest::SetAndRaise { target, owner, write });
-    }
 }
 
 impl<T: Clone + 'static> Coercion<T> {
@@ -222,7 +199,6 @@ impl<T: Clone + 'static> Coercion<T> {
             CoercionRequest::InitializeUncommon { callback, value, result } => {
                 *result = Some(UncommonFields::new(callback, value));
             }
-            CoercionRequest::SetAndRaise { target, owner, write } => target.set_and_raise_coerced(owner, write),
         }
     }
 

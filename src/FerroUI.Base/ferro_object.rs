@@ -724,6 +724,7 @@ impl FerroObject {
     /// [`bind_untyped`](Self::bind_untyped) of the base of a styled property:
     /// the boxed source needs no typed observer or entry, so this is compiled
     /// once, and the untyped routes of every styled property use it.
+    #[inline]
     pub(crate) fn bind_boxed(
         &self,
         property: &'static FerroProperty,

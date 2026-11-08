@@ -1,7 +1,7 @@
 use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
-use crate::ferro_property_metadata::{CoerceValueCallback, CoercedWrite, CoercionOperations, DefaultCoercionOperations};
+use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -160,47 +160,6 @@ impl EffectiveValueState {
         }
     }
 
-    /// Raises the change of the value of an effective value from
-    /// `old_value`: the notifying callback of the property, the change on the
-    /// owner and the change of the inheritance children. Compiled once; the
-    /// value type matters only to copy the new value, which the table of the
-    /// value type does (#576). `value` is the cell of the effective value, and
-    /// `new_value` and `inherited_value` are empty `Option`s of the value type
-    /// in the frame of the typed caller, which receive the copy that is
-    /// announced and the copy that the inheritance children are told; they
-    /// drop there after this returns, as the copies of the typed notification
-    /// did.
-    #[inline(never)]
-    fn notify_value_changed(
-        &self,
-        owner: &FerroObject,
-        value: &RefCell<dyn Any>,
-        old_value: &dyn Any,
-        new_value: &mut dyn Any,
-        inherited_value: &mut dyn Any,
-    ) {
-        let property = self.property;
-        let notifying = property.notifying();
-        if let Some(notifying) = notifying {
-            notifying(owner, true);
-        }
-        let clone_into = property.value_table().clone_into;
-        // SAFETY: the cell holds the property's value type, and the copies are
-        // `Option`s of it (the typed caller).
-        let new_value = unsafe { clone_into(&*value.borrow(), new_value) };
-        owner.raise_property_changed_values(property, Some(old_value), new_value, self.priority.get(), true);
-        if property.inherits() {
-            // A change handler may have changed the value again: inheritance
-            // children are told the value as it is now, not the value that
-            // was announced to the handlers of this object.
-            // SAFETY: as above.
-            let new_value = unsafe { clone_into(&*value.borrow(), inherited_value) };
-            owner.values().on_inherited_effective_value_changed(owner, property, old_value, new_value);
-        }
-        if let Some(notifying) = notifying {
-            notifying(owner, false);
-        }
-    }
 }
 
 // The store already holds these values through a trait object. Only methods
@@ -385,54 +344,6 @@ impl<T: Clone + 'static> EffectiveValue<T> {
             (operations.notify_base_value_changed)(self, owner);
         }
     }
-
-    // The coercing branch of `set_and_raise_core`, reached only through the
-    // dispatch of a registered coercer: a value type whose properties never
-    // coerce does not retain it (#576). The steps, their order and the
-    // owned-value frame are those of the original: the value given is a local
-    // declared before the old value, as a parameter drops after the locals.
-    pub(crate) fn set_and_raise_coerced(&self, owner: &FerroObject, write: &mut CoercedWrite<T>) {
-        let value = write.value.take().expect("a coerced write has a value");
-        let priority = write.priority;
-        let equals = write.operations.equals;
-        let old_value = self.value();
-        let mut value_changed = false;
-        let mut base_value_changed = false;
-
-        self.state.is_overriden_current_value.set(write.is_overridden_current_value);
-        self.state.is_coerced_default_value.set(false);
-
-        let (v, uncoerced) = match &self.uncommon {
-            Some(uncommon) => ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value))),
-            None => (value, None),
-        };
-
-        if priority <= self.state.priority.get() {
-            value_changed = !equals(&*self.value.borrow(), &v);
-            // `replace` releases the borrow before the previous value is
-            // dropped: dropping a value may run code that reads the property.
-            self.value.replace(v.clone());
-            self.state.priority.set(priority);
-            if let Some((uncommon, value)) = &uncoerced {
-                uncommon.uncoerced_value.replace(value.clone());
-            }
-        }
-
-        if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
-            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| equals(base, &v));
-            self.base_value.replace(Some(v));
-            self.state.base_priority.set(priority);
-            if let Some((uncommon, value)) = uncoerced {
-                uncommon.uncoerced_base_value.replace(value);
-            }
-        }
-
-        if value_changed {
-            (write.operations.notify_value_changed)(self, owner, old_value);
-        } else if base_value_changed {
-            (write.operations.notify_base_value_changed)(self, owner);
-        }
-    }
 }
 
 impl<T: PropertyValue> EffectiveValue<T> {
@@ -521,37 +432,6 @@ impl<T: PropertyValue> EffectiveValue<T> {
         is_overridden_current_value: bool,
         is_coerced_default_value: bool,
     ) {
-        // A value is coerced when the metadata has a coercer (whose fields
-        // are the uncommon fields) and the value is not the coerced default.
-        // That branch is a function the coercer registered: only value types
-        // whose properties coerce compile it (#576).
-        if let (Some(_), Some(coercion), false) = (&self.uncommon, self.metadata.coercion(), is_coerced_default_value) {
-            let mut write = CoercedWrite {
-                value: Some(value),
-                priority,
-                is_overridden_current_value,
-                operations: CoercionOperations {
-                    equals: value_equals::<T>,
-                    notify_value_changed: Self::notify_value_changed,
-                    notify_base_value_changed: Self::notify_base_value_changed,
-                },
-            };
-            coercion.set_and_raise(self, owner, &mut write);
-        } else {
-            self.set_and_raise_uncoerced(owner, value, priority, is_overridden_current_value, is_coerced_default_value);
-        }
-    }
-
-    // `set_and_raise_core` of a value that is not coerced: `v` is the value
-    // itself, not a copy of it, and there is no uncoerced value to keep.
-    fn set_and_raise_uncoerced(
-        &self,
-        owner: &FerroObject,
-        value: T,
-        priority: BindingPriority,
-        is_overridden_current_value: bool,
-        is_coerced_default_value: bool,
-    ) {
         let old_value = self.value();
         let mut value_changed = false;
         let mut base_value_changed = false;
@@ -559,7 +439,15 @@ impl<T: PropertyValue> EffectiveValue<T> {
         self.state.is_overriden_current_value.set(is_overridden_current_value);
         self.state.is_coerced_default_value.set(is_coerced_default_value);
 
-        let v = value;
+        // `v = value`, or the coerced value. The value as it was given is
+        // only read again where it is stored uncoerced, so without a
+        // coercion `v` is the value itself and not a copy of it.
+        let (v, uncoerced) = match &self.uncommon {
+            Some(uncommon) if !is_coerced_default_value => {
+                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
+            }
+            _ => (value, None),
+        };
 
         if priority <= self.state.priority.get() {
             value_changed = !value_equals(&*self.value.borrow(), &v);
@@ -567,12 +455,18 @@ impl<T: PropertyValue> EffectiveValue<T> {
             // dropped: dropping a value may run code that reads the property.
             self.value.replace(v.clone());
             self.state.priority.set(priority);
+            if let Some((uncommon, value)) = &uncoerced {
+                uncommon.uncoerced_value.replace(value.clone());
+            }
         }
 
         if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
             base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
             self.base_value.replace(Some(v));
             self.state.base_priority.set(priority);
+            if let Some((uncommon, value)) = uncoerced {
+                uncommon.uncoerced_base_value.replace(value);
+            }
         }
 
         if value_changed {
@@ -582,14 +476,23 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
     }
 
-    // The typed end of the shared notification (`EffectiveValueState::
-    // notify_value_changed`): the copies of the new value live in this frame,
-    // so they drop as they did, the copy for inheritance first, then the
-    // announced copy, then the old value.
     fn notify_value_changed(&self, owner: &FerroObject, old_value: T) {
-        let mut new_value = None::<T>;
-        let mut inherited_value = None::<T>;
-        self.state.notify_value_changed(owner, &self.value, &old_value, &mut new_value, &mut inherited_value);
+        let notifying = self.state.property.notifying();
+        if let Some(notifying) = notifying {
+            notifying(owner, true);
+        }
+        let new_value = self.value();
+        owner.raise_property_changed(self.state.property, Some(&old_value), &new_value, self.state.priority.get(), true);
+        if self.state.property.inherits() {
+            // A change handler may have changed the value again: inheritance
+            // children are told the value as it is now, not the value that
+            // was announced to the handlers of this object.
+            let new_value = self.value();
+            owner.values().on_inherited_effective_value_changed(owner, self.state.property, &old_value, &new_value);
+        }
+        if let Some(notifying) = notifying {
+            notifying(owner, false);
+        }
     }
 
     fn notify_base_value_changed(&self, owner: &FerroObject) {
