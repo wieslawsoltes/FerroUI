@@ -17,7 +17,7 @@ import sys
 # Account names that are placeholders, not a real machine.
 GENERIC = {
     "user", "username", "u", "me", "you", "name", "path", "runner", "runneradmin", "example",
-    "someone", "foo", "bar", "test", "tester", "shared", "public", "default", "admin", "<user>",
+    "someone", "foo", "bar", "test", "tester", "shared", "public", "default", "admin", "<user>", "<name>",
 }
 
 # An account directory: the name followed by a separator (`/home/Projects.txt` is a file, not a home).
@@ -28,8 +28,10 @@ FORBIDDEN = [
     (re.compile(r"\bglpat-[A-Za-z0-9_-]{8,}|\bghp_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}"), "an access token"),
 ]
 
-# Third-party sources kept as they were published, and this script itself.
-SKIP_PREFIXES = ("external/", "components/FerroBoard/reference/", "scripts/conventions/private-references.py")
+# Third-party sources kept as they were published, and this check and its documentation, which name
+# the patterns.
+SKIP_PREFIXES = ("external/", "components/FerroBoard/reference/", "scripts/conventions/private-references.py",
+                 "docs/private-references.md")
 
 
 def tracked_files():
