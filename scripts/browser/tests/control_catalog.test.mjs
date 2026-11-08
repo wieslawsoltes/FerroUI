@@ -741,16 +741,26 @@ if (threaded) {
     }, { query: `&${ONE_THREAD}` });
 
     // A frame that panics on the render thread is caught by the render loop there (as upstream's
-    // loop catches the exception of a frame). Nothing of it would reach the page by itself: the
-    // platform queues a call for the thread of the page, which logs the message as an error.
-    check("a frame that panics on the render thread is an error of the page, and the frames go on", async (page) => {
+    // loop catches the exception of a frame) when the module unwinds. Nothing of it would reach the
+    // page by itself: the platform queues a call for the thread of the page, which logs the message
+    // as an error. A module built with the `browser` profile aborts on panic, as `release` and
+    // `dist` do (#567): the panic is reported the same way, and then the render worker stops.
+    check("a frame that panics on the render thread is an error of the page; the frames go on when the module unwinds", async (page) => {
         await navigate(page, "Basic Input");
         const before = await page.rendering();
         assert(page.errors.length === 0, `errors were logged before the panic:\n${page.errors.join("\n")}`);
+        const unwinds = await page.evaluate("controlCatalog.catalogUnwinds()");
         assert(await page.evaluate("controlCatalog.catalogPanicInFrame()") === true, "the job that panics was not posted");
         const reported = (line) => line.includes("the render thread panicked") && line.includes("catalogPanicInFrame");
         for (const end = Date.now() + STATE_TIMEOUT; Date.now() < end && !page.errors.some(reported); await sleep(100)) { }
         assert(page.errors.some(reported), `the page logged no error for the panic; its errors:\n${page.errors.join("\n")}\nits log ends:\n${page.log.slice(-6).join("\n")}`);
+        if (!unwinds) {
+            const trapped = (line) => line.includes("unreachable");
+            for (const end = Date.now() + STATE_TIMEOUT; Date.now() < end && !page.errors.some(trapped); await sleep(100)) { }
+            assert(page.errors.some(trapped), `the aborting render worker did not stop at the panic; errors:\n${page.errors.join("\n")}`);
+            measured(`the page logged: ${page.errors.find(reported).slice(0, 200)}`);
+            return;
+        }
         const panics = await page.evaluate("JSON.stringify(controlCatalogPanics())");
         assert(JSON.parse(panics).length === 1 && JSON.parse(panics)[0].includes("catalogPanicInFrame"), `the script of the platform kept ${panics}`);
         assert((await page.rendering()).panics === "1", `the panic was not counted: ${JSON.stringify(await page.rendering())}`);

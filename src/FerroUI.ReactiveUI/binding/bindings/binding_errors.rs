@@ -1,5 +1,6 @@
 //! `BindingErrors`, and the `TargetInvocationError` it raises.
 
+use crate::RxState;
 use ferroui_splat::{AppLocator, ILogManager, LogHost};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::error::Error;
@@ -10,9 +11,13 @@ use std::rc::Rc;
 ///
 /// A faulted write has no caller stack to surface on: it arrives wherever the change notification
 /// was raised. Every fault is logged against the bound expression. A fault that carries an inner
-/// error (its [`source`](Error::source)), a setter that failed, is raised again as a
-/// [`TargetInvocationError`] panic. A fault with none is the sequence itself ending in error,
-/// and is only logged. Completion is ignored.
+/// error (its [`source`](Error::source)), a setter that failed, becomes a
+/// [`TargetInvocationError`] where upstream throws it, and goes where that exception would end:
+/// the `ThrownExceptions` of the reactive object whose change notification is running, or else
+/// [`RxState::default_exception_handler`], which an application replaces
+/// ([`RxState::initialize_exception_handler`]) and which by default raises it on the main thread.
+/// No panic is raised here (#567), so the binding behaves the same with `panic = "abort"`. A fault with none is the sequence itself ending in
+/// error, and is only logged. Completion is ignored.
 pub struct BindingErrors;
 
 impl BindingErrors {
@@ -35,7 +40,8 @@ impl<T> IObserver<T> for BindingObserver<T> {
         (self.on_next)(value);
     }
 
-    /// Logs the fault, and raises a [`TargetInvocationError`] when it carries an inner error.
+    /// Logs the fault, and gives a [`TargetInvocationError`] to the default exception handler
+    /// when it carries an inner error.
     fn on_error(&self, error: ObservableError) {
         let message = format!("{} Binding received an Exception!", self.binding_expression);
         if let Some(log_manager) = AppLocator::get_service::<dyn ILogManager>() {
@@ -44,19 +50,23 @@ impl<T> IObserver<T> for BindingObserver<T> {
         let Some(inner) = error.source() else {
             return;
         };
-        std::panic::panic_any(TargetInvocationError::with_inner(message, inner));
+        let raised: ObservableError = Rc::new(TargetInvocationError::with_inner(message, inner));
+        // Where the panic of the reference ended: the `ThrownExceptions` of the reactive object
+        // whose notification runs, else the default exception handler.
+        if !crate::reactive_object::deliver_subscriber_error(&raised) {
+            RxState::default_exception_handler().on_next(raised);
+        }
     }
 
     fn on_completed(&self) {}
 }
 
 /// The error of a member that was invoked and failed (`System.Reflection.TargetInvocationException`):
-/// what a binding raises, as a panic, when the sequence feeding its write faults with an inner
-/// error.
+/// what a binding gives the default exception handler when the sequence feeding its write faults
+/// with an inner error.
 ///
-/// Deviation (DEVIATIONS.md, ReactiveUI): the inner exception is kept as its message. The error is
-/// the payload of a panic (`std::panic::panic_any`), which has to be `Send`, and the errors of the
-/// reactive libraries (`Rc<dyn Error>`) are not.
+/// Deviation (DEVIATIONS.md, ReactiveUI): the inner exception is kept as its message, so the
+/// error stays `Clone`, `Eq` and `Send`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TargetInvocationError {
     message: String,

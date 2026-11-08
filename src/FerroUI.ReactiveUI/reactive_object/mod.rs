@@ -5,6 +5,7 @@
 
 mod delayable_notification_signal;
 mod extension_state;
+pub(crate) use extension_state::deliver_subscriber_error;
 mod i_extension_state;
 mod i_reactive_object;
 mod i_reactive_object_extensions;

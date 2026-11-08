@@ -7,8 +7,9 @@ clean (section 5); the rest is deferred with its reason (section 6).
 Issue #567 replaces panics that carry an error between framework functions with `Result`, and
 keeps `catch_unwind` only at true boundaries. The owner decided (issue #567, 2026-11-06) that the
 shipped build aborts on panic, fully supported: `dist` uses `panic = "abort"` (since part 5 of
-#567), with `dist-unwind` for applications that host plugins; `release` keeps unwinding for
-development builds and the development tools. So no production code path may rely on catching a panic
+#567), with `dist-unwind` for applications that host plugins. On 2026-11-07 the owner extended
+this to `release` (`release-unwind` keeps unwinding); `fast-release`, the profile for running
+applications and tools locally, unwinds for the development tools. So no production code path may rely on catching a panic
 to work correctly. With abort, `catch_unwind` never returns `Err`: a panic runs the panic hook
 and ends the process. Cargo ignores `panic` for tests, benches, build scripts and proc macros, so
 the test suites always unwind.
@@ -72,6 +73,10 @@ the browser run before the abort, so the crash reports stay.
 
 Works with abort since this step (section 5):
 
+- a fault of a ReactiveUI binding source with an inner error (`binding_errors.rs`): it goes, as a
+  `TargetInvocationError` and without a panic, to the `ThrownExceptions` of the reactive object
+  whose notification runs, or else to `RxState::default_exception_handler()` (owner decision of
+  2026-11-07, #567);
 - the error scope of the markup runtime (`with_xaml_errors`): `load_winui`, `parse_winui` and
   `parse_winui_as` return the error of a failing deferred resource, include or template of a
   fresh root as `Err`;
@@ -96,9 +101,8 @@ Breaks with abort (an expected error travels as a panic), production paths:
 |---|---|
 | `ferroui-vello` `combined_geometry_impl.rs:133` | a `CombinedGeometry` of finite paths that the third-party sweep (`linesweeper`) still gives up on aborts instead of drawing nothing (paths that are not finite are refused before the sweep, 5.5) |
 | `ferroui-vello` `gpu/window_surface.rs:166` | dropping a `wgpu` surface whose context cannot be made current while the device is not known to be lost aborts (a lost device's surface is left, 5.5) |
-| `ferroui-reactiveui` `binding/bindings/binding_errors.rs:47` | a fault of a binding source aborts instead of reaching `ThrownExceptions` |
 
-Breaks with abort, development tools only (built with `dev`, `release` or `dist-unwind`): hot reload
+Breaks with abort, development tools only (built with `dev`, `fast-release`, `release-unwind` or `dist-unwind`): hot reload
 (the `panic_any(ReloadError)` flows and `catch_reload`, 5 sites; the crate is
 `cfg(debug_assertions)` and never in `release` or `dist`), the previewer of `DesignerSupport`
 (the load and show of the edited document), and the Designer (the animation preview and the
@@ -433,10 +437,6 @@ conversion, or that the panic comes from a third-party crate.
   our side. Mitigated (5.5): paths that are not finite are refused before the sweep and the
   surface of a lost device is left. What remains is a finite input the sweep still gives up on,
   and a surface that cannot be released while its device is not known to be lost.
-- **The fault of a ReactiveUI binding source** (`ferroui-reactiveui` `binding_errors.rs:47`):
-  `IObserver::on_error` returns `()`; delivering the `TargetInvocationError` to the default
-  exception handler or to a `ThrownExceptions` of the binding instead of panicking changes the
-  behaviour of the reference. Needs a decision.
 - **A rendering mode the backend cannot render with** (`ferroui-skia`
   `platform_render_interface.rs:115`, `create_gpu`): forcing the OpenGL mode of the macOS native
   backend (`FERROUI_SMOKE_RENDERING=opengl` of the catalog) with a Skia build without Ganesh GL
@@ -453,7 +453,8 @@ conversion, or that the panic comes from a third-party crate.
 The Designer, `DesignerSupport` (the previewer), hot reload (`ferroui-hot-reload`, debug builds
 only), hot patch, DevTools, MCP and Inspect isolate the code of the previewed or inspected
 application with `catch_unwind`, and three of them still turn expected errors into values with
-it (section 10). They are built with the `dev` or `release` profile or `dist-unwind`. Not
+it (section 10). They are built with the `dev`, `fast-release` or `release-unwind` profile or
+`dist-unwind`. Not
 converted, as decided for this step:
 
 - hot reload: the `panic_any(ReloadError)` of the resource lookups of a candidate and
@@ -961,7 +962,7 @@ Tests (T): 1 site, `lib.rs:401` (`assert_throws`, `ReactiveAssert.Throws`), in a
 | `internal/panic_exception.rs:60` | `PanicError::catch` | catches a panic of user code and gives it as an `ObservableError`; the shared catch of the crate | B | no change in correct operation: a panicking selector, factory, handler, command body or subscriber aborts instead of reaching `OnError` or `ThrownExceptions`; an error returned as a faulted observable is unaffected |
 | `reactive_object/extension_state.rs:157` | `ExtensionState::notify_observable` | raises the panic of a subscriber again when no `ThrownExceptions` observer exists | R | no change (belongs to `panic_exception.rs:60`, called at :150) |
 | `rx_state.rs:67` | `RxState::initialize_default_exception_handler` | raises an unhandled error (`UnhandledError`) on the main thread scheduler on purpose | R | no change in correct operation: an error nobody handled ends the process; with abort the unhandled-exception filter of the dispatcher (the boundary of `ferroui-base` that receives it) can no longer mark it handled |
-| `binding/bindings/binding_errors.rs:47` | `BindingObserver::on_error` | raises a fault of a binding source with an inner error as `TargetInvocationError` | E | breaks: see below |
+| `binding/bindings/binding_errors.rs:47` | `BindingObserver::on_error` | gives a fault of a binding source with an inner error, as `TargetInvocationError`, to the notifying object's `ThrownExceptions` or the default exception handler | E | converted (#567): see below |
 | `binding/view/view_locator.rs:17` | `ViewLocator::current` | raises `ViewLocatorNotFoundError` when no `dyn IViewLocator` is registered | E | no change: no framework code catches it; a misconfiguration crash either way |
 
 `PanicError::catch` has 11 callers outside tests, all wrapping user code where the reference
@@ -980,11 +981,14 @@ unwinds to whoever pushed the fault; when that is the change notification of a r
 `ExtensionState::notify_observable` catches it (`PanicError::catch`) and delivers it to the
 object's `ThrownExceptions` as an error value. With abort that delivery stops: the process aborts.
 Where nothing catches it, it ends the process in both builds, as in the reference. A `Result`
-form cannot travel through `IObserver::on_error` (returns `()`); the alternative is to hand the
-`TargetInvocationError` to `RxState::default_exception_handler()` (or to a `ThrownExceptions`
-of the binding) instead of panicking, a behavior change from the reference. One function, 8
-callers of `BindingErrors::subscribe` (in `binding/bindings/property_binder.rs` and
-`binding/mixins/`). Production path.
+form cannot travel through `IObserver::on_error` (returns `()`). Converted (owner decision of
+2026-11-07): the observer raises no panic. It gives the `TargetInvocationError` to the place the
+panic ended: the `ThrownExceptions` of the reactive object whose change notification runs
+(`ExtensionState::notify_observable` records it on a thread-local stack, and
+`deliver_subscriber_error` logs and delivers as the catch did), or else
+`RxState::default_exception_handler()`, which an application replaces and which by default raises
+it on the main thread. The same in both builds. One function, 8 callers of
+`BindingErrors::subscribe` (in `binding/bindings/property_binder.rs` and `binding/mixins/`).
 
 **(E) `binding/view/view_locator.rs:17`.** A missing `dyn IViewLocator` registration is raised
 as a typed panic payload. Nothing in the framework catches it, so abort changes nothing; listed
@@ -1057,7 +1061,7 @@ comment `error_boundary.rs:6` of `ferroui-view` (it names `catch_unwind`, it is 
 `root_binding_tests.rs:288` of `ferroui-hot-reload` (a `_tests.rs` file the grep leaves out; T).
 
 Most sites are development tools. A (B) site of a tool that isolates user code is marked as
-needing a build that unwinds (`dev`, `release` or `dist-unwind` profile). Three (E) families reach the
+needing a build that unwinds (`dev`, `fast-release`, `release-unwind` or `dist-unwind` profile). Three (E) families reach the
 catches of this group: the `panic_any(ReloadError)` of hot reload, the validation panics of
 `Animation::apply_for_preview` and the animators (`ferroui-base`), and the "throw" of the XAML
 runtime of `ferroui-markup-xaml` (`crate::throw`, `xaml_error_scope::throw`: a failing deferred

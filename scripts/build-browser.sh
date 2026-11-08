@@ -292,7 +292,10 @@ FLAGS=()
 if [ -n "$THREADS" ]; then
   # The standard library that ships with a toolchain is built without atomics and cannot be linked
   # into a module with shared memory: it is rebuilt from rust-src with the flags of the build.
-  FLAGS+=(--target-dir "$BUILD_DIR" -Zbuild-std=std,panic_unwind)
+  # The panic runtime is the one of the profile: `browser` inherits `panic = "abort"` from
+  # `release` (#567), the dev profile of --debug unwinds.
+  if [ "$PROFILE" = "browser" ]; then PANIC_RUNTIME=panic_abort; else PANIC_RUNTIME=panic_unwind; fi
+  FLAGS+=(--target-dir "$BUILD_DIR" -Zbuild-std=std,$PANIC_RUNTIME)
   # Added to the flags of the target in .cargo/config.toml (an array given with --config is appended
   # to the one of the file; RUSTFLAGS in the environment would replace it). The environment of the
   # file is "web" alone, and a thread is a web worker that loads the script of the module.
