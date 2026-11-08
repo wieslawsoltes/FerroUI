@@ -535,6 +535,72 @@ rounds:
 The run of the benchmark's own harness (external frame counter, every framework) needs the display
 at 60 Hz, as the benchmark is calibrated; it is added here once made.
 
+### 8.1 The local performance gate
+
+A change to layout, text, the property system, composition, rendering, input or the TreeDataGrid
+is measured on the developer's machine against the commit it is based on before it goes up for
+review, and the table of the gate goes into the description of the pull request. The gate is not
+a CI job: hosted runners are too noisy and too unlike a desktop for a few-percent threshold, so it
+is run locally, on a quiet machine (no other build, no VM or emulator, on mains power).
+
+```sh
+python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
+python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
+python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
+```
+
+The script checks the base out, detached, in a git worktree of its own under the scratch folder
+(`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
+delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
+with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
+(default 3), and compares the medians of the rounds. Cargo runs through `FERROUI_CARGO` when it is
+set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
+build starts during a measurement), else `cargo`. The logs of every build and run are kept under
+`<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something
+did or a benchmark failed on the candidate, 2 when a build or a run failed.
+
+What it measures:
+
+- **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
+  and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
+  the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
+  in the render-thread mode of the desktop (`Compositor::with_render_thread`), with no pointer
+  device. The screens drive their own frames through the top level's animation frame callback,
+  which advances the frame index once a frame, so nothing depends on wall time; 60 frames of
+  warm-up, then 240 measured (`--warmup`, `--frames`). Per scenario: the UI thread's busy time a
+  frame (animation callback, layout, recording, commit), the render thread's time a frame, and
+  the wall time a frame. Alone:
+
+  ```sh
+  cargo test -p gauntlet-benchmark --release --test frame_gate -- --ignored --nocapture --test-threads=1
+  ```
+
+  When the base has no frame gate (a commit before it), the candidate's `samples/GauntletBenchmark`
+  is copied into the base worktree, and added to its workspace members when needed, so both sides
+  run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
+  a gate of its own.
+- **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
+  median time of one operation of each benchmark, read from the tables of the harness. The gate
+  runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
+  after 2 of warm-up; `--tdg-iterations`, `--tdg-min-iteration-ms`, `--tdg-warmup`) so that a
+  full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
+  `FERROUI_BENCH_FILTER` does.
+
+Tolerances. A metric regresses when the candidate is slower than the base by more than
+`--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
+the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
+
+| Metric | Factor | Why |
+|---|---:|---|
+| UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
+| Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
+| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+
+A regression the gate reports is confirmed with more rounds (`--rounds 5`) before it is acted on;
+a change that is meant to cost time says so in the pull request, with the table.
+
 ## 9. Deviations from upstream for frame cost
 
 Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
