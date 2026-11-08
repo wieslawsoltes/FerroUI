@@ -1,10 +1,15 @@
+#[cfg(not(any(feature = "skia", all(feature = "quartz", target_os = "macos"))))]
+compile_error!("Select a desktop rendering backend: skia, or quartz on macOS");
+
 use ferroui_controls::AppBuilder;
 
 /// Selects the platform subsystems of a desktop application.
 pub trait AppBuilderDesktopExtensions {
     /// Configures the application for the operating system it runs on:
-    /// HarfBuzz for text shaping, the native windowing backend and Skia for
-    /// rendering.
+    /// The native windowing backend with Skia and HarfBuzz by default.
+    /// The experimental `quartz` feature selects Core Graphics and Core Text
+    /// on macOS 13+ with Software surfaces. `quartz-metal` uses direct Metal GPU
+    /// rendering and requires Metal window surfaces.
     ///
     /// # Panics
     /// Panics on an operating system whose windowing backend is not
@@ -14,24 +19,33 @@ pub trait AppBuilderDesktopExtensions {
 
 impl AppBuilderDesktopExtensions for AppBuilder {
     fn use_platform_detect(&self) -> AppBuilder {
-        // Always load HarfBuzz on desktop platforms
+        // The default backend retains its HarfBuzz shaper. Quartz supplies Core Text.
+        #[cfg(all(feature = "skia", not(all(feature = "quartz", target_os = "macos"))))]
         load_harf_buzz(self);
 
         #[cfg(target_os = "macos")]
         {
             load_ferro_native(self);
+            #[cfg(feature = "quartz")]
+            {
+                use ferroui_quartz::QuartzApplicationExtensions;
+                self.use_quartz();
+            }
+            #[cfg(all(feature = "skia", not(feature = "quartz")))]
             load_skia(self);
         }
 
         #[cfg(windows)]
         {
             load_win32(self);
+            #[cfg(feature = "skia")]
             load_skia(self);
         }
 
         #[cfg(target_os = "linux")]
         {
             load_x11(self);
+            #[cfg(feature = "skia")]
             load_skia(self);
         }
 
@@ -67,18 +81,19 @@ fn load_x11(builder: &AppBuilder) {
     builder.use_x11();
 }
 
-#[cfg(any(target_os = "macos", windows, target_os = "linux"))]
+#[cfg(all(feature = "skia", any(target_os = "macos", windows, target_os = "linux")))]
 fn load_skia(builder: &AppBuilder) {
     use ferroui_skia::SkiaApplicationExtensions;
     builder.use_skia();
 }
 
+#[cfg(feature = "skia")]
 fn load_harf_buzz(builder: &AppBuilder) {
     use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
     builder.use_harfbuzz();
 }
 
-#[cfg(all(test, target_os = "macos"))]
+#[cfg(all(test, target_os = "macos", feature = "skia", not(feature = "quartz")))]
 mod tests {
     use super::*;
     use ferroui_controls::Application;

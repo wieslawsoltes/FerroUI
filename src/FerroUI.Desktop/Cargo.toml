@@ -14,14 +14,23 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+default = ["skia"]
+skia = ["dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+# Experimental macOS 13+ system text and drawing backend.
+quartz = ["dep:ferroui-quartz"]
+quartz-metal = ["quartz", "ferroui-quartz/metal"]
+quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
+
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-skia.workspace = true
-ferroui-harfbuzz.workspace = true
+ferroui-skia = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native.workspace = true
+ferroui-quartz = { workspace = true, optional = true }
 
 [target.'cfg(windows)'.dependencies]
 ferroui-win32 = { workspace = true, features = ["angle"] }

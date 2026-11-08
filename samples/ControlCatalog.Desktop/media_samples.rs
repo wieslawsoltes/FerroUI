@@ -1,9 +1,13 @@
 //! Desktop catalog bindings to admitted native media providers.
 use control_catalog::media_samples::MediaSampleProviders;
-use ferroui_base::rendering::composition::{ICompositionGpuInterop, frames::*};
+use ferroui_base::rendering::composition::{frames::*, ICompositionGpuInterop};
 use ferroui_media::{MediaError, MediaErrorKind};
 use ferroui_media_camera::{CameraError, CameraErrorKind};
 use std::rc::Rc;
+
+#[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
+#[path = "media_camera_fixture.rs"]
+mod camera_fixture;
 
 pub fn install() {
     control_catalog::media_samples::install(MediaSampleProviders {
@@ -94,6 +98,16 @@ fn camera(
                 .device_luid()
                 .ok_or_else(|| camera_error(unavailable("No admitted Metal device")))?,
         );
+        #[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
+        if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
+            return Ok((
+                Rc::new(camera_fixture::Provider {
+                    device,
+                    generation: interop.shared_context_generation(),
+                }),
+                Rc::new(ferroui_media_apple::AppleTextureImporter),
+            ));
+        }
         Ok((
             Rc::new(ferroui_media_camera_apple::AppleCameraProvider {
                 device,
@@ -125,6 +139,17 @@ fn camera(
     }
 }
 
+fn gpu_checkpoint(label: &str) {
+    #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
+    if std::env::var_os("FERROUI_METAL_STATS").is_some() {
+        println!(
+            "CATALOG_GPU_CHECKPOINT {label} {:?}",
+            ferroui_quartz::metal_statistics()
+        );
+    }
+    let _ = label;
+}
+
 pub static SMOKE_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn smoke() {
     if std::env::var("FERROUI_SMOKE_MEDIA").as_deref() != Ok("1") {
@@ -135,7 +160,9 @@ pub fn smoke() {
         cell::Cell,
         time::{Duration, Instant},
     };
+    let capture_camera = std::env::var("FERROUI_SMOKE_MEDIA_CAMERA").as_deref() == Ok("1");
     let stage = Cell::new(0);
+    let report_at = Cell::new(0u64);
     let began = Instant::now();
     let old = std::cell::RefCell::new(None::<FrameBudget>);
     DispatcherTimer::run(
@@ -156,8 +183,16 @@ pub fn smoke() {
                 ));
                 return false;
             }
+            if began.elapsed().as_secs() >= report_at.get() {
+                if let Some(s) = smoke_snapshot() {
+                    println!("CATALOG_MEDIA_PROGRESS stage={} title={} paused={} playing={} frame={} camera={} status={:?} counters={:?}",stage.get(),s.title,s.paused,s.playing,s.frame,s.camera_active,s.status,s.budget.counters().snapshot());
+                }
+                report_at.set(began.elapsed().as_secs()+5);
+            }
             match stage.get() {
                 0 => {
+                    gpu_checkpoint("start");
+                    if let Some(window) = super::main_window() { window.set_title(Some("AUTOMATED MEDIA TEST — Quartz Metal".into())); }
                     if control_catalog::select_page("Video") {
                         stage.set(1);
                     }
@@ -178,13 +213,15 @@ pub fn smoke() {
                 }
                 3 => {
                     if let Some(s) = smoke_snapshot().filter(|s| {
-                        s.playing && s.frame && s.budget.counters().snapshot().gpu_imports > 0
+                        s.playing && s.frame && s.budget.counters().snapshot().gpu_conversions >= 5
                     }) {
-                        if s.budget.counters().snapshot().preview != PixelTransferCount::default() {
-                            fail("CPU preview transfer");
+                        let counts=s.budget.counters().snapshot();
+                        if counts.preview != PixelTransferCount::default() || counts.analysis != PixelTransferCount::default() || counts.photo != PixelTransferCount::default() || counts.diagnostic != PixelTransferCount::default() || counts.probe != PixelTransferCount::default() {
+                            fail("Video CPU pixel transfer");
                             return false;
                         }
-                        println!("CATALOG_VIDEO_PASS autoplay=false shared_texture=true");
+                        gpu_checkpoint("video");
+                        println!("CATALOG_VIDEO_PASS autoplay=false shared_texture=true counters={:?}",s.budget.counters().snapshot());
                         control_catalog::select_page("Camera");
                         stage.set(4);
                     }
@@ -208,6 +245,31 @@ pub fn smoke() {
                             return false;
                         }
                         println!("CATALOG_CAMERA_DISCOVERY_PASS {}", s.status);
+                        if capture_camera {
+                            smoke_action("start_camera");
+                            stage.set(20);
+                        } else {
+                            control_catalog::select_page("QR codes");
+                            stage.set(6);
+                        }
+                    }
+                }
+                20 => {
+                    if let Some(s) = smoke_snapshot().filter(|s| s.title == "Camera" && s.camera_active && s.frame && s.budget.counters().snapshot().gpu_conversions >= 5) {
+                        let counts = s.budget.counters().snapshot();
+                        if counts.preview != PixelTransferCount::default() || counts.analysis != PixelTransferCount::default() || counts.photo != PixelTransferCount::default() || counts.diagnostic != PixelTransferCount::default() || counts.probe != PixelTransferCount::default() {
+                            fail("Camera CPU pixel transfer"); return false;
+                        }
+                        gpu_checkpoint("camera");
+                        println!("CATALOG_CAMERA_CAPTURE_PASS {} synthetic={} counters={:?}",s.status,std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref()==Ok("1"),counts);
+                        old.replace(Some(s.budget));
+                        control_catalog::select_page("Buttons");
+                        stage.set(21);
+                    }
+                }
+                21 => {
+                    if old.borrow().as_ref().is_some_and(|b| b.usage().frames == 0 && b.gpu_reads() == 0 && b.quarantined_reads() == 0) {
+                        println!("CATALOG_CAMERA_NAVIGATION_RETIREMENT_PASS");
                         control_catalog::select_page("QR codes");
                         stage.set(6);
                     }
@@ -229,7 +291,7 @@ pub fn smoke() {
                     }
                 }
                 _ => {
-                    println!("CATALOG_MEDIA_SMOKE_PASS camera_acquired=false");
+                    println!("CATALOG_MEDIA_SMOKE_PASS camera_acquired={capture_camera}");
                     if let Some(window) = super::main_window() {
                         window.close();
                     }

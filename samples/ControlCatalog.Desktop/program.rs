@@ -161,6 +161,10 @@ fn main() -> std::process::ExitCode {
     // frames went.
     #[cfg(feature = "vello")]
     ferroui_vello::perf::print_summary();
+    #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
+    if std::env::var_os("FERROUI_METAL_STATS").is_some() {
+        eprintln!("Quartz Metal [surfaces, compute, images, presents, readbacks, uploads, errors]: {:?}", ferroui_quartz::metal_statistics());
+    }
     if media_samples::SMOKE_FAILED.load(std::sync::atomic::Ordering::Relaxed) {
         std::process::ExitCode::FAILURE
     } else {
@@ -177,6 +181,11 @@ pub fn build_ferro_app() -> AppBuilder {
     let builder = use_renderer_of_the_environment(builder);
     builder
         .after_setup(|_| {
+            if let Ok(title) = std::env::var("FERROUI_CATALOG_TITLE") {
+                ferroui_base::threading::DispatcherTimer::run_once(move || {
+                    if let Some(window) = main_window() { window.set_title(Some(title.clone())); }
+                }, std::time::Duration::from_millis(150), ferroui_base::threading::DispatcherPriority::NORMAL).detach();
+            }
             media_samples::install();
             media_samples::smoke();
             #[cfg(target_os = "linux")]
@@ -370,6 +379,8 @@ fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
         Some("opengl") => options.rendering_mode = vec![FerroNativeRenderingMode::OpenGl],
         Some("metal") => options.rendering_mode = vec![FerroNativeRenderingMode::Metal],
         Some("software") => options.rendering_mode = vec![FerroNativeRenderingMode::Software],
+        #[cfg(feature = "quartz")]
+        None => options.rendering_mode = vec![if cfg!(feature = "quartz-metal") { FerroNativeRenderingMode::Metal } else { FerroNativeRenderingMode::Software }],
         _ => return builder,
     }
     println!("Rendering modes: {:?}", options.rendering_mode);

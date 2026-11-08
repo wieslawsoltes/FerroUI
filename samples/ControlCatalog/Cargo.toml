@@ -109,9 +109,6 @@ ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true }
 ferroui-themes-macos = { workspace = true, optional = true }
 ferroui-themes-material = { workspace = true, optional = true }
-# The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
-ferroui-skia = { workspace = true }
-skia-safe = { workspace = true }
 mini-mvvm = { path = "../MiniMvvm" }
 # The compatibility decomposition of the search keys of the pages (`PageItem::create_search_key`).
 unicode-normalization = "0.1"
