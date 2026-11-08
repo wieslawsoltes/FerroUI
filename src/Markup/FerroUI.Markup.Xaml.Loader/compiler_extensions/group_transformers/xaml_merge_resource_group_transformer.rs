@@ -87,6 +87,13 @@ impl MergedEntryOrigins {
 /// Inlines `MergeResourceInclude` entries of `ResourceDictionary.MergedDictionaries` at
 /// compile time: the resources of the included dictionary (another document of the same
 /// compilation) are added directly to the including dictionary.
+///
+/// The including dictionary is the dictionary of the document root or an inline dictionary of
+/// the document (#633): `<ResourceDictionary><ResourceDictionary.MergedDictionaries>
+/// <MergeResourceInclude Source="…" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>`
+/// as a merged dictionary of another one keeps the included document in a dictionary of its own,
+/// at the place of the include, so that lookups find its entries in the order a `ResourceInclude`
+/// gives them, and its entries are still recorded as merged from it ([`MergedEntryOrigins`]).
 pub struct XamlMergeResourceGroupTransformer;
 
 /// `string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase)`.
@@ -260,11 +267,19 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         {
             return Ok(node);
         }
-        let Some(resource_dictionary_manipulation) = resource_dictionary_node
-            .manipulation()
-            .cast::<XamlManipulationGroupNode>()
-        else {
-            return Ok(node);
+        // The dictionary is the one of the document root or an inline dictionary anywhere in the
+        // tree (a value of the merged dictionaries of another one, #633): the group transformers
+        // visit every node. The manipulation of an inline dictionary whose only content is its
+        // merged dictionaries is that one assignment (`FlattenAstTransformer` unwraps a group of
+        // one): it is read in a group of its own, which becomes the manipulation of the
+        // dictionary only when an include is inlined.
+        let manipulation = resource_dictionary_node.manipulation();
+        let (resource_dictionary_manipulation, wrapped) = match manipulation.cast::<XamlManipulationGroupNode>() {
+            Some(group) => (group, false),
+            None if manipulation.is::<XamlPropertyAssignmentNode>() => {
+                (XamlManipulationGroupNode::new(&*resource_dictionary_node, Some(vec![manipulation.clone()])), true)
+            }
+            None => return Ok(node),
         };
 
         let merge_resource_include_type = ferro_types.merge_resource_include.clone();
@@ -308,6 +323,10 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
 
         if should_exit || merge_source_nodes.is_empty() {
             return Ok(node);
+        }
+        if wrapped {
+            let group: Rc<dyn IXamlAstManipulationNode> = resource_dictionary_manipulation.clone();
+            *resource_dictionary_node.manipulation.borrow_mut() = group;
         }
 
         let mut manipulation_group: Vec<Rc<dyn IXamlAstManipulationNode>> = Vec::new();

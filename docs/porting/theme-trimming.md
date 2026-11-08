@@ -580,7 +580,9 @@ are step 3 (section 10).
 ### 9.2 Generated code
 
 - `MergedEntryOrigins` (an extra of the transformer configuration that only the transform of the
-  emitter adds) records, for each entry a merge inlines, the URI of the document it comes from.
+  emitter adds) records, for each entry a merge inlines, the URI of the document it comes from,
+  whether the merge is into the dictionary of the document root or into an inline dictionary of
+  the document (#633, section 13.1).
   `rust_emitter/theme_unit_graph.rs` plans the units from the documents and those URIs.
 - While the function of a document is written, each entry of a dictionary that comes from a document
   of a unit is written between two marker comments with the index of the unit. Only entries at the
@@ -1171,11 +1173,38 @@ written inline in `MaterialTheme.xaml`:
 <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/Button_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
 ```
 
-Not done in #568 step 6: the compiler does not inline a `MergeResourceInclude` that sits inside
-an inline dictionary (`InjectServiceProviderNode: no emitter for this value node`). The 72
-documents stay `ResourceInclude`s in the ambient unit, as before, and #633 tracks the compiler
-support and the change of the theme. The control documents are units, and the theme has
-`with_parts`.
+Step 6 of #568 could not do it: the compiler did not inline a `MergeResourceInclude` that sits
+inside an inline dictionary (`InjectServiceProviderNode: no emitter for this value node`), so the
+72 documents stayed `ResourceInclude`s in the ambient unit. #633 adds the compiler support and
+changes the theme:
+
+- `XamlMergeResourceGroupTransformer` inlines a `MergeResourceInclude` into the dictionary whose
+  merged dictionaries hold it, wherever that dictionary is: the dictionary of the document root,
+  as before, or an inline `ResourceDictionary` anywhere in the document, such as a value of the
+  merged dictionaries of another one. The group transformers visit every node, so the transformer
+  already saw the inline dictionaries; it skipped them because the manipulation of a dictionary
+  whose only content is its merged dictionaries is that one assignment, not a group
+  (`FlattenAstTransformer` unwraps a group of one). Such a manipulation is now read in a group of
+  its own, which becomes the manipulation of the dictionary when an include is inlined. The
+  semantics are those of the root: the merged entries are added to the inline dictionary after its
+  own entries (an own entry with the key of a merged one is the error of a key added twice, as at
+  the root), its theme dictionaries are merged by theme variant, `EnsureCapacity` is the count of
+  the inline dictionary, and an include outside of the compilation stays a run-time include
+  (decision 22 of xaml.md).
+- The inline dictionary stays a merged dictionary of its parent at the place of the include, so a
+  lookup through the parent finds its entries as it found those of the `ResourceInclude` (the merged
+  dictionaries from the last one, after the own resources and theme dictionaries of the parent), and
+  a `{StaticResource}` of the document looks in its own dictionary first, then in the theme's.
+- `MergedEntryOrigins` records the inlined entries with the URI of their document, as for a merge
+  at the root, so the unit graph makes the document a unit, the emitter writes its entries between
+  the markers of the unit, and they become runs added to the inline dictionary (`rt::apply_theme_unit`
+  with the local of that dictionary). A theme with parts that leaves the unit out builds the inline
+  dictionary empty.
+
+`MaterialTheme.xaml` merges its inherited documents that way, in their order, as in the example
+above; `Resources/Material*.xaml` and `Strings/InvariantResources.xaml` are still merged into the
+theme's dictionary itself, and `CompactStyles` stays a keyed `ResourceInclude`. The inherited
+documents are internal, so, merged, they are no longer emitted as build functions of their own.
 
 ### 13.2 The class and the documents
 
@@ -1206,11 +1235,24 @@ and `FERROUI_XAMLMETA`):
 - `a_theme_with_parts_leaves_out_the_units_it_is_not_given`: without the rating control's unit, its
   control theme is left out; with every unit it is there; `registered_theme_units()` is the full
   table in the test build.
-- `a_theme_with_parts_leaves_out_an_inherited_resource_document`: without
-  `Resources/RatingControl_themeresources.xaml`, its keys are absent in every variant, and the color
-  schemes and the motion resources are set.
+- `a_theme_with_parts_leaves_out_an_inherited_resource_document` (#633): without
+  `Resources/RatingControl_themeresources.xaml`, its keys are absent in every variant, the full
+  table has them, the motion resources are set, and an inherited resource of a unit it is given
+  still resolves the theme's color-scheme override.
 - `an_inherited_resource_resolves_the_overrides_of_the_theme`: `RadioButtonsHeaderForeground`
   resolves to the on-surface role of a color scheme, not to the inherited `TextFillColorPrimaryBrush`.
+
+The compiler side of #633 is tested in `ferroui-markup-xaml-loader`
+(`merge_resource_include_is_inlined_into_an_inline_dictionary` and
+`merge_resource_include_into_an_inline_dictionary_keeps_its_theme_dictionaries` in
+`compiler_extensions/ferro_xaml_il_compiler_tests.rs`: the shape is inlined, each inline dictionary
+keeps its place, its entries, its theme dictionaries and its capacity, and the entries are recorded
+with their documents; `merge_resource_include_in_an_inline_dictionary_is_compiled_into_it` in
+`rust_emitter/runtime_host.rs`: the shape compiles; `a_document_merged_into_an_inline_dictionary_is_a_unit`
+in `rust_emitter/theme_unit_graph_tests.rs`), and the lookup order through the run-time loader in
+`tests/FerroUI.Markup.Xaml.UnitTests/xaml/merge_resource_include_tests.rs`
+(`merge_resource_include_works_in_an_inline_dictionary`: own resources first, then the merged
+dictionaries from the last one, each with its theme dictionaries).
 - `the_classes_of_reflection_paths_are_reached_only_through_their_units` (#612, root D), and the
   loader table answering the class document alone.
 
@@ -1219,6 +1261,7 @@ and `FERROUI_XAMLMETA`):
 The theme has 107 units (the ambient unit, five of its own resource documents and the control
 documents) in 9.84 MB of generated text. `samples/MaterialThemeGallery` constructs its theme in Rust
 (`MaterialTheme::new()`), so it keeps every unit; trimming applies to an application whose compiled
-markup constructs `<MaterialTheme />`, and no sample of the repository does yet. The size of a
-trimmed application on the Material theme is measured with #633, which also moves the inherited
-resource documents (the largest part of the ambient unit) into units.
+markup constructs `<MaterialTheme />`, and no sample of the repository does yet. With #633 the
+72 inherited resource documents (the largest part of the ambient unit) are units of their own.
+Hello world with `<MaterialTheme />` (`dist`, macOS ARM64): MEASUREMENT PENDING (the size with the
+inherited documents in the ambient unit, the size with them as units, and the units kept).

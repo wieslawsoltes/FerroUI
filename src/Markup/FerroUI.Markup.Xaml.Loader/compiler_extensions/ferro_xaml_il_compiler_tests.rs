@@ -14,7 +14,7 @@ use xamlx::diagnostics::XamlDiagnosticSeverity;
 use xamlx::exceptions::XamlResult;
 use xamlx::type_system::{IXamlMethod, IXamlType};
 
-use super::group_transformers::{NewServiceProviderNode, COMPILED_RESOURCES_TYPE_NAME};
+use super::group_transformers::{MergedEntryOrigins, NewServiceProviderNode, COMPILED_RESOURCES_TYPE_NAME};
 use super::transformers::*;
 use super::{
     FerroXamlIlCompiler, IXamlDocumentResource, IXamlDocumentTypeBuilderProvider,
@@ -534,6 +534,136 @@ fn merge_resource_include_merges_theme_dictionaries() {
     let capacity = collect::<EnsureCapacityNode>(&themes[0].as_node());
     assert_eq!(capacity.len(), 1);
     assert_eq!(capacity[0].capacity, 4);
+}
+
+/// An inline dictionary that merges a document (#633): `<ResourceDictionary>` with only a
+/// `MergeResourceInclude` in its merged dictionaries, as a merged dictionary of another one.
+fn inline_merge(source: &str, own: &str) -> String {
+    format!(
+        "<ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='{source}'/></ResourceDictionary.MergedDictionaries>{own}</ResourceDictionary>"
+    )
+}
+
+/// The keys of the resources of `node` (its `Content` assignments, nested ones included), in
+/// the order of the tree.
+fn content_keys(node: &Rc<dyn IXamlAstNode>) -> Vec<String> {
+    assignments(node, "Content").iter().map(|c| text_of(&c.values.borrow()[0])).collect()
+}
+
+/// Not from upstream (#633): a `MergeResourceInclude` in the merged dictionaries of an inline
+/// dictionary is inlined into that dictionary, which stays a merged dictionary of the root at
+/// the place of the include. The manipulation of a dictionary whose only content is the include
+/// is one assignment, not a group. The entries are recorded as merged from their documents.
+#[test]
+fn merge_resource_include_is_inlined_into_an_inline_dictionary() {
+    let fw = create_objects_test_framework();
+    let origins = fw.configuration.get_or_create_extra::<MergedEntryOrigins>();
+    let compiler = compiler(&fw);
+    let a = resource(
+        &fw,
+        &compiler,
+        "A",
+        &dictionary(&format!(
+            "<ResourceDictionary.MergedDictionaries>{}{}</ResourceDictionary.MergedDictionaries><x:String x:Key='a'>1</x:String>",
+            inline_merge("/B.xaml", ""),
+            inline_merge("/C.xaml", "<x:String x:Key='own'>0</x:String>"),
+        )),
+        true,
+        None,
+    );
+    let b = resource(
+        &fw,
+        &compiler,
+        "B",
+        &dictionary("<x:String x:Key='b1'>1</x:String><x:String x:Key='b2'>2</x:String>"),
+        true,
+        None,
+    );
+    let c = resource(&fw, &compiler, "C", &dictionary("<x:String x:Key='c1'>3</x:String>"), true, None);
+    assert_eq!(errors(&fw), Vec::<String>::new());
+    compiler.transform_group(&[a.clone(), b.clone(), c.clone()]).expect("group");
+    assert_eq!(errors(&fw), Vec::<String>::new());
+
+    let root = root_of(&a);
+    // No include is left to be created at run time.
+    assert!(collect::<XamlAstNewClrObjectNode>(&root)
+        .iter()
+        .all(|o| o.type_.borrow().clone().get_clr_type().expect("clr").name() != "MergeResourceInclude"));
+    // The inline dictionaries are still the merged dictionaries of the root, in their order,
+    // each with the entries of its document, in the order a merge into the root gives them: the
+    // entries of a group are appended behind the own entries, the only manipulation of a
+    // document of one entry stays in front.
+    let merged = assignments(&root, "MergedDictionaries");
+    assert_eq!(merged.len(), 2, "{}", dump_tree(&root));
+    // Only the assignment itself: the inline dictionary has no merged dictionaries left.
+    assert!(merged.iter().all(|m| assignments(&m.as_node(), "MergedDictionaries").len() == 1));
+    assert_eq!(content_keys(&merged[0].as_node()), ["b1", "b2"]);
+    assert_eq!(content_keys(&merged[1].as_node()), ["c1", "own"]);
+    let mut all = content_keys(&root);
+    all.sort();
+    assert_eq!(all, ["a", "b1", "b2", "c1", "own"]);
+    // The capacity of each inline dictionary is its own count.
+    let capacity = collect::<EnsureCapacityNode>(&merged[0].as_node());
+    assert_eq!(capacity.len(), 1);
+    assert_eq!(capacity[0].capacity, 2);
+    let capacity = collect::<EnsureCapacityNode>(&merged[1].as_node());
+    assert_eq!(capacity.len(), 1);
+    assert_eq!(capacity[0].capacity, 2);
+    assert_eq!(b.usage(), XamlDocumentUsage::Merged);
+    assert_eq!(c.usage(), XamlDocumentUsage::Merged);
+    assert_eq!(a.usage(), XamlDocumentUsage::Unknown);
+
+    // Each entry is recorded as merged from its document; own entries are not.
+    assert_eq!(origins.documents(), ["ferres://Tests/B.xaml", "ferres://Tests/C.xaml"]);
+    let origin = |node: &Rc<dyn IXamlAstNode>, key: &str| {
+        let entry = assignments(node, "Content").into_iter().find(|c| text_of(&c.values.borrow()[0]) == key).expect("the entry");
+        origins.origin_of(&entry.as_node())
+    };
+    assert_eq!(origin(&root, "b1").as_deref(), Some("ferres://Tests/B.xaml"));
+    assert_eq!(origin(&root, "b2").as_deref(), Some("ferres://Tests/B.xaml"));
+    assert_eq!(origin(&root, "c1").as_deref(), Some("ferres://Tests/C.xaml"));
+    assert_eq!(origin(&root, "own"), None);
+    assert_eq!(origin(&root, "a"), None);
+}
+
+/// Not from upstream (#633): the theme dictionaries of a document merged into an inline
+/// dictionary are the theme dictionaries of that dictionary, not of the root.
+#[test]
+fn merge_resource_include_into_an_inline_dictionary_keeps_its_theme_dictionaries() {
+    let fw = create_objects_test_framework();
+    let compiler = compiler(&fw);
+    let theme = |key: &str| {
+        format!(
+            "<ResourceDictionary.ThemeDictionaries><ResourceDictionary x:Key='Dark'><x:String x:Key='{key}1'>1</x:String><x:String x:Key='{key}2'>2</x:String></ResourceDictionary></ResourceDictionary.ThemeDictionaries>"
+        )
+    };
+    let a = resource(
+        &fw,
+        &compiler,
+        "A",
+        &dictionary(&format!(
+            "<ResourceDictionary.MergedDictionaries>{}</ResourceDictionary.MergedDictionaries>{}",
+            inline_merge("ferres://Tests/B.xaml", ""),
+            theme("a")
+        )),
+        true,
+        None,
+    );
+    let b = resource(&fw, &compiler, "B", &dictionary(&theme("b")), true, None);
+    compiler.transform_group(&[a.clone(), b]).expect("group");
+    assert_eq!(errors(&fw), Vec::<String>::new());
+
+    let root = root_of(&a);
+    let merged = assignments(&root, "MergedDictionaries");
+    assert_eq!(merged.len(), 1, "{}", dump_tree(&root));
+    let inline_themes = assignments(&merged[0].as_node(), "ThemeDictionaries");
+    assert_eq!(inline_themes.len(), 1, "{}", dump_tree(&root));
+    assert_eq!(content_keys(&inline_themes[0].as_node()), ["b1", "b2"]);
+    // The root keeps its own theme dictionary, with its own entries only.
+    let themes = assignments(&root, "ThemeDictionaries");
+    assert_eq!(themes.len(), 2);
+    let own = themes.iter().find(|t| !t.same_node(&inline_themes[0])).expect("the theme dictionary of the root");
+    assert_eq!(content_keys(&own.as_node()), ["a1", "a2"]);
 }
 
 #[test]

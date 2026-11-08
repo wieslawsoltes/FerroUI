@@ -75,12 +75,24 @@ fn the_whole_theme_applies_every_unit() {
     let button = unit("Controls/Button.xaml");
     assert!(button.type_keys.iter().any(|type_key| type_key == "Button"), "{button:?}");
     assert!(button.keys.iter().any(|key| key == "AccentButtonStyle"), "{button:?}");
-    // The inherited resource documents are included with ResourceInclude and belong to the ambient
-    // unit until a MergeResourceInclude inside an inline dictionary is compiled (#633).
-    assert!(graph.units.iter().all(|unit| !unit.name.starts_with("Resources/Common_themeresources")), "{names:?}");
-    for name in ["Resources/MaterialColors.xaml", "Resources/MaterialCompatibility.xaml", "Controls/MaterialBottomSheet.xaml"] {
-        unit(name);
+    // The inherited resource documents are merged into inline dictionaries of their own (#633):
+    // each is a unit of one document, with runs in the table.
+    for name in [
+        "Resources/Common_themeresources.xaml",
+        "Resources/Button_themeresources.xaml",
+        "Resources/RatingControl_themeresources.xaml",
+        "Resources/MaterialColors.xaml",
+        "Resources/MaterialCompatibility.xaml",
+        "Controls/MaterialBottomSheet.xaml",
+    ] {
+        let found = unit(name);
+        assert_eq!(found.documents, [name.to_string()], "{found:?}");
     }
+    for name in ["Resources/Common_themeresources.xaml", "Resources/RatingControl_themeresources.xaml"] {
+        let table = units.iter().find(|unit| unit.name == name).unwrap_or_else(|| panic!("a unit {name} in the table"));
+        assert!(!table.runs.is_empty(), "the unit {name} has no runs");
+    }
+    assert!(!ambient.documents.iter().any(|document| document.ends_with("_themeresources.xaml")), "{:?}", ambient.documents);
 
     let theme = MaterialTheme::new();
     let variants = variants();
@@ -117,10 +129,42 @@ fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
     assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
+/// The keys of `Resources/RatingControl_themeresources.xaml`, which no other document defines.
+const RATING_CONTROL_RESOURCES: &[&str] = &[
+    "RatingControlUnselectedForeground",
+    "RatingControlSelectedForeground",
+    "RatingControlPlaceholderForeground",
+    "RatingControlCaptionForeground",
+    "RatingControlFontSizeForRendering",
+    "RatingControlItemSpacing",
+];
+
+/// #633: a theme constructed without the unit of an inherited resource document leaves out its
+/// resources in every variant, and still has the color schemes, the motion resources and the
+/// inherited resources of the units it is given, which resolve the overrides of the theme.
 #[test]
-fn an_inherited_resource_resolves_the_overrides_of_the_theme() {
+fn a_theme_with_parts_leaves_out_an_inherited_resource_document() {
     let _app = start();
-    let theme = MaterialTheme::new();
+    let trimmed = MaterialTheme::with_parts(None, without("Resources/RatingControl_themeresources.xaml"));
+    let full = MaterialTheme::with_parts(None, crate::compiled_xaml::THEME_UNITS);
+    for key in RATING_CONTROL_RESOURCES {
+        let key = ResourceKey::from(*key);
+        for variant in variants() {
+            assert!(trimmed.try_get_resource(&key, Some(&variant)).is_none(), "{key:?} is left out in {variant:?}");
+        }
+        assert!(variants().iter().any(|variant| full.try_get_resource(&key, Some(variant)).is_some()), "{key:?} is in the full theme");
+    }
+    // The color schemes and the motion resources are set as for the full theme.
+    for key in ["MaterialReducedMotion", "MaterialMotionScheme", "MaterialPageTransition"] {
+        assert!(trimmed.try_get_resource(&ResourceKey::from(key), None).is_some(), "{key} is set");
+    }
+    assert_inherited_resource_resolves_the_overrides(&trimmed);
+}
+
+/// `RadioButtonsHeaderForeground` (of `Resources/RadioButtons_themeresources.xaml`) is the
+/// on-surface role of a color scheme of `theme`, not the inherited `TextFillColorPrimaryBrush`.
+#[track_caller]
+fn assert_inherited_resource_resolves_the_overrides(theme: &MaterialTheme) {
     let value = theme.try_get_resource(&ResourceKey::from("RadioButtonsHeaderForeground"), Some(&ThemeVariant::light())).flatten();
     let color = from_markup_value::<Rc<dyn IBrush>>(&value)
         .and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
@@ -131,6 +175,12 @@ fn an_inherited_resource_resolves_the_overrides_of_the_theme() {
         schemes.iter().any(|scheme| scheme.color(MaterialColorRole::OnSurface) == color),
         "RadioButtonsHeaderForeground is {color:?}, not the on-surface role of a color scheme"
     );
+}
+
+#[test]
+fn an_inherited_resource_resolves_the_overrides_of_the_theme() {
+    let _app = start();
+    assert_inherited_resource_resolves_the_overrides(&MaterialTheme::new());
 }
 
 /// #612, root D: a namespace table that names classes for reflection-binding paths is reachable
