@@ -716,8 +716,13 @@ registered fails with an error that names the fix: `NavigationError::MissingCons
 
 | `samples/HelloWorld`, macOS ARM64 | before | after | Change |
 |---|---:|---:|---:|
-| `release` executable | TBD | TBD | TBD |
-| `dist` executable | TBD | TBD | TBD |
+| `release` executable | 33.73 MB | 32.87 MB | -0.87 MB (-2.6 %) |
+| `dist` executable | 18.94 MB | 18.53 MB | -0.42 MB (-2.2 %) |
+
+The estimate of 2.4 MB (#612) was the share of the constructors before root D and the other
+trims of this section had already removed most of the classes they reach; what remains is the
+constructors of the classes an application links for other reasons. The `dist` build ran its smoke
+run to a clean exit.
 
 ## 5. What an executable is made of
 
