@@ -4539,7 +4539,7 @@ closed, F9 off, no pins. The user rearranged Document1 into a second document gr
 during validation; preserve that live state. Do not reset it to the startup graph.
 
 App and screenshots (absolute directory):
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/
+<evidence>/
 - FerroDock.app
 - ferrodock-rust-header-grip-fixed.png
 - ferrodock-rust-f11-inspector.png
@@ -4625,7 +4625,7 @@ The currently running native app/bundle is the previous F9 checkpoint, not rebui
 for these new property views; no desktop F11 result is claimed. The unlocked visual
 check left Document2/Tool1 selected, no pins, F9 OFF. Source unpin placed Tool1 after
 Tool2 in its group. Screenshot:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-unlocked-check.png
+<evidence>/ferrodock-rust-unlocked-check.png
 The previous app hash and packaging details below remain the last desktop evidence.
 No commits/pushes/PRs, goal status changes or agents were used.
 
@@ -4691,7 +4691,7 @@ original three-document/eight-tool layout, no pinned items, overlay OFF. Hover f
 and footer glyphs are tested in native Headless; the desktop AX click did not establish
 a separate pointer-hover/footer result. Do not claim a desktop hover screenshot.
 Current app and evidence directory:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/
+<evidence>/
 FerroDock.app
 ferrodock-rust-f9-overlay.png
 ferrodock-rust-f9-tab-selection.png
@@ -4772,13 +4772,13 @@ Tool2 selected in its original group, no pinned items and Document1 selected.
 This clears the previous manual-unlock/visual-refresh blocker. No unrelated app was used.
 
 Current app:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 Physical executable SHA256 (matches the normal Cargo desktop build):
 f5e4460b009711b1ba36b0bcffde2e32e0bf162c4bda46aa74cedcf82f19a6af
 Actual native screenshots and final accessibility state:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-running.png
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-pinned.png
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-running.ax.txt
+<evidence>/ferrodock-rust-running.png
+<evidence>/ferrodock-rust-pinned.png
+<evidence>/ferrodock-rust-running.ax.txt
 These validate the recorded native flow on this machine, not full platform/input parity.
 
 Inventory: **222 ported, 411 partial, 1,295 pending / 1,928**. The two complete
@@ -4887,7 +4887,7 @@ The final GUI refresh still awaits the previously requested manual Mac unlock.
 
 After all source changes, the actual desktop executable rebuilt successfully and
 scripts/dock/bundle_macos_sample.py physically updated the existing system-volume app:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 The bundled executable is not a symlink and matches the new build byte-for-byte
 (SHA256 9b1467f87ed04b76324dec90bdecd08ccf6d8d7bd1b6f6925743aa3ab0b9cc95).
 The old app process was not restarted while the Mac remained locked; the refreshed
@@ -5112,7 +5112,7 @@ full window. These observations do not establish the cause of the failed launch 
 The portable scripts/dock/bundle_macos_sample.py helper makes an atomic physical copy,
 checks an existing bundle's identifier and never launches or replaces unrelated apps.
 The verified output location is:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 
 Strict workspace all-target Clippy, formatting, structural inventory, native patch
 integrity and NINE Python verifier cases pass. The local native dependency reports

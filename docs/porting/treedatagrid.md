@@ -1,6 +1,6 @@
 # TreeDataGrid port
 
-The port of TreeDataGrid (<https://github.com/wieslawsoltes/TreeDataGrid>, MIT, Copyright (c) 2026 Wiesław Šoltés; earlier parts MIT, Copyright (c) .NET Foundation and Contributors) to FerroUI: the framework-neutral core, the control library, its themes, the demo application, the unit tests and the benchmarks. The reference is the checkout at `/Users/wieslawsoltes/GitHub/Avalonia.Controls.TreeDataGrid`, branch `master`, commit `3ca47316` (2026-09-05), read only.
+The port of TreeDataGrid (<https://github.com/wieslawsoltes/TreeDataGrid>, MIT, Copyright (c) 2026 Wiesław Šoltés; earlier parts MIT, Copyright (c) .NET Foundation and Contributors) to FerroUI: the framework-neutral core, the control library, its themes, the demo application, the unit tests and the benchmarks. The reference is the checkout at `../Avalonia.Controls.TreeDataGrid`, branch `master`, commit `3ca47316` (2026-09-05), read only.
 
 ## 1. What the reference contains
 

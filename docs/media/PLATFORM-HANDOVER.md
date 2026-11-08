@@ -1,6 +1,6 @@
 # Portable media: platform-agent handover
 
-Current integration branch: `codex/portable-media-desktop`.
+Current integration branch: `media/portable-media-desktop`.
 The original coordinator branch/worktree below describe the historical handoff.
 [MACOS-VERIFICATION.md](MACOS-VERIFICATION.md) records the default Metal Mac profile,
 native presentation/input/packaging checks, measured lifecycle work, dependency
@@ -15,9 +15,9 @@ that the complete portable-media specification has been implemented.
 
 ## Starting revision and working rules
 
-- Repository: FerroUI. Branch: `codex/portable-media-framework`.
+- Repository: FerroUI. Branch: `media/portable-media-framework`.
 - Coordinator worktree on the Mac:
-  `/Users/danw/.codex/worktrees/portable-media-framework/FerroUI`.
+  `<checkout>`.
 - Fresh upstream starting revision: `8518d2cada13541ee6149c259f918cfe504ba6c4`.
 - Foundation/Apple commit: `ce88d55f2bcc19ad28c0caa173a37d11a6a221bc`.
 - iOS/Android native providers and GL jobs: `76b95ab51a37be126809bc15b5d43f5ee62aa5d9`.
@@ -26,7 +26,7 @@ that the complete portable-media specification has been implemented.
   alone. These commits have not been pushed by this task. Transfer the branch or
   its Git bundle before starting work on another machine.
 - Use a separate worktree and branch for each platform, such as
-  `codex/portable-media-windows` and `codex/portable-media-linux`. Keep the other
+  `media/portable-media-windows` and `media/portable-media-linux`. Keep the other
   platform's files unchanged unless a shared-contract change is necessary;
   identify such changes clearly for integration.
 - The specification is [PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md](PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md).
@@ -59,8 +59,8 @@ Example transfer from a bundle into an existing upstream clone:
 ```sh
 git bundle verify /path/to/portable-media-framework.bundle
 git fetch /path/to/portable-media-framework.bundle \
-  refs/heads/codex/portable-media-framework:refs/remotes/handoff/portable-media-framework
-git worktree add -b codex/portable-media-windows ../FerroUI-media-windows \
+  refs/heads/media/portable-media-framework:refs/remotes/handoff/portable-media-framework
+git worktree add -b media/portable-media-windows ../FerroUI-media-windows \
   refs/remotes/handoff/portable-media-framework
 ```
 
