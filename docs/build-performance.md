@@ -303,6 +303,10 @@ purpose acknowledges it with the label `build-output-changes`. With the label:
   some with other features. Every other field of a unit, the set of units and each revision's
   repetition of its own graph are still required; the units built with other features are
   listed in the summary of the job.
+- `sample-freshness.py` also accepts samples whose files the pull request changes (a demo's
+  markup, for example): the changed files are listed in `changed_sample_inputs` of its report,
+  and the repeated builds still compare each revision's unchanged rebuild of its own samples.
+  Without the label, changed sample files fail the job.
 - The optimized-build-tools legs of `compare.py` and `scanner.py` compare the candidate built
   with optimized build tools with the candidate built from source (both checkouts are the head
   of the pull request), strictly. The equivalence of the two modes is checked as before; the
