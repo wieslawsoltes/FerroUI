@@ -10,7 +10,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{
     immutable::{ImmutablePen, ImmutableSolidColorBrush},
-    FillRule, Geometry, PenLineCap, PenLineJoin,
+    FillRule, PenLineCap, PenLineJoin,
 };
 use ferroui_base::media::{Color, Colors, DrawingContext, ImmediateDrawingContext};
 use ferroui_base::platform::{IGeometryImpl, IPlatformRenderInterface};
@@ -614,64 +614,76 @@ impl FluidNavBar {
 }
 
 /// Keep separate contours so each icon component receives the same trim fraction.
+///
+/// The path markup is parsed into one geometry of the backend per figure, so it works in every
+/// backend, whether or not its geometries expose their path data.
 fn parse_icon_contours(svg: &str) -> Option<Vec<std::sync::Arc<dyn IGeometryImpl>>> {
-    use ferroui_base::media::GeometryPathSegment as Segment;
-    let geometry = Geometry::parse(svg).ok()?.platform_impl()?;
-    let data = geometry.try_get_path_data()?;
-    let source = data.stroke?;
     let backend = FerroLocator::current().get_required_service::<dyn IPlatformRenderInterface>();
-    type Builder = Box<dyn ferroui_base::platform::IStreamGeometryBuilder>;
-    /// The figure being built: its builder, its start point, and whether it is still open.
-    struct Figure {
-        builder: Builder,
-        start: Point,
-        open: bool,
-    }
-    let mut result: Vec<std::sync::Arc<dyn IGeometryImpl>> = Vec::new();
-    let mut current: Option<Figure> = None;
-    let finish = |mut figure: Figure, result: &mut Vec<std::sync::Arc<dyn IGeometryImpl>>| {
-        if figure.open {
-            figure.builder.end_figure(false);
-        }
-        result.push(figure.builder.to_geometry());
-    };
-    let begin = |start: Point| {
-        let mut builder = backend.create_stream_geometry_builder(None);
-        builder.begin_figure(start, false);
-        Figure { builder, start, open: true }
-    };
-    for segment in source.segments {
-        if let Segment::MoveTo(p) = segment {
-            if let Some(figure) = current.take() {
-                finish(figure, &mut result);
-            }
-            current = Some(begin(p));
-            continue;
-        }
-        // A drawing segment after a close starts a new contour at the start of the closed one.
-        if let Some(figure) = current.take_if(|f| !f.open && !matches!(segment, Segment::Close)) {
-            let start = figure.start;
-            finish(figure, &mut result);
-            current = Some(begin(start));
-        }
-        let Some(figure) = current.as_mut() else { continue };
-        match segment {
-            Segment::LineTo(p) => figure.builder.line_to(p, true),
-            Segment::QuadraticTo { control, point } => figure.builder.quadratic_bezier_to(control, point, true),
-            Segment::CubicTo { control1, control2, point } => {
-                figure.builder.cubic_bezier_to(control1, control2, point, true)
-            }
-            Segment::Close if figure.open => {
-                figure.builder.end_figure(true);
-                figure.open = false;
-            }
-            Segment::Close | Segment::MoveTo(_) => {}
+    let mut contours = ContourSplitter { backend: &*backend, current: None, contours: Vec::new() };
+    ferroui_base::media::PathMarkupParser::new(&mut contours).parse(svg).ok()?;
+    contours.finish();
+    Some(contours.contours)
+}
+
+/// A geometry context that gives each figure a stream geometry of its own.
+struct ContourSplitter<'a> {
+    backend: &'a dyn IPlatformRenderInterface,
+    current: Option<Box<dyn ferroui_base::platform::IStreamGeometryBuilder>>,
+    contours: Vec<std::sync::Arc<dyn IGeometryImpl>>,
+}
+
+impl ContourSplitter<'_> {
+    fn finish(&mut self) {
+        if let Some(mut builder) = self.current.take() {
+            self.contours.push(builder.to_geometry());
         }
     }
-    if let Some(figure) = current {
-        finish(figure, &mut result);
+}
+
+impl ferroui_base::platform::IGeometryContext for ContourSplitter<'_> {
+    fn arc_to(
+        &mut self,
+        point: Point,
+        size: Size,
+        rotation_angle: f64,
+        is_large_arc: bool,
+        sweep_direction: ferroui_base::media::SweepDirection,
+        is_stroked: bool,
+    ) {
+        if let Some(builder) = self.current.as_mut() {
+            builder.arc_to(point, size, rotation_angle, is_large_arc, sweep_direction, is_stroked);
+        }
     }
-    Some(result)
+    fn begin_figure(&mut self, start_point: Point, is_filled: bool) {
+        self.finish();
+        let mut builder = self.backend.create_stream_geometry_builder(None);
+        builder.begin_figure(start_point, is_filled);
+        self.current = Some(builder);
+    }
+    fn cubic_bezier_to(&mut self, control_point1: Point, control_point2: Point, end_point: Point, is_stroked: bool) {
+        if let Some(builder) = self.current.as_mut() {
+            builder.cubic_bezier_to(control_point1, control_point2, end_point, is_stroked);
+        }
+    }
+    fn quadratic_bezier_to(&mut self, control_point: Point, end_point: Point, is_stroked: bool) {
+        if let Some(builder) = self.current.as_mut() {
+            builder.quadratic_bezier_to(control_point, end_point, is_stroked);
+        }
+    }
+    fn line_to(&mut self, point: Point, is_stroked: bool) {
+        if let Some(builder) = self.current.as_mut() {
+            builder.line_to(point, is_stroked);
+        }
+    }
+    fn end_figure(&mut self, is_closed: bool) {
+        if let Some(builder) = self.current.as_mut() {
+            builder.end_figure(is_closed);
+        }
+    }
+    fn set_fill_rule(&mut self, _fill_rule: FillRule) {}
+    fn dispose(&mut self) {
+        self.finish();
+    }
 }
 
 /// The parsed icon paths, shared with the draw operations. An operation is
