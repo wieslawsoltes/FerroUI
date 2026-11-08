@@ -649,3 +649,17 @@ collection that implements `IFontCollection` directly and changes what it return
 `FontManager::invalidate_glyph_typefaces`. Local gate, three rounds: gauntlet UI thread 45.09 to
 43.15 ms a frame (-4.3 %; the render thread, which the change does not touch, -1.8 % in the same
 rounds).
+
+### 9.5 Render transform and opacity changes do not record the drawing again
+
+A visual's render transform and opacity are composition properties: the render thread applies them
+to the visual's retained drawing. Upstream nevertheless invalidates the visual when either changes,
+so its `render` runs again, a new draw list is recorded and serialized, and the old one is
+disposed, for every frame of an animation. FerroUI routes these changes through
+`Visual::invalidate_composition_properties` and `IRenderer::add_dirty_properties`: the compositing
+renderer synchronizes the visual's composition properties without calling `render`. The default
+of `add_dirty_properties` is `add_dirty`, so other renderers behave as before. No `render` of the
+framework reads the visual's own transform or opacity (checked over every `render` override).
+Changes of `Bounds` still record the drawing: `TextPresenter::render` tracks its position for the
+caret of input methods. Tests: `visual_render_tests.rs`. Local gate, three rounds: gauntlet UI
+thread -0.5 %, still wall UI thread -5.2 % (its cursor moves by a transform).

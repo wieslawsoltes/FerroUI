@@ -780,12 +780,20 @@ impl Visual {
             Self::clip_property().as_property(),
             Self::clip_to_bounds_property().as_property(),
             Self::is_visible_property().as_property(),
-            Self::opacity_property().as_property(),
             Self::opacity_mask_property().as_property(),
             Self::effect_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
         Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
+        // Opacity is a composition property: its change does not record the drawing again.
+        Self::opacity_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(sender) = e.sender().downcast_ref::<Visual>() {
+                    sender.invalidate_composition_properties();
+                }
+            })
+            .detach();
         Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::z_index_property().changed().subscribe(|e| {
@@ -1405,6 +1413,16 @@ impl Visual {
         }
     }
 
+    /// Invalidates the composition properties of this visual (its render transform and opacity)
+    /// but not its drawing: the renderer synchronizes the properties without calling `render`
+    /// again. A FerroUI addition (docs/porting/desktop-performance.md, section 9.5): upstream
+    /// invalidates the visual, which records its drawing again.
+    pub fn invalidate_composition_properties(&self) {
+        if let Some(source) = self.presentation_source() {
+            source.renderer().add_dirty_properties(self);
+        }
+    }
+
     /// Indicates that a property change should cause `invalidate_visual` to
     /// be called on objects of class `T`.
     ///
@@ -1482,14 +1500,14 @@ impl Visual {
             });
             sender.set_render_transform_subscription(subscription);
 
-            sender.invalidate_visual();
+            sender.invalidate_composition_properties();
         }
     }
 
     /// Called when the render transform's `changed` notification is raised.
     fn render_transform_value_changed(&self) {
         bump_geometry_version();
-        self.invalidate_visual();
+        self.invalidate_composition_properties();
     }
 
     fn set_render_transform_subscription(&self, value: Option<Subscription>) {
