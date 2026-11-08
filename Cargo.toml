@@ -641,6 +641,24 @@ opt-level = "z"
 [profile.dist.package.ferroui-themes-material]
 opt-level = "z"
 
+# Cold framework code: file and message dialogs, the remote protocol of the designer and of remote
+# viewing, the headless platform and its VNC server, and DevTools run on demand, never on the path of
+# a frame of an ordinary application (#581, docs/binary-size.md).
+[profile.dist.package.ferroui-dialogs]
+opt-level = "z"
+
+[profile.dist.package.ferroui-remote-protocol]
+opt-level = "z"
+
+[profile.dist.package.ferroui-headless]
+opt-level = "z"
+
+[profile.dist.package.ferroui-headless-vnc]
+opt-level = "z"
+
+[profile.dist.package.ferroui-diagnostics]
+opt-level = "z"
+
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
 # The crates of the run-time XAML loader stay optimised for speed: at "z" the start-up of a themed
