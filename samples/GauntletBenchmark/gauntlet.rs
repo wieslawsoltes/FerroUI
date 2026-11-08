@@ -346,7 +346,7 @@ impl GauntletView {
 /// With `PERF_REPORT=1`, prints `PERF fps N` once a second: the frames the animation frame callback
 /// ran, for comparing builds of FerroUI (the harness counts presented frames from outside instead).
 pub(crate) fn report_frame_rate() {
-    thread_local! {
+    ferroui_base::ferro_thread_local! {
         static REPORT: Option<(Cell<std::time::Instant>, Cell<u32>)> =
             std::env::var_os("PERF_REPORT").map(|_| (Cell::new(std::time::Instant::now()), Cell::new(0)));
     }
