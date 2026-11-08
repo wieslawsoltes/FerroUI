@@ -545,6 +545,10 @@ output and application behavior.
 
 ## Source layout and licenses
 
+- `MaterialTheme.xaml`: the class document. It merges each inherited resource document of
+  `Resources/` into a merged dictionary of its own, and the Material resources into its own
+  dictionary, so that every document is a unit of theme trimming
+  ([theme-trimming.md](theme-trimming.md), section 13).
 - `Resources/Material*.xaml`: generated roles, typography, metrics and inherited-key mappings.
 - `Controls/*.xaml`: Material templates preserving existing control contracts.
 - `motion.rs`, `ripple.rs`, `progress_indicator.rs`, `rounded_geometry.rs`,

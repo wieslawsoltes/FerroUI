@@ -2,7 +2,8 @@
      In-window modal host. Host supplies safe system/keyboard insets. -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:material="using:FerroUI.Themes.Material">
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
   <ControlTheme x:Key="{x:Type material:MaterialBottomSheetHost}" TargetType="material:MaterialBottomSheetHost">
     <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />

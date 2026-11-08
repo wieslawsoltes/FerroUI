@@ -50,7 +50,9 @@ cargo test -p ferroui-themes-winui --test compiled_xaml_tests regenerate_compile
 ```
 
 Run the same command for `ferroui-themes-fluent`, `ferroui-themes-simple` and
-`ferroui-themes-macos`. Commit the regenerated files with the change that caused them.
+`ferroui-themes-macos`. Commit the regenerated files with the change that caused them. The
+Material theme has no checked-in reference; its tests (`tests/compiled_xaml_tests.rs`) check the
+units of the build's own output.
 
 ### 2.1 What the generated code is made of
 
@@ -134,6 +136,16 @@ name, the first time the control looks for its theme. Release builds do not chec
   dictionaries belong in the class document. Everything in it is linked into every application.
 - **Name every entry.** An entry without a key, or with a key that is neither text nor
   `{x:Type}`, cannot be rooted, so its whole document stays in the ambient unit.
+- **No `ResourceInclude` for a document that should be trimmed.** A `ResourceInclude` is not
+  inlined, so the document it includes is part of the ambient unit. When a document must stay a
+  dictionary of its own (its `{StaticResource}` references must find the theme's overrides after
+  their own document, as for the inherited documents of the Material theme), merge it into an
+  inline merged dictionary of its own:
+  `<ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source=".." /></ResourceDictionary.MergedDictionaries></ResourceDictionary>`.
+  It is a unit, and the dictionaries and their order are what the `ResourceInclude` gave.
+- **Mark every document but the class document internal** (`x:ClassModifier="internal"`). The
+  loader table answers the URI of a public document and so keeps its build function, and its unit,
+  linked in every application.
 
 ### 4.2 Resources
 
@@ -272,7 +284,7 @@ application's setting, so it binds the same way.
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
-| Units for the Material theme (step 6) | #568, #603 | Planned |
+| Units for the Material theme (step 6): `MaterialTheme::with_parts`, inherited resource documents as units | #568 | In review |
 | Compiled bindings in all themes | #603 | Planned |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | Planned |
 | Samples, sample apps and component samples on compiled bindings | #604 | Planned |
