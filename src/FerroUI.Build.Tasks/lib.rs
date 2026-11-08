@@ -168,6 +168,14 @@
 //! what can show any control (`ferroui-base/full-themes`, `DEP_FERROUI_BASE_XAML_FULL_THEMES`)
 //! keeps every unit. With the trimming off nothing of this is written.
 //!
+//! # Compiled bindings
+//!
+//! `{Binding}` is a compiled binding in every document that does not say otherwise
+//! (`x:CompileBindings`), for every crate (#603, docs/xaml-themes.md section 5). A crate opts out
+//! with `[package.metadata.ferroui] compile-bindings = false` in its manifest, or with
+//! [`Build::default_compile_bindings`]`(false)` in its build script; the manifest key, when it is
+//! there, wins over the call.
+//!
 //! # The GLSL of the runtime shader effects
 //!
 //! [`shader_effects`] translates the WGSL module of a custom effect that is a
@@ -218,7 +226,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     class_document_group, class_of_document, document_references, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup,
     CompiledMarkupTypeSystem, EmitterHost, ThemePartsTables, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
-use crate::theme_roots::{kept_units, parts_static_name, source_roots, unit_static_path, Roots, ThemeTrimming, TypeGraph};
+use crate::theme_roots::{compile_bindings_from_manifest, kept_units, parts_static_name, source_roots, unit_static_path, Roots, ThemeTrimming, TypeGraph};
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
 pub const DEFAULT_MODULE: &str = "compiled_xaml";
@@ -342,7 +350,10 @@ pub struct Build {
     export_metadata: bool,
     source_root: Option<PathBuf>,
     type_system: TypeSystem,
-    default_compile_bindings: bool,
+    /// What the build script states for compiled bindings ([`Build::default_compile_bindings`]);
+    /// `None` without the call. The manifest key `compile-bindings` overrides it; compiled
+    /// bindings are the default (#603).
+    default_compile_bindings: Option<bool>,
     analyzer_config_files: Vec<PathBuf>,
     warnings_as_errors: bool,
     full_themes: bool,
@@ -386,7 +397,7 @@ impl Build {
             export_metadata: false,
             source_root: None,
             type_system: TypeSystem::Runtime,
-            default_compile_bindings: false,
+            default_compile_bindings: None,
             analyzer_config_files: Vec::new(),
             warnings_as_errors: false,
             full_themes: false,
@@ -438,10 +449,12 @@ impl Build {
     }
 
     /// Whether `{Binding}` is a compiled binding in a document that does not say otherwise
-    /// (`x:CompileBindings`): the `DefaultCompileBindings` of upstream's build task. Not
-    /// without the call.
+    /// (`x:CompileBindings`): the `DefaultCompileBindings` of upstream's build task. Compiled
+    /// bindings are the default without the call (#603). The manifest of the crate has the last
+    /// word: `[package.metadata.ferroui] compile-bindings = false` (or `true`) overrides the call,
+    /// as the project property overrides the default of upstream's build task.
     pub fn default_compile_bindings(mut self, value: bool) -> Self {
-        self.default_compile_bindings = value;
+        self.default_compile_bindings = Some(value);
         self
     }
 
@@ -609,18 +622,20 @@ impl Build {
         };
 
         // The trimming of the themes the documents construct (#568, step 3; on by default): the
-        // switch and the roots of the manifest.
+        // switch and the roots of the manifest. Whether bindings compile (#603; on by default):
+        // the key of the manifest, else the call of the build script.
         let manifest = self.manifest_dir.join("Cargo.toml");
-        let trimming = match fs::read_to_string(&manifest) {
-            Ok(text) => match ThemeTrimming::from_manifest(&text) {
-                Ok(trimming) => trimming,
+        let (trimming, manifest_compile_bindings) = match fs::read_to_string(&manifest) {
+            Ok(text) => match ThemeTrimming::from_manifest(&text).and_then(|trimming| Ok((trimming, compile_bindings_from_manifest(&text)?))) {
+                Ok(read) => read,
                 Err(error) => {
                     errors.push(format!("{}: {error}", manifest.display()));
                     return Outcome { lines, errors };
                 }
             },
-            Err(_) => ThemeTrimming::default(),
+            Err(_) => (ThemeTrimming::default(), None),
         };
+        let default_compile_bindings = compile_bindings_by_default(manifest_compile_bindings, self.default_compile_bindings);
 
         // 1. The compiled markup and the type models of the dependencies.
         let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
@@ -834,7 +849,7 @@ impl Build {
                 let options = TransformOptions {
                     local_assembly: Some(assembly_name.clone()),
                     create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
-                    use_compiled_bindings_by_default: self.default_compile_bindings,
+                    use_compiled_bindings_by_default: default_compile_bindings,
                     diagnostic_handler: Some(diagnostics.handler()),
                     design_mode: false,
                     theme_parts: theme_parts.clone(),
@@ -884,7 +899,7 @@ impl Build {
                     let options = TransformOptions {
                         local_assembly: Some(assembly_name.clone()),
                         create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
-                        use_compiled_bindings_by_default: self.default_compile_bindings,
+                        use_compiled_bindings_by_default: default_compile_bindings,
                         diagnostic_handler: Some(diagnostics.handler()),
                         design_mode: false,
                         theme_parts: theme_parts.clone(),
@@ -894,7 +909,7 @@ impl Build {
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, self.default_compile_bindings, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, default_compile_bindings, &dependencies)
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.
@@ -1234,6 +1249,13 @@ fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
 /// the groups, in order) and `register()`.
 /// The parts tables of the themes the application trims (`parts`, #568) are statics of
 /// `compiled_markup`, which `register()` registers.
+/// Whether `{Binding}` compiles in the documents of a crate (#603): what its manifest states
+/// (`compile-bindings`), else what its build script states ([`Build::default_compile_bindings`]),
+/// else compiled bindings, the default.
+fn compile_bindings_by_default(manifest: Option<bool>, build_script: Option<bool>) -> bool {
+    manifest.or(build_script).unwrap_or(true)
+}
+
 fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], assets: &[(String, PathBuf)], parts: &[PartsTable]) -> String {
     let mut text = String::new();
     text.push_str("// @generated by ferroui-build (Build::run). Do not edit.\n");
@@ -1394,6 +1416,32 @@ mod tests {
         let outcome = Build::new(root.clone(), root.join("out"), "app", Vec::new()).export_metadata().execute();
         assert_eq!(outcome.errors.len(), 1, "{:?}", outcome.errors);
         assert!(outcome.errors[0].ends_with("[package.metadata.ferroui] theme-trimming must be true or false"), "{:?}", outcome.errors);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// Not from upstream (#603): bindings compile by default; the manifest key overrides the call
+    /// of the build script, in both directions.
+    #[test]
+    fn bindings_compile_by_default_and_the_manifest_has_the_last_word() {
+        assert!(compile_bindings_by_default(None, None));
+        assert!(!compile_bindings_by_default(None, Some(false)));
+        assert!(compile_bindings_by_default(None, Some(true)));
+        assert!(!compile_bindings_by_default(Some(false), None));
+        assert!(!compile_bindings_by_default(Some(false), Some(true)));
+        assert!(compile_bindings_by_default(Some(true), Some(false)));
+        assert!(Build::new(PathBuf::from("/crate"), PathBuf::from("/out"), "app", Vec::new()).default_compile_bindings.is_none());
+    }
+
+    /// Not from upstream (#603): a `compile-bindings` key that is not a boolean fails the build
+    /// with the key it names.
+    #[test]
+    fn a_wrong_compile_bindings_key_of_the_manifest_is_an_error() {
+        let root = env::temp_dir().join(format!("ferroui-build-compile-bindings-{}", std::process::id()));
+        fs::create_dir_all(&root).expect("a directory");
+        fs::write(root.join("Cargo.toml"), "[package]\nname = \"app\"\n\n[package.metadata.ferroui]\ncompile-bindings = \"off\"\n").expect("a manifest");
+        let outcome = Build::new(root.clone(), root.join("out"), "app", Vec::new()).export_metadata().execute();
+        assert_eq!(outcome.errors.len(), 1, "{:?}", outcome.errors);
+        assert!(outcome.errors[0].ends_with("[package.metadata.ferroui] compile-bindings must be true or false"), "{:?}", outcome.errors);
         let _ = fs::remove_dir_all(&root);
     }
 
