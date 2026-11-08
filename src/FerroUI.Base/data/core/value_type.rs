@@ -137,7 +137,7 @@ type DisplayFn = fn(&dyn AnyValue) -> String;
 /// and boxes the result: no closure type, vtable or drop glue per registration. Only what
 /// captures state ([`ValueTypes::register_cast_with`], the boxed casts) is a closure.
 #[derive(Clone)]
-enum Convert {
+enum ErasedConversion {
     /// A typed function with its adapter ([`TypedConvert`]).
     Typed(TypedConvert),
     /// The wrap of a value of the inner type of a nullable form (`T` to `Option<T>`).
@@ -150,15 +150,15 @@ enum Convert {
     BoxedClosure(Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>),
 }
 
-impl Convert {
+impl ErasedConversion {
     /// `value` converted, or `None` when it does not convert.
     fn apply(&self, value: &BoxedValue) -> Option<BoxedValue> {
         match self {
-            Convert::Typed(typed) => typed.apply(value.as_any()),
-            Convert::Nullable(operation) => operation(NullableRequest::Wrap(value.as_any())),
-            Convert::Reference(cast, kind) => cast(*kind, value),
-            Convert::AnyClosure(convert) => convert(value.as_any()),
-            Convert::BoxedClosure(convert) => convert(value),
+            ErasedConversion::Typed(typed) => typed.apply(value.as_any()),
+            ErasedConversion::Nullable(operation) => operation(NullableRequest::Wrap(value.as_any())),
+            ErasedConversion::Reference(cast, kind) => cast(*kind, value),
+            ErasedConversion::AnyClosure(convert) => convert(value.as_any()),
+            ErasedConversion::BoxedClosure(convert) => convert(value),
         }
     }
 
@@ -166,10 +166,10 @@ impl Convert {
     /// reference type, the boxed casts) are never registered for borrowed values.
     fn apply_any(&self, value: &dyn std::any::Any) -> Option<BoxedValue> {
         match self {
-            Convert::Typed(typed) => typed.apply(value),
-            Convert::Nullable(operation) => operation(NullableRequest::Wrap(value)),
-            Convert::AnyClosure(convert) => convert(value),
-            Convert::Reference(..) | Convert::BoxedClosure(_) => None,
+            ErasedConversion::Typed(typed) => typed.apply(value),
+            ErasedConversion::Nullable(operation) => operation(NullableRequest::Wrap(value)),
+            ErasedConversion::AnyClosure(convert) => convert(value),
+            ErasedConversion::Reference(..) | ErasedConversion::BoxedClosure(_) => None,
         }
     }
 }
@@ -314,10 +314,10 @@ struct Registry {
     reference_objects: IdMap<TypeId, TypeId>,
     /// Typed interface/class views of an enclosing reference object's identity.
     reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
-    conversions: IdMap<(TypeId, TypeId), Convert>,
+    conversions: IdMap<(TypeId, TypeId), ErasedConversion>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
-    casts: IdMap<(TypeId, TypeId), Convert>,
+    casts: IdMap<(TypeId, TypeId), ErasedConversion>,
     /// Why a value is refused by a cast that holds for some values of its
     /// type only ([`ValueTypes::register_try_cast`]).
     cast_errors: IdMap<(TypeId, TypeId), TypedCastError>,
@@ -338,7 +338,7 @@ struct Registry {
     element_ref_objects: IdMap<TypeId, (ObjectFn, FromObjectFn)>,
     /// Conversions applied to borrowed untyped values when a property is
     /// set with a value that is not of its exact type.
-    any_conversions: IdMap<(TypeId, TypeId), Convert>,
+    any_conversions: IdMap<(TypeId, TypeId), ErasedConversion>,
     /// Interface handle type → the classes whose handles convert to it.
     interfaces: IdMap<TypeId, Vec<(&'static TypeInfo, InterfaceFn)>>,
     /// Interface handle type → the object of the object model behind a
@@ -352,7 +352,7 @@ struct Registry {
 /// the source or of the target: the cast between the forms of the source
 /// (if needed), the registered cast, the cast between the forms of the
 /// target (if needed).
-type ReferenceCast = (Option<Convert>, Convert, Option<Convert>);
+type ReferenceCast = (Option<ErasedConversion>, ErasedConversion, Option<ErasedConversion>);
 
 impl Registry {
     /// The other form of a reference type: the handle `Rc<T>` of the object
@@ -482,15 +482,15 @@ fn insert_nullable(id: TypeId, inner: ValueType, operation: NullableOperation) {
     with_registry(|r| {
         r.nullable.insert(id, operation);
         r.nullable_inner.insert(id, inner);
-        r.conversions.insert(key, Convert::Nullable(operation));
-        r.casts.insert(key, Convert::Nullable(operation));
-        r.any_conversions.insert(key, Convert::Nullable(operation));
+        r.conversions.insert(key, ErasedConversion::Nullable(operation));
+        r.casts.insert(key, ErasedConversion::Nullable(operation));
+        r.any_conversions.insert(key, ErasedConversion::Nullable(operation));
     });
 }
 
 /// Registers the cast `key` of a boxed value only (the boxed casts).
 #[inline(never)]
-fn insert_cast(key: (TypeId, TypeId), cast: Convert) {
+fn insert_cast(key: (TypeId, TypeId), cast: ErasedConversion) {
     with_registry(|r| {
         r.conversions.insert(key, cast.clone());
         r.casts.insert(key, cast);
@@ -501,7 +501,7 @@ fn insert_cast(key: (TypeId, TypeId), cast: Convert) {
 /// boxed value is the cast of the value it holds, through the same entry (a typed
 /// cast is compiled once, not once per form).
 #[inline(never)]
-fn insert_any_cast(key: (TypeId, TypeId), cast: Convert) {
+fn insert_any_cast(key: (TypeId, TypeId), cast: ErasedConversion) {
     with_registry(|r| {
         r.conversions.insert(key, cast.clone());
         r.casts.insert(key, cast.clone());
@@ -510,7 +510,7 @@ fn insert_any_cast(key: (TypeId, TypeId), cast: Convert) {
 }
 
 #[inline(never)]
-fn insert_conversion(key: (TypeId, TypeId), convert: Convert) {
+fn insert_conversion(key: (TypeId, TypeId), convert: ErasedConversion) {
     with_registry(|r| {
         r.conversions.insert(key, convert);
     });
@@ -520,7 +520,7 @@ fn insert_conversion(key: (TypeId, TypeId), convert: Convert) {
 /// derives from the entries of the registry.
 enum Conversion {
     /// Registered with [`ValueTypes::register_conversion`] (or a cast, which is also a conversion).
-    Registered(Convert),
+    Registered(ErasedConversion),
     /// The root handle (`Ref<FerroObject>`) to the handle of a class: the object, when it is of
     /// the class. Derived from the object entry of the class ([`ValueTypes::register_object`]).
     RootToHandle(FromObjectFn),
@@ -618,8 +618,8 @@ fn insert_reference(entry: ReferenceEntry) {
             ((handle, object.id()), ReferenceCastKind::HandleToObject),
             ((handle, nullable), ReferenceCastKind::HandleToNullable),
         ] {
-            r.conversions.insert(key, Convert::Reference(cast, kind));
-            r.casts.insert(key, Convert::Reference(cast, kind));
+            r.conversions.insert(key, ErasedConversion::Reference(cast, kind));
+            r.casts.insert(key, ErasedConversion::Reference(cast, kind));
         }
     });
 }
@@ -791,7 +791,7 @@ impl ValueTypes {
         // The cast of a value that is only borrowed (the untyped property routes are
         // handed `&dyn Any`, see `try_convert_implicit`) and of a boxed value, through the
         // same entry.
-        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::cast(cast)));
+        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::Typed(TypedConvert::cast(cast)));
     }
 
     /// Registers an assignability cast as [`register_cast`](Self::register_cast) does, with a
@@ -799,7 +799,7 @@ impl ValueTypes {
     pub fn register_cast_with<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
         let convert: Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>> =
             Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::AnyClosure(convert));
+        insert_any_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::AnyClosure(convert));
     }
 
     /// Registers an assignability cast that holds for some values of `TFrom`
@@ -814,7 +814,7 @@ impl ValueTypes {
     /// error, and [`cast_error`](Self::cast_error) gives the error of `cast`.
     pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: fn(&TFrom) -> Result<TTo, String>) {
         let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
-        insert_any_cast(key, Convert::Typed(TypedConvert::try_cast(cast)));
+        insert_any_cast(key, ErasedConversion::Typed(TypedConvert::try_cast(cast)));
         let error = TypedCastError::new(cast);
         with_registry(|r| {
             r.cast_errors.insert(key, error);
@@ -876,7 +876,7 @@ impl ValueTypes {
     /// as data; one that captures state registers with
     /// [`register_conversion_with`](Self::register_conversion_with).
     pub fn register_conversion<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> Option<TTo>) {
-        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::conversion(convert)));
+        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::Typed(TypedConvert::conversion(convert)));
     }
 
     /// Registers a conversion as [`register_conversion`](Self::register_conversion) does, with
@@ -887,13 +887,13 @@ impl ValueTypes {
         let convert: Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>> = Rc::new(move |v: &dyn std::any::Any| {
             v.downcast_ref::<TFrom>().and_then(&convert).map(|v| Rc::new(v) as BoxedValue)
         });
-        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::AnyClosure(convert));
+        insert_conversion((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::AnyClosure(convert));
     }
 
     /// Registers the conversion of text to `T` through `parse`, the
     /// equivalent of a type converter from string.
     pub fn register_parse<T: PropertyValue>(parse: fn(&str) -> Option<T>) {
-        insert_conversion((TypeId::of::<String>(), TypeId::of::<T>()), Convert::Typed(TypedConvert::parse(parse)));
+        insert_conversion((TypeId::of::<String>(), TypeId::of::<T>()), ErasedConversion::Typed(TypedConvert::parse(parse)));
     }
 
     /// Registers the handle type of class `T` (`Ref<T>`), so that untyped
@@ -949,8 +949,8 @@ impl ValueTypes {
         Self::register_cast::<ElementRef<T>, Option<Ref<T>>>(|e| e.get());
         Self::register_cast::<Option<ElementRef<T>>, Option<Ref<T>>>(|e| ElementRef::resolve(e));
 
-        fn any<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> TTo) -> ((TypeId, TypeId), Convert) {
-            ((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::Typed(TypedConvert::cast(convert)))
+        fn any<TFrom: 'static, TTo: PropertyValue>(convert: fn(&TFrom) -> TTo) -> ((TypeId, TypeId), ErasedConversion) {
+            ((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::Typed(TypedConvert::cast(convert)))
         }
         with_registry(|r| {
             r.any_conversions.extend([
@@ -2348,7 +2348,7 @@ impl ValueTypes {
     /// conversion.
     pub fn register_boxed_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&BoxedValue) -> Option<TTo> + 'static) {
         let cast: Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>> = Rc::new(move |v: &BoxedValue| cast(v).map(|v| Rc::new(v) as BoxedValue));
-        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), Convert::BoxedClosure(cast));
+        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ErasedConversion::BoxedClosure(cast));
     }
 
     pub fn register_boxed_conversion<TFrom: 'static, TTo: PropertyValue>(
@@ -2356,7 +2356,7 @@ impl ValueTypes {
     ) {
         insert_conversion(
             (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-            Convert::BoxedClosure(Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue))),
+            ErasedConversion::BoxedClosure(Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue))),
         );
     }
 }
