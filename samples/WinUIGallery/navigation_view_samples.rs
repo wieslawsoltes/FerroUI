@@ -13,7 +13,7 @@ use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,
-    Ref, StyledElementImpl, TypeInfo, Visual, VisualImpl,
+    Ref, StyledElementImpl, Visual, VisualImpl,
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::navigation::NavigationError;
@@ -41,6 +41,9 @@ macro_rules! sample_page {
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl,
             FramePageImpl);
         impl $name {
+            /// The page type of the page, created by the page factory the sample registers.
+            pub(crate) const PAGE_TYPE: ferroui_controls::PageType = ferroui_controls::PageType::for_factory::<$name>();
+
             fn create() -> Result<Ref<FramePage>, NavigationError> {
                 let content = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(include_str!($source), None)
                     .map_err(|error| NavigationError::FactoryFailed(error.to_string()))?;
@@ -62,14 +65,14 @@ sample_page!(SampleSettingsPage, "Pages/NavigationSettings.xaml");
 
 pub(crate) fn register_pages(frame: &Frame) -> Result<(), NavigationError> {
     for (type_, factory) in [
-        (SamplePage1::TYPE, SamplePage1::create as fn() -> _),
-        (SamplePage2::TYPE, SamplePage2::create as fn() -> _),
-        (SamplePage3::TYPE, SamplePage3::create as fn() -> _),
-        (SamplePage4::TYPE, SamplePage4::create as fn() -> _),
-        (SamplePage5::TYPE, SamplePage5::create as fn() -> _),
-        (SamplePage6::TYPE, SamplePage6::create as fn() -> _),
+        (SamplePage1::PAGE_TYPE, SamplePage1::create as fn() -> _),
+        (SamplePage2::PAGE_TYPE, SamplePage2::create as fn() -> _),
+        (SamplePage3::PAGE_TYPE, SamplePage3::create as fn() -> _),
+        (SamplePage4::PAGE_TYPE, SamplePage4::create as fn() -> _),
+        (SamplePage5::PAGE_TYPE, SamplePage5::create as fn() -> _),
+        (SamplePage6::PAGE_TYPE, SamplePage6::create as fn() -> _),
         (
-            SampleSettingsPage::TYPE,
+            SampleSettingsPage::PAGE_TYPE,
             SampleSettingsPage::create as fn() -> _,
         ),
     ] {
@@ -78,14 +81,14 @@ pub(crate) fn register_pages(frame: &Frame) -> Result<(), NavigationError> {
     Ok(())
 }
 
-pub(crate) fn page_type(tag: &str) -> Option<&'static TypeInfo> {
+pub(crate) fn page_type(tag: &str) -> Option<ferroui_controls::PageType> {
     match tag {
-        "SamplePage1" => Some(SamplePage1::TYPE),
-        "SamplePage2" => Some(SamplePage2::TYPE),
-        "SamplePage3" => Some(SamplePage3::TYPE),
-        "SamplePage4" => Some(SamplePage4::TYPE),
-        "SamplePage5" => Some(SamplePage5::TYPE),
-        "SamplePage6" => Some(SamplePage6::TYPE),
+        "SamplePage1" => Some(SamplePage1::PAGE_TYPE),
+        "SamplePage2" => Some(SamplePage2::PAGE_TYPE),
+        "SamplePage3" => Some(SamplePage3::PAGE_TYPE),
+        "SamplePage4" => Some(SamplePage4::PAGE_TYPE),
+        "SamplePage5" => Some(SamplePage5::PAGE_TYPE),
+        "SamplePage6" => Some(SamplePage6::PAGE_TYPE),
         _ => None,
     }
 }
@@ -180,7 +183,7 @@ fn wire_selection(
             return;
         };
         let target = if args.is_settings_selected() {
-            Some(SampleSettingsPage::TYPE)
+            Some(SampleSettingsPage::PAGE_TYPE)
         } else {
             args.selected_item().as_ref().and_then(|value| {
                 if let Some(CategoryEntry::Category { name, .. }) =
@@ -190,7 +193,7 @@ fn wire_selection(
                         "Sample Page {}",
                         name.chars().last().unwrap()
                     ))));
-                    Some(SamplePage1::TYPE)
+                    Some(SamplePage1::PAGE_TYPE)
                 } else {
                     let item = Control::from_boxed(value)?.cast::<NavigationViewItem>()?;
                     let tag = item.tag()?;

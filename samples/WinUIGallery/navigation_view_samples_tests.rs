@@ -76,7 +76,7 @@ fn navigation_view_page_initializes_all_eight_source_compositions() {
         assert!(nav.selected_item().is_some(), "nvSample{number}");
         assert_eq!(
             frame.current_source_page_type(),
-            Some(SamplePage1::TYPE),
+            Some(SamplePage1::PAGE_TYPE),
             "contentFrame{number}"
         );
         assert_eq!(frame.back_stack_depth(), 0);
@@ -125,10 +125,10 @@ fn navigation_view_source_selection_loads_distinct_pages_and_settings() {
     let nav = root.get_control::<NavigationView>("nvSample5");
     let frame = root.get_control::<Frame>("contentFrame5");
     for (index, expected) in [
-        SamplePage1::TYPE,
-        SamplePage2::TYPE,
-        SamplePage3::TYPE,
-        SamplePage4::TYPE,
+        SamplePage1::PAGE_TYPE,
+        SamplePage2::PAGE_TYPE,
+        SamplePage3::PAGE_TYPE,
+        SamplePage4::PAGE_TYPE,
     ]
     .into_iter()
     .enumerate()
@@ -144,7 +144,7 @@ fn navigation_view_source_selection_loads_distinct_pages_and_settings() {
     invoke(&nav.settings_item());
     assert_eq!(
         frame.current_source_page_type(),
-        Some(SampleSettingsPage::TYPE)
+        Some(SampleSettingsPage::PAGE_TYPE)
     );
     // The original settings branch leaves the previous header in place.
     assert_eq!(text(nav.header()).as_deref(), Some("Sample Page 4"));
@@ -162,7 +162,7 @@ fn navigation_view_top_and_tabs_preserve_actual_source_targets_and_history() {
     assert_eq!(
         root.get_control::<Frame>("contentFrame6")
             .current_source_page_type(),
-        Some(SamplePage3::TYPE)
+        Some(SamplePage3::PAGE_TYPE)
     );
     assert_eq!(text(nav.header()).as_deref(), Some("This is Header Text"));
     let tabs = root.get_control::<NavigationView>("nvSample7");
@@ -176,7 +176,7 @@ fn navigation_view_top_and_tabs_preserve_actual_source_targets_and_history() {
     );
     invoke(&item(&tabs, 1));
     let frame = root.get_control::<Frame>("contentFrame7");
-    assert_eq!(frame.current_source_page_type(), Some(SamplePage2::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(SamplePage2::PAGE_TYPE));
     // The running Gallery calls Navigate, although its instructional snippet
     // recommends NavigateToType with navigation-stack recording disabled.
     assert_eq!(frame.back_stack_depth(), 1);
@@ -231,7 +231,7 @@ fn navigation_view_category_template_preserves_models_headers_and_separator() {
         assert_eq!(
             root.get_control::<Frame>("contentFrame4")
                 .current_source_page_type(),
-            Some(SamplePage1::TYPE)
+            Some(SamplePage1::PAGE_TYPE)
         );
         assert_eq!(
             text(nav.header()),
@@ -249,9 +249,9 @@ fn navigation_view_footer_uses_the_same_selection_and_original_destinations() {
     assert_eq!(nav.menu_items().count(), 3);
     assert_eq!(nav.footer_menu_items().count(), 3);
     for (index, label, expected) in [
-        (0, "Account", SamplePage4::TYPE),
-        (1, "Your Cart", SamplePage5::TYPE),
-        (2, "Help", SamplePage5::TYPE),
+        (0, "Account", SamplePage4::PAGE_TYPE),
+        (1, "Your Cart", SamplePage5::PAGE_TYPE),
+        (2, "Help", SamplePage5::PAGE_TYPE),
     ] {
         let value = nav.footer_menu_items().get_at(index).unwrap();
         let footer = Control::from_boxed(&value)
@@ -287,20 +287,20 @@ fn navigation_view_hierarchy_navigates_children_and_keeps_action_parent_unselect
     let account = item(&nav, 1);
     invoke(&account);
     assert!(account.is_expanded());
-    assert_eq!(frame.current_source_page_type(), Some(SamplePage2::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(SamplePage2::PAGE_TYPE));
     let mail = Control::from_boxed(&account.menu_items().get_at(0).unwrap())
         .unwrap()
         .cast::<NavigationViewItem>()
         .unwrap();
     invoke(&mail);
-    assert_eq!(frame.current_source_page_type(), Some(SamplePage3::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(SamplePage3::PAGE_TYPE));
     let documents = item(&nav, 2);
     assert!(!documents.selects_on_invoked());
     invoke(&documents);
     assert!(documents.is_expanded());
     assert!(!documents.is_selected());
-    assert_eq!(frame.current_source_page_type(), Some(SamplePage3::TYPE));
-    for (index, expected, tile_count) in [(0, SamplePage5::TYPE, 3), (1, SamplePage6::TYPE, 2)] {
+    assert_eq!(frame.current_source_page_type(), Some(SamplePage3::PAGE_TYPE));
+    for (index, expected, tile_count) in [(0, SamplePage5::PAGE_TYPE, 3), (1, SamplePage6::PAGE_TYPE, 2)] {
         let child = Control::from_boxed(&documents.menu_items().get_at(index).unwrap())
             .unwrap()
             .cast::<NavigationViewItem>()
@@ -366,14 +366,14 @@ fn navigation_view_api_options_update_native_state_and_header_bindings() {
     assert_eq!(
         root.get_control::<Frame>("contentFrame")
             .current_source_page_type(),
-        Some(SamplePage1::TYPE)
+        Some(SamplePage1::PAGE_TYPE)
     );
     click_check(&root, "suppressselectionCheck_Checked", false);
     invoke(&root.get_control::<NavigationViewItem>("SamplePage2Item"));
     assert_eq!(
         root.get_control::<Frame>("contentFrame")
             .current_source_page_type(),
-        Some(SamplePage2::TYPE)
+        Some(SamplePage2::PAGE_TYPE)
     );
 }
 

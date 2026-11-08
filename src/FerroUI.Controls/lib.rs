@@ -364,7 +364,9 @@ mod pager_control_tests;
 pub mod navigation;
 mod frame;
 mod frame_page;
+mod page_type;
 pub use frame::{Frame, PageFactory};
+pub use page_type::PageType;
 pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable};
 // WinUI's NavigationView and its items (docs/porting/winui-controls.md, section 10.4).
 mod navigation_view;

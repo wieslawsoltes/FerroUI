@@ -527,28 +527,28 @@ fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
     let frame = root.get_control::<Frame>("ContentFrame");
     assert_eq!(
         frame.current_source_page_type(),
-        Some(FirstSamplePage::TYPE)
+        Some(FirstSamplePage::PAGE_TYPE)
     );
     assert!(!frame.can_go_back());
     root.get_control::<Button>("NavigationNext")
         .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(SecondSamplePage::TYPE)
+        Some(SecondSamplePage::PAGE_TYPE)
     );
     assert_eq!(frame.back_stack_depth(), 1);
     root.get_control::<Button>("NavigationBack")
         .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(FirstSamplePage::TYPE)
+        Some(FirstSamplePage::PAGE_TYPE)
     );
     assert!(frame.can_go_forward());
     root.get_control::<Button>("NavigationForward")
         .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(SecondSamplePage::TYPE)
+        Some(SecondSamplePage::PAGE_TYPE)
     );
     assert!(root
         .get_control::<TextBlock>("NavigationStatus")

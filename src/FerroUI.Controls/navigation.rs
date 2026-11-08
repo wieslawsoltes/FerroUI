@@ -13,7 +13,7 @@
 mod page_stack_entry;
 pub use page_stack_entry::PageStackEntry;
 
-use crate::{Frame, FramePage};
+use crate::{Frame, FramePage, PageType};
 use crate::{IItemsList, ItemsChangedHandler, ItemsSource};
 use ferroui_base::collections::{CollectionChangedHandler, FerroList};
 use ferroui_base::data::core::ValueTypes;
@@ -62,7 +62,9 @@ pub enum NavigationError {
     MissingSourcePageType,
     /// The type does not derive from [`FramePage`].
     NotAPage(String),
-    /// The type has neither a default constructor nor a page factory of the frame.
+    /// The type has neither a default constructor nor a page factory of the frame: a page type
+    /// converted from a runtime type (`PageType::from`) whose `TypeInfo` carries no default
+    /// constructor.
     MissingConstructor(String),
     /// The page factory of the frame failed, with its message.
     FactoryFailed(String),
@@ -97,7 +99,13 @@ impl fmt::Display for NavigationError {
         match self {
             Self::MissingSourcePageType => f.write_str("SourcePageType must identify a page type."),
             Self::NotAPage(name) => write!(f, "'{name}' does not derive from FerroUI.Controls.FramePage."),
-            Self::MissingConstructor(name) => write!(f, "'{name}' has no default constructor or registered page factory."),
+            Self::MissingConstructor(name) => write!(
+                f,
+                "'{name}' has no default constructor or registered page factory. Navigate with \
+                 PageType::of::<{short}>(), which reaches the constructor of the page statically, or \
+                 enable the ferroui-base feature type-tables to create pages from their runtime type.",
+                short = name.rsplit('.').next().unwrap_or(name)
+            ),
             Self::FactoryFailed(message) => f.write_str(message),
             Self::FactoryTypeMismatch { expected, actual } => write!(f, "The factory for '{expected}' returned '{actual}'."),
             Self::NavigationPending => f.write_str("Navigation history cannot be modified during a pending navigation."),
@@ -151,7 +159,7 @@ impl FrameNavigationOptions {
 pub struct NavigatingCancelEventArgs {
     cancel: Rc<Cell<bool>>,
     navigation_mode: NavigationMode,
-    source_page_type: &'static TypeInfo,
+    source_page_type: PageType,
     parameter: Option<BoxedValue>,
 }
 
@@ -187,7 +195,7 @@ impl NavigatingCancelEventArgs {
     }
 
     /// Gets the type of the page the frame navigates to.
-    pub fn source_page_type(&self) -> &'static TypeInfo {
+    pub fn source_page_type(&self) -> PageType {
         self.source_page_type
     }
 
@@ -206,7 +214,7 @@ pub struct NavigationEventArgs {
     identity: Rc<()>,
     content: Option<Ref<FramePage>>,
     navigation_mode: NavigationMode,
-    source_page_type: &'static TypeInfo,
+    source_page_type: PageType,
     parameter: Option<BoxedValue>,
 }
 
@@ -238,7 +246,7 @@ impl NavigationEventArgs {
     }
 
     /// Gets the type of the page of the navigation.
-    pub fn source_page_type(&self) -> &'static TypeInfo {
+    pub fn source_page_type(&self) -> PageType {
         self.source_page_type
     }
 
@@ -253,7 +261,7 @@ impl NavigationEventArgs {
 #[derive(Clone, Debug)]
 pub struct NavigationFailedEventArgs {
     handled: Rc<Cell<bool>>,
-    source_page_type: &'static TypeInfo,
+    source_page_type: PageType,
     exception: NavigationError,
 }
 
@@ -264,7 +272,7 @@ impl PartialEq for NavigationFailedEventArgs {
 }
 
 impl NavigationFailedEventArgs {
-    pub(crate) fn new(source_page_type: &'static TypeInfo, exception: NavigationError) -> Self {
+    pub(crate) fn new(source_page_type: PageType, exception: NavigationError) -> Self {
         Self { handled: Rc::new(Cell::new(false)), source_page_type, exception }
     }
 
@@ -279,7 +287,7 @@ impl NavigationFailedEventArgs {
     }
 
     /// Gets the type of the page the navigation failed to show.
-    pub fn source_page_type(&self) -> &'static TypeInfo {
+    pub fn source_page_type(&self) -> PageType {
         self.source_page_type
     }
 
@@ -523,7 +531,7 @@ ferro_markup_type!(class NavigatingCancelEventArgs {
     properties: [
         Cancel: bool { get: NavigatingCancelEventArgs::cancel, set: NavigatingCancelEventArgs::set_cancel },
         NavigationMode: NavigationMode { get: NavigatingCancelEventArgs::navigation_mode },
-        SourcePageType: &'static TypeInfo { get: NavigatingCancelEventArgs::source_page_type },
+        SourcePageType: PageType { get: NavigatingCancelEventArgs::source_page_type },
         Parameter: Option<BoxedValue> { get: NavigatingCancelEventArgs::parameter },
     ],
 });
@@ -533,7 +541,7 @@ ferro_markup_type!(class NavigationEventArgs {
     properties: [
         Content: Option<Ref<FramePage>> { get: NavigationEventArgs::content },
         NavigationMode: NavigationMode { get: NavigationEventArgs::navigation_mode },
-        SourcePageType: &'static TypeInfo { get: NavigationEventArgs::source_page_type },
+        SourcePageType: PageType { get: NavigationEventArgs::source_page_type },
         Parameter: Option<BoxedValue> { get: NavigationEventArgs::parameter },
     ],
 });
@@ -542,7 +550,7 @@ ferro_markup_type!(class NavigationFailedEventArgs {
     handles: [NavigationFailedEventArgs],
     properties: [
         Handled: bool { get: NavigationFailedEventArgs::handled, set: NavigationFailedEventArgs::set_handled },
-        SourcePageType: &'static TypeInfo { get: NavigationFailedEventArgs::source_page_type },
+        SourcePageType: PageType { get: NavigationFailedEventArgs::source_page_type },
         Exception: String { get: |args: &NavigationFailedEventArgs| args.exception().to_string() },
     ],
 });
@@ -579,6 +587,12 @@ pub(crate) fn register_value_types() {
     ValueTypes::register_nullable::<NavigationCacheMode>();
     ValueTypes::register_nullable::<NavigationStack>();
     ValueTypes::register_nullable::<FrameNavigationOptions>();
+    // A page type is the value of `SourcePageType` and the argument of `Navigate`: markup gives
+    // them `{x:Type local:Page}`, which the run-time loader holds as the runtime type of the class
+    // and converts with this cast (B3 of #612).
+    ValueTypes::register_nullable::<PageType>();
+    ValueTypes::register_cast::<&'static TypeInfo, PageType>(|type_| PageType::from(*type_));
+    ValueTypes::register_display::<PageType>();
     ItemsSource::register_binding_conversion::<NavigationStack>();
     ferroui_base::data::model::ModelTypes::register_notifying_collection::<NavigationStack>();
 }

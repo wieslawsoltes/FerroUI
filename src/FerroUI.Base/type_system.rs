@@ -658,6 +658,19 @@ pub trait ClassDefaults {
 
 impl<T: ?Sized> ClassDefaults for T {}
 
+/// A class with a default constructor: the `new` part of [`ferro_class_info!`],
+/// reached through the type rather than through its [`TypeInfo`].
+///
+/// Generic code that creates an instance of a class it names statically
+/// (`PageType::of::<T>()` of `ferroui-controls`) calls this, so the compiler
+/// checks that the class has a default constructor, and the constructor is
+/// linked only where something creates the class (#612). Implemented by
+/// [`ferro_class_info!`] for every class that declares `new`.
+pub trait DefaultConstructible: ObjectType {
+    /// Creates an instance as the parameterless `new()` of the class does.
+    fn new_instance() -> Ref<Self>;
+}
+
 /// The part of a class initialisation that is the same for every class:
 /// makes the type known by name and registers its handle type `Ref<T>` with
 /// the untyped value conversions (as an object handle that casts to the
@@ -1493,6 +1506,13 @@ macro_rules! ferro_class_info {
             #[doc(hidden)]
             pub const __CONSTRUCTOR: ::std::option::Option<fn() -> $crate::Ref<$crate::FerroObject>> =
                 ::std::option::Option::Some(|| $crate::Ref::<$name>::upcast($constructor()));
+        }
+
+        impl $crate::DefaultConstructible for $name {
+            #[inline]
+            fn new_instance() -> $crate::Ref<$name> {
+                $constructor()
+            }
         }
     };
 

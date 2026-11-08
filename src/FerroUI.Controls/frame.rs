@@ -7,7 +7,7 @@ use crate::navigation::{
     NavigationFailedEventArgs, NavigationMode, NavigationStack, PageStackEntry,
 };
 use crate::primitives::TemplatedControlImpl;
-use crate::{ContentControl, ContentControlImpl, Control, ControlImpl, FramePage};
+use crate::{ContentControl, ContentControlImpl, Control, ControlImpl, FramePage, PageType};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElementImpl;
@@ -19,8 +19,7 @@ use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl, StyledProperty, TypeInfo,
-    VisualImpl,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl, StyledProperty, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, VecDeque};
@@ -39,9 +38,10 @@ const INITIAL_TRANSIENT_CACHE_SIZE: i32 = 10;
 ///
 /// A navigation is synchronous: `navigate`, `go_back` and `go_forward` raise `Navigating`, which
 /// can cancel it, call the callbacks of the old and the new page, raise `Navigated`, and return; a
-/// navigation requested by one of those handlers while the frame navigates is ignored. A page is
-/// created by the page factory registered for its type (`register_page_factory`) or by the default
-/// constructor of its type. The upstream pages (`Page`, `NavigationPage`) are another model;
+/// navigation requested by one of those handlers while the frame navigates is ignored. The type
+/// of a page is a [`PageType`] (`PageType::of::<MyPage>()`, WinUI's `TypeName`); a page is created
+/// by the page factory registered for its type (`register_page_factory`) or by the default
+/// constructor the page type carries. The upstream pages (`Page`, `NavigationPage`) are another model;
 /// docs/porting/winui-controls.md, section 7, compares them.
 ///
 /// The WinUI theme has the template (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple
@@ -60,11 +60,11 @@ pub struct Frame {
     can_go_back: Cell<bool>,
     can_go_forward: Cell<bool>,
     back_stack_depth: Cell<i32>,
-    source_page_type: Cell<Option<&'static TypeInfo>>,
+    source_page_type: Cell<Option<PageType>>,
     cache_size: Cell<i32>,
-    factories: RefCell<HashMap<&'static TypeInfo, Rc<PageFactory>>>,
-    permanent: RefCell<HashMap<&'static TypeInfo, Ref<FramePage>>>,
-    transient: RefCell<VecDeque<(&'static TypeInfo, Ref<FramePage>)>>,
+    factories: RefCell<HashMap<PageType, Rc<PageFactory>>>,
+    permanent: RefCell<HashMap<PageType, Ref<FramePage>>>,
+    transient: RefCell<VecDeque<(PageType, Ref<FramePage>)>>,
     navigating: HandlerList<dyn Fn(&NavigatingCancelEventArgs)>,
     navigated: HandlerList<dyn Fn(&NavigationEventArgs)>,
     navigation_stopped: HandlerList<dyn Fn(&NavigationEventArgs)>,
@@ -80,15 +80,15 @@ ferro_class_info!(Frame {
         properties: [
             BackStack: NavigationStack { get: Frame::back_stack },
             ForwardStack: NavigationStack { get: Frame::forward_stack },
-            SourcePageType: Option<&'static TypeInfo> {
+            SourcePageType: Option<PageType> {
                 get: Frame::source_page_type,
-                set: |frame: &Ref<Frame>, value: Option<&'static TypeInfo>| frame.set_source_page_type_or_log(value)
+                set: |frame: &Ref<Frame>, value: Option<PageType>| frame.set_source_page_type_or_log(value)
             },
         ],
         methods: [
-            try fn Navigate(&'static TypeInfo) -> bool => |frame: &Ref<Frame>, ty: &'static TypeInfo| frame.navigate(ty, None),
-            try fn Navigate(&'static TypeInfo, Option<BoxedValue>) -> bool => Frame::navigate,
-            try fn NavigateToType(&'static TypeInfo, Option<BoxedValue>, FrameNavigationOptions) -> bool => |frame: &Ref<Frame>, ty: &'static TypeInfo, parameter: Option<BoxedValue>, options: FrameNavigationOptions| frame.navigate_to_type(ty, parameter, &options),
+            try fn Navigate(PageType) -> bool => |frame: &Ref<Frame>, ty: PageType| frame.navigate(ty, None),
+            try fn Navigate(PageType, Option<BoxedValue>) -> bool => |frame: &Ref<Frame>, ty: PageType, parameter: Option<BoxedValue>| frame.navigate(ty, parameter),
+            try fn NavigateToType(PageType, Option<BoxedValue>, FrameNavigationOptions) -> bool => |frame: &Ref<Frame>, ty: PageType, parameter: Option<BoxedValue>, options: FrameNavigationOptions| frame.navigate_to_type(ty, parameter, &options),
             try fn GoBack() => Frame::go_back,
             try fn GoForward() => Frame::go_forward,
         ],
@@ -139,7 +139,7 @@ ferro_properties! {
         /// Defines the `SourcePageType` property: the type of the page of the last navigation; setting
         /// it navigates to a page of the type. An invalid value is logged and ignored (WinUI's setter
         /// fails with the error of `Navigate`).
-        pub fn source_page_type_property() -> DirectProperty<Frame, Option<&'static TypeInfo>> {
+        pub fn source_page_type_property() -> DirectProperty<Frame, Option<PageType>> {
             FerroProperty::register_direct::<Frame, _>(
                 "SourcePageType",
                 Frame::source_page_type,
@@ -148,7 +148,7 @@ ferro_properties! {
             )
         }
         /// Defines the `CurrentSourcePageType` property: the type of the page the frame shows (read-only).
-        pub fn current_source_page_type_property() -> DirectProperty<Frame, Option<&'static TypeInfo>> {
+        pub fn current_source_page_type_property() -> DirectProperty<Frame, Option<PageType>> {
             FerroProperty::register_direct::<Frame, _>("CurrentSourcePageType", Frame::current_source_page_type, None, None)
         }
         /// Defines the `CacheSize` property: the number of pages of the cache mode `Enabled` the frame
@@ -244,12 +244,12 @@ impl Frame {
     }
 
     /// Gets the type of the page of the last navigation recorded in the journal.
-    pub fn source_page_type(&self) -> Option<&'static TypeInfo> {
+    pub fn source_page_type(&self) -> Option<PageType> {
         self.source_page_type.get()
     }
 
     /// Gets the type of the page the frame shows, as recorded in the journal.
-    pub fn current_source_page_type(&self) -> Option<&'static TypeInfo> {
+    pub fn current_source_page_type(&self) -> Option<PageType> {
         self.source_page_type.get()
     }
 
@@ -305,7 +305,7 @@ impl Frame {
 
     /// Navigates to a page of `value` unless the frame shows a page of it already. `None` is an
     /// error, as in WinUI's `Navigate`. Rust callers get the error; the property setter logs it.
-    pub fn set_source_page_type(&self, value: Option<&'static TypeInfo>) -> Result<bool, NavigationError> {
+    pub fn set_source_page_type(&self, value: Option<PageType>) -> Result<bool, NavigationError> {
         match value {
             Some(ty) if self.source_page_type() == Some(ty) => Ok(true),
             Some(ty) => self.navigate(ty, None),
@@ -315,7 +315,7 @@ impl Frame {
 
     /// The setter of the property `SourcePageType`: an invalid type or a failed navigation is
     /// logged, where WinUI's setter fails with the error of `Navigate`.
-    fn set_source_page_type_or_log(&self, value: Option<&'static TypeInfo>) {
+    fn set_source_page_type_or_log(&self, value: Option<PageType>) {
         if let Err(error) = self.set_source_page_type(value) {
             log_invalid(&format!("Frame.SourcePageType: {error}"));
         }
@@ -325,29 +325,32 @@ impl Frame {
     /// constructor of the type. Pages already in the cache stay there.
     pub fn register_page_factory(
         &self,
-        source_page_type: &'static TypeInfo,
+        source_page_type: impl Into<PageType>,
         factory: Rc<PageFactory>,
     ) -> Result<(), NavigationError> {
-        if !FramePage::TYPE.is_assignable_from(source_page_type) {
-            return Err(NavigationError::NotAPage(source_page_type.full_name()));
-        }
+        let source_page_type = source_page_type.into();
+        source_page_type.check_page()?;
         let previous = self.factories.borrow_mut().insert(source_page_type, factory);
         drop(previous);
         Ok(())
     }
 
     /// Removes the page factory of `source_page_type`; returns whether there was one.
-    pub fn unregister_page_factory(&self, source_page_type: &'static TypeInfo) -> bool {
-        let removed = self.factories.borrow_mut().remove(source_page_type);
+    pub fn unregister_page_factory(&self, source_page_type: impl Into<PageType>) -> bool {
+        let removed = self.factories.borrow_mut().remove(&source_page_type.into());
         removed.is_some()
     }
 
-    /// Navigates to a page of `source_page_type` with `parameter` (WinUI's `Navigate`).
+    /// Navigates to a page of `source_page_type` with `parameter` (WinUI's `Navigate`), for
+    /// example `frame.navigate(PageType::of::<SettingsPage>(), None)`.
     ///
     /// `Ok(true)` when the request was taken, also when a handler cancelled it, as WinUI's
     /// `Navigate` returns; `Ok(false)` for a request made during a navigation and for a failure a
     /// `NavigationFailed` handler handled; the error of a failure no handler handled.
-    pub fn navigate(&self, source_page_type: &'static TypeInfo, parameter: Option<BoxedValue>) -> Result<bool, NavigationError> {
+    ///
+    /// A `&'static TypeInfo` converts to a [`PageType`] that creates the page by reflection, as
+    /// before 0.5; that form is deprecated (`PageType::from_type_info`) and removed in #625.
+    pub fn navigate(&self, source_page_type: impl Into<PageType>, parameter: Option<BoxedValue>) -> Result<bool, NavigationError> {
         self.navigate_to_type(source_page_type, parameter, &FrameNavigationOptions::default())
     }
 
@@ -355,10 +358,11 @@ impl Frame {
     /// `NavigateToType`); returns as [`navigate`](Self::navigate).
     pub fn navigate_to_type(
         &self,
-        source_page_type: &'static TypeInfo,
+        source_page_type: impl Into<PageType>,
         parameter: Option<BoxedValue>,
         options: &FrameNavigationOptions,
     ) -> Result<bool, NavigationError> {
+        let source_page_type = source_page_type.into();
         if self.in_navigate.replace(true) {
             return Ok(false);
         }
@@ -495,11 +499,9 @@ impl Frame {
     }
 
     /// `NavigationCache::GetContent`: the cached page of the type, or a new one from the factory
-    /// or the default constructor, cached by its cache mode.
-    fn get_page(&self, ty: &'static TypeInfo) -> Result<Ref<FramePage>, NavigationError> {
-        if !FramePage::TYPE.is_assignable_from(ty) {
-            return Err(NavigationError::NotAPage(ty.full_name()));
-        }
+    /// or the default constructor of the page type, cached by its cache mode.
+    fn get_page(&self, ty: PageType) -> Result<Ref<FramePage>, NavigationError> {
+        ty.check_page()?;
         if let Some(page) = self.permanent.borrow().get(&ty).cloned() {
             return Ok(page);
         }
@@ -516,15 +518,11 @@ impl Frame {
         let factory = self.factories.borrow().get(&ty).cloned();
         let page = match factory {
             Some(factory) => factory()?,
-            None => ty
-                .create_instance()
-                .ok_or_else(|| NavigationError::MissingConstructor(ty.full_name()))?
-                .cast::<FramePage>()
-                .ok_or_else(|| NavigationError::NotAPage(ty.full_name()))?,
+            None => ty.create()?,
         };
         if !ty.is_assignable_from(page.get_type()) {
             return Err(NavigationError::FactoryTypeMismatch {
-                expected: ty.full_name(),
+                expected: ty.display_name(),
                 actual: page.get_type().full_name(),
             });
         }
@@ -551,7 +549,7 @@ impl Frame {
         Ok(page)
     }
 
-    pub(crate) fn remove_cached_page(&self, ty: &'static TypeInfo) {
+    pub(crate) fn remove_cached_page(&self, ty: PageType) {
         let permanent = self.permanent.borrow_mut().remove(&ty);
         let transient = {
             let mut cache = self.transient.borrow_mut();
@@ -616,7 +614,7 @@ impl Frame {
         }
     }
 
-    fn set_source_type(&self, ty: Option<&'static TypeInfo>) {
+    fn set_source_type(&self, ty: Option<PageType>) {
         let old = self.source_page_type.replace(ty);
         if old != ty {
             self.raise_property_changed(

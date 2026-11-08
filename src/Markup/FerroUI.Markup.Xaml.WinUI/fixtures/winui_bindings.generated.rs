@@ -496,7 +496,7 @@ pub fn build_native_controls_xaml(
     frame_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NativeFrame")));
     rt::register_name_value(name_scope.as_ref(), "NativeFrame", ::std::rc::Rc::new(::core::clone::Clone::clone(&frame_0)), 17, 10)?;
     // native_controls.xaml(17,31) SourcePageType
-    frame_0.set_direct_value(::ferroui_controls::Frame::source_page_type_property(), ::core::option::Option::Some(<::ferroui_controls::FramePage as ::ferroui_base::StaticType>::TYPE));
+    frame_0.set_direct_value(::ferroui_controls::Frame::source_page_type_property(), rt::cast(<::ferroui_controls::FramePage as ::ferroui_base::StaticType>::TYPE, 17, 4)?);
     rt::invoked(frame_0.try_end_init(), 17, 4)?;
     // native_controls.xaml(18,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());

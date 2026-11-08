@@ -49,9 +49,9 @@ fn connected_animation_initializes_all_four_source_compositions_and_original_ite
     let _application = start();
     let root = page();
     for (name, expected_type, count) in [
-        ("ConnectedCollectionFrame", ConnectedListPage::TYPE, 8),
-        ("ConnectedCardFrame", ConnectedCardPage::TYPE, 13),
-        ("ConnectedRepeaterFrame", ConnectedRepeaterPage::TYPE, 13),
+        ("ConnectedCollectionFrame", ConnectedListPage::PAGE_TYPE, 8),
+        ("ConnectedCardFrame", ConnectedCardPage::PAGE_TYPE, 13),
+        ("ConnectedRepeaterFrame", ConnectedRepeaterPage::PAGE_TYPE, 13),
     ] {
         let frame = root.get_control::<Frame>(name);
         assert_eq!(frame.current_source_page_type(), Some(expected_type));
@@ -82,7 +82,7 @@ fn connected_animation_initializes_all_four_source_compositions_and_original_ite
     assert_eq!(
         root.get_control::<Frame>("ConnectedContentFrame")
             .current_source_page_type(),
-        Some(ConnectedFirstPage::TYPE)
+        Some(ConnectedFirstPage::PAGE_TYPE)
     );
     assert_eq!(
         root.get_control::<RadioButtons>("ConfigurationPanel")
@@ -106,7 +106,7 @@ fn connected_collection_passes_selected_data_and_returns_to_the_cached_source_pa
     click(&third);
     assert_eq!(
         frame.current_source_page_type(),
-        Some(ConnectedDetailPage::TYPE)
+        Some(ConnectedDetailPage::PAGE_TYPE)
     );
     assert_eq!(frame.back_stack_depth(), 1);
     let detail = content(&frame).unwrap();
@@ -316,7 +316,7 @@ fn connected_manual_items_accept_keyboard_activation_and_restore_the_saved_scrol
     assert!(space_up.handled());
     assert_eq!(
         frame.current_source_page_type(),
-        Some(ConnectedDetailPage::TYPE)
+        Some(ConnectedDetailPage::PAGE_TYPE)
     );
     window.close();
 }
@@ -351,7 +351,7 @@ fn connected_card_uses_selected_item_details_and_restores_its_overlay_after_retu
     assert!(smoke.children().contains(&destination.upcast()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(ConnectedCardPage::TYPE)
+        Some(ConnectedCardPage::PAGE_TYPE)
     );
     assert_eq!(frame.back_stack_depth(), 0);
 }
@@ -369,9 +369,9 @@ fn connected_configurations_alternate_original_destinations_and_preserve_frame_h
         assert_eq!(
             frame.current_source_page_type(),
             Some(if forward {
-                ConnectedSecondPage::TYPE
+                ConnectedSecondPage::PAGE_TYPE
             } else {
-                ConnectedFirstPage::TYPE
+                ConnectedFirstPage::PAGE_TYPE
             })
         );
         let current = content(&frame).unwrap();

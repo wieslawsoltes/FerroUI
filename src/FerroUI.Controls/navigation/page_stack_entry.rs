@@ -2,10 +2,10 @@
 //! commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! ../NOTICE.md).
 
-use crate::Frame;
+use crate::{Frame, PageType};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObject, FerroObjectImpl, Ref,
-    TypeInfo, WeakRef,
+    WeakRef,
 };
 use std::cell::RefCell;
 
@@ -17,7 +17,7 @@ use std::cell::RefCell;
 #[repr(C)]
 pub struct PageStackEntry {
     base: FerroObject,
-    source_page_type: &'static TypeInfo,
+    source_page_type: PageType,
     parameter: Option<BoxedValue>,
     frame: RefCell<Option<WeakRef<Frame>>>,
 }
@@ -28,10 +28,10 @@ ferro_class_info!(PageStackEntry {
     markup: {
         namespace: "FerroUI.Navigation",
         constructors: [
-            (&'static TypeInfo, Option<BoxedValue>) => PageStackEntry::new,
+            (PageType, Option<BoxedValue>) => PageStackEntry::new,
         ],
         properties: [
-            SourcePageType: &'static TypeInfo { get: PageStackEntry::source_page_type },
+            SourcePageType: PageType { get: PageStackEntry::source_page_type },
             Parameter: Option<BoxedValue> { get: PageStackEntry::parameter },
         ],
     },
@@ -39,12 +39,12 @@ ferro_class_info!(PageStackEntry {
 
 impl PageStackEntry {
     /// Creates an entry of the page type `source_page_type` with the parameter of its navigation.
-    pub fn new(source_page_type: &'static TypeInfo, parameter: Option<BoxedValue>) -> Ref<Self> {
+    pub fn new(source_page_type: PageType, parameter: Option<BoxedValue>) -> Ref<Self> {
         instantiate(Self { base: FerroObject::construct(), source_page_type, parameter, frame: RefCell::new(None) })
     }
 
     /// Gets the type of the page of the entry.
-    pub fn source_page_type(&self) -> &'static TypeInfo {
+    pub fn source_page_type(&self) -> PageType {
         self.source_page_type
     }
 
