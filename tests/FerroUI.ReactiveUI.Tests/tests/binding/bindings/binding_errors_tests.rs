@@ -1,7 +1,8 @@
 //! `BindingErrorsTests` (`ReactiveUI.Binding.Tests/Bindings/BindingErrorsTests.cs`).
 //!
-//! A rethrown fault is a panic with a `TargetInvocationError` payload, which the test catches;
-//! the inner error is kept as its message.
+//! A fault with an inner error goes to the default exception handler as a
+//! `TargetInvocationError` (#567: no panic), which the test replaces to observe it; the inner error
+//! is kept as its message.
 
 use ferroui_reactive::subjects::Subject;
 use ferroui_reactiveui::*;
@@ -9,7 +10,6 @@ use ferroui_system::{IObserver, ObservableError};
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 /// The expression the tests report faults against.
@@ -80,13 +80,30 @@ fn subscribe_when_source_faults_with_inner_exception_rethrows_as_target_invocati
 
     let _subscription = BindingErrors::subscribe(subject.as_observable(), |_| {}, BOUND_EXPRESSION);
 
-    let error: ObservableError = Rc::new(InvalidOperation { message: "outer", inner: Some(Box::new(InvalidOperation { message: "the setter threw", inner: None })) });
-    let outcome = catch_unwind(AssertUnwindSafe(|| subject.on_error(error)));
+    let handled: Rc<RefCell<Vec<ObservableError>>> = Rc::new(RefCell::new(Vec::new()));
+    RxState::reset_for_testing();
+    RxState::initialize_exception_handler(Rc::new(Handled(handled.clone())));
 
-    let payload = outcome.expect_err("the fault is raised again");
-    let thrown = payload.downcast_ref::<TargetInvocationError>().expect("a TargetInvocationException");
+    let error: ObservableError = Rc::new(InvalidOperation { message: "outer", inner: Some(Box::new(InvalidOperation { message: "the setter threw", inner: None })) });
+    subject.on_error(error);
+    RxState::reset_for_testing();
+
+    let handled = handled.borrow();
+    assert_eq!(handled.len(), 1, "the fault reaches the default exception handler once");
+    let thrown = handled[0].downcast_ref::<TargetInvocationError>().expect("a TargetInvocationException");
     assert_eq!(thrown.inner_exception(), Some("the setter threw"));
     assert!(thrown.message().contains(BOUND_EXPRESSION));
+}
+
+/// An exception handler that keeps the errors it receives.
+struct Handled(Rc<RefCell<Vec<ObservableError>>>);
+
+impl IObserver<ObservableError> for Handled {
+    fn on_next(&self, error: ObservableError) {
+        self.0.borrow_mut().push(error);
+    }
+    fn on_error(&self, _error: ObservableError) {}
+    fn on_completed(&self) {}
 }
 
 // Not ported: Subscribe_NullSource_Throws - argument validation

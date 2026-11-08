@@ -53,7 +53,7 @@ Pinned toolchain **[M]**: Emscripten 6.0.10, Rust 1.99.0 with the `wasm32-unknow
 
 ### Exception handling (2026-10-06)
 
-The browser build unwinds with **WebAssembly exception handling**, not with JavaScript exceptions. With Rust 1.90.0 every call that may unwind went through an `invoke_*` function in JavaScript and back into the module through the function table (sections 18 to 20); that is gone.
+The browser build unwinds with **WebAssembly exception handling**, not with JavaScript exceptions. Since #567 the `browser` profile aborts on panic, as `release` and `dist` do: a panic runs the panic hook and the module traps; Rust unwinding applies to `--debug` builds. Skia's decoders keep failing cleanly through `longjmp` on WebAssembly exceptions (`emscripten_sjlj.cpp`), which the damaged-image check of `themed_view.test.mjs` covers in both. With Rust 1.90.0 every call that may unwind went through an `invoke_*` function in JavaScript and back into the module through the function table (sections 18 to 20); that is gone.
 
 What the toolchain does **[V]**:
 

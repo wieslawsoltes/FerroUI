@@ -318,6 +318,13 @@ pub fn catalog_frame_drawn() -> bool {
     REQUESTED_FRAME.with(|frame| frame.borrow().as_ref().is_some_and(|batch| batch.rendered().is_completed()))
 }
 
+/// Whether the module unwinds on panic (`cfg!(panic = "unwind")`): the `--debug` build does, the
+/// `browser` profile aborts as `release` and `dist` do (#567). Not a port.
+#[wasm_bindgen(js_name = catalogUnwinds)]
+pub fn catalog_unwinds() -> bool {
+    cfg!(panic = "unwind")
+}
+
 /// Makes the next frame of the view panic, for the behaviour tests: a job
 /// that panics is posted to the compositor of the view and runs on the
 /// thread that renders, inside a frame. Returns whether the job was posted
