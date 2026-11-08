@@ -43,7 +43,7 @@ use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSub
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderLoopTask};
 use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
-use ferroui_base::input::{IInputDevice, MouseDevice, RawInputModifiers};
+use ferroui_base::input::{IInputDevice, InputManager, MouseDevice, RawInputModifiers};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelSize, Point, Ref, Vector};
@@ -260,6 +260,8 @@ impl IGlobalClock for StillClock {}
 
 /// A shown window with a screen, rendering on a thread of the gate.
 struct Gate {
+    input_impl: Rc<ferroui_controls::testing::MockWindowImpl>,
+    pointer: Option<Point>,
     // Declared before the services: the compositor is dropped before the application scope.
     _compositor: Rc<Compositor>,
     render_loop: Arc<WokenRenderLoop>,
@@ -297,6 +299,9 @@ impl Gate {
                 .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
                 .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
                 .with_global_clock(Rc::new(StillClock::default()))
+                // As an application: input goes through the pre-processors (pointer-over), and
+                // tooltips follow the pointer (`ToolTipService`, registered with the input manager).
+                .with_input_manager(Rc::new(InputManager::new()))
                 .with_theme(|| FluentTheme::new().as_style()),
         );
         // What the application of the program does when it initialises (`app.rs`).
@@ -332,22 +337,12 @@ impl Gate {
         window.set_can_resize(false);
         window.set_content(Some(Control::boxed(screen())));
         window.show();
-        if let Some(position) = pointer {
-            let input = ferroui_controls::platform::ITopLevelImpl::input(&*input_impl).expect("the window handles input");
-            let device: Rc<dyn IInputDevice> = MouseDevice::new();
-            input(Rc::new(RawPointerEventArgs::new(
-                device,
-                0,
-                window.input_root(),
-                RawPointerEventType::Move,
-                position,
-                RawInputModifiers::NONE,
-            )));
-        }
 
         let thread_loop = render_loop.clone();
         let render_thread = thread::spawn(move || thread_loop.run());
         Gate {
+            input_impl,
+            pointer,
             _compositor: compositor,
             render_loop,
             render_thread: Some(render_thread),
@@ -355,6 +350,21 @@ impl Gate {
             window,
             frames,
         }
+    }
+
+    /// Moves a mouse to the gate's pointer position, once the screen is laid out and rendered.
+    fn move_pointer(&self) {
+        let Some(position) = self.pointer else { return };
+        let input = ferroui_controls::platform::ITopLevelImpl::input(&*self.input_impl).expect("the window handles input");
+        let device: Rc<dyn IInputDevice> = MouseDevice::new();
+        input(Rc::new(RawPointerEventArgs::new(
+            device,
+            0,
+            self.window.input_root(),
+            RawPointerEventType::Move,
+            position,
+            RawInputModifiers::NONE,
+        )));
     }
 
     /// Runs the jobs of the UI thread until the screen's animation frames have advanced the frame
@@ -409,6 +419,8 @@ fn measure(bench: &str, pointer: Option<Point>, screen: impl FnOnce() -> Ref<Con
     let warmup = variable("GATE_WARMUP", 60);
     let gate = Gate::start(screen, pointer);
     gate.run(warmup);
+    gate.move_pointer();
+    gate.run(warmup.min(10));
     let run = gate.run(frames);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
 
