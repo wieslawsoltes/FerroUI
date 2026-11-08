@@ -510,3 +510,49 @@ The sizes of the earlier sections are those of the `dist` profile. The workflow
 `.github/workflows/perf.yml` builds with the release profile of each ref, so a comparison of a ref
 before this change with one after it shows the difference of the profiles, not a regression of the
 code.
+
+## 8. The cross-framework gauntlet (2026-11-08)
+
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
+benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
+beside the other frameworks. `PERF_REPORT=1` prints the frame rate the app's animation-frame
+callback sees, for A/B runs of FerroUI builds:
+
+```sh
+PERF_SCENARIO=gauntlet PERF_TIER=16 PERF_REPORT=1 PERF_FONTS=<folder of Roboto-*.ttf> \
+  cargo run --release -p gauntlet-benchmark
+```
+
+Apple M3 Pro, `release`, Skia, own counter, median of the last 8 of 12 seconds, two alternating
+rounds:
+
+| Build | Gauntlet (tier 16) | Still wall (tier 20, pointer outside the window) |
+|---|---:|---|
+| main (d09b86731) | 15.6, 16.6 | 27.0, 29.4 |
+| disposal index and hit-test buckets (section 9.1, 9.2) | 19.3, 19.0 | 33.5, 28.4 |
+
+The run of the benchmark's own harness (external frame counter, every framework) needs the display
+at 60 Hz, as the benchmark is calibrated; it is added here once made.
+
+## 9. Deviations from upstream for frame cost
+
+Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
+same results) and changes only how much work a frame does.
+
+### 9.1 The disposal queue of the compositor is indexed by id
+
+Upstream keeps the server objects to dispose with the next batch in a list and searches it for an
+earlier entry of the same object before adding one. A frame in which thousands of visuals record
+new draw lists disposes thousands of render data objects, which made that search quadratic: 14 %
+of the UI thread in the gauntlet. `Compositor` keeps the position of each id's entry in a table
+indexed by the id (ids are dense), so queueing is constant time; the batch writes the same entries
+in the same order.
+
+### 9.2 The hit-test tree reads only a bucket's children
+
+The composition hit-test tree splits a collection's children into buckets of 32 in z order and
+checks a bucket again when the readback revision changed. Checking a bucket took a snapshot of the
+whole collection, so a hit test over a collection of thousands of children was quadratic (97 % of
+the UI thread on the still wall with the pointer in the window). A bucket now reads its own 32
+children by index.
