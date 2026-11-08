@@ -2,7 +2,8 @@
      Core content only. Dialog titles, mode toggle, cancel and confirm actions belong to the host. -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:material="using:FerroUI.Themes.Material">
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
   <ControlTheme x:Key="MaterialTimeSelector" TargetType="RadioButton">
     <Setter Property="MinWidth" Value="0" /><Setter Property="MinHeight" Value="0" />
     <Setter Property="Padding" Value="0" /><Setter Property="CornerRadius" Value="8" />

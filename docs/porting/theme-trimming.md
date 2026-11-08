@@ -1,6 +1,6 @@
 # Theme trimming and compact theme code (#568)
 
-Design note, 2026-11-06. Steps 1 to 5 of the plan are implemented (sections 8 to 12); the rest is not yet. Counts are taken from the checked-in
+Design note, 2026-11-06. Steps 1 to 6 of the plan are implemented (sections 8 to 13). Counts are taken from the checked-in
 `compiled_xaml.rs` of the themes at `main` 72cd992f8 (the build writes the same text into
 `OUT_DIR`), sizes from `docs/binary-size.md` (section 5.4) and from the measurements recorded with
 PR #496 (`docs/benchmarks/compiled-theme-linux-x86_64.json` on that branch).
@@ -437,7 +437,7 @@ release, the catalog), with the symbol attribution script of step 1.
 | 3. Root tables in applications | `WinUITheme::with_parts`; `try_load` through the registered units; the `type_tables` metadata of `ferroui-base` and the cfg in the theme builds; the emitter writes `with_parts(..)` for classes with units; `ferroui-build` computes roots from compiled documents, keys, base classes, `theme-roots` and the ambient unit, and writes the table; debug diagnostics. Hello world trims automatically. | `ferroui-build` fixture tests; hello world screenshot identical to `theme-roots = "all"`; catalog and gallery screenshots with computed roots identical to `all`; first-template activation; hello world size (target: most of the 7.28 MB, plus the control code only templates reached) |
 | 4. Roots from code | `ferroui-build-scan` records the "creates" edges of each class (`X::new`, `X::builder`, `X::default` in its impls and its file) in the type models. `ferroui-build` reads the type names and string literals of the application's sources. This replaces any hand list of companions from step 3. | Scanner tests; every compiled desktop sample (as run for #566) shows no new missing-theme diagnostic and renders identically with computed and `all` roots; hello world and catalog sizes |
 | 5. ControlTheme tables | Declarative per-factory tables for ControlTheme construction (5.3), selector slices, the StaticResource setter helper and template binding runs (5.4). Templates stay native. | Theme reference tests; screenshots; first-template activation (first Button, ComboBox, NavigationView, CalendarView) within noise; sizes |
-| 6. The other themes | Units and `with_parts` for Fluent, Simple, macOS and Material; their galleries. | Their reference tests, gallery screenshots, sizes |
+| 6. The other themes | Units and `with_parts` for Fluent, Simple, macOS and Material; their galleries. Fluent, Simple and macOS came with steps 2 and 3; Material is section 13. | Their reference tests, gallery screenshots, sizes |
 
 ## 7. Open questions for the owner
 
@@ -764,8 +764,8 @@ The generated file of a class with units (the emitter, `rust_emitter/theme_units
 - `THEME_UNIT_TYPE_KEYS`, the type keys of each unit by index, exists under `cfg(debug_assertions)`
   only.
 
-The theme classes (`WinUITheme`, `FluentTheme`, `SimpleTheme`, `MacOSTheme`; Material has no
-units):
+The theme classes (`WinUITheme`, `FluentTheme`, `SimpleTheme`, `MacOSTheme`, and `MaterialTheme`
+since step 6, section 13):
 
 | Entry point | Units |
 |---|---|
@@ -798,7 +798,7 @@ include of the theme constructs it with `new()`, and every run-time loader links
   calls `rt::register_theme_parts(<class>, THEME_PARTS_<CLASS>)`. The kept units are also listed in
   `$OUT_DIR/xaml/theme_parts.txt`, for measuring and debugging.
 - Diagnostics: in debug builds `with_parts` records the type keys of the units left out. The lookup
-  of the WinUI, Fluent and macOS themes (`try_get_resource`) logs once per type through the
+  of the WinUI, Fluent, macOS and Material themes (`try_get_resource`) logs once per type through the
   framework logger (warning, area `Control`) when a lookup of such a type key misses:
   `the WinUI control theme of CalendarView was trimmed: add it to theme-roots`. It yields nothing,
   so the control behaves as it does today without a theme. This is the deferred entry of 4(d) done
@@ -1124,3 +1124,101 @@ with the statements matched exactly; anything else is written as before.
 
 To be filled in after the checked-in output is regenerated and measured (generated text and
 functions per theme, hello world `dist`, theme load time and first-template activation).
+
+## 13. Step 6 as implemented: the Material theme
+
+Fluent, Simple and macOS got their units with step 2 and `with_parts` with step 3. The Material
+theme (`ferroui-themes-material`) got units with step 2 too, for the documents it merged: its control
+documents, which `Controls/MaterialControls.xaml` merges, and its own resources
+(`Resources/Material*.xaml`, `Strings/InvariantResources.xaml`). Its class had no `with_parts`, its
+inherited resource documents were part of the ambient unit, and three control documents were
+public. Step 6 closes the three gaps. Nothing in the build tasks or the emitter names a theme:
+`ferroui-build` reads the classes with units and their tables from the `.xamlmeta` of the
+dependencies (`theme_units`, `table_path`), so the application side needed no change.
+
+### 13.1 The inherited resource documents
+
+`MaterialTheme.xaml` included its 72 inherited resource documents (the documents of the WinUI
+theme with the namespace of this theme: `SystemResources.xaml`, `Generic.xaml`, the
+`*_themeresources.xaml`, `ThemeShadows.xaml`, `Glyphs.xaml`) with `ResourceInclude`, each a merged
+dictionary of the theme's dictionary, and merged its own resources with `MergeResourceInclude` into
+the theme's dictionary itself. A `ResourceInclude` is not inlined, so those documents were not
+units: about 2.3 MB of the 10 MB of generated text, always linked.
+
+The WinUI theme merges the same documents with `MergeResourceInclude` into its dictionary, but
+the Material theme cannot, for three reasons found by reading the documents:
+
+- `Resources/MaterialCompatibility.xaml` redefines five keys of the inherited documents
+  (`ButtonPadding`, `ComboBoxMinHeight` and the three `ThemeShadow*Margin`); one dictionary cannot
+  hold a key twice.
+- The theme replaces the theme dictionaries of its own dictionary with its color schemes when it is
+  constructed (`set_color_scheme`, `ResourceDictionary::set_theme_dictionary`); merged into it, the
+  theme dictionaries of the inherited documents would be replaced too.
+- A `{StaticResource}` looks in its own document's dictionary first, then in the theme's dictionary,
+  where the color schemes override about 1,900 inherited keys (`color_scheme.rs`,
+  `install_compatibility`, 1,923 keys of `scripts/material-theme/compatibility-map.json`). The
+  inherited documents have 836 such references (distinct pairs of a document and a key) from one
+  document to an overridden key of another. Merged into one dictionary of their own, those references would find the
+  inherited definition first; for 84 entries whose own keys the schemes do not override
+  (`InfoBadgeBackground`, `RadioButtonsHeaderForeground`, the rating control and person picture
+  brushes) the value would change.
+
+The inherited documents define no key twice among themselves, and none of them has an entry
+without a key. So each is to be merged, with `MergeResourceInclude`, into a merged dictionary of its own,
+written inline in `MaterialTheme.xaml`:
+
+```xml
+<ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Resources/Button_themeresources.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>
+```
+
+Not done in #568 step 6: the compiler does not inline a `MergeResourceInclude` that sits inside
+an inline dictionary (`InjectServiceProviderNode: no emitter for this value node`). The 72
+documents stay `ResourceInclude`s in the ambient unit, as before, and #633 tracks the compiler
+support and the change of the theme. The control documents are units, and the theme has
+`with_parts`.
+
+### 13.2 The class and the documents
+
+- `MaterialTheme` has the constructors of 10.3: `new()` and `with_service_provider` apply every unit
+  and register the full table unless parts are registered; `with_parts(sp, parts)` applies the
+  given units and then sets the color schemes, the high contrast scheme and the motion resources as
+  the full theme does; `with_registered_parts` and `with_registered_parts_default` (hidden) are the
+  constructors of the type information, of the markup metadata and of the loader table
+  (`build.rs` states `ClassConstructor::ServiceProvider("with_registered_parts")`). In debug builds
+  its `try_get_resource` reports a trimmed control theme ("the Material control theme of .. was
+  trimmed").
+- `Controls/MaterialBottomSheet.xaml`, `MaterialRangeSlider.xaml` and `MaterialTimePicker.xaml` had
+  no `x:ClassModifier="internal"`, so the loader table (`try_load`) answered their URIs and
+  referred to their build functions, which kept the three documents linked in every application
+  that registers the theme's types. They are internal now, as every other document of the theme;
+  nothing loads them by URI.
+
+### 13.3 Tests
+
+`src/FerroUI.Themes.Material/tests/compiled_xaml_tests.rs`. The crate has no checked-in reference
+of its compiled markup, so the tests read the output of the build (`$OUT_DIR/xaml/compiled_xaml.rs`
+and `FERROUI_XAMLMETA`):
+
+- `the_whole_theme_applies_every_unit`: the table in canonical order, the unit graph of the
+  `.xamlmeta` for `MaterialTheme`, the hosts in the ambient unit, the button unit, inherited resource
+  documents as units of one document each, and every key of every unit in the full theme (except
+  those of `Resources/MaterialColors.xaml`, whose theme dictionaries the color schemes replace).
+- `a_theme_with_parts_leaves_out_the_units_it_is_not_given`: without the rating control's unit, its
+  control theme is left out; with every unit it is there; `registered_theme_units()` is the full
+  table in the test build.
+- `a_theme_with_parts_leaves_out_an_inherited_resource_document`: without
+  `Resources/RatingControl_themeresources.xaml`, its keys are absent in every variant, and the color
+  schemes and the motion resources are set.
+- `an_inherited_resource_resolves_the_overrides_of_the_theme`: `RadioButtonsHeaderForeground`
+  resolves to the on-surface role of a color scheme, not to the inherited `TextFillColorPrimaryBrush`.
+- `the_classes_of_reflection_paths_are_reached_only_through_their_units` (#612, root D), and the
+  loader table answering the class document alone.
+
+### 13.4 Measurements
+
+The theme has 107 units (the ambient unit, five of its own resource documents and the control
+documents) in 9.84 MB of generated text. `samples/MaterialThemeGallery` constructs its theme in Rust
+(`MaterialTheme::new()`), so it keeps every unit; trimming applies to an application whose compiled
+markup constructs `<MaterialTheme />`, and no sample of the repository does yet. The size of a
+trimmed application on the Material theme is measured with #633, which also moves the inherited
+resource documents (the largest part of the ambient unit) into units.
