@@ -424,8 +424,10 @@ mod tests {
         use crate::data::core::{ValueType, ValueTypes};
         use crate::{BoxedValue, Ref, TypeInfo};
 
-        // Created through the type metadata, without naming the class.
-        let object = SolidColorBrush::TYPE.create_instance().expect("default constructor");
+        // Created through the type metadata. Without the tables of types (`type-tables`) a
+        // runtime type names no constructor until code that names the class registers it.
+        let type_ = TypeInfo::register_constructor::<SolidColorBrush>();
+        let object = type_.create_instance().expect("default constructor");
         let brush = object.cast::<SolidColorBrush>().expect("a solid color brush");
         brush.set_color(Colors::RED);
         let boxed: BoxedValue = Rc::new(brush);

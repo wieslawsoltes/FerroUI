@@ -1742,13 +1742,22 @@ impl<'a> Emitter<'a> {
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
             // A class named with `x:Type` as another handle of `System.Type` that a crate declares
             // with a cast from the class reference (the `PageType` of a frame, B3 of #612): the
-            // cast of the run-time loader (`RuntimeTypeValue::to_handle`).
+            // cast of the run-time loader (`RuntimeTypeValue::to_handle`). Such a handle creates
+            // the class from its runtime type, which names no constructor without the tables of
+            // types, so the class reference of a class with a default constructor registers it
+            // (`TypeInfo::register_constructor`): the document names the class, and only the
+            // constructors of the classes it names are linked.
             Kind::SystemType { class: Some(class), .. }
                 if self.types.markup_by_handle(target).is_some_and(|markup| markup.full_name() == "System.Type") =>
-            (
-                self.types.known(Known::Class),
-                format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(class.rust_path()?)),
-            ),
+            {
+                let path = absolute(class.rust_path()?);
+                let class_reference = if class.has_default_constructor() {
+                    format!("::ferroui_base::TypeInfo::register_constructor::<{path}>()")
+                } else {
+                    format!("<{path} as ::ferroui_base::StaticType>::TYPE")
+                };
+                (self.types.known(Known::Class), class_reference)
+            }
             Kind::Null | Kind::SystemType { .. } => return None,
         };
         self.types

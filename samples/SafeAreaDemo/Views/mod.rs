@@ -12,5 +12,12 @@ pub use main_window::MainWindow;
 /// The classes of this namespace (`X::TYPE`).
 pub(crate) const TYPES: &[&TypeInfo] = &[MainView::TYPE, MainWindow::TYPE];
 
+/// Makes the default constructors of the views reachable through their runtime types, which the
+/// view locator creates them from ([`TypeInfo::register_constructor`]).
+pub(crate) fn register_constructors() {
+    TypeInfo::register_constructor::<MainView>();
+    TypeInfo::register_constructor::<MainWindow>();
+}
+
 /// The classes of this namespace that have a document (`&X::XAML_CLASS`).
 pub(crate) const CLASSES: &[&XamlClass] = &[&MainView::XAML_CLASS, &MainWindow::XAML_CLASS];

@@ -83,6 +83,9 @@ pub struct TypeInfo {
     identity: Option<&'static TypeIdentity>,
     module_path: &'static str,
     class_init: Option<fn()>,
+    /// The default constructor, kept only with the type tables
+    /// ([`with_constructor`](Self::with_constructor)).
+    #[cfg(feature = "type-tables")]
     constructor: Option<fn() -> Ref<FerroObject>>,
     handles: Option<fn() -> [TypeId; 2]>,
     handle_registration: Option<fn()>,
@@ -98,6 +101,7 @@ impl TypeInfo {
             identity: None,
             module_path: "",
             class_init: None,
+            #[cfg(feature = "type-tables")]
             constructor: None,
             handles: None,
             handle_registration: None,
@@ -160,8 +164,30 @@ impl TypeInfo {
 
     /// Attaches the default constructor of the class: the function that
     /// creates an instance as its parameterless `new()` does.
+    ///
+    /// The type keeps it only with the tables of types (the feature
+    /// `type-tables` of this crate, which the run-time XAML loader, the
+    /// designer, DevTools and hot reload enable): those builds create any
+    /// class by reflection. Without the feature the constructor is dropped
+    /// here, so a runtime type names no constructor and the linker leaves out
+    /// the constructor of every class the application never creates (#612,
+    /// B3). The decision is made by the features of this crate, wherever the
+    /// class is declared: [`ferro_class!`] passes the constructor to this
+    /// function in the crate of the class. Code that names the class creates
+    /// it statically ([`DefaultConstructible`]), or makes its constructor
+    /// reachable by reflection with
+    /// [`register_constructor`](Self::register_constructor).
+    #[cfg(feature = "type-tables")]
     pub const fn with_constructor(mut self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         self.constructor = constructor;
+        self
+    }
+
+    /// Without the tables of types the constructor is not kept; see the
+    /// other definition.
+    #[cfg(not(feature = "type-tables"))]
+    pub const fn with_constructor(self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
+        let _ = constructor;
         self
     }
 
@@ -278,19 +304,68 @@ impl TypeInfo {
         }
     }
 
-    /// The default constructor of the class, if it declares one (see
-    /// [`ferro_class_info!`]): creates an instance as the parameterless
-    /// `new()` of the class does.
-    #[inline]
+    /// The default constructor of the class (see [`ferro_class_info!`]):
+    /// creates an instance as the parameterless `new()` of the class does.
+    ///
+    /// With the tables of types (the feature `type-tables`), the constructor
+    /// of every class that declares one. Without them a runtime type names
+    /// no constructor ([`with_constructor`](Self::with_constructor)): this is
+    /// the constructor registered for the class with
+    /// [`register_constructor`](Self::register_constructor), if any, and
+    /// `None` otherwise. Code that names the class creates it with
+    /// [`DefaultConstructible::new_instance`] instead.
     pub fn default_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
-        self.constructor
+        self.stored_constructor().or_else(|| {
+            let key = self as *const TypeInfo as usize;
+            read_registry().constructors.get(&key).copied()
+        })
     }
 
-    /// Creates an instance with the default constructor of the class.
-    /// `None` if the class has none (abstract classes, classes that need
-    /// constructor arguments, non-instantiable types).
+    /// Creates an instance with the default constructor of the class
+    /// ([`default_constructor`](Self::default_constructor)). `None` if the
+    /// class has none (abstract classes, classes that need constructor
+    /// arguments, non-instantiable types) and, without the tables of types,
+    /// if no constructor is registered for it.
     pub fn create_instance(&self) -> Option<Ref<FerroObject>> {
-        self.constructor.map(|constructor| constructor())
+        self.default_constructor().map(|constructor| constructor())
+    }
+
+    /// Makes the default constructor of the class `T` reachable through its
+    /// runtime type: after this call, [`default_constructor`](Self::default_constructor)
+    /// and [`create_instance`](Self::create_instance) of `T::TYPE` create an
+    /// instance of `T`, with or without the tables of types. Returns
+    /// `T::TYPE`.
+    ///
+    /// For code that names a class statically and hands its runtime type to
+    /// something that creates it by reflection: compiled markup giving
+    /// `{x:Type local:Page}` to a frame (`Frame.SourcePageType`,
+    /// `Frame.Navigate`), or an application whose view locator creates the
+    /// views it registers by name. Only the constructors of the classes named
+    /// here are linked (#612, B3). With the tables of types the runtime type
+    /// already carries the constructor and nothing is registered.
+    pub fn register_constructor<T: DefaultConstructible>() -> &'static TypeInfo {
+        fn construct<T: DefaultConstructible>() -> Ref<FerroObject> {
+            T::new_instance().upcast::<FerroObject>()
+        }
+        let type_ = T::TYPE;
+        if type_.stored_constructor().is_none() {
+            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(construct::<T>);
+        }
+        type_
+    }
+
+    /// The default constructor the type carries: the declared one with the
+    /// tables of types, none without them.
+    #[inline]
+    fn stored_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
+        #[cfg(feature = "type-tables")]
+        {
+            self.constructor
+        }
+        #[cfg(not(feature = "type-tables"))]
+        {
+            None
+        }
     }
 
     /// The Rust type of the handle of the class (`Ref<T>`). `None` for types
@@ -551,6 +626,9 @@ struct TypeRegistry {
     /// The public Rust paths of classes, by the address of their type.
     #[cfg(feature = "compiler-metadata")]
     rust_paths: HashMap<usize, (&'static TypeInfo, &'static str)>,
+    /// The default constructors registered with
+    /// [`TypeInfo::register_constructor`], by the address of their type.
+    constructors: HashMap<usize, fn() -> Ref<FerroObject>>,
 }
 
 impl TypeRegistry {
@@ -665,7 +743,9 @@ impl<T: ?Sized> ClassDefaults for T {}
 /// (`PageType::of::<T>()` of `ferroui-controls`) calls this, so the compiler
 /// checks that the class has a default constructor, and the constructor is
 /// linked only where something creates the class (#612). Implemented by
-/// [`ferro_class_info!`] for every class that declares `new`.
+/// [`ferro_class_info!`] for every class that declares `new`. It works with
+/// and without the tables of types; the constructor a [`TypeInfo`] carries
+/// ([`TypeInfo::default_constructor`]) exists only with them.
 pub trait DefaultConstructible: ObjectType {
     /// Creates an instance as the parameterless `new()` of the class does.
     fn new_instance() -> Ref<Self>;
@@ -1481,7 +1561,10 @@ macro_rules! ferro_class {
 /// ```
 ///
 /// * `new` is a function without parameters that returns the handle of a new
-///   instance. It becomes [`TypeInfo::default_constructor`].
+///   instance. It implements [`DefaultConstructible`] for the class, the
+///   static path to the constructor, and becomes
+///   [`TypeInfo::default_constructor`] with the tables of types (the feature
+///   `type-tables`; see [`TypeInfo::with_constructor`]).
 /// * `interfaces` lists the handle types `I` that `Ref<Class>` converts to
 ///   with `Into<I>`, or, as `I => function`, with the given
 ///   `fn(Ref<Class>) -> I` (for an interface of another crate, for which

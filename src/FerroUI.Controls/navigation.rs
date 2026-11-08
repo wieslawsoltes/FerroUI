@@ -63,8 +63,10 @@ pub enum NavigationError {
     /// The type does not derive from [`FramePage`].
     NotAPage(String),
     /// The type has neither a default constructor nor a page factory of the frame: a page type
-    /// converted from a runtime type (`PageType::from`) whose `TypeInfo` carries no default
-    /// constructor.
+    /// converted from a runtime type (`PageType::from`) whose `TypeInfo` has no default
+    /// constructor, which is the case of every class without the tables of types (the
+    /// `ferroui-base` feature `type-tables`) unless its constructor is registered
+    /// (`TypeInfo::register_constructor`).
     MissingConstructor(String),
     /// The page factory of the frame failed, with its message.
     FactoryFailed(String),
