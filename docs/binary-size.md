@@ -805,11 +805,15 @@ them, are unchanged.
 
 | `samples/HelloWorld`, macOS ARM64 | before | after | Change |
 |---|---:|---:|---:|
-| `release` executable | TBD | TBD | TBD |
-| `dist` executable | TBD | TBD | TBD |
-| `nullable_operation` (instances) | 731 | TBD | TBD |
-| `register_conversion` closures (instances) | 484 | TBD | TBD |
-| `any_value_eq` (instances) | 1,874 | TBD | TBD |
+| `release` executable | 32.87 MB | 31.98 MB | -0.89 MB (-2.7 %) |
+| `dist` executable | 18.53 MB | 17.98 MB | -0.55 MB (-3.0 %) |
+| `nullable_operation` (instances) | 731 | 458 | -273 |
+| `register_conversion` closures (instances) | 484 | 0 | -484 (data, `fn` pointers) |
+| `any_value_eq` (instances) | 1,874 | 1,351 | -523 |
+
+The ControlCatalog page tour (127 pages) and the trimmed samples (HelloWorld, RenderDemo,
+VirtualizationDemo, BehaviorsGallery) ran with no conversion or registration error and the same
+binding messages as main; the `dist` build of hello world smoke-runs cleanly.
 
 ## 5. What an executable is made of
 
