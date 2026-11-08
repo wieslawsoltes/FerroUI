@@ -77,6 +77,45 @@ fn binding_is_compiled_when_requested() {
     }
 }
 
+/// Not from upstream (#603): with compiled bindings as the default (the build's default), a
+/// data-context binding needs a data type; `{ReflectionBinding}` and an element that turns
+/// compiled bindings off (`x:CompileBindings='False'`) are the explicit ways out, and a typed
+/// binding compiles.
+#[test]
+fn under_the_compiled_default_an_untyped_binding_is_an_error_until_it_opts_out() {
+    let compiled = BindingsPipelineOptions { compile_bindings_by_default: true, ..BindingsPipelineOptions::default() };
+
+    // No data type: the error of a compiled binding.
+    let fw = create_bindings_test_framework();
+    transform_root_with(&fw, &window("", "<TextBlock Text='{Binding StringProperty}'/>"), compiled);
+    let errors = reported_errors(&fw);
+    assert_eq!(errors.len(), 1, "{errors:?}");
+    assert_eq!(errors[0].0, "FRN2100");
+    assert!(errors[0].1.starts_with("Cannot parse a compiled binding without an explicit x:DataType directive"), "{errors:?}");
+
+    // An explicit reflection binding, an element that opts out, and a typed binding.
+    let fw = create_bindings_test_framework();
+    let root = transform_root_with(
+        &fw,
+        &window(
+            "",
+            &format!(
+                "<StackPanel>
+                   <TextBlock Text='{{ReflectionBinding StringProperty}}'/>
+                   <Border x:CompileBindings='False'><TextBlock Text='{{Binding StringProperty}}'/></Border>
+                   <Border {DC}><TextBlock Text='{{Binding StringProperty}}'/></Border>
+                 </StackPanel>"
+            ),
+        ),
+        compiled,
+    );
+    assert_eq!(reported_errors(&fw), vec![]);
+    assert_eq!(
+        binding_extension_types(&root),
+        ["ReflectionBindingExtension", "ReflectionBindingExtension", "CompiledBindingExtension"]
+    );
+}
+
 #[test]
 fn the_nearest_compile_bindings_scope_wins() {
     let fw = create_bindings_test_framework();

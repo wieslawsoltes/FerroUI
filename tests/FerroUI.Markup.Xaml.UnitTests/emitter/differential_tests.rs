@@ -100,6 +100,36 @@ fn a_reflection_binding_path_names_its_type_in_the_matching_namespace_entry() {
     assert!(source.contains("(\"FerroUI.Controls\", \"FerroUI.Base\", &[])"), "{source}");
 }
 
+/// Not from upstream (#603): a binding whose path the compiler resolves (the templated parent
+/// of a template and a registered property of its target type) is a compiled path of typed
+/// elements: no description of a plain property looked up by name (`rt::clr_property_info`), no
+/// path parsed at run time. The same binding as a reflection binding takes its relative source
+/// through the provide-value target property, `ReflectionBinding.RelativeSource`.
+#[test]
+fn a_resolvable_binding_path_emits_no_clr_property_info() {
+    let _app = xaml_test_base();
+    let document = (
+        "resolvable_binding_path.xaml",
+        "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><ControlTemplate x:Key='Template' TargetType='Button'>\
+         <Border Background='{Binding Background, RelativeSource={RelativeSource TemplatedParent}}'/>\
+         </ControlTemplate></Border.Resources></Border>",
+    );
+    let emitted = |compiled: bool| {
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.use_compiled_bindings_by_default = compiled;
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &configuration, &[]);
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+        generated.source
+    };
+    let compiled = emitted(true);
+    assert!(compiled.contains("builder.templated_parent()"), "{compiled}");
+    assert!(compiled.contains("builder.ferro_property(rt::property("), "{compiled}");
+    assert!(!compiled.contains("rt::clr_property_info("), "{compiled}");
+    assert!(!compiled.contains("ReflectionBinding"), "{compiled}");
+    let reflection = emitted(false);
+    assert!(reflection.contains("rt::clr_property_info("), "{reflection}");
+}
+
 #[test]
 fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     let _app = xaml_test_base();
