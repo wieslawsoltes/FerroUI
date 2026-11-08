@@ -648,6 +648,25 @@ x:Bind compares with `TextBlock::text_property()` and checks the target by ident
 | fat LTO `release` (the build of the trace) | 38.55 MB | 33.66 MB | -4.89 MB (-12.7 %) |
 | Unused controls reachable from `main` | NavigationView, RichEditBox, InfoBar, ProgressBar, SplitView, NavigationPage, DrawerPage, TextBox | none of these | |
 
+### 4.14 Theme crates optimised for size in `dist` (#581, step 1)
+
+Compiled theme markup runs once, when a theme is constructed. In the shipped build the five theme
+crates (`ferroui-themes-winui`, `-fluent`, `-simple`, `-macos`, `-material`) are at
+`opt-level = "z"` (`[profile.dist.package.*]` in `Cargo.toml`); the rest stays at `3`. Per-crate
+levels survive fat LTO: `z` marks the crate's functions `minsize`, which link-time optimisation
+respects after inlining across crates. Start-up is the median wall time of launches that open the
+window and close it at once (`FERROUI_SMOKE_EXIT_MS=1`), alternating between the builds.
+
+| macOS ARM64, `dist` | main | theme crates at `z` | Change | Start-up (median) |
+|---|---:|---:|---:|---|
+| `samples/HelloWorld` (theme trimmed to the units it uses) | 22.13 MB | 21.62 MB | -0.51 MB (-2.3 %) | 193 ms and 191 ms, 11 launches each |
+| `samples/ControlCatalog.Desktop` (every unit) | 67.59 MB | 65.71 MB | -1.87 MB (-2.8 %) | 373 ms and 364 ms, 9 launches each |
+
+Before theme trimming, the same change gave hello world 5.16 MB (#581, first measurement): trimming
+already removes the units an application does not use, so what remains to shrink is the units it
+keeps. Start-up is within noise in both. The browser profile already builds every crate at `z`
+by default (section 4.1 and the comments of the profile).
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

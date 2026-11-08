@@ -587,6 +587,24 @@ panic = "abort"
 inherits = "dist"
 panic = "unwind"
 
+# Compiled theme markup runs once, when a theme is constructed, and is a large share of an
+# executable: the theme crates are optimised for size in the shipped build (#581). Their start-up
+# cost is within noise (docs/binary-size.md, section 4.14).
+[profile.dist.package.ferroui-themes-winui]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-fluent]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-simple]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-macos]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-material]
+opt-level = "z"
+
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
 # The crates of the run-time XAML loader stay optimised for speed: at "z" the start-up of a themed
