@@ -1136,7 +1136,7 @@ impl DrawingContextImpl {
             };
             PushedEffect::Overlay {
                 shader,
-                blend_mode: program.blend_mode,
+                blender: program.blender.clone(),
                 to_device: layer.to_device.clone(),
                 bounds: layer.bounds,
                 inherited_opacity,
@@ -1961,12 +1961,13 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                 self.restore_canvas();
                 self.current_opacity = inherited_opacity;
             }
-            Some(PushedEffect::Overlay { shader, blend_mode, to_device, bounds, inherited_opacity }) => {
+            Some(PushedEffect::Overlay { shader, blender, to_device, bounds, inherited_opacity }) => {
                 // The overlay over the content, in the coordinates of the
-                // layer, blended with the content only.
+                // layer, blended with the content only (masked by it when
+                // its description says so, #580).
                 let mut paint = SkPaintCache::get();
                 paint.set_shader(shader);
-                paint.set_blend_mode(blend_mode);
+                paint.set_blender(blender);
                 let canvas = self.canvas.get();
                 canvas.set_matrix(&to_device);
                 canvas.draw_rect(bounds, &paint);
@@ -1989,12 +1990,13 @@ enum PushedEffect {
     /// shader image filter; the opacity in effect when it was pushed.
     Shader { inherited_opacity: f64 },
     /// An overlay shader effect: a save of the canvas and the save layer of
-    /// the content; the shader of the overlay with its uniforms and blend
-    /// mode, drawn over `bounds` under `to_device` when it is popped; the
-    /// opacity in effect when it was pushed.
+    /// the content; the shader of the overlay with its uniforms and its
+    /// blender (the blend mode, or the masked blender of #580), drawn over
+    /// `bounds` under `to_device` when it is popped; the opacity in effect
+    /// when it was pushed.
     Overlay {
         shader: sk::Shader,
-        blend_mode: sk::BlendMode,
+        blender: sk::Blender,
         to_device: sk::M44,
         bounds: sk::Rect,
         inherited_opacity: f64,

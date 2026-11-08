@@ -8,50 +8,64 @@
 //! `Visual.Effect`).
 //!
 //! The page transitions sample photographs of the catalog's assets as their pages and their
-//! pattern (decoded once; the backend uploads each once); the gallery application captures pages
-//! of its own instead.
+//! pattern (decoded once; the backend uploads each once), and the water ripple bends one of them
+//! (#580: a ripple shows on image content, not on a flat panel); the gallery application captures
+//! pages and a picture of its own instead.
 //!
 //! The headers here are the ones of the entries of the page list
 //! (`ViewModels/main_window_view_model_page_list.rs`), the titles of the families. The module names
 //! no other page of the catalog, so that the browser host fetches only the photographs for these
 //! pages (`build/page_files.rs`).
 
-use custom_effects::{Family, TransitionImages};
+use custom_effects::{Family, Picture, TransitionImages};
 use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::media::effects::EffectImage;
 use ferroui_base::media::imaging::Bitmap;
+use ferroui_base::media::IImage;
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::{ContentPage, Control, ScrollViewer};
 use std::rc::Rc;
 
-/// The image of the asset at `uri` as the handle of an effect image: the bitmap decoded once (the
-/// handle holds it); the empty image, which the transitions draw transparent, when it does not
-/// load.
-fn asset_image(uri: &str) -> EffectImage {
-    let bitmap = UriRef::parse(uri)
+/// The bitmap of the asset at `uri`, decoded; `None` when it does not load.
+fn asset_bitmap(uri: &str) -> Option<Bitmap> {
+    UriRef::parse(uri)
         .ok()
         .and_then(|uri| AssetLoader::open(&uri, None).ok())
-        .and_then(|mut stream| Bitmap::from_stream(&mut stream).ok());
-    bitmap.map(|bitmap| EffectImage::new(&bitmap)).unwrap_or_default()
+        .and_then(|mut stream| Bitmap::from_stream(&mut stream).ok())
 }
 
-/// The images of the page transitions: two photographs as the pages, the luminance of a third
-/// one as the pattern of the dissolve and the mask of the reveal.
+/// A bitmap as the handle of an effect image (the handle holds it); the empty image, which the
+/// transitions draw transparent, when it did not load.
+fn effect_image(bitmap: Option<&Bitmap>) -> EffectImage {
+    bitmap.map(|bitmap| EffectImage::new(bitmap)).unwrap_or_default()
+}
+
+/// The images of the gallery: two photographs as the pages of the transitions, the luminance of
+/// a third one as the pattern of the dissolve and the mask of the reveal, and the first one,
+/// decoded once, as the picture the water ripple bends.
 pub(crate) fn photographs() -> TransitionImages {
+    let arch = asset_bitmap("ferres://ControlCatalog/Assets/delicate-arch-896885_640.jpg");
+    let deer = asset_bitmap("ferres://ControlCatalog/Assets/hirsch-899118_640.jpg");
+    let leaf = asset_bitmap("ferres://ControlCatalog/Assets/maple-leaf-888807_640.jpg");
     TransitionImages {
-        first_page: asset_image("ferres://ControlCatalog/Assets/delicate-arch-896885_640.jpg"),
-        second_page: asset_image("ferres://ControlCatalog/Assets/hirsch-899118_640.jpg"),
-        pattern: asset_image("ferres://ControlCatalog/Assets/maple-leaf-888807_640.jpg"),
+        first_page: effect_image(arch.as_ref()),
+        second_page: effect_image(deer.as_ref()),
+        pattern: effect_image(leaf.as_ref()),
+        picture: arch.map(|bitmap| Picture::new(Rc::new(bitmap) as Rc<dyn IImage>)).unwrap_or_default(),
     }
 }
 
 /// The page of `family`: its section (its title, its description and its tiles) in a scroll
 /// viewer, under its title, as the pages of the section "Composition" are.
 fn family_page(family: Family) -> Ref<ContentPage> {
-    // Only the transitions sample images: the other pages decode none.
-    let images = if family == Family::Transitions { photographs() } else { TransitionImages::default() };
+    // Only the transitions and the water ripple show images: the other pages decode none.
+    let images = if matches!(family, Family::Transitions | Family::Interactive) {
+        photographs()
+    } else {
+        TransitionImages::default()
+    };
     let content = family.section(&images);
     content.set_margin(Thickness::uniform(16.0));
     content.set_vertical_alignment(VerticalAlignment::Top);

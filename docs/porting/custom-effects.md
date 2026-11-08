@@ -306,9 +306,11 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   colours the program samples the content, in device independent pixels) and the padding
   behaviour (`ShaderEffectPadding::Effect`, the padding of the effect alone, or `SampleRadius`,
   which adds the sample radius to each side), and the names of its children, the image parameters
-  the program samples (E6, section 3.6, "Secondary images as built"). It is made with
+  the program samples (E6, section 3.6, "Secondary images as built"), and whether an overlay is
+  masked by the content (`masked_by_content`, #580: its output times the alpha of the content
+  before the blend, `blend(S * Da, D)`, as Effector draws its overlays). It is made with
   `content_sampling(sksl, wgsl)` or `overlay(sksl, wgsl, blend_mode)` and `with_sample_radius`,
-  `with_padding`, `with_children`.
+  `with_padding`, `with_children`, `with_content_mask`.
 - *Precedence.* A type with both a graph and a shader is drawn as its graph; its shader is not read
   (`ImmutableCustomEffect::shader` is `None`), and a graph that does not load gives the no-op of
   E1, not the shader. Every backend draws graphs; shaders need a backend that runs programs.
@@ -333,7 +335,9 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   `content` for a content-sampling program; for an overlay its images, E6, none before). A content-sampling program is
   the runtime shader image filter of a save layer (`image_filters::runtime_shader_with_options`,
   the sample radius in device pixels), the layer bound to `content`; an overlay is drawn over the
-  content inside the save layer with its blend mode before the layer is composed. Skia evaluates a
+  content inside the save layer with its blend mode before the layer is composed, an overlay
+  masked by the content with a runtime blender (`MASKED_OVERLAY`, `overlay_blend.eval(src * dst.a, dst)`,
+  the blend mode a child blender, made once per program). Skia evaluates a
   runtime shader image filter with translations only (`SkRuntimeImageFilter` takes the matrix
   capability `kTranslate` and applies the rest of the transform to the result), so the layer is
   saved under a translation by whole device pixels to the top left of the area, clipped to the
@@ -348,11 +352,13 @@ read once per type, cached by `TypeId` and registered for the prewarm under
 - *The library* (`media::effects::library`, E4): `pixelate` (`PixelateEffect`, content-sampling:
   each cell of `cell-size` device independent pixels, clamped to 0..64 and at least one device
   pixel, shows the pixel at its centre; sample radius 64), `scanline` (`ScanlineShaderEffect`, an
-  overlay drawn source over: the lower half of each band of `spacing` black at `strength`) and
-  `spotlight` (`SpotlightShaderEffect`, an overlay screened over the content: a light of `color`
-  fading from (`center-x`, `center-y`) to `radius`), Effector's pixelation, scan line and spotlight
-  shaders with the clamps of its factories, each with its SkSL, its WGSL and its CPU reference, and
-  a neutral value that leaves the content unchanged.
+  overlay drawn source over: the lower half of each band of `spacing` black at `strength`),
+  `grid` (`GridShaderEffect`, #580, an overlay drawn source over: lines 6 percent of a cell of
+  `cell-size` wide in `color` at `strength`) and `spotlight` (`SpotlightShaderEffect`, an overlay
+  screened over the content: a light of `color` fading from (`center-x`, `center-y`) to
+  `radius`), Effector's pixelation, scan line, grid and spotlight shaders with the clamps of its
+  factories, each with its SkSL, its WGSL and its CPU reference, and a neutral value that leaves
+  the content unchanged. The overlays are masked by the content (#580).
 
 **Shader effects on Vello as built (E5).**
 
@@ -366,8 +372,9 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   content-sampling program `fn sample_content(coord)` (the texel under `coord`, transparent beyond
   the area: Skia samples the child of a runtime shader image filter at texel centres with nearest
   sampling), the vertex stage of the layer passes and a fragment stage that calls `effect` at the
-  centre of each pixel of the area. An overlay's output, clamped to 0..1, is composed over the
-  content in the pass with the blend mode of the description: every mode of `BitmapBlendingMode`
+  centre of each pixel of the area. An overlay's output, clamped to 0..1 (times the alpha of the
+  content texel when it is masked by the content, #580), is composed over the content in the pass
+  with the blend mode of the description: every mode of `BitmapBlendingMode`
   (the Porter-Duff operators and the modes Skia writes in premultiplied form, among them source
   over and `Screen`, which the library uses, written so; the other separable and the non-separable
   modes of the Compositing and Blending specification on colours that are not premultiplied,
@@ -432,9 +439,13 @@ pointer position is a `Point` parameter, a press time a `Float`).
   and constructs its base with `Effect::construct_interactive::<T>()` (a custom effect class whose
   `Effect` also finds its handler: `is_interactive`, `input_handler`).
 - *The host context.* `EffectHostContext` is Effector's `SkiaEffectHostContext`: the effect, the
-  host (`InputElement`) and its visual, `bounds`, `size`, `input_bounds` (the host's own size),
-  `padding` and `effect_bounds` (the input bounds inflated by the padding of the effect: the area
-  the program is drawn over when the content lies within the host), `layer_scale` (the render
+  host (`InputElement`) and its visual, `bounds`, `size`, `render_bounds` (#580: the rectangle the
+  renderer drew the effect over in the last frame, the bounds of the subtree of the host with the
+  padding of the effect, read back from the compositor), `input_bounds` (that rectangle without the
+  padding, the host's own size before the first frame, so the input and the program agree where
+  Effector uses the content of the host within its bounds for both), `padding` and `effect_bounds`
+  (the input bounds inflated by the padding of the effect: the area the program is drawn over),
+  `layer_scale` (the render
   scaling times the mean of the lengths of the axes of the transform from the host to the root, as
   the render thread computes it), `get_position` (in the host, through every render transform),
   `get_normalized_position` and `normalize` (0 to 1 across the input bounds, clamped on request),
@@ -453,7 +464,8 @@ pointer position is a `Point` parameter, a press time a `Float`).
   `RenderTransform` and `RenderTransformOrigin`; nothing outlives it. A handler delivers the event
   to the effect after the tunnel route, the class handlers of the host (its `on_pointer_*`) and the
   bubble handlers of its descendants, before its ancestors; a handled event only to an effect whose
-  `handled_events_too` is set. A pointer the host (or the effect, through the context) captured is
+  `handled_events_too` is set (the four classes of the library set it, #580). A pointer the host
+  (or the effect, through the context) captured is
   routed to the host wherever it is; the loss of the capture of the host or of a descendant (the
   release of the implicit capture, another element capturing the pointer) is
   `on_pointer_capture_lost`. No borrow of the host is held while the effect runs, so the effect
@@ -466,25 +478,31 @@ pointer position is a `Point` parameter, a press time a `Float`).
   `effect_passes::shader_pipelines_created` of Vello): frames of an interaction compile nothing.
 - *The library* (`media::effects::library`, E7): `PointerSpotlightShaderEffect`
   (`pointer-spotlight`, an overlay screened over the content) and `ReactiveGridShaderEffect`
-  (`reactive-grid`, an overlay drawn source over), the light and the halo under the normalized
-  pointer, brighter or wider while pressed; `WaterRippleShaderEffect` (`water-ripple`,
-  content-sampling, sample radius 20: three `RippleWave`s, each a point and two numbers, rings that
-  move the content outward and tint it); `BurningFlameShaderEffect` (`burning-flame`,
-  content-sampling, sample radius 20: a plume from an ignition point that moves, colours, lights
-  and smokes the content). Each has SkSL, WGSL, a CPU reference and a neutral value. The classes
+  (`reactive-grid`, an overlay drawn source over, lines 5 percent of a cell wide), the light and the
+  halo under the normalized pointer, brighter or wider while pressed, both masked by the content
+  (#580); `WaterRippleShaderEffect` (`water-ripple`, content-sampling, sample radius 56: three
+  `RippleWave`s, each a point and two numbers, rings that move the content outward and tint it);
+  `BurningFlameShaderEffect` (`burning-flame`, content-sampling, sample radius 21: a plume from an
+  ignition point that moves, colours, lights and smokes the content). The two content-sampling
+  programs sample the moved content clamped to the area (Effector's clamp tiling) and compose
+  what they compute over the content source atop, so nothing is smeared beyond its coverage
+  (#580). Each has SkSL, WGSL, a CPU reference and a neutral value. The classes
   `InteractivePointerSpotlightEffect`, `InteractiveReactiveGridEffect`,
   `InteractiveWaterRippleEffect` and `InteractiveBurningFlameEffect` (with `value`, `set_value`
   and `update`) follow Effector's: the overlays track the pointer and capture it while pressed,
   the water ripple makes a ripple on a press, along a drag and on the release and ages them
   (`advance`), the flame ignites on a press, follows a drag and burns down after the release
   (`advance`); the last two advance on the frames of the animation clock while they move, where
-  Effector runs a `DispatcherTimer` of 16 ms. The flame takes handled events (its host, the
-  burn-away button, handles the press). The programs differ from Effector's in four ways: squares
-  are products (`pow` of a negative number is undefined), the moved content is sampled at the
-  centre of the texel under the moved coordinate (the same texel whatever the filtering of a
-  backend), colours are mixed in premultiplied form, and the phase of the flame wraps at 10 pi (a
-  period of its three waves). The catalog page "Custom effects" shows them in a section
-  "Interactive effects".
+  Effector runs a `DispatcherTimer` of 16 ms. All four take handled events, as Effector's do (the
+  host of the flame, the burn-away button, handles the press). The programs differ from Effector's
+  in five ways: squares are products (`pow` of a negative number is undefined), the moved content
+  is sampled at the centre of the texel under the moved coordinate (the same texel whatever the
+  filtering of a backend), colours are mixed in premultiplied form, the moved content is composed
+  source atop where Effector masks it `DstIn` and draws it source over (the same on opaque and
+  transparent content; translucent content at rest stays unchanged), and the phase of the flame
+  wraps at 10 pi (a period of its three waves). Lengths are device independent pixels where
+  Effector's are device pixels (DEVIATIONS.md, Animation). The catalog page "Custom effects" shows
+  them in a section "Interactive effects".
 
 ### 3.6 Secondary image handles
 
@@ -593,13 +611,17 @@ ported as the reference set.
   in and turning the effect off fades it out through its neutral value, and key frames that sweep
   the first number from the minimum of its slider to the maximum and back (the progress of a
   transition forward only). The interactive tiles host the interactive classes of E7 and show the
-  effect string of the snapshot the pointer changes. The shader family has Effector's grid as the
-  reactive grid without the pointer (the library has no second grid program) and Effector's
-  nested sample, a spotlight over cards with tints of their own.
+  effect string of the snapshot the pointer changes, rewritten at most every `CAPTION_MS` (200 ms)
+  while it changes on every frame (#580). The water ripple bends image content (the picture of
+  `TransitionImages`, or a checkerboard the gallery draws), and the burn-away button is opaque, as
+  Effector's (`#1E2328`, a radius of 18; its face a border of its own, so the visual states of the
+  button do not make it translucent). The shader family has Effector's grid (`GridShaderEffect`,
+  #580) and Effector's nested sample, a spotlight over cards with tints of their own.
 - *The page transitions.* The images are a parameter of the sections (`TransitionImages`: two
-  pages and the pattern of the dissolve, also the mask of the mask transition). The gallery
-  captures two pages of its own and a pattern of grey cells once with `RenderTargetBitmap`
-  (`TransitionImages::render`); the catalog gives photographs of its assets. Besides a tile per
+  pages and the pattern of the dissolve, also the mask of the mask transition, and the picture the
+  water ripple bends). The gallery captures two pages of its own, a pattern of grey cells and a
+  picture once with `RenderTargetBitmap` (`TransitionImages::render`); the catalog gives
+  photographs of its assets (to the transitions and the interactive effects). Besides a tile per
   transition, the presenter (Effector's compiz sample) shows one page and, on a press or its
   button, rests on the other page and plays the dissolve to it from the point pressed by key
   frames of its progress. The compiz set of Effector beyond the dissolve (burn, cube, wobbly,
@@ -866,6 +888,20 @@ not prewarm, each pipeline is made once per device and type (section 3.9, "Valid
 gpu-rendering.md records the paths and their tests, and winui-composition.md (section 5.4) maps
 WinUI's effect factory, Win2D's effects and pixel shaders and its render walk onto the custom
 effects.
+
+#580 (the review of the library against Effector's samples and runtime, 2026-11-06) is fixed. The
+water ripple and the burning flame sample the moved content clamped to the area and compose over
+the content masked by it (source atop), in their SkSL, WGSL and CPU forms, so the flame cuts no
+notches into the top of the button and the ripple neither eats bands into the edges nor fills
+rounded corners. The overlays (scan lines, spotlight, pointer spotlight, reactive grid and the new
+grid) are masked by the content (`ShaderEffectDescription::masked_by_content`): a runtime blender
+on Skia, the pass on Vello, the CPU reference. The reactive grid's lines are 5 percent of a cell,
+Effector's `GridShaderEffect` is ported (`grid`: cell 22, strength 0.22, `#3FC3FF`, lines 6
+percent of a cell), the pointer is normalized to the rectangle the renderer drew the effect over
+(`EffectHostContext::render_bounds`), the sample radii are 56 (ripple) and 21 (flame), and the
+four interactive classes take handled events. The lengths stay device independent pixels (the
+owner's decision on the units; DEVIATIONS.md, Animation). The gallery shows the ripple on a
+picture, an opaque burn-away button and a caption rewritten at most every 200 ms.
 
 ## 5. Not in scope
 

@@ -4,23 +4,25 @@
 //! sample set) in a tile of its own.
 
 use crate::tiles::{
-    brush, button, caption, custom_tile, interactive_tile, key_frames, markup_of, row, section, surface, text, EffectTile,
-    Play, Swatch, Sweep, ValueTile,
+    brush, button, caption, column, custom_tile, interactive_tile, key_frames, markup_of, row, section, surface, text,
+    EffectTile, Play, Swatch, Sweep, ValueTile,
 };
 use crate::transition_images::TransitionImages;
 use ferroui_base::animation::{AnimationTask, IClock};
 use ferroui_base::input::{InputElement, PointerPressedEventArgs};
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::effects::library::{
-    BrightnessContrastEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect,
+    BrightnessContrastEffect, DissolveTransitionEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, GridShaderEffect,
     InteractiveBurningFlameEffect, InteractivePointerSpotlightEffect, InteractiveReactiveGridEffect,
-    InteractiveWaterRippleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, ReactiveGridShaderEffect,
-    SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect, SpotlightShaderEffect, TintEffect,
+    InteractiveWaterRippleEffect, InvertEffect, MaskTransitionEffect, PixelateEffect, SaturationEffect,
+    ScanlineShaderEffect, SepiaEffect, SharpenEffect, SpotlightShaderEffect, TintEffect,
 };
 use ferroui_base::media::effects::{CustomEffect, EffectImage, ImmutableCustomEffect};
-use ferroui_base::media::{Color, FontWeight};
+use ferroui_base::media::{Color, FontWeight, Stretch};
 use ferroui_base::threading::CancellationToken;
 use ferroui_base::{CornerRadius, Ref, Thickness, WeakRef};
-use ferroui_controls::{Border, Button, StackPanel, TextBlock};
+use ferroui_controls::primitives::UniformGrid;
+use ferroui_controls::{Border, Button, Control, Image, StackPanel, TextBlock};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -68,7 +70,7 @@ impl Family {
             Family::Colour => "Custom effects that describe themselves as effect graphs of colour matrices (CustomEffect::graph): the backend compiles each graph once and draws it around the content on the GPU; a slider changes only the values of its members. Each is a value set as Visual.Effect from code, or from markup as the effect string under it. The transition of the host fades a change in, and turning an effect off fades it out through its neutral value.",
             Family::Image => "Effects that read the neighbourhood of a pixel: the glow is a drop shadow of the content in a colour, sharpen and edge detect are graphs of a convolution, and pixelate is a runtime shader that samples the content (SkSL on Skia, WGSL on Vello). Each is drawn on the GPU; Vello's CPU mode draws its CPU reference.",
             Family::Shader => "Runtime shaders drawn over the area of their host: scan lines, a grid and a spotlight, each an SkSL program Skia compiles once and a WGSL program Vello compiles once; the parameters are their uniforms. The last tile is a spotlight over cards that have tints of their own: the effect of a visual is drawn around the effects of its children.",
-            Family::Interactive => "Effect classes that implement IEffectInputHandler: set as Visual.Effect on an input element, they receive its pointer input and change their value, and the element takes a new snapshot, so the program, compiled once, is drawn with new uniforms. The water ripple and the flame advance on the frames of the animation clock while they move.",
+            Family::Interactive => "Effect classes that implement IEffectInputHandler: set as Visual.Effect on an input element, they receive its pointer input (handled events too, so a button that handles its press still reaches them) and change their value, and the element takes a new snapshot, so the program, compiled once, is drawn with new uniforms. The water ripple and the flame advance on the frames of the animation clock while they move; the overlays and the moved content stay within the coverage of the content.",
             Family::Transitions => "Runtime shaders that sample two pages and a pattern as images besides the content: each backend uploads an image once into a texture and binds it as a child of the program. Their progress is a number, so key frames of Visual.Effect play a transition. The presenter goes to the next page from where it is pressed, as Effector's compiz-style sample does.",
         }
     }
@@ -79,7 +81,7 @@ impl Family {
             Family::Colour => colour_tiles(),
             Family::Image => image_tiles(),
             Family::Shader => shader_tiles(),
-            Family::Interactive => interactive_tiles(),
+            Family::Interactive => interactive_tiles(images),
             Family::Transitions => transition_tiles(images),
         }
     }
@@ -171,16 +173,12 @@ fn shader_tiles() -> Vec<EffectTile> {
             .number("strength", 0.0, 1.0)
             .number("spacing", 2.0, 32.0)
             .build(),
-        ValueTile::new(
-            "Grid",
-            ReactiveGridShaderEffect { cell_size: 22.0, strength: 0.24, color: Color::from_rgb(0x3F, 0xC3, 0xFF), ..ReactiveGridShaderEffect::default() },
-            "ReactiveGridShaderEffect { cell_size: 22.0, strength: 0.24, ..Default::default() }",
-        )
-        .host(surface())
-        .number("strength", 0.0, 0.8)
-        .number("cell-size", 8.0, 64.0)
-        .colors("color", GRIDS)
-        .build(),
+        ValueTile::new("Grid", GridShaderEffect::default(), "GridShaderEffect { cell_size: 22.0, strength: 0.22, color: Color::from_rgb(0x3F, 0xC3, 0xFF) }")
+            .host(surface())
+            .number("strength", 0.0, 1.0)
+            .number("cell-size", 8.0, 64.0)
+            .colors("color", GRIDS)
+            .build(),
         ValueTile::new(
             "Spotlight",
             SpotlightShaderEffect { strength: 0.8, ..SpotlightShaderEffect::default() },
@@ -207,7 +205,85 @@ fn shader_tiles() -> Vec<EffectTile> {
 
 // --- the interactive effects --------------------------------------------------------------------
 
-fn interactive_tiles() -> Vec<EffectTile> {
+/// The size of the hosts of the interactive effects.
+const HOST_SIZE: (f64, f64) = (240.0, 150.0);
+
+/// The picture the gallery draws when it is given none: a checkerboard of the colours of the
+/// sample, whose straight edges show how the rings bend the content.
+fn drawn_picture() -> Ref<UniformGrid> {
+    const COLORS: [(u8, u8, u8); 4] = [(0xE8, 0x5D, 0x3A), (0x2E, 0x86, 0xDE), (0xF4, 0xF1, 0xEA), (0x3F, 0x9E, 0x5A)];
+    let (columns, rows) = (12, 8);
+    let grid = UniformGrid::new();
+    grid.set_columns(columns);
+    grid.set_rows(rows);
+    for index in 0..columns * rows {
+        let (x, y) = (index % columns, index / columns);
+        let (r, g, b) = COLORS[((x + y) % 2 * 2 + y / 2 % 2) as usize];
+        let cell = Border::new();
+        cell.set_background(Some(brush(Color::from_rgb(r, g, b))));
+        grid.children().add(cell);
+    }
+    grid
+}
+
+/// The host of the water ripple: image content, as Effector shows its ripple on a photograph (a
+/// flat panel shows no distortion): the picture of `images`, or a picture of its own.
+fn picture_host(images: &TransitionImages) -> Ref<Border> {
+    let host = Border::new();
+    host.set_width(HOST_SIZE.0);
+    host.set_height(HOST_SIZE.1);
+    host.set_horizontal_alignment(HorizontalAlignment::Left);
+    host.set_corner_radius(CornerRadius::uniform(8.0));
+    host.set_clip_to_bounds(true);
+    // The background takes the pointer where the picture does not reach.
+    host.set_background(Some(brush(Color::from_rgb(0x1E, 0x27, 0x3A))));
+    match images.picture.image() {
+        Some(image) => {
+            let view = Image::new();
+            view.set_source(Some(image));
+            view.set_stretch(Stretch::UniformToFill);
+            host.set_child(view);
+        }
+        None => host.set_child(drawn_picture()),
+    }
+    host
+}
+
+/// The burn-away button, as Effector's sample draws it: opaque (#1E2328, a radius of 18), so the
+/// flame, which burns the content in proportion to its alpha, burns the whole button and not only
+/// its text. The face is a border of its own, so the button keeps it opaque whatever its visual
+/// states do to its background; its texts have colours of their own for the same reason.
+fn burn_away_button() -> Ref<Button> {
+    let face_color = Color::from_rgb(0x1E, 0x23, 0x28);
+    let title = text("Burn away", 16.0, FontWeight::SemiBold);
+    title.set_foreground(Some(brush(Color::from_rgb(0xFF, 0xFF, 0xFF))));
+    let line = text("Press to ignite; it cools down after the release", 12.0, FontWeight::Normal);
+    line.set_foreground(Some(brush(Color::from_rgb(0xB8, 0xC6, 0xCF))));
+    let texts = column(4.0);
+    texts.children().add(title);
+    texts.children().add(line);
+    let face = Border::new();
+    face.set_background(Some(brush(face_color)));
+    face.set_corner_radius(CornerRadius::uniform(17.0));
+    face.set_padding(Thickness::new(18.0, 12.0, 18.0, 12.0));
+    face.set_child(texts);
+
+    let burn = Button::new();
+    burn.set_width(HOST_SIZE.0);
+    burn.set_height(74.0);
+    burn.set_horizontal_alignment(HorizontalAlignment::Left);
+    burn.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
+    burn.set_vertical_content_alignment(VerticalAlignment::Stretch);
+    burn.set_padding(Thickness::uniform(0.0));
+    burn.set_background(Some(brush(face_color)));
+    burn.set_border_brush(Some(brush(Color::from_rgb(0x36, 0x41, 0x48))));
+    burn.set_border_thickness(Thickness::uniform(1.0));
+    burn.set_corner_radius(CornerRadius::uniform(18.0));
+    burn.set_content(Some(Control::boxed(face)));
+    burn
+}
+
+fn interactive_tiles(images: &TransitionImages) -> Vec<EffectTile> {
     let spotlight = InteractivePointerSpotlightEffect::new();
     let spotlight_host = surface();
     spotlight_host.set_effect(Some(spotlight.clone().into()));
@@ -217,14 +293,12 @@ fn interactive_tiles() -> Vec<EffectTile> {
     grid_host.set_effect(Some(grid.clone().into()));
 
     let ripple = InteractiveWaterRippleEffect::new();
-    let ripple_host = surface();
+    let ripple_host = picture_host(images);
     ripple_host.set_effect(Some(ripple.clone().into()));
 
     // The burn-away button: the flame takes the press the button handles.
     let flame = InteractiveBurningFlameEffect::new();
-    let burn = button("Burn away");
-    burn.set_width(240.0);
-    burn.set_height(72.0);
+    let burn = burn_away_button();
     burn.set_effect(Some(flame.clone().into()));
 
     vec![
@@ -247,8 +321,8 @@ fn interactive_tiles() -> Vec<EffectTile> {
         interactive_tile(
             "Water ripple",
             "water-ripple",
-            "Press, drag and release: rings spread from the pointer and bend the content.",
-            "let ripple = InteractiveWaterRippleEffect::new();\npanel.set_effect(Some(ripple.into()));",
+            "Press, drag and release: rings spread from the pointer and bend the picture.",
+            "let ripple = InteractiveWaterRippleEffect::new();\npicture.set_effect(Some(ripple.into()));",
             &ripple,
             ripple_host.upcast(),
         ),
@@ -266,7 +340,7 @@ fn interactive_tiles() -> Vec<EffectTile> {
 // --- the page transitions -----------------------------------------------------------------------
 
 fn transition_tiles(images: &TransitionImages) -> Vec<EffectTile> {
-    let TransitionImages { first_page, second_page, pattern } = images.clone();
+    let TransitionImages { first_page, second_page, pattern, .. } = images.clone();
     vec![
         ValueTile::new(
             "Dissolve",
