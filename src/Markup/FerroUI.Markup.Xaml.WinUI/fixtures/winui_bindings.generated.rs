@@ -773,7 +773,7 @@ fn build_native_controls_xaml_deferred_2(
     // native_controls.xaml(6,6) PathIconSource
     let path_icon_source_0 = ::ferroui_controls::PathIconSource::new();
     // native_controls.xaml(6,6) Data
-    let value_0 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 8,8")), 6, 40)?;
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     path_icon_source_0.set_value(::ferroui_controls::PathIconSource::data_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)));
     ::core::result::Result::Ok(rt::to_value(path_icon_source_0.clone()))
 }
