@@ -682,6 +682,67 @@ fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
     }
 }
 
+/// The commands of a path data literal (#603): `StreamGeometry.Parse(text)` or
+/// `Geometry.Parse(text)` of a text, what the compiler makes of the path data of a geometry
+/// (`Data="M 0 0 L 10 10"`), recorded with the parser of the run-time library
+/// ([`PathCommand::record`](ferroui_base::media::PathCommand::record)) and written as the
+/// elements of a constant table. `None` (the text is parsed when the document is loaded, and a
+/// failure is the load error it is) for text the parser refuses and for a number a literal
+/// cannot state.
+fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstValueNode>]) -> Option<String> {
+    use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
+    let declaring = method.declaring_type();
+    if method.name() != "Parse" || !(declaring.is("FerroUI.Media", "StreamGeometry") || declaring.is("FerroUI.Media", "Geometry")) {
+        return None;
+    }
+    let [argument] = arguments else { return None };
+    let text = argument.clone().as_node().cast::<XamlAstTextNode>()?.text();
+    let commands = PathCommand::record(&text).ok()?;
+    if !commands.iter().all(PathCommand::is_finite) {
+        return None;
+    }
+    let number = |value: f64| format!("{value:?}_f64");
+    let point = |point: ferroui_base::Point| format!("::ferroui_base::Point::new({}, {})", number(point.x), number(point.y));
+    let command = |command: &PathCommand| -> String {
+        const COMMAND: &str = "::ferroui_base::media::PathCommand";
+        match *command {
+            PathCommand::SetFillRule(fill_rule) => {
+                let rule = match fill_rule {
+                    FillRule::EvenOdd => "EvenOdd",
+                    FillRule::NonZero => "NonZero",
+                };
+                format!("{COMMAND}::SetFillRule(::ferroui_base::media::FillRule::{rule})")
+            }
+            PathCommand::BeginFigure(start_point, is_filled) => format!("{COMMAND}::BeginFigure({}, {is_filled})", point(start_point)),
+            PathCommand::LineTo(end_point, is_stroked) => format!("{COMMAND}::LineTo({}, {is_stroked})", point(end_point)),
+            PathCommand::QuadraticBezierTo(control_point, end_point, is_stroked) => {
+                format!("{COMMAND}::QuadraticBezierTo({}, {}, {is_stroked})", point(control_point), point(end_point))
+            }
+            PathCommand::CubicBezierTo(control_point1, control_point2, end_point, is_stroked) => format!(
+                "{COMMAND}::CubicBezierTo({}, {}, {}, {is_stroked})",
+                point(control_point1),
+                point(control_point2),
+                point(end_point)
+            ),
+            PathCommand::ArcTo(end_point, size, rotation_angle, is_large_arc, sweep_direction, is_stroked) => {
+                let sweep = match sweep_direction {
+                    SweepDirection::CounterClockwise => "CounterClockwise",
+                    SweepDirection::Clockwise => "Clockwise",
+                };
+                format!(
+                    "{COMMAND}::ArcTo({}, ::ferroui_base::Size::new({}, {}), {}, {is_large_arc}, ::ferroui_base::media::SweepDirection::{sweep}, {is_stroked})",
+                    point(end_point),
+                    number(size.width),
+                    number(size.height),
+                    number(rotation_angle)
+                )
+            }
+            PathCommand::EndFigure(is_closed) => format!("{COMMAND}::EndFigure({is_closed})"),
+        }
+    };
+    Some(commands.iter().map(command).collect::<Vec<_>>().join(", "))
+}
+
 /// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
 /// makes of the text of a culture (the parse of its markup metadata: an IETF language tag).
 fn culture_literal(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
@@ -4002,6 +4063,16 @@ impl<'a> Emitter<'a> {
         }
         let runtime = self.types.method(method.as_ref())
             .ok_or_else(|| unsupported(node, "a method that is not a method of the run-time type system"))?;
+        // Deviation (DEVIATIONS.md, Build integration of markup): upstream parses path data
+        // when the document is loaded (`StreamGeometry.Parse`); here it is parsed now (#603) and
+        // the geometry is built from the commands the parser records.
+        if target.is_none() {
+            if let Some(commands) = path_data_literal(&method, &call.arguments.borrow()) {
+                let owner = self.owner_path(node, &runtime)?;
+                let returned = self.declared_return(node, &runtime)?;
+                return Ok((format!("{{ const COMMANDS: &[::ferroui_base::media::PathCommand] = &[{commands}]; {owner}::from_commands(COMMANDS) }}"), Some(returned)));
+            }
+        }
         let mut arguments = Vec::new();
         if let Some(target) = target {
             arguments.push(Typed { expr: target.expr.clone(), kind: target.kind });

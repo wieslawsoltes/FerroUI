@@ -29,7 +29,8 @@ the documents of the theme and a Rust class (`WinUITheme`). Its `build.rs` does 
 
 1. **Embeds the documents that are not compiled** as assets. `Controls/excluded.txt` lists the
    control documents that are not merged into the theme yet, and why.
-2. **Compiles the theme** with `ferroui_build::Build::from_env().type_system(TypeSystem::Model)`.
+2. **Compiles the theme** with `ferroui_build::Build::from_env().type_system(TypeSystem::Model)`
+   and `.default_compile_bindings(true)` (every `{Binding}` is a compiled binding, section 4.5).
    It compiles one group: the document of the class (`WinUITheme.xaml`) and every document it
    includes. The compilation runs against type models, not a running program. The models are the
    scan of the crate's own sources and the `.xamlmeta` files of the crates it depends on. The
@@ -46,7 +47,7 @@ review. Their tests `compiled_xaml_is_up_to_date` and
 with:
 
 ```bash
-cargo test -p ferroui-themes-winui --test compiled_xaml_tests regenerate_compiled_xaml -- --ignored
+cargo test -p ferroui-themes-winui --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored
 ```
 
 Run the same command for `ferroui-themes-fluent`, `ferroui-themes-simple` and
@@ -210,8 +211,13 @@ name, the first time the control looks for its theme. Release builds do not chec
 
 - Write values in the forms the compiler converts at build time: numbers, colours, thicknesses,
   enumerations, durations, key splines, font weights, `{x:Static}` and `{x:Type}`.
-- Path data (`Data="M 0 0 L 10 10"`) is parsed when it is loaded today (section 9). Prefer a
-  keyed geometry shared by the templates that draw it.
+- Path data (`Data="M 0 0 L 10 10"`, `<StreamGeometry x:Key="..">M ..</StreamGeometry>`) is
+  parsed when the markup is compiled, by the parser of the run-time library: the generated code
+  builds the geometry from a constant table of the commands the parser recorded
+  (`PathCommand`, `StreamGeometry::from_commands`), and nothing parses the text at load. Text
+  the parser refuses is left to the run-time parse, which fails the load with its error: fix the
+  path data. Still prefer a keyed geometry shared by the templates that draw it, so that the
+  table and the geometry exist once.
 - Converters belong in resources (`<local:BoolToOpacityConverter x:Key=.. />`) and are referred
   to with `{StaticResource}`. They should not be created inline in every binding.
 
@@ -228,10 +234,12 @@ name, the first time the control looks for its theme. Release builds do not chec
 
 The build compiles bindings by default for every crate: themes, control libraries, applications
 and the templates of `FerroUI/templates`. Opt out per crate with
-`ferroui_build::Build::default_compile_bindings(false)` or
-`[package.metadata.ferroui] compile-bindings = false`, and per element with
-`x:CompileBindings="False"`. Hot reload and the designer compile a reloaded document with the
-application's setting, so it binds the same way.
+`[package.metadata.ferroui] compile-bindings = false` or
+`ferroui_build::Build::default_compile_bindings(false)` (the manifest key, when it is there, wins
+over the call of the build script), and per element with `x:CompileBindings="False"`. The class
+file the reference tests of a theme generate (`generate_class_file`) compiles bindings unless the
+assembly states `FerroUseCompiledBindingsByDefault = False` in its metadata. Hot reload and the
+designer compile a reloaded document with the application's setting, so it binds the same way.
 
 ## 6. Porting a theme from upstream
 
@@ -284,12 +292,13 @@ application's setting, so it binds the same way.
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, inherited resource documents as units | #568 | In review |
-| Compiled bindings in all themes | #603 | Planned |
-| Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | Planned |
+| Compiled bindings in all themes | #603 | In review |
+| Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |
 | Samples, sample apps and component samples on compiled bindings | #604 | Planned |
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
-| `rt::clr_property_info` resolved at compile time; remaining reflection paths parsed at compile time | #603 | Planned |
-| Path data converted at compile time instead of at load | #603 | Planned |
+| Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
+| `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
+| Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |

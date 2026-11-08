@@ -44,6 +44,26 @@ pub const TRIMMING_KEY: &str = "theme-trimming";
 /// The explicit roots of the manifest (`theme-roots = ["Name", ..]` or `"all"`).
 pub const ROOTS_KEY: &str = "theme-roots";
 
+/// The switch of the manifest for compiled bindings (`compile-bindings = false` makes `{Binding}`
+/// a reflection binding in the documents of the crate; compiled bindings are the default, #603).
+pub const COMPILE_BINDINGS_KEY: &str = "compile-bindings";
+
+/// What the manifest `text` states for compiled bindings in its table
+/// `[package.metadata.ferroui]` (`compile-bindings = true` or `false`, #603); `None` when it says
+/// nothing. An error names the key when its value is not a boolean.
+pub fn compile_bindings_from_manifest(text: &str) -> Result<Option<bool>, String> {
+    let mut compile_bindings = None;
+    for (key, value) in manifest_table(text, MANIFEST_TABLE)? {
+        if key == COMPILE_BINDINGS_KEY {
+            match value {
+                TomlValue::Bool(value) => compile_bindings = Some(value),
+                _ => return Err(format!("[{MANIFEST_TABLE}] {COMPILE_BINDINGS_KEY} must be true or false")),
+            }
+        }
+    }
+    Ok(compile_bindings)
+}
+
 /// What the manifest of an application states about the trimming of its themes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ThemeTrimming {

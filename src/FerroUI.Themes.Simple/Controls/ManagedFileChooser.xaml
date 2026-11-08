@@ -126,7 +126,7 @@
                      ItemsSource="{Binding QuickLinks}"
                      SelectedIndex="{Binding QuickLinksSelectedIndex}">
               <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="internal:ManagedFileChooserItemViewModel">
                   <StackPanel Background="Transparent"
                               Orientation="Horizontal"
                               Spacing="4">
@@ -199,7 +199,7 @@
                        SelectedItems="{Binding SelectedItems}"
                        SelectionMode="{Binding SelectionMode}">
                 <ListBox.ItemTemplate>
-                  <DataTemplate>
+                  <DataTemplate x:DataType="internal:ManagedFileChooserItemViewModel">
                     <Grid Background="Transparent">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="Icon" />

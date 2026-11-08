@@ -224,3 +224,21 @@ fn the_sources_root_type_keys_classes_and_keys() {
     // The calendar view and its buttons, the popup the canvas creates, the caption style.
     assert_eq!(kept_units(&theme, &roots, &graph, false), [0, 1, 2, 3, 4, 7, 8]);
 }
+
+/// Not from upstream (#603): compiled bindings are the default; the manifest turns them off for
+/// the crate (`compile-bindings = false`), or states the default, and refuses anything else.
+#[test]
+fn the_manifest_states_whether_bindings_compile() {
+    assert_eq!(compile_bindings_from_manifest("[package]\nname = \"app\"\n"), Ok(None));
+    assert_eq!(compile_bindings_from_manifest("[package.metadata.ferroui]\ntheme-trimming = false\n"), Ok(None));
+    assert_eq!(compile_bindings_from_manifest("[package.metadata.ferroui]\ncompile-bindings = false # reflection bindings\n"), Ok(Some(false)));
+    assert_eq!(compile_bindings_from_manifest("[package.metadata.ferroui]\ncompile-bindings = true\n"), Ok(Some(true)));
+    // Another table with the same key says nothing about the crate.
+    assert_eq!(compile_bindings_from_manifest("[package.metadata.other]\ncompile-bindings = false\n"), Ok(None));
+    assert_eq!(
+        compile_bindings_from_manifest("[package.metadata.ferroui]\ncompile-bindings = \"no\"\n"),
+        Err("[package.metadata.ferroui] compile-bindings must be true or false".to_string())
+    );
+    // The key does not change the trimming of the themes.
+    assert_eq!(ThemeTrimming::from_manifest("[package.metadata.ferroui]\ncompile-bindings = false\n"), Ok(ThemeTrimming::default()));
+}
