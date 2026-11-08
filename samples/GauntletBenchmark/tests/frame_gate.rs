@@ -42,9 +42,11 @@ use ferroui_base::platform::{AlphaFormat, ILockedFramebuffer, PixelFormats, Rend
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderLoopTask};
+use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
+use ferroui_base::input::{IInputDevice, MouseDevice, RawInputModifiers};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::{PixelSize, Ref, Vector};
+use ferroui_base::{PixelSize, Point, Ref, Vector};
 use ferroui_controls::testing::{CompositorTestServices, MockWindowingPlatform, TestServices};
 use ferroui_controls::{Application, Control, Window};
 use ferroui_themes_fluent::FluentTheme;
@@ -283,7 +285,9 @@ impl Gate {
     /// Fluent theme, Roboto from files) and shows `screen` in a window; the first frame is
     /// rendered by the UI thread (the show is a synchronous commit), the ones after it by the
     /// render thread.
-    fn start(screen: impl FnOnce() -> Ref<Control>) -> Gate {
+    /// Shows `screen`; with `pointer`, a mouse moves to that point of the window first, so that
+    /// pointer-over and tooltips follow the scene as on a desktop with the pointer in the window.
+    fn start(screen: impl FnOnce() -> Ref<Control>, pointer: Option<Point>) -> Gate {
         if std::env::var_os("PERF_FONTS").is_none() {
             std::env::set_var("PERF_FONTS", concat!(env!("CARGO_MANIFEST_DIR"), "/../../src/FerroUI.Themes.Material/Assets"));
         }
@@ -321,12 +325,25 @@ impl Gate {
         let surface = Arc::new(RasterSurface { frames: frames.clone() });
         window_impl.setup_surfaces(vec![surface as Arc<dyn IPlatformRenderSurface>]);
 
+        let input_impl = window_impl.clone();
         let window = Window::with_impl(window_impl);
         window.set_width(WIDTH);
         window.set_height(HEIGHT);
         window.set_can_resize(false);
         window.set_content(Some(Control::boxed(screen())));
         window.show();
+        if let Some(position) = pointer {
+            let input = ferroui_controls::platform::ITopLevelImpl::input(&*input_impl).expect("the window handles input");
+            let device: Rc<dyn IInputDevice> = MouseDevice::new();
+            input(Rc::new(RawPointerEventArgs::new(
+                device,
+                0,
+                window.input_root(),
+                RawPointerEventType::Move,
+                position,
+                RawInputModifiers::NONE,
+            )));
+        }
 
         let thread_loop = render_loop.clone();
         let render_thread = thread::spawn(move || thread_loop.run());
@@ -387,10 +404,10 @@ impl Drop for Gate {
 
 /// Shows `screen`, runs the warm-up frames and the measured ones, and prints the line of the gate
 /// and a summary.
-fn measure(bench: &str, screen: impl FnOnce() -> Ref<Control>) {
+fn measure(bench: &str, pointer: Option<Point>, screen: impl FnOnce() -> Ref<Control>) {
     let frames = variable("GATE_FRAMES", 240).max(1);
     let warmup = variable("GATE_WARMUP", 60);
-    let gate = Gate::start(screen);
+    let gate = Gate::start(screen, pointer);
     gate.run(warmup);
     let run = gate.run(frames);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
@@ -416,11 +433,17 @@ fn measure(bench: &str, screen: impl FnOnce() -> Ref<Control>) {
 #[test]
 #[ignore = "the frame gate: run in an optimised build with --ignored --nocapture --test-threads=1"]
 fn gauntlet_tier_16() {
-    measure("gauntlet/16", || GauntletView::new(16, 0).upcast());
+    measure("gauntlet/16", None, || GauntletView::new(16, 0).upcast());
 }
 
 #[test]
 #[ignore = "the frame gate: run in an optimised build with --ignored --nocapture --test-threads=1"]
 fn still_wall_tier_20() {
-    measure("wall/20", || WallView::new(20, 0).upcast());
+    measure("wall/20", None, || WallView::new(20, 0).upcast());
+}
+
+#[test]
+#[ignore = "the frame gate: run in an optimised build with --ignored --nocapture --test-threads=1"]
+fn still_wall_tier_20_with_the_pointer_in_the_window() {
+    measure("wall/20+pointer", Some(Point::new(WIDTH / 2.0, HEIGHT / 2.0)), || WallView::new(20, 0).upcast());
 }
