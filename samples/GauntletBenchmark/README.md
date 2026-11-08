@@ -1,0 +1,69 @@
+# GauntletBenchmark
+
+The two desktop screens of the framework comparison benchmark of the
+[Cranpose](https://github.com/samoylenkodmitry/Cranpose) project (`benchmarks/compose-vs-cranpose`),
+in FerroUI. It is ported from the benchmark's .NET desktop app, so it builds the same screens out
+of the same kinds of controls and does the same work every frame; see `NOTICE.md` for the
+attribution and the MIT license of the original.
+
+- **Gauntlet** (the default): a screen heavy enough that no framework holds 60 fps. Every frame
+  advances a frame index `k` and everything follows from `k`: a ticker strip whose prices, changes
+  and bars change every frame (a `WrapPanel` of `Border` tiles), a list of cards scrolling 3 points
+  a frame (an `ItemsControl` over a `VirtualizingStackPanel` in a `ScrollViewer`, whose card rows and
+  cluster rows each recycle only their own kind), cards with a box shadow, a circle-clipped avatar
+  (a `WriteableBitmap`), a two-line title, an annotated subtitle, a progress bar and a sparkline
+  drawn by controls that override `render` (`DrawingContext`, `StreamGeometry`), a chip flow row and a
+  footer of counters, a tilting badge on every fifth card, deep nested clusters, and translucent
+  panels stacked over the list that drift and tilt by their `RenderTransform` alone. The width of
+  the whole content follows `k` between 92% and 100%, so everything visible is measured again every
+  frame.
+- **Still wall** (`PERF_SCENARIO=wall`): thousands of tiles made once on a `Canvas`, under a clock
+  line whose text changes every frame and a cursor outline moved by a `TranslateTransform`. A frame
+  changes those two things and nothing else.
+
+Frames are driven by `TopLevel::request_animation_frame`, one frame index step per callback. The
+window is 1280 x 820 logical points, not resizable, in the light Fluent theme, with Roboto loaded
+from files as a font collection of its own (`fonts:Device#Roboto`).
+
+## Running
+
+```sh
+PERF_TIER=16 PERF_FONTS=path/to/fonts cargo run --release -p gauntlet-benchmark
+PERF_SCENARIO=wall PERF_TIER=20 PERF_FONTS=path/to/fonts cargo run --release -p gauntlet-benchmark
+```
+
+| Variable | Meaning | Default |
+| --- | --- | --- |
+| `PERF_TIER` | Load tier: 1 to 16 for the gauntlet, 1 to 20 for the still wall (clamped) | `5` |
+| `PERF_FREEZE` | Stop on this frame and hold still, for picture comparisons; `0` runs on | `0` |
+| `PERF_SCENARIO` | `wall` for the still wall, anything else for the gauntlet | the gauntlet |
+| `PERF_FONTS` | The folder of `Roboto-Regular.ttf` and `Roboto-Bold.ttf` (the benchmark's `fonts` folder) | `fonts` |
+
+The program writes the lines the harness reads to standard output: `PERF first_frame` on the first
+animation frame and, with `PERF_FREEZE`, `PERF frozen frame=<k>` when it stops.
+
+The renderer is chosen with the features of the crate, as in the other desktop samples: Skia by
+default; `--features vello` adds the Vello backend, which `FERROUI_RENDERER=vello` (or
+`vello-hybrid`, `vello-gpu`, `vello-cpu`) selects at start; on macOS `--features quartz` and
+`--features quartz-metal` use the Quartz backend.
+
+## In the benchmark's desktop harness
+
+`desktop.py` of the benchmark measures every app it finds in its `APPS` table, each alone in its
+window, from outside the app. To add this one, build it with `cargo build --release -p
+gauntlet-benchmark` and add an entry pointing at the program, with the path of the FerroUI
+checkout's target folder (or a copy of the program):
+
+```python
+APPS = {
+    # ...
+    'ferroui': [Path('path/to/FerroUI/target/release/perf-compare-ferroui')],
+}
+```
+
+The harness passes the scenario, the tier, the frame to freeze on and the fonts in `PERF_SCENARIO`,
+`PERF_TIER`, `PERF_FREEZE` and `PERF_FONTS`, as it does for the other desktop apps, for example:
+
+```sh
+python3 desktop.py --output results/desktop --scenario gauntlet:16 --scenario wall:20
+```

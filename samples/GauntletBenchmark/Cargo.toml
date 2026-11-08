@@ -1,0 +1,40 @@
+[package]
+name = "gauntlet-benchmark"
+description = "The gauntlet and the still wall of the Cranpose UI benchmark in FerroUI: a heavy animated screen and a still one, driven frame by frame for a cross-framework comparison"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[[bin]]
+name = "perf-compare-ferroui"
+path = "program.rs"
+test = false
+
+# Only what the benchmark uses: the framework, the Fluent theme and the desktop entry point.
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
+ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
+url = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, optional = true }
+
+[features]
+default = ["skia"]
+skia = ["ferroui-desktop/skia"]
+quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
+quartz-metal = ["quartz", "ferroui-desktop/quartz-metal"]
+# The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
+# `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
+vello = ["dep:ferroui-vello"]

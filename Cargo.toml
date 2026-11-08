@@ -184,6 +184,7 @@ members = [
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
     "samples/HelloWorld",
+    "samples/GauntletBenchmark",
     "samples/ProTranslateDemo",
     "samples/HelloWorld.Builders",
     "samples/HelloWorld.Macros",
