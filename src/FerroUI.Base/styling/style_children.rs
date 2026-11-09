@@ -20,6 +20,19 @@ fn as_style_base(item: &Rc<dyn IStyle>) -> Option<&StyleBase> {
     item.as_object().and_then(|o| o.downcast_ref::<StyleBase>())
 }
 
+impl StyleChildrenData {
+    /// The children of the owner changed. A style with children is a candidate
+    /// for every element, so the collection that counts the owner as
+    /// index-enabled drops its candidate lists.
+    fn owner_children_changed(&self) {
+        if let Some(owner) = self.owner.upgrade() {
+            if let Some(style) = owner.downcast_ref::<super::Style>() {
+                style.index_link().changed();
+            }
+        }
+    }
+}
+
 impl PartialEq for StyleChildren {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
@@ -63,6 +76,11 @@ impl StyleChildren {
         self.0.candidates.select(self.snapshot(), target)
     }
 
+    #[cfg(test)]
+    pub(crate) fn candidate_stats(&self) -> Option<(u32, usize, usize)> {
+        self.0.candidates.stats()
+    }
+
     /// Adds a child style.
     pub fn add(&self, item: impl Into<Rc<dyn IStyle>>) {
         self.insert(self.count(), item)
@@ -75,8 +93,9 @@ impl StyleChildren {
         if let Some(style) = as_style_base(&item) {
             style.set_parent(owner.as_ref());
         }
-        Rc::make_mut(&mut *self.0.items.borrow_mut()).insert(index, item);
-        super::selector_candidates::invalidate();
+        Rc::make_mut(&mut *self.0.items.borrow_mut()).insert(index, item.clone());
+        self.0.candidates.added(&item);
+        self.0.owner_children_changed();
     }
 
     /// Removes the child style at `index`.
@@ -91,7 +110,8 @@ impl StyleChildren {
             }
         }
         Rc::make_mut(&mut *self.0.items.borrow_mut()).remove(index);
-        super::selector_candidates::invalidate();
+        self.0.candidates.removed(&item);
+        self.0.owner_children_changed();
     }
 
     /// Removes a child style. Returns whether it was present.
@@ -114,8 +134,10 @@ impl StyleChildren {
         if let Some(style) = as_style_base(&item) {
             style.set_parent(owner.as_ref());
         }
-        Rc::make_mut(&mut *self.0.items.borrow_mut())[index] = item.clone();
-        super::selector_candidates::invalidate();
+        let old = std::mem::replace(&mut Rc::make_mut(&mut *self.0.items.borrow_mut())[index], item.clone());
+        self.0.candidates.removed(&old);
+        self.0.candidates.added(&item);
+        self.0.owner_children_changed();
         if let Some(host) = owner.and_then(|o| o.owner()) {
             if let Some(provider) = item.as_resource_provider() {
                 provider.add_owner(&host);
@@ -125,7 +147,13 @@ impl StyleChildren {
 
     /// Removes all child styles.
     pub fn clear(&self) {
-        *self.0.items.borrow_mut() = Rc::new(Vec::new());
-        super::selector_candidates::invalidate();
+        let old = std::mem::replace(&mut *self.0.items.borrow_mut(), Rc::new(Vec::new()));
+        if old.is_empty() {
+            return;
+        }
+        for item in old.iter() {
+            self.0.candidates.removed(item);
+        }
+        self.0.owner_children_changed();
     }
 }

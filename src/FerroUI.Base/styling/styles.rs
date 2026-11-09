@@ -205,6 +205,11 @@ impl Styles {
         self.candidates.select(self.snapshot(), target)
     }
 
+    #[cfg(test)]
+    pub(crate) fn candidate_stats(&self) -> Option<(u32, usize, usize)> {
+        self.candidates.stats()
+    }
+
     /// Tries to find a resource in the collection's resources and then in
     /// its styles, last style first.
     pub fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
@@ -376,6 +381,17 @@ impl Styles {
     fn on_collection_changed(&self, e: &NotifyCollectionChangedEventArgs<'_, Rc<dyn IStyle>>) {
         if e.action == NotifyCollectionChangedAction::Reset {
             panic!("Reset should not be called on Styles.");
+        }
+
+        // The candidate index first: the handlers below can apply styles.
+        match e.action {
+            NotifyCollectionChangedAction::Add => e.new_items.iter().for_each(|item| self.candidates.added(item)),
+            NotifyCollectionChangedAction::Remove => e.old_items.iter().for_each(|item| self.candidates.removed(item)),
+            NotifyCollectionChangedAction::Replace => {
+                e.old_items.iter().for_each(|item| self.candidates.removed(item));
+                e.new_items.iter().for_each(|item| self.candidates.added(item));
+            }
+            _ => self.candidates.changed(),
         }
 
         let current_owner = self.owner();

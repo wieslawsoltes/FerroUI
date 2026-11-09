@@ -1079,3 +1079,61 @@ builds `ferroui-markup-xaml` with hot reload and source overlays on, so CI runs 
 tests of the crate on its own as well. `tests/FerroUI.ResourceBenchmarks` with
 `scripts/perf/resource-descriptors.py` measures the load and the allocations of the two forms
 from two builds.
+
+### 9.26 A collection of styles offers an element the styles whose selector can match its type
+
+Upstream applies a style to an element by matching the selector of every child style against
+it (`StyledElement.ApplyStyle` walks `IStyle.Children`, and `Style.TryAttach` evaluates the
+selector). A control theme of a control with a large template has many nested styles, most of
+which name a part of another type than the element at hand, so most of these matches fail at
+the type test of the selector's last compound, once for each style and each element of the
+template.
+
+A collection of styles (`StyleChildren`, `Styles`) can now keep, for a style key, the list of
+its entries that can match an element of that key (`styling/selector_candidates.rs`), and
+`StyledElement::apply_style` visits the entries of the list in source order.
+
+- **What is left out.** Only a style that is index-enabled (`Style::enable_selector_index`,
+  hidden; the compiled control theme tables call it for each nested style they build), has no
+  child styles, and whose selector requires a type that rules the key out. The type is read from
+  the last compound of the selector, which must start with it (`Selector::type_candidate`):
+  exact for a type selector, with the derived types for `:is()`. A selector with an OR, a
+  `:not()`, a nesting or a custom node at the start of that compound gives none, and so does a
+  style whose parent is a container query. Every other entry is in every list: styles that are
+  not index-enabled, styles with children, nested collections, custom `IStyle` implementations
+  (which the index does not call). The matcher evaluates the whole selector of every listed
+  style, activators included; the index does not replace any part of it.
+- **Where the lists live.** A collection and the index-enabled styles added to it share one
+  state (`IndexState`: the number of such styles, a generation, the lists); the collection
+  allocates it when the first such style is added, and each `Style` holds a weak pointer to the
+  state of the collection that counts it. A collection without index-enabled styles has no state:
+  `CandidateCache::select` returns the whole snapshot after one check, with no scan and no
+  allocation. A collection with fewer than eight entries is traversed whole as well.
+- **Invalidation.** The generation of a state advances, and its lists are dropped, when the
+  collection changes, when a style it counts gets a selector, is enabled again or gets a parent,
+  and when the children of such a style change. No state is shared between collections, so a
+  change of one collection or of its styles does not invalidate the lists of another. A list is
+  used only for the snapshot of the collection and the generation it was computed for; a
+  traversal re-reads the element's style key and the generation before each step and, when
+  either changed, goes on from its position through every remaining entry of its snapshot.
+- **Memory.** The lists of a collection are kept by style key, up to 1024 keys; a list is a
+  shared slice of entry indices (`u32`), and keys with the same candidates share one slice. A
+  key beyond the bound is computed at each use and nothing is dropped for it, so a rotation of
+  more keys than the bound does not empty the lists of the others.
+- **A restriction.** A collection counts a style when the style is added to it while it is
+  index-enabled. A style enabled for the first time afterwards is a candidate for every key
+  until it is added again; a style in two collections is narrowed by the first one. Generated
+  code enables a nested style before it adds it.
+
+The values and the order in which styles apply are upstream's: an entry that is left out is one
+the matcher rejects by type. Tests: `styling/selector_candidate_tests.rs` (the lists for exact,
+derived and overridden style keys; selectors that give no type; edits of the collection, of a
+selector, of the children and of the parent, during a traversal too; a collection without
+index-enabled styles is never scanned and allocates nothing; 200 style keys in rotation are
+scanned once each; keys beyond the bound; a change of another collection invalidates nothing;
+a style the index cannot leave out and one it can apply in source order, with the same values
+as without the index), `theme_styles_tests.rs` of `ferroui-markup-xaml` (a generated theme) and
+the style reload test of `ferroui-hot-reload` (an indexed collection replaced by one loaded at
+run time). `tests/FerroUI.ResourceBenchmarks/selectors.rs` with
+`scripts/perf/selector-candidates.py` measures the application of a generated theme from two
+builds, for selectors with a type, with a type and a pseudo-class, and without a type.

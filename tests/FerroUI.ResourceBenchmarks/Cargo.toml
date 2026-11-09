@@ -16,6 +16,7 @@ test = false
 [[bin]]
 name = "ferroui-selector-benchmarks"
 path = "selectors.rs"
+test = false
 
 [features]
 count-allocations = []

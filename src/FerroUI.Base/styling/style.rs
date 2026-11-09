@@ -13,6 +13,7 @@ pub struct Style {
     base: StyleBase,
     selector: RefCell<Option<Selector>>,
     type_candidate: Cell<Option<super::selector_candidates::TypeCandidate>>,
+    index_link: super::selector_candidates::IndexLink,
 }
 
 ferro_class!(Style: StyleBase);
@@ -38,8 +39,9 @@ impl StyleBaseImpl for Style {
         }
 
         Self::parent_set_parent(this, parent);
+        // Below a container query the style has no type candidate.
         if this.type_candidate.get().is_some() {
-            super::selector_candidates::invalidate();
+            this.index_link.changed();
         }
     }
 
@@ -55,7 +57,12 @@ impl StyleBaseImpl for Style {
 impl Style {
     /// Creates the class data; see [`FerroObject::construct`](crate::FerroObject::construct).
     pub fn construct() -> Self {
-        Self { base: StyleBase::construct(), selector: RefCell::new(None), type_candidate: Cell::new(None) }
+        Self {
+            base: StyleBase::construct(),
+            selector: RefCell::new(None),
+            type_candidate: Cell::new(None),
+            index_link: Default::default(),
+        }
     }
 
     /// Creates a style without a selector.
@@ -83,19 +90,36 @@ impl Style {
     pub fn set_selector(&self, value: Option<Selector>) {
         let value = Self::validate_selector(value);
         if self.type_candidate.take().is_some() {
-            super::selector_candidates::invalidate();
+            self.index_link.candidate_changed(true, false);
         }
         *self.selector.borrow_mut() = value;
     }
 
     /// Enables conservative type indexing for a generated selector. Replacing
     /// the selector automatically returns the style to the ordinary matcher.
+    ///
+    /// Call it before the style is added to its collection: the collection
+    /// counts the style as index-enabled when it is added. A style that is
+    /// enabled for the first time while it is already in a collection stays a
+    /// candidate for every element until it is added again; one that was
+    /// enabled when it was added can be enabled again in place after its
+    /// selector was replaced.
     #[doc(hidden)]
     pub fn enable_selector_index(&self) {
         let candidate = self.selector.borrow().as_ref().and_then(Selector::type_candidate);
-        if self.type_candidate.replace(candidate) != candidate {
-            super::selector_candidates::invalidate();
+        let previous = self.type_candidate.replace(candidate);
+        if previous != candidate {
+            self.index_link.candidate_changed(previous.is_some(), candidate.is_some());
         }
+    }
+
+    pub(super) fn index_link(&self) -> &super::selector_candidates::IndexLink {
+        &self.index_link
+    }
+
+    /// Whether the selector is index-enabled, whatever the parent is.
+    pub(super) fn has_type_candidate(&self) -> bool {
+        self.type_candidate.get().is_some()
     }
 
     pub(super) fn type_candidate(&self) -> Option<super::selector_candidates::TypeCandidate> {

@@ -133,6 +133,78 @@ recurses over the tree), cost the matching of the selectors and nothing in the p
 The deviation from upstream, which reevaluates at the end of every batch, is recorded in
 [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.25.
 
+### 2.4 Applying styles: the selector candidate index
+
+A control theme of a control with a large template has many nested styles, and most of them name
+a part of another type than the element being styled: of the nested styles of a button's theme, a
+`Border` in the template can match only those whose selector ends in `Border`. Matching every
+nested style against every element of the template is the cost the index removes.
+
+**What is indexed.** A compiled control theme table index-enables each nested style it builds,
+right after it sets the selector and before the style joins the children of its parent
+(`theme_styles.rs`, `Style::enable_selector_index`, a hidden method). An index-enabled style
+records the type its selector requires of the element it matches, when the selector has one: the
+last compound of the selector must start with a type, exact (`Border`) or with derived types
+(`:is(Border)`); a name, classes, property conditions and nth-child conditions may follow in the
+same compound, and anything may come before the compound's combinator
+(`^ /template/ Border#PART_Border:pointerover`). The collection that holds such styles (the
+children of a control theme or of a style, a `Styles` collection) keeps, for each style key it is
+asked for, the list of its entries that can match an element of that key, in source order, and
+applying styles visits the entries of the list.
+
+**What falls back.** An entry is left out of a list only when it is an index-enabled style without
+child styles and the type of its selector rules the style key out. Everything else stays in every
+list and goes through the ordinary matcher:
+
+- a style that was never index-enabled (every style the run-time loader, hot reload or code
+  creates), and a style whose selector was replaced after it was enabled;
+- a selector that gives no type to index by: an OR of selectors (`,`), `:not()`, a last compound
+  that starts with `^` (`^:pointerover`), with a name or a class alone (`/template/ #PART_Border`)
+  or with a custom selector node;
+- a style with child styles, because the type of a parent says nothing about its children;
+- a style whose parent is a container query, which is evaluated before the selector;
+- an entry that is not a style: a nested `Styles` collection, a style include, a custom `IStyle`;
+- every entry of a collection with fewer than eight entries.
+
+The index reads the type of the selector and nothing else: classes, names, pseudo-classes and
+property conditions are evaluated by the matcher, with their activators, for every style in the
+list. The styles of the list apply in source order with the priorities they always had, so the
+values of an element are the same with and without the index.
+
+A selector in a nested style of a theme that names the type of the part
+(`^ /template/ Border#PART_Border`) is indexed; one that names only the part
+(`^ /template/ #PART_Border`) is matched against every element of the template.
+
+**Invalidation.** The lists belong to the collection. They are dropped when
+
+- the collection changes (an entry is added, removed, replaced or moved, or it is cleared);
+- a style the collection counts as index-enabled gets another selector, is index-enabled again,
+  or gets another parent;
+- the child styles of such a style change.
+
+A change of any other collection, or of a style in another collection, leaves the lists in place:
+there is no state shared between collections. A traversal that is under way when one of these
+happens (a setter applied by an earlier style can run code that edits a later one), or during
+which the style key of the element changes, goes on from its position through every remaining
+entry of the collection.
+
+A collection counts a style as index-enabled when the style is added to it while it is enabled.
+A style that is enabled for the first time after it was added is matched for every element until
+it is added again, and a style that two collections hold is narrowed by the first of them only.
+Generated code enables before it adds; nothing else calls the method.
+
+**Cost.** A collection that never held an index-enabled style allocates nothing for the index:
+asking it for the candidates of an element is one check, and the collection is traversed as it
+always was. This is the case of the styles of an application, of a document loaded at run time
+and of a theme replaced by a hot reload. A collection with index-enabled styles shares one small
+state with them (each `Style` holds one pointer to it), scans its entries once for each style key
+it meets and remembers the result: up to 1024 keys for each collection, and keys with the same
+candidates share one list of entry indices. A key beyond the bound gets its list computed at each
+use, and nothing that is remembered is dropped for it.
+
+The deviation from upstream, which matches every child style against every element, is recorded
+in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
+
 ## 3. Units and theme trimming
 
 **Units.** The documents a theme merges (`MergeResourceInclude`) are each a unit, such as
@@ -383,3 +455,4 @@ Documents loaded at run time bind the way the built application does (#604):
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
+| Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |
