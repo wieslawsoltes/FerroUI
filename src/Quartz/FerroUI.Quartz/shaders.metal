@@ -8,7 +8,32 @@ struct Params {
   float4 color, gradient, inverse, translation, src, dst, clip, shadow, target;
   uint stops, clipped, flipped, reserved;
   uint edgeRows, edgeOriginY, edgeStride, edgePad;
+  float4 rclip, rradius, sclip;
 };
+
+// The coverage of a rectangle clip (`clipped & 4`): the area of the pixel
+// inside the rectangle.
+static float clip_rectangle(float2 c, float4 rect) {
+  float2 inside = saturate(min(c + 0.5f, rect.zw) - max(c - 0.5f, rect.xy));
+  return inside.x * inside.y;
+}
+
+// The coverage of the analytic clip (`clipped & 2`) at a pixel center: a
+// rectangle with elliptical corners of radii `rad`, antialiased over a pixel.
+static float clip_rounded(float2 c, float4 rect, float2 rad) {
+  float2 mid = (rect.xy + rect.zw) * 0.5f;
+  float2 halfSize = (rect.zw - rect.xy) * 0.5f;
+  float2 d = abs(c - mid) - halfSize;
+  float coverage = saturate(0.5f - max(d.x, d.y));
+  if (rad.x > 0 && rad.y > 0) {
+    float2 k = d + rad;
+    if (k.x > 0 && k.y > 0) {
+      float distance = (length(k / rad) - 1.0f) * min(rad.x, rad.y);
+      coverage = min(coverage, saturate(0.5f - distance));
+    }
+  }
+  return coverage;
+}
 struct Stop {
   float4 color;
   float4 location;
@@ -200,12 +225,16 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
   uint2 position = p.origin + tid;
   float2 pixel = float2(position), center = pixel + 0.5f;
   float mask = 1;
-  if (p.clipped) {
+  if (p.clipped & 1) {
     float2 relative = center - p.clip.xy;
     mask = all(relative >= 0) && all(relative < p.clip.zw)
                ? clip.read(uint2(relative)).r
                : 0;
   }
+  if (p.clipped & 2)
+    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+  if (p.clipped & 4)
+    mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
   uint count = p.edges;
   if (p.edgeRows) {
@@ -698,12 +727,16 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
   uint2 position = uint2(v.position.xy + p.target.xy);
   float2 center = float2(position) + 0.5f;
   float mask = 1;
-  if (p.clipped) {
+  if (p.clipped & 1) {
     float2 relative = center - p.clip.xy;
     mask = all(relative >= 0) && all(relative < p.clip.zw)
                ? clip.read(uint2(relative)).r
                : 0;
   }
+  if (p.clipped & 2)
+    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+  if (p.clipped & 4)
+    mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
   uint count = p.edges;
   if (p.edgeRows) {
@@ -778,12 +811,16 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
   uint2 position = uint2(v.position.xy + p.target.xy);
   float2 center = float2(position) + 0.5f;
   float mask = 1;
-  if (p.clipped) {
+  if (p.clipped & 1) {
     float2 relative = center - p.clip.xy;
     mask = all(relative >= 0) && all(relative < p.clip.zw)
                ? clip.read(uint2(relative)).r
                : 0;
   }
+  if (p.clipped & 2)
+    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+  if (p.clipped & 4)
+    mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
   uint count = p.edges;
   if (p.edgeRows) {

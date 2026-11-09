@@ -21,6 +21,10 @@ typedef struct {
       target;
   uint32_t stops, clipped, flipped, reserved;
   uint32_t edgeRows, edgeOriginY, edgeStride, edgePad;
+  // The analytic clips, in canvas pixels: a rectangle (left, top, right,
+  // bottom) with corner radii (x, y) (`clipped & 2`), and a rectangle
+  // (`clipped & 4`), the intersection of the rectangle clips in effect.
+  vector_float4 rclip, rradius, sclip;
 } QParams;
 typedef struct {
   vector_float4 color, location;
@@ -206,6 +210,9 @@ void qm_record_fault(uint64_t generation) {
 @property(nonatomic) CGAffineTransform transform;
 @property(nonatomic) id<MTLTexture> clip;
 @property(nonatomic) CGRect clipRect;
+// The analytic clip: a rounded rectangle in canvas pixels (`rclipped`).
+@property(nonatomic) vector_float4 rclip, rradius, sclip;
+@property(nonatomic) int rclipped, sclipped;
 @property(nonatomic) vector_float4 shadow, shadowColor, gradientOptions;
 @property(nonatomic) int blendMode, aliased, interpolation, hinting;
 @end
@@ -1109,6 +1116,11 @@ static QState *copy_state(QState *s) {
   n.aliased = s.aliased;
   n.interpolation = s.interpolation;
   n.hinting = s.hinting;
+  n.rclip = s.rclip;
+  n.rradius = s.rradius;
+  n.rclipped = s.rclipped;
+  n.sclip = s.sclip;
+  n.sclipped = s.sclipped;
   return n;
 }
 static QParams params(QMetalSurface *s) {
@@ -1127,10 +1139,19 @@ static QParams params(QMetalSurface *s) {
   p.inverse = (vector_float4){inv.a, inv.b, inv.c, inv.d};
   p.translation = (vector_float4){inv.tx, inv.ty, 0, 1};
   if (state.clip) {
-    p.clipped = 1;
+    p.clipped |= 1;
     CGRect c = state.clipRect;
     p.clip =
         (vector_float4){c.origin.x, c.origin.y, c.size.width, c.size.height};
+  }
+  if (state.rclipped) {
+    p.clipped |= 2;
+    p.rclip = state.rclip;
+    p.rradius = state.rradius;
+  }
+  if (state.sclipped) {
+    p.clipped |= 4;
+    p.sclip = state.sclip;
   }
   return p;
 }
@@ -1589,7 +1610,7 @@ static CGRect crop(QMetalSurface *s, CGRect rect) {
   rect = CGRectIntersection(
       CGRectIntegral(rect),
       CGRectMake(0, 0, s.storage.canvas.width, s.storage.canvas.height));
-  if (s.state.clip)
+  if (s.state.clip || s.state.rclipped || s.state.sclipped)
     rect = CGRectIntersection(rect, s.state.clipRect);
   return CGRectIsNull(rect) ? CGRectZero : rect;
 }
@@ -1912,7 +1933,62 @@ void qm_clip(void *surface, CGPathRef path, int evenodd) {
   dispatch(s, mask, p, edges, nil, nil);
   s.state.clip = mask;
   s.state.clipRect = box;
+  // The mask was drawn through the analytic clips: it holds them now.
+  s.state.rclipped = 0;
+  s.state.sclipped = 0;
   UNLOCK
+}
+// A rectangle clip with equal elliptical corners (x, y, width, height, rx, ry
+// in user space), as a coverage function of the shaders instead of a mask:
+// no texture, no path and no pass for it. Applied when the transform keeps
+// axes and no other clip is in effect; returns 0 otherwise, and the caller
+// clips with the path (whose mask then takes the analytic clip in).
+int qm_clip_rounded(void *surface, const double *rect) {
+  int applied = 0;
+  LOCK if (!r || !surface || !rect) return 0;
+  QMetalSurface *s = (__bridge QMetalSurface *)surface;
+  CGAffineTransform t = s.state.transform;
+  double x = rect[0], y = rect[1], w = rect[2], h = rect[3], rx = rect[4],
+         ry = rect[5];
+  BOOL axes = t.b == 0 && t.c == 0 && t.a != 0 && t.d != 0;
+  BOOL rounded = rx > 0 && ry > 0 && isfinite(rx) && isfinite(ry);
+  // A mask holds every clip before it; a rounded clip in a rounded clip is
+  // not one rounded rectangle. Those clip with the path.
+  if (axes && !s.state.clip && !(rounded && s.state.rclipped) && w >= 0 &&
+      h >= 0 && isfinite(x) && isfinite(y) && isfinite(w) && isfinite(h)) {
+    BOOL clipped = s.state.rclipped || s.state.sclipped;
+    CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), t);
+    CGPoint b = CGPointApplyAffineTransform(CGPointMake(x + w, y + h), t);
+    double left = MIN(a.x, b.x), top = MIN(a.y, b.y), right = MAX(a.x, b.x),
+           bottom = MAX(a.y, b.y);
+    if (rounded) {
+      double radiusX = MIN(rx * fabs(t.a), (right - left) / 2);
+      double radiusY = MIN(ry * fabs(t.d), (bottom - top) / 2);
+      s.state.rclip = (vector_float4){left, top, right, bottom};
+      s.state.rradius = (vector_float4){radiusX, radiusY, 0, 0};
+      s.state.rclipped = 1;
+    } else if (s.state.sclipped) {
+      vector_float4 old = s.state.sclip;
+      left = MAX(left, old.x);
+      top = MAX(top, old.y);
+      right = MAX(left, MIN(right, old.z));
+      bottom = MAX(top, MIN(bottom, old.w));
+      s.state.sclip = (vector_float4){left, top, right, bottom};
+    } else {
+      s.state.sclip = (vector_float4){left, top, right, bottom};
+      s.state.sclipped = 1;
+    }
+    CGRect box = CGRectIntersection(
+        CGRectIntegral(CGRectMake(left, top, right - left, bottom - top)),
+        CGRectMake(0, 0, s.storage.canvas.width, s.storage.canvas.height));
+    // The pixels any clip in effect leaves: the work of a draw is cropped to them.
+    if (clipped)
+      box = CGRectIntersection(box, s.state.clipRect);
+    s.state.clipRect = CGRectIsNull(box) ? CGRectZero : box;
+    applied = 1;
+  }
+  UNLOCK
+  return applied;
 }
 void qm_fill(void *surface, CGPathRef path, int evenodd, double red,
              double green, double blue, double alpha) {
@@ -2078,6 +2154,8 @@ void qm_begin_layer(void *surface, double opacity, int blend) {
   // identity opacity group, and unnecessarily truncates filter inputs.
   s.state.clip = nil;
   s.state.clipRect = CGRectZero;
+  s.state.rclipped = 0;
+  s.state.sclipped = 0;
   s.storage.dirty = CGRectNull;
   atomic_fetch_add(&counters[1], 1);
   UNLOCK
@@ -3335,5 +3413,7 @@ void qm_reset_effect_input_clip(void *surface) {
   QMetalSurface *s = (__bridge QMetalSurface *)surface;
   s.state.clip = nil;
   s.state.clipRect = CGRectZero;
+  s.state.rclipped = 0;
+  s.state.sclipped = 0;
   UNLOCK
 }
