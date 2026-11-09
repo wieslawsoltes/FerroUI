@@ -35,6 +35,8 @@ impl Lifetime {
     /// The root empty and a new wall waiting to be attached.
     fn prepare_detached(&mut self) {
         self.fixture.show(None);
+        // The layout queue holds what was detached until its next pass: freed here, unmeasured.
+        self.fixture.lay_out();
         self.pending = Some(self.build());
     }
 
@@ -54,6 +56,8 @@ impl Lifetime {
     /// An empty canvas attached to the root.
     fn prepare_empty(&mut self) {
         self.fixture.show(None);
+        // The layout queue holds what was detached until its next pass: freed here, unmeasured.
+        self.fixture.lay_out();
         let canvas = Canvas::new();
         self.fixture.show(Some(&canvas.clone().upcast::<Control>()));
         self.pending = Some(canvas);
@@ -107,6 +111,7 @@ pub fn register(registry: &mut Registry) {
         || Lifetime::new(TILES),
         |b: &mut Lifetime| {
             b.fixture.show(None);
+            b.fixture.lay_out();
             let canvas = Canvas::new();
             for index in 0..b.tiles {
                 canvas.children().add(tile(index, &b.fixture.brushes));

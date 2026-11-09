@@ -76,6 +76,8 @@ impl Styling {
 
     fn prepare_detached(&mut self) {
         self.fixture.show(None);
+        // The layout queue holds what was detached until its next pass: freed here, unmeasured.
+        self.fixture.lay_out();
         let canvas = Canvas::new();
         self.built.clear();
         for index in 0..self.tiles {
