@@ -742,3 +742,18 @@ and only `Some(false)` keeps the single rectangle. The tracker is upstream's
 target still renders into its retained layer, so the pixels outside the rectangles are the last
 frame's. Test: `composition_options.rs` (the default). Headless still wall, 900 frames: 81.4 to
 10.8 ms a frame, flat over the run (10.6 ms at 120 frames).
+### 9.11 Skia draws box shadows with a blur mask filter
+
+Upstream gives the paint of a box shadow a blur image filter. An image filter makes Skia draw the
+shadow's shape into a layer of its own and blur the layer's pixels with a full Gaussian pass, for
+every shadow in every frame it is drawn: in the gauntlet, whose cards each have a shadow, that
+pass (`GaussianPass::blurSegment`) was 39 % of the render thread. The Skia backend now gives the
+paint a blur mask filter of the same sigma (`MaskFilter::blur(Normal, sigma, respect_ctm)`): the
+same Gaussian of the shape's coverage, in the shadow's color, under the same clip that keeps it
+outside (or inside) the box. No layer is made, and Skia draws a blurred rounded rectangle from a
+nine-patch it caches on the CPU and with an analytic shader on the GPU, so equal shadows cost a
+lookup. The Vello backend already drew most shadows in closed form, and Quartz with its own GPU
+path. Test: `media/box_shadow_tests.rs` `box_shadows_of_every_kind` (outer and inset, rounded and
+square, offsets, spreads, blurs from 2 to 40, two shadows on one box), whose expected image is the
+image filter's: the two differ by at most 3 of 255 in a channel, in 6 of 120,000 pixels. Local gate,
+three rounds: gauntlet render 88.9 to 50.9 ms a frame (-42.8 %), wall time -42.3 %.
