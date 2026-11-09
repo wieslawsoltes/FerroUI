@@ -271,6 +271,9 @@ impl Dispatcher {
     }
 
     fn send_inline(&self, action: impl FnOnce(), priority: DispatcherPriority) {
+        // Boundary (#567): an application callback. Its panic goes through the
+        // unhandled-exception filter and events of the dispatcher, as the exception of the
+        // reference does, and is raised again only when they do not handle it.
         let result = catch_unwind(AssertUnwindSafe(|| {
             let _restore = self.enter_job(priority);
             action();

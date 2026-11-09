@@ -33,7 +33,8 @@ from dataclasses import dataclass, field
 
 # The checkout of microsoft-ui-xaml the port is made from (branch winui3/main).
 REFERENCE_COMMIT = "7e4b0c2096be402f51cc8f7d203ebf67cff183d0"
-DEFAULT_REFERENCE = "/Users/wieslawsoltes/GitHub/microsoft-ui-xaml"
+# A checkout beside this repository; WINUI_XAML_ROOT or an argument names another one.
+DEFAULT_REFERENCE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "microsoft-ui-xaml")
 
 XAML_NS = "http://schemas.microsoft.com/winfx/2006/xaml"
 PRESENTATION_NS = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"

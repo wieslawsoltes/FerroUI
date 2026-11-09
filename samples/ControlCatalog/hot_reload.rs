@@ -50,11 +50,10 @@ pub(crate) fn session_release_check() -> impl Fn() -> bool {
     move || session.upgrade().is_none()
 }
 
+/// The reloaded documents bind as the build compiles the catalog: compiled bindings, unless its
+/// assembly says otherwise (#604).
 fn configuration() -> RuntimeXamlLoaderConfiguration {
-    let mut configuration = RuntimeXamlLoaderConfiguration::default();
-    configuration.local_assembly = Some(&crate::register_types::ASSEMBLY);
-    configuration.use_compiled_bindings_by_default = true;
-    configuration
+    RuntimeXamlLoaderConfiguration::for_assembly(&crate::register_types::ASSEMBLY)
 }
 pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str) {
     if ![
@@ -109,9 +108,6 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 } else {
                     manifest.watcher(Duration::from_millis(60))
                 };
-                for source in manifest.sources.values_mut() {
-                    *source = normalize(source.clone()).expect("valid embedded geometry");
-                }
                 let mut session = manifest
                     .session()
                     .expect("register catalog reload documents");
@@ -141,12 +137,7 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                         let mut context = context.borrow_mut();
                         context.targets.retain(|(target, _)| target.is_alive());
                         let latest = context.watcher.changes.try_iter().last();
-                        if let Some(mut batch) = latest {
-                            for file in &mut batch.files {
-                                file.contents =
-                                    std::mem::replace(&mut file.contents, Err(String::new()))
-                                        .and_then(normalize);
-                            }
+                        if let Some(batch) = latest {
                             context.session.submit_files(batch);
                         }
                         if let Some(outcome) = context.session.apply_pending() {
@@ -299,14 +290,3 @@ impl ferroui_hot_reload::CapturedControlState for CheckBoxState {
     }
 }
 
-#[path = "build/placeholder_geometry.rs"]
-mod placeholder_geometry;
-include!(concat!(env!("OUT_DIR"), "/hot_reload_geometries.rs"));
-fn normalize(mut source: String) -> Result<String, String> {
-    if cfg!(feature = "placeholder-branding") {
-        for (key, data) in RELOAD_GEOMETRIES {
-            placeholder_geometry::replace_geometry(&mut source, key, data)?;
-        }
-    }
-    Ok(source)
-}

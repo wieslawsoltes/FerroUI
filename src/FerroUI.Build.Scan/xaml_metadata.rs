@@ -39,9 +39,38 @@
 //!       "public": true                                 x:ClassModifier
 //!     }
 //!   ],
-//!   "dependencies": ["../Other/compiled_xaml.xamlmeta"]   relative to this file, or absolute
+//!   "dependencies": ["../Other/compiled_xaml.xamlmeta"],  relative to this file, or absolute
+//!   "theme_units": [                                   only when a class has units (#568)
+//!     {
+//!       "class": "Fixture.Theme",                      the class whose documents the units are of
+//!       "table_path": "::fixture::compiled_xaml::THEME_UNITS",
+//!       "units": [
+//!         {
+//!           "name": "Controls/Button.xaml",            the document, or `ambient`
+//!           "index": 1,                                canonical index; the ambient unit is 0
+//!           "documents": ["Controls/Button.xaml"],
+//!           "keys": ["AccentButtonStyle"],             text keys it defines
+//!           "type_keys": ["Button"],                   type keys it defines (`{x:Type Button}`)
+//!           "references": ["ButtonBackground"],        keys of the group it names
+//!           "types": ["Border", "Button"]              types it constructs or selects
+//!         }
+//!       ]
+//!     }
+//!   ],
+//!   "referenced_types": ["Border", "Button"],         only for a crate without units whose
+//!   "referenced_keys": ["ButtonBackground"]            documents name something (#568)
 //! }
 //! ```
+//!
+//! # Theme units
+//!
+//! The unit graph of the compiled theme of a class (#568, step 2 of
+//! docs/porting/theme-trimming.md): the generated file applies every unit through the static
+//! table `table_path`; the graph says what each unit defines and what it needs. The documents
+//! of a unit are in the order of the group; the other lists are sorted and hold each name once.
+//! Type names are local names, as the documents name them.
+//! The member is left out when no class has units, and a reader that does not know it ignores
+//! it.
 
 use std::path::{Path, PathBuf};
 
@@ -64,6 +93,59 @@ pub struct DocumentModel {
     pub public: bool,
 }
 
+/// A unit of the compiled theme of a class (#568): one merged document, or the ambient content
+/// that is always kept, and what it defines and needs.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ThemeUnitModel {
+    /// The path of the document of the unit below the root URI of the assembly, or `ambient`.
+    pub name: String,
+    /// The canonical index of the unit: the order the units are applied in. The ambient unit
+    /// is 0.
+    pub index: u32,
+    /// The documents whose entries the unit holds, by their path below the root URI.
+    pub documents: Vec<String>,
+    /// The text keys the unit defines.
+    pub keys: Vec<String>,
+    /// The type keys the unit defines (`{x:Type Button}`), by the local name of the type.
+    pub type_keys: Vec<String>,
+    /// The keys of the group the unit names (`{StaticResource}`, `{DynamicResource}`,
+    /// `BasedOn`, `Theme`, and every other mention of a key).
+    pub references: Vec<String>,
+    /// The types the unit constructs or selects (elements, `TargetType`, selectors, `{x:Type}`),
+    /// by their local names.
+    pub types: Vec<String>,
+}
+
+/// What the compiled documents of a crate without theme units name that can root the units of
+/// a theme (#568): the types they construct or select and the tokens that may spell a key, by
+/// local name, sorted. An application that trims its themes roots what the documents of its
+/// dependencies name, since those documents run in it.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct MarkupReferencesModel {
+    /// The local names of the types the documents construct or select.
+    pub types: Vec<String>,
+    /// What may name a key: keys and the identifier tokens of the documents.
+    pub keys: Vec<String>,
+}
+
+impl MarkupReferencesModel {
+    /// Whether the documents name nothing.
+    pub fn is_empty(&self) -> bool {
+        self.types.is_empty() && self.keys.is_empty()
+    }
+}
+
+/// The units of the compiled theme of a class (#568).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ThemeUnitsModel {
+    /// The full name of the class whose documents the units are of.
+    pub class: String,
+    /// The absolute Rust path of the static table of every unit, in canonical order.
+    pub table_path: String,
+    /// The units, in canonical order.
+    pub units: Vec<ThemeUnitModel>,
+}
+
 /// The compiled markup a crate exports to its dependents (`AssemblyModel`, the part of
 /// it the compiler reads today).
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -78,6 +160,12 @@ pub struct XamlMetadata {
     /// the directory of this file or absolute (the files of a build are in the `OUT_DIR`
     /// of each crate).
     pub dependencies: Vec<String>,
+    /// The units of the compiled themes of the classes of the crate (#568), in the order of the
+    /// compilation; empty for a crate without them.
+    pub theme_units: Vec<ThemeUnitsModel>,
+    /// What the compiled documents of the crate name, for a crate without theme units (#568);
+    /// empty otherwise.
+    pub references: MarkupReferencesModel,
 }
 
 impl XamlMetadata {
@@ -102,7 +190,22 @@ impl XamlMetadata {
         text.push_str("  \"dependencies\": [");
         let dependencies: Vec<String> = self.dependencies.iter().map(|path| json_string(path)).collect();
         text.push_str(&dependencies.join(", "));
-        text.push_str("]\n}\n");
+        text.push(']');
+        if !self.theme_units.is_empty() {
+            text.push_str(",\n  \"theme_units\": [");
+            for (index, units) in self.theme_units.iter().enumerate() {
+                text.push_str(if index == 0 { "\n" } else { ",\n" });
+                write_theme_units(&mut text, units);
+            }
+            text.push_str("\n  ]");
+        }
+        for (name, items) in [("referenced_types", &self.references.types), ("referenced_keys", &self.references.keys)] {
+            if !items.is_empty() {
+                let items: Vec<String> = items.iter().map(|item| json_string(item)).collect();
+                text.push_str(&format!(",\n  \"{name}\": [{}]", items.join(", ")));
+            }
+        }
+        text.push_str("\n}\n");
         text
     }
 
@@ -130,11 +233,24 @@ impl XamlMetadata {
             .iter()
             .map(|path| path.string("a dependency").map(str::to_string))
             .collect::<Result<Vec<_>, String>>()?;
+        let theme_units = match object.iter().find(|(key, _)| key == "theme_units") {
+            Some((_, value)) => value.array("theme_units")?.iter().map(read_theme_units).collect::<Result<Vec<_>, String>>()?,
+            None => Vec::new(),
+        };
+        let strings = |name: &str| -> Result<Vec<String>, String> {
+            match object.iter().find(|(key, _)| key == name) {
+                Some((_, value)) => value.array(name)?.iter().map(|item| item.string(name).map(str::to_string)).collect(),
+                None => Ok(Vec::new()),
+            }
+        };
+        let references = MarkupReferencesModel { types: strings("referenced_types")?, keys: strings("referenced_keys")? };
         Ok(Self {
             name: field(object, "name")?.string("name")?.to_string(),
             crate_name: field(object, "crate_name")?.string("crate_name")?.to_string(),
             documents,
             dependencies,
+            theme_units,
+            references,
         })
     }
 
@@ -159,6 +275,59 @@ impl XamlMetadata {
         }
         Ok(read.into_iter().map(|(_, metadata)| metadata).collect())
     }
+}
+
+/// Writes the units of a class as an item of `"theme_units"`: each unit on its lines, each
+/// list on one line.
+fn write_theme_units(text: &mut String, units: &ThemeUnitsModel) {
+    let list = |items: &[String]| format!("[{}]", items.iter().map(|item| json_string(item)).collect::<Vec<_>>().join(", "));
+    text.push_str("    {\n");
+    text.push_str(&format!("      \"class\": {},\n", json_string(&units.class)));
+    text.push_str(&format!("      \"table_path\": {},\n", json_string(&units.table_path)));
+    text.push_str("      \"units\": [");
+    for (index, unit) in units.units.iter().enumerate() {
+        text.push_str(if index == 0 { "\n" } else { ",\n" });
+        text.push_str("        {\n");
+        text.push_str(&format!("          \"name\": {},\n", json_string(&unit.name)));
+        text.push_str(&format!("          \"index\": {},\n", unit.index));
+        text.push_str(&format!("          \"documents\": {},\n", list(&unit.documents)));
+        text.push_str(&format!("          \"keys\": {},\n", list(&unit.keys)));
+        text.push_str(&format!("          \"type_keys\": {},\n", list(&unit.type_keys)));
+        text.push_str(&format!("          \"references\": {},\n", list(&unit.references)));
+        text.push_str(&format!("          \"types\": {}\n", list(&unit.types)));
+        text.push_str("        }");
+    }
+    text.push_str(if units.units.is_empty() { "]\n" } else { "\n      ]\n" });
+    text.push_str("    }");
+}
+
+/// Reads an item of `"theme_units"`.
+fn read_theme_units(value: &JsonValue) -> Result<ThemeUnitsModel, String> {
+    let object = value.object("the units of a class")?;
+    let strings = |object: &[(String, JsonValue)], name: &str| -> Result<Vec<String>, String> {
+        field(object, name)?.array(name)?.iter().map(|item| item.string(name).map(str::to_string)).collect()
+    };
+    let units = field(object, "units")?
+        .array("units")?
+        .iter()
+        .map(|unit| {
+            let unit = unit.object("a unit")?;
+            Ok(ThemeUnitModel {
+                name: field(unit, "name")?.string("name")?.to_string(),
+                index: field(unit, "index")?.integer("index")?,
+                documents: strings(unit, "documents")?,
+                keys: strings(unit, "keys")?,
+                type_keys: strings(unit, "type_keys")?,
+                references: strings(unit, "references")?,
+                types: strings(unit, "types")?,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    Ok(ThemeUnitsModel {
+        class: field(object, "class")?.string("class")?.to_string(),
+        table_path: field(object, "table_path")?.string("table_path")?.to_string(),
+        units,
+    })
 }
 
 fn json_optional(value: &Option<String>) -> String {
@@ -188,7 +357,8 @@ fn json_string(text: &str) -> String {
 enum JsonValue {
     Null,
     Boolean(bool),
-    Number,
+    /// A number, as its text.
+    Number(String),
     String(String),
     Array(Vec<JsonValue>),
     Object(Vec<(String, JsonValue)>),
@@ -230,14 +400,21 @@ impl JsonValue {
             _ => Err(format!("{what} is not a boolean")),
         }
     }
+
+    fn integer(&self, what: &str) -> Result<u32, String> {
+        match self {
+            JsonValue::Number(text) => text.parse::<u32>().map_err(|_| format!("{what} is not an unsigned integer")),
+            _ => Err(format!("{what} is not a number")),
+        }
+    }
 }
 
 fn field<'a>(object: &'a [(String, JsonValue)], name: &str) -> Result<&'a JsonValue, String> {
     object.iter().find(|(key, _)| key == name).map(|(_, value)| value).ok_or_else(|| format!("\"{name}\" is missing"))
 }
 
-/// A reader of the JSON the model is written in (RFC 8259; numbers are accepted and not
-/// kept, the model has none).
+/// A reader of the JSON the model is written in (RFC 8259; a number is kept as its text, and
+/// the model has only the indices of theme units).
 struct JsonParser<'a> {
     text: &'a [u8],
     at: usize,
@@ -336,10 +513,11 @@ impl JsonParser<'_> {
             Some(b'f') => self.keyword("false", JsonValue::Boolean(false)),
             Some(b'n') => self.keyword("null", JsonValue::Null),
             Some(b'-' | b'0'..=b'9') => {
+                let start = self.at;
                 while self.at < self.text.len() && matches!(self.text[self.at], b'-' | b'+' | b'.' | b'e' | b'E' | b'0'..=b'9') {
                     self.at += 1;
                 }
-                Ok(JsonValue::Number)
+                Ok(JsonValue::Number(String::from_utf8_lossy(&self.text[start..self.at]).into_owned()))
             }
             Some(_) => Err(self.error("unexpected character")),
             None => Err(self.error("unexpected end")),
@@ -434,11 +612,73 @@ mod tests {
                 },
             ],
             dependencies: vec!["../Other/compiled_xaml.xamlmeta".to_string()],
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel::default(),
         };
         let text = metadata.to_json();
+        assert!(!text.contains("theme_units"), "a crate without units writes no units");
         assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
-        let empty = XamlMetadata { name: "A".into(), crate_name: "a".into(), documents: Vec::new(), dependencies: Vec::new() };
+        let empty = XamlMetadata { name: "A".into(), crate_name: "a".into(), documents: Vec::new(), dependencies: Vec::new(), theme_units: Vec::new(), references: MarkupReferencesModel::default() };
         assert_eq!(XamlMetadata::parse(&empty.to_json()), Ok(empty));
+    }
+
+    /// Not from upstream: the units of a compiled theme (#568) are read back as they were
+    /// written, and a file without them reads as one without units.
+    #[test]
+    fn theme_units_round_trip_through_the_text() {
+        let unit = |name: &str, index: u32| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: vec!["AccentButtonStyle".to_string(), "Key \"quoted\"".to_string()],
+            type_keys: vec!["Button".to_string()],
+            references: vec!["ButtonBackground".to_string()],
+            types: vec!["Border".to_string(), "Button".to_string()],
+        };
+        let metadata = XamlMetadata {
+            name: "Fixture".to_string(),
+            crate_name: "fixture".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: vec![
+                ThemeUnitsModel {
+                    class: "Fixture.Theme".to_string(),
+                    table_path: "::fixture::compiled_xaml::THEME_UNITS".to_string(),
+                    units: vec![ThemeUnitModel { name: "ambient".to_string(), ..ThemeUnitModel::default() }, unit("Controls/Button.xaml", 1)],
+                },
+                ThemeUnitsModel { class: "Fixture.Other".to_string(), table_path: "::fixture::other::THEME_UNITS".to_string(), units: Vec::new() },
+            ],
+            references: MarkupReferencesModel::default(),
+        };
+        let text = metadata.to_json();
+        assert!(text.contains("\n          \"index\": 1,\n"), "{text}");
+        assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
+        assert_eq!(
+            XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": [], "theme_units": [{"class": "C", "table_path": "p", "units": [{"name": "u", "index": -1, "documents": [], "keys": [], "type_keys": [], "references": [], "types": []}]}]}"#),
+            Err("index is not an unsigned integer".to_string())
+        );
+    }
+
+    /// Not from upstream: what the documents of a crate without units name (#568) is read back
+    /// as it was written, and a file without it reads as one that names nothing.
+    #[test]
+    fn markup_references_round_trip_through_the_text() {
+        let metadata = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel {
+                types: vec!["Border".to_string(), "ThicknessTransition".to_string()],
+                keys: vec!["SplitViewPaneAnimationEasing".to_string(), "Key \"quoted\"".to_string()],
+            },
+        };
+        let text = metadata.to_json();
+        assert!(text.contains("\n  \"referenced_types\": [\"Border\", \"ThicknessTransition\"]"), "{text}");
+        assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
+        let plain = XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": []}"#).expect("a file without references");
+        assert!(plain.references.is_empty());
     }
 
     /// Not from upstream: escapes and errors of the reader.

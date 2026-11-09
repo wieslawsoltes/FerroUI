@@ -39,41 +39,73 @@ pub(crate) const TYPE_LISTS: &[&[&MarkupType]] =
 /// types with markup metadata. Called once by `register_types()`.
 pub(crate) fn register() {
     for types in TYPE_LISTS {
-        MarkupType::register_all(types);
+        MarkupType::register_table(types);
     }
     // The navigation model of WinUI's Frame, declared next to its types (namespace
     // FerroUI.Navigation, docs/porting/winui-controls.md, section 7).
-    MarkupType::register_all(crate::navigation::MARKUP_TYPES);
+    MarkupType::register_table(crate::navigation::MARKUP_TYPES);
     // The enumerations and the event arguments of WinUI's NavigationView, declared next to them.
-    MarkupType::register_all(crate::navigation_view_events::MARKUP_TYPES);
+    MarkupType::register_table(crate::navigation_view_events::MARKUP_TYPES);
     // A binding a property holds as its value is a binding: the wrapper is one more handle of
     // the binding type, so that a property of that type is a property of binding type.
     let binding = <dyn ferroui_base::data::BindingBase as ferroui_base::metadata::MarkupTyped>::MARKUP;
     MarkupType::register_handle::<AssignedBinding>(binding);
     MarkupType::register_handle::<Option<AssignedBinding>>(binding);
+    // A page type is one more handle of `System.Type`: a property or a parameter of type
+    // `PageType` (`Frame.SourcePageType`, `Frame.Navigate`) takes `{x:Type local:Page}`, which the
+    // registered cast from `&'static TypeInfo` converts (B3 of #612).
+    let page_type = <ferroui_base::TypeInfo as ferroui_base::metadata::MarkupTyped>::MARKUP;
+    MarkupType::register_handle::<crate::PageType>(page_type);
+    MarkupType::register_handle::<Option<crate::PageType>>(page_type);
     ValueTypes::register_global(register_value_types);
+    ValueTypes::register_table(register_value_type_table);
     lists::PipsList::register();
 }
 
-/// Registers what the untyped value conversions need to know about the
-/// types declared in this module (nullable forms, reference types). The
-/// conversions are per thread: this runs on every thread, when the thread
-/// next converts an untyped value ([`ValueTypes::register_global`]).
+/// Registers what the untyped value conversions need to know about the types declared in this
+/// crate that no first use shows (#566). The conversions are per thread: this runs on every
+/// thread, when the thread next converts an untyped value ([`ValueTypes::register_global`]).
+/// These are:
+/// - the casts and nullable forms that compiled markup performs for the members of markup types
+///   (a converter of a binding, a data template), which register nothing when they are set;
+/// - the registrations of instantiations of the generic types of `ferroui-base` with a type of
+///   this crate (`RoutedEvent<SpinEventArgs>`, `FerroList<Ref<KeyBinding>>`) and the casts to the
+///   types of `ferroui-base` (a converter to `IValueConverter`, a typed routed event to
+///   `RoutedEvent`): no type of this crate is the type a first use names, and the orphan rule
+///   leaves a `ValueTypeRegistration` of a type of another crate to that crate.
+///
+/// Every other type registers when it is first used: with the first property of the type, and
+/// when its metadata becomes known ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 fn register_value_types() {
-    enums::register_value_types();
     values::register_value_types();
     contracts::register_value_types();
     plain::register_value_types();
     classes::register_value_types();
     converters::register_value_types();
+    crate::navigation::register_value_types();
     crate::documents::register_value_types();
     crate::context_menu_event_args::register_value_types();
-    crate::rich_text::register_value_types();
     crate::rich_edit_box::register_value_types();
     register_assigned_binding();
     // The delegate of `DataValidationErrors.ErrorConverter` (`Func<object, object>?`): a binding
     // delivers a converter, and the property holds the nullable form.
     ValueTypes::register_nullable::<crate::ErrorConverter>();
+}
+
+/// Registers every type of this crate that registers when it is first used: what the tables of
+/// types register at start-up ([`ValueTypes::register_table`], the `ferroui-base` feature
+/// `type-tables`), for what looks types up by name.
+pub(crate) fn register_value_type_table() {
+    enums::register_value_type_table();
+    values::register_value_type_table();
+    contracts::register_value_type_table();
+    plain::register_value_type_table();
+    converters::register_value_type_table();
+    crate::navigation::register_value_type_table();
+    crate::navigation_view_events::register_value_type_table();
+    crate::documents::register_value_type_table();
+    crate::rich_text::register_value_type_table();
+    crate::rich_edit_box::register_value_type_table();
 }
 
 /// The casts between a binding and the value of a property that is assigned a binding.

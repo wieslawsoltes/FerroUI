@@ -3,10 +3,9 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    ControlsGalleryAppPage, DrawerPageBreakpointPage, DrawerPageCompactPage, DrawerPageCustomFlyoutPage,
-    DrawerPageCustomizationPage, DrawerPageEventsPage, DrawerPageFirstLookPage, DrawerPageNavigationPage,
-    DrawerPagePerformancePage, DrawerPageRtlPage, DrawerPageTransitionsPage, EcoTrackerAppPage, FerroFlixAppPage,
-    LAvenirAppPage, ModernAppPage,
+    DrawerPageBreakpointPage, DrawerPageCompactPage, DrawerPageCustomFlyoutPage, DrawerPageCustomizationPage,
+    DrawerPageEventsPage, DrawerPageFirstLookPage, DrawerPageNavigationPage, DrawerPagePerformancePage,
+    DrawerPageRtlPage, DrawerPageTransitionsPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -82,37 +81,6 @@ const DEMOS: &[Demo] = &[
         "Performance Monitor",
         "Track detail page swaps and live page instances. Observe how pages are released after swapping them.",
         || DrawerPagePerformancePage::new().upcast(),
-    ),
-    // Showcases
-    (
-        "Showcases",
-        "FerroFlix",
-        "Streaming app with DrawerPage wrapping NavigationPage. Hamburger auto-injected at root, back arrow on detail, and dark themed flyout menu.",
-        || FerroFlixAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "L'Avenir Restaurant",
-        "Restaurant app with DrawerPage as the root container, NavigationPage for detail navigation, and TabbedPage bottom tabs for Menu, Reservations, and Profile.",
-        || LAvenirAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "EcoTracker",
-        "Sustainability tracker with CompactInline drawer, eco leaf hamburger icon, crossfade compact/open menu transitions, and green-themed Home, Stats, Habits, and Community pages.",
-        || EcoTrackerAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "ModernApp",
-        "Travel social app using a top-placement DrawerPage. A slide-down nav pane gives access to Discover, My Trips, Profile, and Settings. Features destination cards, story circles, an experience feed, a stats profile, and a travel gallery.",
-        || ModernAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Controls Gallery App",
-        "Controls gallery app using DrawerPage CompactInline mode. Dark Fluent palette, accent pill selection indicator, search box that fades in when open, expandable category groups, and Settings pinned to the footer.",
-        || ControlsGalleryAppPage::new().upcast(),
     ),
 ];
 

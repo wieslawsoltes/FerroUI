@@ -1,4 +1,5 @@
-//! The images the page transitions sample: two pages and the pattern of a dissolve.
+//! The images the page transitions sample: two pages and the pattern of a dissolve; and the
+//! picture the water ripple bends.
 //!
 //! An effect image is a handle of a bitmap (`EffectImage`), made by the application and uploaded
 //! once by the backend. The ControlCatalog gives the transitions photographs of its assets; the
@@ -11,10 +12,12 @@ use crate::tiles::{brush, column, row, text};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::effects::EffectImage;
 use ferroui_base::media::imaging::RenderTargetBitmap;
-use ferroui_base::media::{Color, FontWeight};
+use ferroui_base::media::{Color, FontWeight, IImage};
 use ferroui_base::{CornerRadius, PixelSize, Rect, Ref, Size, Thickness};
 use ferroui_controls::primitives::UniformGrid;
 use ferroui_controls::Border;
+use std::fmt;
+use std::rc::Rc;
 
 /// The width of a captured page, in pixels.
 pub const PAGE_WIDTH: i32 = 480;
@@ -25,9 +28,45 @@ pub const PAGE_HEIGHT: i32 = 300;
 /// The columns and rows of the cells of the pattern.
 const PATTERN_CELLS: (i32, i32) = (16, 10);
 
-/// The images of the page transitions: the page a transition leaves, the page it comes to, and
-/// the pattern of the dissolve (its luminance), which is also the mask of the mask transition.
-/// The empty images (the default) are drawn transparent.
+/// A picture an effect is shown on: an image the application decoded or captured, shown by an
+/// `Image` (the water ripple bends it, as Effector shows its ripple on a photograph). Without one
+/// (the default) the gallery draws a picture of its own.
+#[derive(Clone, Default)]
+pub struct Picture(Option<Rc<dyn IImage>>);
+
+impl Picture {
+    /// The picture `image`.
+    pub fn new(image: Rc<dyn IImage>) -> Self {
+        Self(Some(image))
+    }
+
+    /// The image of the picture; `None` for the picture the gallery draws.
+    pub fn image(&self) -> Option<Rc<dyn IImage>> {
+        self.0.clone()
+    }
+}
+
+impl fmt::Debug for Picture {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(if self.0.is_some() { "Picture(image)" } else { "Picture(drawn)" })
+    }
+}
+
+/// Two pictures are the same image.
+impl PartialEq for Picture {
+    fn eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (Some(a), Some(b)) => Rc::ptr_eq(a, b),
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+/// The images of the gallery: those of the page transitions (the page a transition leaves, the
+/// page it comes to, and the pattern of the dissolve, its luminance, which is also the mask of the
+/// mask transition) and the picture the water ripple bends. The empty images (the default) are
+/// drawn transparent, and without a picture the gallery draws one.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TransitionImages {
     /// The first page.
@@ -36,11 +75,13 @@ pub struct TransitionImages {
     pub second_page: EffectImage,
     /// The pattern of the dissolve and the mask of the mask transition.
     pub pattern: EffectImage,
+    /// The picture the water ripple bends.
+    pub picture: Picture,
 }
 
 impl TransitionImages {
-    /// Two pages and a pattern drawn by the render interface of the platform into bitmaps of
-    /// [`PAGE_WIDTH`] by [`PAGE_HEIGHT`] pixels.
+    /// Two pages, a pattern and a picture drawn by the render interface of the platform into
+    /// bitmaps of [`PAGE_WIDTH`] by [`PAGE_HEIGHT`] pixels.
     pub fn render() -> Self {
         Self {
             first_page: capture(&page(
@@ -56,17 +97,30 @@ impl TransitionImages {
                 [(0xF5, 0x9E, 0x0B), (0xEC, 0x48, 0x99), (0x8B, 0x5C, 0xF6)],
             )),
             pattern: capture(&pattern()),
+            // The picture is kept as the bitmap it is drawn into, shown by an `Image`.
+            picture: Picture::new(Rc::new(render_into_bitmap(&page(
+                "Lake",
+                "The picture the water ripple bends.",
+                Color::from_rgb(0x0E, 0x5A, 0x6E),
+                [(0xF9, 0xC7, 0x4F), (0x90, 0xBE, 0x6D), (0xF9, 0x84, 0x4A)],
+            )))),
         }
     }
 }
 
-/// Lays `control` out at the size of a page and draws it into a bitmap, whose handle it returns.
-fn capture(control: &Ref<Border>) -> EffectImage {
+/// Lays `control` out at the size of a page and draws it into a bitmap.
+fn render_into_bitmap(control: &Ref<Border>) -> RenderTargetBitmap {
     let size = Size::new(f64::from(PAGE_WIDTH), f64::from(PAGE_HEIGHT));
     control.measure(size);
     control.arrange(Rect::from_size(size));
     let bitmap = RenderTargetBitmap::new(PixelSize::new(PAGE_WIDTH, PAGE_HEIGHT));
     bitmap.render(&control.clone().upcast());
+    bitmap
+}
+
+/// Lays `control` out at the size of a page and draws it into a bitmap, whose handle it returns.
+fn capture(control: &Ref<Border>) -> EffectImage {
+    let bitmap = render_into_bitmap(control);
     // The handle takes a count of the platform bitmap of its own.
     let image = EffectImage::new(&bitmap);
     bitmap.dispose();

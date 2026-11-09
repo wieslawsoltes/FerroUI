@@ -1,6 +1,7 @@
 use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
 use crate::ferro_property::{
-    convert_property_value, copy_converted_property_value, FerroPropertyInit, NotifyingCallback, PropertyRoutes,
+    convert_property_value, copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
+    FerroPropertyInit, NotifyingCallback, PayloadSlot, PropertyRoutes,
 };
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
@@ -203,33 +204,34 @@ impl<T: PropertyValue> StyledProperty<T> {
     pub fn unregister(&self, type_: &'static TypeInfo) {
         self.metadata.unregister(type_);
     }
+}
 
-    /// Interprets a typed payload or the cold marker / notification /
-    /// conversion cases of an untyped binding. Exact T keeps first precedence.
-    pub(crate) fn from_untyped(&self, value: &dyn Any) -> BindingValue<T> {
-        if let Some(v) = value.downcast_ref::<T>() {
-            BindingValue::new(v.clone())
-        } else if let Some(v) = value.downcast_ref::<BindingValue<T>>() {
-            v.clone()
-        } else {
-            let mut typed = None;
-            let (kind, error) = resolve_untyped_binding(&self.base, value, &mut |value| {
-                typed = value.downcast_ref::<T>().cloned();
-                typed.is_some()
-            });
-            BindingValue::from_notification_parts(kind, typed, error)
-        }
+/// Interprets a value of an untyped binding of a styled property: a value of
+/// the property's value type, a `BindingValue` of it, the unset and do-nothing
+/// markers, a binding notification, or a value that converts implicitly, in
+/// that order. The value stays boxed: a value of the property's value type is
+/// the box that was given, and any other value is copied into a box of its
+/// own, which then holds exactly the property's value type. Compiled once; the
+/// typed operations are the routes of the property.
+pub(crate) fn resolve_boxed_binding_value(property: &FerroProperty, value: &BoxedValue) -> BindingValue<BoxedValue> {
+    if value.value_type_id() == property.property_type() {
+        BindingValue::new(value.clone())
+    } else if let Some(value) = property.routes().route_unpack_binding_value(value.as_any()) {
+        value
+    } else {
+        let mut slot = BoxedPayloadSlot::new(property);
+        let (kind, error) = resolve_untyped_binding(property, value.as_any(), &mut slot);
+        BindingValue::from_notification_parts(kind, slot.into_value(), error)
     }
 }
 
-// BindingValue<T>'s custom Clone remains in the typed caller. The marker and
-// conversion policies are common, with the existing notification snapshot
-// scope retained around the payload copy.
+// The marker and conversion policies are common, with the existing
+// notification snapshot scope retained around the payload copy.
 #[inline(never)]
 fn resolve_untyped_binding(
     property: &FerroProperty,
     value: &dyn Any,
-    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+    copy_value: &mut dyn PayloadSlot,
 ) -> (BindingValueType, Option<BindingError>) {
     if value.is::<UnsetValueType>() {
         return (BindingValueType::UNSET_VALUE, None);
@@ -361,20 +363,18 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
     }
 
-    fn route_create_boxed_local_binding(
-        &'static self,
-        owner: &FerroObject,
-    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
-        crate::property_store::BoxedLocalValueBindingObserver::new(owner, self)
+    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool> {
+        self.get_metadata_for(owner).enable_data_validation()
     }
 
-    fn route_create_binding_entry(
-        &'static self,
-        o: &FerroObject,
-        frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
-        source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedBindingValue> {
-        crate::property_store::create_boxed_binding_entry(o, frame, self, source)
+    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+        unpack_binding_value::<T>(value)
+    }
+
+    fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
+        if let Some(value) = take_boxed_value::<T>(value) {
+            o.values().set_local_value(o, self, value);
+        }
     }
 }
 

@@ -1,0 +1,63 @@
+[package]
+name = "ferroui-text-comparison"
+description = "Compares the text layout of FerroUI with parley, cosmic-text and epaint on identical inputs (the same font, size, widths and strings), measured with the harness of ferroui-benchmarks"
+version = "0.0.0"
+edition = "2021"
+# epaint 0.37 requires Rust 1.95 (see rust-toolchain.toml).
+rust-version = "1.95"
+license = "MIT"
+repository = "https://github.com/wieslawsoltes/FerroUI"
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+# A workspace of its own: parley, cosmic-text and epaint stay out of the workspace of the
+# framework and out of its lock file. The root manifest lists this directory in its `exclude`, as
+# it does the GPUI comparison. No lock file is committed: the first build writes it.
+[workspace]
+
+[lib]
+path = "lib.rs"
+
+# `cargo run --release`: measures the benchmarks the environment selects and prints the table.
+[[bin]]
+name = "ferroui-text-comparison"
+path = "main.rs"
+
+[features]
+# The counting allocator of the harness (ferroui-benchmarks, harness.rs): the table has what an
+# operation allocated. Off by default: counting costs time.
+count-allocations = ["ferroui-benchmarks/count-allocations"]
+
+[dependencies]
+# The harness: the registry, the runner, the smoke helpers and the allocation counts.
+ferroui-benchmarks = { path = "../FerroUI.Benchmarks" }
+# TextLayout, TextRunCache and the in-memory font backend of the font tests (`testing`).
+ferroui-base = { path = "../../src/FerroUI.Base", features = ["testing"] }
+# The test application and its services (`TestServices`, `UnitTestApplication`).
+ferroui-controls = { path = "../../src/FerroUI.Controls", features = ["testing"] }
+# The text shaper of the platforms: HarfBuzz.
+ferroui-harfbuzz = { path = "../../src/HarfBuzz/FerroUI.HarfBuzz" }
+
+# The libraries compared, from crates.io. Without their system font backends: every library sees
+# Roboto Regular of this repository and nothing else.
+parley = { version = "0.12", default-features = false, features = ["std"] }
+cosmic-text = { version = "0.19", default-features = false, features = ["std"] }
+epaint = { version = "0.37", default-features = false }
+
+# As the workspace of the framework: the Skia bindings that ferroui-benchmarks reaches through
+# ferroui-skia.
+[patch.crates-io]
+skia-bindings = { path = "../../external/rust-skia-bindings" }
+
+# The profiles of the workspace of the framework that matter here (profiles are not inherited
+# across workspaces). Release unwinds, so that the harness reports a failing benchmark and goes
+# on.
+[profile.release]
+lto = "thin"
+
+[profile.fast-release]
+inherits = "release"
+lto = false

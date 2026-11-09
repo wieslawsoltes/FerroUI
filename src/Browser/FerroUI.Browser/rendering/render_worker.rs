@@ -239,6 +239,9 @@ impl RenderWorker {
     fn report_panics() {
         static WRAPPED: Once = Once::new();
         WRAPPED.call_once(|| {
+            // Boundary (#567): a crash reporter for the render thread, wrapped around the hook
+            // that was there. A hook runs before the process aborts, so it reports with
+            // `panic = "abort"` too.
             let previous = std::panic::take_hook();
             std::panic::set_hook(Box::new(move |info| {
                 previous(info);

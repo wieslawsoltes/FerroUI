@@ -15,7 +15,7 @@ use ferroui_controls::automation::{
         ContentControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::{IExpandCollapseProvider, IInvokeProvider},
-    ElementNotEnabledError, ExpandCollapseState,
+    AutomationError, ElementNotEnabledError, ExpandCollapseState,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -131,13 +131,13 @@ impl IExpandCollapseProvider for Provider {
     fn shows_menu(&self) -> bool {
         true
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         if let Some(flyout) = self.0.owner.tool_flyout().filter(|f| !f.is_open()) {
             flyout.show_at(&self.0.owner);
         }
         Ok(())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         if let Some(flyout) = self.0.owner.tool_flyout().filter(|f| f.is_open()) {
             flyout.hide();
         }

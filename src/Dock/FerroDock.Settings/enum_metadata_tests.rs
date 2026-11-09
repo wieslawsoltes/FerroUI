@@ -43,7 +43,7 @@ fn settings_metadata_keeps_all_original_core_enum_handles_and_no_duplicate_opera
         ));
         for member in metadata.enum_members {
             assert_eq!(
-                (metadata.enum_to_value.unwrap())(&*(member.get)()),
+                (metadata.enum_to_value.unwrap())(&*member.get(metadata).unwrap()),
                 Some(member.value)
             );
             assert!((metadata.enum_from_value.unwrap())(member.value).is_some());

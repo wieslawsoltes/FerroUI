@@ -276,6 +276,8 @@ impl Choreographer {
 /// A callback of the system must not unwind into it: a panic is written to
 /// the log and the process is stopped.
 fn run_callback(body: impl FnOnce()) {
+    // Boundary (#567): the body of an `extern "C"` callback of the choreographer, which a
+    // panic must not unwind through.
     if let Err(panic) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(body)) {
         let message = crate::interop::panic_message(&*panic);
         log_write(LogPriority::Fatal, crate::log::TAG, &format!("panic in a frame callback: {message}"));

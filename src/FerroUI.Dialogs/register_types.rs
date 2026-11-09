@@ -60,13 +60,13 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_markup_xaml::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupType::register_all(MARKUP_TYPES);
+        MarkupType::register_table(MARKUP_TYPES);
         ItemViewModelList::register();
         FilterViewModelList::register();
         ValueTypes::register_global(register_value_types);
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
         // The assets (`Assets/`) and the loader table of the compiled markup, which the build
         // of the crate generates: a load of the document of a class by its URI creates an
         // instance of the class, whose constructor populates it.

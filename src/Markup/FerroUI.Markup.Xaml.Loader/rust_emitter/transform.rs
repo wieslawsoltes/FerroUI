@@ -27,7 +27,7 @@ use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::{TransformerConfiguration, XamlDiagnosticsHandler};
 use xamlx::type_system::{IXamlAssembly, IXamlMethod, IXamlType, IXamlTypeSystem};
 
-use crate::compiler_extensions::group_transformers::XamlRuntimeIncludeFallback;
+use crate::compiler_extensions::group_transformers::{MergedEntryOrigins, XamlRuntimeIncludeFallback};
 use crate::compiler_extensions::{
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage, IXamlCompileTimeValueParser,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlCompileTimeValueParsers, XamlDocumentResource,
@@ -65,6 +65,47 @@ pub struct TransformOptions {
     pub create_source_info: bool,
     /// Receives the diagnostics of the transform and may change their severity.
     pub diagnostic_handler: Option<DiagnosticHandler>,
+    /// The parts tables of the themes the application trims (#568, step 3): a construction of
+    /// one of their classes is written as `with_parts` over the table. Nothing without trimming.
+    pub theme_parts: Option<Rc<ThemePartsTables>>,
+}
+
+/// The parts tables of the themes an application trims (#568, step 3 of
+/// docs/porting/theme-trimming.md): for each class whose compiled markup is partitioned into
+/// units, the expression of the static table of the units the application keeps
+/// (`crate::compiled_markup::THEME_PARTS_<CLASS>`). The emitter writes a construction of such a
+/// class in the documents (`<WinUITheme />`) as `Class::with_parts(None, <table>)` instead of
+/// `Class::new()`, and records the class; the build writes the tables, after every group is
+/// compiled, from the roots of all of them.
+#[derive(Debug, Default)]
+pub struct ThemePartsTables {
+    /// The expression of the table of each class, by the full name of the class.
+    tables: Vec<(String, String)>,
+    /// The classes a construction was written for, by full name.
+    used: RefCell<Vec<String>>,
+}
+
+impl ThemePartsTables {
+    /// The tables `(full name of the class, expression of its table)`.
+    pub fn new(tables: Vec<(String, String)>) -> Self {
+        Self { tables, used: RefCell::new(Vec::new()) }
+    }
+
+    /// The expression of the table of the class `class` (its full name), if it is trimmed;
+    /// records the class as constructed.
+    pub fn table_of(&self, class: &str) -> Option<&str> {
+        let (_, table) = self.tables.iter().find(|(known, _)| known == class)?;
+        let mut used = self.used.borrow_mut();
+        if !used.iter().any(|known| known == class) {
+            used.push(class.to_string());
+        }
+        Some(table)
+    }
+
+    /// The classes a construction was written for, in the order they were first met.
+    pub fn used(&self) -> Vec<String> {
+        self.used.borrow().clone()
+    }
 }
 
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
@@ -102,6 +143,7 @@ impl TransformOptions {
             design_mode: configuration.design_mode,
             create_source_info: configuration.create_source_info(),
             diagnostic_handler,
+            theme_parts: None,
         }
     }
 }
@@ -114,10 +156,11 @@ pub struct TransformedDocument {
     pub configuration: Rc<TransformerConfiguration>,
     /// The base URI the contexts of the document get, as it was given.
     pub base_uri: Option<String>,
-    /// The namespace information the contexts of the document get, as the value of an
-    /// `rt::XmlNamespaceTable` ([`namespace_table`]); nothing when the language maps no
-    /// namespace information provider.
-    pub namespaces: Option<String>,
+    /// The namespace information the contexts of the document get, which the emitter writes
+    /// as the value of an `rt::XmlNamespaceTable` with the types the reflection-binding paths
+    /// of the document name; nothing when the language maps no namespace information
+    /// provider.
+    pub namespaces: Option<NamespaceTable>,
     /// The build method of the document in its group (what a call from another
     /// document of the group calls).
     pub build: Option<Rc<dyn IXamlMethod>>,
@@ -181,6 +224,13 @@ pub fn transform_group(
         value_parsers.add(parser.clone());
     }
     transformer_configuration.get_or_create_extra::<XamlRuntimeIncludeFallback>().set(None);
+    // The documents the merged entries come from, which the units of a compiled theme are made
+    // of (#568, `MergedEntryOrigins`).
+    transformer_configuration.add_extra(Rc::new(MergedEntryOrigins::default()));
+    // The parts tables of the themes the application trims (#568, step 3), for the emitter.
+    if let Some(theme_parts) = &options.theme_parts {
+        transformer_configuration.add_extra(theme_parts.clone());
+    }
 
     let compiler = FerroXamlIlCompiler::new(transformer_configuration.clone())?;
     compiler.set_default_compile_bindings(options.use_compiled_bindings_by_default);
@@ -371,38 +421,82 @@ fn method_not_found(
     Some(described)
 }
 
-/// The namespace information of a document as the value of an `rt::XmlNamespaceTable`
-/// (the argument of `rt::create_context`): what the namespace information provider of
-/// the document gives the contexts of the run-time loader, prefixes in order, one per
-/// line.
-pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &XamlDocument) -> String {
+/// A type that a reflection-binding path of a document names, as the compiler resolved it
+/// (`emitter::reflection_path_types`): the CLR namespace and the assembly of the entry of
+/// a namespace table it is found through, the name the path gives it, and the expression of
+/// the `fn() -> CastTarget` that yields it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct PathType {
+    pub clr_namespace: String,
+    pub assembly: String,
+    pub name: String,
+    pub target: String,
+}
+
+/// The namespace information of a document as the compiler resolved it: for each prefix, in
+/// order, the namespaces and the assemblies it maps to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct NamespaceTable {
+    entries: Vec<(String, Vec<(String, String)>)>,
+}
+
+impl NamespaceTable {
+    /// The table as the value of an `rt::XmlNamespaceTable` (the argument of
+    /// `rt::create_context`), one prefix per line, each entry with the types of
+    /// `path_types` found through it ([`namespace_entry`]).
+    pub(crate) fn source(&self, path_types: &[PathType]) -> String {
+        let entries: Vec<String> = self
+            .entries
+            .iter()
+            .map(|(prefix, infos)| {
+                let infos: Vec<String> =
+                    infos.iter().map(|(clr_namespace, assembly)| namespace_entry(clr_namespace, assembly, path_types)).collect();
+                format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
+            })
+            .collect();
+        format!("&[\n{}]", entries.concat())
+    }
+}
+
+/// One entry of a namespace table: the namespace, the assembly and the types of
+/// `path_types` that were resolved through an entry of the same namespace and assembly, by
+/// name.
+fn namespace_entry(clr_namespace: &str, assembly: &str, path_types: &[PathType]) -> String {
+    let types: Vec<String> = path_types
+        .iter()
+        .filter(|path_type| path_type.clr_namespace == clr_namespace && path_type.assembly == assembly)
+        .map(|path_type| format!("({}, {})", rust_string_literal(&path_type.name), path_type.target))
+        .collect();
+    format!("({}, {}, &[{}])", rust_string_literal(clr_namespace), rust_string_literal(assembly), types.join(", "))
+}
+
+/// The namespace information of a document: what the namespace information provider of the
+/// document gives the contexts of the run-time loader, prefixes in order.
+pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &XamlDocument) -> NamespaceTable {
     let namespaces = XmlNamespaceInfoProvider::new(configuration.clone(), document).xml_namespaces();
     let mut prefixes: Vec<&String> = namespaces.keys().collect();
     prefixes.sort();
-    let entries: Vec<String> = prefixes
+    let entries = prefixes
         .into_iter()
         .map(|prefix| {
-            let infos: Vec<String> = namespaces[prefix]
+            let infos = namespaces[prefix]
                 .iter()
-                .map(|info| {
-                    format!(
-                        "({}, {})",
-                        rust_string_literal(&info.clr_namespace),
-                        rust_string_literal(info.clr_assembly_name.as_deref().unwrap_or(""))
-                    )
-                })
+                .map(|info| (info.clr_namespace.clone(), info.clr_assembly_name.clone().unwrap_or_default()))
                 .collect();
-            format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
+            (prefix.clone(), infos)
         })
         .collect();
-    format!("&[\n{}]", entries.concat())
+    NamespaceTable { entries }
 }
 
-/// The same static table for a lexical element scope. Prefix meanings are resolved by the
-/// compiler's namespace helper, exactly as the runtime namespace information provider does.
+/// The same static table for a lexical element scope, as the value of an
+/// `rt::XmlNamespaceTable`. Prefix meanings are resolved by the compiler's namespace
+/// helper, exactly as the runtime namespace information provider does; each entry has the
+/// types of `path_types` found through it.
 pub(crate) fn namespace_table_for_aliases(
     configuration: &TransformerConfiguration,
     aliases: &std::collections::HashMap<String, String>,
+    path_types: &[PathType],
 ) -> String {
     let mut prefixes: Vec<_> = aliases.keys().collect();
     prefixes.sort();
@@ -411,7 +505,7 @@ pub(crate) fn namespace_table_for_aliases(
             .unwrap_or_default();
         let infos: Vec<_> = resolved.into_iter().map(|info| {
             let assembly = info.assembly_name.or_else(|| info.assembly.map(|assembly| assembly.name())).unwrap_or_default();
-            format!("({}, {})", rust_string_literal(&info.clr_namespace), rust_string_literal(&assembly))
+            namespace_entry(&info.clr_namespace, &assembly, path_types)
         }).collect();
         format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
     }).collect();

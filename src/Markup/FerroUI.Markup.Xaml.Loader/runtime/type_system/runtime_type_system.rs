@@ -1194,7 +1194,7 @@ impl RuntimeTypeSystem {
                     declaring_type: weak.clone(),
                     field_type: self_type.clone(),
                     literal: Some(if wide { XamlValue::Int64(member.value) } else { XamlValue::Int32(member.value as i32) }),
-                    value: RuntimeFieldValue::EnumMember(member.get),
+                    value: RuntimeFieldValue::EnumMember(markup, member),
                     attributes: Vec::new(),
                 }));
             }

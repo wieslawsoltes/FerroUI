@@ -27,13 +27,25 @@ path = "program.rs"
 # the WinUI theme and the desktop entry point.
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
+# Compiled markup only: the tables of types are not registered at start-up (#566, opt-in).
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-themes-winui = { workspace = true }
-ferroui-desktop = { workspace = true }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
 sample-support = { path = "../SampleSupport" }
+
+[features]
+default = ["skia"]
+skia = ["ferroui-desktop/skia"]
+quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
+quartz-metal = ["quartz", "ferroui-desktop/quartz-metal", "dep:ferroui-quartz"]
+quartz-runtime-shaders = ["quartz-metal", "ferroui-desktop/quartz-runtime-shaders"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, optional = true }
+ferroui-quartz = { workspace = true, optional = true, features = ["metal"] }
 
 [build-dependencies]
 sample-build = { path = "../SampleBuild" }
@@ -42,3 +54,9 @@ sample-build = { path = "../SampleBuild" }
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 sample-testing = { path = "../SampleTesting" }
+
+# The WinUI theme is constructed from the units of its compiled markup the application needs (the
+# default): the window, the text block, what their themes reference, and the controls the sources
+# name and the code of those controls creates (#568, steps 3 and 4 of
+# docs/porting/theme-trimming.md). `[package.metadata.ferroui] theme-roots = "all"` keeps every unit,
+# for comparing; a control whose name is built only at run time is named in `theme-roots`.

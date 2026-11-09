@@ -225,6 +225,9 @@ pub fn generate_class_file(
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
+    // `{Binding}` compiles as the build compiles it (#603): compiled bindings, the default of
+    // the build, unless the assembly states otherwise (`FerroUseCompiledBindingsByDefault`).
+    configuration.use_compiled_bindings_by_default = compiles_bindings_by_default(group.assembly);
     let host = EmitterHost::runtime(dependencies).map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let class = ClassGroup {
         class: FerroXamlIlRuntimeCompiler::type_system().type_of_class(class),
@@ -235,10 +238,43 @@ pub fn generate_class_file(
     generate_class_file_with(&host, &class, &TransformOptions::of(&configuration))
 }
 
+/// Whether `{Binding}` is a compiled binding in the documents of `assembly` by default: the
+/// value of its metadata entry `FerroUseCompiledBindingsByDefault` (`"True"` or `"False"`), and
+/// compiled bindings, the default of the build (#603), when it states none.
+fn compiles_bindings_by_default(assembly: Option<&'static ferroui_base::metadata::MarkupAssembly>) -> bool {
+    assembly.is_none_or(ferroui_base::metadata::MarkupAssembly::compiles_bindings_by_default)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use ferroui_build_scan::xaml_metadata::DocumentModel;
+
+    /// Not from upstream (#603): the class file of an assembly compiles its bindings unless the
+    /// assembly states otherwise, as the build does.
+    #[test]
+    fn a_class_file_compiles_bindings_unless_the_assembly_says_otherwise() {
+        use ferroui_base::metadata::MarkupAssembly;
+        static STATED_OFF: MarkupAssembly = MarkupAssembly {
+            name: "Off",
+            crate_name: "off",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "False")],
+        };
+        static STATED_ON: MarkupAssembly = MarkupAssembly {
+            name: "On",
+            crate_name: "on",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "True")],
+        };
+        static SILENT: MarkupAssembly = MarkupAssembly { name: "Silent", crate_name: "silent", xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[] };
+        assert!(compiles_bindings_by_default(None));
+        assert!(compiles_bindings_by_default(Some(&SILENT)));
+        assert!(compiles_bindings_by_default(Some(&STATED_ON)));
+        assert!(!compiles_bindings_by_default(Some(&STATED_OFF)));
+    }
 
     fn reason(compiled: &[CompiledDocument], name: &str) -> Option<String> {
         compiled.iter().find(|document| document.name == name).and_then(|document| document.source.clone().err())
@@ -260,6 +296,8 @@ mod tests {
             crate_name: "library".to_string(),
             documents: vec![document("Style.xaml", true), document("Internal/Style.xaml", false)],
             dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: Default::default(),
         }
     }
 
@@ -312,6 +350,39 @@ mod tests {
 
     /// Not from upstream: documents whose build functions would have the same name are
     /// reported as a diagnostic of the later document, not left to rustc.
+    /// Not from upstream (#633): a `MergeResourceInclude` in the merged dictionaries of an
+    /// inline dictionary is compiled into that dictionary: the document compiles (the include
+    /// is not left as an object that needs a service provider at run time) with the entries of
+    /// the included document.
+    #[test]
+    fn merge_resource_include_in_an_inline_dictionary_is_compiled_into_it() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let root = format!(
+            "<ResourceDictionary {namespaces}>\
+             <ResourceDictionary.MergedDictionaries>\
+             <ResourceDictionary><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='/Included.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>\
+             </ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='OwnEntry'>own</x:String>\
+             </ResourceDictionary>"
+        );
+        let included = format!(
+            "<ResourceDictionary {namespaces} x:ClassModifier='internal'>\
+             <x:String x:Key='IncludedEntry1'>1</x:String><x:String x:Key='IncludedEntry2'>2</x:String>\
+             </ResourceDictionary>"
+        );
+        let compiled = compile_documents(
+            &[("Root.xaml", &root), ("Included.xaml", &included)],
+            Some("ferres://App/"),
+            &RuntimeXamlLoaderConfiguration::new(),
+            &[],
+        );
+        let source = compiled[0].source.clone().unwrap_or_else(|reason| panic!("Root.xaml is not eligible: {reason}"));
+        assert!(!source.contains("MergeResourceInclude"), "{source}");
+        for key in ["OwnEntry", "IncludedEntry1", "IncludedEntry2"] {
+            assert!(source.contains(key), "{key} is not compiled: {source}");
+        }
+    }
+
     #[test]
     fn colliding_function_names_are_reported() {
         let xaml = "<Border xmlns='https://github.com/ferroui'/>";

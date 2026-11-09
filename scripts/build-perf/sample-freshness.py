@@ -45,6 +45,22 @@ def definitions(record: dict) -> list[dict]:
                    for unit in record["units"]), key=lambda value: json.dumps(value, sort_keys=True))
 
 
+def without_features(units: list[dict]) -> list[dict]:
+    return sorted(({key: value for key, value in unit.items() if key != "features"} for unit in units),
+                  key=lambda value: json.dumps(value, sort_keys=True))
+
+
+def changed_features(first: list[dict], second: list[dict]) -> list[str]:
+    """The units (name and kind) whose features differ between two graphs."""
+    def features(units):
+        found = {}
+        for unit in units:
+            found.setdefault(f"{unit.get('name')} {unit.get('kind')}", []).append(unit.get("features"))
+        return {key: sorted(map(json.dumps, value)) for key, value in found.items()}
+    first, second = features(first), features(second)
+    return sorted(key for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+
+
 def is_fresh(record: dict) -> bool:
     return bool(record["units"]) and all(unit["fresh"] for unit in record["units"])
 
@@ -227,10 +243,13 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
                 # files; the runtime result (checked against its expected value above) and the graph
                 # still have to be the baseline's.
                 if not (accept_output_changes and equivalence["runtime"] == reference["runtime"]
-                        and equivalence["units"] == reference["units"]):
+                        and without_features(equivalence["units"]) == without_features(reference["units"])):
                     raise RuntimeError(f"fixture {phase}: baseline/candidate generated output, runtime or graph differs")
                 report.setdefault("fixture_output_changes", {})[phase] = changed_outputs(
                     reference["generated"], equivalence["generated"])
+                if equivalence["units"] != reference["units"]:
+                    report.setdefault("fixture_feature_changes", {})[phase] = changed_features(
+                        reference["units"], equivalence["units"])
             previous_generated = record["generated"]
             report["fixture"].append(record)
             save()
@@ -288,8 +307,18 @@ def main() -> int:
 
     save()
     try:
-        if report["sources"]["baseline"]["sample_inputs"] != report["sources"]["candidate"]["sample_inputs"]:
-            raise RuntimeError("Sample input files differ between revisions; select equivalent workloads")
+        baseline_inputs = report["sources"]["baseline"]["sample_inputs"]
+        candidate_inputs = report["sources"]["candidate"]["sample_inputs"]
+        if baseline_inputs != candidate_inputs:
+            # A change that acknowledges its output changes may change the samples it builds; the
+            # report names the files, and the repeated builds still compare unchanged rebuilds.
+            changed = sorted(path for path in baseline_inputs.keys() | candidate_inputs.keys()
+                             if baseline_inputs.get(path) != candidate_inputs.get(path))
+            report["changed_sample_inputs"] = changed
+            save()
+            if not args.accept_output_changes:
+                raise RuntimeError("Sample input files differ between revisions; select equivalent workloads "
+                                   "or acknowledge the output changes: " + ", ".join(changed))
         if not args.offline:
             for source in sources.values():
                 subprocess.run(["cargo", "fetch", "--locked"], cwd=source, env=env, check=True)
@@ -307,7 +336,12 @@ def main() -> int:
                     references[label] = (definitions(record), record["generated"])
                     baseline_reference = references["baseline"]
                     if references[label][0] != baseline_reference[0]:
-                        raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
+                        # An acknowledged change (label build-output-changes) may build some units with
+                        # other features; the units and their profiles are still the baseline's.
+                        if not (args.accept_output_changes and without_features(references[label][0])
+                                == without_features(baseline_reference[0])):
+                            raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
+                        report["graph_feature_changes"] = changed_features(baseline_reference[0], references[label][0])
                     if references[label][1] != baseline_reference[1]:
                         if not args.accept_output_changes:
                             raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
@@ -335,10 +369,13 @@ def main() -> int:
                              "repeat_speedup": medians["baseline"] / medians["candidate"] if medians else None,
                              "initial_population_seconds": {row["label"]: row["seconds"] for row in report["population"]},
                              "same_graph_features_profiles_and_generated_files": (
-                                 not report.get("graph_output_changes") if medians else None),
+                                 not report.get("graph_output_changes") and not report.get("graph_feature_changes")
+                                 if medians else None),
                              "output_changes_acknowledged": args.accept_output_changes,
                              "graph_output_changes": report.get("graph_output_changes", []),
+                             "graph_feature_changes": report.get("graph_feature_changes", []),
                              "fixture_output_changes": report.get("fixture_output_changes", {}),
+                             "fixture_feature_changes": report.get("fixture_feature_changes", {}),
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
                              "fixture_runtime_and_generated_outputs_equal": True}
@@ -367,6 +404,14 @@ def main() -> int:
                      "files of its revision; these generated files differ from the baseline's:\n\n"
                      + "".join(f"- `{name}`\n" for name in changes[:50])
                      + "".join(f"- fixture {phase}: {len(names)} files\n" for phase, names in fixture_changes.items()))
+        feature_changes = report["summary"]["graph_feature_changes"] + [
+            f"fixture {phase}: {name}" for phase, names in report["summary"]["fixture_feature_changes"].items()
+            for name in names]
+        if feature_changes:
+            text += ("\n### Feature changes acknowledged (`build-output-changes`)\n\n"
+                     "The units and profiles of the graph are the baseline's and every repeat builds the graph of its "
+                     "revision; these units are built with other features than the baseline's:\n\n"
+                     + "".join(f"- `{name}`\n" for name in feature_changes[:50]))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")

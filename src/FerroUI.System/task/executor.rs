@@ -132,7 +132,7 @@ impl Header {
     }
 
     fn on_its_thread(&self) -> bool {
-        self.thread.get() == Some(&std::thread::current().id())
+        try_thread_id().is_some_and(|current| self.thread.get() == Some(&current))
     }
 
     /// Queues a poll of the task: in the queue of its thread, or on its schedule unless one is
@@ -211,6 +211,32 @@ crate::ferro_thread_local! {
     static CURRENT: Cell<Option<u64>> = const { Cell::new(None) };
     /// The schedule of the work that runs on the thread ([`current_schedule`]).
     static CURRENT_SCHEDULE: RefCell<Option<Arc<dyn Schedule>>> = const { RefCell::new(None) };
+    /// The id of the thread, kept once known ([`thread_id`]).
+    static THREAD_ID: Cell<Option<ThreadId>> = const { Cell::new(None) };
+}
+
+/// The id of the calling thread, kept in a variable of the thread the first time it is asked
+/// for. Taking it from `std::thread::current` again while the thread ends panics once the
+/// standard library has destroyed its own data of the thread, and the values of the thread
+/// (a dispatcher with its queued work) are destroyed after that: the work they drop forgets its
+/// callbacks and compares threads (#567).
+fn thread_id() -> ThreadId {
+    try_thread_id().unwrap_or_else(|| std::thread::current().id())
+}
+
+/// The id of the calling thread when it is known without `std::thread::current`, or can still be
+/// taken from it; `None` once the variables of the thread are destroyed, as the thread ends.
+fn try_thread_id() -> Option<ThreadId> {
+    THREAD_ID
+        .try_with(|id| match id.get() {
+            Some(id) => id,
+            None => {
+                let current = std::thread::current().id();
+                id.set(Some(current));
+                current
+            }
+        })
+        .ok()
 }
 
 /// The ids of the tasks and of the callbacks, unique in the process so that a poll or a request
@@ -242,6 +268,9 @@ fn poll_task(id: u64) -> bool {
                 Some(future) => {
                     let mut context = Context::from_waker(&task.waker);
                     let previous = CURRENT.try_with(|current| current.replace(Some(id))).ok().flatten();
+                    // Boundary (#567): the future is application code; its panic fails the task
+                    // (`JoinError::Panicked` for its handle), as an exception faults a task of the
+                    // reference, instead of unwinding through the poll loop.
                     let polled = catch_unwind(AssertUnwindSafe(|| future.as_mut().poll(&mut context)));
                     let _ = CURRENT.try_with(|current| current.set(previous));
                     Some(polled)
@@ -318,7 +347,7 @@ fn local_route() -> Route {
 }
 
 fn spawn_routed(future: LocalFuture, route: Route, first_poll: FirstPoll, on_failure: OnFailure) -> Arc<Header> {
-    let header = Header::new(route, Some(std::thread::current().id()));
+    let header = Header::new(route, Some(thread_id()));
     start_task(header.clone(), future, on_failure, first_poll);
     header
 }
@@ -363,12 +392,27 @@ where
     })
 }
 
+/// The future of a task whose outcome its future gives: the output of `future`, an error
+/// included, is written to `cell` ([`spawn_local_on_result`]).
+fn result_future<F, T>(future: F, cell: Arc<JoinCell<T>>) -> LocalFuture
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    Box::pin(async move {
+        let outcome = future.await;
+        drop(cell.complete(outcome));
+    })
+}
+
 /// What a task with a handle does when it fails: writes the failure to `cell`.
 fn handle_failure<T: 'static>(cell: Arc<JoinCell<T>>) -> OnFailure {
     Box::new(move |failure: Failure| {
         // A panic after the outcome was written (in what the completion ran) cannot fault the
         // task: it goes on from the call that polled it.
         if let Some(Err(JoinError::Panicked(payload))) = cell.complete(Err(failure.into())) {
+            // Boundary (#567): the panic of the poll that cannot fault the task is raised again
+            // to the caller of the poll (belongs to the catch of `poll_task`).
             std::panic::resume_unwind(payload);
         }
     })
@@ -415,6 +459,29 @@ where
     spawn_with_handle(future, Route::Schedule(schedule), first_poll)
 }
 
+/// Runs `future` as a task of the current thread whose polls run on `schedule`, as
+/// [`spawn_local_on`], and gives a handle whose outcome is the output of the future: `Ok(value)`
+/// is the value of the task, and `Err(error)` ends the task with `error`, as if it had been
+/// aborted ([`JoinError::Canceled`]) or had panicked ([`JoinError::Panicked`], whose payload
+/// the future makes). A future reports the failure of its task this way without unwinding, so
+/// that the failure reaches the observers of the handle with `panic = "abort"` too (#567). A
+/// panic of the future still fails the task as with [`spawn_local_on`], and an abort still
+/// cancels it.
+pub fn spawn_local_on_result<F, T>(future: F, schedule: Arc<dyn Schedule>, first_poll: FirstPoll) -> JoinHandle<T>
+where
+    F: Future<Output = Result<T, JoinError>> + 'static,
+    T: 'static,
+{
+    let cell = Arc::new(JoinCell::new());
+    let header = spawn_routed(
+        result_future(future, cell.clone()),
+        Route::Schedule(schedule),
+        first_poll,
+        handle_failure(cell.clone()),
+    );
+    JoinHandle::new(header, cell)
+}
+
 /// Runs the future that `create` makes as a task of the thread of `schedule`, and gives its
 /// handle, from any thread: `create` is `Send`, the future it makes need not be. The schedule is
 /// given one piece of work that, on its thread, calls `create` and polls the future at once (both
@@ -455,13 +522,15 @@ impl<C, T: 'static> Start<C, T> {
     {
         let Some(create) = self.create.take() else { return };
         let header = self.header.clone();
-        let _ = header.thread.set(std::thread::current().id());
+        let _ = header.thread.set(thread_id());
         header.scheduled.store(false, Ordering::Release);
         if header.aborted.load(Ordering::Acquire) {
             header.finished.store(true, Ordering::Release);
             drop(self.cell.complete(Err(JoinError::Canceled)));
             return;
         }
+        // Boundary (#567): `create` is application code; its panic fails the task, as a panic of
+        // the future does.
         let future = match catch_unwind(AssertUnwindSafe(create)) {
             Ok(future) => future,
             Err(payload) => {
@@ -602,6 +671,8 @@ where
         if let Some(outcome) = handle.try_take() {
             return match outcome {
                 Ok(output) => output,
+                // Boundary (#567): the panic of the future is raised again to the caller, as
+                // `block_on` documents (belongs to the catch of `poll_task`).
                 Err(error) => error.resume_unwind(),
             };
         }
@@ -623,7 +694,7 @@ impl LocalCallback {
     pub(crate) fn register(callback: LocalCallbackFn) -> Self {
         let id = NEXT_CALLBACK.fetch_add(1, Ordering::Relaxed);
         CALLBACKS.with_borrow_mut(|callbacks| callbacks.insert(id, callback));
-        Self { id, thread: std::thread::current().id(), inbox: INBOX.with(Arc::clone), _thread_bound: std::marker::PhantomData }
+        Self { id, thread: thread_id(), inbox: INBOX.with(Arc::clone), _thread_bound: std::marker::PhantomData }
     }
 
     /// The part that crosses threads.
@@ -646,7 +717,7 @@ pub(crate) struct LocalCallbackHandle {
 
 impl LocalCallbackHandle {
     pub(crate) fn run(&self) {
-        if std::thread::current().id() == self.thread {
+        if try_thread_id() == Some(self.thread) {
             run_callback(self.id);
         } else {
             self.inbox.push(Pending::Callback(self.id));
@@ -655,12 +726,16 @@ impl LocalCallbackHandle {
 
     /// Forgets the callback unless it ran, from any thread: at once on the thread of the
     /// callback; from another thread through the queue of the callback's thread, which drops the
-    /// callback there (it need not be `Send`).
+    /// callback there (it need not be `Send`). On a thread whose variables are already destroyed
+    /// (it is ending, and its dispatcher with the work it drops is being destroyed) nothing is
+    /// done: a callback of this thread went with the thread's variables, and queuing would ask
+    /// the schedule of a dispatcher that is being destroyed to run. A callback of another thread
+    /// then stays registered until that thread ends.
     pub(crate) fn forget(&self) {
-        if std::thread::current().id() == self.thread {
-            forget_callback(self.id);
-        } else {
-            self.inbox.push(Pending::Forget(self.id));
+        match try_thread_id() {
+            Some(current) if current == self.thread => forget_callback(self.id),
+            Some(_) => self.inbox.push(Pending::Forget(self.id)),
+            None => {}
         }
     }
 }

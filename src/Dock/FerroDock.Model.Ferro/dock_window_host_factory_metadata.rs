@@ -15,7 +15,7 @@ ferroui_base::ferro_markup_type!(interface dyn IDockWindowHostFactoryMetadata as
     methods:[fn CreateHostWindow(Option<Rc<dyn IDockWindow>>)->Option<Rc<dyn IHostWindow>> => (|this:&Rc<dyn IDockWindowHostFactory>,window|this.create_host_window(window))],
 });
 pub(crate) fn register() {
-    MarkupType::register(<dyn IDockWindowHostFactoryMetadata>::MARKUP);
+    MarkupType::register_table(&[<dyn IDockWindowHostFactoryMetadata>::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IDockWindowHostFactory>>();
     ValueTypes::register_reference_identity::<Rc<dyn IDockWindowHostFactory>>(|value| {
         Rc::as_ptr(value).cast::<()>()

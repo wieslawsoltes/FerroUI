@@ -159,6 +159,19 @@ macro_rules! ferro_markup_type {
         $m.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
     };
 
+    // The parts, with the typed path hooks of the properties where the instance
+    // type may be a shared handle: not for a value type (a `struct` whose
+    // members receive the type itself) or a contract (`dyn Trait`).
+    (@items struct implied $m:ident, $this:ty; $($body:tt)*) => {
+        $crate::__ferro_markup_items!($m, $this, untyped; $($body)*);
+    };
+    (@items $kind:ident implied_dyn $m:ident, $this:ty; $($body:tt)*) => {
+        $crate::__ferro_markup_items!($m, $this, untyped; $($body)*);
+    };
+    (@items $kind:ident $form:ident $m:ident, $this:ty; $($body:tt)*) => {
+        $crate::__ferro_markup_items!($m, $this, typed; $($body)*);
+    };
+
     (@kind class) => { $crate::metadata::MarkupTypeKind::Class };
     (@kind struct) => { $crate::metadata::MarkupTypeKind::Struct };
     (@kind interface) => { $crate::metadata::MarkupTypeKind::Interface };
@@ -215,12 +228,13 @@ macro_rules! ferro_markup_type {
                         ::std::module_path!(),
                     );
                     $crate::ferro_markup_type!(@nullable $kind markup, $this, $form, { $($body)* });
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     $crate::__ferro_compiler_metadata!(
                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
                         markup.owner_rust_name = ::std::option::Option::Some(|| ::std::any::type_name::<$type_>());
                     );
-                    $crate::__ferro_markup_items!(markup, $this; $($body)*);
+                    $crate::ferro_markup_type!(@items $kind $form markup, $this; $($body)*);
                     markup
                 };
                 &MARKUP
@@ -243,6 +257,24 @@ macro_rules! ferro_markup_type {
     };
     (@impl $kind:ident $type_:ty, $name:expr, $default:ident, { $($body:tt)* }) => {
         $crate::ferro_markup_type!(@scan $kind $type_, $name, $default, [] $($body)*);
+    };
+}
+
+/// The [`MarkupType::value_types`](crate::metadata::MarkupType::value_types) of a declared
+/// type: a function that makes the type a used type of the untyped value conversions
+/// ([`ValueTypes::register_used`](crate::data::core::ValueTypes::register_used)) when it has
+/// registrations ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)), and does
+/// nothing otherwise. The choice is made where the type is declared, by the method a reference
+/// to a reference to the probe resolves to.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_value_types {
+    ($type_:ty) => {
+        ::std::option::Option::Some(|| {
+            #[allow(unused_imports)]
+            use $crate::data::core::{__NoValueTypeRegistration as _, __ValueTypeRegistrationOf as _};
+            (&&$crate::data::core::__ValueTypeProbe::<$type_>::NEW).__register_value_type();
+        })
     };
 }
 
@@ -283,30 +315,32 @@ macro_rules! ferro_markup_enum {
                     );
                     markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
                     markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
                             value: $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?) as i64,
-                            get: || ::std::rc::Rc::new($crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?)),
                             rust_variant: ::std::option::Option::Some(
                                 $crate::__ferro_markup_enum_variant_name!($member $(, $variant)?),
                             ),
                         },)*
                     ];
+                    // The one function that makes values of the type: a member is its
+                    // numeric value (`MarkupEnumMember::get`).
                     markup.enum_from_value = ::std::option::Option::Some(|value| {
-                        $(
+                        let member: $type_ = $(
                             if value == $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?) as i64 {
-                                return ::std::option::Option::Some(::std::rc::Rc::new(
-                                    $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?),
-                                ) as $crate::BoxedValue);
-                            }
-                        )*
-                        ::std::option::Option::None
+                                $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?)
+                            } else
+                        )* {
+                            return ::std::option::Option::None;
+                        };
+                        ::std::option::Option::Some(::std::rc::Rc::new(member) as $crate::BoxedValue)
                     });
                     markup.enum_to_value = ::std::option::Option::Some(|value| {
                         value.downcast_ref::<$type_>().map(|value| ::std::clone::Clone::clone(value) as i64)
                     });
-                    $($crate::__ferro_markup_items!(markup, $type_; $($body)*);)?
+                    $($crate::__ferro_markup_items!(markup, $type_, untyped; $($body)*);)?
                     markup
                 };
                 &MARKUP
@@ -326,11 +360,11 @@ macro_rules! ferro_markup_enum {
                     markup.is_flags = true;
                     markup.handles = &[$crate::data::core::ValueType::of::<$type_>];
                     markup.nullable = ::std::option::Option::Some($crate::data::core::ValueType::of::<::std::option::Option<$type_>>);
+                    markup.value_types = $crate::__ferro_value_types!($type_);
                     markup.enum_members = &[
                         $($crate::metadata::MarkupEnumMember {
                             name: ::std::stringify!($member),
                             value: $value.bits() as i64,
-                            get: || ::std::rc::Rc::new($value),
                             rust_variant: ::std::option::Option::None,
                         },)*
                     ];
@@ -356,7 +390,7 @@ macro_rules! ferro_markup_enum {
                     markup.enum_to_value = ::std::option::Option::Some(|value| {
                         value.downcast_ref::<$type_>().map(|value| value.bits() as i64)
                     });
-                    $($crate::__ferro_markup_items!(markup, $type_; $($body)*);)?
+                    $($crate::__ferro_markup_items!(markup, $type_, untyped; $($body)*);)?
                     markup
                 };
                 &MARKUP
@@ -387,56 +421,61 @@ macro_rules! ferro_markup_enum {
 }
 
 /// The parts of a metadata declaration, as assignments to the fields of the
-/// `MarkupType` under construction.
+/// `MarkupType` under construction: `markup, this, paths; parts..`. `paths`
+/// is `typed` when the instance type may be a shared handle (`Rc<S>`), whose
+/// properties then have the typed path hook (`metadata::typed_path`), and
+/// `untyped` when it cannot be one (a handle of a class of the object model,
+/// a value type, a contract): their properties have no hook and no code for
+/// one.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_items {
-    ($m:ident, $this:ty; ) => {};
+    ($m:ident, $this:ty, $paths:ident; ) => {};
 
-    ($m:ident, $this:ty; namespace: $namespace:literal $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; namespace: $namespace:literal $(, $($rest:tt)*)?) => {
         $m.explicit_namespace = ::std::option::Option::Some($namespace);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; handles: [$($handle:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; handles: [$($handle:ty),* $(,)?] $(, $($rest:tt)*)?) => {
         $m.handles = &[$($crate::data::core::ValueType::of::<$handle>),*];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; base: $base:ty $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; base: $base:ty $(, $($rest:tt)*)?) => {
         $m.base = ::std::option::Option::Some($crate::data::core::ValueType::of::<$base>);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; interfaces: [$($interface:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; interfaces: [$($interface:ty),* $(,)?] $(, $($rest:tt)*)?) => {
         $m.interfaces = &[$($crate::data::core::ValueType::of::<$interface>),*];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; generic: $definition:literal [$($argument:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; generic: $definition:literal [$($argument:ty),* $(,)?] $(, $($rest:tt)*)?) => {
         $m.generic = ::std::option::Option::Some($crate::metadata::MarkupGeneric {
             definition: $definition,
             arguments: &[$($crate::data::core::ValueType::of::<$argument>),*],
         });
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; content: $content:ident $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; content: $content:ident $(, $($rest:tt)*)?) => {
         $m.content_property = ::std::option::Option::Some(::std::stringify!($content));
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; attributes: [$($attributes:tt)*] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; attributes: [$($attributes:tt)*] $(, $($rest:tt)*)?) => {
         $m.attributes = $crate::__ferro_markup_attributes!([] $($attributes)*);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; constructors: [$($constructors:tt)*] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; constructors: [$($constructors:tt)*] $(, $($rest:tt)*)?) => {
         $m.constructors = $crate::__ferro_markup_pool!(constructors { [] $($constructors)* });
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; parse: $parse:expr $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; parse: $parse:expr $(, $($rest:tt)*)?) => {
         $m.parse = ::std::option::Option::Some(|arguments| {
             let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
             let text = arguments.next::<::std::string::String>()?;
@@ -449,10 +488,10 @@ macro_rules! __ferro_markup_items {
                 ),
             }
         });
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; properties: [
+    ($m:ident, $this:ty, $paths:ident; properties: [
         $($name:ident : $type_:ty { $($accessors:tt)* } $([$($attributes:tt)*])?),* $(,)?
     ] $(, $($rest:tt)*)?) => {
         $m.properties = &[
@@ -462,31 +501,32 @@ macro_rules! __ferro_markup_items {
                 get: $crate::__ferro_markup_getter!($this, $type_; $($accessors)*),
                 set: $crate::__ferro_markup_setter!($this, $type_; $($accessors)*),
                 attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
-                typed_path_element: $crate::__ferro_markup_typed_path!(
+                typed_path_element: $crate::__ferro_markup_typed_path!($paths;
                     $this, $type_, ::std::stringify!($name); [] [] $($accessors)*
                 ),
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*)),
+                value_markup: $crate::__ferro_value_markup!($type_),
             },)*
         ];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; indexers: [$($indexers:tt)*] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; indexers: [$($indexers:tt)*] $(, $($rest:tt)*)?) => {
         $m.indexers = $crate::__ferro_markup_indexers!($this; [] $($indexers)*);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; property_attributes: [
+    ($m:ident, $this:ty, $paths:ident; property_attributes: [
         $($name:ident : [$($attributes:tt)*]),* $(,)?
     ] $(, $($rest:tt)*)?) => {
         $m.property_attributes = &[
             $((::std::stringify!($name), $crate::__ferro_markup_attributes!([] $($attributes)*)),)*
         ];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; notify_property_changed: $object:ty $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; notify_property_changed: $object:ty $(, $($rest:tt)*)?) => {
         $m.notify_property_changed = ::std::option::Option::Some(|value| {
             // The object itself (the box is the shared object) or its handle.
             match value.downcast_ref::<$object>() {
@@ -498,20 +538,20 @@ macro_rules! __ferro_markup_items {
                     .map(|object| &**object as &dyn $crate::data::model::INotifyPropertyChanged),
             }
         });
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; type_info: $type_info:ty $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; type_info: $type_info:ty $(, $($rest:tt)*)?) => {
         $m.type_info = ::std::option::Option::Some(|| <$type_info as $crate::StaticType>::TYPE);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; methods: [$($methods:tt)*] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; methods: [$($methods:tt)*] $(, $($rest:tt)*)?) => {
         $m.methods = $crate::__ferro_markup_pool!(methods { $this; [] $($methods)* });
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; fields: [$($name:ident : $type_:ty => $get:expr),* $(,)?] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; fields: [$($name:ident : $type_:ty => $get:expr),* $(,)?] $(, $($rest:tt)*)?) => {
         $m.fields = &[
             $($crate::metadata::MarkupField {
                 name: ::std::stringify!($name),
@@ -524,10 +564,10 @@ macro_rules! __ferro_markup_items {
                 })),
             },)*
         ];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; static_properties: [
+    ($m:ident, $this:ty, $paths:ident; static_properties: [
         $($name:ident : $type_:ty { $($accessors:tt)* } $([$($attributes:tt)*])?),* $(,)?
     ] $(, $($rest:tt)*)?) => {
         $m.static_properties = &[
@@ -540,14 +580,15 @@ macro_rules! __ferro_markup_items {
                 typed_path_element: ::std::option::Option::None,
                 emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*)),
                 emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*)),
+                value_markup: $crate::__ferro_value_markup!($type_),
             },)*
         ];
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 
-    ($m:ident, $this:ty; events: [$($events:tt)*] $(, $($rest:tt)*)?) => {
+    ($m:ident, $this:ty, $paths:ident; events: [$($events:tt)*] $(, $($rest:tt)*)?) => {
         $m.events = $crate::__ferro_markup_events!($this; [] $($events)*);
-        $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
+        $crate::__ferro_markup_items!($m, $this, $paths; $($($rest)*)?);
     };
 }
 
@@ -805,6 +846,14 @@ macro_rules! __ferro_markup_setter {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_typed_path {
+    // A declaration whose instances cannot be shared handles: no typed form,
+    // which the probe below would select at run time.
+    (untyped; $($rest:tt)*) => {
+        ::std::option::Option::None
+    };
+    (typed; $($rest:tt)*) => {
+        $crate::__ferro_markup_typed_path!($($rest)*)
+    };
     ($this:ty, $type_:ty, $name:expr; [$($get:tt)*] [$($set:tt)*]) => {
         ::std::option::Option::Some(|builder, accepts_null| {
             #[allow(unused_imports)]
@@ -2000,4 +2049,30 @@ macro_rules! __ferro_compiler_metadata {
         $crate::metadata::NotRecorded::new()
     };
     ($($tokens:tt)*) => {};
+}
+
+/// The `value_markup` of a declared property ([`MarkupProperty::value_markup`](crate::metadata::MarkupProperty::value_markup)):
+/// with the tables of types trimmed, the function that finds the metadata of the value type;
+/// otherwise none, as the tables hold every type (and the function would only link more). The
+/// definition is chosen by the features of this crate, wherever the declaration is.
+#[doc(hidden)]
+#[macro_export]
+#[cfg(not(any(feature = "type-tables", test)))]
+macro_rules! __ferro_value_markup {
+    ($type_:ty) => {
+        || {
+            #[allow(unused_imports)]
+            use $crate::metadata::{__NoTypeMarkup as _, __TypeMarkup as _};
+            (&&$crate::metadata::__TypeMarkupProbe::<$type_>::NEW).__type_markup()
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+#[cfg(any(feature = "type-tables", test))]
+macro_rules! __ferro_value_markup {
+    ($type_:ty) => {
+        || ::std::option::Option::None
+    };
 }

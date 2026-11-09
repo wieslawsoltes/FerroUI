@@ -517,119 +517,355 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <CompositePageTransition as MarkupTyped>::MARKUP,
 ];
 
-/// Registers what the untyped value conversions need to know about the types
-/// declared in this file: the nullable handles, and the casts of each easing
-/// to the easing class and contract and of each page transition to its
-/// contract.
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
-    // The easing class is the handle of an easing contract.
-    ValueTypes::register_cast::<Easing, Rc<dyn IEasing>>(|easing| easing.as_rc().clone());
     ValueTypes::register_cast::<Rc<dyn IEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_nullable::<Rc<BackEaseIn>>();
     ValueTypes::register_cast::<Rc<BackEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BackEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<BackEaseInOut>>();
     ValueTypes::register_cast::<Rc<BackEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BackEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<BackEaseOut>>();
     ValueTypes::register_cast::<Rc<BackEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BackEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<BounceEaseIn>>();
     ValueTypes::register_cast::<Rc<BounceEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BounceEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<BounceEaseInOut>>();
     ValueTypes::register_cast::<Rc<BounceEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BounceEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<BounceEaseOut>>();
     ValueTypes::register_cast::<Rc<BounceEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<BounceEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CircularEaseIn>>();
     ValueTypes::register_cast::<Rc<CircularEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CircularEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CircularEaseInOut>>();
     ValueTypes::register_cast::<Rc<CircularEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CircularEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CircularEaseOut>>();
     ValueTypes::register_cast::<Rc<CircularEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CircularEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CubicEaseIn>>();
     ValueTypes::register_cast::<Rc<CubicEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CubicEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CubicEaseInOut>>();
     ValueTypes::register_cast::<Rc<CubicEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CubicEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CubicEaseOut>>();
     ValueTypes::register_cast::<Rc<CubicEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<CubicEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ElasticEaseIn>>();
     ValueTypes::register_cast::<Rc<ElasticEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ElasticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ElasticEaseInOut>>();
     ValueTypes::register_cast::<Rc<ElasticEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ElasticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ElasticEaseOut>>();
     ValueTypes::register_cast::<Rc<ElasticEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ElasticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ExponentialEaseIn>>();
     ValueTypes::register_cast::<Rc<ExponentialEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ExponentialEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ExponentialEaseInOut>>();
     ValueTypes::register_cast::<Rc<ExponentialEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ExponentialEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<ExponentialEaseOut>>();
     ValueTypes::register_cast::<Rc<ExponentialEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<ExponentialEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<LinearEasing>>();
     ValueTypes::register_cast::<Rc<LinearEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<LinearEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuadraticEaseIn>>();
     ValueTypes::register_cast::<Rc<QuadraticEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuadraticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuadraticEaseInOut>>();
     ValueTypes::register_cast::<Rc<QuadraticEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuadraticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuadraticEaseOut>>();
     ValueTypes::register_cast::<Rc<QuadraticEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuadraticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuarticEaseIn>>();
     ValueTypes::register_cast::<Rc<QuarticEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuarticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuarticEaseInOut>>();
     ValueTypes::register_cast::<Rc<QuarticEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuarticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuarticEaseOut>>();
     ValueTypes::register_cast::<Rc<QuarticEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuarticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuinticEaseIn>>();
     ValueTypes::register_cast::<Rc<QuinticEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuinticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuinticEaseInOut>>();
     ValueTypes::register_cast::<Rc<QuinticEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuinticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<QuinticEaseOut>>();
     ValueTypes::register_cast::<Rc<QuinticEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<QuinticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<SineEaseIn>>();
     ValueTypes::register_cast::<Rc<SineEaseIn>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<SineEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<SineEaseInOut>>();
     ValueTypes::register_cast::<Rc<SineEaseInOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<SineEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<SineEaseOut>>();
     ValueTypes::register_cast::<Rc<SineEaseOut>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<SineEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<SplineEasing>>();
     ValueTypes::register_cast::<Rc<SplineEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<SplineEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<SpringEasing>>();
     ValueTypes::register_cast::<Rc<SpringEasing>, Easing>(|easing| Easing::from_rc(easing.clone()));
-    ValueTypes::register_cast::<Rc<SpringEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
-    ValueTypes::register_nullable::<Rc<CrossFade>>();
     ValueTypes::register_cast::<Rc<CrossFade>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_nullable::<Rc<PageSlide>>();
     ValueTypes::register_cast::<Rc<PageSlide>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_nullable::<Rc<Rotate3DTransition>>();
     ValueTypes::register_cast::<Rc<Rotate3DTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
-    ValueTypes::register_nullable::<Rc<CompositePageTransition>>();
     ValueTypes::register_cast::<Rc<CompositePageTransition>, Rc<dyn IPageTransition>>(|transition| transition.clone());
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<dyn IEasing>();
+    ValueTypes::register_used::<BackEaseIn>();
+    ValueTypes::register_used::<BackEaseInOut>();
+    ValueTypes::register_used::<BackEaseOut>();
+    ValueTypes::register_used::<BounceEaseIn>();
+    ValueTypes::register_used::<BounceEaseInOut>();
+    ValueTypes::register_used::<BounceEaseOut>();
+    ValueTypes::register_used::<CircularEaseIn>();
+    ValueTypes::register_used::<CircularEaseInOut>();
+    ValueTypes::register_used::<CircularEaseOut>();
+    ValueTypes::register_used::<CubicEaseIn>();
+    ValueTypes::register_used::<CubicEaseInOut>();
+    ValueTypes::register_used::<CubicEaseOut>();
+    ValueTypes::register_used::<ElasticEaseIn>();
+    ValueTypes::register_used::<ElasticEaseInOut>();
+    ValueTypes::register_used::<ElasticEaseOut>();
+    ValueTypes::register_used::<ExponentialEaseIn>();
+    ValueTypes::register_used::<ExponentialEaseInOut>();
+    ValueTypes::register_used::<ExponentialEaseOut>();
+    ValueTypes::register_used::<LinearEasing>();
+    ValueTypes::register_used::<QuadraticEaseIn>();
+    ValueTypes::register_used::<QuadraticEaseInOut>();
+    ValueTypes::register_used::<QuadraticEaseOut>();
+    ValueTypes::register_used::<QuarticEaseIn>();
+    ValueTypes::register_used::<QuarticEaseInOut>();
+    ValueTypes::register_used::<QuarticEaseOut>();
+    ValueTypes::register_used::<QuinticEaseIn>();
+    ValueTypes::register_used::<QuinticEaseInOut>();
+    ValueTypes::register_used::<QuinticEaseOut>();
+    ValueTypes::register_used::<SineEaseIn>();
+    ValueTypes::register_used::<SineEaseInOut>();
+    ValueTypes::register_used::<SineEaseOut>();
+    ValueTypes::register_used::<SplineEasing>();
+    ValueTypes::register_used::<SpringEasing>();
+    ValueTypes::register_used::<CrossFade>();
+    ValueTypes::register_used::<PageSlide>();
+    ValueTypes::register_used::<Rotate3DTransition>();
+    ValueTypes::register_used::<CompositePageTransition>();
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn IEasing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn IEasing>>();
+        // The easing class is the handle of an easing contract.
+        ValueTypes::register_cast::<Easing, Rc<dyn IEasing>>(|easing| easing.as_rc().clone());
+        ValueTypes::register_cast::<Rc<BackEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<BackEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<BackEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<BounceEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<BounceEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<BounceEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CircularEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CircularEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CircularEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CubicEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CubicEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<CubicEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ElasticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ElasticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ElasticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ExponentialEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ExponentialEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<ExponentialEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<LinearEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuadraticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuadraticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuadraticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuarticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuarticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuarticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuinticEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuinticEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<QuinticEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<SineEaseIn>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<SineEaseInOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<SineEaseOut>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<SplineEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
+        ValueTypes::register_cast::<Rc<SpringEasing>, Rc<dyn IEasing>>(|easing| easing.clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BackEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BackEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BackEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BounceEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BounceEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BounceEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BounceEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BounceEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<BounceEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CircularEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CircularEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CircularEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CircularEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CircularEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CircularEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CubicEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CubicEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CubicEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CubicEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CubicEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CubicEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ElasticEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ElasticEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ElasticEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ElasticEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ElasticEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ElasticEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ExponentialEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ExponentialEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ExponentialEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ExponentialEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for ExponentialEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<ExponentialEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for LinearEasing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<LinearEasing>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuadraticEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuadraticEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuadraticEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuadraticEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuadraticEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuadraticEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuarticEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuarticEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuarticEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuarticEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuarticEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuarticEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuinticEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuinticEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuinticEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuinticEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for QuinticEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<QuinticEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SineEaseIn {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<SineEaseIn>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SineEaseInOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<SineEaseInOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SineEaseOut {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<SineEaseOut>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SplineEasing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<SplineEasing>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for SpringEasing {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<SpringEasing>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CrossFade {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CrossFade>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for PageSlide {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<PageSlide>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for Rotate3DTransition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<Rotate3DTransition>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for CompositePageTransition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<CompositePageTransition>>();
+    }
+}
+

@@ -1,5 +1,5 @@
 use crate::surfaces::IGlPlatformSurfaceRenderTarget;
-use crate::{GlInterface, GlVersion};
+use crate::{GlInterface, GlVersion, OpenGlError};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
@@ -32,6 +32,29 @@ pub trait IGlContext: IPlatformGraphicsContext {
     /// Existing submitted work still retires on that native context, while
     /// queued imports from its previous binding become stale.
     fn begin_shared_frame_generation(&self) {}
+    /// The context that browser media frames transferred to this thread are uploaded into
+    /// ([`KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME`]): the context
+    /// of a render worker, which cannot sample the page's media elements. `None` for every
+    /// other context (#601).
+    ///
+    /// [`KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME`]: ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME
+    fn transferred_frame_context_id(&self) -> Option<u64> {
+        None
+    }
+    /// Uploads the transferred browser frame `frame` into a new texture of this context and
+    /// releases the frame: the name of the texture, which [`release_transferred_frame_texture`]
+    /// deletes. An error when the frame is not on this thread (retired, or never transferred) or
+    /// the upload fails.
+    ///
+    /// [`release_transferred_frame_texture`]: Self::release_transferred_frame_texture
+    fn import_transferred_frame(&self, frame: u32, width: u32, height: u32) -> Result<u32, String> {
+        let _ = (frame, width, height);
+        Err("This context imports no transferred browser frames".into())
+    }
+    /// Deletes a texture made by [`import_transferred_frame`](Self::import_transferred_frame).
+    fn release_transferred_frame_texture(&self, texture: u32) {
+        let _ = texture;
+    }
     /// Retires a compositor binding on a platform-owned shared context. The
     /// platform may replace it on the next acquisition; existing native work
     /// must remain pollable until its consumers and resource owners retire.
@@ -57,6 +80,23 @@ pub trait IGlContext: IPlatformGraphicsContext {
     /// Makes the context current. Disposing the result restores the
     /// previously current context.
     fn make_current(&self) -> Rc<dyn IDisposable>;
+
+    /// [`make_current`](Self::make_current) that fails, instead of
+    /// panicking, when the context is lost or cannot be made current: for
+    /// the callers that do without a broken context. The default asks
+    /// `make_current`; the contexts whose making current can fail override
+    /// it.
+    fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        Ok(self.make_current())
+    }
+
+    /// [`ensure_current`](IPlatformGraphicsContext::ensure_current) that
+    /// fails, instead of panicking, when the context is lost or cannot be
+    /// made current. The default asks `ensure_current`; the contexts whose
+    /// making current can fail override it.
+    fn try_ensure_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
+        Ok(self.ensure_current())
+    }
 
     /// Whether the two contexts share their objects.
     fn is_shared_with(&self, context: &dyn IGlContext) -> bool;

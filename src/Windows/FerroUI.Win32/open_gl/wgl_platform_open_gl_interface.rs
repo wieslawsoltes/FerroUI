@@ -43,7 +43,6 @@ mod imp {
     use ferroui_opengl::{GlVersion, IGlContext, OpenGlError};
     use std::any::Any;
     use std::cell::RefCell;
-    use std::panic::{catch_unwind, AssertUnwindSafe};
     use std::rc::Rc;
 
     ferroui_base::ferro_thread_local! {
@@ -83,28 +82,18 @@ mod imp {
         }
 
         pub(crate) fn try_create_with_profiles(profiles: &[GlVersion]) -> Option<WglPlatformOpenGlInterface> {
-            // The reference catches every exception of the creation. The
-            // entry points of a context are resolved by the OpenGL crate,
-            // which panics when a required one is missing: that is caught
-            // here too, and the mode is then one that did not initialize.
-            match catch_unwind(AssertUnwindSafe(|| WglDisplay::create_context(profiles, None))) {
-                Ok(Ok(Some(primary))) => {
+            // The reference catches every exception of the creation. A context
+            // whose required entry points cannot be resolved fails with an
+            // error too, and the mode is then one that did not initialize.
+            match WglDisplay::create_context(profiles, None) {
+                Ok(Some(primary)) => {
                     let graphics = WglPlatformOpenGlInterface::new(primary.version());
                     PRIMARY_CONTEXT.with(|slot| *slot.borrow_mut() = Some(primary));
                     Some(graphics)
                 }
-                Ok(Ok(None)) => None,
-                Ok(Err(error)) => {
+                Ok(None) => None,
+                Err(error) => {
                     log_failure(&error);
-                    None
-                }
-                Err(panic) => {
-                    let message = panic
-                        .downcast_ref::<String>()
-                        .cloned()
-                        .or_else(|| panic.downcast_ref::<&str>().map(|message| (*message).to_owned()))
-                        .unwrap_or_else(|| "the creation of the context panicked".to_owned());
-                    log_failure(&message);
                     None
                 }
             }

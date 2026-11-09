@@ -128,6 +128,9 @@ impl DispatcherFrame {
                 token
             };
 
+            // Boundary (#567): the try/finally of the reference around the platform run loop,
+            // which runs application jobs; the frame stops running before their panic is raised
+            // again.
             let result = catch_unwind(AssertUnwindSafe(|| {
                 // Wake up the dispatcher in case it has pending jobs
                 self.dispatcher.request_processing();

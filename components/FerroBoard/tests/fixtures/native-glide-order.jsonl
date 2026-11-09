@@ -1,0 +1,4 @@
+{"kind":"ordered-layout","order":"abcd","ranked":["ad","bd"],"count":4,"sameLayoutCache":true,"sameReplayCache":true,"replayCount":4}
+{"kind":"ordered-layout","order":"cbad","ranked":["cd","bd"],"count":4,"sameLayoutCache":true,"sameReplayCache":true,"replayCount":4}
+{"kind":"ordered-layout","order":"bacd","ranked":["bd","ad"],"count":3,"sameLayoutCache":true,"sameReplayCache":true,"replayCount":3}
+{"kind":"duplicate-layout","error":"ArgumentException","sameCache":true,"ranked":["ad","bd"],"count":4}

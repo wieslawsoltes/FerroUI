@@ -147,15 +147,60 @@ impl ExtensionState {
     /// Sends `item` to a subject of the observables, routing a panic of a subscriber to
     /// `thrown_exceptions` once it exists and propagating it otherwise (`NotifyObservable`).
     fn notify_observable(&self, item: Rc<str>, subject: NameSignal) {
+        // The object whose notification runs, for the faults its subscribers report without a
+        // panic (`deliver_subscriber_error`, #567).
+        let _notifying = Notifying::enter(self.sender_type.get(), self.thrown_exceptions.get().cloned());
         let Err((error, payload)) = PanicError::catch(move || subject.on_next(item)) else {
             return;
         };
         log_subscriber_exception(self.sender_type.get(), &error);
         let Some(thrown_exceptions) = self.thrown_exceptions.get().cloned() else {
+            // Boundary (#567): with no `ThrownExceptions` observer the panic of the subscriber is
+            // raised again, as the `throw;` of the reference.
             std::panic::resume_unwind(payload);
         };
         thrown_exceptions.on_next(error);
     }
+}
+
+ferroui_system::ferro_thread_local! {
+    /// The reactive objects whose change notifications are running on this thread, innermost
+    /// last: the type of each and its `ThrownExceptions`, when something asked for it.
+    static NOTIFYING: std::cell::RefCell<Vec<(&'static str, Option<Rc<ScheduledSubject<ObservableError>>>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Marks a notification as running for as long as it lives.
+struct Notifying;
+
+impl Notifying {
+    fn enter(sender_type: &'static str, thrown_exceptions: Option<Rc<ScheduledSubject<ObservableError>>>) -> Self {
+        NOTIFYING.with(|stack| stack.borrow_mut().push((sender_type, thrown_exceptions)));
+        Notifying
+    }
+}
+
+impl Drop for Notifying {
+    fn drop(&mut self) {
+        NOTIFYING.with(|stack| {
+            stack.borrow_mut().pop();
+        });
+    }
+}
+
+/// Delivers `error`, which a subscriber of a running change notification reports instead of
+/// raising it (a faulted binding write, #567), as the panic of that subscriber would be: logged
+/// against the type of the notifying object and given to its `ThrownExceptions`. Returns `false`
+/// when no notification runs, or when its object has no `ThrownExceptions`; the caller then hands
+/// the error to the default exception handler, as the raised panic would have ended there.
+pub(crate) fn deliver_subscriber_error(error: &ObservableError) -> bool {
+    let notifying = NOTIFYING.with(|stack| stack.borrow().last().cloned());
+    let Some((sender_type, Some(thrown_exceptions))) = notifying else {
+        return false;
+    };
+    log_subscriber_exception(sender_type, error);
+    thrown_exceptions.on_next(error.clone());
+    true
 }
 
 /// Logs the error of a subscriber with the logger of the type of the object

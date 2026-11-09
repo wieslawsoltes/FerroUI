@@ -50,6 +50,8 @@
 //! compositor of the window as it draws the frames it presents
 //! (`NN-<header>-composed.png`, a snapshot of the composition visual of the
 //! window at its render scaling). On
+//! multi-monitor systems `FERROUI_SMOKE_WINDOW_POSITION=X,Y` pins the screenshot
+//! window to a desktop position so runs use the same display and pixel density. On
 //! a screenshot run `FERROUI_SMOKE_OPEN_POPUP=combobox` (or `menu`) opens
 //! the first combo box (or the first menu item) of each page that is shown,
 //! so that a picture taken from outside (the compositor's, on Wayland) has a
@@ -161,6 +163,10 @@ fn main() -> std::process::ExitCode {
     // frames went.
     #[cfg(feature = "vello")]
     ferroui_vello::perf::print_summary();
+    #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
+    if std::env::var_os("FERROUI_METAL_STATS").is_some() {
+        eprintln!("Quartz Metal [surfaces, compute, images, presents, readbacks, uploads, errors]: {:?}", ferroui_quartz::metal_statistics());
+    }
     if media_samples::SMOKE_FAILED.load(std::sync::atomic::Ordering::Relaxed) {
         std::process::ExitCode::FAILURE
     } else {
@@ -177,6 +183,11 @@ pub fn build_ferro_app() -> AppBuilder {
     let builder = use_renderer_of_the_environment(builder);
     builder
         .after_setup(|_| {
+            if let Ok(title) = std::env::var("FERROUI_CATALOG_TITLE") {
+                ferroui_base::threading::DispatcherTimer::run_once(move || {
+                    if let Some(window) = main_window() { window.set_title(Some(title.clone())); }
+                }, std::time::Duration::from_millis(150), ferroui_base::threading::DispatcherPriority::NORMAL).detach();
+            }
             media_samples::install();
             media_samples::smoke();
             #[cfg(target_os = "linux")]
@@ -370,6 +381,8 @@ fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
         Some("opengl") => options.rendering_mode = vec![FerroNativeRenderingMode::OpenGl],
         Some("metal") => options.rendering_mode = vec![FerroNativeRenderingMode::Metal],
         Some("software") => options.rendering_mode = vec![FerroNativeRenderingMode::Software],
+        #[cfg(feature = "quartz")]
+        None => options.rendering_mode = vec![if cfg!(feature = "quartz-metal") { FerroNativeRenderingMode::Metal } else { FerroNativeRenderingMode::Software }],
         _ => return builder,
     }
     println!("Rendering modes: {:?}", options.rendering_mode);
@@ -1125,6 +1138,13 @@ fn screenshot_run(directory: PathBuf) {
                     window.set_height(height);
                     println!("Screenshots: the window asked for a client area of {width} by {height}");
                 }
+                if let Some((x, y)) = std::env::var("FERROUI_SMOKE_WINDOW_POSITION").ok().and_then(|value| {
+                    let (x, y) = value.split_once(',')?;
+                    Some((x.trim().parse::<i32>().ok()?, y.trim().parse::<i32>().ok()?))
+                }) {
+                    window.set_position(PixelPoint::new(x, y));
+                    println!("Screenshots: the window asked for a desktop position of {x}, {y}");
+                }
                 fit_window_to_screen(&window);
                 apply_smoke_transparency(&window);
             }
@@ -1603,6 +1623,24 @@ fn dev_tools_run(_directory: PathBuf) {
 /// The smoke run asked for with `FERROUI_SMOKE_EXIT_MS`,
 /// `FERROUI_SMOKE_PAGES` and `FERROUI_SMOKE_SCREENSHOTS`.
 fn smoke_run() {
+    if std::env::var_os("FERROUI_DIAGNOSTIC_WINDOW_POSITION").is_some() {
+        DispatcherTimer::run_once(|| {
+            if let Some(window) = main_window() {
+                let report = |position| {
+                    let line = format!("CATALOG_WINDOW_POSITION {position:?}\n");
+                    print!("{line}");
+                    if let Some(path) = std::env::var_os("FERROUI_DIAGNOSTIC_WINDOW_POSITION_LOG") {
+                        use std::io::Write;
+                        if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+                            let _ = file.write_all(line.as_bytes());
+                        }
+                    }
+                };
+                report(window.position());
+                window.position_changed(move |e| report(e.point())).detach();
+            }
+        }, Duration::from_millis(150), DispatcherPriority::NORMAL).detach();
+    }
     if let Some(directory) = std::env::var_os("FERROUI_SMOKE_BACKDROP").filter(|directory| !directory.is_empty()) {
         backdrop_run(PathBuf::from(directory));
     } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_SCREENSHOTS").filter(|directory| !directory.is_empty()) {

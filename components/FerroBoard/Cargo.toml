@@ -1,0 +1,25 @@
+[workspace]
+members = ["src/FerroBoard.Core", "src/FerroBoard.Controls", "src/FerroBoard.Core.Ferro", "samples/FerroBoard.Sample"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# As the FerroUI workspace pins it: one wasm-bindgen in a module.
+wasm-bindgen = "=0.2.129"
+ferroui-android = { path = "../../src/Android/FerroUI.Android" }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop" }
+ferroui-themes-winui = { path = "../../src/FerroUI.Themes.WinUI" }
+ferroui-reactiveui = { path = "../../src/FerroUI.ReactiveUI" }
+ferroui-reactive = { path = "../../src/FerroUI.Reactive" }
+ferroui-build-scan = { path = "../../src/FerroUI.Build.Scan" }
+ferroui-build = { path = "../../src/FerroUI.Build.Tasks" }
+ferroui-markup-xaml = { path = "../../src/Markup/FerroUI.Markup.Xaml" }
+ferroui-markup-xaml-loader = { path = "../../src/Markup/FerroUI.Markup.Xaml.Loader" }
+ferroui-system = { path = "../../src/FerroUI.System" }
+ferroui-base = { path = "../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../src/FerroUI.Controls" }
+ferroui-headless = { path = "../../src/Headless/FerroUI.Headless" }

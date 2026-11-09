@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:s="clr-namespace:FerroBoard.Text;assembly=FerroBoard.Core"
+ x:DataType="s:SuggestionRequest">
+ <StackPanel.DataContext>
+  <s:SuggestionRequest Word="İz 😀" PrecedingText="say " MaxCount="7"
+    AllowAutoCorrect="False" Culture="tr"/>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding Word}"/>
+ <ContentControl Content="{CompiledBinding Culture}"/>
+ <ContentControl Content="{CompiledBinding MaxCount}"/>
+ <ContentControl Content="{CompiledBinding KeyProximity}"/>
+ <ContentControl Content="{Binding}"/>
+</StackPanel>

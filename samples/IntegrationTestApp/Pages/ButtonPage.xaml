@@ -8,6 +8,8 @@
     <Button Name="DisabledButton" IsEnabled="False">
       Disabled Button
     </Button>
+    <!-- A reflection binding on purpose, as upstream: the command does not resolve, so the
+         button is effectively disabled; a compiled binding would refuse the path at build time. -->
     <Button Name="EffectivelyDisabledButton" Command="{ReflectionBinding DoesntExist}">
       Effectively Disabled Button
     </Button>

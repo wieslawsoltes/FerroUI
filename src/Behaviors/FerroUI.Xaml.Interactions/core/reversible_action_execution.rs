@@ -36,6 +36,8 @@ impl ReversibleActionExecution {
             return applied_actions;
         };
 
+        // Boundary (#567): the actions are application code; as the try/catch of the reference,
+        // the applied reversible actions are reverted before the panic is raised again.
         let result = catch_unwind(AssertUnwindSafe(|| {
             for item in actions.snapshot().iter() {
                 if let Some(reversible_action) = <dyn IReversibleAction>::of(item) {
@@ -51,6 +53,8 @@ impl ReversibleActionExecution {
 
         if let Err(payload) = result {
             for applied_action in applied_actions.iter().rev() {
+                // Boundary (#567): the revert is application code; its panic is dropped so that
+                // the panic of the action is the one raised, as the reference does.
                 let _ = catch_unwind(AssertUnwindSafe(|| {
                     if let Some(reversible_action) = <dyn IReversibleAction>::of(applied_action) {
                         reversible_action.revert(sender, parameter);

@@ -1290,7 +1290,7 @@ fn boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwi
                 }),
             );
             let conversion_dropped = dropped.clone();
-            ValueTypes::register_cast::<Input, Output>(move |_| Output {
+            ValueTypes::register_cast_with::<Input, Output>(move |_| Output {
                 number: 23,
                 temporary: true,
                 panic_on_clone,
@@ -1355,7 +1355,7 @@ fn boxed_input_drop_runs_after_the_delivery_releases_its_binding() {
             let conversion_lease = lease.clone();
             let reentrant_conversions = Rc::new(Cell::new(0));
             let conversions = reentrant_conversions.clone();
-            ValueTypes::register_cast::<Input, i32>(move |input| {
+            ValueTypes::register_cast_with::<Input, i32>(move |input| {
                 if input.reentrant {
                     conversions.set(conversions.get() + 1);
                 } else {

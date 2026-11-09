@@ -647,6 +647,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
     }
 
     pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
+        crate::property_store::advance_metadata_generation();
         let exists = match &*self.inner.borrow() {
             MetadataEntries::Single(existing) => existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)),
             MetadataEntries::Multiple(table) => host_index(&table.hosts.owners, type_).is_some(),
@@ -679,6 +680,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
     }
 
     pub fn unregister(&self, type_: &'static TypeInfo) {
+        crate::property_store::advance_metadata_generation();
         let mut inner = self.inner.borrow_mut();
         match &mut *inner {
             MetadataEntries::Single(existing) => {

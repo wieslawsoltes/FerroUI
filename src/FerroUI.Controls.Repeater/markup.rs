@@ -139,5 +139,5 @@ const TYPES: &[&MarkupType] = &[
     <ItemsRepeaterElementIndexChangedEventArgs as MarkupTyped>::MARKUP,
 ];
 pub(crate) fn register_types() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
 }

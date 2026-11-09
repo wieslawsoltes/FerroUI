@@ -112,6 +112,8 @@ impl INativeControlHostImpl for NativeControlHostImpl {
         let a = Rc::new(Attachment::new(self.host().create_attachment()));
         // The attachment is disposed when creating or initializing the
         // child fails, and the failure goes on to the caller.
+        // Boundary (#567): the try/catch of the reference around the application callback that
+        // creates the child; its panic is raised again after the attachment is disposed of.
         let attach = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let child = create(a.get_parent_handle());
             a.init_with_child(&*child);

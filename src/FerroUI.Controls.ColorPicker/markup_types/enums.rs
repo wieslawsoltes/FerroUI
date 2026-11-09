@@ -100,17 +100,78 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <RgbComponent as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable form of each enumeration with the untyped value
-/// conversions of the current thread.
-pub(super) fn register_value_types() {
-    ValueTypes::register_nullable::<AlphaComponentPosition>();
-    ValueTypes::register_nullable::<ColorComponent>();
-    ValueTypes::register_nullable::<ColorModel>();
-    ValueTypes::register_nullable::<ColorSpectrumComponents>();
-    ValueTypes::register_nullable::<ColorSpectrumShape>();
-    ValueTypes::register_nullable::<ColorViewTab>();
-    ValueTypes::register_nullable::<FlatColor>();
-    ValueTypes::register_nullable::<HsvComponent>();
-    ValueTypes::register_nullable::<MaterialColor>();
-    ValueTypes::register_nullable::<RgbComponent>();
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<AlphaComponentPosition>();
+    ValueTypes::register_used::<ColorComponent>();
+    ValueTypes::register_used::<ColorModel>();
+    ValueTypes::register_used::<ColorSpectrumComponents>();
+    ValueTypes::register_used::<ColorSpectrumShape>();
+    ValueTypes::register_used::<ColorViewTab>();
+    ValueTypes::register_used::<FlatColor>();
+    ValueTypes::register_used::<HsvComponent>();
+    ValueTypes::register_used::<MaterialColor>();
+    ValueTypes::register_used::<RgbComponent>();
 }
+
+impl ferroui_base::data::core::ValueTypeRegistration for AlphaComponentPosition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<AlphaComponentPosition>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColorComponent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColorComponent>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColorModel {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColorModel>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColorSpectrumComponents {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColorSpectrumComponents>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColorSpectrumShape {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColorSpectrumShape>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ColorViewTab {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ColorViewTab>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for FlatColor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FlatColor>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for HsvComponent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<HsvComponent>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for MaterialColor {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<MaterialColor>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RgbComponent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<RgbComponent>();
+    }
+}
+

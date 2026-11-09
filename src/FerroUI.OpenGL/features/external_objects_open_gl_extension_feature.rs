@@ -21,17 +21,6 @@ struct ExternalObjectsInterface {
     ext: ExternalObjectsEntryPoints,
 }
 
-/// The entry points without which the interface cannot be created.
-const REQUIRED_ENTRY_POINTS: [&str; 7] = [
-    "glCreateMemoryObjectsEXT",
-    "glDeleteMemoryObjectsEXT",
-    "glTexStorageMem2DEXT",
-    "glGenSemaphoresEXT",
-    "glDeleteSemaphoresEXT",
-    "glWaitSemaphoreEXT",
-    "glSignalSemaphoreEXT",
-];
-
 gl_entry_points! {
     table ExternalObjectsEntryPoints for ExternalObjectsInterface.ext(get, info: ());
 
@@ -86,13 +75,9 @@ gl_entry_points! {
 }
 
 impl ExternalObjectsInterface {
-    /// Resolves the entry points; the name of the first required one that is missing
-    /// otherwise.
-    fn try_new(get_proc_address: &GetProcAddress) -> Result<Self, &'static str> {
-        if let Some(missing) = REQUIRED_ENTRY_POINTS.iter().find(|name| get_proc_address(name).is_null()) {
-            return Err(*missing);
-        }
-        Ok(Self { ext: ExternalObjectsEntryPoints::load(get_proc_address, &()) })
+    /// Resolves the entry points; fails when a required one is missing.
+    fn try_new(get_proc_address: &GetProcAddress) -> Result<Self, OpenGlError> {
+        Ok(Self { ext: ExternalObjectsEntryPoints::load(get_proc_address, &())? })
     }
 }
 
@@ -134,8 +119,7 @@ impl ExternalObjectsOpenGlExtensionFeature {
             let gl = gl.clone();
             Rc::new(move |name: &str| gl.get_proc_address(name))
         };
-        let ext = ExternalObjectsInterface::try_new(&get_proc_address)
-            .map_err(|name| OpenGlError::new(format!("Unable to find an entry point named '{name}'.")))?;
+        let ext = ExternalObjectsInterface::try_new(&get_proc_address)?;
 
         let mut device_uuid = None;
         if ext.is_get_unsigned_bytei_v_ext_available() {

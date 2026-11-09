@@ -1,0 +1,5 @@
+<k:OnScreenKeyboard xmlns="https://github.com/ferroui"
+ xmlns:k="clr-namespace:FerroBoard.Controls;assembly=FerroBoard.Controls"
+ xmlns:s="clr-namespace:FerroBoard.Settings;assembly=FerroBoard.Core" AutoAttach="False">
+ <k:OnScreenKeyboard.Settings><s:KeyboardSettings KeyHeight="not-a-number"/></k:OnScreenKeyboard.Settings>
+</k:OnScreenKeyboard>

@@ -80,6 +80,83 @@ fn identical_lexical_scopes_share_guards_and_deferred_namespace_tables() {
         "the deferred factory uses the same interned lexical table after its declaring guard ends");
 }
 
+/// Not from upstream (#566): the type a reflection-binding path names is resolved by the
+/// compiler and written into the entry of the namespace table it is found through, so that the
+/// type resolver of the document finds it without the process-wide tables of types. The other
+/// entries of the table name no type.
+#[test]
+fn a_reflection_binding_path_names_its_type_in_the_matching_namespace_entry() {
+    let _app = xaml_test_base();
+    let document = (
+        "reflection_path_type.xaml",
+        "<StackPanel xmlns='https://github.com/ferroui'><TextBlock Text='{ReflectionBinding $parent[TextBox].Text}'/></StackPanel>",
+    );
+    let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    let source = generated.source;
+    let typed = "(\"FerroUI.Controls\", \"FerroUI.Controls\", &[(\"TextBox\", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))])";
+    assert_eq!(source.matches(typed).count(), 1, "{source}");
+    assert_eq!(source.matches("(\"TextBox\", ||").count(), 1, "{source}");
+    assert!(source.contains("(\"FerroUI.Controls\", \"FerroUI.Base\", &[])"), "{source}");
+}
+
+/// Not from upstream (#603): a binding whose path the compiler resolves (the templated parent
+/// of a template and a registered property of its target type) is a compiled path of typed
+/// elements: no description of a plain property looked up by name (`rt::clr_property_info`), no
+/// path parsed at run time. The same binding as a reflection binding takes its relative source
+/// through the provide-value target property, `ReflectionBinding.RelativeSource`.
+#[test]
+fn a_resolvable_binding_path_emits_no_clr_property_info() {
+    let _app = xaml_test_base();
+    let document = (
+        "resolvable_binding_path.xaml",
+        "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><ControlTemplate x:Key='Template' TargetType='Button'>\
+         <Border Background='{Binding Background, RelativeSource={RelativeSource TemplatedParent}}'/>\
+         </ControlTemplate></Border.Resources></Border>",
+    );
+    let emitted = |compiled: bool| {
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.use_compiled_bindings_by_default = compiled;
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &configuration, &[]);
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+        generated.source
+    };
+    let compiled = emitted(true);
+    assert!(compiled.contains("builder.templated_parent()"), "{compiled}");
+    assert!(compiled.contains("builder.ferro_property(rt::property("), "{compiled}");
+    assert!(!compiled.contains("rt::clr_property_info("), "{compiled}");
+    assert!(!compiled.contains("ReflectionBinding"), "{compiled}");
+    let reflection = emitted(false);
+    assert!(reflection.contains("rt::clr_property_info("), "{reflection}");
+}
+
+/// Not from upstream (#603): path data is parsed when the markup is compiled. The geometry is
+/// built from a constant table of the commands the parser records, so the text is not parsed
+/// when the document is loaded; text the parser refuses is still parsed at load, which reports
+/// the error as the load error it is.
+#[test]
+fn path_data_is_parsed_when_the_markup_is_compiled() {
+    let _app = xaml_test_base();
+    let emitted = |data: &str| {
+        let xaml = format!("<Path xmlns='https://github.com/ferroui' Data='{data}'/>");
+        let document = ("path_data.xaml", xaml.as_str());
+        let generated = generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &[document], &RuntimeXamlLoaderConfiguration::new(), &[]);
+        assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+        generated.source
+    };
+    let compiled = emitted("F1 M 0,0 L 10,10 A 5,5 0 1 0 20,0 Z");
+    assert!(compiled.contains("const COMMANDS: &[::ferroui_base::media::PathCommand] = &["), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 10.0_f64), true)"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::SweepDirection::CounterClockwise"), "{compiled}");
+    assert!(compiled.contains("::ferroui_base::media::PathCommand::EndFigure(true)"), "{compiled}");
+    assert!(compiled.contains("::from_commands(COMMANDS)"), "{compiled}");
+    assert!(!compiled.contains("__markup_parse"), "{compiled}");
+    let refused = emitted("M 0,0 X 10");
+    assert!(refused.contains("Geometry::__markup_parse("), "{refused}");
+}
+
 #[test]
 fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
     let _app = xaml_test_base();

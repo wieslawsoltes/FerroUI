@@ -1,0 +1,40 @@
+[package]
+name = "ferroui-quartz"
+description = "Apple native renderer using Metal, Core Graphics, Core Text and ImageIO on macOS and iOS"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+metal = ["dep:ferroui-metal"]
+# WGSL-to-MSL translation for user-defined shader effects; omitted by size-first apps.
+runtime-shaders = ["metal", "dep:naga"]
+# Explicit development fixture; absent from normal native builds.
+media-test-fixtures = ["metal", "dep:ferroui-media-apple"]
+
+[dependencies]
+naga = { workspace = true, optional = true, features = ["wgsl-in", "msl-out"] }
+ferroui-media-apple = { workspace = true, optional = true }
+ferroui-metal = { workspace = true, optional = true }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+kurbo.workspace = true
+
+[build-dependencies]
+cc.workspace = true
+
+[package.metadata.release]
+group = "rendering"
+
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+objc2 = "0.6.3"
+objc2-metal = { version = "0.3.2", default-features = false, features = ["std", "MTLAllocation", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent"] }

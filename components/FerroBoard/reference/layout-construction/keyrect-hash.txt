@@ -1,0 +1,26 @@
+28 System.Collections.Generic.EqualityComparer`1[System.Double]: System.Collections.Generic.EqualityComparer`1[System.Double] get_Default()
+02
+7b ScreenKeyboard.Layouts.KeyRect: Double <X>k__BackingField
+6f System.Collections.Generic.EqualityComparer`1[System.Double]: Int32 GetHashCode(Double)
+20 -1521134295
+5a
+28 System.Collections.Generic.EqualityComparer`1[System.Double]: System.Collections.Generic.EqualityComparer`1[System.Double] get_Default()
+02
+7b ScreenKeyboard.Layouts.KeyRect: Double <Y>k__BackingField
+6f System.Collections.Generic.EqualityComparer`1[System.Double]: Int32 GetHashCode(Double)
+58
+20 -1521134295
+5a
+28 System.Collections.Generic.EqualityComparer`1[System.Double]: System.Collections.Generic.EqualityComparer`1[System.Double] get_Default()
+02
+7b ScreenKeyboard.Layouts.KeyRect: Double <Width>k__BackingField
+6f System.Collections.Generic.EqualityComparer`1[System.Double]: Int32 GetHashCode(Double)
+58
+20 -1521134295
+5a
+28 System.Collections.Generic.EqualityComparer`1[System.Double]: System.Collections.Generic.EqualityComparer`1[System.Double] get_Default()
+02
+7b ScreenKeyboard.Layouts.KeyRect: Double <Height>k__BackingField
+6f System.Collections.Generic.EqualityComparer`1[System.Double]: Int32 GetHashCode(Double)
+58
+2a

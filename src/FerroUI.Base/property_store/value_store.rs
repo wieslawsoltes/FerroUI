@@ -1,7 +1,8 @@
 use super::effective_value::cast_effective_value;
 use super::{
-    entry_ptr_eq, frame_ptr_eq, BindingSource, DirectBindingObserver, EffectiveValue, EffectiveValueDyn,
-    FramePriority, FrameType, ImmediateValueFrame, IValueEntry, LocalValueBindingObserver, ValueFrame,
+    entry_ptr_eq, frame_ptr_eq, BindingSource, BoxedLocalValueBindingObserver, DirectBindingObserver,
+    DirectBoxedBindingObserver, EffectiveValue, EffectiveValueDyn, FramePriority, FrameType, ImmediateValueFrame,
+    IValueEntry, LocalValueBindingObserver, ValueFrame,
 };
 use crate::data::core::SinkRef;
 use crate::diagnostics::{
@@ -85,12 +86,20 @@ pub(crate) struct ValueStore {
     /// Effective values sorted by property ID.
     effective_values: RefCell<Vec<(u32, EffectiveValueRef)>>,
     inherited_value_count: Cell<u32>,
+    /// Changes with every change of an effective value of the store: the kept copies of property
+    /// values (`HotValue`) are valid while it stays the same.
+    value_generation: Cell<u32>,
     is_evaluating: Cell<u32>,
     frame_generation: Cell<u32>,
     styling: Cell<u32>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.
     inheritance_ancestor: RefCell<Option<WeakRef<FerroObject>>>,
+    /// The inherited lookups of this store (property id, the effective value found or `None`),
+    /// valid while the thread's inheritance generation is `inherited_lookups_generation`
+    /// (FerroUI deviation, desktop-performance.md, section 9.3).
+    inherited_lookups: RefCell<Vec<(u32, Option<EffectiveValueRef>)>>,
+    inherited_lookups_generation: Cell<u64>,
 }
 
 impl ValueStore {
@@ -103,10 +112,13 @@ impl ValueStore {
             local_value_expressions: RefCell::new(Vec::new()),
             effective_values: RefCell::new(Vec::new()),
             inherited_value_count: Cell::new(0),
+            value_generation: Cell::new(1),
             is_evaluating: Cell::new(0),
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
             inheritance_ancestor: RefCell::new(None),
+            inherited_lookups: RefCell::new(Vec::new()),
+            inherited_lookups_generation: Cell::new(0),
         }
     }
 
@@ -206,9 +218,9 @@ impl ValueStore {
         }
     }
 
-    /// Installs a boxed source without specializing subscription ownership and
-    /// priority selection for every property value type. The typed routes only
-    /// construct the inline cache and its weak observer.
+    /// Installs a boxed source without specializing subscription ownership,
+    /// priority selection or delivery for every property value type: the
+    /// observer and the entry of a boxed source are not typed.
     pub fn add_boxed_binding(
         &self,
         owner: &FerroObject,
@@ -217,7 +229,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         if priority == BindingPriority::LocalValue {
-            let observer = property.routes().route_create_boxed_local_binding(owner);
+            let observer = BoxedLocalValueBindingObserver::new(owner, property);
             self.dispose_existing_local_value_binding(property);
             self.set_local_value_binding(property, observer.clone());
             observer.start(source);
@@ -245,6 +257,21 @@ impl ValueStore {
         self.dispose_existing_local_value_binding(property);
         self.set_local_value_binding(property, observer.clone());
         start(&observer, source);
+        observer
+    }
+
+    /// Adds a binding of untyped values to a direct property, `property` as
+    /// registered for the owner. The observer is not typed.
+    pub fn add_direct_boxed_binding(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn IObservable<BoxedValue>>,
+    ) -> Rc<dyn IDisposable> {
+        let observer = DirectBoxedBindingObserver::new(owner, property);
+        self.dispose_existing_local_value_binding(property);
+        self.set_local_value_binding(property, observer.clone());
+        observer.start(source);
         observer
     }
 
@@ -563,6 +590,22 @@ impl ValueStore {
     /// ancestor that has one.
     pub fn try_get_inherited_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
         debug_assert!(property.inherits());
+        let generation = inheritance_generation::current();
+        if self.inherited_lookups_generation.get() == generation {
+            if let Some((_, found)) = self.inherited_lookups.borrow().iter().find(|(id, _)| *id == property.id()) {
+                return found.clone();
+            }
+        } else {
+            self.inherited_lookups.borrow_mut().clear();
+            self.inherited_lookups_generation.set(generation);
+        }
+        let found = self.find_inherited_value(property);
+        self.inherited_lookups.borrow_mut().push((property.id(), found.clone()));
+        found
+    }
+
+    /// Walks the inheritance ancestors for the nearest effective value of `property`.
+    fn find_inherited_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
         let mut current = self.inheritance_ancestor();
         while let Some(ancestor) = current {
             let store = ancestor.values();
@@ -620,6 +663,7 @@ impl ValueStore {
             return;
         }
         crate::perf_count!(InheritanceAncestorChanges);
+        inheritance_generation::advance();
 
         // A list of the pool. The pool is not there any more while the
         // thread is torn down: a new list serves then.
@@ -741,6 +785,7 @@ impl ValueStore {
         });
         if !is_self {
             *self.inheritance_ancestor.borrow_mut() = ancestor.map(Ref::downgrade);
+            inheritance_generation::advance();
             if self.inherited_value_count.get() > 0 {
                 return;
             }
@@ -928,7 +973,20 @@ impl ValueStore {
         value
     }
 
+    /// The generation of the effective values of the store.
+    #[inline]
+    pub(crate) fn value_generation(&self) -> u32 {
+        self.value_generation.get()
+    }
+
+    /// Records a change of an effective value of the store.
+    #[inline]
+    pub(crate) fn advance_value_generation(&self) {
+        self.value_generation.set(self.value_generation.get().wrapping_add(1).max(1));
+    }
+
     fn add_effective_value(&self, owner: &FerroObject, property: &FerroProperty, value: EffectiveValueRef) {
+        self.advance_value_generation();
         {
             let mut values = self.effective_values.borrow_mut();
             if values.capacity() == 0 {
@@ -941,6 +999,7 @@ impl ValueStore {
             values.insert(index, (property.id(), value));
         }
         if property.inherits() {
+            inheritance_generation::advance();
             let count = self.inherited_value_count.get();
             self.inherited_value_count.set(count + 1);
             if count == 0 {
@@ -962,6 +1021,7 @@ impl ValueStore {
     }
 
     fn remove_effective_value(&self, owner: &FerroObject, property: &FerroProperty) -> bool {
+        self.advance_value_generation();
         let removed = {
             let mut values = self.effective_values.borrow_mut();
             Self::find(&values, property.id()).map(|index| values.remove(index))
@@ -970,6 +1030,7 @@ impl ValueStore {
             return false;
         }
         if property.inherits() {
+            inheritance_generation::advance();
             let count = self.inherited_value_count.get() - 1;
             self.inherited_value_count.set(count);
             if count == 0 {
@@ -977,6 +1038,7 @@ impl ValueStore {
                 // Detach the self-marker first so the notification is not
                 // mistaken for "the owner is the ancestor".
                 *self.inheritance_ancestor.borrow_mut() = ancestor.as_ref().map(Ref::downgrade);
+                inheritance_generation::advance();
                 owner.for_each_inheritance_child(|child| {
                     child.values().on_inheritance_ancestor_changed(child, ancestor.as_ref());
                 });
@@ -1313,3 +1375,25 @@ impl Drop for EvaluatingGuard<'_> {
 #[cfg(test)]
 #[path = "value_store_default_coercion_tests.rs"]
 mod default_coercion_tests;
+
+/// The generation of the inheritance of this thread: it changes whenever the object that holds
+/// the inherited value an object reads can change (an inheriting property's effective value added
+/// to or removed from a store, an inheritance parent or ancestor changed). A store keeps the
+/// results of its inherited lookups while the generation stays the same; a change of an inherited
+/// value itself does not change the generation, because a lookup keeps the effective value, which
+/// holds the current value.
+mod inheritance_generation {
+    use std::cell::Cell;
+
+    crate::ferro_thread_local! {
+        static GENERATION: Cell<u64> = const { Cell::new(1) };
+    }
+
+    pub(super) fn current() -> u64 {
+        GENERATION.with(Cell::get)
+    }
+
+    pub(super) fn advance() {
+        GENERATION.with(|generation| generation.set(generation.get().wrapping_add(1)));
+    }
+}

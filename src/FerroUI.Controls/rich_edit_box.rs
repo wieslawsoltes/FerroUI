@@ -2598,14 +2598,45 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <crate::automation::provider::TextEditChangeType as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the value types of [`MARKUP_TYPES`].
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
 pub(crate) fn register_value_types() {
     use ferroui_base::data::core::ValueTypes;
-    ValueTypes::register_nullable::<RichEditCharacterCasing>();
-    ValueTypes::register_nullable::<DisabledFormattingAccelerators>();
-    ValueTypes::register_nullable::<crate::automation::provider::TextEditChangeType>();
     ValueTypes::register_nullable::<RoutedEvent<RichEditCompositionEventArgs>>();
     ValueTypes::register_nullable::<RoutedEvent<RichEditBoxSelectionChangingEventArgs>>();
     ValueTypes::register_nullable::<RoutedEvent<RichEditBoxTextChangingEventArgs>>();
+}
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(crate) fn register_value_type_table() {
+    use ferroui_base::data::core::ValueTypes;
+    ValueTypes::register_used::<RichEditCharacterCasing>();
+    ValueTypes::register_used::<DisabledFormattingAccelerators>();
+    ValueTypes::register_used::<crate::automation::provider::TextEditChangeType>();
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for RichEditCharacterCasing {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<RichEditCharacterCasing>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for DisabledFormattingAccelerators {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<DisabledFormattingAccelerators>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::automation::provider::TextEditChangeType {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<crate::automation::provider::TextEditChangeType>();
+    }
 }
 

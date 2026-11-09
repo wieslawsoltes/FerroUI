@@ -887,7 +887,7 @@ fn nullable_template_assignability_keeps_object_identity_and_calls_a_failing_con
         struct Target;
         let count = Rc::new(std::cell::Cell::new(0));
         let called = count.clone();
-        ValueTypes::register_conversion::<Source, Target>(move |_| {
+        ValueTypes::register_conversion_with::<Source, Target>(move |_| {
             called.set(called.get() + 1);
             None
         });

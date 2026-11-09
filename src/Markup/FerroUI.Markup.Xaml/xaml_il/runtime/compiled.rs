@@ -37,11 +37,32 @@ use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, T
 use super::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
     IFerroXamlIlXmlNamespaceInfoProvider, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext,
-    XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaces,
+    XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaceTypes, XmlNamespaces,
 };
 use crate::converters::ITypeDescriptorContext;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::{ServiceProviderExtensions, XamlLoadError};
+
+// The row tables of theme resources (#568, `theme_resources.rs`): the rows and the builders of
+// the shapes generated code writes as rows.
+pub use super::theme_resources::{
+    add_color_resources, add_corner_radius_resources, add_double_resources, add_dynamic_brushes, add_literal_brushes,
+    add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
+    LiteralBrushRow, ResourceAliasRow, StaticBrushRow, ValueRow,
+};
+// The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
+// run-time choice of the setter of a resource value and a run of template bindings as data.
+pub use super::theme_styles::{
+    assign_resource_value, bind_template_bindings, build_control_theme, build_selector, ControlThemeTable, PropertyFn,
+    ResourceChoice, SelectorStep, SetterForm, StyleMember, TemplateBindingRow, ThemeKey, ThemeSetter, ThemeTemplate, ThemeValue,
+    ThemeValueFn, ValueHandle,
+};
+// The units of a compiled theme (#568, `theme_units.rs`): a unit, its runs and the function the
+// builds of the dictionaries apply them with.
+pub use super::theme_units::{
+    active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
+    registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
+};
 
 /// The exception a step of generated code failed with: the type name of the
 /// exception the managed original throws there (the name the run-time
@@ -955,8 +976,10 @@ fn clear_target_property(context: &Rc<XamlIlContext>) {
 /// The XML namespaces of a document as the compiler resolved them: for each
 /// prefix (empty for the default namespace) the dotted namespaces and
 /// assemblies it maps to (the namespace information the run-time loader
-/// computes from the parsed document).
-pub type XmlNamespaceTable = &'static [(&'static str, &'static [(&'static str, &'static str)])];
+/// computes from the parsed document), each with the types of the namespace
+/// that the reflection-binding paths of the document name, as the compiler
+/// resolved them ([`XmlNamespaceTypes`]).
+pub type XmlNamespaceTable = &'static [(&'static str, &'static [(&'static str, &'static str, XmlNamespaceTypes)])];
 
 /// The definition of the context of the framework language: every service
 /// of the context is mapped (the transformer configuration of the language
@@ -991,7 +1014,9 @@ impl IFerroXamlIlXmlNamespaceInfoProvider for CompiledXmlNamespaceInfo {
         for (prefix, infos) in self.table {
             let infos = infos
                 .iter()
-                .map(|(clr_namespace, clr_assembly_name)| FerroXamlIlXmlNamespaceInfo::with(clr_namespace, clr_assembly_name))
+                .map(|&(clr_namespace, clr_assembly_name, types)| {
+                    FerroXamlIlXmlNamespaceInfo::with_types(clr_namespace, clr_assembly_name, types)
+                })
                 .collect();
             namespaces.insert(prefix.to_string(), infos);
         }

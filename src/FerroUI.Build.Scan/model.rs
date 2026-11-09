@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{DocumentModel, XamlMetadata};
+pub use crate::xaml_metadata::{DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -663,7 +663,7 @@ pub struct TypeModel {
     /// `ferro_class_info!`): its runtime type has metadata, whatever the part lists.
     pub class_markup: bool,
     /// The crate has a list of the classes it registers (`const TYPES: &[&TypeInfo]`, which
-    /// its `register_types()` hands to `TypeInfo::register_all`) and the type is not in
+    /// its `register_types()` hands to `TypeInfo::register_table`) and the type is not in
     /// it: the type is not known by its name or by its handle until an instance of it is
     /// created. Never set for a crate without such a list, and never for a type that is
     /// not of the object model.
@@ -723,6 +723,13 @@ pub struct TypeModel {
     pub property_attributes: Vec<(String, Vec<AttributeModel>)>,
     /// `notify_property_changed: T`.
     pub notify_property_changed: Option<RustType>,
+    /// The classes the code of the class constructs (#568, step 4 of
+    /// docs/porting/theme-trimming.md): the namespace-qualified names of the classes of the
+    /// object model, of this crate or of the crates it is built on, that the file of the class
+    /// or an `impl` block of it constructs by `X::new`, `X::new_..`, `X::builder` or
+    /// `X::default`; sorted, the class itself left out. They keep the control themes of what a
+    /// class creates in code (`ListBox` creates `ListBoxItem` containers). Absent in a file: none.
+    pub creates: Vec<String>,
 }
 
 impl TypeModel {
@@ -765,6 +772,7 @@ impl TypeModel {
             attributes: Vec::new(),
             property_attributes: Vec::new(),
             notify_property_changed: None,
+            creates: Vec::new(),
         }
     }
 
@@ -933,7 +941,8 @@ impl TypeModel {
                 .list("property_attributes", &self.property_attributes, |(name, attributes)| {
                     Json::Array(vec![Json::string(name), Json::Array(attributes.iter().map(AttributeModel::to_json).collect())])
                 })
-                .optional("notify_property_changed", optional_type(&self.notify_property_changed)),
+                .optional("notify_property_changed", optional_type(&self.notify_property_changed))
+                .list("creates", &self.creates, |name| Json::string(name)),
         )
     }
 
@@ -988,6 +997,7 @@ impl TypeModel {
                 _ => Err("the attributes of a registered property are not a pair".to_string()),
             })?,
             notify_property_changed: fields.optional("notify_property_changed", RustType::from_json)?,
+            creates: fields.list("creates", |name| text_of(name, "a class a type creates"))?,
         })
     }
 }
@@ -1226,6 +1236,10 @@ pub struct AssemblyModel {
     /// The `.xamlmeta` files of the crates this crate is built on, relative to the
     /// directory of this file or absolute.
     pub dependencies: Vec<String>,
+    /// The units of the compiled themes of the classes of the crate (#568).
+    pub theme_units: Vec<ThemeUnitsModel>,
+    /// What the compiled documents of the crate name, for a crate without theme units (#568).
+    pub references: MarkupReferencesModel,
 }
 
 impl AssemblyModel {
@@ -1249,6 +1263,8 @@ impl AssemblyModel {
             functions: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel::default(),
         }
     }
 
@@ -1257,6 +1273,8 @@ impl AssemblyModel {
         let mut model = Self::new(&metadata.name, &metadata.crate_name);
         model.documents = metadata.documents;
         model.dependencies = metadata.dependencies;
+        model.theme_units = metadata.theme_units;
+        model.references = metadata.references;
         model
     }
 
@@ -1267,6 +1285,8 @@ impl AssemblyModel {
             crate_name: self.crate_name.clone(),
             documents: self.documents.clone(),
             dependencies: self.dependencies.clone(),
+            theme_units: self.theme_units.clone(),
+            references: self.references.clone(),
         }
     }
 
@@ -1354,7 +1374,10 @@ impl AssemblyModel {
                 let rules = exported.rules.iter().map(|(matcher, transcriber)| pair_to_json(matcher, transcriber)).collect();
                 Json::Array(vec![Json::string(&exported.name), Json::Array(rules)])
             })
-            .list("functions", &self.functions, FunctionsModel::to_json);
+            .list("functions", &self.functions, FunctionsModel::to_json)
+            .list("theme_units", &self.theme_units, theme_units_to_json)
+            .list("referenced_types", &self.references.types, |name| Json::string(name))
+            .list("referenced_keys", &self.references.keys, |name| Json::string(name));
         Json::object(members).to_text()
     }
 
@@ -1429,8 +1452,56 @@ impl AssemblyModel {
             functions: fields.list("functions", FunctionsModel::from_json)?,
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
+            theme_units: fields.list("theme_units", theme_units_from_json)?,
+            references: MarkupReferencesModel {
+                types: fields.list("referenced_types", |name| text_of(name, "a referenced type"))?,
+                keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
+            },
         })
     }
+}
+
+/// The units of the compiled theme of a class (#568) as an item of `"theme_units"`: the
+/// members the reader of format 1 reads ([`XamlMetadata::parse`]), every list written even when
+/// empty.
+fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
+    let strings = |items: &[String]| Json::Array(items.iter().map(|item| Json::string(item)).collect());
+    let unit = |unit: &ThemeUnitModel| {
+        Json::Object(vec![
+            ("name".to_string(), Json::string(&unit.name)),
+            ("index".to_string(), Json::Integer(i64::from(unit.index))),
+            ("documents".to_string(), strings(&unit.documents)),
+            ("keys".to_string(), strings(&unit.keys)),
+            ("type_keys".to_string(), strings(&unit.type_keys)),
+            ("references".to_string(), strings(&unit.references)),
+            ("types".to_string(), strings(&unit.types)),
+        ])
+    };
+    Json::Object(vec![
+        ("class".to_string(), Json::string(&units.class)),
+        ("table_path".to_string(), Json::string(&units.table_path)),
+        ("units".to_string(), Json::Array(units.units.iter().map(unit).collect())),
+    ])
+}
+
+/// Reads an item of `"theme_units"` ([`theme_units_to_json`]).
+fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
+    let fields = Fields::of(value, "the units of a class")?;
+    let units = fields.list("units", |unit| {
+        let unit = Fields::of(unit, "a unit")?;
+        let strings = |name: &str| unit.list(name, |item| text_of(item, name));
+        let index = unit.optional_integer("index")?.ok_or_else(|| "\"index\" is missing in a unit".to_string())?;
+        Ok(ThemeUnitModel {
+            name: unit.text("name")?,
+            index: u32::try_from(index).map_err(|_| "the index of a unit is not an unsigned integer".to_string())?,
+            documents: strings("documents")?,
+            keys: strings("keys")?,
+            type_keys: strings("type_keys")?,
+            references: strings("references")?,
+            types: strings("types")?,
+        })
+    })?;
+    Ok(ThemeUnitsModel { class: fields.text("class")?, table_path: fields.text("table_path")?, units })
 }
 
 #[cfg(test)]
@@ -1573,6 +1644,7 @@ mod tests {
         type_.attributes = vec![attribute.clone()];
         type_.property_attributes = vec![("Row".to_string(), vec![attribute])];
         type_.notify_property_changed = Some(unresolved);
+        type_.creates = vec!["Fixture.Controls.Item".to_string(), "Other.Handle".to_string()];
 
         let mut model = AssemblyModel::new("\u{30a2}\u{30bb}\u{30f3}\u{30d6}\u{30ea}", "fixture");
         model.xmlns_definitions = vec![XmlnsDefinitionModel { xml_namespace: "https://example.org/fixture".to_string(), namespace: "Fixture".to_string() }];
@@ -1605,6 +1677,22 @@ mod tests {
             public: true,
         }];
         model.dependencies = vec!["../Other/compiled_xaml.xamlmeta".to_string()];
+        model.theme_units = vec![ThemeUnitsModel {
+            class: "Fixture.Main".to_string(),
+            table_path: "::fixture::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![
+                ThemeUnitModel { name: "ambient".to_string(), documents: vec!["Main.xaml".to_string()], ..ThemeUnitModel::default() },
+                ThemeUnitModel {
+                    name: "Controls/Panel.xaml".to_string(),
+                    index: 1,
+                    documents: vec!["Controls/Panel.xaml".to_string()],
+                    keys: vec!["PanelBackground".to_string()],
+                    type_keys: vec!["Panel".to_string()],
+                    references: vec!["Accent".to_string()],
+                    types: vec!["Border".to_string(), "Panel".to_string()],
+                },
+            ],
+        }];
         model
     }
 
@@ -1619,6 +1707,26 @@ mod tests {
         let empty = AssemblyModel::new("A", "a");
         assert_eq!(AssemblyModel::parse(&empty.to_json()), Ok(empty.clone()));
         assert_eq!(empty.to_json(), "{\n  \"format\": 2,\n  \"name\": \"A\",\n  \"crate_name\": \"a\",\n  \"documents\": [],\n  \"dependencies\": []\n}\n");
+    }
+
+    /// Not from upstream: the classes a type creates (#568, step 4) are written only when there
+    /// are some, and a file written before they existed reads as a type that creates nothing.
+    #[test]
+    fn creates_edges_are_optional_in_the_file() {
+        let mut model = AssemblyModel::new("A", "a");
+        let mut list = TypeModel::new("List", TypeKind::Class, RustType::resolved("::a::List"), "a");
+        list.object_model = true;
+        list.creates = vec!["A.Item".to_string()];
+        model.types = vec![list, TypeModel::new("Item", TypeKind::Class, RustType::resolved("::a::Item"), "a")];
+        let text = model.to_json();
+        assert_eq!(text.matches("\"creates\"").count(), 1, "{text}");
+        assert_eq!(AssemblyModel::parse(&text), Ok(model.clone()));
+        // A file of an earlier scanner: its types have no member "creates".
+        let older = r#"{"format": 2, "name": "A", "crate_name": "a", "documents": [], "dependencies": [],
+            "types": [{"name": "List", "kind": "class", "object_model": true, "rust_path": "::a::List", "module": "a"}]}"#;
+        let read = AssemblyModel::parse(older).expect("a file without creates edges");
+        assert_eq!(read.types.len(), 1);
+        assert!(read.types.iter().all(|type_| type_.creates.is_empty()));
     }
 
     /// Not from upstream: the reader of format 1 (the compiler's) reads a file of format 2

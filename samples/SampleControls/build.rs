@@ -20,8 +20,6 @@ fn main() {
     let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
     Build::from_env()
         .type_system(TypeSystem::Model)
-        // The upstream project is built with compiled bindings as the default of its documents.
-        .default_compile_bindings(true)
         .compile_group(XamlGroup::new("compiled_xaml").documents(&[(DOCUMENT, text.as_str())]))
         .run();
 

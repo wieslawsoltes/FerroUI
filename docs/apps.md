@@ -9,7 +9,7 @@ repository, so that a new application is cheap to set up and builds exactly as t
 |---|---|
 | The framework crates | path dependencies into the submodule (`FerroUI/src/...`) |
 | Workspace dependencies and their pinned versions | `[workspace.dependencies]` of FerroUI's `Cargo.toml`, copied by `scripts/apps/sync-workspace.py` |
-| Profiles (release, fast-release, dist, browser with its per-package levels) | the `[profile.*]` sections of FerroUI's `Cargo.toml`, copied by the same script |
+| Profiles (release and dist, which abort on panic, release-unwind and dist-unwind, fast-release, browser with its per-package levels) | the `[profile.*]` sections of FerroUI's `Cargo.toml`, copied by the same script |
 | The cargo configuration of the browser target | FerroUI's `.cargo/config.toml`, included by the application's `.cargo/config.toml` |
 | Compiler cache and build-tool optimisation | FerroUI's opt-in `.cargo/compiler-cache.toml` and `.cargo/build-tools.toml` |
 | The browser site | `scripts/build-browser.sh` with `FERROUI_BROWSER_WORKSPACE` |

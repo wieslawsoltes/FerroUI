@@ -3,12 +3,11 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    FerroFlixAppPage, LAvenirAppPage, NavigationPageAppearancePage, NavigationPageAttachedMethodsPage,
-    NavigationPageBackButtonPage, NavigationPageCurvedHeaderPage, NavigationPageEventsPage, NavigationPageFirstLookPage,
-    NavigationPageGesturePage, NavigationPageInteractiveHeaderPage, NavigationPageModalPage,
-    NavigationPageModalTransitionsPage, NavigationPageMvvmPage, NavigationPagePassDataPage,
-    NavigationPagePerformancePage, NavigationPageScrollAwarePage, NavigationPageStackPage, NavigationPageTitlePage,
-    NavigationPageToolbarPage, NavigationPageTransitionsPage, PulseAppPage, RetroGamingAppPage,
+    NavigationPageAppearancePage, NavigationPageAttachedMethodsPage, NavigationPageBackButtonPage,
+    NavigationPageCurvedHeaderPage, NavigationPageEventsPage, NavigationPageFirstLookPage, NavigationPageGesturePage,
+    NavigationPageInteractiveHeaderPage, NavigationPageModalPage, NavigationPageModalTransitionsPage,
+    NavigationPageMvvmPage, NavigationPagePassDataPage, NavigationPagePerformancePage, NavigationPageScrollAwarePage,
+    NavigationPageStackPage, NavigationPageTitlePage, NavigationPageToolbarPage, NavigationPageTransitionsPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -52,6 +51,12 @@ const DEMOS: &[Demo] = &[
         "Header",
         "Set page header content: a string, icon, or any custom control in the navigation bar.",
         || NavigationPageTitlePage::new().upcast(),
+    ),
+    (
+        "Appearance",
+        "Curved Header",
+        "A dome-bottomed header drawn in the page content: the bar hidden on the root page, and an overlaid bar (BarLayoutBehavior.Overlay) over a curved header on the pushed page.",
+        || NavigationPageCurvedHeaderPage::new().upcast(),
     ),
     // Data
     (
@@ -127,37 +132,6 @@ const DEMOS: &[Demo] = &[
         "Performance Monitor",
         "Track stack depth and live page instances. Observe how pages are released after popping them.",
         || NavigationPagePerformancePage::new().upcast(),
-    ),
-    // Showcases
-    (
-        "Showcases",
-        "Pulse Fitness",
-        "Login flow with RemovePage, TabbedPage dashboard with bottom tabs, and NavigationPage push for workout detail.",
-        || PulseAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "L'Avenir",
-        "Restaurant app with DrawerPage flyout menu, TabbedPage bottom tabs, and NavigationPage push for dish detail.",
-        || LAvenirAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "FerroFlix",
-        "Streaming app with dark NavigationPage, hidden nav bar on home, and custom bar tint on movie detail pages.",
-        || FerroFlixAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Retro Gaming",
-        "Arcade-style app with NavigationPage header, TabbedPage bottom tabs with CenteredTabPanel, and game detail push.",
-        || RetroGamingAppPage::new().upcast(),
-    ),
-    (
-        "Showcases",
-        "Curved Header",
-        "Shop app with dome-bottomed white header on home (nav bar hidden) and blue curved header on detail (BarLayoutBehavior.Overlay).",
-        || NavigationPageCurvedHeaderPage::new().upcast(),
     ),
 ];
 

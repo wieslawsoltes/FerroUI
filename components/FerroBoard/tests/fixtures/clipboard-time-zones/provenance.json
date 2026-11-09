@@ -1,0 +1,55 @@
+{
+  "version": "2026e-rearguard",
+  "source": "macOS /usr/share/zoneinfo; +VERSION2026e, tzdata.zi rearguard marker",
+  "license": "IANA time zone data: public domain",
+  "files": [
+    {
+      "zone": "UTC",
+      "file": "UTC.tzif",
+      "sha256": "8b85846791ab2c8a5463c83a5be3c043e2570d7448434d41398969ed47e3e6f2",
+      "source": "/usr/share/zoneinfo/UTC"
+    },
+    {
+      "zone": "America/New_York",
+      "file": "America-New_York.tzif",
+      "sha256": "e9ed07d7bee0c76a9d442d091ef1f01668fee7c4f26014c0a868b19fe6c18a95",
+      "source": "/usr/share/zoneinfo/America/New_York"
+    },
+    {
+      "zone": "Europe/Lisbon",
+      "file": "Europe-Lisbon.tzif",
+      "sha256": "92b07cb24689226bf934308d1f1bd33c306aa4da610c52cd5bce25077960502c",
+      "source": "/usr/share/zoneinfo/Europe/Lisbon"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "file": "Australia-Sydney.tzif",
+      "sha256": "42c3857585b16db2f8ffd47ba19faa60f473340de8d4fe9320ea7be861605906",
+      "source": "/usr/share/zoneinfo/Australia/Sydney"
+    },
+    {
+      "zone": "Asia/Kathmandu",
+      "file": "Asia-Kathmandu.tzif",
+      "sha256": "fd1b1f79259b0abf24338611262ed7bfa8401221d6d7820586c5ec7e16cf8e83",
+      "source": "/usr/share/zoneinfo/Asia/Kathmandu"
+    },
+    {
+      "zone": "Europe/Dublin",
+      "file": "Europe-Dublin.tzif",
+      "sha256": "dde53d4c45d70e07671cf073f313c16e6238955f37adba7f0da95d09026e2c71",
+      "source": "/usr/share/zoneinfo/Europe/Dublin"
+    },
+    {
+      "zone": "Africa/Casablanca",
+      "file": "Africa-Casablanca.tzif",
+      "sha256": "36668203ef1b9febbce81cc6694825d24e0c4e9bd798f4ad5257d20ab3adca22",
+      "source": "/usr/share/zoneinfo/Africa/Casablanca"
+    },
+    {
+      "zone": "Pacific/Apia",
+      "file": "Pacific-Apia.tzif",
+      "sha256": "33740ab29ef943b1f55f769e13ff59a90962f5a12434209072d650e6c10abb4d",
+      "source": "/usr/share/zoneinfo/Pacific/Apia"
+    }
+  ]
+}

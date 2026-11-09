@@ -234,6 +234,8 @@ impl<K: Clone + 'static, V: Clone + 'static> MemoizingMRUCache<K, V> {
 
         let mut messages = Vec::new();
         for (_, value) in old_entries {
+            // Boundary (#567): the release callback is application code; as in the reference,
+            // every value is released and the failures are aggregated into the error.
             if let Err(payload) = catch_unwind(AssertUnwindSafe(|| release(value))) {
                 messages.push(panic_message(payload.as_ref()));
             }

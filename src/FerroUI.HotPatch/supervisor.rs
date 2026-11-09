@@ -188,6 +188,9 @@ impl PatchSupervisor {
         });
         // SAFETY: the caller supplies the documented toolchain and quiescence guarantees.
         unsafe { subsecond::apply_patch(table) }.map_err(|error| format!("{error:?}"))?;
+        // Boundary (#567): a try/finally around the view transaction, application code: the
+        // previous dispatch table is restored before its panic is raised again. With
+        // `panic = "abort"` the process ends instead, so no rollback is needed.
         let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(transaction));
         if !matches!(&outcome, Ok(Ok(()))) {
             // SAFETY: this is the original, unrelocated descriptor of a retained

@@ -6,6 +6,9 @@ mod i_ferro_xaml_il_control_template_provider;
 mod i_ferro_xaml_il_parent_stack_provider;
 mod i_ferro_xaml_il_xml_namespace_info_provider_v1;
 mod runtime_list;
+mod theme_resources;
+mod theme_styles;
+mod theme_units;
 mod xaml_il_context;
 mod xaml_il_parent_stack_provider_wrapper;
 mod xaml_il_runtime_helpers;
@@ -15,7 +18,7 @@ pub use i_ferro_xaml_il_parent_stack_provider::{
     IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider,
 };
 pub use i_ferro_xaml_il_xml_namespace_info_provider_v1::{
-    FerroXamlIlXmlNamespaceInfo, IFerroXamlIlXmlNamespaceInfoProvider, XmlNamespaces,
+    FerroXamlIlXmlNamespaceInfo, IFerroXamlIlXmlNamespaceInfoProvider, XmlNamespaceTypes, XmlNamespaces,
 };
 pub use runtime_list::{RuntimeList, RuntimeListElement};
 pub(crate) use xaml_il_parent_stack_provider_wrapper::XamlIlParentStackProviderWrapper;

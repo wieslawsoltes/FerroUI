@@ -40,10 +40,8 @@ vello = ["ferroui-browser/vello"]
 macos-theme = ["control-catalog/macos-theme"]
 material-theme = ["control-catalog/material-theme"]
 
-# The published site carries the artwork of this project instead of the upstream brand assets of the
-# sample (see `samples/ControlCatalog/PlaceholderAssets`); the feature is a default of the sample and
-# is named here so that the site cannot lose it. The pictures and fonts of the sample are
-# plain files of the site (`assets/ControlCatalog/`, feature `separate-assets`) that the host page
-# fetches next to the module, so that the module stays within its size budget.
+# The pictures and fonts of the sample are plain files of the site (`assets/ControlCatalog/`,
+# feature `separate-assets`) that the host page fetches next to the module, so that the module stays
+# within its size budget.
 [target.'cfg(target_os = "emscripten")'.dependencies]
-control-catalog = { path = "../ControlCatalog", features = ["placeholder-branding", "separate-assets"] }
+control-catalog = { path = "../ControlCatalog", features = ["separate-assets"] }

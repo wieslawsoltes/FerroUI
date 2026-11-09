@@ -16,7 +16,7 @@
 //!   (`/Assets/Fonts/SourceSansPro-*.ttf`); a directory as the source of a
 //!   font collection (`/Assets/Fonts#Family`, which loads every font of the
 //!   directory and its subdirectories into one collection); a directory
-//!   joined with a file name at run time (`format!(".../Assets/Movies/{name}")`),
+//!   joined with a file name at run time (`format!(".../Assets/<directory>/{name}")`),
 //!   which names the files of the directory whose names are string literals
 //!   of the same source, or the whole directory when none is;
 //! * the classes and other types they use (an identifier that a `struct`,
@@ -59,7 +59,7 @@ const PAGE_LIST: &str = "ViewModels/main_window_view_model_page_list.rs";
 const ASSET_URI_PREFIX: &str = "ferres://ControlCatalog/";
 
 /// Directories of the crate without sources of the application.
-const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "Assets", "PlaceholderAssets"];
+const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "Assets"];
 
 /// A document or a Rust file of the crate.
 struct Unit {

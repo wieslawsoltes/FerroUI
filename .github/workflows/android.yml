@@ -79,6 +79,8 @@ jobs:
           echo "GPU features: '$features'"
           test "$features" = 'skia-bindings feature "ganesh" skia-bindings feature "gl" '
       - name: The package of the smoke application
+        # bash with pipefail: a failed package step fails here, not at the next command.
+        shell: bash
         run: |
           scripts/android/apk.sh smoke | tee apk.out
           apk="$(sed -n 's/^APK: //p' apk.out)"

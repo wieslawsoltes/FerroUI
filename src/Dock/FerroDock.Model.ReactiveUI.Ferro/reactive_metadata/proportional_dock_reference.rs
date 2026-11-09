@@ -72,7 +72,7 @@ ferroui_base::ferro_markup_type!(class ProportionalDockReference as "Proportiona
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(ProportionalDockReference::MARKUP);
+    MarkupType::register_table(&[ProportionalDockReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IProportionalDock>>();
     ValueTypes::register_cast::<Rc<dyn IProportionalDock>, Rc<dyn IDockable>>(|model| {
         model.clone()

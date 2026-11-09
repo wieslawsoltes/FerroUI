@@ -82,6 +82,8 @@ fn the_page_transitions_sample_photographs_of_the_assets() {
         assert!(!image.is_empty(), "a photograph of the assets");
     }
     assert_ne!(images.first_page, images.second_page);
+    // The water ripple bends one of them (#580).
+    assert!(images.picture.image().is_some(), "the picture of the water ripple");
 
     let page = page_transitions_page();
     let tiles = section_of(&page).children().get(2).cast::<WrapPanel>().expect("the tiles");

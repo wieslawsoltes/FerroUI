@@ -367,6 +367,9 @@ impl HtmlWebSocketTransport {
     fn raise_message(&self, message: &Message) -> Result<(), Error> {
         let handlers = lock(&self.lock).on_message.snapshot();
         let _raising = lock(&self.raising);
+        // Boundary (#567): the handlers of a message are application code; the exception of one
+        // is the error of the transport in the reference. Isolating them needs a build that
+        // unwinds (`dev`, `release` or `dist-unwind` profile).
         catch_unwind(AssertUnwindSafe(|| {
             for handler in &handlers {
                 handler(self, message);

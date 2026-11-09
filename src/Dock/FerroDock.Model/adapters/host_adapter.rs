@@ -116,6 +116,8 @@ impl HostAdapter {
         let _reset = ExitGuard(&self.exiting);
         // Native host failures unwind. No interior borrows cross callbacks;
         // restore the same tracked flag as the source catch/finally blocks.
+        // Boundary (#567): the catch/finally of the reference around the native host and the
+        // closing handlers of the application; the panic is raised again after the restore.
         let result = catch_unwind(AssertUnwindSafe(|| {
             self.save();
             host.set_is_tracked(false);

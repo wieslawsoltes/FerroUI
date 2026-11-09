@@ -95,9 +95,9 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
-        MarkupType::register_all(MARKUP_TYPES);
-        MarkupAssembly::register(&ASSEMBLY);
+        TypeInfo::register_table(TYPES);
+        MarkupType::register_table(MARKUP_TYPES);
+        MarkupAssembly::register_table(&ASSEMBLY);
         crate::rust_paths::register_rust_paths();
         ValueTypes::register_global(register_value_types);
     });

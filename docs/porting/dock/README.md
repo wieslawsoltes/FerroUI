@@ -335,21 +335,21 @@ and F9 for the docking overlay.
 Build and run the desktop sample:
 
 ```sh
-export TMPDIR=/Volumes/SSD/temp/ferrodock-port
-export CARGO_TARGET_DIR=/Volumes/SSD/temp/ferrodock-port/desktop-file-workflow-target
+export TMPDIR=<evidence>/ferrodock-port
+export CARGO_TARGET_DIR=<evidence>/ferrodock-port/desktop-file-workflow-target
 cargo run --locked -j1 -p ferrodock-reactiveui-sample --bin ferrodock-reactiveui-sample
 ```
 
 On macOS, package and open the native application instead:
 
 ```sh
-export TMPDIR=/Volumes/SSD/temp/ferrodock-port
-export CARGO_TARGET_DIR=/Volumes/SSD/temp/ferrodock-port/desktop-file-workflow-target
+export TMPDIR=<evidence>/ferrodock-port
+export CARGO_TARGET_DIR=<evidence>/ferrodock-port/desktop-file-workflow-target
 cargo build --locked -j1 -p ferrodock-reactiveui-sample --bin ferrodock-reactiveui-sample
 python3 scripts/dock/bundle_macos_sample.py \
   --binary "$CARGO_TARGET_DIR/debug/ferrodock-reactiveui-sample" \
-  --output "/Volumes/SSD/temp/ferrodock-port/FerroDock.app"
-open /Volumes/SSD/temp/ferrodock-port/FerroDock.app
+  --output "<evidence>/ferrodock-port/FerroDock.app"
+open <evidence>/ferrodock-port/FerroDock.app
 ```
 
 The helper physically copies the executable into the bundle. `--output` selects another

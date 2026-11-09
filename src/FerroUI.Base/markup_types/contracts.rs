@@ -407,15 +407,13 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn crate::media::TextTrimming as MarkupTyped>::MARKUP,
 ];
 
-/// Registers the nullable forms of the contract handles that can be held in
-/// untyped values with the untyped value conversions of the current thread.
-/// (The handles of contracts implemented by classes are also registered by
-/// those classes when they are initialised.)
+/// Registers what the untyped value conversions need of the types of this file that
+/// no first use shows: the nullable forms and the casts of the types that members of
+/// markup types hold (compiled markup converts a value for such a member before it
+/// sets it, and setting it registers nothing). Every other type registers when it is
+/// first used ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration)).
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn crate::media::IBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::ISolidColorBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableBrush>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableSolidColorBrush>>();
     // A theme variant provider is a resource provider.
     ValueTypes::register_cast::<Rc<dyn crate::controls::IThemeVariantProvider>, Rc<dyn crate::controls::IResourceProvider>>(
         |provider| provider.clone(),
@@ -424,42 +422,206 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<dyn crate::media::ISolidColorBrush>, Rc<dyn crate::media::IBrush>>(|b| b.clone());
     ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableBrush>, Rc<dyn crate::media::IBrush>>(|b| b.clone());
     ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::IBrush>>(|b| b.clone());
-    ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::ISolidColorBrush>>(
-        |b| b.clone(),
-    );
-    ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableBrush>>(
-        |b| b.clone(),
-    );
     ValueTypes::register_nullable::<Rc<dyn crate::media::IImage>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::IImageBrushSource>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::imaging::IBitmap>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::ITransform>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::fonts::IFontCollection>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IPen>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::IDashStyle>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::IExperimentalAcrylicMaterial>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::effects::IEffect>>();
     ValueTypes::register_nullable::<Rc<dyn crate::input::ICommand>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::ITransition>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IPageTransition>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IClock>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::platform::storage::IStorageProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::media::TextTrimming>>();
     ValueTypes::register_nullable::<crate::controls::NameScopeRef>();
-    ValueTypes::register_nullable::<Rc<dyn crate::INamed>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::IStyle>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::SetterBase>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::styling::ITemplate>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceDictionary>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IThemeVariantProvider>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::controls::IDeferredContent>>();
     ValueTypes::register_nullable::<Rc<dyn crate::data::converters::IValueConverter>>();
     ValueTypes::register_nullable::<Rc<dyn crate::data::converters::IMultiValueConverter>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::easings::IEasing>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimation>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimationSetter>>();
-    ValueTypes::register_nullable::<Rc<dyn crate::animation::ICustomAnimator>>();
     ValueTypes::register_nullable::<Rc<dyn crate::data::BindingBase>>();
-
 }
+
+/// Registers every type of this file that registers when it is first used: what the
+/// tables of types (`type-tables`) register at start-up.
+pub(super) fn register_value_type_table() {
+    ValueTypes::register_used::<dyn crate::media::ISolidColorBrush>();
+    ValueTypes::register_used::<dyn crate::media::IImmutableBrush>();
+    ValueTypes::register_used::<dyn crate::media::IImmutableSolidColorBrush>();
+    ValueTypes::register_used::<dyn crate::media::imaging::IBitmap>();
+    ValueTypes::register_used::<dyn crate::media::fonts::IFontCollection>();
+    ValueTypes::register_used::<dyn crate::media::IPen>();
+    ValueTypes::register_used::<dyn crate::media::IExperimentalAcrylicMaterial>();
+    ValueTypes::register_used::<dyn crate::media::effects::IEffect>();
+    ValueTypes::register_used::<dyn crate::animation::ITransition>();
+    ValueTypes::register_used::<dyn crate::animation::IPageTransition>();
+    ValueTypes::register_used::<dyn crate::animation::IClock>();
+    ValueTypes::register_used::<dyn crate::platform::storage::IStorageProvider>();
+    ValueTypes::register_used::<dyn crate::media::TextTrimming>();
+    ValueTypes::register_used::<dyn crate::INamed>();
+    ValueTypes::register_used::<dyn crate::styling::IStyle>();
+    ValueTypes::register_used::<dyn crate::styling::SetterBase>();
+    ValueTypes::register_used::<dyn crate::styling::ITemplate>();
+    ValueTypes::register_used::<dyn crate::controls::IResourceProvider>();
+    ValueTypes::register_used::<dyn crate::controls::IResourceDictionary>();
+    ValueTypes::register_used::<dyn crate::controls::IThemeVariantProvider>();
+    ValueTypes::register_used::<dyn crate::controls::IDeferredContent>();
+    ValueTypes::register_used::<dyn crate::animation::IAnimation>();
+    ValueTypes::register_used::<dyn crate::animation::IAnimationSetter>();
+    ValueTypes::register_used::<dyn crate::animation::ICustomAnimator>();
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::ISolidColorBrush {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::ISolidColorBrush>>();
+        // An immutable brush is a solid color brush.
+        ValueTypes::register_cast::<Rc<crate::media::immutable::ImmutableSolidColorBrush>, Rc<dyn crate::media::ISolidColorBrush>>(
+            |brush| brush.clone(),
+        );
+        ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::ISolidColorBrush>>(
+            |b| b.clone(),
+        );
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::IImmutableBrush {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableBrush>>();
+        // An immutable brush is an immutable brush contract.
+        ValueTypes::register_cast::<Rc<crate::media::immutable::ImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableBrush>>(
+            |brush| brush.clone(),
+        );
+        ValueTypes::register_cast::<Rc<dyn crate::media::IImmutableSolidColorBrush>, Rc<dyn crate::media::IImmutableBrush>>(
+            |b| b.clone(),
+        );
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::IImmutableSolidColorBrush {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::IImmutableSolidColorBrush>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::imaging::IBitmap {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::imaging::IBitmap>>();
+        // A bitmap is a bitmap contract.
+        ValueTypes::register_cast::<Rc<crate::media::imaging::Bitmap>, Rc<dyn crate::media::imaging::IBitmap>>(|bitmap| bitmap.clone());
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::fonts::IFontCollection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::fonts::IFontCollection>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::IPen {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::IPen>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::IExperimentalAcrylicMaterial {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::IExperimentalAcrylicMaterial>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::effects::IEffect {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::effects::IEffect>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::ITransition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::ITransition>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::IPageTransition {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::IPageTransition>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::IClock {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::IClock>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::platform::storage::IStorageProvider {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::platform::storage::IStorageProvider>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::media::TextTrimming {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::media::TextTrimming>>();
+        // The text of a text trimming is the name it parses from (`CharacterEllipsis`, `None`, ...),
+        // as the `ToString()` of the trimmings of the managed original.
+        ValueTypes::register_display::<Rc<dyn crate::media::TextTrimming>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::INamed {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::INamed>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::styling::IStyle {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::styling::IStyle>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::styling::SetterBase {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::styling::SetterBase>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::styling::ITemplate {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::styling::ITemplate>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::controls::IResourceProvider {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceProvider>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::controls::IResourceDictionary {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::controls::IResourceDictionary>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::controls::IThemeVariantProvider {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::controls::IThemeVariantProvider>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::controls::IDeferredContent {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::controls::IDeferredContent>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::IAnimation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimation>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::IAnimationSetter {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimationSetter>>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for dyn crate::animation::ICustomAnimator {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<Rc<dyn crate::animation::ICustomAnimator>>();
+    }
+}
+

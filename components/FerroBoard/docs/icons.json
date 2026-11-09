@@ -1,0 +1,543 @@
+{
+  "source": "reference/ScreenKeyboardControl/src/ScreenKeyboard.Uno/Icons/IconData.g.cs",
+  "sha256": "b54acb9beb004da04a7d49afd60cedaf6fb908972f851cfc3b21e55a8377d4f3",
+  "generator": "reference/ScreenKeyboardControl/build/scripts/generate_icons.py",
+  "generator_sha256": "e32b054b09e56656b5a979d1f63d41312e6534748903e707862cfbdc05a1e5cb",
+  "provenance": "Material Symbols by Google via pinned ScreenKeyboardControl generated output",
+  "license": "Apache-2.0",
+  "runtime_loading": "static strings; parsed commands lazily cached",
+  "absent_builtins": [
+    "None",
+    "Emoticon"
+  ],
+  "entries": [
+    {
+      "name": "Backspace",
+      "value": 1,
+      "logical_name": "KeyIcon.Backspace",
+      "compression": "none",
+      "bytes": 1535,
+      "sha256": "018ef8c14b04210a40894e9519f33846d9794ed8e460c27ba31e5ac6c77a9af5"
+    },
+    {
+      "name": "Shift",
+      "value": 2,
+      "logical_name": "KeyIcon.Shift",
+      "compression": "none",
+      "bytes": 717,
+      "sha256": "34d32687e7852092691fafc5f8bc72ec83fbf04a3952109d66a839b3d3c759cb"
+    },
+    {
+      "name": "ShiftActive",
+      "value": 3,
+      "logical_name": "KeyIcon.ShiftActive",
+      "compression": "none",
+      "bytes": 569,
+      "sha256": "e22e558775017e89a0e659771e2c6c8bf28b0cc63f218add7ff41c969d0948bc"
+    },
+    {
+      "name": "CapsLock",
+      "value": 4,
+      "logical_name": "KeyIcon.CapsLock",
+      "compression": "none",
+      "bytes": 971,
+      "sha256": "aca7e5e205c9e39476a8f0caaf76580a6e487be7e00bcb0f98a5889fee1471e7"
+    },
+    {
+      "name": "Enter",
+      "value": 5,
+      "logical_name": "KeyIcon.Enter",
+      "compression": "none",
+      "bytes": 937,
+      "sha256": "506d1e05decef9315d0816dbebbbea73b6e32d6d448ed61450eaf6f2cf532ea7"
+    },
+    {
+      "name": "Search",
+      "value": 6,
+      "logical_name": "KeyIcon.Search",
+      "compression": "none",
+      "bytes": 1035,
+      "sha256": "20e29d47c99acfbe03fa4278ad68bd388e2df483227638bd72f87e6c87a35a9a"
+    },
+    {
+      "name": "Send",
+      "value": 7,
+      "logical_name": "KeyIcon.Send",
+      "compression": "none",
+      "bytes": 493,
+      "sha256": "110feb537a5d88f604b77036ecffa567f375cb3860531ea7be3ac30edf6d2259"
+    },
+    {
+      "name": "Go",
+      "value": 8,
+      "logical_name": "KeyIcon.Go",
+      "compression": "none",
+      "bytes": 817,
+      "sha256": "bf1fd0849a0101f8b102d28dbed00e5ab74f5fa0a1f4ccd11928e019053b9703"
+    },
+    {
+      "name": "Next",
+      "value": 9,
+      "logical_name": "KeyIcon.Next",
+      "compression": "none",
+      "bytes": 817,
+      "sha256": "bf1fd0849a0101f8b102d28dbed00e5ab74f5fa0a1f4ccd11928e019053b9703"
+    },
+    {
+      "name": "Previous",
+      "value": 10,
+      "logical_name": "KeyIcon.Previous",
+      "compression": "none",
+      "bytes": 817,
+      "sha256": "f7d0aa500958b2b849fec040cab445cde36f136d6e57b13c90c2913afc11b202"
+    },
+    {
+      "name": "Done",
+      "value": 11,
+      "logical_name": "KeyIcon.Done",
+      "compression": "none",
+      "bytes": 521,
+      "sha256": "7c8972eb9b694e19c2735cc2b44d28467d5e3ad8f03cf63ab4d2a3680eaeb547"
+    },
+    {
+      "name": "Space",
+      "value": 12,
+      "logical_name": "KeyIcon.Space",
+      "compression": "none",
+      "bytes": 641,
+      "sha256": "94c1db5247f9d6afc57e657fcd21072aefd75a211330f48f0be4579d98bf7637"
+    },
+    {
+      "name": "Language",
+      "value": 13,
+      "logical_name": "KeyIcon.Language",
+      "compression": "none",
+      "bytes": 3187,
+      "sha256": "982e6e3f6272eb3bdb628a2b83b9b59bdceb9a363bf9eee495891baae4c41fc9"
+    },
+    {
+      "name": "Emoji",
+      "value": 14,
+      "logical_name": "KeyIcon.Emoji",
+      "compression": "none",
+      "bytes": 2235,
+      "sha256": "1a1eef10e2606c2e284781f8c3b5521f94d01465d5c002b5d891e9510ef3ca45"
+    },
+    {
+      "name": "Clipboard",
+      "value": 15,
+      "logical_name": "KeyIcon.Clipboard",
+      "compression": "none",
+      "bytes": 1317,
+      "sha256": "5fa5f1b23c16477af417c6af9f14387a2df30e70fee0185e6a9c15558d9652af"
+    },
+    {
+      "name": "Settings",
+      "value": 16,
+      "logical_name": "KeyIcon.Settings",
+      "compression": "none",
+      "bytes": 3319,
+      "sha256": "5b8813339d5e862177de177b9917f5ee2dd76cbba5f895686a62474ba22c3779"
+    },
+    {
+      "name": "HideKeyboard",
+      "value": 17,
+      "logical_name": "KeyIcon.HideKeyboard",
+      "compression": "none",
+      "bytes": 4997,
+      "sha256": "0ae47cb4a34a0b986dca1ca17a5b942a7481b31982694bbb8ac7da0523583e5c"
+    },
+    {
+      "name": "ArrowLeft",
+      "value": 18,
+      "logical_name": "KeyIcon.ArrowLeft",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "542b2ce8b122957ab5d2bedfc4f6c88fc0ce3ccd7803fe20955133b4f3985656"
+    },
+    {
+      "name": "ArrowRight",
+      "value": 19,
+      "logical_name": "KeyIcon.ArrowRight",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "ca98998c8d62e44692210b31db5907f9d6d376fe6dea3fd1741a46a0d08a0261"
+    },
+    {
+      "name": "ArrowUp",
+      "value": 20,
+      "logical_name": "KeyIcon.ArrowUp",
+      "compression": "none",
+      "bytes": 521,
+      "sha256": "0f0b6086836b8d42a3843e1c0ba2e6603bc1e8acb6c8cc9a7e759de688246fb3"
+    },
+    {
+      "name": "ArrowDown",
+      "value": 21,
+      "logical_name": "KeyIcon.ArrowDown",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "cd65f8b34ce7114cea499ff36a7c5ea2d59277153e07c947512b9ab5ad5ce0d3"
+    },
+    {
+      "name": "Undo",
+      "value": 22,
+      "logical_name": "KeyIcon.Undo",
+      "compression": "none",
+      "bytes": 1201,
+      "sha256": "955a997ad48d88c73de96b0c6f91b6fd0cc9a9f83c123758cd59811a1402119e"
+    },
+    {
+      "name": "Redo",
+      "value": 23,
+      "logical_name": "KeyIcon.Redo",
+      "compression": "none",
+      "bytes": 1201,
+      "sha256": "de6d4126bce1cb4d25f2b5fb0c5dd3339b730b38359890d4f331e5583fbe98d3"
+    },
+    {
+      "name": "Copy",
+      "value": 24,
+      "logical_name": "KeyIcon.Copy",
+      "compression": "none",
+      "bytes": 1087,
+      "sha256": "8373a408be75f5f5293ea7ee0b817ee640de3b93034137a26ed89d3f4ec43766"
+    },
+    {
+      "name": "Cut",
+      "value": 25,
+      "logical_name": "KeyIcon.Cut",
+      "compression": "none",
+      "bytes": 2505,
+      "sha256": "ad5f05d9a4afd7e132173fe7fd3463b40fee6038895431699ca817459d73073c"
+    },
+    {
+      "name": "Paste",
+      "value": 26,
+      "logical_name": "KeyIcon.Paste",
+      "compression": "none",
+      "bytes": 1317,
+      "sha256": "5fa5f1b23c16477af417c6af9f14387a2df30e70fee0185e6a9c15558d9652af"
+    },
+    {
+      "name": "SelectAll",
+      "value": 27,
+      "logical_name": "KeyIcon.SelectAll",
+      "compression": "none",
+      "bytes": 6435,
+      "sha256": "edd54e191318f818ee8865b6dc8ae780da0e2ce026f786926897b643ec50da4c"
+    },
+    {
+      "name": "Select",
+      "value": 28,
+      "logical_name": "KeyIcon.Select",
+      "compression": "none",
+      "bytes": 4179,
+      "sha256": "4fd09a6f0183ef97157502665661318790f05e195ea16c9db9847f4bbac7b57a"
+    },
+    {
+      "name": "Microphone",
+      "value": 29,
+      "logical_name": "KeyIcon.Microphone",
+      "compression": "none",
+      "bytes": 1751,
+      "sha256": "40b09189e64d3eb7cfccc7ab31a74469e0060385a3d0432dbe68cd9aa904c7d9"
+    },
+    {
+      "name": "OneHandedLeft",
+      "value": 30,
+      "logical_name": "KeyIcon.OneHandedLeft",
+      "compression": "none",
+      "bytes": 977,
+      "sha256": "b6f0f7c8bef0e4c3e6f59e34f50a2e14674b0f30aa9ae4076240a339a873af63"
+    },
+    {
+      "name": "OneHandedRight",
+      "value": 31,
+      "logical_name": "KeyIcon.OneHandedRight",
+      "compression": "none",
+      "bytes": 977,
+      "sha256": "16e75283c5d5bc363ec4201dfbdf2db395d35006ce05c0f7bf65b1e8420a2d35"
+    },
+    {
+      "name": "Keyboard",
+      "value": 32,
+      "logical_name": "KeyIcon.Keyboard",
+      "compression": "none",
+      "bytes": 4667,
+      "sha256": "906fa8151166884b69e1ff1702aeb2f8fad92612cd3949776ffec645594dfeaa"
+    },
+    {
+      "name": "Tab",
+      "value": 33,
+      "logical_name": "KeyIcon.Tab",
+      "compression": "none",
+      "bytes": 1219,
+      "sha256": "061a383e4d8a65ad6da7ac946db0cf06d608ca52a672298687d2b00ea83298b5"
+    },
+    {
+      "name": "Incognito",
+      "value": 34,
+      "logical_name": "KeyIcon.Incognito",
+      "compression": "none",
+      "bytes": 3267,
+      "sha256": "6488fa3669e1e4e82bc831d3f6d749fc8f694860da0d953f31519bf006a0e3bb"
+    },
+    {
+      "name": "TextEditing",
+      "value": 35,
+      "logical_name": "KeyIcon.TextEditing",
+      "compression": "none",
+      "bytes": 2149,
+      "sha256": "6e0886806fc56a7a3aaa874b333fa1e66e411a3f6c20d77e3a3738bbf806c05f"
+    },
+    {
+      "name": "Home",
+      "value": 36,
+      "logical_name": "KeyIcon.Home",
+      "compression": "none",
+      "bytes": 1011,
+      "sha256": "9b7adb4518fc6afbc00eba2c1de2fb59b9e6ee20b9b0c42b60716e0d87c10d3d"
+    },
+    {
+      "name": "End",
+      "value": 37,
+      "logical_name": "KeyIcon.End",
+      "compression": "none",
+      "bytes": 1011,
+      "sha256": "499d204304b5f6b16f44a48929dd6457861ca68a7f36e4e753bc782559c80e90"
+    },
+    {
+      "name": "DeleteForward",
+      "value": 38,
+      "logical_name": "KeyIcon.DeleteForward",
+      "compression": "none",
+      "bytes": 1535,
+      "sha256": "018ef8c14b04210a40894e9519f33846d9794ed8e460c27ba31e5ac6c77a9af5"
+    },
+    {
+      "name": "SplitKeyboard",
+      "value": 39,
+      "logical_name": "KeyIcon.SplitKeyboard",
+      "compression": "none",
+      "bytes": 2141,
+      "sha256": "15f7989e6e79033dce25960a7d778a5440d0632589febf8d9b757cb02d63f3e0"
+    },
+    {
+      "name": "Close",
+      "value": 40,
+      "logical_name": "KeyIcon.Close",
+      "compression": "none",
+      "bytes": 849,
+      "sha256": "345ccc6a81074eacc5aab3e673e096fb8febbdc842820a6e47da3914347d3ea6"
+    },
+    {
+      "name": "Pin",
+      "value": 41,
+      "logical_name": "KeyIcon.Pin",
+      "compression": "none",
+      "bytes": 1325,
+      "sha256": "240bfc60523b392653cc5942d32e708525384a5dd699740e16dc5a7b64c5ab2e"
+    },
+    {
+      "name": "Unpin",
+      "value": 42,
+      "logical_name": "KeyIcon.Unpin",
+      "compression": "none",
+      "bytes": 1625,
+      "sha256": "57eda3f33690d481d4025f1f4e65c70c5751c06d9be212c2752d73e2d593c2ad"
+    },
+    {
+      "name": "Delete",
+      "value": 43,
+      "logical_name": "KeyIcon.Delete",
+      "compression": "none",
+      "bytes": 1753,
+      "sha256": "4dd864f2c93328a465a7188b8e28f4e0858ef9b8f2830d6704cb449e117d6da3"
+    },
+    {
+      "name": "Recent",
+      "value": 44,
+      "logical_name": "KeyIcon.Recent",
+      "compression": "none",
+      "bytes": 1631,
+      "sha256": "3223c85e4ef859917299026dcd5d2071542e6b60229d6366ad5296771a51c4ce"
+    },
+    {
+      "name": "Smiley",
+      "value": 45,
+      "logical_name": "KeyIcon.Smiley",
+      "compression": "none",
+      "bytes": 2571,
+      "sha256": "c8a5a4219801ce0fb4873dddfaf31da4aa0e1fc9f05e77cc5d6274f0926f9d4f"
+    },
+    {
+      "name": "Person",
+      "value": 46,
+      "logical_name": "KeyIcon.Person",
+      "compression": "none",
+      "bytes": 1483,
+      "sha256": "f52887994ae0e9de45956bc6fd78ea52d976c03024491cd16f4385b39eed1ee5"
+    },
+    {
+      "name": "Nature",
+      "value": 47,
+      "logical_name": "KeyIcon.Nature",
+      "compression": "none",
+      "bytes": 3807,
+      "sha256": "a7ffa9d4bfa6849d67e73880279d0c2f1eaca42b75b2472ecb09eb1af480687f"
+    },
+    {
+      "name": "Food",
+      "value": 48,
+      "logical_name": "KeyIcon.Food",
+      "compression": "none",
+      "bytes": 1803,
+      "sha256": "39533c78742cd414d016f295526075f2b4ed860a89b949c19ac7cf27042f7f79"
+    },
+    {
+      "name": "Travel",
+      "value": 49,
+      "logical_name": "KeyIcon.Travel",
+      "compression": "none",
+      "bytes": 2605,
+      "sha256": "186e5c61d27a70bfd6ff738dcedb9218cb5c3a05be866d07adde46f89ee8e2c4"
+    },
+    {
+      "name": "Activity",
+      "value": 50,
+      "logical_name": "KeyIcon.Activity",
+      "compression": "none",
+      "bytes": 1801,
+      "sha256": "eb3e7a21661a1e39026f0f2cc1423e695fc748ef1a71d0fc419088e1667df4a4"
+    },
+    {
+      "name": "Objects",
+      "value": 51,
+      "logical_name": "KeyIcon.Objects",
+      "compression": "none",
+      "bytes": 1803,
+      "sha256": "079eef866d2fc6b057947b11356e0d6df1a23b9e0ef43b89ba60327f75624303"
+    },
+    {
+      "name": "Symbols",
+      "value": 52,
+      "logical_name": "KeyIcon.Symbols",
+      "compression": "none",
+      "bytes": 4729,
+      "sha256": "8c584e2524e2ff65b60d062580e88a12c1b9ef73cb5f1d1af920d492096cdb46"
+    },
+    {
+      "name": "Flag",
+      "value": 53,
+      "logical_name": "KeyIcon.Flag",
+      "compression": "none",
+      "bytes": 1117,
+      "sha256": "c259311a8279b811f86f9ede49e4c7e43f4093ef971f2f5d2ec4034d33800a8e"
+    },
+    {
+      "name": "ChevronLeft",
+      "value": 55,
+      "logical_name": "KeyIcon.ChevronLeft",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "542b2ce8b122957ab5d2bedfc4f6c88fc0ce3ccd7803fe20955133b4f3985656"
+    },
+    {
+      "name": "ChevronRight",
+      "value": 56,
+      "logical_name": "KeyIcon.ChevronRight",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "ca98998c8d62e44692210b31db5907f9d6d376fe6dea3fd1741a46a0d08a0261"
+    },
+    {
+      "name": "ChevronUp",
+      "value": 57,
+      "logical_name": "KeyIcon.ChevronUp",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "85a936646e0f1bca3d8e76b0aa993db775bf463346346278207de66b5d680f3f"
+    },
+    {
+      "name": "ChevronDown",
+      "value": 58,
+      "logical_name": "KeyIcon.ChevronDown",
+      "compression": "none",
+      "bytes": 609,
+      "sha256": "d984cc50f0d41dbd47762bd3f42a022e7c82c42a4bbfe90a87c0b28b8bab4756"
+    },
+    {
+      "name": "MoreHorizontal",
+      "value": 59,
+      "logical_name": "KeyIcon.MoreHorizontal",
+      "compression": "none",
+      "bytes": 1109,
+      "sha256": "30ce8477f0020ad64e02922784f169e946d961ae6dbcad54954a8895ffca4876"
+    },
+    {
+      "name": "Resize",
+      "value": 60,
+      "logical_name": "KeyIcon.Resize",
+      "compression": "none",
+      "bytes": 1057,
+      "sha256": "ac1249bdd8477efcfac98c0a521ab73c45abf0794cb9a133735280aa382e8843"
+    },
+    {
+      "name": "Autocorrect",
+      "value": 61,
+      "logical_name": "KeyIcon.Autocorrect",
+      "compression": "none",
+      "bytes": 1333,
+      "sha256": "64f27893447f1befb4fa02bd0b1b165854dd96482703b58962913a6044bcaf33"
+    },
+    {
+      "name": "Numpad",
+      "value": 62,
+      "logical_name": "KeyIcon.Numpad",
+      "compression": "none",
+      "bytes": 3699,
+      "sha256": "d60ca599e6b57bcd1eb090193d9ece1a8e5a12f43858e19abf0273b1ca274710"
+    },
+    {
+      "name": "DocumentStart",
+      "value": 63,
+      "logical_name": "KeyIcon.DocumentStart",
+      "compression": "none",
+      "bytes": 1219,
+      "sha256": "ffa5d7443f63312d60d93f91688b8bfc7bb262ff9471e7f652e5a96a9cbcdbc9"
+    },
+    {
+      "name": "DocumentEnd",
+      "value": 64,
+      "logical_name": "KeyIcon.DocumentEnd",
+      "compression": "none",
+      "bytes": 1219,
+      "sha256": "4216da754a464f3dcd3f8b8f239de81de596fed1d63a4ac8b565a77280958e22"
+    },
+    {
+      "name": "ResizeHeight",
+      "value": 65,
+      "logical_name": "KeyIcon.ResizeHeight",
+      "compression": "none",
+      "bytes": 1233,
+      "sha256": "de3c1c42153cad2bcac170046bd20ad34d2eebce1d86cf99dd65081dfe3a0153"
+    },
+    {
+      "name": "Floating",
+      "value": 66,
+      "logical_name": "KeyIcon.Floating",
+      "compression": "none",
+      "bytes": 1081,
+      "sha256": "9754066baf0deedbaa0444498b53a69bf5e232f30498e3f3dfbe54159b9a2684"
+    },
+    {
+      "name": "DragHandle",
+      "value": 67,
+      "logical_name": "KeyIcon.DragHandle",
+      "compression": "none",
+      "bytes": 803,
+      "sha256": "536ae2918ca4d7d4e02404807fe181250c8660517e26f365de580160dfd0e26a"
+    }
+  ]
+}

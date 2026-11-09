@@ -154,9 +154,7 @@ struct Measure {
 fn measure(sample: &Path, out_dir: &Path, dependencies: Vec<PathBuf>, documents: &[(String, String)]) -> Measure {
     let borrowed: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
     let mut build = Build::new(sample.to_path_buf(), out_dir.to_path_buf(), "control-catalog", dependencies)
-        .type_system(TypeSystem::Model)
-        // The sample loads its documents with compiled bindings as their default.
-        .default_compile_bindings(true);
+        .type_system(TypeSystem::Model);
     let module_of = |index: usize| format!("document_{index}");
     for (index, (name, text)) in documents.iter().enumerate() {
         // A document that includes another one of the sample is given every document, of
@@ -349,7 +347,6 @@ fn measure_the_control_catalog_against_the_models() {
         fs::create_dir_all(&out_dir).expect("the directory of the model");
         let outcome = Build::new(directory, out_dir.clone(), "ferroui-controls-color-picker", vec![base.clone(), controls.clone(), markup_xaml.clone()])
             .type_system(TypeSystem::Model)
-            .default_compile_bindings(true)
             .compile_group(XamlGroup::new("compiled_xaml").documents(&borrowed))
             .execute();
         assert!(outcome.errors.is_empty(), "the colour picker is not built: {:?}", outcome.errors);

@@ -19,11 +19,7 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
-default = ["placeholder-branding"]
-# Embeds the artwork of this project (`PlaceholderAssets/`) in place of the brand assets of the
-# upstream project (see `build.rs`). On by default, for the desktop and the browser host alike;
-# without it the sample shows the assets of the upstream sample unchanged.
-placeholder-branding = []
+default = []
 # The assets other than the markup documents are not embedded in the binary: the build script
 # copies them as plain files, with a list of the files each page needs, for the host to fetch and
 # register (see build.rs). For the browser, where the WebAssembly module is downloaded and has a
@@ -61,6 +57,10 @@ runtime-markup = [
 ]
 
 [dependencies]
+# The detachable on-screen keyboard component and its compiled markup models.
+ferroboard-core = { path = "../../components/FerroBoard/src/FerroBoard.Core" }
+ferroboard-core-ferro = { path = "../../components/FerroBoard/src/FerroBoard.Core.Ferro" }
+ferroboard-controls = { path = "../../components/FerroBoard/src/FerroBoard.Controls" }
 ferroui-media.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
@@ -109,9 +109,6 @@ ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true }
 ferroui-themes-macos = { workspace = true, optional = true }
 ferroui-themes-material = { workspace = true, optional = true }
-# The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
-ferroui-skia = { workspace = true }
-skia-safe = { workspace = true }
 mini-mvvm = { path = "../MiniMvvm" }
 # The compatibility decomposition of the search keys of the pages (`PageItem::create_search_key`).
 unicode-normalization = "0.1"
@@ -123,6 +120,7 @@ unicode-normalization = "0.1"
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-rendering-benchmarks = { path = "../../tests/FerroUI.Rendering.Benchmarks", features = ["vello"] }
 ferroui-base = { workspace = true, features = ["testing"] }
 # `url::Url`, the base URI of the recording asset loader of the tests (C5 of #423).
 url.workspace = true

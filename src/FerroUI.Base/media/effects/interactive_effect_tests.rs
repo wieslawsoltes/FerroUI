@@ -9,8 +9,8 @@
 
 use super::library::{
     BurningFlameShaderEffect, InteractiveBurningFlameEffect, InteractivePointerSpotlightEffect,
-    InteractiveWaterRippleEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect, RippleWave,
-    WaterRippleShaderEffect,
+    InteractiveReactiveGridEffect, InteractiveWaterRippleEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect,
+    RippleWave, WaterRippleShaderEffect,
 };
 use super::*;
 use crate::media::imaging::BitmapBlendingMode;
@@ -99,19 +99,29 @@ fn the_interactive_effects_are_shader_effects_of_the_convention() {
         // The flags are `int` uniforms.
         assert!(layout.iter().any(|(name, ty)| name == "is_pressed" && *ty == ShaderUniformType::Int), "{effect}");
     }
-    let modes: Vec<(ShaderEffectMode, BitmapBlendingMode, f64)> = interactive_effects()
+    let modes: Vec<(ShaderEffectMode, BitmapBlendingMode, f64, bool)> = interactive_effects()
         .iter()
-        .map(|effect| effect.shader().map(|shader| (shader.mode, shader.blend_mode, shader.sample_radius)).unwrap())
+        .map(|effect| {
+            effect
+                .shader()
+                .map(|shader| (shader.mode, shader.blend_mode, shader.sample_radius, shader.masked_by_content))
+                .unwrap()
+        })
         .collect();
+    // The overlays are masked by the content (#580); the programs that move the content compose
+    // with it themselves.
     assert_eq!(
         vec![
-            (ShaderEffectMode::Overlay, BitmapBlendingMode::Screen, 0.0),
-            (ShaderEffectMode::Overlay, BitmapBlendingMode::SourceOver, 0.0),
-            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver, WaterRippleShaderEffect::SAMPLE_RADIUS),
-            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver, BurningFlameShaderEffect::SAMPLE_RADIUS),
+            (ShaderEffectMode::Overlay, BitmapBlendingMode::Screen, 0.0, true),
+            (ShaderEffectMode::Overlay, BitmapBlendingMode::SourceOver, 0.0, true),
+            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver, WaterRippleShaderEffect::SAMPLE_RADIUS, false),
+            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver, BurningFlameShaderEffect::SAMPLE_RADIUS, false),
         ],
         modes
     );
+    // Effector's sample radii: the largest moves of the programs.
+    assert_eq!(56.0, WaterRippleShaderEffect::SAMPLE_RADIUS);
+    assert_eq!(21.0, BurningFlameShaderEffect::SAMPLE_RADIUS);
     // The ripples are a point and two numbers each, in order.
     let layout = ImmutableCustomEffect::new(WaterRippleShaderEffect::default()).shader_uniform_layout();
     let names: Vec<&str> = layout.iter().map(|(name, _)| name.as_str()).collect();
@@ -187,11 +197,21 @@ fn alpha(pixels: &[u8], width: usize, x: usize, y: usize) -> u8 {
     pixels[(y * width + x) * 4 + 3]
 }
 
+/// The red channel of the pixel (`x`, `y`) of an image `width` wide.
+fn red(pixels: &[u8], width: usize, x: usize, y: usize) -> u8 {
+    pixels[(y * width + x) * 4]
+}
+
+/// A `width` by `height` image of opaque dark grey: the content the overlays are drawn over.
+fn dark(width: usize, height: usize) -> Vec<u8> {
+    [40u8, 40, 40, 255].repeat(width * height)
+}
+
 #[test]
 fn the_reference_of_the_pointer_spotlight_follows_the_pointer() {
     let (width, height) = (40, 40);
     let lit = |effect: PointerSpotlightShaderEffect| {
-        let mut pixels = vec![0u8; width * height * 4];
+        let mut pixels = dark(width, height);
         assert!(ImmutableCustomEffect::new(effect).cpu_reference(&mut pixels, width, height, 1.0));
         pixels
     };
@@ -199,39 +219,98 @@ fn the_reference_of_the_pointer_spotlight_follows_the_pointer() {
         PointerSpotlightShaderEffect { pointer_x: 0.25, pointer_y: 0.25, is_pointer_over: true, ..PointerSpotlightShaderEffect::default() };
     let hovered = lit(over.clone());
     // Brightest under the pointer, nothing far from it.
-    assert!(alpha(&hovered, width, 10, 10) > alpha(&hovered, width, 14, 10));
-    assert_eq!(0, alpha(&hovered, width, 35, 35));
+    assert!(red(&hovered, width, 10, 10) > red(&hovered, width, 14, 10));
+    assert_eq!(40, red(&hovered, width, 35, 35));
     // Pressed, the light is brighter.
     let pressed = lit(PointerSpotlightShaderEffect { is_pressed: true, ..over.clone() });
-    assert!(alpha(&pressed, width, 10, 10) > alpha(&hovered, width, 10, 10));
+    assert!(red(&pressed, width, 10, 10) > red(&hovered, width, 10, 10));
     // The pointer away: nothing.
-    assert!(lit(PointerSpotlightShaderEffect { is_pointer_over: false, ..over }).iter().all(|&value| value == 0));
+    assert_eq!(dark(width, height), lit(PointerSpotlightShaderEffect { is_pointer_over: false, ..over }));
+}
+
+/// The overlays are masked by the content (#580): over transparent pixels they draw nothing,
+/// over translucent ones in proportion to their alpha, so a light or a line never shows in the
+/// transparent corners of a rounded host or the gaps between its children.
+#[test]
+fn an_interactive_overlay_over_transparent_content_leaves_it_transparent() {
+    let (width, height) = (44, 44);
+    let overlays = [
+        ImmutableCustomEffect::new(PointerSpotlightShaderEffect {
+            is_pointer_over: true,
+            is_pressed: true,
+            strength: 1.0,
+            ..PointerSpotlightShaderEffect::default()
+        }),
+        ImmutableCustomEffect::new(ReactiveGridShaderEffect {
+            is_pointer_over: true,
+            is_pressed: true,
+            strength: 1.0,
+            ..ReactiveGridShaderEffect::default()
+        }),
+    ];
+    for effect in overlays {
+        for scale in [1.0, 2.0] {
+            let mut clear = vec![0u8; width * height * 4];
+            assert!(effect.cpu_reference(&mut clear, width, height, scale));
+            assert!(clear.iter().all(|&value| value == 0), "{effect} at {scale}: drawn over transparent content");
+            // Over opaque content it draws, over translucent content less.
+            let mut opaque = dark(width, height);
+            effect.cpu_reference(&mut opaque, width, height, scale);
+            let mut translucent = [20u8, 20, 20, 128].repeat(width * height);
+            effect.cpu_reference(&mut translucent, width, height, scale);
+            let (x, y) = (22, 22);
+            assert!(red(&opaque, width, x, y) > 40, "{effect} at {scale}");
+            assert!(red(&translucent, width, x, y) > 20, "{effect} at {scale}");
+            assert!(red(&translucent, width, x, y) - 20 < red(&opaque, width, x, y) - 40, "{effect} at {scale}");
+        }
+    }
 }
 
 #[test]
 fn the_reference_of_the_reactive_grid_draws_lines_and_a_halo() {
     let (width, height) = (44, 44);
     let draw = |effect: ReactiveGridShaderEffect, scale: f64| {
-        let mut pixels = vec![0u8; width * height * 4];
+        let mut pixels = dark(width, height);
         assert!(ImmutableCustomEffect::new(effect).cpu_reference(&mut pixels, width, height, scale));
         pixels
     };
+    let lit = |pixels: &[u8], x: usize, y: usize| red(pixels, width, x, y) > 40;
     let away = draw(ReactiveGridShaderEffect::default(), 1.0);
-    // Lines along the first pixel of each cell of 22.
+    // Lines along the first pixel of each cell of 22 (5 percent of 22 is 1.1 pixels).
     for (x, y) in [(0, 5), (22, 5), (5, 0), (5, 22)] {
-        assert!(alpha(&away, width, x, y) > 0, "({x}, {y})");
+        assert!(lit(&away, x, y), "({x}, {y})");
     }
     for (x, y) in [(1, 5), (21, 5), (5, 23), (10, 10)] {
-        assert_eq!(0, alpha(&away, width, x, y), "({x}, {y})");
+        assert!(!lit(&away, x, y), "({x}, {y})");
     }
     // At a scale of 2 a cell is 44 device pixels and a line 2.
     let scaled = draw(ReactiveGridShaderEffect::default(), 2.0);
-    assert!(alpha(&scaled, width, 1, 5) > 0);
-    assert_eq!(0, alpha(&scaled, width, 22, 5));
+    assert!(lit(&scaled, 1, 5));
+    assert!(!lit(&scaled, 2, 5));
+    assert!(!lit(&scaled, 22, 5));
     // The halo under the pointer.
     let over = draw(ReactiveGridShaderEffect { is_pointer_over: true, ..ReactiveGridShaderEffect::default() }, 1.0);
-    assert!(alpha(&over, width, 20, 20) > 0);
-    assert_eq!(0, alpha(&away, width, 20, 20));
+    assert!(lit(&over, 20, 20));
+    assert!(!lit(&away, 20, 20));
+}
+
+/// The lines of the reactive grid are 5 percent of a cell wide, as Effector's (`gridX < 0.05`),
+/// not a pixel: a cell of 40 has lines of 2 pixels, one of 64 lines of 3 (#580).
+#[test]
+fn the_lines_of_the_reactive_grid_are_a_twentieth_of_a_cell() {
+    let (width, height) = (130, 4);
+    let columns = |cell_size: f64, scale: f64| -> Vec<usize> {
+        let mut pixels = dark(width, height);
+        let effect = ReactiveGridShaderEffect { cell_size, strength: 1.0, ..ReactiveGridShaderEffect::default() };
+        assert!(ImmutableCustomEffect::new(effect).cpu_reference(&mut pixels, width, height, scale));
+        // The second row: below the horizontal line at the top of the first cells.
+        (0..width).filter(|&x| red(&pixels, width, x, height - 1) > 40).collect()
+    };
+    assert_eq!(vec![0, 1, 40, 41, 80, 81, 120, 121], columns(40.0, 1.0));
+    assert_eq!(vec![0, 1, 2, 64, 65, 66, 128, 129], columns(64.0, 1.0));
+    // At a scale of 2 a cell of 22 is 44 device pixels and its lines 2.2: 2 pixels.
+    assert_eq!(vec![0, 1, 44, 45, 88, 89], columns(22.0, 2.0));
+    assert_eq!(0.05, ReactiveGridShaderEffect::LINE_WIDTH);
 }
 
 /// A `width` by `height` image of opaque vertical stripes, two pixels wide.
@@ -261,6 +340,56 @@ fn the_reference_of_the_water_ripple_bends_the_content_under_its_rings() {
     assert!(clear.iter().all(|&value| value == 0));
 }
 
+/// The water ripple samples the moved content clamped to the area and composes over the content
+/// masked by it (#580): a ring near the edge of opaque content moves the texels of the edge in,
+/// where they were transparent before, and what is transparent stays transparent however the
+/// content beside it is moved.
+#[test]
+fn a_ripple_samples_inside_the_area_and_stays_within_the_content() {
+    let (width, height) = (60, 40);
+    let green = [0u8, 255, 0, 255];
+    // Stripes with a green first column: the edge the ring pushes the content beyond.
+    let content: Vec<u8> = stripes(width, height)
+        .chunks_exact(4)
+        .enumerate()
+        .flat_map(|(index, pixel)| if index % width == 0 { green } else { [pixel[0], pixel[1], pixel[2], pixel[3]] })
+        .collect();
+    let mut effect = WaterRippleShaderEffect { distortion: 18.0, ..WaterRippleShaderEffect::default() };
+    // A ring of about 5 pixels around (6, 20): left of its centre it moves the content 10 to 18
+    // pixels to the left, beyond the left edge.
+    effect.spawn_ripple(Point::new(0.1, 0.5), 1.0);
+    effect.ripples[0].age = 0.12;
+    let mut pixels = content.clone();
+    assert!(ImmutableCustomEffect::new(effect).cpu_reference(&mut pixels, width, height, 1.0));
+    let at = |pixels: &[u8], x: usize, y: usize| -> [u8; 4] { pixels[(y * width + x) * 4..][..4].try_into().unwrap() };
+    assert!(pixels.chunks_exact(4).all(|pixel| pixel[3] == 255), "opaque content stays opaque");
+    // The pixels the ring moves beyond the edge show the edge (green), not themselves.
+    let edge_shown = (16..25).any(|y| (1..4).any(|x| {
+        let pixel = at(&pixels, x, y);
+        at(&content, x, y) != green && pixel[1] > pixel[0] && pixel[1] > pixel[2]
+    }));
+    assert!(edge_shown, "the moved content is sampled at the edge of the area");
+
+    // The left half opaque, the right half transparent, a ring in the right half: it pulls the
+    // opaque content towards the transparent half, which stays transparent.
+    let content: Vec<u8> = (0..width * height)
+        .flat_map(|index| if index % width < width / 2 { [0, 160, 80, 255] } else { [0, 0, 0, 0] })
+        .collect();
+    let mut ripple = WaterRippleShaderEffect { distortion: 18.0, ..WaterRippleShaderEffect::default() };
+    ripple.spawn_ripple(Point::new(0.6, 0.5), 1.0);
+    ripple.ripples[0].age = 0.15;
+    let mut pixels = content.clone();
+    assert!(ImmutableCustomEffect::new(ripple).cpu_reference(&mut pixels, width, height, 1.0));
+    for (index, (after, before)) in pixels.chunks_exact(4).zip(content.chunks_exact(4)).enumerate() {
+        let (x, y) = (index % width, index / width);
+        if before[3] == 0 {
+            assert_eq!([0, 0, 0, 0], after, "pixel ({x}, {y}) stays transparent");
+        } else {
+            assert_eq!(255, after[3], "pixel ({x}, {y}) stays opaque");
+        }
+    }
+}
+
 #[test]
 fn the_reference_of_the_burning_flame_burns_above_the_ignition() {
     let (width, height) = (60, 60);
@@ -274,13 +403,23 @@ fn the_reference_of_the_burning_flame_burns_above_the_ignition() {
     assert!(ignition[0] > 40 + 60, "{ignition:?}");
     // The flame does not reach the bottom corners.
     assert_eq!(at(&original, 1, 58), at(&pixels, 1, 58));
-    // Below the top, where the flame moves the content up from beyond the area, the content
-    // stays opaque.
-    for y in 20..height {
-        for x in 10..50 {
+    // The content stays opaque everywhere: where the flame moves the content up from beyond the
+    // top, it samples the top row (clamped to the area, #580), so it cuts no notches into it.
+    for y in 0..height {
+        for x in 0..width {
             assert_eq!(255, at(&pixels, x, y)[3], "({x}, {y})");
         }
     }
+    // Ignited at the top, the flame still keeps the top edge opaque, and it burns nothing
+    // beyond the coverage of the content.
+    let top = BurningFlameShaderEffect { ignition_y: 0.18, ..effect.clone() };
+    let mut pixels = original.clone();
+    ImmutableCustomEffect::new(top.clone()).cpu_reference(&mut pixels, width, height, 1.0);
+    assert!(pixels.chunks_exact(4).all(|pixel| pixel[3] == 255));
+    let banded: Vec<u8> = (0..width * height).flat_map(|index| if index / width < 30 { [0, 0, 0, 0] } else { [40, 60, 200, 255] }).collect();
+    let mut pixels = banded.clone();
+    ImmutableCustomEffect::new(top).cpu_reference(&mut pixels, width, height, 1.0);
+    assert!(pixels[..30 * width * 4].iter().all(|&value| value == 0), "the transparent top half stays transparent");
     let mut clear = vec![0u8; width * height * 4];
     ImmutableCustomEffect::new(effect).cpu_reference(&mut clear, width, height, 1.0);
     assert!(clear.iter().all(|&value| value == 0));
@@ -375,4 +514,14 @@ fn the_burning_flame_class_burns_while_pressed_and_burns_down_after() {
     assert!((effect.value().burn_amount - 0.4).abs() < 1e-9, "{}", effect.value().burn_amount);
     assert!(!effect.advance(1.1));
     assert_eq!(0.0, effect.value().burn_amount);
+}
+
+/// Every interactive effect class takes handled events (#580), as Effector's input effects use
+/// `handledEventsToo`: the pointer over a button, which handles its press, still reaches them.
+#[test]
+fn every_interactive_class_takes_handled_events() {
+    assert!(InteractivePointerSpotlightEffect::new().handled_events_too());
+    assert!(InteractiveReactiveGridEffect::new().handled_events_too());
+    assert!(InteractiveWaterRippleEffect::new().handled_events_too());
+    assert!(InteractiveBurningFlameEffect::new().handled_events_too());
 }

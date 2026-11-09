@@ -19,8 +19,8 @@ use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{
     Frame, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
-    NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode, Symbol,
-    SymbolIcon,
+    NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode, PageType,
+    Symbol, SymbolIcon,
 };
 use ferroui_controls::{
     AutoSuggestBox, Button, ContentControl, ContentPage, Control, FontIcon, FontIconSource,
@@ -354,7 +354,7 @@ fn assert_native_controls(root: Ref<StackPanel>) {
     let page = scope.find_as::<FramePage>("NativePage").unwrap();
     assert_eq!(page.navigation_cache_mode(), NavigationCacheMode::Required);
     let frame = scope.find_as::<Frame>("NativeFrame").unwrap();
-    assert_eq!(frame.current_source_page_type(), Some(FramePage::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(PageType::of::<FramePage>()));
     let number = scope.find_as::<NumberBox>("Number").unwrap();
     assert_eq!(number.value(), 12.0);
     assert_eq!(number.spin_button_placement_mode(), NumberBoxSpinButtonPlacementMode::Inline);

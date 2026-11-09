@@ -6,7 +6,7 @@
 //! back, are registered and prewarmed, and have CPU references. What Skia
 //! draws is tested against those references in `ferroui-skia`.
 
-use super::library::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+use super::library::{GridShaderEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
 use super::*;
 use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{Color, Colors};
@@ -287,6 +287,7 @@ fn library_shader_effects() -> Vec<ImmutableCustomEffect> {
             strength: 0.8,
             color: Colors::ORANGE,
         }),
+        ImmutableCustomEffect::new(GridShaderEffect { cell_size: 12.0, strength: 0.6, ..GridShaderEffect::default() }),
     ]
 }
 
@@ -341,15 +342,17 @@ fn the_programs_of_the_library_declare_the_uniforms_of_their_parameters() {
         assert_eq!(shader.samples_content(), shader.wgsl.contains("sample_content("), "{effect}");
         assert!(shader.children.is_empty(), "{effect}");
     }
-    let modes: Vec<(ShaderEffectMode, BitmapBlendingMode)> = library_shader_effects()
+    let modes: Vec<(ShaderEffectMode, BitmapBlendingMode, bool)> = library_shader_effects()
         .iter()
-        .map(|effect| effect.shader().map(|shader| (shader.mode, shader.blend_mode)).unwrap())
+        .map(|effect| effect.shader().map(|shader| (shader.mode, shader.blend_mode, shader.masked_by_content)).unwrap())
         .collect();
+    // The overlays are masked by the content (#580).
     assert_eq!(
         vec![
-            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver),
-            (ShaderEffectMode::Overlay, BitmapBlendingMode::SourceOver),
-            (ShaderEffectMode::Overlay, BitmapBlendingMode::Screen),
+            (ShaderEffectMode::ContentSampling, BitmapBlendingMode::SourceOver, false),
+            (ShaderEffectMode::Overlay, BitmapBlendingMode::SourceOver, true),
+            (ShaderEffectMode::Overlay, BitmapBlendingMode::Screen, true),
+            (ShaderEffectMode::Overlay, BitmapBlendingMode::SourceOver, true),
         ],
         modes
     );
@@ -384,6 +387,13 @@ fn the_wgsl_module_wraps_the_program_with_the_pass() {
     assert_eq!(blend(BitmapBlendingMode::Unspecified), blend(BitmapBlendingMode::SourceOver));
     assert!(blend(BitmapBlendingMode::Overlay).contains("fn ferroui_hard_light("));
     assert!(blend(BitmapBlendingMode::Hue).contains("fn ferroui_set_sat("));
+    // An overlay masked by the content (#580) blends its output times the alpha of the content;
+    // one that is not blends its output as it is.
+    let masked = ShaderEffectDescription::overlay("", WGSL, BitmapBlendingMode::Screen).with_content_mask();
+    assert!(masked.masked_by_content);
+    assert!(masked.wgsl_module().contains("return ferroui_blend(source * destination.a, destination);"));
+    assert!(blend(BitmapBlendingMode::Screen).contains("return ferroui_blend(source, destination);"));
+    assert!(!ShaderEffectDescription::overlay("", WGSL, BitmapBlendingMode::Screen).masked_by_content);
 }
 
 #[test]
@@ -399,7 +409,7 @@ fn the_shader_effects_print_parse_back_and_are_registered() {
     assert_eq!(Some(PixelateEffect { cell_size: 12.0 }), pixelate);
 
     let names = CustomEffectRegistry::names();
-    for name in ["pixelate", "scanline", "spotlight"] {
+    for name in ["pixelate", "scanline", "spotlight", "grid"] {
         assert!(names.contains(&name), "{name}: {names:?}");
         assert!(effect_prewarm_names().contains(&format!("custom-effect:{name}")), "{name}");
     }
@@ -466,16 +476,21 @@ fn the_reference_of_the_scan_lines_darkens_the_lower_half_of_each_band() {
             assert_eq!([255, 255, 255, 255], row, "row {y}");
         }
     }
-    // Over transparent pixels the band is translucent black.
+    // Masked by the content (#580): over transparent pixels nothing, over translucent ones the
+    // band times their alpha.
     let mut clear = vec![0u8; 4 * 4];
     effect.cpu_reference(&mut clear, 1, 4, 1.0);
-    assert_eq!(&[0, 0, 0, 128], &clear[8..12]);
+    assert!(clear.iter().all(|&value| value == 0), "{clear:?}");
+    let mut translucent = [100u8, 100, 100, 128].repeat(4);
+    effect.cpu_reference(&mut translucent, 1, 4, 1.0);
+    // Black at 0.5 times 128 / 255 over the pixel: 100 * (1 - 0.251) and 128 + 0.251 * 127.
+    assert_eq!(&[75, 75, 75, 160], &translucent[8..12]);
 }
 
 #[test]
 fn the_reference_of_the_spotlight_is_brightest_at_its_centre() {
     let (width, height) = (20, 20);
-    let mut pixels = vec![0u8; width * height * 4];
+    let mut pixels = [0u8, 0, 0, 255].repeat(width * height);
     let effect = ImmutableCustomEffect::new(SpotlightShaderEffect {
         center_x: 0.5,
         center_y: 0.5,
@@ -484,17 +499,55 @@ fn the_reference_of_the_spotlight_is_brightest_at_its_centre() {
         color: Colors::WHITE,
     });
     assert!(effect.cpu_reference(&mut pixels, width, height, 1.0));
-    let alpha = |x: usize, y: usize| pixels[(y * width + x) * 4 + 3];
-    assert!(alpha(10, 10) > 230, "{}", alpha(10, 10));
-    assert!(alpha(10, 10) > alpha(14, 10) && alpha(14, 10) > alpha(18, 10));
+    // Screened over opaque black, the light is grey, brightest at the centre.
+    let red = |x: usize, y: usize| pixels[(y * width + x) * 4];
+    assert!(red(10, 10) > 230, "{}", red(10, 10));
+    assert!(red(10, 10) > red(14, 10) && red(14, 10) > red(18, 10));
     // Beyond the radius, nothing.
-    assert_eq!(0, alpha(0, 0));
-    // Screened over opaque black, the light is grey; over white it is white.
-    let mut black = [0, 0, 0, 255].repeat(width * height);
-    effect.cpu_reference(&mut black, width, height, 1.0);
-    let center = &black[(10 * width + 10) * 4..][..4];
-    assert!(center[0] > 230 && center[0] == center[1] && center[3] == 255, "{center:?}");
+    assert_eq!(0, red(0, 0));
+    let center = &pixels[(10 * width + 10) * 4..][..4];
+    assert!(center[0] == center[1] && center[3] == 255, "{center:?}");
+    // Masked by the content (#580): over transparent pixels, nothing.
+    let mut clear = vec![0u8; width * height * 4];
+    effect.cpu_reference(&mut clear, width, height, 1.0);
+    assert!(clear.iter().all(|&value| value == 0));
+    // Over white it is white.
     let mut white = vec![255u8; width * height * 4];
     effect.cpu_reference(&mut white, width, height, 1.0);
     assert!(white.iter().all(|&value| value == 255));
+}
+
+/// The grid (Effector's `GridShaderEffect`, #580): lines 6 percent of a cell wide along the top
+/// and the left of each cell, in its colour at its strength, masked by the content.
+#[test]
+fn the_reference_of_the_grid_draws_lines_six_percent_of_a_cell_wide() {
+    let (width, height) = (110, 4);
+    let grey = [40u8, 40, 40, 255];
+    let columns = |cell_size: f64, scale: f64| -> Vec<usize> {
+        let mut pixels = grey.repeat(width * height);
+        let effect = GridShaderEffect { cell_size, strength: 1.0, color: Colors::WHITE };
+        assert!(ImmutableCustomEffect::new(effect).cpu_reference(&mut pixels, width, height, scale));
+        // The last row: below the horizontal lines at the top of the first cells.
+        (0..width).filter(|&x| pixels[((height - 1) * width + x) * 4] > 40).collect()
+    };
+    // A cell of 22: lines of one pixel (1.32); of 50: three pixels (3.0); at a scale of 2 a cell
+    // of 22 is 44 device pixels, its lines 2.64: three pixels.
+    assert_eq!(vec![0, 22, 44, 66, 88], columns(22.0, 1.0));
+    assert_eq!(vec![0, 1, 2, 50, 51, 52, 100, 101, 102], columns(50.0, 1.0));
+    assert_eq!(vec![0, 1, 2, 44, 45, 46, 88, 89, 90], columns(22.0, 2.0));
+    // The lines are white at the strength: opaque white over grey.
+    let mut pixels = grey.repeat(width * height);
+    ImmutableCustomEffect::new(GridShaderEffect { strength: 1.0, color: Colors::WHITE, ..GridShaderEffect::default() })
+        .cpu_reference(&mut pixels, width, height, 1.0);
+    assert_eq!(&[255, 255, 255, 255], &pixels[..4]);
+    // Masked by the content: over transparent pixels, nothing; a strength of 0 is neutral.
+    let mut clear = vec![0u8; width * height * 4];
+    ImmutableCustomEffect::new(GridShaderEffect::default()).cpu_reference(&mut clear, width, height, 1.0);
+    assert!(clear.iter().all(|&value| value == 0));
+    let neutral = ImmutableCustomEffect::new(GridShaderEffect::default()).neutral().expect("a neutral value");
+    let mut unchanged = grey.repeat(width * height);
+    neutral.cpu_reference(&mut unchanged, width, height, 1.0);
+    assert_eq!(grey.repeat(width * height), unchanged);
+    // Effector's defaults.
+    assert_eq!(GridShaderEffect { cell_size: 22.0, strength: 0.22, color: Color::from_rgb(0x3F, 0xC3, 0xFF) }, GridShaderEffect::default());
 }

@@ -69,7 +69,7 @@ ferroui_base::ferro_markup_type!(class ProportionalDockSplitterReference as "Pro
  ],
 });
 pub(crate) fn register() {
-    MarkupType::register(ProportionalDockSplitterReference::MARKUP);
+    MarkupType::register_table(&[ProportionalDockSplitterReference::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IProportionalDockSplitter>>();
     ValueTypes::register_cast::<Rc<dyn IProportionalDockSplitter>, Rc<dyn IDockable>>(|model| {
         model.clone()

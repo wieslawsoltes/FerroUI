@@ -182,10 +182,18 @@ impl NativeAnimations {
                     &(dictionary.clone().into()),
                     key.clone(),
                 );
-                let value =
-                    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| dictionary.get(&key)))
+                // A deferred resource that fails to build reports its error to the error scope
+                // and is left out, without unwinding (#567).
+                // Boundary (#567): the builder runs constructors of the previewed application,
+                // whose panic leaves the key out too; isolating them needs a build that unwinds
+                // (`dev`, `release` or `dist-unwind` profile).
+                let value = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| Ok(dictionary.get(&key)))
                         .ok()
-                        .flatten();
+                        .flatten()
+                }))
+                .ok()
+                .flatten();
                 if let Some(value) = value {
                     if let Some(animation) = Ref::<Animation>::from_xaml_object(&value) {
                         animations.push((animation.into(), source_info));
@@ -362,6 +370,10 @@ impl NativeAnimations {
     }
 }
 fn pulse(runs: &[NativeRun], seconds: f64) -> Result<(), String> {
+    // Boundary (#567): a frame runs the interpolation of the animators and the property
+    // changed handlers of the previewed application; the animators validate on apply, and a
+    // timing error of a frame is an observable error, not a panic. Isolating the application
+    // needs a build that unwinds (`dev`, `release` or `dist-unwind` profile).
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         for run in runs {
             run.clock.subject.on_next(SignedDuration::from_seconds(seconds));

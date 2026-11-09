@@ -25,6 +25,8 @@ fn panic_message(payload: &(dyn Any + Send)) -> String {
 /// Runs a member of the handler; a panic is logged as upstream logs the
 /// exception of a handler.
 fn guarded(handler: &Rc<dyn ICompositionCustomVisualHandler>, member: &str, f: impl FnOnce()) {
+    // Boundary (#567): the handler is application code; its panic must not take the render
+    // thread down, and the reference catches and logs the exception of a handler here too.
     if let Err(error) = catch_unwind(AssertUnwindSafe(f)) {
         if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::VISUAL) {
             let message = panic_message(&*error);

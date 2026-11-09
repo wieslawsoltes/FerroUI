@@ -49,10 +49,24 @@ use crate::compiler_extensions::{
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
 
+use super::transform::PathType;
 use super::emit_types::{
     DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
 };
 use super::source::rust_string_literal;
+
+/// Runs of theme resources written as row tables (#568).
+#[path = "theme_rows.rs"]
+mod theme_rows;
+
+/// Control themes, selector chains, resource setter choices and template bindings written as
+/// tables (#568, step 5).
+#[path = "theme_styles.rs"]
+mod theme_styles;
+
+/// The runs of the units of a compiled theme (#568).
+#[path = "theme_units.rs"]
+pub(crate) mod theme_units;
 
 /// Why a document is not eligible for emission: the first node (or member)
 /// the emitter has no exact Rust for.
@@ -426,9 +440,30 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
 /// key, other members, another service provider.
 fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<Vec<String>> {
     let extension = types.framework_path(FrameworkType::StaticResourceExtension)?;
+    let StaticResourceAlias { marker, key, line, column } = static_resource_alias(&extension, lines, returned)?;
+    Some(vec![
+        format!("    {marker}"),
+        format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
+    ])
+}
+
+/// The parts of a body that is `{StaticResource key}` alone ([`static_resource_alias`]): the
+/// marker of `ResourceKey`, the key (a Rust string literal) and the position of `ProvideValue`.
+struct StaticResourceAlias<'s> {
+    marker: &'s str,
+    key: &'s str,
+    line: &'s str,
+    column: &'s str,
+}
+
+/// The parts of the body `lines`, returning `returned`, of deferred content that is
+/// `{StaticResource key}` alone, with `extension` the path of `StaticResourceExtension`: the
+/// extension created, its `ResourceKey` set to a text, `ProvideValue` with the context. `None`
+/// for any other body.
+fn static_resource_alias<'s>(extension: &str, lines: &'s [String], returned: &str) -> Option<StaticResourceAlias<'s>> {
     let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
-    let [create, marker, set_key, provide] = statements.as_slice() else { return None };
-    if *create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
+    let &[create, marker, set_key, provide] = statements.as_slice() else { return None };
+    if create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
         return None;
     }
     let key = set_key
@@ -443,10 +478,7 @@ fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], return
     if !is_string_literal(key) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err() || returned != "rt::to_value(provided_0)" {
         return None;
     }
-    Some(vec![
-        format!("    {marker}"),
-        format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
-    ])
+    Some(StaticResourceAlias { marker, key, line, column })
 }
 
 /// The literal of `::std::string::String::from("..")`, the form in which the emitter writes text
@@ -650,6 +682,67 @@ fn uri_literal(n: &XamlAstNewClrObjectNode) -> Option<String> {
     }
 }
 
+/// The commands of a path data literal (#603): `StreamGeometry.Parse(text)` or
+/// `Geometry.Parse(text)` of a text, what the compiler makes of the path data of a geometry
+/// (`Data="M 0 0 L 10 10"`), recorded with the parser of the run-time library
+/// ([`PathCommand::record`](ferroui_base::media::PathCommand::record)) and written as the
+/// elements of a constant table. `None` (the text is parsed when the document is loaded, and a
+/// failure is the load error it is) for text the parser refuses and for a number a literal
+/// cannot state.
+fn path_data_literal(method: &Rc<dyn IXamlMethod>, arguments: &[Rc<dyn IXamlAstValueNode>]) -> Option<String> {
+    use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
+    let declaring = method.declaring_type();
+    if method.name() != "Parse" || !(declaring.is("FerroUI.Media", "StreamGeometry") || declaring.is("FerroUI.Media", "Geometry")) {
+        return None;
+    }
+    let [argument] = arguments else { return None };
+    let text = argument.clone().as_node().cast::<XamlAstTextNode>()?.text();
+    let commands = PathCommand::record(&text).ok()?;
+    if !commands.iter().all(PathCommand::is_finite) {
+        return None;
+    }
+    let number = |value: f64| format!("{value:?}_f64");
+    let point = |point: ferroui_base::Point| format!("::ferroui_base::Point::new({}, {})", number(point.x), number(point.y));
+    let command = |command: &PathCommand| -> String {
+        const COMMAND: &str = "::ferroui_base::media::PathCommand";
+        match *command {
+            PathCommand::SetFillRule(fill_rule) => {
+                let rule = match fill_rule {
+                    FillRule::EvenOdd => "EvenOdd",
+                    FillRule::NonZero => "NonZero",
+                };
+                format!("{COMMAND}::SetFillRule(::ferroui_base::media::FillRule::{rule})")
+            }
+            PathCommand::BeginFigure(start_point, is_filled) => format!("{COMMAND}::BeginFigure({}, {is_filled})", point(start_point)),
+            PathCommand::LineTo(end_point, is_stroked) => format!("{COMMAND}::LineTo({}, {is_stroked})", point(end_point)),
+            PathCommand::QuadraticBezierTo(control_point, end_point, is_stroked) => {
+                format!("{COMMAND}::QuadraticBezierTo({}, {}, {is_stroked})", point(control_point), point(end_point))
+            }
+            PathCommand::CubicBezierTo(control_point1, control_point2, end_point, is_stroked) => format!(
+                "{COMMAND}::CubicBezierTo({}, {}, {}, {is_stroked})",
+                point(control_point1),
+                point(control_point2),
+                point(end_point)
+            ),
+            PathCommand::ArcTo(end_point, size, rotation_angle, is_large_arc, sweep_direction, is_stroked) => {
+                let sweep = match sweep_direction {
+                    SweepDirection::CounterClockwise => "CounterClockwise",
+                    SweepDirection::Clockwise => "Clockwise",
+                };
+                format!(
+                    "{COMMAND}::ArcTo({}, ::ferroui_base::Size::new({}, {}), {}, {is_large_arc}, ::ferroui_base::media::SweepDirection::{sweep}, {is_stroked})",
+                    point(end_point),
+                    number(size.width),
+                    number(size.height),
+                    number(rotation_angle)
+                )
+            }
+            PathCommand::EndFigure(is_closed) => format!("{COMMAND}::EndFigure({is_closed})"),
+        }
+    };
+    Some(commands.iter().map(command).collect::<Vec<_>>().join(", "))
+}
+
 /// The text of a culture literal: `CultureInfo.Parse(text)` of a text, what the compiler
 /// makes of the text of a culture (the parse of its markup metadata: an IETF language tag).
 fn culture_literal(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
@@ -709,6 +802,17 @@ struct Emitter<'a> {
     /// Scoped tables are shared by the document's guards and deferred factories. A merged
     /// dictionary can contribute thousands of values with the same lexical declaration.
     namespace_tables: Vec<ScopedNamespaceTable>,
+    /// The types the reflection-binding paths of the document name outside every unit of the
+    /// theme ([`reflection_path_types_by_unit`]): every namespace table of the document gives
+    /// each to the entry it is found through.
+    path_types: Vec<PathType>,
+    /// The types of the paths of each unit (#612, root D): an entry of a unit whose documents
+    /// have such paths pushes a table with them around its code, and its deferred content
+    /// builds with that table, so the document's table names no class only a unit's binding
+    /// needs.
+    unit_path_types: HashMap<u32, Vec<PathType>>,
+    /// The types of the unit whose entry is being written, while it has paths.
+    entry_path_types: Option<Vec<PathType>>,
     /// The locals that hold a time span literal ([`time_span_literal`]), with its ticks:
     /// a member that declares a `Duration` takes the literal only when it is not negative
     /// ([`Emitter::coerce_time_span_literal`]).
@@ -721,10 +825,29 @@ struct Emitter<'a> {
     /// that declares a `Locale` takes the literal only when it is a BCP-47 tag
     /// ([`Emitter::refused_locale_literal`]).
     culture_literals: HashMap<String, String>,
+    /// The paths of the framework types the rows of theme resources name (#568); `None` when
+    /// the type system lacks one, and then nothing is written as rows.
+    row_paths: Option<theme_rows::RowPaths>,
+    /// The deferred content in one of the shapes of the rows, by the name of its build
+    /// function, with the slot of the function ([`theme_rows::deferred_row`]).
+    deferred_rows: HashMap<String, (usize, theme_rows::DeferredRow)>,
+    /// The statements written so far that a row can replace, by their text
+    /// ([`theme_rows::RowStatement`]).
+    row_statements: HashMap<String, theme_rows::RowStatement>,
+    /// The row tables of the runs written as rows, in the order of their calls.
+    row_tables: Vec<String>,
+    /// How deep the content being written is in deferred content: the entries of units are
+    /// marked only at the top level, in the function of the document ([`theme_units`]).
+    deferred_depth: usize,
+    /// The tables of control themes and template bindings and the items they share (#568,
+    /// [`theme_styles`]).
+    theme_styles: theme_styles::StylePool,
 }
 
 struct ScopedNamespaceTable {
     aliases: HashMap<String, String>,
+    /// The types of the unit's paths the table adds to the document's (#612, root D).
+    unit_types: Option<Vec<PathType>>,
     name: String,
     source: String,
 }
@@ -825,17 +948,27 @@ impl<'a> Emitter<'a> {
         }
     }
     fn scoped_namespace_table(&mut self, aliases: &HashMap<String, String>) -> String {
-        if aliases == &self.root_namespace_aliases {
+        if aliases == &self.root_namespace_aliases && self.entry_path_types.is_none() {
             return format!("{}.namespaces", self.document);
         }
-        if let Some(table) = self.namespace_tables.iter().find(|table| table.aliases == *aliases) {
+        let unit_types = self.entry_path_types.clone();
+        if let Some(table) =
+            self.namespace_tables.iter().find(|table| table.aliases == *aliases && table.unit_types == unit_types)
+        {
             return table.name.clone();
         }
         let name = format!("{}_XML_NAMESPACES_{}", self.function_name.to_uppercase(), self.namespace_tables.len());
+        let mut path_types = self.path_types.clone();
+        for path_type in unit_types.iter().flatten() {
+            if !path_types.contains(path_type) {
+                path_types.push(path_type.clone());
+            }
+        }
         self.namespace_tables.push(ScopedNamespaceTable {
             aliases: aliases.clone(),
+            unit_types,
             name: name.clone(),
-            source: super::transform::namespace_table_for_aliases(self.configuration, aliases),
+            source: super::transform::namespace_table_for_aliases(self.configuration, aliases, &path_types),
         });
         name
     }
@@ -1232,7 +1365,14 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", type_.full_name())))?;
         let local = self.local_for(class);
         self.marker(node, class.name());
-        self.line(format!("let {local} = {}::new();", absolute(path)));
+        // A theme the application trims (#568, step 3) is constructed from the units the
+        // application keeps: `with_parts` over the table of the build, which `new()` is
+        // `with_parts` over the table of all units with.
+        let parts = self.configuration.get_extra::<super::transform::ThemePartsTables>().ok();
+        match parts.as_ref().and_then(|parts| parts.table_of(&class.full_name()).map(str::to_string)) {
+            Some(table) => self.line(format!("let {local} = {}::with_parts(::core::option::Option::None, {table});", absolute(path))),
+            None => self.line(format!("let {local} = {}::new();", absolute(path))),
+        }
         self.local_types.insert(local.clone(), format!("::ferroui_base::Ref<{}>", absolute(path)));
         Ok(Typed { expr: local, kind: Kind::Class(class) })
     }
@@ -1661,6 +1801,24 @@ impl<'a> Emitter<'a> {
         let (from, expr) = match value.kind {
             Kind::Exact { id, .. } => (id, owned(&value.expr)),
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
+            // A class named with `x:Type` as another handle of `System.Type` that a crate declares
+            // with a cast from the class reference (the `PageType` of a frame, B3 of #612): the
+            // cast of the run-time loader (`RuntimeTypeValue::to_handle`). Such a handle creates
+            // the class from its runtime type, which names no constructor without the tables of
+            // types, so the class reference of a class with a default constructor registers it
+            // (`TypeInfo::register_constructor`): the document names the class, and only the
+            // constructors of the classes it names are linked.
+            Kind::SystemType { class: Some(class), .. }
+                if self.types.markup_by_handle(target).is_some_and(|markup| markup.full_name() == "System.Type") =>
+            {
+                let path = absolute(class.rust_path()?);
+                let class_reference = if class.has_default_constructor() {
+                    format!("::ferroui_base::TypeInfo::register_constructor::<{path}>()")
+                } else {
+                    format!("<{path} as ::ferroui_base::StaticType>::TYPE")
+                };
+                (self.types.known(Known::Class), class_reference)
+            }
             Kind::Null | Kind::SystemType { .. } => return None,
         };
         self.types
@@ -1929,7 +2087,41 @@ impl<'a> Emitter<'a> {
             return self.adder_assignment(node, assignment, adder, target);
         }
         if let Some(adder) = setter.as_any().downcast_ref::<ResourceAdderSetter>() {
-            return self.resource_assignment(node, assignment, adder, target);
+            // An entry a merge inlined from a document of a unit of the theme (#568) is written
+            // between the markers of its unit.
+            let unit = match self.deferred_depth {
+                0 => self.documents.units().and_then(|units| units.unit_of(node)),
+                _ => None,
+            };
+            if let Some(unit) = unit {
+                self.lines.push(theme_units::begin_marker(unit));
+            }
+            // The reflection-binding paths of the unit resolve through a table of the unit's own
+            // (#612, root D), pushed around the entry and given to its deferred content.
+            let unit_types = unit.and_then(|unit| self.unit_path_types.get(&unit)).filter(|types| !types.is_empty()).cloned();
+            let outer_types = match unit_types {
+                Some(types) => Some(std::mem::replace(&mut self.entry_path_types, Some(types))),
+                None => None,
+            };
+            let guard = outer_types.as_ref().map(|_| {
+                let aliases = self.namespace_aliases.clone();
+                let table = self.scoped_namespace_table(&aliases);
+                let guard = self.local_named("unit_namespace_scope");
+                self.uses_context = true;
+                self.line(format!("let {guard} = rt::push_namespace_scope(&context, {table});"));
+                guard
+            });
+            let result = self.resource_assignment(node, assignment, adder, target);
+            if let Some(guard) = guard {
+                self.line(format!("::core::mem::drop({guard});"));
+            }
+            if let Some(outer) = outer_types {
+                self.entry_path_types = outer;
+            }
+            if unit.is_some() {
+                self.lines.push(format!("    {}", theme_units::END_MARKER));
+            }
+            return result;
         }
         // The value of an unset-value assignment is not evaluated at all.
         if setter.as_any().is::<UnsetValueSetter>() {
@@ -2624,6 +2816,11 @@ impl<'a> Emitter<'a> {
             ));
         }
         lines.push("}".to_string());
+        // The choice of a `{StaticResource}` value as one call of the shared helper (#568, step 5).
+        if let Some(call) = theme_styles::resource_choice(&local, &lines) {
+            self.line(call);
+            return Ok(());
+        }
         for line in lines {
             self.line(line);
         }
@@ -2714,9 +2911,11 @@ impl<'a> Emitter<'a> {
             let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
             if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, last, &local, &call)) {
                 self.lines.pop();
+                self.record_deferred_row(&fused);
                 self.line(fused);
                 return Ok(());
             }
+            self.record_value_row(&call);
             self.line(format!("{call};"));
             return Ok(());
         }
@@ -2736,6 +2935,50 @@ impl<'a> Emitter<'a> {
         let call = self.declared_call(node, &dictionary_setter, &[dictionary, key, info])?;
         self.line(format!("{call};"));
         Ok(())
+    }
+
+    /// Records the fused addition `statement` of a deferred resource as a row statement when
+    /// its build function is in one of the shapes of the rows ([`theme_rows`]).
+    fn record_deferred_row(&mut self, statement: &str) {
+        let Some(addition) = theme_rows::deferred_addition(statement) else { return };
+        let Some((slot, row)) = self.deferred_rows.get(addition.build) else { return };
+        let entry = theme_rows::deferred_row_statement(&addition, row, *slot);
+        self.row_statements.insert(statement.to_string(), entry);
+    }
+
+    /// Records `call`, the addition of a plain value to a dictionary, as a row statement when
+    /// the value has a literal form of the rows and the dictionary is a local that holds a
+    /// `ResourceDictionary` ([`theme_rows::value_row_statement`]).
+    fn record_value_row(&mut self, call: &str) {
+        let Some(paths) = &self.row_paths else { return };
+        let previous = self.lines.last().map(String::as_str);
+        let Some(entry) = theme_rows::value_row_statement(paths, call, previous) else { return };
+        let Some(dictionary_type) = self.types.framework_path(FrameworkType::ResourceDictionary) else { return };
+        if self.local_types.get(&entry.dictionary) != Some(&format!("::ferroui_base::Ref<{}>", absolute(&dictionary_type))) {
+            return;
+        }
+        self.row_statements.insert(format!("{call};"), entry);
+    }
+
+    /// `lines`, a complete body, with the runs of row statements written as row tables
+    /// ([`theme_rows::row_runs`]); the build functions of the deferred rows of those runs are
+    /// no longer emitted.
+    fn apply_row_runs(&mut self, lines: Vec<String>) -> Vec<String> {
+        let prefix = self.function_name.to_uppercase();
+        let mut next = self.row_tables.len();
+        let (lines, runs) = theme_rows::row_runs(lines, &self.row_statements, &self.document, || {
+            let name = format!("{prefix}_ROWS_{next}");
+            next += 1;
+            name
+        });
+        let document_text = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
+        for (name, run) in runs {
+            for slot in &run.slots {
+                self.deferred_functions[*slot].clear();
+            }
+            self.row_tables.push(theme_rows::row_table(&name, &document_text, &run));
+        }
+        lines
     }
 
     /// Deferred content (`XamlDeferredContentNode`): the build function as a
@@ -2775,7 +3018,9 @@ impl<'a> Emitter<'a> {
         let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
             .unwrap_or_else(|| self.namespace_aliases.clone());
         let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
+        self.deferred_depth += 1;
         let body = self.deferred_body(deferred);
+        self.deferred_depth -= 1;
         self.namespace_aliases = outer_aliases;
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
@@ -2783,6 +3028,9 @@ impl<'a> Emitter<'a> {
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
+        let body_lines = self.apply_row_runs(body_lines);
+        // Runs of template bindings on one object, as tables (#568, step 5).
+        let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         let context_name = if uses_context { "context" } else { "_context" };
@@ -2797,21 +3045,43 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {\n",
         );
-        let document_info = if declaration_aliases != self.root_namespace_aliases {
-            let table = self.scoped_namespace_table(&declaration_aliases);
-            format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document)
-        } else {
-            self.document.clone()
+        // Content of a unit with reflection-binding paths builds with the unit's table (#612, root D).
+        let scoped_table = (declaration_aliases != self.root_namespace_aliases || self.entry_path_types.is_some())
+            .then(|| self.scoped_namespace_table(&declaration_aliases));
+        let document_info = match &scoped_table {
+            Some(table) => format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document),
+            None => self.document.clone(),
         };
+        // Content in one of the shapes of the rows of theme resources: its addition to a
+        // dictionary can be written as a row, and then this function is not emitted.
+        if let Some(paths) = self.row_paths.as_ref().filter(|_| !uses_name_scope) {
+            if let Some(row) = theme_rows::deferred_row(paths, &body_lines, &returned, scoped_table.as_deref()) {
+                self.deferred_rows.insert(function.clone(), (slot, row));
+            }
+        }
         // The shared helper accepts the declaration's DocumentInfo as well as the root's.
         // Retain the fused resource fast path when a dictionary imports another lexical scope.
         let fused = fused_static_resource_content(self.types, &body_lines, &returned, &document_info);
-        match fused {
-            Some(fused) if !uses_name_scope => {
+        // A control theme whose members a table holds is built from its table (#568, step 5).
+        let theme = match uses_name_scope {
+            true => None,
+            false => theme_styles::parse_theme(&body_lines, &returned),
+        };
+        match (fused, theme) {
+            (Some(fused), _) if !uses_name_scope => {
                 for line in fused {
                     text.push_str(&line);
                     text.push('\n');
                 }
+            }
+            (_, Some(theme)) => {
+                let call = theme_styles::control_theme_table(&mut self.theme_styles, &function, &theme);
+                text.push_str(&format!("    let context = rt::deferred_context(service_provider, &{document_info});\n"));
+                if let Some(marker) = body_lines.first().filter(|line| line.trim_start().starts_with("//")) {
+                    text.push_str(marker);
+                    text.push('\n');
+                }
+                text.push_str(&format!("    {call}\n"));
             }
             _ => {
                 text.push_str(&format!("    let {context_name} = rt::deferred_context(service_provider, &{document_info});\n"));
@@ -3793,6 +4063,16 @@ impl<'a> Emitter<'a> {
         }
         let runtime = self.types.method(method.as_ref())
             .ok_or_else(|| unsupported(node, "a method that is not a method of the run-time type system"))?;
+        // Deviation (DEVIATIONS.md, Build integration of markup): upstream parses path data
+        // when the document is loaded (`StreamGeometry.Parse`); here it is parsed now (#603) and
+        // the geometry is built from the commands the parser records.
+        if target.is_none() {
+            if let Some(commands) = path_data_literal(&method, &call.arguments.borrow()) {
+                let owner = self.owner_path(node, &runtime)?;
+                let returned = self.declared_return(node, &runtime)?;
+                return Ok((format!("{{ const COMMANDS: &[::ferroui_base::media::PathCommand] = &[{commands}]; {owner}::from_commands(COMMANDS) }}"), Some(returned)));
+            }
+        }
         let mut arguments = Vec::new();
         if let Some(target) = target {
             arguments.push(Typed { expr: target.expr.clone(), kind: target.kind });
@@ -4280,6 +4560,221 @@ pub fn emit_document(
     emit_function(types, root, configuration, base_uri, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
 }
 
+/// The full names of the types whose objects are reflection bindings: a path of one of them
+/// names its types by text, which the type resolver of the document resolves at run time.
+const REFLECTION_BINDING_TYPES: [&str; 2] =
+    ["FerroUI.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension", "FerroUI.Data.ReflectionBinding"];
+
+/// The types the reflection-binding paths of the document of `root` name, as the type
+/// resolver of a compiled document resolves them at run time (`XamlTypeResolver` of the
+/// runtime helpers): the prefix of a name by the namespace declarations in scope at the
+/// binding, then the first entry of the prefix with an assembly that declares a type of
+/// the name. A path is the text of the first constructor argument of a reflection binding or
+/// the text assigned to its `Path`. Only a class of the object model with a public Rust path
+/// is kept, as the function that yields it as a cast target; a name that resolves to
+/// anything else, or to nothing, is left to the tables of types the resolver falls back to.
+/// The types are in the order the paths name them, each once.
+pub(crate) fn reflection_path_types(
+    types: &dyn EmitTypes,
+    configuration: &TransformerConfiguration,
+    root: &Rc<dyn IXamlAstNode>,
+) -> Vec<PathType> {
+    reflection_path_types_by_unit(types, configuration, root, None).0
+}
+
+/// The types the reflection-binding paths of `root` name ([`reflection_path_types`]), split by
+/// the unit of the theme each path is in (#612, root D): the paths outside every unit, and the
+/// paths of each unit by its index. Without `units` every path is outside the units.
+///
+/// The table of the document carries only the first list and each unit pushes a table with its
+/// own, so a unit the application trims takes the classes its paths name with it: a table of
+/// the document names its types through functions, and every unit's code reaches it.
+pub(crate) fn reflection_path_types_by_unit(
+    types: &dyn EmitTypes,
+    configuration: &TransformerConfiguration,
+    root: &Rc<dyn IXamlAstNode>,
+    units: Option<&theme_units::UnitEmission>,
+) -> (Vec<PathType>, HashMap<u32, Vec<PathType>>) {
+    let reflection_types: Vec<Rc<dyn IXamlType>> =
+        REFLECTION_BINDING_TYPES.iter().filter_map(|name| configuration.type_system.find_type(name)).collect();
+    if reflection_types.is_empty() {
+        return (Vec::new(), HashMap::new());
+    }
+    let root_scope = root
+        .namespace_scope()
+        .or_else(|| root.as_value_with_manipulation_node().and_then(|group| group.value().as_node().namespace_scope()));
+    let mut paths = ReflectionPaths {
+        types,
+        configuration,
+        reflection_types,
+        root_scope,
+        scopes: Vec::new(),
+        objects: Vec::new(),
+        units,
+        unit_stack: Vec::new(),
+        found: Vec::new(),
+        by_unit: HashMap::new(),
+    };
+    // The collection never fails a document: a node it cannot read is skipped.
+    let _ = visit_node(root, &mut paths);
+    (paths.found, paths.by_unit)
+}
+
+/// The visitor of [`reflection_path_types`]: for every node on the path from the root, the
+/// namespace scope it carries and whether it is an object of a reflection binding.
+struct ReflectionPaths<'t> {
+    types: &'t dyn EmitTypes,
+    configuration: &'t TransformerConfiguration,
+    reflection_types: Vec<Rc<dyn IXamlType>>,
+    root_scope: Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>,
+    scopes: Vec<Option<std::sync::Arc<xamlx::ast::XamlNamespaceScope>>>,
+    objects: Vec<Option<bool>>,
+    /// The units of the theme, when the document is partitioned into them, and the unit of each
+    /// node on the path from the root (an entry a merge inlined names its unit, its descendants
+    /// inherit it).
+    units: Option<&'t theme_units::UnitEmission>,
+    unit_stack: Vec<Option<u32>>,
+    /// The types of the paths outside every unit, and of the paths of each unit.
+    found: Vec<PathType>,
+    by_unit: HashMap<u32, Vec<PathType>>,
+}
+
+impl ReflectionPaths<'_> {
+    fn is_reflection_binding(&self, type_: &dyn IXamlType) -> bool {
+        self.reflection_types.iter().any(|reflection| reflection.is_assignable_from(type_))
+    }
+
+    /// The namespace declarations in scope at `node`.
+    fn aliases_at(&self, node: &Rc<dyn IXamlAstNode>) -> HashMap<String, String> {
+        node.namespace_scope()
+            .or_else(|| self.scopes.iter().rev().find_map(Clone::clone))
+            .or_else(|| self.root_scope.clone())
+            .map(|scope| scope.aliases().clone())
+            .unwrap_or_default()
+    }
+
+    /// The unit `node` belongs to: its own, as an entry a merge inlined, or its parent's.
+    fn unit_of(&self, node: &Rc<dyn IXamlAstNode>) -> Option<u32> {
+        self.units
+            .and_then(|units| units.unit_of(node))
+            .or_else(|| self.unit_stack.last().copied().flatten())
+    }
+
+    /// The types named by the path `text`, resolved with `aliases`, recorded for `unit`.
+    fn collect(&mut self, text: &str, aliases: &HashMap<String, String>, unit: Option<u32>) {
+        use ferroui_base::data::core::parsers::{BindingExpressionGrammar, Node};
+        let Ok((nodes, _)) = BindingExpressionGrammar::parse(text) else {
+            return;
+        };
+        for node in nodes {
+            let (prefix, name) = match node {
+                Node::AttachedPropertyName { namespace, type_name, .. } => (namespace, type_name),
+                Node::Ancestor { namespace, type_name: Some(type_name), .. } => (namespace.unwrap_or_default(), type_name),
+                Node::TypeCast { namespace, type_name } => (namespace, type_name),
+                _ => continue,
+            };
+            if let Some(path_type) = self.resolve(aliases, &prefix, &name) {
+                let found = match unit {
+                    Some(unit) => self.by_unit.entry(unit).or_default(),
+                    None => &mut self.found,
+                };
+                if !found.contains(&path_type) {
+                    found.push(path_type);
+                }
+            }
+        }
+    }
+
+    /// `prefix:name` as the class it names, through the first entry of the prefix with an
+    /// assembly that declares a type of the name.
+    fn resolve(&self, aliases: &HashMap<String, String>, prefix: &str, name: &str) -> Option<PathType> {
+        let xmlns = aliases.get(prefix)?;
+        let resolved = xamlx::transform::NamespaceInfoHelper::try_resolve(self.configuration, Some(xmlns.as_str()))?;
+        for info in resolved {
+            let assembly = info.assembly_name.clone().or_else(|| info.assembly.as_ref().map(|assembly| assembly.name())).unwrap_or_default();
+            if assembly.is_empty() {
+                continue;
+            }
+            let full_name = format!("{}.{name}", info.clr_namespace);
+            let found = match &info.assembly {
+                Some(declaring) => declaring.find_type(&full_name),
+                None => self.configuration.type_system.find_type_in_assembly(&full_name, &assembly),
+            };
+            let Some(found) = found else {
+                continue;
+            };
+            let path = self.types.class_of(&*found)?.rust_path()?;
+            return Some(PathType {
+                clr_namespace: info.clr_namespace,
+                assembly,
+                name: name.to_string(),
+                target: format!(
+                    "|| ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<{} as ::ferroui_base::StaticType>::TYPE)",
+                    absolute(path)
+                ),
+            });
+        }
+        None
+    }
+}
+
+/// The text `node` is: a text node, or a constant of text.
+fn text_of(node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+    if let Some(text) = node.cast::<XamlAstTextNode>() {
+        return Some(text.text());
+    }
+    match &node.cast::<XamlConstantNode>()?.constant {
+        XamlValue::String(text) => Some(text.clone()),
+        _ => None,
+    }
+}
+
+impl IXamlAstVisitor for ReflectionPaths<'_> {
+    fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        if let Some(object) = node.cast::<XamlAstNewClrObjectNode>() {
+            let created = object.type_.borrow().get_clr_type().ok();
+            if created.is_some_and(|created| self.is_reflection_binding(&*created)) {
+                let first = object.arguments.borrow().first().and_then(|argument| text_of(&argument.as_node()));
+                if let Some(text) = first {
+                    let aliases = self.aliases_at(&node);
+                    let unit = self.unit_of(&node);
+                    self.collect(&text, &aliases, unit);
+                }
+            }
+        } else if let Some(assignment) = node.cast::<XamlPropertyAssignmentNode>() {
+            let in_binding = self.objects.iter().rev().find_map(|object| *object) == Some(true)
+                || self.is_reflection_binding(&**assignment.property.declaring_type.borrow());
+            if in_binding && assignment.property.name() == "Path" {
+                let values = assignment.values.borrow().clone();
+                for value in values {
+                    if let Some(text) = text_of(&value.as_node()) {
+                        let aliases = self.aliases_at(&node);
+                        let unit = self.unit_of(&node);
+                        self.collect(&text, &aliases, unit);
+                    }
+                }
+            }
+        }
+        Ok(node)
+    }
+
+    fn push(&mut self, node: Rc<dyn IXamlAstNode>) {
+        let unit = self.unit_of(&node);
+        self.unit_stack.push(unit);
+        self.scopes.push(node.namespace_scope());
+        let object = node.as_value_with_manipulation_node().map(|group| {
+            group.value().type_().get_clr_type().is_ok_and(|created| self.is_reflection_binding(&*created))
+        });
+        self.objects.push(object);
+    }
+
+    fn pop(&mut self) {
+        self.unit_stack.pop();
+        self.scopes.pop();
+        self.objects.pop();
+    }
+}
+
 /// The actual constructed handle of a root, including a plain model reference.
 pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn IXamlAstNode>) -> Option<TypeKey<'a>> {
     let group = root.as_value_with_manipulation_node()?;
@@ -4298,6 +4793,8 @@ pub struct DocumentFunctions<'a> {
     builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
+    /// The units of the theme the documents are partitioned into (#568), when they have them.
+    units: Option<theme_units::UnitEmission>,
 }
 
 impl<'a> DocumentFunctions<'a> {
@@ -4318,6 +4815,16 @@ impl<'a> DocumentFunctions<'a> {
     /// The functions the documents emitted so far call.
     pub fn called(&self) -> Vec<String> {
         self.called.borrow().clone()
+    }
+
+    /// Partitions the documents emitted from now on into the units `units` (#568).
+    pub(crate) fn set_units(&mut self, units: theme_units::UnitEmission) {
+        self.units = Some(units);
+    }
+
+    /// The units of the documents, if they are partitioned.
+    pub(crate) fn units(&self) -> Option<&theme_units::UnitEmission> {
+        self.units.as_ref()
     }
 }
 
@@ -4370,6 +4877,8 @@ pub fn emit_function<'a>(
         return Err(unsupported(&root_value, "the root object is not created with a constructor"));
     }
 
+    // The paths of each unit go into tables of their own (#612, root D).
+    let unit_path_types = reflection_path_types_by_unit(types, configuration, root, documents.units());
     let mut emitter = Emitter {
         types,
         configuration,
@@ -4390,9 +4899,18 @@ pub fn emit_function<'a>(
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         namespace_tables: Vec::new(),
+        path_types: unit_path_types.0,
+        unit_path_types: unit_path_types.1,
+        entry_path_types: None,
         time_span_literals: HashMap::new(),
         uri_literals: HashMap::new(),
         culture_literals: HashMap::new(),
+        row_paths: theme_rows::RowPaths::of(types),
+        deferred_rows: HashMap::new(),
+        row_statements: HashMap::new(),
+        row_tables: Vec::new(),
+        deferred_depth: 0,
+        theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -4462,7 +4980,23 @@ pub fn emit_function<'a>(
     );
     local_types.insert("root".to_string(), root_type.clone());
     local_types.insert(created.expr.clone(), root_type);
-    let (body, parts) = split_into_parts(function_name, &document_text, &emitter.lines, &local_types);
+    let lines = std::mem::take(&mut emitter.lines);
+    let lines = emitter.apply_row_runs(lines);
+    // The entries of the units of a theme, taken out into the functions of their runs (#568).
+    let (lines, unit_runs) = match (documents.units(), types.framework_path(FrameworkType::ResourceDictionary)) {
+        (Some(units), Some(dictionary)) => theme_units::extract_runs(
+            function_name,
+            &document_text,
+            lines,
+            &local_types,
+            &format!("::ferroui_base::Ref<{}>", absolute(&dictionary)),
+            units,
+        ),
+        // Without the units there are no markers, and without the path of the dictionary they
+        // are dropped.
+        _ => (lines.into_iter().filter(|line| theme_units::unit_marker(line).is_none()).collect(), Vec::new()),
+    };
+    let (body, parts) = split_into_parts(function_name, &document_text, &lines, &local_types);
     for line in &body {
         source.push_str(line);
         source.push('\n');
@@ -4472,7 +5006,21 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(part);
     }
-    for function in &emitter.deferred_functions {
+    for run in &unit_runs {
+        source.push('\n');
+        source.push_str(run);
+    }
+    for table in &emitter.row_tables {
+        source.push('\n');
+        source.push_str(table);
+    }
+    // The tables of control themes and template bindings and the items they share.
+    for item in &emitter.theme_styles.items {
+        source.push('\n');
+        source.push_str(item);
+    }
+    // The build functions of deferred rows were cleared: their rows build them.
+    for function in emitter.deferred_functions.iter().filter(|function| !function.is_empty()) {
         source.push('\n');
         source.push_str(function);
     }

@@ -93,6 +93,8 @@ impl DefaultModeDetector {
     }
 
     fn detect_unit_test_runner_safely(&self) -> Option<bool> {
+        // Boundary (#567): the try/catch of the reference around the detection; the environment
+        // reads of the port return values and do not panic, so nothing reaches it in practice.
         let detected = catch_unwind(AssertUnwindSafe(|| {
             Self::has_explicit_test_signal()
                 || Self::scan_environment_for_test_runner_signals()

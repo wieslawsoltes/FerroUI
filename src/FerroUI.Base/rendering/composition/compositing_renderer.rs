@@ -104,6 +104,8 @@ pub struct CompositingRenderer {
     compositor: Rc<Compositor>,
     recorder: RefCell<RenderDataDrawingContext>,
     dirty: RefCell<VisualSet>,
+    /// Visuals whose composition properties changed but whose drawing did not.
+    properties_dirty: RefCell<VisualSet>,
     recalculate_children: RefCell<VisualSet>,
     queued_update: Cell<bool>,
     queued_scene_invalidation: Cell<bool>,
@@ -144,6 +146,7 @@ impl CompositingRenderer {
             compositor: compositor.clone(),
             recorder: RefCell::new(RenderDataDrawingContext::new(Some(compositor.clone()))),
             dirty: RefCell::new(VisualSet::default()),
+            properties_dirty: RefCell::new(VisualSet::default()),
             recalculate_children: RefCell::new(VisualSet::default()),
             queued_update: Cell::new(false),
             queued_scene_invalidation: Cell::new(false),
@@ -290,7 +293,9 @@ impl CompositingRenderer {
             let Some(comp) = visual.composition_visual() else { continue };
 
             visual.synchronize_composition_properties();
+            crate::perf_count!(VisualsRecorded);
 
+            let previous = comp.draw_list();
             let draw_list = {
                 struct ResetRecorder<'a>(&'a RefCell<RenderDataDrawingContext>);
                 impl Drop for ResetRecorder<'_> {
@@ -306,12 +311,27 @@ impl CompositingRenderer {
                     let mut context = DrawingContext::new(&mut *recorder);
                     visual.render(&mut context);
                 }
-                recorder.get_render_results()
+                // A drawing equal to the one the visual has is not sent again (section 9.14).
+                recorder.get_render_results_unless_same(previous.as_ref())
             };
-            comp.set_draw_list(draw_list);
+            match draw_list {
+                Some(draw_list) => comp.set_draw_list(draw_list),
+                None => {
+                    crate::perf_count!(VisualsRecordedUnchanged);
+                    comp.invalidate_draw_list_content();
+                }
+            }
 
             visual.synchronize_composition_child_visuals();
         }
+        // The visuals whose properties alone changed: their drawing is kept.
+        let properties_dirty: Vec<Ref<Visual>> = self.properties_dirty.borrow_mut().snapshot();
+        for visual in &properties_dirty {
+            if visual.composition_visual().is_some() && !self.dirty.borrow().contains(visual) {
+                visual.synchronize_composition_properties();
+            }
+        }
+        self.properties_dirty.borrow_mut().clear();
         let recalculate: Vec<Ref<Visual>> = self.recalculate_children.borrow_mut().snapshot();
         for visual in &recalculate {
             if !self.dirty.borrow().contains(visual) {
@@ -419,10 +439,26 @@ impl IRenderer for CompositingRenderer {
             // Queuing a detached visual would keep it alive for as long as rendering is stopped.
             self.dirty.borrow_mut().remove(visual);
             self.recalculate_children.borrow_mut().remove(visual);
+            self.properties_dirty.borrow_mut().remove(visual);
         } else {
             self.dirty.borrow_mut().add(visual);
         }
 
+        self.queue_update();
+    }
+
+    fn add_dirty_properties(&self, visual: &Visual) {
+        if self.is_disposed.get() {
+            return;
+        }
+        if self.updating.get() {
+            panic!("Visual was invalidated during the render pass");
+        }
+        if visual.composition_visual().is_none() {
+            self.properties_dirty.borrow_mut().remove(visual);
+            return;
+        }
+        self.properties_dirty.borrow_mut().add(visual);
         self.queue_update();
     }
 
@@ -481,6 +517,7 @@ impl IRenderer for CompositingRenderer {
         }
         self.dirty.borrow_mut().clear();
         self.recalculate_children.borrow_mut().clear();
+        self.properties_dirty.borrow_mut().clear();
         for (token, _) in self.scene_invalidated.snapshot().iter() {
             self.scene_invalidated.remove(*token);
         }

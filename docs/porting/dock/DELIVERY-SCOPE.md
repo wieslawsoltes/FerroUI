@@ -52,7 +52,7 @@ regression tests. The original Dock engine, models and sample production code ar
 All127 native library tests and1967 workspace tests pass; strict all-target Clippy and
 source/format/Python/seven-vendor checks pass. See VALIDATION.md and CONTINUATION.md.
 
-The clean rebuilt example, `/Volumes/SSD/temp/ferrodock-port/FerroDock Core Review.app`,
+The clean rebuilt example, `<evidence>/ferrodock-port/FerroDock Core Review.app`,
 was launched and actual native Save/Open passed. Reopening a real saved layout restored
 three documents and their views; CreateDocument and F11 work afterward. Save/Open cancel
 and malformed JSON preserve the layout. The user confirmed physical reorder and tool

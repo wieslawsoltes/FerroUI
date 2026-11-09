@@ -443,17 +443,24 @@ impl DrawingContextImpl {
 
     /// Configures the paint that draws a box shadow and returns it with the
     /// clip operation that keeps the shadow outside (or inside) the box.
+    ///
+    /// The blur is a mask filter on the shadow's shape, not an image filter
+    /// (a deviation, docs/porting/desktop-performance.md section 9.11): the
+    /// same Gaussian of the shape's coverage, without a layer per shadow, and
+    /// Skia draws a blurred rounded rectangle from a cached nine-patch on the
+    /// CPU and with an analytic shader on the GPU.
     fn create_box_shadow_filter(mut paint: sk::Paint, shadow: &BoxShadow, opacity: f64) -> (sk::Paint, sk::ClipOp) {
         let ac = shadow.color;
 
         let sigma = Self::sk_blur_radius_to_sigma(shadow.blur);
-        let filter = sk::image_filters::blur((sigma, sigma), None, None, None);
         let color = sk::Color::from_argb((ac.a as f64 * opacity) as u8, ac.r, ac.g, ac.b);
 
         paint.reset();
         paint.set_anti_alias(true);
         paint.set_color(color);
-        paint.set_image_filter(filter);
+        if sigma > 0.0 {
+            paint.set_mask_filter(sk::MaskFilter::blur(sk::BlurStyle::Normal, sigma, true));
+        }
 
         let clip_operation = if shadow.is_inset { sk::ClipOp::Intersect } else { sk::ClipOp::Difference };
 
@@ -1136,7 +1143,7 @@ impl DrawingContextImpl {
             };
             PushedEffect::Overlay {
                 shader,
-                blend_mode: program.blend_mode,
+                blender: program.blender.clone(),
                 to_device: layer.to_device.clone(),
                 bounds: layer.bounds,
                 inherited_opacity,
@@ -1851,6 +1858,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
         Some(self)
     }
 
+    #[cfg(feature = "media3d")]
+    fn as_drawing_context_impl_with_scene_3d(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithScene3D> {
+        Some(self)
+    }
+
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             let surface = self.surface.clone()?;
@@ -1900,6 +1914,22 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 }
 
+/// 3D scenes: the CPU reference drawn as an image (`scene3d.rs`, #608).
+#[cfg(feature = "media3d")]
+impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
+    fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
+        self.check_lease();
+        let mut device = self.current_transform.unwrap_or(Matrix::IDENTITY);
+        if let Some(post_transform) = self.post_transform {
+            device *= post_transform;
+        }
+        let antialiased = self.render_options.edge_mode != EdgeMode::Aliased;
+        let opacity = self.current_opacity;
+        let gr_context = self.gr_context.clone();
+        crate::scene3d::draw_scene_3d(self.canvas.get(), gr_context.as_deref(), device, opacity, antialiased, frame)
+    }
+}
+
 impl IDrawingContextImplWithEffects for DrawingContextImpl {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
         self.check_lease();
@@ -1938,12 +1968,13 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                 self.restore_canvas();
                 self.current_opacity = inherited_opacity;
             }
-            Some(PushedEffect::Overlay { shader, blend_mode, to_device, bounds, inherited_opacity }) => {
+            Some(PushedEffect::Overlay { shader, blender, to_device, bounds, inherited_opacity }) => {
                 // The overlay over the content, in the coordinates of the
-                // layer, blended with the content only.
+                // layer, blended with the content only (masked by it when
+                // its description says so, #580).
                 let mut paint = SkPaintCache::get();
                 paint.set_shader(shader);
-                paint.set_blend_mode(blend_mode);
+                paint.set_blender(blender);
                 let canvas = self.canvas.get();
                 canvas.set_matrix(&to_device);
                 canvas.draw_rect(bounds, &paint);
@@ -1966,12 +1997,13 @@ enum PushedEffect {
     /// shader image filter; the opacity in effect when it was pushed.
     Shader { inherited_opacity: f64 },
     /// An overlay shader effect: a save of the canvas and the save layer of
-    /// the content; the shader of the overlay with its uniforms and blend
-    /// mode, drawn over `bounds` under `to_device` when it is popped; the
-    /// opacity in effect when it was pushed.
+    /// the content; the shader of the overlay with its uniforms and its
+    /// blender (the blend mode, or the masked blender of #580), drawn over
+    /// `bounds` under `to_device` when it is popped; the opacity in effect
+    /// when it was pushed.
     Overlay {
         shader: sk::Shader,
-        blend_mode: sk::BlendMode,
+        blender: sk::Blender,
         to_device: sk::M44,
         bounds: sk::Rect,
         inherited_opacity: f64,

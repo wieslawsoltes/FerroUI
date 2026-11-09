@@ -40,8 +40,6 @@ fn main() {
     let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
     Build::from_env()
         .type_system(TypeSystem::Model)
-        // The reference is built with compiled bindings as the default of its documents.
-        .default_compile_bindings(true)
         .compile_group(XamlGroup::new("compiled_xaml").documents(&documents))
         .run();
 

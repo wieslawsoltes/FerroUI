@@ -53,7 +53,7 @@ pub(crate) fn grid_length(type_: &RuntimeType, parsed: &MarkupValue) -> Option<F
     let unit = property(type_, parsed, "GridUnitType")?;
     let system = type_.system.upgrade()?;
     let unit_markup = system.runtime_type_of(&unit).as_any().downcast_ref::<RuntimeType>()?.markup()?;
-    let member = unit_markup.enum_members.iter().find(|member| (member.get)().value_eq(&*unit))?;
+    let member = unit_markup.find_enum_member_of(&*unit)?;
     let grid_unit_type = match member.value {
         0 => FerroXamlIlGridUnitType::Auto,
         1 => FerroXamlIlGridUnitType::Pixel,

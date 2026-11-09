@@ -22,6 +22,8 @@ impl MainThreadDispatcher {
     pub fn invoke_async(&self, action: Rc<dyn Fn()>) -> Shared<Result<(), ObservableError>> {
         let (completion, task) = Shared::channel();
         let _ = RxSchedulers::main_thread_scheduler().schedule_action(move || {
+            // Boundary (#567): the action is application code; its panic faults the returned
+            // task, as `InvokeAsync` of the reference does.
             match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| action())) {
                 Ok(()) => completion.send(Ok(())),
                 Err(payload) => completion.send(Err(super::task_action::panic_error(payload))),

@@ -16,7 +16,7 @@ pub use mock_platform_render_interface::{
 
 use crate::media::BoxShadow;
 use crate::rendering::composition::drawing::{
-    DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
+    DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload, DrawScene3DPayload,
     DrawLinePayload, DrawRectanglePayload, PushClipPayload, PushCompositingLayerPayload, PushEffectPayload, PushGeometryClipPayload,
     PushOpacityMaskPayload, PushOpacityPayload, PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload,
     RenderDataOpcode, RenderDataReader, RenderDataStream,
@@ -104,6 +104,7 @@ pub fn recorded_opcodes(stream: &RenderDataStream) -> Vec<RenderDataOpcode> {
             RenderDataOpcode::DrawGlyphRun => drop(reader.read_payload::<DrawGlyphRunPayload>()),
             RenderDataOpcode::DrawBitmap => drop(reader.read_payload::<DrawBitmapPayload>()),
             RenderDataOpcode::DrawCustom => drop(reader.read_payload::<DrawCustomPayload>()),
+            RenderDataOpcode::DrawScene3D => drop(reader.read_payload::<DrawScene3DPayload>()),
             RenderDataOpcode::PushClip => drop(reader.read_payload::<PushClipPayload>()),
             RenderDataOpcode::PushGeometryClip => drop(reader.read_payload::<PushGeometryClipPayload>()),
             RenderDataOpcode::PushOpacity => drop(reader.read_payload::<PushOpacityPayload>()),

@@ -22,6 +22,7 @@
 //! | `struct`, `enum`, `trait`, `type`, `use`, `mod`, `bitflags!` | the names of each module, for the resolution of paths; the values of enumerations; the type aliases ([`AssemblyModel::aliases`]) |
 //! | `impl X { fn .., const .. }` | the functions of each type ([`Scan::functions`]); the constants an enumeration or a set of flags names as members |
 //! | `ferro_rust_paths!` | the public paths the crate states, compared with the ones the scanner finds |
+//! | `X::new(..)`, `X::new_..(..)`, `X::builder(..)`, `X::default()` in the code of a file | the classes each class constructs ([`TypeModel::creates`]): the classes declared in the file and the class of the `impl` block the call is in create the class `X` names |
 //!
 //! Macros are not expanded, except the macros the crate itself defines with
 //! a single form of identifiers and types (`ferro_transition_class!`): an
@@ -133,11 +134,29 @@ pub struct ScanOptions {
     /// then canonical, [`ModelSet::canonical`]), and the names of their properties the
     /// crate adds owners to.
     pub dependencies: Vec<AssemblyModel>,
+    /// Collect the names and the string literals of the code of the crate
+    /// ([`Scan::references`]): what an application that trims its themes roots them by (#568,
+    /// step 4 of docs/porting/theme-trimming.md). Off unless asked for.
+    pub source_references: bool,
 }
 
 impl ScanOptions {
     pub fn new(crate_name: &str, root: impl Into<PathBuf>) -> Self {
-        Self { crate_name: crate_name.to_string(), root: root.into(), assembly_name: None, extern_crates: Vec::new(), dependencies: Vec::new() }
+        Self {
+            crate_name: crate_name.to_string(),
+            root: root.into(),
+            assembly_name: None,
+            extern_crates: Vec::new(),
+            dependencies: Vec::new(),
+            source_references: false,
+        }
+    }
+
+    /// The scan that collects the names and the string literals of the code
+    /// ([`ScanOptions::source_references`]).
+    pub fn with_source_references(mut self, value: bool) -> Self {
+        self.source_references = value;
+        self
     }
 
     /// The scan with the models of the crates the crate is built on.
@@ -299,6 +318,37 @@ pub struct Statistics {
     pub rust_paths_agreeing: usize,
 }
 
+/// The names and the string literals of the code of a crate, outside test code and attributes
+/// ([`ScanOptions::source_references`]). An application that trims its themes roots them by the
+/// names that are type keys or classes and by the strings that are keys of the themes (#568,
+/// step 4 of docs/porting/theme-trimming.md).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct SourceReferences {
+    /// The identifiers that start with an upper-case letter: the names of types, of enumeration
+    /// members and of constants as the code writes them, in expressions, types, `use` items and
+    /// the bodies of macro invocations.
+    pub names: BTreeSet<String>,
+    /// The values of the string literals, up to [`SourceReferences::MAX_STRING`] bytes long.
+    pub strings: BTreeSet<String>,
+}
+
+impl SourceReferences {
+    /// The longest string literal that is kept: a key is a short name.
+    pub const MAX_STRING: usize = 256;
+
+    pub(crate) fn add_name(&mut self, name: &str) {
+        if name.starts_with(|c: char| c.is_ascii_uppercase()) && !self.names.contains(name) {
+            self.names.insert(name.to_string());
+        }
+    }
+
+    pub(crate) fn add_string(&mut self, text: &str) {
+        if !text.is_empty() && text.len() <= Self::MAX_STRING && !self.strings.contains(text) {
+            self.strings.insert(text.to_string());
+        }
+    }
+}
+
 /// The result of a scan.
 pub struct Scan {
     pub model: AssemblyModel,
@@ -306,6 +356,9 @@ pub struct Scan {
     pub files: Vec<ScannedFile>,
     pub functions: Vec<InherentFunction>,
     pub statistics: Statistics,
+    /// The names and the string literals of the code; empty unless the options asked for them
+    /// ([`ScanOptions::source_references`]).
+    pub references: SourceReferences,
     modules: Modules,
 }
 
@@ -448,6 +501,7 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
         source,
         model: AssemblyModel::new(options.assembly_name.as_deref().unwrap_or(""), &options.crate_name),
         index: BTreeMap::new(),
+        files: Vec::new(),
         reported: BTreeSet::new(),
         statistics: Statistics::default(),
     };
@@ -518,6 +572,8 @@ struct Builder {
     model: AssemblyModel,
     /// The types of the model by the text of their Rust path.
     index: BTreeMap<String, usize>,
+    /// The file each type of the model is declared in, by the index of the type.
+    files: Vec<usize>,
     /// The unresolved paths already reported, by file, line and path.
     reported: BTreeSet<(usize, usize, String)>,
     statistics: Statistics,
@@ -606,6 +662,7 @@ impl Builder {
         } else {
             self.index.insert(key, self.model.types.len());
         }
+        self.files.push(site.file);
         self.model.types.push(type_);
     }
 
@@ -1225,6 +1282,74 @@ impl Builder {
         }
     }
 
+    /// The creates edges of the classes of the crate ([`TypeModel::creates`]; #568, step 4 of
+    /// docs/porting/theme-trimming.md). Each construction the code of a file writes
+    /// (`Source::constructions`) is an edge of every class declared in the file and of the class
+    /// of the `impl` block it is written in. Only a path whose last segment names a class of the
+    /// object model, of this crate or of a crate it is built on, is resolved. The created class
+    /// is the one the path resolves to; a path that resolves into another crate and to no class
+    /// of it, and a path the modules do not resolve (a name a function imports for itself), stand
+    /// for every class of that name. An edge too many keeps a control theme the application
+    /// does not need; one too few trims a theme it shows.
+    fn creates(&mut self, dependencies: &[AssemblyModel]) {
+        let constructions = std::mem::take(&mut self.source.constructions);
+        if constructions.is_empty() {
+            return;
+        }
+        let is_class = |type_: &TypeModel| type_.object_model && type_.kind == TypeKind::Class;
+        let crate_of = |path: &str| path.trim_start_matches("::").split("::").next().unwrap_or_default().to_string();
+        // The classes by the last segment of their Rust path: the path and the full name.
+        let mut by_name: BTreeMap<String, Vec<(String, String)>> = BTreeMap::new();
+        for type_ in self.model.types.iter().chain(dependencies.iter().flat_map(|model| model.types.iter())).filter(|type_| is_class(*type_)) {
+            let path = type_.rust_path.text.as_str();
+            let name = path.rsplit("::").next().unwrap_or(path).to_string();
+            by_name.entry(name).or_default().push((path.to_string(), type_.full_name()));
+        }
+        // The classes of the crate by the file that declares them.
+        let mut in_file: BTreeMap<usize, Vec<usize>> = BTreeMap::new();
+        for (index, type_) in self.model.types.iter().enumerate() {
+            if is_class(type_) {
+                in_file.entry(self.files[index]).or_default().push(index);
+            }
+        }
+        let mut edges: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
+        for construction in &constructions {
+            // `Self::new()` constructs the class of its block.
+            let Some(candidates) = construction.path.last().filter(|name| *name != "Self").and_then(|name| by_name.get(name)) else { continue };
+            let all: Vec<&str> = candidates.iter().map(|(_, full_name)| full_name.as_str()).collect();
+            let created: Vec<&str> = match self.resolve_path(construction.module, &construction.path, None) {
+                Some(path) => {
+                    let exact: Vec<&str> = candidates.iter().filter(|(rust_path, _)| *rust_path == path).map(|(_, full_name)| full_name.as_str()).collect();
+                    let same_crate: Vec<&str> =
+                        candidates.iter().filter(|(rust_path, _)| crate_of(rust_path) == crate_of(&path)).map(|(_, full_name)| full_name.as_str()).collect();
+                    if !exact.is_empty() {
+                        exact
+                    } else if !same_crate.is_empty() || crate_of(&path) == self.model.crate_name {
+                        same_crate
+                    } else {
+                        all
+                    }
+                }
+                None => all,
+            };
+            if created.is_empty() {
+                continue;
+            }
+            let mut targets: Vec<usize> = in_file.get(&construction.file).cloned().unwrap_or_default();
+            let owner = construction.owner.as_ref().and_then(|owner| self.resolve_path(construction.module, std::slice::from_ref(owner), None));
+            if let Some(index) = owner.and_then(|owner| self.index.get(&owner).copied()).filter(|index| is_class(&self.model.types[*index])) {
+                targets.push(index);
+            }
+            for target in targets {
+                let own = self.model.types[target].full_name();
+                edges.entry(target).or_default().extend(created.iter().filter(|created| **created != own).map(|created| created.to_string()));
+            }
+        }
+        for (index, created) in edges {
+            self.model.types[index].creates = created.into_iter().collect();
+        }
+    }
+
     /// The namespaces and the public paths of the types, the functions, the numbers.
     fn finish(mut self, dependencies: &[AssemblyModel]) -> Scan {
         let public = self.source.modules.public_paths();
@@ -1252,6 +1377,7 @@ impl Builder {
         self.aliases_and_handles();
         self.exported_macros();
         self.link_dependencies(dependencies);
+        self.creates(dependencies);
 
         // The public paths the crate states for the emitter, against the ones found here.
         let rust_paths = std::mem::take(&mut self.source.rust_paths);
@@ -1345,8 +1471,9 @@ impl Builder {
                 }
             }
         }
+        let references = self.source.references.take().unwrap_or_default();
         let mut diagnostics = self.source.diagnostics;
         diagnostics.sort_by(|left, right| (&left.file, left.line, left.severity).cmp(&(&right.file, right.line, right.severity)));
-        Scan { model: self.model, diagnostics, files: self.source.files, functions, statistics, modules: self.source.modules }
+        Scan { model: self.model, diagnostics, files: self.source.files, functions, statistics, references, modules: self.source.modules }
     }
 }

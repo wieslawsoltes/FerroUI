@@ -17,14 +17,14 @@ pub type BuildDocument = fn(
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[])]),
     ("x", &[]),
 ];
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_1: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
-    ("fui0", &[("FerroUI.Controls", "")]),
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[])]),
+    ("fui0", &[("FerroUI.Controls", "", &[])]),
     ("x", &[]),
 ];
 
@@ -496,7 +496,7 @@ pub fn build_native_controls_xaml(
     frame_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NativeFrame")));
     rt::register_name_value(name_scope.as_ref(), "NativeFrame", ::std::rc::Rc::new(::core::clone::Clone::clone(&frame_0)), 17, 10)?;
     // native_controls.xaml(17,31) SourcePageType
-    frame_0.set_direct_value(::ferroui_controls::Frame::source_page_type_property(), ::core::option::Option::Some(<::ferroui_controls::FramePage as ::ferroui_base::StaticType>::TYPE));
+    frame_0.set_direct_value(::ferroui_controls::Frame::source_page_type_property(), rt::cast(::ferroui_base::TypeInfo::register_constructor::<::ferroui_controls::FramePage>(), 17, 4)?);
     rt::invoked(frame_0.try_end_init(), 17, 4)?;
     // native_controls.xaml(18,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -629,17 +629,7 @@ pub fn build_native_controls_xaml(
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FontSource"));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::InfoBadge::icon_source_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 39)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property());
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property(), value_1.clone(), 32, 39)?;
-    } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE)) {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else if value_1.is_none() {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("IconSource", &value_1, 32, 39));
-    }
+    rt::assign_resource_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property(), value_1, &rt::ResourceChoice { name: "IconSource", member: "FerroUI.Controls.InfoBadge.set_IconSource", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE), null: true, line: 32, position: 39 }, ::core::option::Option::None)?;
     context.pop_parent();
     rt::invoked(info_badge_0.try_end_init(), 32, 4)?;
     // native_controls.xaml(33,4) Children
@@ -783,7 +773,7 @@ fn build_native_controls_xaml_deferred_2(
     // native_controls.xaml(6,6) PathIconSource
     let path_icon_source_0 = ::ferroui_controls::PathIconSource::new();
     // native_controls.xaml(6,6) Data
-    let value_0 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 8,8")), 6, 40)?;
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     path_icon_source_0.set_value(::ferroui_controls::PathIconSource::data_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)));
     ::core::result::Result::Ok(rt::to_value(path_icon_source_0.clone()))
 }

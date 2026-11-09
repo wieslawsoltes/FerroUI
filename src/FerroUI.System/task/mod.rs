@@ -62,7 +62,7 @@ mod shared;
 pub use canceled::Canceled;
 pub use executor::{
     block_on, current_schedule, is_current_schedule, poll_now, run_pending, set_current_schedule, set_thread_schedule, spawn_local, spawn_local_on,
-    spawn_on, thread_schedule, try_id,
+    spawn_local_on_result, spawn_on, thread_schedule, try_id,
 };
 pub use join::{AbortHandle, Id, JoinError, JoinHandle};
 pub use schedule::{FirstPoll, Schedule};

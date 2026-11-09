@@ -146,7 +146,7 @@ const TEST_HOOK_TYPES: &[&MarkupType] = &[
 ];
 
 pub(crate) fn register_types() {
-    MarkupType::register_all(TYPES);
+    MarkupType::register_table(TYPES);
     #[cfg(any(test, feature = "testing"))]
     MarkupType::register_all(TEST_HOOK_TYPES);
 }

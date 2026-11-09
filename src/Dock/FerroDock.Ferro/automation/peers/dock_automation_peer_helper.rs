@@ -147,10 +147,8 @@ fn enum_name(value: &BoxedValue) -> Option<String> {
     if metadata.kind != MarkupTypeKind::Enum {
         return None;
     }
-    for member in metadata.enum_members {
-        if (member.get)().value_eq(&**value) {
-            return Some(member.name.to_owned());
-        }
+    if let Some(member) = metadata.find_enum_member_of(&**value) {
+        return Some(member.name.to_owned());
     }
     metadata
         .enum_to_value

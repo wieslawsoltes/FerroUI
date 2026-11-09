@@ -14,7 +14,7 @@ use ferroui_base::metadata::{MarkupEvent, MarkupValue};
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref, UnsetValueType};
-use ferroui_controls::TextBox;
+use ferroui_controls::{TextBlock, TextBox};
 use std::rc::Rc;
 
 /// What `{x:Bind}` does with the value of its path on the way to the target and back (step X3):
@@ -162,11 +162,16 @@ impl XBinding {
     /// The update trigger of a `TwoWay` binding to `target_property` of `target`: `Default` is
     /// `LostFocus` for `TextBox.Text` and `PropertyChanged` for every other property
     /// (`BindAssignment.NeedsLostFocusForTwoWay` of WinUI's compiler).
+    ///
+    /// `TextBox.Text` is `TextBlock.Text` with TextBox as another owner, the same property: the
+    /// test compares it with `TextBlock::text_property()` and checks the target by its identity,
+    /// so that the binding does not register `TextBox` and link it into every application that
+    /// uses `x:Bind` (#612, root D).
     fn trigger_for(&self, target: &FerroObject, target_property: &'static FerroProperty) -> UpdateSourceTrigger {
         match self.update_source_trigger {
             UpdateSourceTrigger::Default
-                if target.to_ref().cast::<TextBox>().is_some()
-                    && target_property.id() == TextBox::text_property().id() =>
+                if target.to_ref().is::<TextBox>()
+                    && target_property.id() == TextBlock::text_property().id() =>
             {
                 UpdateSourceTrigger::LostFocus
             }

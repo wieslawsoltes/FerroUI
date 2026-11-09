@@ -21,22 +21,39 @@
 //! | [`WaterRippleShaderEffect`] | [`InteractiveWaterRippleEffect`] | rings that spread from presses and drags and bend the content |
 //! | [`BurningFlameShaderEffect`] | [`InteractiveBurningFlameEffect`] | a flame that burns the content from a press (the burn-away button) |
 //!
-//! The pointer positions are normalized to the host (0 to 1 across it), as
-//! Effector's are, so they need no conversion for the scale of the layer; the
-//! lengths of the programs in device independent pixels (a distortion) are
-//! scaled by `layer_scale`. The water ripple and the flame animate: their
+//! The pointer positions are normalized to the area the effect is drawn over
+//! (0 to 1 across it, [`EffectHostContext::input_bounds`]), as Effector's
+//! are, so they need no conversion for the scale of the layer; the lengths of
+//! the programs in device independent pixels (a distortion) are scaled by
+//! `layer_scale` (Effector's are device pixels: the two agree at a scale of 1,
+//! docs/porting/DEVIATIONS.md). The water ripple and the flame animate: their
 //! classes advance their values on the frames of the animation clock while
 //! anything moves ([`EffectHostContext::request_animation_frame`]), and each
-//! frame changes uniforms only.
+//! frame changes uniforms only. The four classes take handled events
+//! ([`IEffectInputHandler::handled_events_too`]), as Effector's input effects
+//! do, so they see the pointer over a button or another control that handles
+//! it.
 //!
-//! Effector's programs are followed with four changes: squares are written
+//! The overlays (the pointer spotlight and the reactive grid) are masked by
+//! the content (#580, [`ShaderEffectDescription::masked_by_content`]): their
+//! output is multiplied by the alpha of the content before it is blended, so
+//! they draw nothing over transparent content. The content-sampling programs
+//! (the water ripple and the flame) sample the moved content clamped to the
+//! area, as Effector's clamp tiling does, and compose what they compute over
+//! the content masked by it (source atop: `S * D.a + D * (1 - S.a)`), so
+//! that nothing is smeared beyond the coverage of the content.
+//!
+//! Effector's programs are followed with five changes: squares are written
 //! as products (`pow` of a negative number is undefined in SkSL, GLSL and
 //! WGSL); the content-sampling programs sample the moved content at the
 //! centre of the texel under the moved coordinate (the same texel whatever
 //! the filtering of a backend) and mix their colours in premultiplied form
-//! (so transparent content stays transparent); and the phase of the flame
-//! wraps at 10 pi, a period of its three waves, so that its `sin` stays
-//! precise.
+//! (so transparent content stays transparent); they compose with the content
+//! source atop where Effector masks `DstIn` and then draws source over, which
+//! is the same where the content is opaque or transparent and leaves
+//! translucent content unchanged where nothing moves (Effector counts its
+//! coverage twice); and the phase of the flame wraps at 10 pi, a period of
+//! its three waves, so that its `sin` stays precise.
 
 use super::super::{
     CustomEffect, CustomEffectClass, Effect, EffectHostContext, EffectParameterValue, IEffectInputHandler,
@@ -89,13 +106,29 @@ fn load(pixel: &[u8]) -> [f32; 4] {
 }
 
 /// The texel of `source` (`width` by `height` premultiplied RGBA) under `at`,
-/// transparent beyond it: what `content.eval` and `sample_content` give.
+/// clamped to the area (the texel at its edge beyond it): what the
+/// content-sampling programs give with `content.eval` and `sample_content` of
+/// the clamped coordinate (Effector's clamp tiling).
 fn texel(source: &[u8], width: usize, height: usize, at: [f32; 2]) -> [f32; 4] {
-    let (x, y) = (at[0].floor(), at[1].floor());
-    if !(x >= 0.0 && y >= 0.0 && x < width as f32 && y < height as f32) {
+    if width == 0 || height == 0 {
         return [0.0; 4];
     }
+    let x = at[0].floor().clamp(0.0, (width - 1) as f32);
+    let y = at[1].floor().clamp(0.0, (height - 1) as f32);
     load(&source[(y as usize * width + x as usize) * 4..][..4])
+}
+
+/// `moved` composed over `original` masked by it (source atop): what the
+/// content-sampling programs return, so that their output covers the content
+/// and nothing beyond it.
+fn atop(moved: [f32; 4], original: [f32; 4]) -> [f32; 4] {
+    std::array::from_fn(|channel| moved[channel] * original[3] + original[channel] * (1.0 - moved[3]))
+}
+
+/// `source` masked by the alpha of `destination`: the source of an overlay
+/// masked by the content.
+fn masked(source: [f32; 4], destination: [f32; 4]) -> [f32; 4] {
+    source.map(|channel| channel * destination[3])
 }
 
 /// Calls `f` with each pixel of the area and the coordinates of its centre
@@ -198,6 +231,12 @@ macro_rules! follow_the_pointer {
         }
 
         impl IEffectInputHandler for $class {
+            /// The pointer over a control that handles it (a button) is
+            /// followed too, as Effector's input effects follow it.
+            fn handled_events_too(&self) -> bool {
+                true
+            }
+
             fn on_attached(&self, _context: &EffectHostContext<'_>) {
                 self.update(|value| {
                     value.pointer_x = 0.5;
@@ -360,9 +399,10 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
 ///
 /// `pointer-spotlight(pointer-x=0.5, pointer-y=0.5, is-pointer-over=true,
 /// radius=0.24, strength=0.28, color=#FFD26B)`. An overlay shader effect with
-/// the blend mode `Screen`; without the pointer over the host (the default),
-/// or with no strength and no boost (the neutral value), the content is
-/// unchanged. [`InteractivePointerSpotlightEffect`] follows the pointer.
+/// the blend mode `Screen`, masked by the content (no light over transparent
+/// content); without the pointer over the host (the default), or with no
+/// strength and no boost (the neutral value), the content is unchanged.
+/// [`InteractivePointerSpotlightEffect`] follows the pointer.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PointerSpotlightShaderEffect {
     /// The horizontal position of the pointer, 0 (left) to 1 (right)
@@ -434,7 +474,10 @@ impl CustomEffect for PointerSpotlightShaderEffect {
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
-        Some(ShaderEffectDescription::overlay(POINTER_SPOTLIGHT_SKSL, POINTER_SPOTLIGHT_WGSL, BitmapBlendingMode::Screen))
+        Some(
+            ShaderEffectDescription::overlay(POINTER_SPOTLIGHT_SKSL, POINTER_SPOTLIGHT_WGSL, BitmapBlendingMode::Screen)
+                .with_content_mask(),
+        )
     }
 
     fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
@@ -453,11 +496,12 @@ impl CustomEffect for PointerSpotlightShaderEffect {
             if factor <= 0.0 {
                 return;
             }
-            // Screen, premultiplied: source + destination - source * destination.
+            // Screen, premultiplied: source + destination - source *
+            // destination, the source masked by the content.
             let destination = load(pixel);
+            let source = masked(color.map(|channel| channel * factor), destination);
             store(pixel, std::array::from_fn(|channel| {
-                let source = color[channel] * factor;
-                source + destination[channel] - source * destination[channel]
+                source[channel] + destination[channel] - source[channel] * destination[channel]
             }));
         });
         true
@@ -503,11 +547,10 @@ uniform float press_boost;
 uniform float4 color;
 
 half4 main(float2 coord) {
-    // The lines: the first device independent pixel of each cell.
+    // The lines: 5 percent of each cell, along its top and its left.
     float span = max(clamp(cell_size, 8.0, 64.0) * layer_scale, 1.0);
-    float stroke = max(layer_scale, 1.0);
     float2 cell = coord - floor(coord / span) * span;
-    float grid = (cell.x < stroke || cell.y < stroke) ? 1.0 : 0.0;
+    float grid = (cell.x < 0.05 * span || cell.y < 0.05 * span) ? 1.0 : 0.0;
     float2 size = max(layer_size, float2(1.0));
     float2 d = coord / size - float2(clamp(pointer_x, 0.0, 1.0), clamp(pointer_y, 0.0, 1.0));
     float pressed = is_pressed != 0 ? 1.0 : 0.0;
@@ -533,11 +576,10 @@ struct Uniforms {
 }
 
 fn effect(coord: vec2<f32>) -> vec4<f32> {
-    // The lines: the first device independent pixel of each cell.
+    // The lines: 5 percent of each cell, along its top and its left.
     let span = max(clamp(uniforms.cell_size, 8.0, 64.0) * uniforms.layer_scale, 1.0);
-    let stroke = max(uniforms.layer_scale, 1.0);
     let cell = coord - floor(coord / span) * span;
-    let grid = select(0.0, 1.0, cell.x < stroke || cell.y < stroke);
+    let grid = select(0.0, 1.0, cell.x < 0.05 * span || cell.y < 0.05 * span);
     let size = max(uniforms.layer_size, vec2<f32>(1.0));
     let d = coord / size - vec2<f32>(clamp(uniforms.pointer_x, 0.0, 1.0), clamp(uniforms.pointer_y, 0.0, 1.0));
     let pressed = select(0.0, 1.0, uniforms.is_pressed != 0);
@@ -549,18 +591,19 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
 "#;
 
 /// Grid lines over the content and a halo under the pointer (Effector's
-/// `ReactiveGridShaderEffect`): lines of one device independent pixel along
-/// the top and the left of each cell of `cell-size` (clamped to 8..64) from
-/// the top left corner of the area, at the opacity `strength * 0.45`
+/// `ReactiveGridShaderEffect`): lines 5 percent of the cell wide along the
+/// top and the left of each cell of `cell-size` (clamped to 8..64) from the
+/// top left corner of the area, at the opacity `strength * 0.45`
 /// (`strength` clamped to 0..1), and, while the pointer is over the host or
 /// pressed, a halo around (`pointer-x`, `pointer-y`) fading to nothing at 0.18
 /// of the area (0.28 while pressed), at the opacity 0.18 plus `press-boost`
-/// while pressed; all times the colour, drawn source over the content.
+/// while pressed; all times the colour and the alpha of the content, drawn
+/// source over the content.
 ///
 /// `reactive-grid(cell-size=22, strength=0.24, color=#64D6FF)`. An overlay
-/// shader effect; without strength and the pointer away (the neutral value)
-/// the content is unchanged. [`InteractiveReactiveGridEffect`] follows the
-/// pointer.
+/// shader effect masked by the content; without strength and the pointer away
+/// (the neutral value) the content is unchanged.
+/// [`InteractiveReactiveGridEffect`] follows the pointer.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ReactiveGridShaderEffect {
     /// The horizontal position of the pointer, 0 (left) to 1 (right)
@@ -598,6 +641,12 @@ impl Default for ReactiveGridShaderEffect {
     }
 }
 
+impl ReactiveGridShaderEffect {
+    /// The width of a line, a fraction of the side of a cell (Effector's
+    /// `gridX < 0.05`).
+    pub const LINE_WIDTH: f32 = 0.05;
+}
+
 impl CustomEffect for ReactiveGridShaderEffect {
     const NAME: &'static str = "reactive-grid";
 
@@ -631,13 +680,16 @@ impl CustomEffect for ReactiveGridShaderEffect {
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
-        Some(ShaderEffectDescription::overlay(REACTIVE_GRID_SKSL, REACTIVE_GRID_WGSL, BitmapBlendingMode::SourceOver))
+        Some(
+            ShaderEffectDescription::overlay(REACTIVE_GRID_SKSL, REACTIVE_GRID_WGSL, BitmapBlendingMode::SourceOver)
+                .with_content_mask(),
+        )
     }
 
     fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
         let scale = layer_scale(scale);
         let span = (clamp(self.cell_size, 8.0, 64.0) as f32 * scale).max(1.0);
-        let line = scale.max(1.0);
+        let line = ReactiveGridShaderEffect::LINE_WIDTH * span;
         let size = [(width as f32).max(1.0), (height as f32).max(1.0)];
         let pointer = [unit(self.pointer_x) as f32, unit(self.pointer_y) as f32];
         let pressed = flag(self.is_pressed);
@@ -656,8 +708,9 @@ impl CustomEffect for ReactiveGridShaderEffect {
             if alpha <= 0.0 {
                 return;
             }
+            // Source over, the source masked by the content.
             let destination = load(pixel);
-            let source = color.map(|channel| channel * alpha);
+            let source = masked(color.map(|channel| channel * alpha), destination);
             store(pixel, std::array::from_fn(|channel| source[channel] + destination[channel] * (1.0 - source[3])));
         });
         true
@@ -742,13 +795,17 @@ half4 main(float2 coord) {
         + ripple(coord, size, ripple_3_center, ripple_3_age, ripple_3_strength, travel, band);
     displaced += wave.xy * (clamp(distortion, 0.0, 18.0) * layer_scale);
     float highlight = hover_field * 0.18 + wave.z;
-    // The texel under the moved coordinate, sampled at its centre.
-    float4 base = float4(content.eval(floor(displaced) + 0.5));
+    // The texel under the moved coordinate, clamped to the area, sampled at
+    // its centre.
+    float4 base = float4(content.eval(clamp(floor(displaced), float2(0.0), max(layer_size - 1.0, float2(0.0))) + 0.5));
     float tint = clamp(tint_strength, 0.0, 0.42);
     float amount = clamp(highlight * tint + hover_field * tint * 0.25, 0.0, 0.42);
     float3 shade = color.rgb * base.a;
     float3 rgb = mix(base.rgb, shade, amount) + shade * min(highlight * 0.06, 0.04);
-    return half4(float4(clamp(rgb, float3(0.0), float3(base.a)), base.a));
+    float4 moved = float4(clamp(rgb, float3(0.0), float3(base.a)), base.a);
+    // Over the content, masked by it (source atop).
+    float4 original = float4(content.eval(coord));
+    return half4(moved * original.a + original * (1.0 - moved.a));
 }
 "#;
 
@@ -810,13 +867,18 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
         + ripple(coord, size, uniforms.ripple_3_center, uniforms.ripple_3_age, uniforms.ripple_3_strength, travel, band);
     displaced += wave.xy * (clamp(uniforms.distortion, 0.0, 18.0) * uniforms.layer_scale);
     let highlight = hover_field * 0.18 + wave.z;
-    // The texel under the moved coordinate, sampled at its centre.
-    let base = sample_content(floor(displaced) + vec2<f32>(0.5));
+    // The texel under the moved coordinate, clamped to the area, sampled at
+    // its centre.
+    let far_texel = max(uniforms.layer_size - vec2<f32>(1.0), vec2<f32>(0.0));
+    let base = sample_content(clamp(floor(displaced), vec2<f32>(0.0), far_texel) + vec2<f32>(0.5));
     let tint = clamp(uniforms.tint_strength, 0.0, 0.42);
     let amount = clamp(highlight * tint + hover_field * tint * 0.25, 0.0, 0.42);
     let shade = uniforms.color.rgb * base.a;
     let rgb = mix(base.rgb, shade, vec3<f32>(amount)) + shade * min(highlight * 0.06, 0.04);
-    return vec4<f32>(clamp(rgb, vec3<f32>(0.0), vec3<f32>(base.a)), base.a);
+    let moved = vec4<f32>(clamp(rgb, vec3<f32>(0.0), vec3<f32>(base.a)), base.a);
+    // Over the content, masked by it (source atop).
+    let original = sample_content(coord);
+    return moved * original.a + original * (1.0 - moved.a);
 }
 "#;
 
@@ -883,11 +945,14 @@ const RIPPLE_PARAMETERS: [[&str; 3]; 3] = [
 /// independent pixels (clamped to 0..18) and tinted towards the colour by
 /// `tint-strength` (clamped to 0..0.42). While the pointer is over the host
 /// or pressed, the content around (`pointer-x`, `pointer-y`) swells a little.
+/// The moved content is sampled clamped to the area and composed over the
+/// content masked by it, so the rings bend the content within its coverage
+/// only (transparent corners stay transparent).
 ///
 /// `water-ripple(distortion=12, max-radius=0.72, ring-width=0.065,
 /// tint-strength=0.18, color=#7FD6FF)`; a ripple is `ripple-1-center=0.5,0.5,
 /// ripple-1-age=0.3, ripple-1-strength=1`. A content-sampling shader effect
-/// with a sample radius of 20; without ripples and with the pointer away
+/// with a sample radius of 56; without ripples and with the pointer away
 /// (the default and the neutral value) the content is unchanged.
 /// [`InteractiveWaterRippleEffect`] makes ripples where the pointer is pressed,
 /// dragged and released, and ages them on the frames of the animation clock.
@@ -936,9 +1001,11 @@ impl Default for WaterRippleShaderEffect {
 }
 
 impl WaterRippleShaderEffect {
-    /// The largest distance the program moves the content: the distortion
-    /// and the swell under the pointer.
-    pub const SAMPLE_RADIUS: f64 = 20.0;
+    /// How far the program moves the content at most, in device independent
+    /// pixels: the largest distortion (18) times the sum of the waves of the
+    /// three rings (up to 3) and the swell under the pointer (1.25), rounded
+    /// up (#580).
+    pub const SAMPLE_RADIUS: f64 = 56.0;
 
     /// Whether a ripple is there.
     pub fn has_active_ripples(&self) -> bool {
@@ -1055,13 +1122,15 @@ impl CustomEffect for WaterRippleShaderEffect {
             let base = texel(&source, width, height, displaced);
             let amount = (highlight * tint + hover_field * tint * 0.25).clamp(0.0, 0.42);
             let glint = (highlight * 0.06).min(0.04);
-            store(pixel, std::array::from_fn(|channel| {
+            let moved: [f32; 4] = std::array::from_fn(|channel| {
                 if channel == 3 {
                     return base[3];
                 }
                 let shade = color[channel] * base[3];
                 (mix(base[channel], shade, amount) + shade * glint).clamp(0.0, base[3])
-            }));
+            });
+            let original = load(pixel);
+            store(pixel, atop(moved, original));
         });
         true
     }
@@ -1144,6 +1213,12 @@ impl Animated for InteractiveWaterRippleEffect {
 }
 
 impl IEffectInputHandler for InteractiveWaterRippleEffect {
+    /// Presses and drags over a control that handles them (a button) make
+    /// ripples too, as Effector's input effects take them.
+    fn handled_events_too(&self) -> bool {
+        true
+    }
+
     fn on_attached(&self, _context: &EffectHostContext<'_>) {
         self.frames.stop();
         self.last_drag_ripple.set(None);
@@ -1262,14 +1337,18 @@ half4 main(float2 coord) {
     float amount = clamp(distortion, 0.0, 18.0) * layer_scale;
     float2 displaced = coord + float2((wave_a + wave_b) * 0.5 * amount * flame,
         -flame * (2.5 + 5.0 * engaged) * (0.25 + upward) * layer_scale);
-    // The texel under the moved coordinate, sampled at its centre.
-    float4 base = float4(content.eval(floor(displaced) + 0.5));
+    // The texel under the moved coordinate, clamped to the area, sampled at
+    // its centre.
+    float4 base = float4(content.eval(clamp(floor(displaced), float2(0.0), max(layer_size - 1.0, float2(0.0))) + 0.5));
     float hot = clamp(flame * 1.75 - upward * 0.55, 0.0, 1.0);
     float3 fire = mix(ember_color.rgb, core_color.rgb, hot) * base.a;
     float3 rgb = mix(base.rgb, fire, clamp(flame * 0.58, 0.0, 0.82));
     rgb += fire * (flame * clamp(glow_strength, 0.0, 1.0) * 0.42);
     rgb = mix(rgb, float3(0.13, 0.08, 0.05) * base.a, clamp(smoke * 0.28, 0.0, 0.24));
-    return half4(float4(clamp(rgb, float3(0.0), float3(base.a)), base.a));
+    float4 burnt = float4(clamp(rgb, float3(0.0), float3(base.a)), base.a);
+    // Over the content, masked by it (source atop).
+    float4 original = float4(content.eval(coord));
+    return half4(burnt * original.a + original * (1.0 - burnt.a));
 }
 "#;
 
@@ -1318,14 +1397,19 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
     let amount = clamp(uniforms.distortion, 0.0, 18.0) * uniforms.layer_scale;
     let displaced = coord + vec2<f32>((wave_a + wave_b) * 0.5 * amount * flame,
         -flame * (2.5 + 5.0 * engaged) * (0.25 + upward) * uniforms.layer_scale);
-    // The texel under the moved coordinate, sampled at its centre.
-    let base = sample_content(floor(displaced) + vec2<f32>(0.5));
+    // The texel under the moved coordinate, clamped to the area, sampled at
+    // its centre.
+    let far_texel = max(uniforms.layer_size - vec2<f32>(1.0), vec2<f32>(0.0));
+    let base = sample_content(clamp(floor(displaced), vec2<f32>(0.0), far_texel) + vec2<f32>(0.5));
     let hot = clamp(flame * 1.75 - upward * 0.55, 0.0, 1.0);
     let fire = mix(uniforms.ember_color.rgb, uniforms.core_color.rgb, vec3<f32>(hot)) * base.a;
     var rgb = mix(base.rgb, fire, vec3<f32>(clamp(flame * 0.58, 0.0, 0.82)));
     rgb += fire * (flame * clamp(uniforms.glow_strength, 0.0, 1.0) * 0.42);
     rgb = mix(rgb, vec3<f32>(0.13, 0.08, 0.05) * base.a, vec3<f32>(clamp(smoke * 0.28, 0.0, 0.24)));
-    return vec4<f32>(clamp(rgb, vec3<f32>(0.0), vec3<f32>(base.a)), base.a);
+    let burnt = vec4<f32>(clamp(rgb, vec3<f32>(0.0), vec3<f32>(base.a)), base.a);
+    // Over the content, masked by it (source atop).
+    let original = sample_content(coord);
+    return burnt * original.a + original * (1.0 - burnt.a);
 }
 "#;
 
@@ -1337,11 +1421,13 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
 /// little while pressed; the content under it is moved by up to `distortion`
 /// device independent pixels (clamped to 0..18), coloured from `ember-color`
 /// to `core-color` where it is hot, lit by `glow-strength` (0..1) and darkened
-/// by smoke (`smoke-strength`, 0..0.8).
+/// by smoke (`smoke-strength`, 0..0.8). The moved content is sampled clamped
+/// to the area and composed over the content masked by it, so the top edge
+/// keeps its content and nothing burns beyond the coverage of the content.
 ///
 /// `burning-flame(burn-amount=0.8, flame-phase=1.2, ignition-x=0.5,
 /// ignition-y=0.68)`. A content-sampling shader effect with a sample radius
-/// of 20; without burning and not pressed (the default and the neutral
+/// of 21; without burning and not pressed (the default and the neutral
 /// value) the content is unchanged. [`InteractiveBurningFlameEffect`] ignites
 /// it where the pointer is pressed and lets it burn down after the release.
 #[derive(Clone, Debug, PartialEq)]
@@ -1392,8 +1478,10 @@ impl Default for BurningFlameShaderEffect {
 }
 
 impl BurningFlameShaderEffect {
-    /// The largest distance the program moves the content.
-    pub const SAMPLE_RADIUS: f64 = 20.0;
+    /// How far the program moves the content at most, in device independent
+    /// pixels: the length of the largest move sideways (the largest
+    /// distortion, 18) and up (7.5 times 1.25), rounded up (#580).
+    pub const SAMPLE_RADIUS: f64 = 21.0;
 
     /// The period of the phase: 10 pi, a whole number of periods of each
     /// wave of the flame (5.8, 7.4 and 9.6 are 29, 37 and 48 fifths).
@@ -1488,14 +1576,16 @@ impl CustomEffect for BurningFlameShaderEffect {
             let lit = (flame * 0.58).clamp(0.0, 0.82);
             let shine = flame * glow * 0.42;
             let dark = (smoke * 0.28).clamp(0.0, 0.24);
-            store(pixel, std::array::from_fn(|channel| {
+            let burnt: [f32; 4] = std::array::from_fn(|channel| {
                 if channel == 3 {
                     return base[3];
                 }
                 let fire = mix(ember[channel], core[channel], hot) * base[3];
                 let rgb = mix(base[channel], fire, lit) + fire * shine;
                 mix(rgb, smoke_color[channel] * base[3], dark).clamp(0.0, base[3])
-            }));
+            });
+            let original = load(pixel);
+            store(pixel, atop(burnt, original));
         });
         true
     }

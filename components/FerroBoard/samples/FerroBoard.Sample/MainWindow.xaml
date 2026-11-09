@@ -1,0 +1,8 @@
+<Window xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:app="using:FerroBoard.Sample"
+ x:Class="FerroBoard.Sample.MainWindow" x:DataType="app:SampleBindings"
+ RequestedThemeVariant="{CompiledBinding RequestedThemeVariant}"
+ Title="FerroBoard" Width="1120" Height="900" MinWidth="700" MinHeight="650">
+ <app:MainView/>
+</Window>

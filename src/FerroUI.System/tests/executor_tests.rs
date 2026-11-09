@@ -4,7 +4,7 @@
 
 use crate::task::{
     block_on, current_schedule, is_current_schedule, poll_now, run_pending, set_current_schedule, set_thread_schedule, spawn_local, spawn_local_on,
-    spawn_on, thread_schedule, try_id, AbortHandle, FirstPoll, JoinError, JoinHandle, Schedule,
+    spawn_local_on_result, spawn_on, thread_schedule, try_id, AbortHandle, FirstPoll, JoinError, JoinHandle, Schedule,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -462,6 +462,37 @@ fn first_poll_now_polls_inside_the_spawning_call() {
 }
 
 #[test]
+fn a_task_on_a_schedule_takes_its_outcome_from_the_result_of_its_future_without_a_panic() {
+    // #567: a future ends its task with a `JoinError` value, which the handle gives as if the
+    // task had panicked or been aborted, and nothing unwinds.
+    let schedule = Arc::new(QueueSchedule::default());
+    let ok = spawn_local_on_result(async { Ok::<_, JoinError>(5) }, schedule.clone(), FirstPoll::Now);
+    assert_eq!(now_or_never(ok).unwrap().unwrap(), 5);
+
+    let gate = Gate::default();
+    let g = gate.clone();
+    let failed = spawn_local_on_result(
+        async move {
+            g.wait().await;
+            Err::<(), _>(JoinError::Panicked(Box::new("an animation could not be run".to_string())))
+        },
+        schedule.clone(),
+        FirstPoll::Now,
+    );
+    assert!(!failed.is_finished());
+    gate.open();
+    schedule.run_all();
+    assert!(failed.is_finished());
+    let error = now_or_never(failed).unwrap().unwrap_err();
+    assert!(error.is_panic());
+    assert_eq!(error.into_panic().downcast_ref::<String>().unwrap(), "an animation could not be run");
+
+    let canceled = spawn_local_on_result(async { Err::<(), _>(JoinError::Canceled) }, schedule.clone(), FirstPoll::Now);
+    assert!(now_or_never(canceled).unwrap().unwrap_err().is_canceled());
+    assert_eq!(schedule.len(), 0);
+}
+
+#[test]
 fn a_task_on_a_schedule_has_one_queued_poll_at_a_time_and_wakes_from_other_threads_queue_there() {
     let schedule = Arc::new(QueueSchedule::default());
     let waker: Arc<Mutex<Option<Waker>>> = Arc::new(Mutex::new(None));
@@ -829,4 +860,31 @@ fn work_that_is_not_send_is_scheduled_through_a_callback_of_its_thread() {
     drop(dropped);
     assert!(!run_pending());
     assert_eq!(ran.get(), 1);
+}
+
+/// Work a thread still holds when it ends: a callback of the thread that is forgotten (a schedule
+/// dropped the work that would have run it) while the values of the thread are destroyed, after
+/// the standard library has destroyed its own data of the thread. Forgetting it, and the checks of
+/// its thread, must not ask `std::thread::current`, which panics then (the dispatcher of a test
+/// thread dropped an animation's cancellation guard that way, and the thread aborted, #567).
+#[test]
+fn a_callback_forgotten_while_its_thread_ends_does_not_panic() {
+    use crate::task::executor::{LocalCallback, RunCallback};
+
+    crate::ferro_thread_local! {
+        static HELD: RefCell<Option<RunCallback>> = const { RefCell::new(None) };
+    }
+
+    let ran = Arc::new(Mutex::new(false));
+    let flag = ran.clone();
+    let result = thread::spawn(move || {
+        let callback = LocalCallback::register(Box::new(move || *flag.lock().unwrap() = true));
+        HELD.with(|held| *held.borrow_mut() = Some(RunCallback::new(callback.handle())));
+        // The thread ends with the callback queued; its value is dropped with the thread's
+        // values, which forgets the callback.
+    })
+    .join();
+
+    assert!(result.is_ok(), "the thread panicked while it ended");
+    assert!(!*ran.lock().unwrap(), "a forgotten callback does not run");
 }

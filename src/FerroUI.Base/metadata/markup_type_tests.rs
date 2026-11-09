@@ -367,7 +367,7 @@ fn enumerations_list_their_members() {
     assert_eq!(members, [("Left", 0), ("Bottom", 1), ("Right", 2), ("Top", 5)]);
 
     let top = markup.find_enum_member("top", true).unwrap();
-    assert_eq!((top.get)().downcast_ref::<MetaDock>(), Some(&MetaDock::Top));
+    assert_eq!(top.get(markup).unwrap().downcast_ref::<MetaDock>(), Some(&MetaDock::Top));
     assert!(markup.find_enum_member("top", false).is_none());
     assert!(markup.find_enum_member("Middle", true).is_none());
 }
@@ -380,7 +380,7 @@ fn flags_enumerations_list_their_bits() {
     let members: Vec<(&str, i64)> = markup.enum_members.iter().map(|m| (m.name, m.value)).collect();
     assert_eq!(members, [("Direct", 1), ("Tunnel", 2), ("Bubble", 4)]);
     let bubble = markup.find_enum_member("Bubble", false).unwrap();
-    assert_eq!((bubble.get)().downcast_ref::<MetaRoutes>(), Some(&MetaRoutes::BUBBLE));
+    assert_eq!(bubble.get(markup).unwrap().downcast_ref::<MetaRoutes>(), Some(&MetaRoutes::BUBBLE));
 }
 
 // A declaration marker is not the native value represented by its metadata.
@@ -609,7 +609,9 @@ fn class_markup_is_reached_from_the_runtime_type() {
 
 #[test]
 fn class_info_parts_combine_in_any_order() {
-    assert!(MetaPanel::TYPE.default_constructor().is_some());
+    // The constructor of `new` is in the runtime type with the tables of types only.
+    assert_eq!(MetaPanel::TYPE.default_constructor().is_some(), cfg!(feature = "type-tables"));
+    assert!(<MetaPanel as crate::DefaultConstructible>::new_instance().is::<MetaPanel>());
     assert_eq!(MetaPanel::TYPE.interfaces().len(), 1);
     assert_eq!((MetaPanel::TYPE.interfaces()[0])(), ValueType::of::<Rc<dyn IMetaNamed>>());
     // The registered properties need no markup declaration.
@@ -830,7 +832,7 @@ fn enumeration_members_can_be_renamed() {
     let members: Vec<(&str, i64)> = markup.enum_members.iter().map(|m| (m.name, m.value)).collect();
     assert_eq!(members, [("DataContext", 0), ("Self", 1)]);
     let self_ = markup.find_enum_member("Self", false).unwrap();
-    assert_eq!((self_.get)().downcast_ref::<MetaMode>(), Some(&MetaMode::Self_));
+    assert_eq!(self_.get(markup).unwrap().downcast_ref::<MetaMode>(), Some(&MetaMode::Self_));
 }
 
 test_class!(MetaContent: FerroObject);

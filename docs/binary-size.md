@@ -67,6 +67,16 @@ No functionality was removed, no executable packer is used, and the panic strate
   "resident" is the maximum resident set size, "footprint" the peak memory footprint, which on
   macOS includes the memory of the GPU driver.
 
+- **Finding what roots code**: why the linker keeps a function or a static. A fat-LTO build that
+  also emits IR (`cargo rustc --release -p hello-world --bin hello-world -- -C lto=fat
+  --emit=llvm-ir,link`) gives the whole program as one module,
+  `<target>/release/deps/hello_world-<hash>.ll`. `scripts/irpaths.py <module.ll> <regex>...` builds
+  the graph from every function and global to the globals it names, searches it breadth-first
+  from `main` and the constructor lists, and prints one shortest chain to each symbol that
+  matches, for example `'NavigationView\$u20\$as.*StaticType.*TYPE'` for the `TypeInfo` of a
+  control. Apple's linker ignores `-why_live`, and the chains often run through anonymous tables
+  that a linker reports only by address.
+
 Every number below comes from this procedure; the commands are in section 9.
 
 ## 3. Measurements, before and after
@@ -320,9 +330,10 @@ those of the unmerged #496 that need no binary markup, re-applied to the current
   inherited-change notification through a callback stored on the property by an inheriting
   registration. A value type whose properties never coerce or inherit does not retain them.
 - **Installation by overload.** Typed, binding-value and boxed sources choose their observer
-  where they are bound; boxed sources are installed by one non-generic `add_boxed_binding` that
-  still delivers through the original typed `BindingEntry<T>` cache and typed observer (a fully
-  shared observer measured 7 to 21 % slower boxed style delivery in #496 and was not taken).
+  where they are bound; boxed sources are installed by one non-generic `add_boxed_binding`. In
+  #565 a boxed source still delivered through the typed `BindingEntry<T>` cache and a typed
+  observer (a fully shared observer measured 7 to 21 % slower boxed style delivery in #496 and was
+  not taken then); #576 erased that path (section 4.10).
 - **Cold construction.** Property identity, registration per owner type, direct property
   construction, class vtable initialisation, metadata host lookup and the nullable operations of
   the value type registry (one typed operation per nullable type) are shared non-generic paths.
@@ -334,6 +345,475 @@ panic safety, which the regressions ported with the mechanisms check against the
 algorithms under injected panics and reentrant reads and writes. One corner case changes: when
 the metadata of a type is unregistered, a derived type that had cached it now resolves its
 metadata again instead of keeping the stale entry.
+
+### 4.5 Handle conversions derived, not registered (#566, part 1)
+
+Every class registered two conversions of the root handle with the value type registry, to
+`Ref<T>` and to `Option<Ref<T>>`: two closures and their vtables and drop glue per class, in
+every application whether it converts handles or not. The registry already has the object entry
+of each class (its `from_object` function), so it derives both conversions when they are looked
+up (`Conversion::find` in `data/core/value_type.rs`). Behaviour is unchanged: the conversion is
+found and refused exactly as before.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| Executable | 51.26 MB | 50.71 MB | -0.55 MB (-1.1 %) |
+
+The rest of #566 makes the tables of types that every crate registers at start-up (6.5 MB of hello
+world, measured by building it without them) registered only by what looks types up by name
+(section 4.6).
+
+### 4.6 Trimming the tables of types (#566)
+
+Every crate's `register_types()` registers its table of classes, its markup assembly and its markup
+types at start-up. The tables reference every class with its constructor, properties and markup
+accessors, so the linker kept all of them. By default the tables are now trimmed: an application
+that loads only compiled markup does not look types up by name, and does not register them.
+
+A crate of the framework registers its tables with the trimmable forms `TypeInfo::register_table`,
+`MarkupType::register_table` and `MarkupAssembly::register_table`. Without the `ferroui-base`
+feature `type-tables` these are inlined no-ops, and link-time optimisation drops what only the
+tables reach. A type is still registered when it is used:
+- a class when it is initialised, with its markup metadata (`TypeInfo::markup`);
+- the metadata of the value type of a property (`T` or `Option<T>` with metadata) when the property
+  is registered (`MarkupType::register_used`), so enumeration members convert to text and text
+  parses to value types;
+- the metadata of the value types of the properties of a registered type
+  (`MarkupProperty::value_markup`), which a binding through a view-model property finds by handle;
+- the classes named by the reflection-binding paths of a compiled document (`$parent[TextBox]`,
+  `(DataValidationErrors.HasErrors)`), which the compiler resolves into typed references in the
+  namespace table of the document.
+
+The plain functions `TypeInfo::register_all`, `MarkupType::register`, `MarkupType::register_all`
+and `MarkupAssembly::register` always register, whatever the features say. An application
+registers its own types (its view models, its assembly) with them from its `register_types()`, so
+its reflection bindings find its own properties with no change.
+
+What looks types up by name enables the feature `type-tables`, which keeps the tables. These are:
+- the run-time XAML loader, the designer and `ferroui-designer-support`;
+- diagnostics, DevTools, hot reload and Inspect;
+- the declarative View API, which parses selector strings;
+- the behaviors' member lookup.
+
+Feature unification gives the tables to every application that links one of them. An application
+that looks types up by name itself enables the feature:
+
+```toml
+ferroui-base = { workspace = true, features = ["type-tables"] }
+```
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size | Start-up (median of 9) |
+|---|---:|---:|
+| with the tables (before #566) | 50.78 MB | 214 ms |
+| trimmed, opt-in (#582) | 44.36 MB | 215 ms |
+| trimmed, with what trimmed builds need (#583, the default) | 45.28 MB (**-5.50 MB, -10.8 %**) | |
+
+The default was flipped after a run of 24 compiled desktop samples without the tables: with the
+fixes of #583, each logs exactly what it logs with the tables (`FERROUI_SMOKE_EXIT_MS`, binding
+diagnostics compared sample for sample).
+
+### 4.7 Unwinding (#567)
+
+Every function that owns a value with a destructor has a landing pad and unwind records, so a panic
+can run the destructors on its way up. In hello world's `dist` build these are 6.63 MB of unwind
+sections (`__eh_frame` 3.67 MB, `__gcc_except_tab` 2.23 MB, `__unwind_info` 0.73 MB) and about
+3.1 MB of landing-pad code in `__text`.
+
+Panics used as exceptions are not what keeps them. `ferroui-base` has 30 sites of
+`catch_unwind`, `resume_unwind` and `panic_any` outside tests, and every one is a boundary:
+the dispatcher loop and its jobs, the render loop, the isolation of user handlers, or the rethrow
+of a caught panic after cleanup (the try/finally of the original). The classification is in
+[porting/panics-as-exceptions.md](porting/panics-as-exceptions.md). Turning panics into `Result`
+removes few of these records. The cost comes from unwinding itself.
+
+The shipped profile `dist` builds without unwinding (`panic = "abort"`, since #567; before, this
+was the opt-in profile `dist-abort`):
+
+| `samples/HelloWorld`, macOS ARM64, tables of types trimmed | with unwinding | `dist` (abort) |
+|---|---:|---:|
+| executable | 45.28 MB | 35.71 MB (**-9.57 MB, -21 %**) |
+| `__text` | 34.48 MB | 31.35 MB |
+| unwind sections | 6.63 MB | 0.26 MB |
+
+The desktop control catalog (`samples/ControlCatalog.Desktop`, macOS ARM64, with its images and
+fonts) is 98.9 MB built this way.
+
+What changes without unwinding: a panic ends the process at once, after the panic hook has run,
+without running destructors.
+- No production path carries an expected error as a panic: the markup error scope, the page
+  transitions, OpenGL loading, making a GL context current, UI Automation refusals and the Vello
+  inputs the third-party sweep refuses return errors (the classification of every site is in
+  [porting/panics-as-exceptions.md](porting/panics-as-exceptions.md)).
+- What a catch of a panic still isolates is a bug: the dispatcher no longer isolates a panicking
+  job or event handler, and the render loop no longer survives a panicking frame. With unwinding
+  the panic is caught, the frame is cleaned up and the panic is raised again on the dispatcher, the
+  way the original rethrows an exception of a handler.
+- The development tools that isolate the code of the application they inspect (the Designer, the
+  previewer of `DesignerSupport`, hot reload, DevTools) need unwinding. They are built with `dev`,
+  `fast-release`, `release-unwind` or `dist-unwind`.
+
+`release` aborts on panic as well (owner decision of 2026-11-07, #567): it is what
+`cargo build --release` gives an application, and the unwind tables are as large there as in
+`dist`. `release-unwind` and `dist-unwind` are the same profiles with unwinding, for a program that
+catches panics to carry on. `fast-release`, the profile for running an application or a tool
+locally, keeps unwinding so the Designer and the previewer isolate the code they preview. The
+browser profile inherits `release` and aborts too; the threaded module rebuilds the standard library
+with `panic_abort` (`scripts/build-browser.sh`). Cargo ignores `panic` for tests, benches, build
+scripts and procedural macros, so the tests and benchmarks are unchanged.
+
+| `samples/HelloWorld`, macOS ARM64, `release` | with unwinding | `release` (abort) |
+|---|---:|---:|
+| executable | 48.92 MB | 38.66 MB (**-10.26 MB, -21 %**) |
+| `__text` | 23.67 MB | 20.48 MB |
+| unwind sections (`__eh_frame`, `__gcc_except_tab`, `__unwind_info`) | 5.57 MB | 0.19 MB |
+
+The abort build ran its smoke run (`FERROUI_SMOKE_EXIT_MS=5000`) to a clean exit.
+
+Workspace profiles do not reach an application in a workspace of its own: its root `Cargo.toml`
+states its own. The application templates (the `FerroUI/templates` repository) and the shared
+workspace settings that `scripts/apps/sync-workspace.py` writes carry `panic = "abort"` in their
+`release` and `dist` profiles. An application that wants a report of a panic before the process ends installs a
+panic hook (`std::panic::set_hook`), which runs before the abort, as the Android and browser
+platforms do for their crash reports.
+
+### 4.8 Class tables are constants (#569)
+
+A class's table of virtual members was built at run time by `Subclassable::build_vtable`, a
+function per pair of a class and each of its ancestors: every class built the part of each
+ancestor with its own overrides. That was 1,146 functions in hello world (1.1 MB of code for
+`InputElement`, `StyledElement` and `Visual` alone).
+
+Every slot is known when the program is compiled: the function of the class, or, for a member
+the class states it does not override, the slot of its parent's table. So the table is now a
+constant, `Subclassable::VTABLE`. The table of a class (`ObjectType::CLASS_VTABLE`) is a static
+of the executable, and `ObjectType::vtable` returns it with no `OnceLock`. A slot that forwards
+reads its parent's table through a `const fn`, so the root class (its own parent) never names
+its own table.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after |
+|---|---:|---:|
+| `release` (with symbols) | 73.56 MB | 72.21 MB (-1.35 MB) |
+| `dist` | 45.28 MB | 43.03 MB (**-2.25 MB, -5.0 %**) |
+
+### 4.9 Fewer closures in the metadata of types (#569)
+
+The declaration macros generated closures per type and per member, each a function in the
+executable (1.72 MB of closure bodies in hello world, most of them in markup metadata):
+- an enumeration member was a closure that made its value; it is now its numeric value, made by
+  the `enum_from_value` of its type (`MarkupEnumMember::get`), and found by
+  `MarkupType::find_enum_member_of`;
+- a cast and a reference type registered a closure per form of the value; they register one typed
+  function, which a shared adapter calls;
+- a property whose typed path hook could only give nothing has none;
+- the untyped routes of properties copy a value through one function per value type instead of
+  three closures.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
+|---|---:|
+| class tables as constants (4.8) | 43.03 MB |
+| and fewer closures | 41.95 MB (**-1.07 MB**) |
+
+### 4.10 Type-erased binding observers (#576, part 1)
+
+A binding of untyped values (`IObservable<BoxedValue>`: style setters, markup, `bind_untyped`) was
+delivered by observers compiled once per value type of a property: the entry of a value frame
+(`BindingEntry<T>` with its `UntypedObserver<T>`), the local value observer (`Value<T>` with its
+`Observer<T>`) and the direct property observer (`DirectBindingObserver<T>` with `DirectUntyped<T>`).
+The routes of every property reach them, so every value type had all three (1.43 MB in 2,477
+functions with the animation observers, section 5.4).
+
+They are now one type each, not generic: `BoxedBindingEntry`, `BoxedLocalValueBindingObserver` and
+`DirectBoxedBindingObserver`. A value stays boxed (`BindingValue<BoxedValue>`), and the box always
+holds exactly the property's value type. The interpretation of an untyped value (the value type,
+`BindingValue<T>`, the unset and do-nothing markers, notifications, implicit conversion) is one
+function, `resolve_boxed_binding_value`. What names the value type is a route of the property, the
+table of `fn` pointers every property already has (`PropertyRoutes`), with four new entries:
+
+- `route_unpack_binding_value`: the parts of a `BindingValue<T>`, its value in a box;
+- `route_enable_data_validation`: the data validation flag of the metadata, read without a copy;
+- `route_set_local_value` (styled) and `route_set_direct_binding_value` (direct): the typed write
+  of the store, which moves the value out of a box the observer made and clones it otherwise;
+
+and the existing `route_box_value`, `route_copy_value`, `route_is_valid_value` and
+`route_get_default_value`. Two routes that constructed typed observers
+(`route_create_boxed_local_binding`, `route_create_binding_entry`) are gone.
+
+The typed paths are unchanged: `bind` and `bind_value` with their typed entries and observers,
+typed `set_value`, and the reads of `EffectiveValue<T>`. Behaviour is unchanged as well: priority,
+notification order, data validation, `UnsetValue` and `DoNothing`, disposal and reentrancy, and the
+number of copies of a value. A value in a frame is a snapshot in a box of the entry's own, as it was
+a clone in the typed entry, so each value delivered to a frame costs one allocation. The one
+difference is equality: an entry compares a new value with the comparer of the store
+(`value_equals`, which takes two NaN to be equal) instead of `PartialEq` alone, so a NaN delivered
+again is not published again, which the store would not have raised either.
+
+The animation observers (`StepObserver<A>`, `PreviewValue<T>`) are not part of this change: they
+are generic over the animator, not the property, and their code is the timing of the animation
+instance, inlined into them.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
+|---|---:|
+| fewer closures (4.9) | 41.95 MB |
+| one observer for untyped bindings | 40.39 MB (**-1.56 MB**) |
+
+The property, binding and styling benchmarks (`base::`, `data::`, `styling::` of
+`ferroui-benchmarks`, release, alternate runs) are within the noise of the machine: the median
+benchmark is 2 % faster, and the two resource lookups that are slower in both runs (`find_pre_resource`,
+`find_not_existing_resource`, 8 to 14 %) differ by as much between two runs of the same code.
+
+### 4.11 Theme trimming in applications (#568, on by default)
+
+A compiled theme is partitioned into units, one per control or resource document plus the ambient
+unit (docs/porting/theme-trimming.md, section 9). An application can construct the themes its
+documents construct from only the units it needs. The linker then removes the other units, and
+the control code that only their templates reach. This is the default; an application turns it
+off in its manifest:
+
+```toml
+[package.metadata.ferroui]
+theme-trimming = false
+```
+
+The build of the application (`ferroui-build`) computes the units from what its documents name:
+the types they construct or select and their base classes, and every token that may be a key of
+the theme. It adds what the compiled documents of its dependencies name (a control library's
+templates), what its Rust sources name (type names that are controls, string literals that
+are keys) and the controls the code of each live control creates (the creates edges of the type
+models). It follows the keys, `BasedOn` chains and template types of the unit graph, and writes
+the table that `<WinUITheme />` is constructed with (`WinUITheme::with_parts`). Two optional forms
+of `theme-roots`:
+
+```toml
+# A control or style whose name is built at run time, or a unit by its document.
+theme-roots = ["CalendarView", "AccentButtonStyle", "Controls/Popup.xaml"]
+# Every unit, as without trimming (for comparing).
+theme-roots = "all"
+```
+
+A control or key the sources name, or that the code of a live control creates, is kept without a
+`theme-roots` entry (step 4, docs/porting/theme-trimming.md section 11); a name built at run time
+needs one. In debug builds the first lookup of a trimmed control's theme logs
+`the WinUI control theme of <Type> was trimmed: add it to theme-roots`.
+Builds with `ferroui-base/full-themes` (the run-time loader, hot reload, the designer, DevTools,
+Inspect, Diagnostics) keep every unit; the tables of types alone (`type-tables`, which
+`ferroui-view` and the behaviors enable) do not. So do themes constructed in Rust with `WinUITheme::new()`.
+The kept units are listed in `$OUT_DIR/xaml/theme_parts.txt`.
+
+| `samples/HelloWorld`, `dist`, macOS ARM64 | Size |
+|---|---:|
+| full theme (step 2) | 37.98 MB |
+| trimmed (30 of 164 units) | 28.63 MB (-9.35 MB, -24.6 %) |
+
+### 4.12 Type checks name the identity of a class, not its type (#612, B1)
+
+`is::<T>()`, `cast::<T>()` and `downcast_ref::<T>()` compared the runtime type of the object with
+`T::TYPE`, the `TypeInfo` of `T`. A `TypeInfo` holds the class's initialisation, its constructor,
+its markup metadata and the registration of its handle, so every type check anywhere kept all of
+these for `T` in the executable, even in an application that never creates a `T`: a check whether
+a text element sits in a `RichTextBlock` linked the rich text block, its properties and their
+generic code into a window without one.
+
+Each class now has an identity of its own (`TypeIdentity`, `ObjectType::IDENTITY`, one static per
+class made by `ferro_class!`), which its `TypeInfo` points to. A type check walks the base chain of
+the object's runtime type and compares identities (`TypeInfo::derives_from`); it gives the answers
+the comparison of `TypeInfo`s gave, and it names only the identity. The rest of a class is linked
+when something uses it.
+
+| `ferroui-desktop --example hello_window`, release, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| Executable | 41.76 MB | 38.64 MB | -3.12 MB (-7.5 %) |
+| Classes initialised | 188 | 153 | -35 |
+| `ferroui_base` (code and named data) | 8.70 MB | 8.29 MB | -0.41 MB |
+| `ferroui_controls` | 2.59 MB | 1.76 MB | -0.83 MB |
+
+The next steps of #612 keep the initialisation, the constructor and the markup metadata of a class
+reachable from its `TypeInfo` only with the tables of types (reflection), and remove the other
+defaults that construct what an application does not use.
+
+### 4.13 Trimmed theme units take the classes of their binding paths with them (#612, root D)
+
+With theme trimming on, `samples/HelloWorld` (WinUI theme, XAML) kept 30 of the theme's 164 units,
+none of them for NavigationView, InfoBar or RichEditBox, yet it still initialised those classes. The
+chains of the IR trace (section 2, "Finding what roots code") all ran:
+
+`WinUITheme::with_parts` → `build_controls_winuicontrols_xaml` → the namespace table of the
+document → the cast-target functions of its reflection-binding paths →
+`NavigationView::TYPE`, `RichEditBox::TYPE`, `InfoBar::TYPE`, `ProgressBar::TYPE`,
+`SplitView::TYPE`, `NavigationPage::TYPE` (and from NavigationPage's virtual table, DrawerPage and
+its automation peer).
+
+A path such as `(controls:TextBox.Text)` names a class, which the generated code yields through a
+function in the document's namespace table. The table carried every class any path of the merged
+theme names, and every unit's code reaches it, so dropping a unit left its controls linked. The
+emitter now collects the path types per unit: the document's table keeps the paths outside every
+unit, and an entry of a unit with paths pushes a table of the unit around its code, which its
+templates and deferred resources build with ([xaml-themes.md](xaml-themes.md), section 3). A test
+of the WinUI theme checks that no table naming classes is reachable from code outside the units.
+
+One more chain led from `register_value_types` to `XBinding::create_instance`, whose default
+update trigger for `TextBox.Text` called `TextBox::text_property()`, the accessor that registers
+the property for `TextBox`. `TextBox.Text` is `TextBlock.Text` with TextBox as another owner, so
+x:Bind compares with `TextBlock::text_property()` and checks the target by identity (4.12).
+
+| `samples/HelloWorld`, macOS ARM64 | main | after | Change |
+|---|---:|---:|---:|
+| `dist` executable | 22.13 MB | 19.45 MB | -2.67 MB (-12.1 %) |
+| fat LTO `release` (the build of the trace) | 38.55 MB | 33.66 MB | -4.89 MB (-12.7 %) |
+| Unused controls reachable from `main` | NavigationView, RichEditBox, InfoBar, ProgressBar, SplitView, NavigationPage, DrawerPage, TextBox | none of these | |
+
+### 4.14 Theme crates optimised for size in `dist` (#581, step 1)
+
+Compiled theme markup runs once, when a theme is constructed. In the shipped build the five theme
+crates (`ferroui-themes-winui`, `-fluent`, `-simple`, `-macos`, `-material`) are at
+`opt-level = "z"` (`[profile.dist.package.*]` in `Cargo.toml`); the rest stays at `3`. Per-crate
+levels survive fat LTO: `z` marks the crate's functions `minsize`, which link-time optimisation
+respects after inlining across crates. Start-up is the median wall time of launches that open the
+window and close it at once (`FERROUI_SMOKE_EXIT_MS=1`), alternating between the builds.
+
+| macOS ARM64, `dist` | main | theme crates at `z` | Change | Start-up (median) |
+|---|---:|---:|---:|---|
+| `samples/HelloWorld` (theme trimmed to the units it uses) | 22.13 MB | 21.62 MB | -0.51 MB (-2.3 %) | 193 ms and 191 ms, 11 launches each |
+| `samples/ControlCatalog.Desktop` (every unit) | 67.59 MB | 65.71 MB | -1.87 MB (-2.8 %) | 373 ms and 364 ms, 9 launches each |
+
+Before theme trimming, the same change gave hello world 5.16 MB (#581, first measurement): trimming
+already removes the units an application does not use, so what remains to shrink is the units it
+keeps. Start-up is within noise in both. The browser profile already builds every crate at `z`
+by default (section 4.1 and the comments of the profile).
+
+### 4.15 The default constructor needs the tables of types (#612, B3)
+
+The `TypeInfo` of a class carried its default constructor (`new` of `ferro_class_info!`). Every
+`TypeInfo` an application reaches is reachable from start-up (a type check of an older form, a
+`TargetType`, a property owner, a base class), so the constructor of every class it names was
+linked, and with it what the constructor alone reaches: the construction of the class, its
+default values and its templates. An application creates only a few of those classes.
+
+The constructor is now in the `TypeInfo` only with the tables of types (the `ferroui-base` feature
+`type-tables`, section 4.6), which the run-time XAML loader, the designer, DevTools, hot reload and
+Inspect enable: those builds still create any class by reflection. `ferro_class!` passes the
+constructor to `TypeInfo::with_constructor`, a `const fn` of `ferroui-base` whose body keeps it or
+drops it by the features of `ferroui-base`, wherever the class is declared; the evaluated `TypeInfo`
+static then holds no pointer to it, and the linker leaves it out. Without the tables,
+`TypeInfo::default_constructor` and `TypeInfo::create_instance` return `None` for a class whose
+constructor nothing registered.
+
+Code that names a class creates it statically:
+- `DefaultConstructible::new_instance()`, implemented by `ferro_class_info!` for every class with
+  `new`; `PageType::of::<T>()` of a frame (B3, part 1), `PageNavigationExtensions::push_async_of`,
+  `replace_async_of` and `push_modal_async_of`, and
+  `ManagedFileDialogExtensions::use_managed_system_dialogs_with` take the constructor this way,
+  with a `DefaultConstructible` bound the compiler checks;
+- `TypeInfo::register_constructor::<T>()`, for code that names a class and hands its runtime type to
+  something that creates it by reflection. Compiled markup does this for `{x:Type local:Page}`
+  given to `Frame.SourcePageType` or `Frame.Navigate`, and an application whose view locator
+  creates its views from their runtime types registers their constructors from its
+  `register_types()` (`samples/SafeAreaDemo`).
+
+The constructor is not registered when a class is initialised: the initialisation is reachable from
+the `TypeInfo` too, and would link every constructor again. Reflection over a class that nothing
+registered fails with an error that names the fix: `NavigationError::MissingConstructor` names
+`PageType::of` and `type-tables`.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after | Change |
+|---|---:|---:|---:|
+| `release` executable | 33.73 MB | 32.87 MB | -0.87 MB (-2.6 %) |
+| `dist` executable | 18.94 MB | 18.53 MB | -0.42 MB (-2.2 %) |
+
+The estimate of 2.4 MB (#612) was the share of the constructors before root D and the other
+trims of this section had already removed most of the classes they reach; what remains is the
+constructors of the classes an application links for other reasons. The `dist` build ran its smoke
+run to a clean exit.
+
+### 4.16 Value types registered on first use (#566)
+
+`ferroui-base` registered the nullable forms, texts, casts and conversions of every value type,
+enumeration, contract and collection it declares from one function, `register_value_types`, which
+`register_types()` handed to `ValueTypes::register_global` at start-up whatever the features. That
+list named about 480 types, so each of them was linked into every application with the code of its
+registrations: `nullable_operation` (0.31 MB, 731 instances in hello world), the closures of
+`register_conversion` (0.12 MB, 484 instances) and of `register_cast`, and the `AnyValue` vtable of
+every type the registrations box (`any_value_eq`, 0.33 MB, 1,874 instances). `ferroui-controls` did
+the same for its own types.
+
+**On first use.** A type now states its registrations in an implementation of
+`ValueTypeRegistration` (`register_value_conversions`), next to its metadata in `markup_types/`.
+They are made on every thread, once (`ValueTypes::register_used::<T>()`, which `register_global`
+deduplicates by the address of the function), when the type is first used:
+- a styled, attached or direct property of `T`, `Option<T>`, `Rc<T>` or `Option<Rc<T>>` is
+  registered: the declaration macro selects this at compile time, by the probe that #583 uses for
+  the markup metadata of a property's value type;
+- its markup metadata becomes known: `MarkupType::value_types`, which the declaration macros fill
+  for every type they declare, runs when the metadata is first registered (the value type of a
+  property of a registered type, a type an application registers, the tables of types).
+
+A type that no linked code uses this way is not named by anything reachable from start-up, and the
+linker drops its registrations, its `nullable_operation` and the vtables only they create.
+
+**With the tables of types.** Each crate keeps a table, `register_value_type_table`, that makes all
+of its types used. `ValueTypes::register_table` registers it only with the `ferroui-base` feature
+`type-tables` (and in the unit tests of `ferroui-base`), decided by the features of `ferroui-base`
+wherever it is called, as `MarkupType::register_table` is (section 4.6); `ValueTypes::TYPE_TABLES`
+says which. The run-time XAML loader, the designer, DevTools, hot reload and Inspect see every type
+from the start, as before.
+
+**What stays at start-up.** Some registrations are needed before any first use the registry can
+see, and stay in the list each crate registers at start-up (`register_value_types`):
+- the casts and nullable forms of the types that members of markup types hold, such as the
+  converter of a binding (`Rc<dyn IValueConverter>` and the casts of the converters to it), the
+  setters of a style, the routed event of an event trigger, the easing of a transition. Compiled
+  markup converts a value for such a member (`rt::cast::<Option<Rc<dyn IValueConverter>>, _>`)
+  before it calls the typed setter of the member, and setting a member registers nothing. The
+  registrations of a type stay at start-up when `Option<T>` (for its nullable form) or the target
+  of a cast is the type of a property, a constructor parameter or a method parameter of a
+  `ferro_markup_type!` declaration anywhere in the workspace;
+- in `ferroui-controls`, the registrations of instantiations of the generic types of
+  `ferroui-base` with a type of the crate (`RoutedEvent<SpinEventArgs>`, `FerroList<Ref<Page>>`)
+  and the casts to types of `ferroui-base` (a converter to `IValueConverter`): the orphan rule
+  leaves a `ValueTypeRegistration` of a type of another crate to that crate;
+- the defaults of the registry (the primitives, `Duration`, `Uri`, `UriRef`, `Url`, `Locale`, the
+  numeric conversions), which every application converts.
+
+| Registration calls of the lists | on first use | at start-up |
+|---|---:|---:|
+| `ferroui-base` | 352, of 273 types | 112 |
+| `ferroui-controls` | 163, of 150 types | 81 |
+| `ferroui-controls-colorpicker` (the enumerations) | 10, of 10 types | 0 |
+
+The Dock crates register their types on the calling thread from their `register_types()`, mostly
+nullable forms of contracts of the model crates and casts of converters to the contracts of
+`ferroui-base`: a `ValueTypeRegistration` of those would belong to the model crates and to
+`ferroui-base`. They are left as they are; the change of the casts below applies to them.
+
+**Functions, not closures.** `ValueTypes::register_cast`, `register_conversion`,
+`register_try_cast` and `register_parse` take function pointers (a closure that captures nothing
+coerces to one). A registration is data: the typed function and the adapter of its pair of types,
+which downcasts the value, calls the function and boxes the result. The wrap of a nullable form
+and the casts of a reference type are entries of the same kind. No registration makes a closure, a
+vtable with its call shims or drop glue any more. A cast or conversion that captures state
+registers with `register_cast_with` or `register_conversion_with`.
+
+**`nullable_operation` and `any_value_eq`.** `nullable_operation::<T>` boxes and unboxes
+`Option<T>`: it clones the `T`, which only typed code can do, so it stays generic, and is now
+instantiated only for the types that are used. `any_value_eq` is the comparison of the `AnyValue`
+vtable of a type, which every boxed value needs; a comparison shared between plain-old-data types
+would compare bytes, which differs from `PartialEq` for floating point fields (`NaN`, `-0.0`) and
+padding, so it is not shared. Its instances drop with the types that are no longer boxed.
+
+`ferroui-build-scan` reads the registrations of a `ValueTypeRegistration` implementation as it
+reads the body of a function, so the type models of the crates, and the compiled markup made from
+them, are unchanged.
+
+| `samples/HelloWorld`, macOS ARM64 | before | after | Change |
+|---|---:|---:|---:|
+| `release` executable | 32.87 MB | 31.98 MB | -0.89 MB (-2.7 %) |
+| `dist` executable | 18.53 MB | 17.98 MB | -0.55 MB (-3.0 %) |
+| `nullable_operation` (instances) | 731 | 458 | -273 |
+| `register_conversion` closures (instances) | 484 | 0 | -484 (data, `fn` pointers) |
+| `any_value_eq` (instances) | 1,874 | 1,351 | -523 |
+
+The ControlCatalog page tour (127 pages) and the trimmed samples (HelloWorld, RenderDemo,
+VirtualizationDemo, BehaviorsGallery) ran with no conversion or registration error and the same
+binding messages as main; the `dist` build of hello world smoke-runs cleanly.
 
 ## 5. What an executable is made of
 
@@ -435,6 +915,9 @@ top of the machine code (#567).
   from the field (on Windows keep the PDB).
 - Depend only on the themes the application uses. A theme declared in a document, or registered in
   `register_types()`, is linked; a theme that is not named is not.
+- Keep theme trimming on (the default, section 4.11), leave the developer tools and the run-time
+  loader out of the shipped build (they keep every unit), and
+  name in `theme-roots` the controls and keys whose names the application builds at run time.
 - Leave the panic strategy alone: the framework catches panics in its render loop and dispatcher.
 - `opt-level = "s"` for the whole program makes it about 15 % smaller still and costs about 19 % of
   processor time in layout and rendering (`docs/porting/desktop-performance.md`, section 4.1); it is

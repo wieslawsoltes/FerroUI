@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a problem with ScreenKeyboard
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Focus a TextBox with InputScope="Email"
+        2. Long press "e"
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ScreenKeyboard version
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options: [WebAssembly, Windows (Skia), Windows (WinAppSDK), macOS, Linux (X11), Linux (framebuffer), Android, iOS]
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, logs, layout/subtype and settings

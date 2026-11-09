@@ -18,7 +18,7 @@ resources); the WinUI theme is the theme of WinUI 3 itself, ported from its own 
 
 - Repository: <https://github.com/microsoft/microsoft-ui-xaml>, branch `winui3/main`, commit
   `7e4b0c2096be402f51cc8f7d203ebf67cff183d0` (local checkout
-  `/Users/wieslawsoltes/GitHub/microsoft-ui-xaml`; the scripts take `--reference` or
+  `../microsoft-ui-xaml`; the scripts take `--reference` or
   `WINUI_XAML_ROOT` for another place). Read-only.
 - License: MIT, Copyright (c) Microsoft Corporation (`LICENSE` at the root of the repository;
   `NOTICE.md` lists the third-party code of the repository, none of which the port uses). The

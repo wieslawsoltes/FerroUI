@@ -29,7 +29,7 @@ pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
-        MarkupAssembly::register(&ASSEMBLY);
+        TypeInfo::register_table(TYPES);
+        MarkupAssembly::register_table(&ASSEMBLY);
     });
 }

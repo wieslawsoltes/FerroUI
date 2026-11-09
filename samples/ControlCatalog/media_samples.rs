@@ -1,21 +1,22 @@
 //! Media pages shared by catalog hosts. Native providers are installed by each
 //! host; constructing or navigating to a page never starts playback/capture.
 use ferroui_base::{
-    FerroObjectImpl, Ref, StyledElementImpl, Thickness, VisualImpl, VisualImplExt,
-    VisualTreeAttachmentEventArgs, ferro_class, ferro_class_info, ferro_impl_classes,
+    ferro_class, ferro_class_info, ferro_impl_classes,
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
     layout::LayoutableImpl,
-    media::{Color, Stretch, TextWrapping, imaging::Bitmap, immutable::ImmutableSolidColorBrush},
+    media::{imaging::Bitmap, immutable::ImmutableSolidColorBrush, Color, Stretch, TextWrapping},
     reactive::Subscription,
-    rendering::composition::{ElementComposition, ICompositionGpuInterop, frames::*},
+    rendering::composition::{frames::*, ElementComposition, ICompositionGpuInterop},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
+    FerroObjectImpl, Ref, StyledElementImpl, Thickness, VisualImpl, VisualImplExt,
+    VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::{
-    Button, ContentPage, Control, ControlImpl, Image, Page, PageImpl, ScrollViewer, StackPanel,
-    TextBlock, TextBox, WrapPanel, automation::AutomationProperties,
-    primitives::TemplatedControlImpl,
+    automation::AutomationProperties, primitives::TemplatedControlImpl, Button, ContentPage,
+    Control, ControlImpl, Image, Page, PageImpl, ScrollViewer, StackPanel, TextBlock, TextBox,
+    WrapPanel,
 };
 use ferroui_media::{MediaError, MediaSubscription};
 use ferroui_media_camera::{CameraCapture, CameraError, CameraFormat, CameraProvider};
@@ -745,6 +746,7 @@ pub fn smoke_action(action: &str) -> bool {
         match action {
             "load" => s.load(true),
             "discover" => s.start_camera(true),
+            "start_camera" => s.start_camera(false),
             "decode" => s.decode(),
             "play" => {
                 let Some(player) = s.video.media_player() else {
@@ -790,7 +792,10 @@ pub fn smoke_snapshot() -> Option<MediaSampleSnapshot> {
                 budget: s.budget.clone(),
                 playing: state == Some(ferroui_media_video::MediaPlaybackState::Playing),
                 paused: state == Some(ferroui_media_video::MediaPlaybackState::Paused),
-                frame: player.is_some_and(|p| p.frames().latest().is_some()),
+                frame: player.is_some_and(|p| p.frames().latest().is_some())
+                    || s.camera
+                        .session()
+                        .is_some_and(|c| c.frames().latest().is_some()),
                 camera_active: s.camera.session().is_some(),
             }
         })

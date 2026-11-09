@@ -2,6 +2,7 @@ use super::IRenderDataGeometry;
 use crate::media::{IBrush, IPen};
 use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::composition::server::ServerObjectId;
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -32,6 +33,9 @@ pub enum RenderDataResource {
     Bitmap(Arc<crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>>),
     CustomDrawOperation(std::sync::Arc<dyn ICustomDrawOperation>),
     Effect(Arc<dyn crate::media::IImmutableEffect>),
+    /// The snapshot of a 3D scene (#608): immutable and shared, sent to the
+    /// render thread as it is.
+    Scene3D(Arc<Scene3DSnapshot>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
     ServerPen { server: ServerObjectId, client: Rc<dyn IPen> },
     ServerGeometry { server: ServerObjectId, client: Rc<dyn IRenderDataGeometry> },
@@ -52,6 +56,7 @@ enum Kind {
     Bitmap,
     Custom,
     Effect,
+    Scene3D,
     Server,
 }
 
@@ -67,10 +72,12 @@ impl RenderDataResource {
             RenderDataResource::Pen(v) | RenderDataResource::ClientPen(v) => (Kind::Pen, address(v)),
             RenderDataResource::GeometryImpl(v) => (Kind::GeometryImpl, std::sync::Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Geometry(v) => (Kind::Geometry, address(v)),
-            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(v) as *const () as usize),
+            // The glyph run itself: the recording wraps it in an `Arc` of its own every time.
+            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(&**v) as *const () as usize),
             RenderDataResource::Bitmap(v) => (Kind::Bitmap, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Effect(v) => (Kind::Effect, Arc::as_ptr(v) as *const () as usize),
+            RenderDataResource::Scene3D(v) => (Kind::Scene3D, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::ServerBrush { server, .. }
             | RenderDataResource::ServerPen { server, .. }
             | RenderDataResource::ServerGeometry { server, .. } => (Kind::Server, server.index()),
@@ -88,6 +95,17 @@ pub struct RenderDataResources {
 }
 
 impl RenderDataResources {
+    /// Whether `other` holds the same resources, by identity and in the same order, none of
+    /// them a custom draw operation (which the recording that is dropped disposes) or a resource
+    /// not sent (an addition, desktop-performance.md section 9.14).
+    pub(crate) fn same_resources(&self, other: &RenderDataResources) -> bool {
+        self.resources.len() == other.resources.len()
+            && self.resources.iter().zip(&other.resources).all(|(mine, theirs)| {
+                !matches!(mine, RenderDataResource::CustomDrawOperation(_) | RenderDataResource::NotSent)
+                    && mine.key() == theirs.key()
+            })
+    }
+
     pub fn count(&self) -> usize {
         self.resources.len()
     }
@@ -180,6 +198,13 @@ impl RenderDataResources {
         match self.get(handle)? {
             RenderDataResource::Effect(effect) => Some(effect),
             _ => panic!("the render data resource is not an effect"),
+        }
+    }
+
+    pub fn scene_3d(&self, handle: i32) -> Option<&Arc<Scene3DSnapshot>> {
+        match self.get(handle)? {
+            RenderDataResource::Scene3D(scene) => Some(scene),
+            _ => panic!("the render data resource is not a 3D scene"),
         }
     }
 

@@ -75,6 +75,15 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
 } }
 
 impl LayoutableImpl for Border {
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        let child = this.child();
+        LayoutHelper::measure_hold_with_border(
+            child.as_deref().map(|c| -> &Layoutable { c }),
+            this.padding(),
+            this.border_thickness(),
+        )
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.child();
         LayoutHelper::measure_child_with_border(

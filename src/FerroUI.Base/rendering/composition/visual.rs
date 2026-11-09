@@ -331,6 +331,13 @@ impl CompositionVisual {
         }
     }
 
+    /// The revision of the readback this visual has at `read_revision`, read without copying the
+    /// readback: a hit-test tree compares it with the revision it last read (desktop-performance.md,
+    /// section 9.6).
+    pub(crate) fn readback_revision(&self, read_revision: u64) -> Option<u64> {
+        self.readback.readback_revision(read_revision)
+    }
+
     /// The data the server wrote back for this visual, if it is valid for
     /// the current read revision.
     pub fn try_get_valid_readback(&self) -> Option<ReadbackData> {
@@ -389,6 +396,10 @@ impl CompositionVisual {
 }
 
 impl CompositionVisualHooks for CompositionVisual {
+    fn on_animated_property_assigned(&self, property_name: &str) {
+        self.object.note_animation_property_assigned(property_name);
+    }
+
     fn on_root_changed(&self) {
         // OnRootChangedCore of the container visual.
         let root = self.root();

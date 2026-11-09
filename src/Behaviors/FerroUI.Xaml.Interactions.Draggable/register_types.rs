@@ -50,9 +50,9 @@ pub fn register_types() {
         // controls and the base crate.
         ferroui_xaml_interactivity::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
-        TypeInfo::register_all(TYPES);
+        TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
         // The styles document as an asset: what lets a document the run-time loader loads include
         // it.
         #[cfg(any(test, feature = "document-assets"))]

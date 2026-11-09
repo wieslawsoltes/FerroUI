@@ -40,6 +40,7 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
+#[cfg(feature = "harfbuzz")]
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_system::task::oneshot;
 use std::any::Any;
@@ -140,6 +141,8 @@ impl<T> HeadlessUnitTestTask<T> {
     fn take(outcome: Result<Result<T, Exception>, Canceled>) -> Result<T, Canceled> {
         match outcome {
             Ok(Ok(result)) => Ok(result),
+            // Boundary (#567): the panic of the test, caught on the session thread, is raised again
+            // in the thread that waits for it, as the reference rethrows the exception of the task.
             Ok(Err(exception)) => resume_unwind(exception),
             Err(canceled) => Err(canceled),
         }
@@ -324,6 +327,9 @@ impl HeadlessUnitTestSession {
                 cancellation_token.register(move || cts.cancel())
             };
 
+            // Boundary (#567): the setup of the application runs its code; a panic fails this
+            // test (the catch of the reference sets the exception of the task) instead of ending
+            // the session thread. Tests always unwind, whatever the profile says.
             let application = match catch_unwind(AssertUnwindSafe(|| {
                 if isolated {
                     session.ensure_isolated_application()
@@ -344,6 +350,8 @@ impl HeadlessUnitTestSession {
             let mut caught: Option<Exception> = None;
             let mut result: Option<Fut::Output> = None;
 
+            // Boundary (#567): the test itself; its panic (a failed assertion) is the exception
+            // the reference catches and sets on the task, after the cleanup below has run.
             match catch_unwind(AssertUnwindSafe(|| {
                 // The future is started as a call of an asynchronous method is: it runs to its
                 // first pending await before `start_local` returns. The guard is the continuation
@@ -377,6 +385,8 @@ impl HeadlessUnitTestSession {
                 Err(ex) => caught = Some(ex),
             }
 
+            // Boundary (#567): the finally of the reference; the cleanup runs the jobs of the
+            // test, and its panic fails the test instead of escaping the consumer loop.
             if let Err(ex) = catch_unwind(AssertUnwindSafe(|| application.dispose())) {
                 // Cleanup runs before the TCS is completed, so its failure must be
                 // reported by this work item instead of escaping the consumer loop.
@@ -403,6 +413,8 @@ impl HeadlessUnitTestSession {
         let dispatch_task = self.dispatch_task.lock().unwrap_or_else(PoisonError::into_inner).take();
         if let Some(dispatch_task) = dispatch_task {
             // `_dispatchTask.Wait()`.
+            // Boundary (#567): a panic that ended the session thread (the top of that thread) is
+            // raised again in the thread that disposes of the session, as `Wait()` rethrows.
             if let Err(ex) = dispatch_task.join() {
                 resume_unwind(ex);
             }
@@ -454,6 +466,9 @@ impl HeadlessUnitTestSession {
                     let _dispatcher = Dispatcher::unit_test_scope();
                     // Dropped before the scope of the dispatcher, after the session.
                     let _compositor = ReleaseCompositorOnDrop;
+                    // Boundary (#567): the entry point is application code; its panic is sent to
+                    // the thread that starts the session and raised there, as the reference
+                    // sets the exception of its start task.
                     let session = match catch_unwind(|| {
                         let mut app_builder = entry_point_type();
 
@@ -463,7 +478,8 @@ impl HeadlessUnitTestSession {
                         }
 
                         if app_builder.text_shaping_subsystem_initializer().is_none() {
-                            app_builder = app_builder.use_harfbuzz();
+                            #[cfg(feature = "harfbuzz")]
+                            { app_builder = app_builder.use_harfbuzz(); }
                         }
 
                         SessionThread { app_builder, shared_priority: Cell::new(None) }
@@ -490,6 +506,7 @@ impl HeadlessUnitTestSession {
 
         match started.recv() {
             Ok(Ok(())) => {}
+            // Boundary (#567): the panic of the entry point, caught on the session thread.
             Ok(Err(e)) => resume_unwind(e),
             Err(_) => panic!("The thread of the headless unit test session ended before the session was created."),
         }
@@ -586,6 +603,8 @@ impl SessionThread {
         }
 
         Box::new(Cleanup::new(move || {
+            // Boundary (#567): the try/finally of the reference around the jobs the test left;
+            // the priority is restored before their panic is raised again.
             let jobs = catch_unwind(|| {
                 Dispatcher::ui_thread().run_jobs(None);
                 finish_composition_in_flight();
@@ -600,6 +619,8 @@ impl SessionThread {
     fn ensure_isolated_application(&self) -> Box<dyn IDisposable> {
         let scope = FerroLocator::enter_scope();
         let old_priority = Dispatcher::current_priority();
+        // Boundary (#567): the setup runs application code; the locator scope is disposed of
+        // before its panic is raised again (the try/catch of the reference).
         if let Err(ex) = catch_unwind(AssertUnwindSafe(|| {
             Dispatcher::reset_before_unit_tests();
             self.app_builder.setup_unsafe();
@@ -609,6 +630,9 @@ impl SessionThread {
         }
 
         Box::new(Cleanup::new(move || {
+            // Boundary (#567): the nested try/finally of the reference around the disposal of the
+            // services and the scope; the dispatcher is reset whatever they do, and the panics
+            // are raised again after it.
             let services = catch_unwind(|| {
                 let tool_tip_service = FerroLocator::current().get_service::<dyn IToolTipService>();
                 if let Some(tool_tip_service) =
@@ -623,6 +647,7 @@ impl SessionThread {
             });
 
             // Cleanup jobs can throw, but the ambient state still belongs to this dispatch.
+            // Boundary (#567): part of the try/finally above.
             let scope = catch_unwind(AssertUnwindSafe(|| scope.dispose()));
             Dispatcher::reset_before_unit_tests();
             Dispatcher::set_current_priority(old_priority);
@@ -667,6 +692,8 @@ fn result_of<T>(task: &mut ferroui_system::task::JoinHandle<T>) -> T {
     let mut context = std::task::Context::from_waker(std::task::Waker::noop());
     match std::pin::Pin::new(task).poll(&mut context) {
         std::task::Poll::Ready(Ok(result)) => result,
+        // Boundary (#567): the panic of the future of the test, kept by its task, is raised again
+        // to the catch of the test in `dispatch_core`.
         std::task::Poll::Ready(Err(ferroui_system::task::JoinError::Panicked(payload))) => resume_unwind(payload),
         std::task::Poll::Ready(Err(ferroui_system::task::JoinError::Canceled)) => std::panic::panic_any(Canceled),
         std::task::Poll::Pending => panic!("Synchronous wait is only supported on non-UI threads"),

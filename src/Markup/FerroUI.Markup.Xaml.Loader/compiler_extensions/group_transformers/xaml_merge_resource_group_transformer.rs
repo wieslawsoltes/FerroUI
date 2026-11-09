@@ -1,5 +1,7 @@
 //! Port of `CompilerExtensions/GroupTransformers/XamlMergeResourceGroupTransformer.cs`.
 
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use xamlx::ast::{
@@ -18,9 +20,80 @@ use crate::compiler_extensions::transformers::{
 };
 use crate::compiler_extensions::XamlDocumentUsage;
 
+/// The documents the entries a merge inlined come from (#568, step 2 of
+/// docs/porting/theme-trimming.md): for every entry of an included dictionary that
+/// [`XamlMergeResourceGroupTransformer`] adds to the including dictionary (its resources and the
+/// resources of its theme dictionaries), the URI of the included document. The emitter of Rust
+/// source partitions the compiled markup of a theme by it.
+///
+/// Not from upstream. Recorded only when the configuration of the transform has this extra (the
+/// transform of the emitter adds it); the run-time loader records nothing. An entry keeps the
+/// first document it is recorded for: the innermost one when merges nest. The nodes are held, so
+/// that the address of a recorded node is not given to another one while the record exists.
+#[derive(Default)]
+pub struct MergedEntryOrigins {
+    entries: RefCell<HashMap<usize, (Rc<dyn IXamlAstNode>, String)>>,
+}
+
+impl MergedEntryOrigins {
+    fn address(node: &Rc<dyn IXamlAstNode>) -> usize {
+        Rc::as_ptr(node) as *const () as usize
+    }
+
+    fn record(&self, node: Rc<dyn IXamlAstNode>, uri: &str) {
+        self.entries.borrow_mut().entry(Self::address(&node)).or_insert_with(|| (node, uri.to_string()));
+    }
+
+    /// The URI of the document the entry `node` was merged from, if a merge inlined it.
+    pub fn origin_of(&self, node: &Rc<dyn IXamlAstNode>) -> Option<String> {
+        self.entries.borrow().get(&Self::address(node)).map(|(_, uri)| uri.clone())
+    }
+
+    /// The URIs of the documents whose entries were merged, each once, sorted.
+    pub fn documents(&self) -> Vec<String> {
+        let mut documents: Vec<String> = self.entries.borrow().values().map(|(_, uri)| uri.clone()).collect();
+        documents.sort();
+        documents.dedup();
+        documents
+    }
+
+    /// Records the entries of `manipulation`, the root manipulation of the included document
+    /// `uri`: its property assignments, through nested groups, and the entries of the theme
+    /// dictionaries it assigns.
+    fn record_entries(&self, manipulation: &Rc<dyn IXamlAstManipulationNode>, uri: &str) {
+        if let Some(group) = manipulation.cast::<XamlManipulationGroupNode>() {
+            let children = group.children.borrow().clone();
+            for child in &children {
+                self.record_entries(child, uri);
+            }
+            return;
+        }
+        let Some(assignment) = manipulation.cast::<XamlPropertyAssignmentNode>() else {
+            return;
+        };
+        if assignment.property.name() == "ThemeDictionaries" {
+            let values = assignment.values.borrow().clone();
+            if let Some(group) = values.get(1).and_then(theme_dictionary_value_group) {
+                let children = group.children.borrow().clone();
+                for child in &children {
+                    self.record_entries(child, uri);
+                }
+            }
+        }
+        self.record(manipulation.as_node(), uri);
+    }
+}
+
 /// Inlines `MergeResourceInclude` entries of `ResourceDictionary.MergedDictionaries` at
 /// compile time: the resources of the included dictionary (another document of the same
 /// compilation) are added directly to the including dictionary.
+///
+/// The including dictionary is the dictionary of the document root or an inline dictionary of
+/// the document (#633): `<ResourceDictionary><ResourceDictionary.MergedDictionaries>
+/// <MergeResourceInclude Source="…" /></ResourceDictionary.MergedDictionaries></ResourceDictionary>`
+/// as a merged dictionary of another one keeps the included document in a dictionary of its own,
+/// at the place of the include, so that lookups find its entries in the order a `ResourceInclude`
+/// gives them, and its entries are still recorded as merged from it ([`MergedEntryOrigins`]).
 pub struct XamlMergeResourceGroupTransformer;
 
 /// `string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase)`.
@@ -194,11 +267,19 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         {
             return Ok(node);
         }
-        let Some(resource_dictionary_manipulation) = resource_dictionary_node
-            .manipulation()
-            .cast::<XamlManipulationGroupNode>()
-        else {
-            return Ok(node);
+        // The dictionary is the one of the document root or an inline dictionary anywhere in the
+        // tree (a value of the merged dictionaries of another one, #633): the group transformers
+        // visit every node. The manipulation of an inline dictionary whose only content is its
+        // merged dictionaries is that one assignment (`FlattenAstTransformer` unwraps a group of
+        // one): it is read in a group of its own, which becomes the manipulation of the
+        // dictionary only when an include is inlined.
+        let manipulation = resource_dictionary_node.manipulation();
+        let (resource_dictionary_manipulation, wrapped) = match manipulation.cast::<XamlManipulationGroupNode>() {
+            Some(group) => (group, false),
+            None if manipulation.is::<XamlPropertyAssignmentNode>() => {
+                (XamlManipulationGroupNode::new(&*resource_dictionary_node, Some(vec![manipulation.clone()])), true)
+            }
+            None => return Ok(node),
         };
 
         let merge_resource_include_type = ferro_types.merge_resource_include.clone();
@@ -242,6 +323,10 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
 
         if should_exit || merge_source_nodes.is_empty() {
             return Ok(node);
+        }
+        if wrapped {
+            let group: Rc<dyn IXamlAstManipulationNode> = resource_dictionary_manipulation.clone();
+            *resource_dictionary_node.manipulation.borrow_mut() = group;
         }
 
         let mut manipulation_group: Vec<Rc<dyn IXamlAstManipulationNode>> = Vec::new();
@@ -344,6 +429,11 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 );
             }
 
+            if let Ok(origins) = context.configuration().get_extra::<MergedEntryOrigins>() {
+                if let Some(uri) = target_document.uri() {
+                    origins.record_entries(&single_root_object.manipulation(), &uri);
+                }
+            }
             manipulation_group.push(single_root_object.manipulation());
             if target_document.usage() == XamlDocumentUsage::Unknown {
                 target_document.set_usage(XamlDocumentUsage::Merged);

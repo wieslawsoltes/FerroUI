@@ -44,9 +44,9 @@ macro_rules! define_dock_tab_strip_item_peer {
             fn peer(&self)->Ref<AutomationPeer> {self.0.clone().upcast()}
             fn is_selected(&self)->bool {self.0.owner.is_selected()}
             fn selection_container(&self)->Option<Rc<dyn ISelectionProvider>> {let strip=self.0.owner.find_ancestor_of_type::<TabStrip>(false)?;ControlAutomationPeer::create_peer_for_element(&strip).get_provider::<dyn ISelectionProvider>()}
-            fn add_to_selection(&self)->Result<(),ElementNotEnabledError> {self.0.invoke();Ok(())}
-            fn select(&self)->Result<(),ElementNotEnabledError> {self.0.invoke();Ok(())}
-            fn remove_from_selection(&self)->Result<(),ElementNotEnabledError> {if self.0.owner.is_selected() {self.0.owner.set_is_selected(false);}Ok(())}
+            fn add_to_selection(&self)->Result<(),AutomationError> {self.0.invoke();Ok(())}
+            fn select(&self)->Result<(),AutomationError> {self.0.invoke();Ok(())}
+            fn remove_from_selection(&self)->Result<(),AutomationError> {if self.0.owner.is_selected() {self.0.owner.set_is_selected(false);}Ok(())}
         }
     };
 }

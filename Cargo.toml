@@ -1,8 +1,11 @@
 [workspace]
 resolver = "2"
-# Git submodules of other projects (ProGPU, third_party) and the patched skia-bindings
-# (external/rust-skia-bindings) are not members of the workspace.
-exclude = ["third_party", "external/rust-skia-bindings"]
+# Detachable native keyboard workspace, consumed through ordinary path dependencies; the
+# patched skia-bindings (external/rust-skia-bindings) is not a member either. The comparison of
+# the TreeDataGrid with GPUI tables is a workspace of its own too, so that no GPUI crate enters
+# this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md). Git
+# submodules of other projects (ProGPU, third_party) are not members of the workspace.
+exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison", "third_party"]
 members = [
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",
@@ -19,6 +22,9 @@ members = [
     "src/FerroUI.Media.Qr.Apple",
     "src/FerroUI.Media.Qr.Android",
     "src/FerroUI.Media",
+    # WPF-style 3D (#608, docs/porting/media3d.md).
+    "src/FerroUI.Media3D",
+    "src/FerroUI.Rendering3D",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
     "src/FerroUI.Media.Qr",
@@ -154,6 +160,7 @@ members = [
     "src/FerroUI.Remote.Protocol",
     "src/FerroUI.DesignerSupport",
     "src/Skia/FerroUI.Skia",
+    "src/Quartz/FerroUI.Quartz",
     "src/Vello/FerroUI.Vello",
     "src/ProGPU/FerroUI.ProGPU",
     "src/HarfBuzz/FerroUI.HarfBuzz",
@@ -170,6 +177,7 @@ members = [
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
     "tests/FerroUI.RenderBackends.Comparison",
+    "tests/FerroUI.Rendering.Benchmarks",
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
     "tests/FerroUI.TreeDataGrid.Benchmarks",
@@ -179,6 +187,7 @@ members = [
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
     "samples/HelloWorld",
+    "samples/GauntletBenchmark",
     "samples/ProTranslateDemo",
     "samples/HelloWorld.Builders",
     "samples/HelloWorld.Macros",
@@ -285,6 +294,8 @@ ferroui-media-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Medi
 ferroui-media-video-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Video.Browser" }
 ferroui-media-camera-browser = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Camera.Browser" }
 ferroui-media = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media" }
+ferroui-media3d = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media3D" }
+ferroui-render3d = { version = "=0.5.0-preview.1", path = "src/FerroUI.Rendering3D" }
 ferroui-media-metal = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Metal" }
 ferroui-media-opengl = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.OpenGL" }
 ferroui-media-android = { version = "=0.5.0-preview.1", path = "src/FerroUI.Media.Android" }
@@ -371,7 +382,7 @@ ferroui-win32 = { version = "=0.5.0-preview.1", path = "src/Windows/FerroUI.Win3
 ferroui-desktop = { version = "=0.5.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.5.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-wayland = { version = "=0.5.0-preview.1", path = "src/FerroUI.Wayland" }
-ferroui-ios = { version = "=0.5.0-preview.1", path = "src/iOS/FerroUI.iOS" }
+ferroui-ios = { version = "=0.5.0-preview.1", path = "src/iOS/FerroUI.iOS", default-features = false }
 ferroui-freedesktop = { version = "=0.5.0-preview.1", path = "src/FerroUI.FreeDesktop" }
 ferroui-android = { version = "=0.5.0-preview.1", path = "src/Android/FerroUI.Android" }
 ferroui-browser = { version = "=0.5.0-preview.1", path = "src/Browser/FerroUI.Browser" }
@@ -404,6 +415,7 @@ ferroui-opengl = { version = "=0.5.0-preview.1", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.5.0-preview.1", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.5.0-preview.1", path = "src/FerroUI.Remote.Protocol" }
 ferroui-designer-support = { version = "=0.5.0-preview.1", path = "src/FerroUI.DesignerSupport" }
+ferroui-quartz = { version = "=0.5.0-preview.1", path = "src/Quartz/FerroUI.Quartz" }
 ferroui-skia = { version = "=0.5.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.5.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-progpu = { version = "=0.5.0-preview.1", path = "src/ProGPU/FerroUI.ProGPU" }
@@ -539,17 +551,28 @@ getrandom = { version = "0.4" }
 
 # The default release build is the one that is built most often, so it is set up for build time:
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
+# It aborts on panic, as `dist` does (#567, docs/binary-size.md, section 4.7): no framework path
+# relies on catching a panic, and unwinding tables and landing pads are a fifth of an executable.
 [profile.release]
 lto = "thin"
+panic = "abort"
+
+# `release` with unwinding, for a program that catches panics to carry on (a plug-in host, a tool
+# that isolates the code it runs). Tests and benchmarks unwind in every profile.
+[profile.release-unwind]
+inherits = "release"
+panic = "unwind"
 
 # Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
 # the optimisation level of release, without link-time optimisation across crates. The last step
 # of an executable then links the optimised crates instead of optimising the whole program again,
 # which took most of a release build of a large application. Not for measurements or shipping:
-# the benchmarks are measured with release, and what is shipped is built with dist.
+# the benchmarks are measured with release, and what is shipped is built with dist. It unwinds:
+# the Designer and the previewer, run this way, isolate the code of the previewed application.
 [profile.fast-release]
 inherits = "release"
 lto = false
+panic = "unwind"
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are
@@ -563,11 +586,45 @@ lto = false
 # then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
 # symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
 # release profile for a backtrace with names.
+#
+# Without unwinding (`panic = "abort"`, docs/binary-size.md, section 4.7, #567): a panic ends the
+# process, after the panic hook has run. The unwind tables and the landing pads are left out: hello
+# world's executable is 21 % smaller. No production path of the framework carries an expected
+# error as a panic (docs/porting/panics-as-exceptions.md); what a catch of a panic still isolates
+# is a bug, which then ends the process instead of being logged. The development tools that isolate
+# the code of the application they inspect (the Designer, the previewer, hot reload, DevTools) are
+# built with `dev`, `release` or `dist-unwind`. Cargo ignores the setting for tests, benches, build
+# scripts and procedural macros, which always unwind.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
 strip = "symbols"
+panic = "abort"
+
+# The shipped build with unwinding: `dist` with `panic = "unwind"`, for an application that catches
+# panics to carry on (a plug-in host, a tool that isolates the code it runs).
+[profile.dist-unwind]
+inherits = "dist"
+panic = "unwind"
+
+# Compiled theme markup runs once, when a theme is constructed, and is a large share of an
+# executable: the theme crates are optimised for size in the shipped build (#581). Their start-up
+# cost is within noise (docs/binary-size.md, section 4.14).
+[profile.dist.package.ferroui-themes-winui]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-fluent]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-simple]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-macos]
+opt-level = "z"
+
+[profile.dist.package.ferroui-themes-material]
+opt-level = "z"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).

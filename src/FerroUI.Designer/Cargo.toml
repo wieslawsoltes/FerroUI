@@ -34,7 +34,7 @@ ferroui-harfbuzz = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-mcp = { workspace = true, optional = true }
 serde = "1"
-ferroui-base.workspace = true
+ferroui-base = { workspace = true, features = ["full-themes"] }
 ferroui-controls.workspace = true
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
 ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets"] }

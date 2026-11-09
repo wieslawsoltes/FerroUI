@@ -45,6 +45,9 @@ impl BrowserBridge {
     }
 }
 fn guarded(f: impl FnOnce() -> Vec<serde_json::Value>) -> String {
+    // Boundary (#567): a JavaScript callback (FFI); a command reaches application handlers and
+    // must not unwind into the closure. Isolating them needs a build that unwinds, which
+    // `wasm32-unknown-unknown` is not by default: there a panic aborts the module.
     let messages = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).unwrap_or_else(|_| {
         vec![
             serde_json::json!({"id":null,"error":{"code":-32603,"message":"The command panicked"}}),

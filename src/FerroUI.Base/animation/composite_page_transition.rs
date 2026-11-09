@@ -51,14 +51,17 @@ impl IPageTransition for CompositePageTransition {
             for task in transition_tasks {
                 match task.await {
                     Ok(()) => {}
-                    // A failed transition fails the composite with its panic.
-                    Err(JoinError::Panicked(payload)) => std::panic::resume_unwind(payload),
+                    // A failed transition fails the composite with its failure (the payload of
+                    // its panic, or the error it reported), without a panic (#567).
+                    Err(error @ JoinError::Panicked(_)) => return Err(error),
                     Err(JoinError::Canceled) => canceled = true,
                 }
             }
             if canceled {
-                panic!("{}", crate::threading::Canceled);
+                // The payload a `panic!` with the message had (#567).
+                return Err(JoinError::Panicked(Box::new(crate::threading::Canceled.to_string())));
             }
+            Ok(())
         })
     }
 

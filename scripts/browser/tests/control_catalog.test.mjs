@@ -5,8 +5,8 @@
 //
 // The site directory defaults to target/browser/control-catalog-browser. The checks:
 //
-// - no file of the site (the asset files included) carries a brand asset of the upstream project that
-//   samples/ControlCatalog/PlaceholderAssets replaces;
+// - no file of the site (the asset files included) carries a brand asset of the upstream project, and
+//   the site carries the artwork of the catalog (samples/ControlCatalog/Assets) in their place;
 // - once for WebGL2 (`?RenderingMode=WebGL2`) and once for the 2D canvas (`?RenderingMode=Software2D`):
 //   the application starts (the splash is closed and the view has a canvas), the canvas has the
 //   context of the mode, the main view is drawn (the canvas is not blank), the view is laid out again
@@ -31,7 +31,7 @@
 //   and nothing requests a bundle (`.assets`); with that prefetch off (`?PrefetchAssets=false`), opening
 //   the Container Queries page downloads exactly its files and its images have their bitmaps and are
 //   drawn, and the CJK sample of the TextBox page finds its font (the typeface the font manager resolves
-//   is WenQuanYi Micro Hei) and draws its glyphs.
+//   is WenQuanYi Micro Hei, from the subset of the start-up files) and draws its glyphs.
 //
 // The view is read through the `catalogState` export of the host (samples/ControlCatalog.Browser),
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
@@ -67,6 +67,7 @@
 // canvas, and one more check, that this backend is the one that draws.
 //
 // With --screenshot the picture of the WebGL2 run at the first size is written to the given file.
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -174,47 +175,36 @@ const check = (name, body, options) => checks.push([name, async () => {
 
 // --- branding --------------------------------------------------------------------------------------
 
+// The SHA-256 of the brand assets of the upstream sample that the artwork of the catalog stands in for
+// (samples/ControlCatalog/Assets, drawn by scripts/browser/render-placeholder-assets.mjs).
+const UPSTREAM_BRAND_ASSETS = {
+    "banner-bg.png": "1a612161a1914255d0f65383dcb9e11f9c849f4548f0e6646af61337dd9bec40",
+    "banner-logo.png": "252457715b72a5e92723f7d566b310e09f2a795608453837ae028a8f4ee16ee5",
+    "icon-32.png": "6c63a76f1ffd6452fc8aff65ca396e8e3af05048f8c9be989dc320ff7805964c",
+    "icon.ico": "f2dda9899283b7c200f0c41f614fe81ee2620d15beb886ecd3a90e6c1878e46b",
+    "logo1.png": "db9b41a499b1d76197f6b8f34733a95f568aef1831350a255f85650441a6da0c",
+    "logo2.png": "033dfc85e9bec3a2d4d3679c7f9cfac9c956124c7e090805d1bec37d0733d418",
+    "logo3.png": "ee2631b41e70e27b9ba099c2aad19bd6f5ebec06c7614b33205602128e1c39b8",
+    "logo4.png": "1cdbd0a4fb6469ca68396c192325d73f3d5c571c6162a3a4e721f2871b9cd700",
+};
+
 /**
- * The site must not carry the brand assets of the upstream project that samples/ControlCatalog/PlaceholderAssets
- * replaces: neither the bytes of a replaced asset nor the path data of a replaced geometry resource may
- * appear in a file of the site.
+ * The site carries the artwork of the catalog, not the brand assets of the upstream sample: no file of the
+ * site has the content of one of them, and each file of the artwork is in the site as the catalog has it.
  */
-checks.push(["the site carries none of the replaced brand assets", async () => {
+checks.push(["the site carries the artwork of the catalog and none of the upstream brand assets", async () => {
     const catalog = path.join(root, "samples", "ControlCatalog");
-    const placeholders = path.join(catalog, "PlaceholderAssets");
     const published = fs.readdirSync(site, { recursive: true }).map((name) => path.join(site, name))
-        .filter((file) => fs.statSync(file).isFile()).map((file) => fs.readFileSync(file));
-    const shipped = (needle) => published.some((content) => content.indexOf(needle) >= 0);
-    const found = [];
-    let compared = 0;
-
-    for (const name of fs.readdirSync(placeholders)) {
-        const original = path.join(catalog, "Assets", name);
-        if (!fs.existsSync(original) || !fs.statSync(original).isFile()) { continue; }
-        // A run of bytes from the middle of the file: long enough to be unique to it.
-        const bytes = fs.readFileSync(original);
-        const length = Math.min(256, Math.floor(bytes.length / 2));
-        const middle = Math.floor((bytes.length - length) / 2);
-        compared++;
-        if (shipped(bytes.subarray(middle, middle + length))) { found.push(`Assets/${name}`); }
-    }
-
-    const geometries = path.join(placeholders, "StreamGeometry");
-    const documents = fs.readdirSync(catalog, { recursive: true }).filter((name) => name.endsWith(".xaml"))
-        .map((name) => fs.readFileSync(path.join(catalog, name), "utf8"));
-    for (const file of fs.readdirSync(geometries).filter((name) => name.endsWith(".txt"))) {
-        const key = file.slice(0, -".txt".length);
-        const opening = `<StreamGeometry x:Key="${key}">`;
-        for (const document of documents) {
-            for (let at = document.indexOf(opening); at >= 0; at = document.indexOf(opening, at + 1)) {
-                const data = document.slice(at + opening.length, document.indexOf("</StreamGeometry>", at)).trim();
-                compared++;
-                if (shipped(Buffer.from(data))) { found.push(`the path data of the resource ${key}`); }
-            }
-        }
-    }
-    assert(compared > 0, "no replaced asset was found to compare");
-    assert(found.length === 0, `the site carries ${found.join(", ")}`);
+        .filter((file) => fs.statSync(file).isFile());
+    const digest = (content) => crypto.createHash("sha256").update(content).digest("hex");
+    const upstream = new Set(Object.values(UPSTREAM_BRAND_ASSETS));
+    const found = published.filter((file) => upstream.has(digest(fs.readFileSync(file)))).map((file) => path.relative(site, file));
+    assert(found.length === 0, `the site carries brand assets of the upstream sample: ${found.join(", ")}`);
+    const differing = Object.keys(UPSTREAM_BRAND_ASSETS).filter((name) => {
+        const shipped = path.join(site, "assets", "ControlCatalog", "Assets", name);
+        return !fs.existsSync(shipped) || !fs.readFileSync(shipped).equals(fs.readFileSync(path.join(catalog, "Assets", name)));
+    });
+    assert(differing.length === 0, `the site does not carry the artwork of the catalog: ${differing.join(", ")}`);
 }]);
 
 // --- rendering and resize, per rendering mode ---------------------------------------------------------
@@ -596,7 +586,9 @@ async function fileRequests(page) {
 
 check("the start-up downloads the start-up files only; the other files follow the first frame, each once", async (page) => {
     const others = Object.keys(manifest.files).filter((asset) => !manifest.startup.includes(asset));
-    assert(others.length >= 20 && manifest.prefetch.length === others.length && new Set(manifest.prefetch).size === others.length,
+    // The pictures, the fonts and the other files of the pages: fewer than 20 since the galleries of
+    // NavigationPage, CarouselPage and DrawerPage show the controls only, without sample applications.
+    assert(others.length >= 10 && manifest.prefetch.length === others.length && new Set(manifest.prefetch).size === others.length,
         `the manifest lists ${others.length} files besides the start-up files, and prefetches ${manifest.prefetch.length}`);
     await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 120_000);
     const { resources, bundles, requests, marks } = await fileRequests(page);
@@ -653,8 +645,9 @@ check("the CJK sample of the TextBox page finds its font and draws its glyphs", 
     await navigate(page, "TextBox");
     const { requests } = await fileRequests(page);
     const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name);
-    assert(manifest.pages.TextBox.includes("/Assets/Fonts/WenQuanYiMicroHei-01.ttf") && manifest.pages.TextBox.every((name) => fetched.includes(name)),
-        `the TextBox page fetched ${fetched.join(", ")}`);
+    // The sample names the CJK subset of the catalog (Assets/FallbackFonts), which is a start-up file.
+    assert(manifest.startup.includes("/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf"), "the CJK subset is not a start-up file");
+    assert(manifest.pages.TextBox.every((name) => fetched.includes(name)), `the TextBox page fetched ${fetched.join(", ")}`);
     await page.clickElement(await page.find("Fonts and Complex Scripts", inContent));
     await page.until("the sample is shown", (s) => !s.navigating && s.elements.some((e) => e.text === "Complex scripts" || (e.type === "TextBox" && inContent(e))));
     const isCjk = (e) => e.type === "TextBox" && e.text?.startsWith("计算机科学") && e.x >= DRAWER_EDGE;
@@ -748,16 +741,26 @@ if (threaded) {
     }, { query: `&${ONE_THREAD}` });
 
     // A frame that panics on the render thread is caught by the render loop there (as upstream's
-    // loop catches the exception of a frame). Nothing of it would reach the page by itself: the
-    // platform queues a call for the thread of the page, which logs the message as an error.
-    check("a frame that panics on the render thread is an error of the page, and the frames go on", async (page) => {
+    // loop catches the exception of a frame) when the module unwinds. Nothing of it would reach the
+    // page by itself: the platform queues a call for the thread of the page, which logs the message
+    // as an error. A module built with the `browser` profile aborts on panic, as `release` and
+    // `dist` do (#567): the panic is reported the same way, and then the render worker stops.
+    check("a frame that panics on the render thread is an error of the page; the frames go on when the module unwinds", async (page) => {
         await navigate(page, "Basic Input");
         const before = await page.rendering();
         assert(page.errors.length === 0, `errors were logged before the panic:\n${page.errors.join("\n")}`);
+        const unwinds = await page.evaluate("controlCatalog.catalogUnwinds()");
         assert(await page.evaluate("controlCatalog.catalogPanicInFrame()") === true, "the job that panics was not posted");
         const reported = (line) => line.includes("the render thread panicked") && line.includes("catalogPanicInFrame");
         for (const end = Date.now() + STATE_TIMEOUT; Date.now() < end && !page.errors.some(reported); await sleep(100)) { }
         assert(page.errors.some(reported), `the page logged no error for the panic; its errors:\n${page.errors.join("\n")}\nits log ends:\n${page.log.slice(-6).join("\n")}`);
+        if (!unwinds) {
+            const trapped = (line) => line.includes("unreachable");
+            for (const end = Date.now() + STATE_TIMEOUT; Date.now() < end && !page.errors.some(trapped); await sleep(100)) { }
+            assert(page.errors.some(trapped), `the aborting render worker did not stop at the panic; errors:\n${page.errors.join("\n")}`);
+            measured(`the page logged: ${page.errors.find(reported).slice(0, 200)}`);
+            return;
+        }
         const panics = await page.evaluate("JSON.stringify(controlCatalogPanics())");
         assert(JSON.parse(panics).length === 1 && JSON.parse(panics)[0].includes("catalogPanicInFrame"), `the script of the platform kept ${panics}`);
         assert((await page.rendering()).panics === "1", `the panic was not counted: ${JSON.stringify(await page.rendering())}`);

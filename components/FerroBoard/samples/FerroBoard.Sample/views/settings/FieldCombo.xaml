@@ -1,0 +1,8 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      RowDefinitions="Auto,Auto">
+ <TextBlock x:Name="Header" TextWrapping="Wrap" VerticalAlignment="Top"
+            Foreground="{DynamicResource TextControlForeground}"
+            Margin="0,0,0,8" IsHitTestVisible="False" FontWeight="Normal" LineHeight="20"/>
+ <ComboBox x:Name="Value" Grid.Row="1" HorizontalAlignment="Stretch"/>
+</Grid>

@@ -15,9 +15,28 @@ use hello_world::App;
 
 fn main() -> std::process::ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let exit_code = AppBuilder::configure::<App>()
+    let builder = AppBuilder::configure::<App>();
+    #[cfg(all(target_os = "macos", feature = "quartz"))]
+    let builder = builder.with(std::rc::Rc::new(
+        ferroui_native::FerroNativePlatformOptions {
+            rendering_mode: vec![if cfg!(feature = "quartz-metal") {
+                ferroui_native::FerroNativeRenderingMode::Metal
+            } else {
+                ferroui_native::FerroNativeRenderingMode::Software
+            }],
+            ..Default::default()
+        },
+    ));
+    let exit_code = builder
         .use_platform_detect()
         .after_setup(|_| sample_support::smoke_run())
         .start_with_classic_desktop_lifetime(&args);
+    #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
+    if std::env::var_os("FERROUI_METAL_STATS").is_some() {
+        eprintln!(
+            "Quartz Metal [surfaces, paths, images, presents, readbacks, uploads, errors]: {:?}",
+            ferroui_quartz::metal_statistics()
+        );
+    }
     std::process::ExitCode::from(exit_code as u8)
 }

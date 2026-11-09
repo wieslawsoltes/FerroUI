@@ -7,7 +7,7 @@ use crate::navigation::{
 };
 use crate::primitives::TemplatedControlImpl;
 use crate::testing::TestLogSink;
-use crate::{Button, ContentControlImpl, ControlImpl, Frame, FramePage, FramePageImpl};
+use crate::{Button, ContentControlImpl, ControlImpl, Frame, FramePage, FramePageImpl, PageType};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -61,6 +61,27 @@ page_type!(FirstPage);
 page_type!(SecondPage);
 page_type!(ThirdPage);
 
+/// The page types of the test pages, made in a constant context.
+const FIRST: PageType = PageType::of::<FirstPage>();
+const SECOND: PageType = PageType::of::<SecondPage>();
+const THIRD: PageType = PageType::of::<ThirdPage>();
+
+/// A page class without a default constructor: navigating to it is possible only through its
+/// runtime type, which has no constructor to create it with.
+#[allow(dead_code)]
+#[repr(C)]
+struct NoConstructorPage {
+    base: FramePage,
+}
+ferro_class!(NoConstructorPage: FramePage);
+ferro_impl_classes!(NoConstructorPage: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
+    InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
+impl FramePageImpl for NoConstructorPage {
+    fn on_navigating_from(_this: &Self, _args: &NavigatingCancelEventArgs) {}
+    fn on_navigated_from(_this: &Self, _args: &NavigationEventArgs) {}
+    fn on_navigated_to(_this: &Self, _args: &NavigationEventArgs) {}
+}
+
 fn frame() -> Ref<Frame> {
     crate::register_types();
     events();
@@ -70,7 +91,7 @@ fn frame() -> Ref<Frame> {
 
 fn factory(
     frame: &Frame,
-    ty: &'static TypeInfo,
+    ty: PageType,
     mode: NavigationCacheMode,
     count: Rc<Cell<usize>>,
 ) {
@@ -79,7 +100,7 @@ fn factory(
             ty,
             Rc::new(move || {
                 count.set(count.get() + 1);
-                let page = ty.create_instance().unwrap().cast::<FramePage>().unwrap();
+                let page = ty.create()?;
                 page.set_navigation_cache_mode(mode);
                 Ok(page)
             }),
@@ -117,7 +138,7 @@ fn virtual_callbacks_follow_frame_event_order_and_parameters_survive_history() {
     frame.navigated(|_| record("Frame.Navigated")).detach();
     let parameter: BoxedValue = Rc::new("first parameter".to_string());
     assert!(frame
-        .navigate(FirstPage::TYPE, Some(parameter.clone()))
+        .navigate(FIRST, Some(parameter.clone()))
         .unwrap());
     assert_eq!(
         events(),
@@ -127,7 +148,7 @@ fn virtual_callbacks_follow_frame_event_order_and_parameters_survive_history() {
             "FirstPage.NavigatedTo"
         ]
     );
-    assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
+    assert!(frame.navigate(SECOND, None).unwrap());
     assert_eq!(
         events(),
         [
@@ -141,31 +162,31 @@ fn virtual_callbacks_follow_frame_event_order_and_parameters_survive_history() {
     assert_eq!(frame.back_stack_depth(), 1);
     assert_eq!(
         frame.back_stack().get(0).unwrap().source_page_type(),
-        FirstPage::TYPE
+        FIRST
     );
     assert!(Rc::ptr_eq(
         &frame.back_stack().get(0).unwrap().parameter().unwrap(),
         &parameter
     ));
     frame.go_back().unwrap();
-    assert_eq!(frame.current_source_page_type(), Some(FirstPage::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(FIRST));
     assert!(!frame.can_go_back());
     assert!(frame.can_go_forward());
     assert_eq!(
         frame.forward_stack().get(0).unwrap().source_page_type(),
-        SecondPage::TYPE
+        SECOND
     );
     frame.go_forward().unwrap();
-    assert_eq!(frame.current_source_page_type(), Some(SecondPage::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(SECOND));
     frame.go_back().unwrap();
-    frame.navigate(ThirdPage::TYPE, None).unwrap();
+    frame.navigate(THIRD, None).unwrap();
     assert!(!frame.can_go_forward());
 }
 
 #[test]
 fn frame_cancellation_stops_before_page_callback_and_accepts_request() {
     let frame = frame();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let old = frame.current_page().unwrap();
     events();
     frame.navigating(|args| {
@@ -177,7 +198,7 @@ fn frame_cancellation_stops_before_page_callback_and_accepts_request() {
         assert!(args.content().is_none());
         record("Frame.Stopped");
     }).detach();
-    assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
+    assert!(frame.navigate(SECOND, None).unwrap());
     assert_eq!(frame.current_page(), Some(old));
     assert_eq!(frame.back_stack_depth(), 0);
     assert_eq!(events(), ["Frame.Cancel", "Frame.Stopped"]);
@@ -186,13 +207,13 @@ fn frame_cancellation_stops_before_page_callback_and_accepts_request() {
 #[test]
 fn page_cancellation_is_virtual_and_does_not_commit_history() {
     let frame = frame();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     events();
     CANCEL_PAGE.with(|cancel| cancel.set(true));
     frame.navigation_stopped(|_| record("Stopped")).detach();
-    assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
+    assert!(frame.navigate(SECOND, None).unwrap());
     assert_eq!(events(), ["FirstPage.NavigatingFrom", "Stopped"]);
-    assert_eq!(frame.current_source_page_type(), Some(FirstPage::TYPE));
+    assert_eq!(frame.current_source_page_type(), Some(FIRST));
     assert_eq!(frame.back_stack_depth(), 0);
 }
 
@@ -202,7 +223,7 @@ fn navigation_is_not_reentrant_and_history_edits_are_rejected_while_pending() {
     let weak = frame.downgrade();
     frame.navigating(move |_| {
         let frame = weak.upgrade().unwrap();
-        assert!(!frame.navigate(ThirdPage::TYPE, None).unwrap());
+        assert!(!frame.navigate(THIRD, None).unwrap());
         assert!(frame.go_back().is_ok());
         assert_eq!(
             frame.back_stack().clear(),
@@ -211,20 +232,20 @@ fn navigation_is_not_reentrant_and_history_edits_are_rejected_while_pending() {
         assert_eq!(
             frame
                 .back_stack()
-                .add(PageStackEntry::new(ThirdPage::TYPE, None)),
+                .add(PageStackEntry::new(THIRD, None)),
             Err(NavigationError::NavigationPending)
         );
     }).detach();
     let weak = frame.downgrade();
     frame.navigated(move |_| {
         let frame = weak.upgrade().unwrap();
-        assert!(!frame.navigate(ThirdPage::TYPE, None).unwrap());
+        assert!(!frame.navigate(THIRD, None).unwrap());
         // Journal edits are allowed after its commit, even though nested navigation is not.
         frame.forward_stack().clear().unwrap();
     }).detach();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
-    frame.navigate(SecondPage::TYPE, None).unwrap();
-    assert_eq!(frame.current_source_page_type(), Some(SecondPage::TYPE));
+    frame.navigate(FIRST, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
+    assert_eq!(frame.current_source_page_type(), Some(SECOND));
     assert_eq!(frame.back_stack_depth(), 1);
 }
 
@@ -237,7 +258,7 @@ fn history_handles_are_live_observable_and_mutations_update_properties() {
     let count = changes.clone();
     stack.add_collection_changed(Rc::new(move |_| count.set(count.get() + 1)));
     stack
-        .add(PageStackEntry::new(FirstPage::TYPE, None))
+        .add(PageStackEntry::new(FIRST, None))
         .unwrap();
     assert!(frame.can_go_back());
     assert_eq!(frame.back_stack_depth(), 1);
@@ -263,7 +284,7 @@ fn a_journal_is_a_live_items_source_and_bindings_keep_its_mutation_guards() {
     assert_eq!(source.count(), 0);
     assert!(source.list().as_any().is::<NavigationStack>());
     stack
-        .add(PageStackEntry::new(FirstPage::TYPE, None))
+        .add(PageStackEntry::new(FIRST, None))
         .unwrap();
     assert_eq!(source.count(), 1);
     let boxed: BoxedValue = Rc::new(stack);
@@ -277,7 +298,7 @@ fn a_journal_is_a_live_items_source_and_bindings_keep_its_mutation_guards() {
 fn history_entries_cannot_belong_to_two_frames_and_removed_entries_can_move() {
     let a = frame();
     let b = Frame::new();
-    let entry = PageStackEntry::new(FirstPage::TYPE, None);
+    let entry = PageStackEntry::new(FIRST, None);
     a.back_stack().add(entry.clone()).unwrap();
     assert_eq!(
         b.back_stack().add(entry.clone()),
@@ -303,7 +324,7 @@ fn property_handlers_can_edit_history_without_overwriting_the_newer_state() {
     });
     frame
         .back_stack()
-        .add(PageStackEntry::new(FirstPage::TYPE, None))
+        .add(PageStackEntry::new(FIRST, None))
         .unwrap();
     assert!(frame.back_stack().is_empty());
     assert!(!frame.can_go_back());
@@ -313,9 +334,9 @@ fn property_handlers_can_edit_history_without_overwriting_the_newer_state() {
 #[test]
 fn setting_the_same_source_type_does_not_navigate_twice() {
     let frame = frame();
-    frame.set_source_page_type(Some(FirstPage::TYPE)).unwrap();
+    frame.set_source_page_type(Some(FIRST)).unwrap();
     let page = frame.current_page();
-    frame.set_source_page_type(Some(FirstPage::TYPE)).unwrap();
+    frame.set_source_page_type(Some(FIRST)).unwrap();
     assert_eq!(frame.current_page(), page);
     assert_eq!(frame.back_stack_depth(), 0);
 }
@@ -326,28 +347,28 @@ fn disabled_cache_constructs_each_visit_and_enabled_cache_is_per_type() {
     let count = Rc::new(Cell::new(0));
     factory(
         &frame,
-        FirstPage::TYPE,
+        FIRST,
         NavigationCacheMode::Disabled,
         count.clone(),
     );
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let first = frame.current_page().unwrap();
-    frame.navigate(SecondPage::TYPE, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
     frame.go_back().unwrap();
     assert_ne!(frame.current_page(), Some(first));
     assert_eq!(count.get(), 2);
     factory(
         &frame,
-        FirstPage::TYPE,
+        FIRST,
         NavigationCacheMode::Enabled,
         count.clone(),
     );
     frame
-        .navigate(FirstPage::TYPE, Some(Rc::new(1_i32)))
+        .navigate(FIRST, Some(Rc::new(1_i32)))
         .unwrap();
     let cached = frame.current_page().unwrap();
     frame
-        .navigate(FirstPage::TYPE, Some(Rc::new(2_i32)))
+        .navigate(FIRST, Some(Rc::new(2_i32)))
         .unwrap();
     assert_eq!(frame.current_page(), Some(cached));
     assert_eq!(count.get(), 3);
@@ -358,18 +379,18 @@ fn enabled_cache_is_lru_and_required_entries_survive_shrinking() {
     let frame = frame();
     frame.set_cache_size(2).unwrap();
     let count = Rc::new(Cell::new(0));
-    for ty in [FirstPage::TYPE, SecondPage::TYPE, ThirdPage::TYPE] {
+    for ty in [FIRST, SECOND, THIRD] {
         factory(&frame, ty, NavigationCacheMode::Enabled, count.clone());
     }
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let first = frame.current_page().unwrap();
-    frame.navigate(SecondPage::TYPE, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
     let second = frame.current_page().unwrap();
-    frame.navigate(FirstPage::TYPE, None).unwrap(); // First is most recently used.
-    frame.navigate(ThirdPage::TYPE, None).unwrap(); // Second is evicted.
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap(); // First is most recently used.
+    frame.navigate(THIRD, None).unwrap(); // Second is evicted.
+    frame.navigate(FIRST, None).unwrap();
     assert_eq!(frame.current_page(), Some(first));
-    frame.navigate(SecondPage::TYPE, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
     assert_ne!(frame.current_page(), Some(second));
     assert_eq!(count.get(), 4);
 
@@ -377,15 +398,15 @@ fn enabled_cache_is_lru_and_required_entries_survive_shrinking() {
     frame.set_cache_size(1).unwrap();
     factory(
         &frame,
-        FirstPage::TYPE,
+        FIRST,
         NavigationCacheMode::Required,
         count.clone(),
     );
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let required = frame.current_page().unwrap();
     frame.set_cache_size(0).unwrap();
-    frame.navigate(SecondPage::TYPE, None).unwrap();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     assert_eq!(frame.current_page(), Some(required));
 }
 
@@ -396,44 +417,44 @@ fn zero_capacity_blocks_new_required_admission_and_disabled_mode_uncaches() {
     let count = Rc::new(Cell::new(0));
     factory(
         &frame,
-        FirstPage::TYPE,
+        FIRST,
         NavigationCacheMode::Required,
         count.clone(),
     );
-    frame.navigate(FirstPage::TYPE, None).unwrap();
-    frame.navigate(SecondPage::TYPE, None).unwrap();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     assert_eq!(count.get(), 2);
     frame.set_cache_size(10).unwrap();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     frame
         .current_page()
         .unwrap()
         .set_navigation_cache_mode(NavigationCacheMode::Disabled);
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     assert_eq!(count.get(), 4);
 }
 
 #[test]
 fn failures_preserve_content_history_and_allow_retry() {
     let frame = frame();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let old = frame.current_page();
     frame
         .register_page_factory(
-            SecondPage::TYPE,
+            SECOND,
             Rc::new(|| Err(NavigationError::FactoryFailed("construction failed".into()))),
         )
         .unwrap();
-    assert!(frame.navigate(SecondPage::TYPE, None).is_err());
+    assert!(frame.navigate(SECOND, None).is_err());
     assert_eq!(frame.current_page(), old);
     assert_eq!(frame.back_stack_depth(), 0);
     frame.navigation_failed(|args| {
         args.clone().set_handled(true);
     }).detach();
-    assert!(!frame.navigate(SecondPage::TYPE, None).unwrap());
-    frame.unregister_page_factory(SecondPage::TYPE);
-    assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
+    assert!(!frame.navigate(SECOND, None).unwrap());
+    frame.unregister_page_factory(SECOND);
+    assert!(frame.navigate(SECOND, None).unwrap());
     assert!(frame.can_go_back());
     assert_eq!(
         frame.set_cache_size(-1),
@@ -444,7 +465,7 @@ fn failures_preserve_content_history_and_allow_retry() {
         Err(NavigationError::MissingSourcePageType)
     );
     assert!(matches!(
-        frame.register_page_factory(Button::TYPE, Rc::new(|| Ok(FramePage::new()))),
+        frame.register_page_factory(PageType::from(Button::TYPE), Rc::new(|| Ok(FramePage::new()))),
         Err(NavigationError::NotAPage(_))
     ));
 }
@@ -452,19 +473,20 @@ fn failures_preserve_content_history_and_allow_retry() {
 #[test]
 fn disabled_journal_changes_content_without_committing_history_or_source_type() {
     let frame = frame();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let options = FrameNavigationOptions::new();
     options.set_is_navigation_stack_enabled(false);
     frame
-        .navigate_to_type(SecondPage::TYPE, None, &options)
+        .navigate_to_type(SECOND, None, &options)
         .unwrap();
-    assert_eq!(frame.current_page().unwrap().get_type(), SecondPage::TYPE);
-    assert_eq!(frame.current_source_page_type(), Some(FirstPage::TYPE));
+    assert!(SECOND.is_assignable_from(frame.current_page().unwrap().get_type()));
+    assert!(frame.current_page().unwrap().is::<SecondPage>());
+    assert_eq!(frame.current_source_page_type(), Some(FIRST));
     assert_eq!(frame.back_stack_depth(), 0);
-    frame.navigate(ThirdPage::TYPE, None).unwrap();
+    frame.navigate(THIRD, None).unwrap();
     assert_eq!(
         frame.back_stack().get(0).unwrap().source_page_type(),
-        FirstPage::TYPE
+        FIRST
     );
     assert_eq!(frame.back_stack_depth(), 1);
 }
@@ -473,7 +495,7 @@ fn disabled_journal_changes_content_without_committing_history_or_source_type() 
 fn page_and_journal_handles_do_not_keep_a_frame_alive() {
     let frame = frame();
     let weak = frame.downgrade();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let page = frame.current_page().unwrap();
     let stack = frame.back_stack();
     assert_eq!(page.frame(), Some(frame.clone()));
@@ -482,7 +504,7 @@ fn page_and_journal_handles_do_not_keep_a_frame_alive() {
     assert!(page.frame().is_none());
     // A detached journal remains a valid observable collection with no dangling owner.
     stack
-        .add(PageStackEntry::new(SecondPage::TYPE, None))
+        .add(PageStackEntry::new(SECOND, None))
         .unwrap();
     assert_eq!(stack.count(), 1);
 }
@@ -530,7 +552,7 @@ fn a_negative_cache_size_from_markup_is_coerced_to_zero_and_logged() {
 #[test]
 fn an_invalid_source_page_type_from_markup_is_logged() {
     let frame = frame();
-    frame.navigate(FirstPage::TYPE, None).unwrap();
+    frame.navigate(FIRST, None).unwrap();
     let page = frame.current_page();
     let warnings = Rc::new(Cell::new(0));
     let counter = warnings.clone();
@@ -539,17 +561,103 @@ fn an_invalid_source_page_type_from_markup_is_logged() {
             counter.set(counter.get() + 1);
         }
     });
-    let none: Option<&'static TypeInfo> = None;
+    let none: Option<PageType> = None;
     frame.set_value_untyped(Frame::source_page_type_property().as_property(), &none, BindingPriority::LocalValue);
-    let not_a_page: Option<&'static TypeInfo> = Some(Button::TYPE);
+    let not_a_page: Option<PageType> = Some(PageType::from(Button::TYPE));
     frame.set_value_untyped(Frame::source_page_type_property().as_property(), &not_a_page, BindingPriority::LocalValue);
     assert_eq!(2, warnings.get());
     assert_eq!(frame.current_page(), page);
-    assert_eq!(frame.source_page_type(), Some(FirstPage::TYPE));
+    assert_eq!(frame.source_page_type(), Some(FIRST));
     // A page type navigates.
-    let second: Option<&'static TypeInfo> = Some(SecondPage::TYPE);
+    let second: Option<PageType> = Some(SECOND);
     frame.set_value_untyped(Frame::source_page_type_property().as_property(), &second, BindingPriority::LocalValue);
-    assert_eq!(frame.source_page_type(), Some(SecondPage::TYPE));
+    assert_eq!(frame.source_page_type(), Some(SECOND));
     assert_eq!(2, warnings.get());
     sink.dispose();
+}
+
+/// A page type compares and hashes by the identity of its class (B3 of #612): the same class gives
+/// equal page types whether it is named statically or converted from its runtime type.
+#[test]
+fn page_types_compare_and_hash_by_the_identity_of_the_class() {
+    use std::collections::HashSet;
+    assert_eq!(FIRST, PageType::of::<FirstPage>());
+    assert_ne!(FIRST, SECOND);
+    assert_eq!(FIRST, PageType::from(FirstPage::TYPE));
+    #[allow(deprecated)]
+    let deprecated = PageType::from_type_info(SecondPage::TYPE);
+    assert_eq!(deprecated, SECOND);
+    let set: HashSet<PageType> = [FIRST, PageType::from(FirstPage::TYPE), SECOND, THIRD].into_iter().collect();
+    assert_eq!(set.len(), 3);
+    assert!(set.contains(&PageType::from(ThirdPage::TYPE)));
+    assert_eq!(FIRST.name(), "FirstPage");
+    assert_eq!(FIRST.to_string(), "FirstPage");
+    assert_eq!(format!("{FIRST:?}"), "PageType(\"FirstPage\")");
+    assert!(FIRST.is::<FirstPage>());
+    assert!(!FIRST.is::<SecondPage>());
+    assert!(std::ptr::eq(FIRST.identity().unwrap(), <FirstPage as ferroui_base::ObjectType>::IDENTITY));
+    assert!(FIRST.create().unwrap().is::<FirstPage>());
+}
+
+/// The journal, `SourcePageType` and the arguments of the navigation events carry the page type of
+/// the navigation.
+#[test]
+fn the_journal_the_source_page_type_and_the_events_carry_the_page_type() {
+    let frame = frame();
+    let seen = Rc::new(RefCell::new(Vec::new()));
+    let navigating = seen.clone();
+    frame.navigating(move |args| navigating.borrow_mut().push(args.source_page_type())).detach();
+    let navigated = seen.clone();
+    frame.navigated(move |args| navigated.borrow_mut().push(args.source_page_type())).detach();
+    frame.navigate(FIRST, None).unwrap();
+    frame.navigate(SECOND, None).unwrap();
+    assert_eq!(*seen.borrow(), [FIRST, FIRST, SECOND, SECOND]);
+    assert_eq!(frame.source_page_type(), Some(SECOND));
+    assert_eq!(frame.current_source_page_type(), Some(SECOND));
+    assert_eq!(frame.back_stack().get(0).unwrap().source_page_type(), FIRST);
+    frame.go_back().unwrap();
+    assert_eq!(frame.forward_stack().get(0).unwrap().source_page_type(), SECOND);
+    assert_eq!(frame.current_source_page_type(), Some(FIRST));
+}
+
+/// The deprecated form of 0.5: a `&'static TypeInfo` converts to a page type that creates the page
+/// by reflection, through the default constructor of its runtime type, and markup converts the
+/// runtime type `{x:Type}` gives to a page type with the registered cast.
+#[test]
+fn a_runtime_type_converts_to_a_page_type_that_navigates() {
+    use ferroui_base::data::core::{ValueType, ValueTypes};
+    use ferroui_base::metadata::from_markup_value;
+    let frame = frame();
+    let class: &'static TypeInfo = SecondPage::TYPE;
+    assert!(frame.navigate(class, None).unwrap());
+    assert!(frame.current_page().unwrap().is::<SecondPage>());
+    assert_eq!(frame.current_source_page_type(), Some(SECOND));
+    frame.set_source_page_type(Some(PageType::from(FirstPage::TYPE))).unwrap();
+    assert!(frame.current_page().unwrap().is::<FirstPage>());
+    // The conversions of markup: the argument of `Navigate` and the value of `SourcePageType`.
+    let boxed: BoxedValue = Rc::new(ThirdPage::TYPE);
+    let cast = ValueTypes::try_cast(&boxed, ValueType::of::<PageType>()).unwrap();
+    assert_eq!(*cast.downcast_ref::<PageType>().unwrap(), THIRD);
+    let nullable = ValueTypes::try_cast(&boxed, ValueType::of::<Option<PageType>>()).unwrap();
+    assert_eq!(*nullable.downcast_ref::<Option<PageType>>().unwrap(), Some(THIRD));
+    assert_eq!(from_markup_value::<PageType>(&Some(boxed)), Some(THIRD));
+}
+
+/// A page type converted from the runtime type of a page without a default constructor fails with
+/// `MissingConstructor`, whose message names the static form and the type tables.
+#[test]
+fn a_runtime_type_without_a_default_constructor_is_a_missing_constructor() {
+    let frame = frame();
+    let page_type = PageType::from(NoConstructorPage::TYPE);
+    let error = frame.navigate(page_type, None).unwrap_err();
+    let NavigationError::MissingConstructor(name) = &error else {
+        panic!("expected MissingConstructor, got {error:?}");
+    };
+    assert!(name.ends_with("NoConstructorPage"), "{name}");
+    let message = error.to_string();
+    assert!(message.contains("PageType::of::<NoConstructorPage>()"), "{message}");
+    assert!(message.contains("type-tables"), "{message}");
+    assert!(frame.current_page().is_none());
+    assert_eq!(frame.back_stack_depth(), 0);
+    assert_eq!(page_type.create().err(), Some(error));
 }

@@ -21,4 +21,9 @@ pub use i_metal_device::{
     try_get_metal_surface, IMetalDevice, IMetalPlatformSurface, IMetalPlatformSurfaceRenderTarget,
     IMetalPlatformSurfaceRenderingSession,
 };
-pub use i_metal_external_objects_feature::{IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalSharedEvent};
+pub use i_metal_external_objects_feature::{
+    IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalSharedEvent,
+};
+
+#[cfg(all(target_os = "macos", feature = "offscreen"))]
+pub mod offscreen;

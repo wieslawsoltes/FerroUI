@@ -45,6 +45,8 @@ impl ClipboardHelper {
                 match CatchUnwind::new(operation).await {
                     Ok(Ok(())) => {}
                     Ok(Err(error)) => target.post(move || Self::throw(error), priority),
+                    // Boundary (#567): the panic of the operation leaves on the dispatcher, as the
+                    // exception of an async void method of the reference does.
                     Err(payload) => target.post(move || resume_unwind(payload), priority),
                 }
             },
@@ -95,6 +97,9 @@ impl<T> Future for CatchUnwind<T> {
             panic!("The future was polled after it completed.");
         };
 
+        // Boundary (#567): the operation runs application handlers (the pasting events) and the
+        // platform clipboard; clipboard failures are `ClipboardError` values, a panic is raised
+        // again from a dispatcher job or logged, as the reference does with an exception.
         match catch_unwind(AssertUnwindSafe(|| future.as_mut().poll(cx))) {
             Ok(Poll::Pending) => Poll::Pending,
             Ok(Poll::Ready(value)) => {

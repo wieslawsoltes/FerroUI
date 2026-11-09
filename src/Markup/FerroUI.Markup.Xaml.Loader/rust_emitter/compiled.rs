@@ -36,10 +36,13 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
-use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
+use super::emitter::theme_units::{UnitEmission, TABLE as THEME_UNITS_TABLE};
+use super::emitter::{emit_function, reflection_path_types, reflection_path_types_by_unit, root_value_handle_of, DocumentFunctions};
+use super::theme_unit_graph;
 use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
-use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
+use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
+use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitsModel, XamlMetadata};
 
 /// How the reason of a document of a group that did not transform starts
 /// ([`CompiledDocument::source`], [`GeneratedFile::documents`]): the error of the transform
@@ -112,6 +115,8 @@ impl GeneratedFile {
                 })
                 .collect(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+            theme_units: Vec::new(),
+            references: Default::default(),
         }
     }
 }
@@ -208,10 +213,11 @@ pub fn compile_documents_with(
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
                 let functions = functions_of_group();
                 let document = &mut compiled[*index];
-                let Some(table) = transformed.namespaces.clone() else {
+                let Some(namespaces) = &transformed.namespaces else {
                     document.source = Err("the document has no namespace information".to_string());
                     continue;
                 };
+                let table = namespaces.source(&reflection_path_types(types, &transformed.configuration, &transformed.root));
                 let table_index = match tables.iter().position(|known| *known == table) {
                     Some(known) => known,
                     None => {
@@ -443,7 +449,10 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
                 .and_then(|rest| rest.strip_prefix(function.as_str()));
             let deferred = || {
                 let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
-                let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
+                let rest = rest
+                    .strip_prefix("_deferred_")
+                    .or_else(|| rest.strip_prefix("_part_"))
+                    .or_else(|| rest.strip_prefix("_unit_"))?;
                 rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
             };
             build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
@@ -506,7 +515,9 @@ fn collides(a: &str, b: &str) -> bool {
     let is_deferred_of = |deferred: &str, function: &str| {
         deferred
             .strip_prefix(function)
-            .and_then(|rest| rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")))
+            .and_then(|rest| {
+                rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")).or_else(|| rest.strip_prefix("_unit_"))
+            })
             .is_some_and(|index| !index.is_empty() && index.chars().all(|c| c.is_ascii_digit()))
     };
     a == b || is_deferred_of(a, b) || is_deferred_of(b, a)
@@ -770,6 +781,17 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         names.push(function_name);
     }
 
+    // The units the compiled markup is partitioned into (#568, step 2 of
+    // docs/porting/theme-trimming.md): every document a merge inlined into another one is a unit
+    // of its own unless it is ambient. Planned from the documents and from where the merges took
+    // the entries from.
+    let origins = transformed[0].configuration.get_extra::<MergedEntryOrigins>().ok();
+    let plan = origins.as_ref().and_then(|origins| theme_unit_graph::plan(documents, &origins.documents()));
+    if let (Some(origins), Some(plan)) = (&origins, &plan) {
+        let unit_names = plan.units.iter().map(|unit| unit.name.clone()).collect();
+        functions.set_units(UnitEmission::new(origins.clone(), plan.unit_of_uri.clone(), unit_names));
+    }
+
     // The document of the class, then the documents its calls reach and the public
     // documents with a build function (the entries of the loader table). A document the
     // group merged into another one that is not public is not called and not emitted, as
@@ -791,7 +813,11 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         }
         emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
-        let table = transformed.namespaces.clone().ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        let namespaces = transformed.namespaces.as_ref().ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        // The paths of the units of a theme go into the units' tables (#612, root D).
+        let table = namespaces.source(
+            &reflection_path_types_by_unit(types, &transformed.configuration, &transformed.root, functions.units()).0,
+        );
         let table_index = match tables.iter().position(|known| *known == table) {
             Some(known) => known,
             None => {
@@ -857,17 +883,51 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         source.push_str("/// The XML namespaces of documents of this file, as the compiler resolved them.\n");
         source.push_str(&format!("const XML_NAMESPACES_{index}: rt::XmlNamespaceTable = {table};\n"));
     }
+    // The units and the table of all units, when an entry of a unit was taken out of the
+    // functions of the documents (#568).
+    let units = functions.units().filter(|units| units.runs().iter().any(|runs| !runs.is_empty()));
+    let partitioned = units.is_some() && plan.is_some();
     source.push('\n');
-    source.push_str(&format!(
-        "/// Populates `root` from the document of the class (`{}`), with a root service provider\n",
-        names[0]
-    ));
-    source.push_str("/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the\n");
-    source.push_str("/// run-time loader populates it.\n");
-    source.push_str("pub fn populate(\n");
-    source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-    source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
-    source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+    if partitioned {
+        // The full theme populates through the table of all units; an application that keeps
+        // some units populates through `populate_with_parts` (#568, step 3).
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`) with every unit of the theme\n",
+            names[0]
+        ));
+        source.push_str("/// (`populate_with_parts` with the table of all units).\n");
+        source.push_str("pub fn populate(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+        source.push_str(&format!("    populate_with_parts(service_provider, root, {THEME_UNITS_TABLE})\n"));
+        source.push_str("}\n");
+        source.push('\n');
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`) with the units `parts` of the\n",
+            names[0]
+        ));
+        source.push_str("/// theme, in canonical order (#568, step 3): the builds of its dictionaries apply those units\n");
+        source.push_str("/// and leave the others out. With a root service provider over `service_provider`\n");
+        source.push_str("/// (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the run-time loader populates it.\n");
+        source.push_str("pub fn populate_with_parts(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str("    parts: rt::ThemeParts,\n");
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+        source.push_str("    rt::set_active_theme_units(THEME_CLASS, parts);\n");
+    } else {
+        source.push_str(&format!(
+            "/// Populates `root` from the document of the class (`{}`), with a root service provider\n",
+            names[0]
+        ));
+        source.push_str("/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the\n");
+        source.push_str("/// run-time loader populates it.\n");
+        source.push_str("pub fn populate(\n");
+        source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+        source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+        source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+    }
     source.push_str(&format!("    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<::{} as ::ferroui_base::StaticType>::TYPE, root);\n", class_path.trim_start_matches("::")));
     source.push_str(&format!("    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<::{} as ::ferroui_base::StaticType>::TYPE) {{\n", class_path.trim_start_matches("::")));
     source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
@@ -883,6 +943,19 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         source.push('\n');
         source.push_str(function);
     }
+    let theme_units = match (units, plan) {
+        (Some(units), Some(plan)) => {
+            source.push('\n');
+            let type_keys: Vec<Vec<String>> = plan.units.iter().map(|unit| unit.type_keys.clone()).collect();
+            source.push_str(&units.table(&class.full_name(), &type_keys));
+            Some(ThemeUnitsModel {
+                class: class.full_name(),
+                table_path: format!("{module_path}::{THEME_UNITS_TABLE}"),
+                units: plan.units,
+            })
+        }
+        _ => None,
+    };
     source.push('\n');
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
@@ -920,6 +993,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         assembly_name: options.local_assembly.clone().unwrap_or_default(),
         crate_name: own_crate.to_string(),
         documents: exported,
+        theme_units,
     })
 }
 
@@ -953,9 +1027,16 @@ pub struct ClassFile {
     assembly_name: String,
     crate_name: String,
     documents: Vec<DocumentModel>,
+    /// The unit graph of the theme of the class (#568), when its markup is partitioned into units.
+    theme_units: Option<ThemeUnitsModel>,
 }
 
 impl ClassFile {
+    /// The units the markup of the class is partitioned into (#568), when it is.
+    pub fn theme_units(&self) -> Option<&ThemeUnitsModel> {
+        self.theme_units.as_ref()
+    }
+
     /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
     /// for crates that include them. `dependencies` are the `.xamlmeta` files of the
     /// crates the documents include documents of, relative to the file the metadata is
@@ -966,6 +1047,8 @@ impl ClassFile {
             crate_name: self.crate_name.clone(),
             documents: self.documents.clone(),
             dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+            theme_units: self.theme_units.iter().cloned().collect(),
+            references: Default::default(),
         }
     }
 }

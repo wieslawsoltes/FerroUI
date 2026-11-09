@@ -1,12 +1,12 @@
 # Current checkpoint: native JSON workflow and physical docking verified
 
-The clean `/Volumes/SSD/temp/ferrodock-port/FerroDock Core Review.app` was launched on
+The clean `<evidence>/ferrodock-port/FerroDock Core Review.app` was launched on
 2026-10-24, after closing only the owned diagnostic Desktop Acceptance app. The Mac is
 unlocked. The user confirms the File dropdown appears and works with their mouse.
 Actual native Save As and Open both PASS on executable SHA
 f2728b3b6a71505bc732e4c18040f9ac67460f27287076020c33b1f2718fd6cd.
 
-Native Save produced `/Volumes/SSD/temp/ferrodock-port/ferrodock-core-desktop-20261024.json`:
+Native Save produced `<evidence>/ferrodock-port/ferrodock-core-desktop-20261024.json`:
 49,403 bytes, UTF-8 BOM, original Dock.Model.ReactiveUI.Controls.RootDock discriminator,
 SHA 9b1bf3de6a6817d14d7bc2657933f4ede40b425c9e42391b383b5c02719a34cf.
 Creating Document4 then opening that saved file restored three documents and their actual
@@ -40,10 +40,10 @@ source changed. Previous full automated revision:1967 workspace tests/57 suites 
 native library tests pass, strict all-target Clippy/fmt/24Python/source/theme/inspector/
 seven-vendor guards and clean native build pass. Only the restored-layout integration test gained assertions in this turn; the full
 workspace count remains1967, and the204-test markup suite was rerun after that change.
-Proof: /Volumes/SSD/temp/ferrodock-port/ferrodock-native-desktop-checkpoint.json.
+Proof: <evidence>/ferrodock-port/ferrodock-native-desktop-checkpoint.json.
 
 README now records real native Save/Open and uses SSD TMPDIR/target/bundle commands.
-All own scratch remains /Volumes/SSD/temp/ferrodock-port; one owned Cargo job at a time.
+All own scratch remains <evidence>/ferrodock-port; one owned Cargo job at a time.
 Original parent source and staged index remain clean. Protected old executable SHA
 7262f885d1469c30ebacfafe765648cf0902266602f84a5241b8080e62d7d465 stays untouched.
 Do not use old diagnostic apps or the shared window title to select this sample.
@@ -82,12 +82,12 @@ generators pass. Broad source completion remains correctly rejected, separately 
 accepted delivery. Inventory 227/465/1236 of 1928 unchanged; only existing record notes
 changed. No new files this turn, no agents/commits/pushes/PRs; staged index remains empty.
 
-Proof: /Volumes/SSD/temp/ferrodock-port/ferrodock-core-acceptance-exact-manifest.json.
+Proof: <evidence>/ferrodock-port/ferrodock-core-acceptance-exact-manifest.json.
 All 168 input hashes, 64 earlier source outputs, prior emitted JSON context, original parent
 sources and both desktop artifacts are verified unchanged. Scratch/artifacts stay on SSD.
 All owned processes are terminal. Production source did not change, so no redundant
 native rebuild was performed. The separate actual review bundle remains ready:
-/Volumes/SSD/temp/ferrodock-port/FerroDock File Workflow Review.app
+<evidence>/ferrodock-port/FerroDock File Workflow Review.app
 identifier org.ferrodock.reactiveui-sample.file-workflow-review
 SHA 442e414f32b98acb4d7c2452530cd06eb9a332eadf0ca82ee6e7923cae467926
 It has NOT been launched/visually verified. Preserve the old protected executable/window.
@@ -109,7 +109,7 @@ handoff; do not create more substitute tests/status turns merely to avoid the bl
 NEXT ON USER UNLOCK/RESUME: refresh CUA documentation if context was compacted, inventory
 apps, launch only the distinct review bundle using cua_repl, and verify it is the correct
 new process/window. Never restart/overwrite the protected old app/window. Exercise File
-Save/Open/cancel/error with fresh files under /Volumes/SSD/temp/ferrodock-port; switch
+Save/Open/cancel/error with fresh files under <evidence>/ferrodock-port; switch
 Fluent/Browser and verify tabs, split/resize, drag/drop/float/redock and pin/preview/unpin/
 hide/restore/close with restored layouts. Check F11 original inspector, F9 overlay and
 the header grip across resize. Fix actual findings, rerun relevant checks and update
@@ -155,10 +155,10 @@ Full repository completion remains correctly rejected. One new test target maps 
 original DockControlState and DockManager records; statuses/counts 227/465/1236 of 1928
 stay unchanged. New file intent-to-add only; no agents/commits/pushes/PRs.
 
-Proof: /Volumes/SSD/temp/ferrodock-port/ferrodock-composed-drag-final-manifest.json.
+Proof: <evidence>/ferrodock-port/ferrodock-composed-drag-final-manifest.json.
 All 168 input hashes, 64 previous source outputs and the prior generated JSON context match.
 Original parent source/index and both desktop artifacts are unchanged. Separate SSD review
-bundle remains /Volumes/SSD/temp/ferrodock-port/FerroDock File Workflow Review.app;
+bundle remains <evidence>/ferrodock-port/FerroDock File Workflow Review.app;
 its hash matches the recorded source executable (production inputs unchanged). No desktop
 rebuild was needed. All owned processes terminal. CUA still reports Mac locked; the prior
 unlock request is pending. The distinct review app has not been launched/visually verified.
@@ -221,12 +221,12 @@ pass. Full repository completion remains correctly rejected, separately from del
 No source coverage promotions: 227/465/1236 of 1928. One new test target is mapped to the
 original App record; new file is intent-to-add only. No agents/commits/pushes/PRs.
 
-Proof: /Volumes/SSD/temp/ferrodock-port/ferrodock-native-files-final-manifest.json.
+Proof: <evidence>/ferrodock-port/ferrodock-native-files-final-manifest.json.
 All 167 input hashes, 64 prior source outputs and the previous UI-independent generated
 context match. Original parent sources and staged index remain unchanged. The protected
 old executable retains its recorded size/mtime/SHA. The separate review bundle and its
 build executable still match SHA 442e414f32b98acb4d7c2452530cd06eb9a332eadf0ca82ee6e7923cae467926:
-/Volumes/SSD/temp/ferrodock-port/FerroDock File Workflow Review.app
+<evidence>/ferrodock-port/FerroDock File Workflow Review.app
 Production inputs did not change, so no redundant desktop rebuild was made. All owned
 processes are terminal. CUA still reports Mac locked; the earlier unlock request remains
 pending. The review bundle has NOT been launched or visually verified.
@@ -292,7 +292,7 @@ frozen. Finisher48756 is terminal0 and reran all remaining structural checks. Co
 counts remain 227/465/1236 of 1928; no completion promotions. The stale App inventory note
 about unported F11 attachment now agrees with its actual startup implementation/test.
 
-Proof: /Volumes/SSD/temp/ferrodock-port/ferrodock-file-workflow-final-manifest.json.
+Proof: <evidence>/ferrodock-port/ferrodock-file-workflow-final-manifest.json.
 All 166 input hashes, 64 earlier source outputs, prior UI-independent generated context,
 protected desktop executable size/mtime/hash, original parent sources and empty staged
 index are verified. Existing framework versions/features/vendor sources and manifests
@@ -300,7 +300,7 @@ are unchanged. New files are intent-to-add only; no agents/commits/pushes/PRs. S
 and native storage test files use SSD. The full goal remains active/incomplete/unblocked.
 
 Desktop build55508 is terminal0 (3m38s). A distinct bundle is ready:
-/Volumes/SSD/temp/ferrodock-port/FerroDock File Workflow Review.app
+<evidence>/ferrodock-port/FerroDock File Workflow Review.app
 Its bundle identifier is org.ferrodock.reactiveui-sample.file-workflow-review, so a
 later launch can be distinguished from the protected original app. Source/bundle hashes
 match; the exact artifact proof is ferrodock-file-workflow-desktop-review.json on SSD.
@@ -839,7 +839,7 @@ all21 sequential validation stages pass, **1,909 Rust tests across55 suites**, z
 ignored. Strict workspace/all-target and selected release-library Clippy, eight standalone
 suites, ten normal boundaries, format,24 Python tests, source/theme/inspector checks, six
 framework provenance checks and both generators pass. Full completion is correctly rejected.
-Logs/summary prefix: /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-mode-final-.
+Logs/summary prefix: <evidence>/ferrodock-port/ferrodock-layout-mode-final-.
 All owned Cargo/source-reference handles are terminal; only documentation follows green.
 Source/test hashes are recorded at the validated checkpoint. Inventory227/463/1238 of1928;
 full original goal stays active/incomplete/unblocked. No dependencies/versions/features,
@@ -929,7 +929,7 @@ tests; 50969 passes all4 generated-consumer tests. Final56061 is confirmed termi
 Strict workspace/all-target and selected release-library Clippy, eight standalone suites,
 ten dependency boundaries, format, 24 Python tests, source/theme/inspector checks,
 six provenance checks and both generators pass. Full completion is correctly rejected.
-Logs/summary: /Volumes/SSD/temp/ferrodock-port/ferrodock-native-enum-catalog-final-*.
+Logs/summary: <evidence>/ferrodock-port/ferrodock-native-enum-catalog-final-*.
 All owned Cargo handles are terminal; only documentation/inventory follows full green.
 
 The audit corrects three closed enum units from ported to partial: their named members and
@@ -1035,7 +1035,7 @@ no behavioral or test changes. Builds use -j1, all owned command handles now ter
 
 Only FerroDock/owned SSD temp edited; no agents/commit/push/PR/dependency-version-feature/
 framework edits. Parent/sibling/cache source read-only; actual desktop executable/app/window
-protected, no rebuild/restart. TMPDIR/artifacts on /Volumes/SSD/temp/ferrodock-port.
+protected, no rebuild/restart. TMPDIR/artifacts on <evidence>/ferrodock-port.
 
 NEXT: implement genuine shared typed compiled numeric-enum literal support (current emitter
 only emits named nonflags members; do not falsely mark enums as flags or add guessed calls),
@@ -1082,7 +1082,7 @@ ferrodock-core-value-final-. No production/test changes follow full green. Inven
 Only FerroDock/owned SSD temp edited. No agents/commit/push/PR/dependency-version-feature/
 framework changes. Parent original source, sibling FerroUI and package cache sources read-only.
 Actual desktop executable/app/window protected, no rebuild/restart. Scratch/TMPDIR/artifacts
-on /Volumes/SSD/temp/ferrodock-port; Cargo sequential -j1. All owned jobs terminal.
+on <evidence>/ferrodock-port; Cargo sequential -j1. All owned jobs terminal.
 
 NEXT: complete plain-enum numeric representation/codecs, remaining original model fields and
 Core/options types, full automatic native compiler bindings/system/ancillary facts and all
@@ -1127,7 +1127,7 @@ follow green. Inventory232/458/1238 of1928 unchanged; no source unit promoted co
 
 Only FerroDock/owned SSD temp edited. No agents/commit/push/PR/dependency-version-feature or
 framework changes. Original parent/sibling/cache sources read-only. Actual desktop executable/
-app/window protected, no rebuild/restart. TMPDIR/artifacts on /Volumes/SSD/temp/ferrodock-port;
+app/window protected, no rebuild/restart. TMPDIR/artifacts on <evidence>/ferrodock-port;
 Cargo sequential -j1. All owned jobs terminal. Docs/inventory now record exact supported scope.
 
 NEXT: continue original value/enum/options codecs and full default/application/backend catalogs,
@@ -1189,7 +1189,7 @@ Inventory232/458/1238 of1928 unchanged; generator remains partial.
 
 Only FerroDock/owned SSD temp edited; parent/sibling/cache source read-only. No agents/commit/
 push/PR. Actual desktop executable/app/window protected; no rebuild/restart. Scratch/TMPDIR
-/Volumes/SSD/temp/ferrodock-port. Cargo sequential -j1. No cleanup/other-project artifacts or
+<evidence>/ferrodock-port. Cargo sequential -j1. No cleanup/other-project artifacts or
 jobs changed. Inventory statuses unchanged; no source unit promoted complete.
 Final lightweight format/source/inventory/factory/new-code checks pass. New files intent-to-add;
 staging empty. Actual desktop size/mtime/SHA256 preserved after full validation in owned SSD
@@ -1246,7 +1246,7 @@ edit follows full green. Inventory232/458/1238 of1928 unchanged; generator remai
 
 Only FerroDock/owned SSD temp changed; parent and sibling
 sources read-only. No agents/commit/push/PR. Actual desktop executable/app/window protected,
-no rebuild/restart. TMPDIR/scratch on /Volumes/SSD/temp/ferrodock-port; Cargo sequential -j1.
+no rebuild/restart. TMPDIR/scratch on <evidence>/ferrodock-port; Cargo sequential -j1.
 SSD availability varied~353MB to8GB; no cleanup or other-project jobs/artifacts changed.
 Inventory statuses unchanged; generator and contracts remain partial.
 Final lightweight source/inventory/factory/format and new-code scans pass. New files have
@@ -1299,7 +1299,7 @@ Inventory232/458/1238 of1928 unchanged; generator remains partial.
 
 Only FerroDock and owned SSD temp edited; original/sibling source read-only. No agents/commit/push/PR.
 Actual desktop executable/app/window preserved, no rebuild/restart. All scratch/TMPDIR on
-/Volumes/SSD/temp/ferrodock-port; Cargo sequential -j1. Entire source/API/backend/platform/
+<evidence>/ferrodock-port; Cargo sequential -j1. Entire source/API/backend/platform/
 serializer/lifetime scope remains required.
 
 Next: construct dependency symbols from actual source/shared metadata (Core/ReactiveUI and
@@ -1488,7 +1488,7 @@ No production/test source edit follows full green. Inventory232/458/1238 of1928 
 Only FerroDock and owned SSD temp edited; parent originals/sibling FerroUI sources read-only.
 No agents,commit,push,PR or staged contents. New files intent-to-add only after final checks.
 Actual native desktop executable/app/window protected; no rebuild/restart. All TMPDIR/temp
-storage on /Volumes/SSD/temp/ferrodock-port; no cleanup or other project artifacts/processes
+storage on <evidence>/ferrodock-port; no cleanup or other project artifacts/processes
 changed. Cargo sequential,-j1. Direct proc-macro2/span-locations reuses already-locked scanner
 version/features; no native/runtime/backend dependencies added. All owned jobs terminal.
 Final source/staging/format/inventory and actual desktop preservation checks follow below.
@@ -1623,7 +1623,7 @@ workspace scenarios still run actual original engine/model handles. Inventory232
 Original parent/sibling sources untouched. Only FerroDock and owned SSD temp edited. No agents,
 commit/push/PR or staged contents; new files intent-to-add only after final checks. Actual native
 executable/app/window protected; no rebuild/restart. Its size/mtime/SHA256 match prior baseline
-in ferrodock-shared-bindings-desktop-preserved.json. All temp/TMPDIR on /Volumes/SSD/temp/ferrodock-port.
+in ferrodock-shared-bindings-desktop-preserved.json. All temp/TMPDIR on <evidence>/ferrodock-port.
 Cargo jobs sequential,-j1. No cleanup or other project process/artifact changes this turn.
 Python3 here is3.9, so use hashlib.sha256 with streamed reads rather than file_digest/tomllib.
 
@@ -1743,7 +1743,7 @@ tests (11cases/66names);62121 passes expanded17/102.62616 strict compiler Clippy
 First full28702 passes1812/51 and19stages before those added name records. Final40695 terminal0:
 **1812 Rust tests/51 suites**, zero failed/ignored. Generator3, JSON18, ReactiveUI568,Domain225,
 UI373,markup189,diagnostics49,settings33,sample27,CoreSDK62. All19 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-generator-final-validation-summary.json:
+<evidence>/ferrodock-port/ferrodock-json-generator-final-validation-summary.json:
 strict debug/all-target and selected release-library Clippy (compiler included), standalone
 3+18+62+2+7+3,8 normal dependency boundaries, fmt/21Python, source/theme/inspector/two generators/
 six provenance guards and expected full-completion rejection. No code/test change after final
@@ -1821,7 +1821,7 @@ are terminal0. The final source proof regenerates17helper+25read,33model,1362num
 
 Full95023 terminal0: **1809 Rust tests/49 suites**, zero failed/ignored (JSON18,ReactiveUI568,
 Domain225,UI373,markup189,diagnostics49,settings33,sample27,CoreSDK62). All18 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-payload-validation-summary.json: strict debug/
+<evidence>/ferrodock-port/ferrodock-json-payload-validation-summary.json: strict debug/
 all-target and selected release-library Clippy, standalone18+62+2+7+3, seven normal dependency
 boundaries, fmt/21Python, source/theme/inspector/two generators/six provenance guards and expected
 full-completion rejection. No production/test change follows full green validation. No Cargo
@@ -1882,7 +1882,7 @@ No production behavior or assertion was weakened to hide an implementation failu
 Latest locked workspace passes **1805 tests/49 suites**, zero failed/ignored; JSON14,
 ReactiveUI568,Domain225,UI373,markup189,diagnostics49,settings33,sample27,CoreSDK62.
 Full96955 terminal0: all18 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-numeric-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-json-numeric-validation-summary.json.
 Strict debug/all-target and selected release-library Clippy, standalone14+62+2+7+3,
 seven normal dependency boundaries, fmt/21Python, source/theme/inspector/two generators/
 six package provenance guards and expected full-completion rejection pass. No production/
@@ -1958,7 +1958,7 @@ workspace passes **1,803 tests /49 suites**, zero failed/ignored; strict debug/a
 and selected release-library Clippy pass. All18 final driver stages pass, including standalone12+62+2+7+3, seven normal dependency
 boundaries, fmt/21Python, source/theme/inspector/two generators/six provenance guards and
 expected full-completion rejection. Summary:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-fallback-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-json-fallback-validation-summary.json.
 No production/test change follows the green run. All owned Cargo/driver jobs terminal.
 
 Inventory remains232 ported/455 partial/1241 pending of1928; full completion must reject.
@@ -1980,7 +1980,7 @@ PORTING-GUIDE.md. No subsystem or whole goal is declared complete.
 
 Final lightweight checks confirm explicit include-file rustfmt, original source diff empty,
 intent-to-add with no staged contents, and unchanged actual desktop size/mtime/SHA256.
-Preservation manifest: /Volumes/SSD/temp/ferrodock-port/ferrodock-json-fallback-desktop-preserved.json.
+Preservation manifest: <evidence>/ferrodock-port/ferrodock-json-fallback-desktop-preserved.json.
 No owned Cargo/validation process remains running. Source and generator checks are repeated
 following this documentation update; the whole goal remains active and incomplete.
 
@@ -2042,7 +2042,7 @@ Int32,Boolean; float/enums/full codecs missing. Preserve original ignored member
 subtype fallback, registration attributes/generator, custom/closed generic payloads and
 property converters. DOM preserves duplicate $type names, but type resolution still pending.
 Do not substitute snapshot data or silently instantiate fallback models. Source paths and
-requirements: docs/porting/dock/SERIALIZATION.md and /Volumes/SSD/repos/FerroUI/docs/porting/PORTING-GUIDE.md.
+requirements: docs/porting/dock/SERIALIZATION.md and <checkout>/docs/porting/PORTING-GUIDE.md.
 Also outstanding: exact text reader/writer buffering/callback order, malformed UTF/CLR
 exception/lifetime semantics, metadata validation/allocation/performance; other serializers/
 model backends; remaining engine/API nullable contracts, public attribute class, generic/
@@ -2057,7 +2057,7 @@ Goal turn PROGRESS. The full original Dock-to-FerroDock goal remains ACTIVE, inc
 and unblocked. Only FerroDock and owned SSD temp edited; parent original source and sibling
 FerroUI read-only. No agents/commit/push/PR or staged contents. New files intent-to-add.
 Preserve actual desktop executable/app bundle/running window; no rebuild/restart. All
-owned temp and child TMPDIR=/Volumes/SSD/temp/ferrodock-port; keep NuGet/package/HTTP
+owned temp and child TMPDIR=<evidence>/ferrodock-port; keep NuGet/package/HTTP
 caches on SSD too. One owned Cargo job at a time,-j1. Do not interrupt other chats/builds
 or restart live jobs on observation timeout. All owned jobs now terminal.
 
@@ -2118,7 +2118,7 @@ unit assertions for readonly omission and empty-load null contradict measured so
 port the implementation. StreamReader/Writer buffering, encoding/BOM detection and source
 close/failure order remain unimplemented, as do actual serializer crates and default/
 generated JSON metadata. Source framework guide:
-/Volumes/SSD/repos/FerroUI/docs/porting/PORTING-GUIDE.md. No System.IO/JSON layer was found
+<checkout>/docs/porting/PORTING-GUIDE.md. No System.IO/JSON layer was found
 in the inspected sibling System crate; reuse published dependencies where actually available.
 
 Other whole-goal requirements remain: remaining service/manager/window/state inputs;
@@ -2137,7 +2137,7 @@ ACTIVE, incomplete and unblocked. Only FerroDock and owned SSD temp edited; pare
 original source and sibling FerroUI remain read-only. No agents, commits, push or PR.
 New files intent-to-add; no staged contents. Preserve actual desktop executable/app
 bundle/running window; no rebuild/restart. All owned temp and child TMPDIR must use
-/Volumes/SSD/temp/ferrodock-port. One owned Cargo job at a time,-j1. Never interrupt other
+<evidence>/ferrodock-port. One owned Cargo job at a time,-j1. Never interrupt other
 chats/builds or restart live jobs merely because an observation timed out.
 
 All owned jobs terminal. Source probes4032/91173 establish actual .NET cleanup behavior.
@@ -2185,7 +2185,7 @@ tests/Dock.Serializer.UnitTests plus source-generation tests. Preserve generic d
 T, reference identity/cycles, polymorphism, original list types, generated metadata and
 stream behavior; do not substitute a layout-only snapshot serializer or introduce
 reflection. Reuse existing FerroUI dependencies where available after inspecting them.
-The sibling guide remains /Volumes/SSD/repos/FerroUI/docs/porting/PORTING-GUIDE.md.
+The sibling guide remains <checkout>/docs/porting/PORTING-GUIDE.md.
 
 Also outstanding: custom collection enumerator Dispose/cleanup callback order/reentry,
 CLR/lifetime/exception semantics and allocation/performance parity; remaining service/
@@ -2202,7 +2202,7 @@ Full original Dock-to-FerroDock goal ACTIVE, incomplete and unblocked. Only Ferr
 and owned SSD temp edited; original parent source and sibling FerroUI remain read-only.
 No agents, commit, push, PR or staged contents. New files are intent-to-add. Preserve
 the actual desktop executable/app bundle/running window; no rebuild/restart. All owned
-temp and child TMPDIR=/Volumes/SSD/temp/ferrodock-port. One owned Cargo job at a time,
+temp and child TMPDIR=<evidence>/ferrodock-port. One owned Cargo job at a time,
 -j1. Never interrupt other chats/builds or restart a confirmed live job on observation
 timeout. Last observed SSD free 2.5 GiB; no cleanup performed this checkpoint.
 
@@ -2259,7 +2259,7 @@ Goal turn PROGRESS; full original Dock-to-FerroDock goal ACTIVE/incomplete/unblo
 Only FerroDock + owned SSD temp edited. Original parent source and sibling FerroUI read-only.
 No agents, commit/push/PR/staged contents. New files intent-to-add. Preserve actual desktop
 executable/app bundle/running window; no desktop rebuild/restart. All temp/child
-TMPDIR=/Volumes/SSD/temp/ferrodock-port. One owned Cargo job at a time,-j1. Never interrupt
+TMPDIR=<evidence>/ferrodock-port. One owned Cargo job at a time,-j1. Never interrupt
 other chats/builds or restart confirmed live handles solely because observation timed out.
 
 All owned jobs terminal. Model30007 passes11; native20995 passes5. C#1923 terminal0:
@@ -2339,7 +2339,7 @@ Goal turn PROGRESS. Full original Dock-to-FerroDock goal ACTIVE, incomplete/unbl
 Only FerroDock and owned SSD temp edited. Parent original source and sibling FerroUI
 read-only. No agents/commit/push/PR/staged contents; new files intent-to-add. Preserve
 actual desktop executable/app bundle/running window; no desktop rebuild/restart.
-All temp and child TMPDIR=/Volumes/SSD/temp/ferrodock-port. Owned Cargo jobs sequential,
+All temp and child TMPDIR=<evidence>/ferrodock-port. Owned Cargo jobs sequential,
 -j1; don't interrupt other chats or restart confirmed live handles on timeouts.
 
 All owned jobs terminal. Workspace92613 passes1,751 tests/47 suites, zero failed/ignored:
@@ -2414,7 +2414,7 @@ unblocked. Previous user-facing status turn was no-progress; this turn takes the
 safe source implementation step. No agents/commit/push/PR/staged contents. Only FerroDock
 and owned SSD temp edited. Original parent source and sibling FerroUI read-only. Preserve
 actual desktop executable/bundle/window; no desktop rebuild/restart. All temp/child
-TMPDIR=/Volumes/SSD/temp/ferrodock-port. One owned Cargo job at a time,-j1, never interrupt
+TMPDIR=<evidence>/ferrodock-port. One owned Cargo job at a time,-j1, never interrupt
 other chats/builds or restart live handles because observation timed out.
 
 All owned jobs terminal. Full validation71072 terminal0/all17zero in
@@ -2485,7 +2485,7 @@ incomplete/no blocker. Preserve complete objective. Only FerroDock edits; origin
 parent C#/README/src/tests/samples and sibling FerroUI read-only. No agents, commits,
 push/PR/staged contents. New files intent-to-add. Preserve actual desktop executable/
 bundle/window; no desktop rebuild/restart. All temporary artifacts and child TMPDIR
-MUST use /Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1; never interrupt
+MUST use <evidence>/ferrodock-port. Owned Cargo sequential,-j1; never interrupt
 other chat builds or restart a confirmed live process because observation timed out.
 
 All owned jobs terminal. Full validation17308 terminal0: all17 values zero in
@@ -2544,7 +2544,7 @@ window collection/option lifecycle hooks, factory/service/manager inputs, serial
 other backends/services, public attributes/generic collections/delegates, CLR/lifetime
 and full original platform/input/rendering/accessibility/performance remain required.
 Never narrow goal around nullable work/sample. C# writes BETWEEN owned Cargo jobs, in
-reference project cwd with SSD TMPDIR and -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/.
+reference project cwd with SSD TMPDIR and -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/.
 Last SSD free5.1GiB; monitor without blind cleanup. Other chat builds untouched.
 
 ## Previous fully validated checkpoint
@@ -2556,7 +2556,7 @@ incomplete/no blocker. Preserve complete scope. Only FerroDock edits; original p
 C#/README/src/tests/samples and sibling FerroUI read-only. No agents/commit/push/PR/
 staged contents. New files intent-to-add. Preserve actual desktop executable/bundle/
 window; no desktop rebuild/restart. All temp and child TMPDIR MUST use
-/Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other chat
+<evidence>/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other chat
 builds or restart a confirmed live job solely because an observation timed out.
 
 All owned jobs terminal. Full validation16333 terminal0: all17 values zero in
@@ -2608,7 +2608,7 @@ metadata/corpus. Then remaining factory/service/manager inputs, serializers, oth
 backends/services, attributes/generic collections/delegates, CLR/lifetime and full original
 platform/input/rendering/accessibility/performance scope. Never narrow whole goal around
 sample or nullable work. C# corpus writes BETWEEN owned Cargo jobs; reference project cwd,
-SSD TMPDIR and -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/. Last free6.5GiB;
+SSD TMPDIR and -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/. Last free6.5GiB;
 monitor without blind cleanup. Actual sample and other chat builds remain untouched.
 
 ## Previous fully validated checkpoint
@@ -2620,7 +2620,7 @@ incomplete/no blocker; preserve complete objective. Only FerroDock edits; origin
 parent C#/README/src/tests/samples and sibling FerroUI read-only. No agents/commit/
 push/PR/staged contents. New files intent-to-add. Preserve actual desktop executable/
 bundle/window; no rebuild/restart. All temp and child TMPDIR MUST use
-/Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other
+<evidence>/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other
 chat builds or restart a confirmed live process on an observation timeout.
 
 All owned jobs terminal. Full validation94406 terminal0: all17 values zero in
@@ -2672,7 +2672,7 @@ serializers, other model backends/services, public attribute/generic collections
 delegates, CLR/lifetime and full platform/input/rendering/accessibility/performance.
 Do not narrow original goal around current nullable work or sample. Future C# writes
 must be BETWEEN Cargo jobs to protect include_str! readers; run in reference project
-with SSD TMPDIR and -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/. Last free
+with SSD TMPDIR and -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/. Last free
 7.4GiB; monitor without blind cleanup. Actual sample/other chats remain untouched.
 
 ## Previous fully validated checkpoint
@@ -2684,7 +2684,7 @@ ACTIVE/incomplete/no blocker. Preserve complete scope. Only FerroDock edits; ori
 parent C#/README/src/tests/samples and sibling FerroUI read-only. No agents, commits,
 push/PR or staged contents. All new files intent-to-add. Preserve actual desktop
 executable/bundle/window; no desktop rebuild/restart. All temp and child TMPDIR MUST
-use /Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other
+use <evidence>/ferrodock-port. Owned Cargo sequential,-j1; never interrupt other
 chat builds or restart confirmed live jobs merely on an observation timeout.
 
 All owned jobs terminal. Full68875 passed workspace1,707 tests/47 suites (zero failed/
@@ -2737,7 +2737,7 @@ serializers, other model backends/services, public attributes/generic collection
 delegates, CLR/lifetime and full platform/input/rendering/accessibility/performance scope.
 Do not narrow the full goal around current nullable work or sample. C# corpus writes
 must be BETWEEN owned Cargo jobs (include_str! safety), from its project cwd with SSD
-TMPDIR and -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/. Last SSD free10GiB;
+TMPDIR and -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/. Last SSD free10GiB;
 monitor without blind cleanup. Actual sample and other chats remain untouched.
 
 ## Previous fully validated checkpoint
@@ -2749,7 +2749,7 @@ goal turn PROGRESS: next exact factory argument contracts implemented and valida
 Full original goal ACTIVE/incomplete/no blocker; preserve complete scope. Only FerroDock
 edits, original C#/parent README/src/tests/samples and sibling FerroUI read-only.
 No agents/commit/push/PR/staged contents. New files intent-to-add. Preserve actual
-desktop executable/bundle/window. All temp/TMPDIR /Volumes/SSD/temp/ferrodock-port.
+desktop executable/bundle/window. All temp/TMPDIR <evidence>/ferrodock-port.
 Owned Cargo sequential,-j1; never interrupt other chats or restart a live process
 because an observation times out. Previous full scope/instructions below still apply.
 
@@ -2784,7 +2784,7 @@ Seven nullable_target_tests, one new native consumer and existing override consu
 extension match27 original C# assertions in NullableTargetReference.cs. All new tests
 mapped to actual FactoryBase.Dockable.cs and IFactory.cs; no source status upgraded.
 Run future C# corpus writes BETWEEN Cargo jobs to protect include_str! corpus readers.
-Use its project cwd, SSD TMPDIR, -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/.
+Use its project cwd, SSD TMPDIR, -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/.
 
 NEXT: inspect remaining MoveDockable/MovePinnedDockable/SwapDockable slots and their
 original null entries, source IndexOf/Contains, snapshot/events/virtual Init and same/
@@ -2806,7 +2806,7 @@ turn: PROGRESS. Full original Dock-to-FerroDock goal ACTIVE/incomplete, no block
 Only FerroDock edits; original C#/parent README/src/tests/samples and sibling FerroUI
 read-only. No agents/commit/push/PR/staged contents. All new files intent-to-add.
 Preserve actual desktop executable/bundle/window. All temporary artifacts and TMPDIR
-use /Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1; never interrupt
+use <evidence>/ferrodock-port. Owned Cargo sequential,-j1; never interrupt
 other chats or restart a live job solely because an observation times out.
 
 All owned jobs terminal. Main52674 completed workspace/lint/standalone/dependency/
@@ -2828,7 +2828,7 @@ Original C# reference46544 terminal (handle missing; log successful):604 asserti
 20 new, zero source-only rows. Log ferrodock-null-mutation-reference.log; corpus
 is tests/Dock/data/factory-markup-reference.tsv. Run future reference BETWEEN owned Cargo
 jobs to avoid include_str! reading a partial corpus. Use TMPDIR on SSD and
--p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ from its project directory.
+-p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ from its project directory.
 
 InsertDockable nullable dock/item and RemoveDockable nullable item now pass through
 actual original virtual slots and both Core metadata views. Negative insert index
@@ -2866,7 +2866,7 @@ Previous/current goal turns: PROGRESS. Full original Dock-to-FerroDock goal ACTI
 incomplete, no blocker. Preserve scope. Only FerroDock edits; original C#/parent
 README/src/tests/samples and sibling FerroUI read-only. No agents/commit/push/PR/staged
 contents. All new files intent-to-add. Preserve actual desktop binary/bundle/window.
-All temp/TMPDIR use /Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1;
+All temp/TMPDIR use <evidence>/ferrodock-port. Owned Cargo sequential,-j1;
 never interrupt other chat builds or restart a confirmed live process on timeout.
 
 All owned jobs terminal. Main validation30816 completed code gates, stopped only for
@@ -2884,7 +2884,7 @@ Original-engine reference78108 terminal0:584 assertions, zero source-only rows.
 C# NullableStateReference.cs is called by existing harness and covers13 new assertions.
 Log ferrodock-null-state-reference.log; corpus tests/Dock/data/factory-markup-reference.tsv.
 Run future reference BETWEEN Cargo jobs from scripts/dock/factory-markup-reference, TMPDIR
-on SSD, -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ (trailing slash). Do not
+on SSD, -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ (trailing slash). Do not
 let include_str! read a partially written corpus. Original projects remain read-only.
 
 Five argument contracts now nullable: protected update/recursive/resolve hooks,
@@ -2930,11 +2930,11 @@ and incomplete. No blocker. Do not mark complete or narrow the original objectiv
 Only FerroDock edits; original parent C#/README/src/tests/samples and sibling FerroUI
 are read-only. No agents, commits/push/PR or staged contents. All new files intent-to-add.
 Preserve actual desktop executable/bundle/window; library/test builds are allowed.
-All temp/TMPDIR MUST use /Volumes/SSD/temp/ferrodock-port. Owned Cargo sequential,-j1;
+All temp/TMPDIR MUST use <evidence>/ferrodock-port. Owned Cargo sequential,-j1;
 never interrupt other chat builds or restart a live job after observation timeout.
 
 All owned jobs are terminal. Final validation18467 closed0: all17 stages zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-list-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-list-validation-summary.json.
 Driver ferrodock-null-list-validate.py and stage logs share that prefix. Current code
 passes locked workspace1675 tests/47 suites, zero failed/ignored (UI373, markup160,
 diagnostics49, settings33, sample27, ReactiveUI486, Core62). Strict all-target and
@@ -2950,7 +2950,7 @@ Filtered items_source58 and selection437 pass but overlap; do not add their coun
 Original C# reference23720 closed0:571 assertions, zero source-only labels. Log
 ferrodock-null-list-reference-final.log; corpus tests/Dock/data/factory-markup-reference.tsv.
 Run future reference from scripts/dock/factory-markup-reference, with TMPDIR on SSD and
--p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ (trailing slash), between Cargo
+-p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ (trailing slash), between Cargo
 jobs so include_str! cannot read a partially written corpus. Preserve original sources.
 
 ListHandle/ReadOnlyListHandle/ReadOnlyObservableCollection dockable elements now carry
@@ -3025,15 +3025,15 @@ Only FerroDock edits; preserve original C#, sibling FerroUI and actual desktop s
 executable/bundle/window. No agents, commits/push/PR or staged contents.
 
 USER REQUIREMENT: all temporary artifacts and TMPDIR must use
-/Volumes/SSD/temp/ferrodock-port, never /tmp or the main disk. Moved138 owned-prefix
+<evidence>/ferrodock-port, never /tmp or the main disk. Moved138 owned-prefix
 artifacts; historical docs and temporary script prefixes now point at the SSD.
 Do not move/delete unrelated chat files. Owned Cargo one at a time, -j1. Do not
 interrupt other chat builds or restart a confirmed live job after observation timeout.
 
 All owned jobs are terminal. Final validation session10004 closed0; Python71002 is
 absent and every one of17 stages is zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-factory-validation-summary.json.
-Command /Volumes/SSD/temp/ferrodock-port/ferrodock-null-factory-validate.py; all stage
+<evidence>/ferrodock-port/ferrodock-null-factory-validation-summary.json.
+Command <evidence>/ferrodock-port/ferrodock-null-factory-validate.py; all stage
 logs use the same prefix. No need to resume/restart those completed jobs.
 
 Full locked workspace **1666 Rust tests / 47 suites**, zero failed/ignored: UI372,
@@ -3062,9 +3062,9 @@ slots through both original interface and abstract FactoryBase metadata.
 C# reference47456 closed0: **544 assertions / 545-line TSV**, all rows pass. Thirteen
 new matched-source assertions cover those same paths. One explicitly SOURCE-ONLY
 assertion proves the still unsupported nullable IList element path. Source log:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-factory-reference.log.
+<evidence>/ferrodock-port/ferrodock-null-factory-reference.log.
 Successful reference command runs from scripts/dock/factory-markup-reference with TMPDIR
-on SSD and -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ (trailing slash).
+on SSD and -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ (trailing slash).
 Two earlier setup failures changed no original project files and were superseded.
 Targeted model44239 and consumer59182 also closed0 (482 and157 tests).
 
@@ -3099,8 +3099,8 @@ Use one owned Cargo at a time, -j 1, and do not interrupt other chats' builds.
 
 Owned Python validation process63077 and its sequential Cargo children are terminal;
 process63077 is absent and all 17 stages in
-`/Volumes/SSD/temp/ferrodock-port/ferrodock-null-virtual-validation-summary.json` are zero. Do not restart/resume
-that completed process. The command was `/Volumes/SSD/temp/ferrodock-port/ferrodock-null-virtual-validate.py`;
+`<evidence>/ferrodock-port/ferrodock-null-virtual-validation-summary.json` are zero. Do not restart/resume
+that completed process. The command was `<evidence>/ferrodock-port/ferrodock-null-virtual-validate.py`;
 all stage logs use that prefix. Workspace tests, strict workspace all-target and
 release-library Clippy, standalone Core/recyclingSDK/backendSDK/runtime tests,
 six normal dependency boundaries, formatting, 21 Python tests, source/theme/inspector
@@ -3131,8 +3131,8 @@ required; inventory still232/454/1242 of1928 and completion must remain rejected
 
 Disk cleanup before validation removed65 old unreferenced owned test executables,
 17.19GiB reclaimed; sample binaries/bundles/window and logged artifacts were protected.
-Evidence: /Volumes/SSD/temp/ferrodock-port/ferrodock-stale-test-candidates.json and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-stale-test-prune.json. No vendor/dependency changes this checkpoint.
+Evidence: <evidence>/ferrodock-port/ferrodock-stale-test-candidates.json and
+<evidence>/ferrodock-port/ferrodock-stale-test-prune.json. No vendor/dependency changes this checkpoint.
 
 Final bookkeeping: new files are intent-to-add, authored whitespace clean, staged
 contents empty; original parent README/src/tests/samples unchanged. Actual desktop
@@ -3190,7 +3190,7 @@ source assertions cover matching TwoWay/map/engine/null/identity behavior. Two m
 SOURCE-ONLY assertions prove remaining null-engine behavior: without Factory,
 AddDocument(null) is a no-op, and a subclass override receives null. These cases have
 no Rust parity and must not be presented as matched. Reference job 86795 closed 0;
-log /Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-null-engine-reference.log. Earlier reference job 99982
+log <evidence>/ferrodock-port/ferrodock-delegate-null-engine-reference.log. Earlier reference job 99982
 closed 0 (523 assertions); first script path error made no source change.
 
 Strict all-target workspace and release-library Clippy pass. The first validation
@@ -3221,27 +3221,27 @@ service / serializer source scope. The full goal is unchanged and not completed.
 
 Owned final validation job 62205 closed 0; every stage in the merged summary is 0.
 Workspace job 14389 completed its tests before the final test-only borrow cleanup.
-Commands: /Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-validate.py and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-finish-validation.py. Logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-standalone-ferrodock-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-standalone-ferrodock-controls-recycling-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-standalone-ferrodock-model-reactiveui-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-standalone-ferrodock-runtime.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-python-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-check_port.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-check_theme_links.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-check_inspector_views.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-check_framework_patch.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-factory-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-preview-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-completion.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-validation-summary.json.
-Targeted consumer job 52349 closed 0; log /Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-consumers.log.
+Commands: <evidence>/ferrodock-port/ferrodock-delegate-validate.py and
+<evidence>/ferrodock-port/ferrodock-delegate-finish-validation.py. Logs:
+<evidence>/ferrodock-port/ferrodock-delegate-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-delegate-clippy.log,
+<evidence>/ferrodock-port/ferrodock-delegate-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-delegate-standalone-ferrodock-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-delegate-standalone-ferrodock-controls-recycling-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-delegate-standalone-ferrodock-model-reactiveui-ferro.log,
+<evidence>/ferrodock-port/ferrodock-delegate-standalone-ferrodock-runtime.log,
+<evidence>/ferrodock-port/ferrodock-delegate-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-delegate-format.log,
+<evidence>/ferrodock-port/ferrodock-delegate-python-tests.log,
+<evidence>/ferrodock-port/ferrodock-delegate-check_port.log,
+<evidence>/ferrodock-port/ferrodock-delegate-check_theme_links.log,
+<evidence>/ferrodock-port/ferrodock-delegate-check_inspector_views.log,
+<evidence>/ferrodock-port/ferrodock-delegate-check_framework_patch.log,
+<evidence>/ferrodock-port/ferrodock-delegate-factory-generator.log,
+<evidence>/ferrodock-port/ferrodock-delegate-preview-generator.log,
+<evidence>/ferrodock-port/ferrodock-delegate-completion.log,
+<evidence>/ferrodock-port/ferrodock-delegate-validation-summary.json.
+Targeted consumer job 52349 closed 0; log <evidence>/ferrodock-port/ferrodock-delegate-consumers.log.
 Earlier failed validation handles are terminal/superseded; do not resume old handles.
 
 ## Previous validated checkpoint
@@ -3287,7 +3287,7 @@ casts for root values, rather than assuming one Rust boxing form.
 Unchanged original C# reference passes **514 assertions** (515-line TSV), including
 native method assignment, compiled Core Func binding, original graph identity and
 explicit CLR cross-nullability delegate assignment/identity/invocation. C# job 34171
-closed 0; log /Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-reference.log. Earlier failed Rust attempts
+closed 0; log <evidence>/ferrodock-port/ferrodock-native-factory-reference.log. Earlier failed Rust attempts
 are terminal and superseded: missing fixture registration / direct root downcast were
 fixed in the consumer. Isolated runtime job 45499 closed 0; final workspace covers all
 three consumers. Core's new generic metadata test originally named the wrong field;
@@ -3321,25 +3321,25 @@ CLR cycles/lifetimes and original platform/input/rendering/performance parity.
 Do not weaken the original HostWindowState strong readonly host reference.
 
 Owned validation job 65941 closed 0; every stage in its summary is 0. Commands live in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-validate.py. Logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-controls-recycling-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-model-reactiveui-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-runtime.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-python-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-check_port.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-check_theme_links.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-check_inspector_views.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-check_framework_patch.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-factory-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-preview-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-completion.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-native-factory-validate.py. Logs:
+<evidence>/ferrodock-port/ferrodock-native-factory-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-clippy.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-controls-recycling-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-model-reactiveui-ferro.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-standalone-ferrodock-runtime.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-format.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-python-tests.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-check_port.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-check_theme_links.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-check_inspector_views.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-check_framework_patch.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-factory-generator.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-preview-generator.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-completion.log,
+<evidence>/ferrodock-port/ferrodock-native-factory-validation-summary.json.
 
 ## Previous validated checkpoint
 
@@ -3404,27 +3404,27 @@ rejects the unfinished original scope; do not mark the goal complete.
 Original HostWindowState retains its strong readonly host reference; do not weaken it.
 
 Owned validation job 26479 closed 0; all stages in the machine-readable summary are 0.
-Logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-controls-recycling-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-model-reactiveui-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-runtime.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-python-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-check_port.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-check_theme_links.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-check_inspector_views.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-check_framework_patch.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-factory-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-preview-generator.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-completion.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-validation-summary.json.
+Logs: <evidence>/ferrodock-port/ferrodock-core-controls-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-controls-recycling-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-model-reactiveui-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-standalone-ferrodock-runtime.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-format.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-python-tests.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-check_port.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-check_theme_links.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-check_inspector_views.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-check_framework_patch.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-factory-generator.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-preview-generator.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-completion.log,
+<evidence>/ferrodock-port/ferrodock-core-controls-validation-summary.json.
 C# reference job 52841 closed 0; log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-controls-reference-compiled.log. Independent consumer job 28073
-closed 0; log /Volumes/SSD/temp/ferrodock-port/ferrodock-model-controls-consumers-v2.log. Earlier failed attempts
+<evidence>/ferrodock-port/ferrodock-model-controls-reference-compiled.log. Independent consumer job 28073
+closed 0; log <evidence>/ferrodock-port/ferrodock-model-controls-consumers-v2.log. Earlier failed attempts
 are terminal and superseded by final validation; do not restart live processes.
 
 Next: continue original source/API scope with native DocumentFactory/delegate and
@@ -3492,16 +3492,16 @@ source is clean; authored whitespace passes. New files are intent-to-add, with n
 contents. Final bookkeeping checks pass after documentation edits.
 
 Owned validation job22791 closed0; machine-readable summary has zero for every stage.
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-reference.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-consumers.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-standalone-ferrodock-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-standalone-ferrodock-controls-recycling-model-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-standalone-ferrodock-model-reactiveui-ferro.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-standalone-ferrodock-runtime.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-dependencies.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-verifiers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-whitespace.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-validation-summary.json, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-host-completion.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-core-host-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-core-host-reference.log, <evidence>/ferrodock-port/ferrodock-core-host-consumers.log,
+<evidence>/ferrodock-port/ferrodock-core-host-clippy.log, <evidence>/ferrodock-port/ferrodock-core-host-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-host-standalone-ferrodock-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-host-standalone-ferrodock-controls-recycling-model-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-host-standalone-ferrodock-model-reactiveui-ferro.log,
+<evidence>/ferrodock-port/ferrodock-core-host-standalone-ferrodock-runtime.log,
+<evidence>/ferrodock-port/ferrodock-core-host-dependencies.log, <evidence>/ferrodock-port/ferrodock-core-host-format.log,
+<evidence>/ferrodock-port/ferrodock-core-host-verifiers.log, <evidence>/ferrodock-port/ferrodock-core-host-whitespace.log,
+<evidence>/ferrodock-port/ferrodock-core-host-validation-summary.json, <evidence>/ferrodock-port/ferrodock-core-host-completion.log.
 
 An earlier build was explicitly interrupted for verified memory pressure (24GiB RAM,
 16GiB swap); only owned group34137 was stopped, handle18599 closed130 and all children
@@ -3572,16 +3572,16 @@ vendor guards pass. Completion correctly rejects the unfinished inventory: 222 p
 464 partial, 1242 pending of 1928. Authored whitespace and original-source checks pass;
 new files are intent-to-add with no staged contents. Formatting also passes.
 
-Logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-standalone-sdk.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-verifiers.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-whitespace.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-contracts-completion.log.
+Logs: <evidence>/ferrodock-port/ferrodock-core-contracts-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-reference.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-standalone-sdk.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-verifiers.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-format.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-whitespace.log,
+<evidence>/ferrodock-port/ferrodock-core-contracts-completion.log.
 
 Next: remaining Core metadata still owned by controls includes ILocalTarget,
 IGlobalTarget and IDockItemContainerMetadata; move source-only contracts/identity facts
@@ -3628,9 +3628,9 @@ source-comparison guard declares that namespace migration, and two new regressio
 reject restoring the old owner or changing unrelated markup. All 20 Python tests pass.
 Layouts, bindings and behavior are preserved; the running sample was not rebuilt.
 
-Compiled consumer tests pass (4 cases), log /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-consumers.log.
+Compiled consumer tests pass (4 cases), log <evidence>/ferrodock-port/ferrodock-core-policies-consumers.log.
 The unchanged C# reference succeeds with 424 assertions, log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-reference.log. Reference source and six assets are under
+<evidence>/ferrodock-port/ferrodock-core-policies-reference.log. Reference source and six assets are under
 scripts/dock/factory-markup-reference. The final locked workspace passes **1,607 Rust tests in 45 suites**, zero failed/ignored:
 native UI375, markup131, diagnostics49, settings33, sample27, ReactiveUI model474,
 Core SDK36, backend SDK6 and runtime3. Strict all-target workspace Clippy and release
@@ -3646,12 +3646,12 @@ controls. The backend SDK retains native controls through recycling. Formatting 
 authored whitespace checks pass. New files are intent-to-add, with no staged contents,
 commits or original tracked source changes.
 
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-consumers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-standalone-sdk.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-python.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-verifiers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-format.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-core-policies-completion.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-core-policies-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-core-policies-consumers.log, <evidence>/ferrodock-port/ferrodock-core-policies-reference.log,
+<evidence>/ferrodock-port/ferrodock-core-policies-clippy.log, <evidence>/ferrodock-port/ferrodock-core-policies-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-core-policies-standalone-sdk.log, <evidence>/ferrodock-port/ferrodock-core-policies-python.log,
+<evidence>/ferrodock-port/ferrodock-core-policies-verifiers.log, <evidence>/ferrodock-port/ferrodock-core-policies-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-core-policies-format.log, <evidence>/ferrodock-port/ferrodock-core-policies-completion.log.
 
 Next ownership work includes IDockable/IDock and the remaining model contracts still
 registered by controls, preserving their object/recycling bridges and source assembly
@@ -3712,12 +3712,12 @@ controls. The backend SDK retains native controls through its recycling integrat
 Formatting and authored whitespace checks pass. New files are intent-to-add for review;
 there are no staged contents, commits or original tracked source changes.
 
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-core.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-verifiers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-signatures.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-completion.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-standalone-sdk.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-dependencies.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-api-format.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-factory-api-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-factory-api-core.log, <evidence>/ferrodock-port/ferrodock-factory-api-reference.log,
+<evidence>/ferrodock-port/ferrodock-factory-api-clippy.log, <evidence>/ferrodock-port/ferrodock-factory-api-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-factory-api-verifiers.log, <evidence>/ferrodock-port/ferrodock-factory-api-signatures.log,
+<evidence>/ferrodock-port/ferrodock-factory-api-completion.log, <evidence>/ferrodock-port/ferrodock-factory-api-standalone-sdk.log,
+<evidence>/ferrodock-port/ferrodock-factory-api-dependencies.log, <evidence>/ferrodock-port/ferrodock-factory-api-format.log.
 
 Remaining: complete Core contract/POCO logical ownership, generic/optional method and
 collection/x:Class/name/root metadata, other backends/services/serializers, full CLR
@@ -3786,13 +3786,13 @@ Formatting and authored whitespace checks pass. New files are intent-to-add for
 review, with no staged contents, commits or changes to original source trees.
 The structural completion gate still rejects the unfinished inventory as expected.
 
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-reference.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-release-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-core-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-scanner-tests.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-verifiers.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-preview-generator.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-format.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-standalone-sdk.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-locators-dependencies.log and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-locators-completion.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-locators-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-locators-reference.log, <evidence>/ferrodock-port/ferrodock-locators-clippy.log,
+<evidence>/ferrodock-port/ferrodock-locators-release-clippy.log, <evidence>/ferrodock-port/ferrodock-locators-core-tests.log,
+<evidence>/ferrodock-port/ferrodock-locators-scanner-tests.log, <evidence>/ferrodock-port/ferrodock-locators-verifiers.log,
+<evidence>/ferrodock-port/ferrodock-locators-preview-generator.log, <evidence>/ferrodock-port/ferrodock-locators-format.log,
+<evidence>/ferrodock-port/ferrodock-locators-standalone-sdk.log, <evidence>/ferrodock-port/ferrodock-locators-dependencies.log and
+<evidence>/ferrodock-port/ferrodock-locators-completion.log.
 
 Remaining: complete Core contract/POCO ownership and IFactory members, generic method/
 collection/x:Class/name/root metadata, other backends/services/serializers, complete
@@ -3853,12 +3853,12 @@ base/controls. The compiled event-owner test additionally clears its own retaine
 factory/sender references and verifies that both owner and publisher release. This
 explicit teardown does not establish general CLR cycle collection.
 
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-consumers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-standalone-sdk.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-python.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-completion.log and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-events-{ui,core,sdk,runtime,domain}-dependencies.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-factory-events-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-factory-events-consumers.log, <evidence>/ferrodock-port/ferrodock-factory-events-reference.log,
+<evidence>/ferrodock-port/ferrodock-factory-events-clippy.log, <evidence>/ferrodock-port/ferrodock-factory-events-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-factory-events-standalone-sdk.log, <evidence>/ferrodock-port/ferrodock-factory-events-python.log,
+<evidence>/ferrodock-port/ferrodock-factory-events-completion.log and
+<evidence>/ferrodock-port/ferrodock-factory-events-{ui,core,sdk,runtime,domain}-dependencies.log.
 The completion gate correctly rejects the unchanged unfinished inventory. No build
 cache cleanup was needed in this checkpoint.
 
@@ -3930,21 +3930,21 @@ FerroUI source files remain untouched. No desktop sample rebuild/restart, commit
 or pushes are part of this checkpoint. New files are intent-to-add for review only.
 
 Storage pressure was resolved only after authoritative build termination. Selective
-records: /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-cache-cleanup.json and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-obsolete-tests-cleanup.json. The latter removed 61
+records: <evidence>/ferrodock-port/ferrodock-factory-window-cache-cleanup.json and
+<evidence>/ferrodock-port/ferrodock-factory-window-obsolete-tests-cleanup.json. The latter removed 61
 obsolete duplicate test executables (19.35 GiB), retaining the newest two per target
 and excluding sample binaries. No source, app bundle or active build was removed.
 Cargo operations remain sequential.
 
-Current logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-consumers.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-standalone-sdk.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-python.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-completion.log and
-/Volumes/SSD/temp/ferrodock-port/ferrodock-factory-window-{ui,core,sdk,domain}-dependencies.log.
+Current logs: <evidence>/ferrodock-port/ferrodock-factory-window-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-consumers.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-clippy.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-standalone-sdk.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-reference.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-python.log,
+<evidence>/ferrodock-port/ferrodock-factory-window-completion.log and
+<evidence>/ferrodock-port/ferrodock-factory-window-{ui,core,sdk,domain}-dependencies.log.
 
 Next scope: remaining FactoryBase/collection metadata and Core interface/POCO logical
 ownership; every generic/nullable/x:Class/name/root case; other backends/services/
@@ -4015,7 +4015,7 @@ and four exact vendor guards pass. Inventory remains 222 ported, 464 partial and
 
 After verified build termination, storage pressure was resolved by removing obsolete
 test executables and older duplicate base/control archives only. The exact record is
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-cache-cleanup.json. Source, live app bundles and current builds
+<evidence>/ferrodock-port/ferrodock-layout-cache-cleanup.json. Source, live app bundles and current builds
 were preserved; no broad cache cleanup or overlapping Cargo builds/tests occurred.
 
 Next substantive scope: Factory and DockWindow class constructors; remaining Core
@@ -4025,12 +4025,12 @@ platform/custom identity/string boxing/CLR GC/lifetime parity. Preserve original
 algorithms and API, passive views, actual model identity and metadata composition.
 Do not mark the full goal complete from these control constructors or passing tests.
 
-Current authoritative logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-libraries.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-cast-regression.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-standalone-sdk.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-reference.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-release-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-{ui,core,sdk,domain}-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-layout-python.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-completion.log.
+Current authoritative logs: <evidence>/ferrodock-port/ferrodock-layout-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-layout-libraries.log, <evidence>/ferrodock-port/ferrodock-layout-cast-regression.log,
+<evidence>/ferrodock-port/ferrodock-layout-standalone-sdk.log, <evidence>/ferrodock-port/ferrodock-layout-reference.log,
+<evidence>/ferrodock-port/ferrodock-layout-clippy.log, <evidence>/ferrodock-port/ferrodock-layout-release-clippy.log,
+<evidence>/ferrodock-port/ferrodock-layout-{ui,core,sdk,domain}-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-layout-python.log, <evidence>/ferrodock-port/ferrodock-layout-completion.log.
 
 ## Previous constructor SDK checkpoint
 
@@ -4103,12 +4103,12 @@ wider source/API/platform/lifetime inventory. Current inventory remains 222 port
 complete from these constructor/metadata checks. Continue using original engines,
 passive views, compiled metadata/bindings and explicit integration composition.
 
-Final logs: /Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-workspace-tests.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-consumers.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-unit.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-reference.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-clippy.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-release-clippy.log, /Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-python.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-{ui,sdk,model}-dependencies.log,
-/Volumes/SSD/temp/ferrodock-port/ferrodock-model-sdk-completion.log.
+Final logs: <evidence>/ferrodock-port/ferrodock-model-sdk-workspace-tests.log,
+<evidence>/ferrodock-port/ferrodock-model-sdk-consumers.log, <evidence>/ferrodock-port/ferrodock-model-sdk-unit.log,
+<evidence>/ferrodock-port/ferrodock-model-sdk-reference.log, <evidence>/ferrodock-port/ferrodock-model-sdk-clippy.log,
+<evidence>/ferrodock-port/ferrodock-model-sdk-release-clippy.log, <evidence>/ferrodock-port/ferrodock-model-sdk-python.log,
+<evidence>/ferrodock-port/ferrodock-model-sdk-{ui,sdk,model}-dependencies.log,
+<evidence>/ferrodock-port/ferrodock-model-sdk-completion.log.
 
 ## Prior external carrier checkpoint
 
@@ -4125,7 +4125,7 @@ impasse. There is concrete SDK metadata/constructor work available below.
 The actual unresolved carrier gap was reproduced before editing: two ordinary roots
 for DockCapabilityPolicy and DockCapabilityOverrides emitted nonexistent
 DockCapabilityPolicyMetadataImpl / trait-as-concrete return types. The baseline is
-/Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-baseline.log. The old helper replaced a canonical model name
+<evidence>/ferrodock-port/ferrodock-carrier-baseline.log. The old helper replaced a canonical model name
 inside a different constructor-result type with the carrier's Rust path. That is now
 removed. The model host uses the import-resolved declared value syntax, never the
 carrier's path as the model type.
@@ -4192,12 +4192,12 @@ is promoted by these cases; the completion gate must reject. These are further t
 not blockers or a reduced goal.
 
 Authoritative logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-final-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-final-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-final-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-python.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-carrier-completion.log (expected rejection)
+- <evidence>/ferrodock-port/ferrodock-carrier-final-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-carrier-final-clippy.log
+- <evidence>/ferrodock-port/ferrodock-carrier-final-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-carrier-reference.log
+- <evidence>/ferrodock-port/ferrodock-carrier-python.log
+- <evidence>/ferrodock-port/ferrodock-carrier-completion.log (expected rejection)
 
 ## Historical plain-root and identity checkpoint
 
@@ -4277,12 +4277,12 @@ of those contracts or substitute UI model surrogates. Full inventory remains **2
 port tasks, not blockers or a smaller replacement objective.
 
 Authoritative logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-root-identity-final-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-root-identity-final-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-root-identity-final-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-plain-root-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-root-identity-python.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-root-identity-completion.log (expected rejection)
+- <evidence>/ferrodock-port/ferrodock-root-identity-final-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-root-identity-final-clippy.log
+- <evidence>/ferrodock-port/ferrodock-root-identity-final-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-plain-root-reference.log
+- <evidence>/ferrodock-port/ferrodock-root-identity-python.log
+- <evidence>/ferrodock-port/ferrodock-root-identity-completion.log (expected rejection)
 
 ## Historical shared namescope checkpoint
 
@@ -4352,19 +4352,19 @@ three exact dependency provenance guards pass. Original dependency/linker warnin
 No files are staged, committed or pushed; new files are intent-to-add for review.
 
 Authoritative logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-final-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-final-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-final-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-reference.log (42 unchanged-C# assertions)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-python.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-completion.log (expected rejection)
+- <evidence>/ferrodock-port/ferrodock-namescope-final-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-namescope-final-clippy.log
+- <evidence>/ferrodock-port/ferrodock-namescope-final-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-namescope-reference.log (42 unchanged-C# assertions)
+- <evidence>/ferrodock-port/ferrodock-namescope-python.log
+- <evidence>/ferrodock-port/ferrodock-namescope-completion.log (expected rejection)
 
 Next: extend the genuine shared compiler/root and reference-identity machinery for
 plain model roots and separate interface/class-reference identity projections; keep
 normal model metadata UI-owned and original engine objects unchanged. Do not create
 UI surrogates or infer whole-library completion from the current named nested fixture.
 An initial validation overlap invalidated an artifact during doc tests; that is superseded
-by the clean final runs. Do not cite the overlapped /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-workspace-tests.log.
+by the clean final runs. Do not cite the overlapped <evidence>/ferrodock-port/ferrodock-namescope-workspace-tests.log.
 
 ## Historical factory and markup-extension checkpoint
 
@@ -4446,15 +4446,15 @@ user's live rearranged layout. The preceding inspector/grip checkpoint remains t
 latest native screenshot/executable evidence. No new desktop behavior is claimed.
 
 Logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-workspace-tests.log (1,515 / 39 suites)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-extensions-tests.log (seven engine/model helpers)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-extensions-metadata.log (native static metadata)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-markup-extensions-tests.log (13 native consumer cases)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-reference.log (33 source outcomes + known gap)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-python.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-factory-markup-completion.log (expected incomplete)
+- <evidence>/ferrodock-port/ferrodock-factory-markup-workspace-tests.log (1,515 / 39 suites)
+- <evidence>/ferrodock-port/ferrodock-factory-extensions-tests.log (seven engine/model helpers)
+- <evidence>/ferrodock-port/ferrodock-factory-extensions-metadata.log (native static metadata)
+- <evidence>/ferrodock-port/ferrodock-markup-extensions-tests.log (13 native consumer cases)
+- <evidence>/ferrodock-port/ferrodock-factory-markup-reference.log (33 source outcomes + known gap)
+- <evidence>/ferrodock-port/ferrodock-factory-markup-clippy.log
+- <evidence>/ferrodock-port/ferrodock-factory-markup-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-factory-markup-python.log
+- <evidence>/ferrodock-port/ferrodock-factory-markup-completion.log (expected incomplete)
 
 ## Historical main inspector/F11 and grip checkpoint
 
@@ -4539,7 +4539,7 @@ closed, F9 off, no pins. The user rearranged Document1 into a second document gr
 during validation; preserve that live state. Do not reset it to the startup graph.
 
 App and screenshots (absolute directory):
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/
+<evidence>/
 - FerroDock.app
 - ferrodock-rust-header-grip-fixed.png
 - ferrodock-rust-f11-inspector.png
@@ -4547,13 +4547,13 @@ App and screenshots (absolute directory):
 - ferrodock-rust-f11-events.png
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-grip-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-desktop-build.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-main-inspector-python.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-grip-tests.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-reference.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-clippy.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-desktop-build.log
+- <evidence>/ferrodock-port/ferrodock-main-inspector-python.log
 
 No commits/pushes/PRs or agents. All source changes are under FerroDock.
 
@@ -4613,19 +4613,19 @@ property views; do not create a reduced inspector. Source file:
 SelectDockableRequested routing. Existing selection/debug overlay foundations remain.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-workspace-tests.log (1,483 / 37 suites)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-final-diagnostics.log (38 after test-only cleanup)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-expanded-tests.log (diagnostics/settings/consumer)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-reference.log (unchanged-source actual reference)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-clippy.log (strict all-target workspace)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-python.log (16 Python tests)
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-inspector-completion.log (expected incomplete)
+- <evidence>/ferrodock-port/ferrodock-inspector-workspace-tests.log (1,483 / 37 suites)
+- <evidence>/ferrodock-port/ferrodock-inspector-final-diagnostics.log (38 after test-only cleanup)
+- <evidence>/ferrodock-port/ferrodock-inspector-expanded-tests.log (diagnostics/settings/consumer)
+- <evidence>/ferrodock-port/ferrodock-inspector-reference.log (unchanged-source actual reference)
+- <evidence>/ferrodock-port/ferrodock-inspector-clippy.log (strict all-target workspace)
+- <evidence>/ferrodock-port/ferrodock-inspector-python.log (16 Python tests)
+- <evidence>/ferrodock-port/ferrodock-inspector-completion.log (expected incomplete)
 
 The currently running native app/bundle is the previous F9 checkpoint, not rebuilt
 for these new property views; no desktop F11 result is claimed. The unlocked visual
 check left Document2/Tool1 selected, no pins, F9 OFF. Source unpin placed Tool1 after
 Tool2 in its group. Screenshot:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-unlocked-check.png
+<evidence>/ferrodock-rust-unlocked-check.png
 The previous app hash and packaging details below remain the last desktop evidence.
 No commits/pushes/PRs, goal status changes or agents were used.
 
@@ -4691,7 +4691,7 @@ original three-document/eight-tool layout, no pinned items, overlay OFF. Hover f
 and footer glyphs are tested in native Headless; the desktop AX click did not establish
 a separate pointer-hover/footer result. Do not claim a desktop hover screenshot.
 Current app and evidence directory:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/
+<evidence>/
 FerroDock.app
 ferrodock-rust-f9-overlay.png
 ferrodock-rust-f9-tab-selection.png
@@ -4706,13 +4706,13 @@ full original sample scope remain incomplete. No unsafe, reflection, source stub
 alternate UI/docking engine, original C# or sibling FerroUI edit was introduced.
 
 Current logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-overlay-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-overlay-reference.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-app-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-release-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-debug-desktop-build.log
+<evidence>/ferrodock-port/ferrodock-debug-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-debug-overlay-tests.log
+<evidence>/ferrodock-port/ferrodock-debug-overlay-reference.log
+<evidence>/ferrodock-port/ferrodock-debug-app-tests.log
+<evidence>/ferrodock-port/ferrodock-debug-clippy.log
+<evidence>/ferrodock-port/ferrodock-debug-release-clippy.log
+<evidence>/ferrodock-port/ferrodock-debug-desktop-build.log
 
 ## Historical diagnostics selection checkpoint
 
@@ -4772,13 +4772,13 @@ Tool2 selected in its original group, no pinned items and Document1 selected.
 This clears the previous manual-unlock/visual-refresh blocker. No unrelated app was used.
 
 Current app:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 Physical executable SHA256 (matches the normal Cargo desktop build):
 f5e4460b009711b1ba36b0bcffde2e32e0bf162c4bda46aa74cedcf82f19a6af
 Actual native screenshots and final accessibility state:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-running.png
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-pinned.png
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/ferrodock-rust-running.ax.txt
+<evidence>/ferrodock-rust-running.png
+<evidence>/ferrodock-rust-pinned.png
+<evidence>/ferrodock-rust-running.ax.txt
 These validate the recorded native flow on this machine, not full platform/input parity.
 
 Inventory: **222 ported, 411 partial, 1,295 pending / 1,928**. The two complete
@@ -4802,13 +4802,13 @@ in whitespace verification; the exact vendor copy/literal patch is excluded as b
 The source C# tree outside FerroDock remains unchanged. Nothing is committed or pushed.
 
 Current logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-overlay-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-overlay-reference.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-desktop-build.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-release-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-selection-final-clippy.log
+<evidence>/ferrodock-port/ferrodock-selection-overlay-tests.log
+<evidence>/ferrodock-port/ferrodock-selection-overlay-reference.log
+<evidence>/ferrodock-port/ferrodock-selection-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-selection-clippy.log
+<evidence>/ferrodock-port/ferrodock-selection-desktop-build.log
+<evidence>/ferrodock-port/ferrodock-selection-release-clippy.log
+<evidence>/ferrodock-port/ferrodock-selection-final-clippy.log
 
 ## Historical Browser overlay and delayed panel checkpoint
 
@@ -4887,7 +4887,7 @@ The final GUI refresh still awaits the previously requested manual Mac unlock.
 
 After all source changes, the actual desktop executable rebuilt successfully and
 scripts/dock/bundle_macos_sample.py physically updated the existing system-volume app:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 The bundled executable is not a symlink and matches the new build byte-for-byte
 (SHA256 9b1467f87ed04b76324dec90bdecd08ccf6d8d7bd1b6f6925743aa3ab0b9cc95).
 The old app process was not restarted while the Mac remained locked; the refreshed
@@ -4899,15 +4899,15 @@ Both generators, 12 Python tests and source/theme/provenance guards pass; comple
 still correctly exits 1 for unfinished scope. No C# source outside FerroDock changed.
 
 Current logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-construction-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-combined-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delayed-reference.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delayed-panel-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-release-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delayed-final-corpus.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-browser-desktop-build.log
+<evidence>/ferrodock-port/ferrodock-browser-construction-tests.log
+<evidence>/ferrodock-port/ferrodock-browser-combined-tests.log
+<evidence>/ferrodock-port/ferrodock-delayed-reference.log
+<evidence>/ferrodock-port/ferrodock-delayed-panel-tests.log
+<evidence>/ferrodock-port/ferrodock-browser-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-browser-clippy.log
+<evidence>/ferrodock-port/ferrodock-browser-release-clippy.log
+<evidence>/ferrodock-port/ferrodock-delayed-final-corpus.log
+<evidence>/ferrodock-port/ferrodock-browser-desktop-build.log
 
 ## Historical Simple theme checkpoint
 
@@ -4966,13 +4966,13 @@ Completion must still reject.
 Strict release checking of the new Simple library passes. Both source generators,
 unchanged-original-source and workspace whitespace checks pass too (the latter excludes
 the exact vendor copy/literal patch). Full completion was rerun and correctly rejects
-remaining source scope. Release log: /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-release-clippy.log.
+remaining source scope. Release log: <evidence>/ferrodock-port/ferrodock-simple-release-clippy.log.
 
 Current logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-simple-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-simple-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-simple-color-matrix.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-simple-clippy.log
+<evidence>/ferrodock-port/ferrodock-simple-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-simple-tests.log
+<evidence>/ferrodock-port/ferrodock-simple-color-matrix.log
+<evidence>/ferrodock-port/ferrodock-simple-clippy.log
 
 The final sample visual refresh still awaits the manual Mac unlock requested earlier.
 No further unlock attempts or changes to system settings were made this turn. Library
@@ -5032,16 +5032,16 @@ Strict all-target workspace Clippy and strict release library checks for setting
 native UI, Fluent and the sample pass. Formatting, both source generators, NINE Python
 checks, unchanged-original-source and provenance checks pass; workspace whitespace
 checks exclude the exact vendor copy/literal patch. Existing native warnings persist.
-Strict log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-clippy.log.
-Release log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-release-clippy.log.
+Strict log: <evidence>/ferrodock-port/ferrodock-flags-clippy.log.
+Release log: <evidence>/ferrodock-port/ferrodock-flags-release-clippy.log.
 
 The actual desktop executable was rebuilt and physically repackaged; the bundle
 matches the new executable byte-for-byte. Visual refresh remains pending the manual
-unlock. Desktop build log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-desktop-build.log.
+unlock. Desktop build log: <evidence>/ferrodock-port/ferrodock-flags-desktop-build.log.
 
-Current full-regression log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-workspace-tests.log.
-Targeted metadata log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-metadata-tests.log.
-Original view reference log: /Volumes/SSD/temp/ferrodock-port/ferrodock-original-proportional-view.log.
+Current full-regression log: <evidence>/ferrodock-port/ferrodock-flags-workspace-tests.log.
+Targeted metadata log: <evidence>/ferrodock-port/ferrodock-flags-metadata-tests.log.
+Original view reference log: <evidence>/ferrodock-port/ferrodock-original-proportional-view.log.
 
 ## Historical original application checkpoint
 
@@ -5082,7 +5082,7 @@ New production work:
   converter twice. Dock's original object-valued IconTemplate API is retained.
   Original hashes/revision and exact declared edits are guarded by
   scripts/dock/check_framework_patch.py; no registry source or sibling checkout was edited.
-  /Volumes/SSD/repos/FerroUI remains READ ONLY. Do not format or alter unrelated vendor
+  <checkout> remains READ ONLY. Do not format or alter unrelated vendor
   files; the package is excluded from workspace formatting.
 - Source ordinal string helpers use the existing frozen mapping and 3,005 independent
   .NET corpus cases. DockingWindowState Display matches 98 outputs from the ACTUAL
@@ -5112,7 +5112,7 @@ full window. These observations do not establish the cause of the failed launch 
 The portable scripts/dock/bundle_macos_sample.py helper makes an atomic physical copy,
 checks an existing bundle's identifier and never launches or replaces unrelated apps.
 The verified output location is:
-/Users/danw/.codex/visualizations/2026/10/20/01a159ac-1bde-7af3-b2d4-2898fb2041f3/FerroDock.app
+<evidence>/FerroDock.app
 
 Strict workspace all-target Clippy, formatting, structural inventory, native patch
 integrity and NINE Python verifier cases pass. The local native dependency reports
@@ -5125,11 +5125,11 @@ The physical app executable was checked byte-for-byte against the desktop build.
 The Mac then locked: a request to close/refresh the earlier running window was refused
 by native app control. The refreshed bundle is ready, but a final visual check requires
 the user to unlock the Mac. Do not describe the refreshed window as visually verified.
-Release log: /Volumes/SSD/temp/ferrodock-port/ferrodock-app-release-clippy.log.
-Desktop build log: /Volumes/SSD/temp/ferrodock-port/ferrodock-app-desktop-build.log.
+Release log: <evidence>/ferrodock-port/ferrodock-app-release-clippy.log.
+Desktop build log: <evidence>/ferrodock-port/ferrodock-app-desktop-build.log.
 
-Current full-regression log: /Volumes/SSD/temp/ferrodock-port/ferrodock-app-workspace-tests.log.
-Strict workspace log: /Volumes/SSD/temp/ferrodock-port/ferrodock-app-clippy.log.
+Current full-regression log: <evidence>/ferrodock-port/ferrodock-app-workspace-tests.log.
+Strict workspace log: <evidence>/ferrodock-port/ferrodock-app-clippy.log.
 
 Remaining work includes original DEBUG F9/F11 diagnostics, full static-field/flags/
 System.Enum/generic metadata, callback/delegate/collection/reentry/CLR lifetime parity,
@@ -5219,9 +5219,9 @@ factory/coordinate generators, SEVEN Python verifier tests, source-name/placehol
 whitespace and unchanged-original-C# checks pass. Inventory: **222 ported, 376 partial,
 1,330 pending / 1,928**. Completion gate MUST still reject unfinished scope. The existing
 macOS compact-unwind linker warning remains. Current logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-compiled-sample-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-compiled-sample-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-compiled-sample-release-clippy.log
+<evidence>/ferrodock-port/ferrodock-compiled-sample-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-compiled-sample-clippy.log
+<evidence>/ferrodock-port/ferrodock-compiled-sample-release-clippy.log
 
 Next work toward launch: implement the original MainView InitializeThemes behavior via
 commands/behaviors (views remain passive), actual App resources/lifetimes and Program/
@@ -5231,7 +5231,7 @@ projection; IResourceDictionary needs its mutable merged-list handle (not just s
 The two concrete managers are still ABSENT; keep source recursive matching/removal and
 custom dictionary support. Do not add unsafe casts, type/identity side registries, or
 recognize only dictionaries created by this application. Use an isolated native support
-change; the dirty sibling /Volumes/SSD/repos/FerroUI remains READ ONLY. No dependency
+change; the dirty sibling <checkout> remains READ ONLY. No dependency
 sources or sibling files were edited. All actual dependencies are still published
 =0.3.0, with no local framework patch/path override. Broader original source scope,
 serializers, alternate models and native input/platform/callback/GC/lifetime parity are
@@ -5302,7 +5302,7 @@ IMPORTANT discovered shared dependency gaps before porting preset managers:
    MergedDictionaries list through the interface. Source recursive remove/add must work
    for custom dictionaries, not just concrete ResourceDictionary. This needs a faithful
    shared native API extension rather than silently ignoring custom providers.
-The dirty sibling /Volumes/SSD/repos/FerroUI was READ ONLY inspected: its current source
+The dirty sibling <checkout> was READ ONLY inspected: its current source
 has the SAME gaps. It was not edited. Exact published sources also remain unchanged.
 Do not claim the actual managers are ported. Full manager types/methods remain absent.
 Only their four-member interface is declared. This does not block progress on original
@@ -5324,9 +5324,9 @@ now also audits samples/**/*.rs (mapping, forbidden upstream names and placehold
 with a meaningful new Python fixture; all SEVEN Python tests pass. Inventory: **222
 ported, 345 partial, 1,361 pending / 1,928**. Completion gate must still reject scope.
 Existing macOS compact-unwind warning persists. Logs:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-original-sample-workspace-tests.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-original-sample-clippy.log
-/Volumes/SSD/temp/ferrodock-port/ferrodock-original-sample-release-clippy.log
+<evidence>/ferrodock-port/ferrodock-original-sample-workspace-tests.log
+<evidence>/ferrodock-port/ferrodock-original-sample-clippy.log
+<evidence>/ferrodock-port/ferrodock-original-sample-release-clippy.log
 Cargo clean -p ferrodock-ferro safely
 removed old build artifacts after disk space fell to ~1 GiB; current space recovered.
 

@@ -1,0 +1,2775 @@
+{
+  "status": "partially_verified",
+  "source_revision": "3694995fabbebc45a801a455880e3d31888367f1",
+  "ferroui_revision": "09c4f95e5cb91f4fa913c264a2bb34971e2d4f82",
+  "scope": "Assertion-by-assertion correspondence for all pinned upstream Core test methods and original source suite execution. New direct16layout andthreeexact text/data tests;no production/runtime changes.",
+  "reference_inputs": [
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "sha256": "9d8a401d01d1f81adaf9082b5624c147d06d74c65d801b39d1c8fb39cfbfe66f"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "sha256": "fdf6e85f9e8e549c8be01ac7506b89dad35913433185d0ea832c567bc65b1d7f"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/ScreenKeyboard.Core.Tests.csproj",
+      "sha256": "d09e380e211cc85c99313b209197d05a72f282ae3d0251a289f2a8f9446685fc"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/TestHelpers.cs",
+      "sha256": "36d4ca6eb452e81f60c556e27f956ab06445abe0e68fc90d3ade3b250893f00e"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "sha256": "8300a398a10dbdc6c13c5821a7f5750def12f5659a9a55637a878303041f150e"
+    },
+    {
+      "path": "reference/ScreenKeyboardControl/tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "sha256": "9f0b814726c3d0edb9d72030dfc0b60557dff546a21f69091e1a90b2ed84fb48"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/clipboard.rs",
+      "sha256": "30cbd8265d95fe626b1ca37e2383602195fcfb56c06f3a2ee33decd697b27cfe"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/dictionary.rs",
+      "sha256": "c9850953da52a1b466bab43ac74f78e59970b2fbcb465e99ef3a2c9c37b772b2"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/editor.rs",
+      "sha256": "c571a20d66fc320404dddf836f6d191a7250e9e869678d84c6bf7398b9713308"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/emoji.rs",
+      "sha256": "2d624583c0c8def4eb974e638c7b675e6c731ff8230b97a88c3736310fda9ce8"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+      "sha256": "bb486405dccaa09e5fd998a3b3e7558dcd5c98704c8af93ac271b96f5d2434b3"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/settings.rs",
+      "sha256": "2f918589634b410b24c0a485edbf75cce63a51bb1574e0c536261d993116cf29"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/text_utils.rs",
+      "sha256": "72a2d0b204e4b29434fd83dace7f04a1fe183ef65bf30d664eadcbcf05bd0c1a"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+      "sha256": "c44d93cec2a8828de1b6ea2b196f0f853959340497f0a97060e0878c0e60b2fa"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/user_dictionary.rs",
+      "sha256": "10a603973804ccbeb9770812327b8f2aa3136062844493b7d82a8224fc19f8e2"
+    }
+  ],
+  "implementation_inputs": [
+    {
+      "path": "scripts/check_dependencies.py",
+      "sha256": "f6324215e49c3a1090591c252e88695e558c6b06ec553153b3a4f8f259ae7578"
+    },
+    {
+      "path": "scripts/check_branding.py",
+      "sha256": "2c0a41f442240b8514111c7449b4adfc321c5c232522ef96c23fe8cce0903968"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+      "sha256": "20e0ae69d612145dbe0b19934e7799faa14cd03b53e8b8ffd2e88257ad187505"
+    },
+    {
+      "path": "src/FerroBoard.Core/tests/text_data_upstream.rs",
+      "sha256": "93715707b373846524128dad78a9c1c830230d696e161110eabdddbb7109c171"
+    },
+    {
+      "path": "scripts/upstream-test-audit/Program.cs",
+      "sha256": "15666b8eb40d2e2a9309f8d5ef50a4c1a099f4cd06b2e363b1794126946babd4"
+    },
+    {
+      "path": "scripts/upstream-test-audit/UpstreamTestAudit.csproj",
+      "sha256": "48fca5e691e92bddcc63d697a6ead0483a005787f3d1fc0b30765239ae7c049f"
+    },
+    {
+      "path": "docs/upstream-test-assertions.json",
+      "sha256": "b2b127e9159a7ffbd73c9d0ef91b767738d6c5495c40c41a69f298b80affbd00"
+    },
+    {
+      "path": "scripts/upstream-test-audit/README.md",
+      "sha256": "2fa9da1473a5aea6e614e02f931f551cba96a124069f9bd77c2c8984d623cd91"
+    }
+  ],
+  "prior_input_transitions": [
+    {
+      "path": "scripts/check_dependencies.py",
+      "before_sha256": "9daa540f856c382cd15eb9d13f0500d31b0f9d21bab0b14aae224b828ecece9b",
+      "after_sha256": "f6324215e49c3a1090591c252e88695e558c6b06ec553153b3a4f8f259ae7578",
+      "before_snapshot": "/tmp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_dependencies.py"
+    },
+    {
+      "path": "scripts/check_branding.py",
+      "before_sha256": "0b2a868868829025295bbf80f1a852eb35fa4ef15058c1b3cfa08fc0b9add68f",
+      "after_sha256": "2c0a41f442240b8514111c7449b4adfc321c5c232522ef96c23fe8cce0903968",
+      "before_snapshot": "/tmp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_branding.py"
+    }
+  ],
+  "methods": [
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:34:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Auto_capitalizes_start_of_sentence",
+      "method_sha256": "8de67470bbccc1a26bb8a67736f10d0a55d03ff0391eb2de0bf737cd43ab8781",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 38,
+          "expression": "Assert.Equal(ShiftState.ShiftedAutomatic, engine.ShiftState)"
+        },
+        {
+          "line": 40,
+          "expression": "Assert.Equal(\"Hi\", target.Text)"
+        },
+        {
+          "line": 41,
+          "expression": "Assert.Equal(ShiftState.Unshifted, engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "auto_capitalizes_start_of_sentence"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Auto_capitalizes_start_of_sentence",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:44:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Auto_capitalization_can_be_disabled",
+      "method_sha256": "a8da83b39acb423cbdc41d69aee7097761d5261c5ad5c350bbcdb92425d19f55",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 49,
+          "expression": "Assert.Equal(\"hi\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "auto_capitalization_can_be_disabled"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Auto_capitalization_can_be_disabled",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:52:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Capitalizes_after_sentence_terminator",
+      "method_sha256": "f4b28820e387f3348787f0bc1a15149379e037c1ebda72ea94a1353b9b98ca72",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 57,
+          "expression": "Assert.Equal(\"Ok. Yes\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "capitalizes_after_sentence_terminator"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Capitalizes_after_sentence_terminator",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:60:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Shift_toggles_and_double_tap_enables_caps_lock",
+      "method_sha256": "2d712e29592564665780917151538642573d62ebec3aef629fe2437a98bdabc3",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 65,
+          "expression": "Assert.Equal(ShiftState.ShiftedManual, engine.ShiftState)"
+        },
+        {
+          "line": 68,
+          "expression": "Assert.Equal(ShiftState.CapsLock, engine.ShiftState)"
+        },
+        {
+          "line": 70,
+          "expression": "Assert.Equal(\"ABC\", target.Text)"
+        },
+        {
+          "line": 71,
+          "expression": "Assert.Equal(ShiftState.CapsLock, engine.ShiftState)"
+        },
+        {
+          "line": 73,
+          "expression": "Assert.Equal(ShiftState.Unshifted, engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "shift_toggles_and_double_tap_enables_caps_lock"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Shift_toggles_and_double_tap_enables_caps_lock",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:76:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Shift_chording_resets_after_release",
+      "method_sha256": "637f7ab3d307fb8021b608c7ea3b2c05e9784810cf63dc46d1e7dab180e27c38",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 85,
+          "expression": "Assert.Equal(\"AB\", target.Text)"
+        },
+        {
+          "line": 86,
+          "expression": "Assert.Equal(ShiftState.Unshifted, engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "shift_chording_resets_after_release"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Shift_chording_resets_after_release",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:89:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Double_space_inserts_period",
+      "method_sha256": "d59cd8bbc00d0e1c13078610a8e50e41e00a8a31582624bf10c2f8a1067c6a27",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 94,
+          "expression": "Assert.Equal(\"Hello. \", target.Text)"
+        },
+        {
+          "line": 95,
+          "expression": "Assert.Equal(ShiftState.ShiftedAutomatic, engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "double_space_inserts_period"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Double_space_inserts_period",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:98:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Double_space_requires_quick_succession",
+      "method_sha256": "f67fa4cd55310a07e53675c421be6e9f90837c02bc4aa53832e71d0e79f11416",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 105,
+          "expression": "Assert.Equal(\"Hello  \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "double_space_requires_quick_succession"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Double_space_requires_quick_succession",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:108:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Autocorrects_and_backspace_reverts",
+      "method_sha256": "1ca9d07442f97cd5fc10cf157fecdbf7d81c1101875c17110a8cc71d631846fa",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 113,
+          "expression": "Assert.Contains(engine.Suggestions, s => s.Text == \"the\" && s.IsAutoCommit)"
+        },
+        {
+          "line": 115,
+          "expression": "Assert.Equal(\"i like the \", target.Text)"
+        },
+        {
+          "line": 117,
+          "expression": "Assert.Equal(\"i like teh\", target.Text)"
+        },
+        {
+          "line": 120,
+          "expression": "Assert.Equal(\"i like teh \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "autocorrects_and_backspace_reverts"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Autocorrects_and_backspace_reverts",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:123:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "No_autocorrect_in_password_fields",
+      "method_sha256": "cf417eed7939752baa99d0aca327bfcb238ff7b66d8444d9baaba042506a45a6",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 128,
+          "expression": "Assert.Equal(\"teh \", target.Text)"
+        },
+        {
+          "line": 129,
+          "expression": "Assert.Empty(engine.Suggestions)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "no_autocorrect_in_password_fields"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.No_autocorrect_in_password_fields",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:132:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Suggestions_complete_prefix",
+      "method_sha256": "80288e7b0efa59408219309c0576c7f3987b414816f405133c71487cd6a89efa",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 137,
+          "expression": "Assert.Contains(engine.Suggestions, s => s.Text is \"thank\" or \"that\" or \"thanks\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "suggestions_complete_prefix"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Suggestions_complete_prefix",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:140:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Committing_suggestion_replaces_word_and_adds_space_then_punctuation_swaps",
+      "method_sha256": "87472c4f95a37527fbcbd16abc7c713825c551fb58055011200be8f54b1998fd",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 147,
+          "expression": "Assert.Equal(suggestion.Text + \" \", target.Text)"
+        },
+        {
+          "line": 149,
+          "expression": "Assert.Equal(suggestion.Text + \". \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "committing_suggestion_replaces_word_and_adds_space_then_punctuation_swaps"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Committing_suggestion_replaces_word_and_adds_space_then_punctuation_swaps",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:152:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Learns_words_and_predicts_next_word",
+      "method_sha256": "8d82bb4ad9ee675f3a55a03ec9f00875a14842b1251b0c9d5daa10de8270a3ef",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 166,
+          "expression": "Assert.Contains(engine.Suggestions, s => s.Text == \"zorblax\")"
+        },
+        {
+          "line": 170,
+          "expression": "Assert.Contains(engine.Suggestions, s => s.Kind == SuggestionKind.Prediction && s.Text == \"quux\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "learns_words_and_predicts_next_word"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Learns_words_and_predicts_next_word",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:173:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Incognito_does_not_learn",
+      "method_sha256": "56796789e52c3e5f50fbbe80cde949d39a48e0def7f2005d94937693ad4ff625",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 181,
+          "expression": "Assert.Empty(models.GetUserDictionary(\"en\").Words)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "incognito_does_not_learn"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Incognito_does_not_learn",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:184:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Delete_removes_whole_grapheme",
+      "method_sha256": "13514b2436623ad2b51e2e2c922b15e26bf23d45a3050f7ba2f8b88605e8b474",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 189,
+          "expression": "Assert.Equal(\"family \ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67 \", target.Text)"
+        },
+        {
+          "line": 192,
+          "expression": "Assert.Equal(\"family \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "delete_removes_whole_grapheme"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Delete_removes_whole_grapheme",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:195:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Enter_inserts_newline_in_multiline_and_performs_action_otherwise",
+      "method_sha256": "73ef298ac465f922d254371902fe57bace7cc9c662799b7ccb79451da81d9420",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 200,
+          "expression": "Assert.Equal(\"\\n\", target.Text)"
+        },
+        {
+          "line": 204,
+          "expression": "Assert.Equal(string.Empty, target2.Text)"
+        },
+        {
+          "line": 205,
+          "expression": "Assert.Equal([EnterAction.Search], target2.PerformedActions)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "enter_inserts_newline_in_multiline_and_performs_action_otherwise"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Enter_inserts_newline_in_multiline_and_performs_action_otherwise",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:208:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Input_kind_selects_initial_mode_and_variation",
+      "method_sha256": "6cdae26bc718417e126b89ac26a428429d59f450279b93fc4fb29545e5f7bae0",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 212,
+          "expression": "Assert.Equal(KeyboardMode.Numeric, engine.Mode)"
+        },
+        {
+          "line": 214,
+          "expression": "Assert.Equal(KeyboardMode.Phone, engine2.Mode)"
+        },
+        {
+          "line": 216,
+          "expression": "Assert.Contains(engine3.Keyboard.Keys, k => k.Label == \"@\")"
+        },
+        {
+          "line": 217,
+          "expression": "Assert.Equal(ShiftState.Unshifted, engine3.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "input_kind_selects_initial_mode_and_variation"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Input_kind_selects_initial_mode_and_variation",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:220:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Mode_switching_and_space_returns_to_characters",
+      "method_sha256": "b6ac9fe25e7fe1f4e5408f55ac9ce1195f620c983a34154075b9fcbd1b11a1a2",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 225,
+          "expression": "Assert.Equal(KeyboardMode.Symbols, engine.Mode)"
+        },
+        {
+          "line": 228,
+          "expression": "Assert.Equal(KeyboardMode.Characters, engine.Mode)"
+        },
+        {
+          "line": 229,
+          "expression": "Assert.Equal(\"1 \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "mode_switching_and_space_returns_to_characters"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Mode_switching_and_space_returns_to_characters",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:232:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Subtype_switching_changes_layout",
+      "method_sha256": "7dcc525fa6352abbc3cc66e7d57e365c7b7ee44855b7c985116637bdd85f5789",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 238,
+          "expression": "Assert.Equal(\"q\", engine.Keyboard.Rows[0][0].Data.Label.ToLowerInvariant())"
+        },
+        {
+          "line": 240,
+          "expression": "Assert.Equal(\"de-DE\", engine.ActiveSubtype.LanguageTag)"
+        },
+        {
+          "line": 241,
+          "expression": "Assert.Equal(\"z\", engine.Keyboard.Rows[0][5].Data.Label.ToLowerInvariant())"
+        },
+        {
+          "line": 242,
+          "expression": "Assert.NotNull(engine.Keyboard.FindKey(KeyCode.LanguageSwitch))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "subtype_switching_changes_layout"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Subtype_switching_changes_layout",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:245:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Hangul_composer_builds_syllables",
+      "method_sha256": "8347141155d35df59021bbc44f88b96ba0cacdf879b51ad0d05efeb4f3ad10f1",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 251,
+          "expression": "Assert.Equal(\"\ud55c\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "hangul_composer_builds_syllables"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Hangul_composer_builds_syllables",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:254:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Telex_composer_applies_rules",
+      "method_sha256": "ed1a421455eee348decbb16ecea2aed64ac292d7058fb04fa1ae8d9b5b4debb1",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 258,
+          "expression": "Assert.Equal((1, \"\u00e2\"), composer.GetActions(\"a\", \"a\"))"
+        },
+        {
+          "line": 259,
+          "expression": "Assert.Equal((1, \"\u00c2\"), composer.GetActions(\"A\", \"a\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "telex_composer_applies_rules"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Telex_composer_applies_rules",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:262:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Kana_composer_applies_dakuten",
+      "method_sha256": "50731027727a46a9977c7d1379d96ff37736e78353e789fb51378208eb05ccdd",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 266,
+          "expression": "Assert.Equal((1, \"\u304c\"), composer.GetActions(\"\u304b\", \"\u3099\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "kana_composer_applies_dakuten"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Kana_composer_applies_dakuten",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:269:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Undo_and_redo_restore_text",
+      "method_sha256": "cea7dbb7c1e38c03ebcc3f720b314f7a26b9d0a7ab893a71a8092ee253a57f7f",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 277,
+          "expression": "Assert.Equal(\"one \", target.Text)"
+        },
+        {
+          "line": 279,
+          "expression": "Assert.Equal(\"one two\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "undo_and_redo_restore_text"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Undo_and_redo_restore_text",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:282:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Arrow_keys_move_caret_and_selection_mode_selects",
+      "method_sha256": "48384cc9bfedfcb256c9ed66a5450696bb8628b757d111c16de60776bf83fd34",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 287,
+          "expression": "Assert.Equal(4, target.SelectionStart)"
+        },
+        {
+          "line": 291,
+          "expression": "Assert.Equal(2, target.SelectionStart)"
+        },
+        {
+          "line": 292,
+          "expression": "Assert.Equal(2, target.SelectionLength)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "arrow_keys_move_caret_and_selection_mode_selects"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Arrow_keys_move_caret_and_selection_mode_selects",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:295:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Clipboard_copy_paste_and_history",
+      "method_sha256": "8a68135536aa7fade04fe12fc14076c45e701bb9bd29f6cfa24e813f0dec0c71",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 301,
+          "expression": "Assert.Equal(\"copy me\", engine.ClipboardHistory.Primary?.Text)"
+        },
+        {
+          "line": 304,
+          "expression": "Assert.Equal(\"copy mecopy me\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "clipboard_copy_paste_and_history"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Clipboard_copy_paste_and_history",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:307:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Emoji_shortcode_suggests_emoji",
+      "method_sha256": "ad1c5ef92035fd8a0add002f294dd889131a17d740d858adbe0a812abd9c1828",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 313,
+          "expression": "Assert.NotNull(emoji)"
+        },
+        {
+          "line": 315,
+          "expression": "Assert.Equal(\"yum \ud83c\udf55\", target.Text)"
+        },
+        {
+          "line": 316,
+          "expression": "Assert.Contains(\"\ud83c\udf55\", engine.EmojiHistory.Recent)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "emoji_shortcode_suggests_emoji"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Emoji_shortcode_suggests_emoji",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:319:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Swipe_actions_move_cursor",
+      "method_sha256": "3f0f550078713306db2bd170b0bb0159297b6708ea7fa807ec4226044d6502a4",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 324,
+          "expression": "Assert.Equal(3, target.SelectionStart)"
+        },
+        {
+          "line": 326,
+          "expression": "Assert.Equal(0, target.SelectionStart)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "swipe_actions_move_cursor"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Swipe_actions_move_cursor",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:329:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Precise_delete_removes_words",
+      "method_sha256": "222520266f62acbbc31df0c5b2e690152f9ce1a2f6ae8d0d62565077b59b9cb3",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 335,
+          "expression": "Assert.Equal(\"two three\", target.Text.Substring(target.SelectionStart, target.SelectionLength))"
+        },
+        {
+          "line": 337,
+          "expression": "Assert.Equal(\"one \", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "precise_delete_removes_words"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Precise_delete_removes_words",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:340:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "External_changes_update_state",
+      "method_sha256": "1c53f00328e49e92d3b78a48705adc0c9c9f12969d0aab81a7c94c56c3f24d60",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 344,
+          "expression": "Assert.Equal(ShiftState.ShiftedAutomatic, engine.ShiftState)"
+        },
+        {
+          "line": 346,
+          "expression": "Assert.Equal(ShiftState.Unshifted, engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "external_changes_update_state"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.External_changes_update_state",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:349:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Settings_changes_rebuild_keyboard",
+      "method_sha256": "4526d0078ea9600b35a5e4c7817ae1592142ccf6288faf593b84ff051e3762f7",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 353,
+          "expression": "Assert.Equal(4, engine.Keyboard.RowCount)"
+        },
+        {
+          "line": 355,
+          "expression": "Assert.Equal(5, engine.Keyboard.RowCount)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "settings_changes_rebuild_keyboard"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Settings_changes_rebuild_keyboard",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:358:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Readme_example_works",
+      "method_sha256": "05134af64fa60e44dc849f141b77f36a26b2796da5d6045d94a91d39ede0e09f",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 365,
+          "expression": "Assert.Equal(\"I like the \", field.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "readme_example_works"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Readme_example_works",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:368:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Phone_pad_has_letter_sub_labels_and_space_icon",
+      "method_sha256": "59bfe5303ca6caffe61663378a477ee80a622b2d229f7065ee0feb4b6cf239d9",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 373,
+          "expression": "Assert.Equal(\"ABC\", two.SubLabel)"
+        },
+        {
+          "line": 378,
+          "expression": "Assert.Equal(KeyIcon.Space, space.Icon)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "phone_pad_has_letter_sub_labels_and_space_icon"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Phone_pad_has_letter_sub_labels_and_space_icon",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:382:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Floating_and_resize_keys",
+      "method_sha256": "ff917924efd750f727aa054eea67200058929b96af1a03f472a595449f72bafc",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 389,
+          "expression": "Assert.True(engine.Settings.Floating)"
+        },
+        {
+          "line": 391,
+          "expression": "Assert.True(resize)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "floating_and_resize_keys"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Floating_and_resize_keys",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:394:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Space_bar_has_no_hint",
+      "method_sha256": "738ed0fc5515c364cbb28278f2d7b7bbb59e4e98e1843ddec07991a17f735d58",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 398,
+          "expression": "Assert.Null(engine.Keyboard.FindKey(KeyCode.Space)!.HintLabel)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "space_bar_has_no_hint"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Space_bar_has_no_hint",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs:401:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/EngineTests.cs",
+      "class": "EngineTests",
+      "name": "Composer_rules_apply_via_custom_composer",
+      "method_sha256": "165d93a37a7081354adab9798a38fe3bbad4e26ac4ed9e5737531be49e0bf132",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 411,
+          "expression": "Assert.Equal(\"a\u2014b\", target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/engine_upstream.rs",
+        "test": "composer_rules_apply_via_custom_composer"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.EngineTests.Composer_rules_apply_via_custom_composer",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source assertion values, key/clock operations and retained object observations inspected against engine_upstream.rs. Fresh explicit dependencies and fixture cleanup differ from the source defaults/GC; Readme constructor path differs. No general API/lifetime/native parity claim.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:11:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Default_resources_contain_bundled_florisboard_data",
+      "method_sha256": "e6b9aedc748e5affa82ee4beedf7c3b68fbcefc31f26e9a08ff5e3064a59d734",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 15,
+          "expression": "Assert.True(resources.GetLayoutMetadata(LayoutType.Characters).Count >= 70)"
+        },
+        {
+          "line": 16,
+          "expression": "Assert.True(resources.SubtypePresets.Count >= 60)"
+        },
+        {
+          "line": 17,
+          "expression": "Assert.True(resources.CurrencySets.Count >= 10)"
+        },
+        {
+          "line": 18,
+          "expression": "Assert.Contains(resources.Composers, c => c.Id == \"hangul-unicode\")"
+        },
+        {
+          "line": 19,
+          "expression": "Assert.NotNull(resources.GetPopupMapping(new ComponentName(\"org.florisboard.localization\", \"de\")))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "default_resources_contain_bundled_florisboard_data"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Default_resources_contain_bundled_florisboard_data",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:22:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Every_bundled_layout_parses",
+      "method_sha256": "a5d7f311f9206dcd85d0df013dc047ae3ffd373383aa3e6e782fa98c4fdd22f5",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 32,
+          "expression": "Assert.NotNull(layout)"
+        },
+        {
+          "line": 36,
+          "expression": "Assert.True(count > 120, $\"Only {count} layouts found\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "every_bundled_layout_parses"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Every_bundled_layout_parses",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:39:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Every_popup_mapping_parses",
+      "method_sha256": "5cfcfd6d66ce7ecdcb07adca0cb7a7ba78731fd027b10ecac3f97f6e0b2a829a",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 45,
+          "expression": "Assert.NotNull(resources.GetPopupMapping(name))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "every_popup_mapping_parses"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Every_popup_mapping_parses",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:49:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Every_subtype_preset_computes_all_modes",
+      "method_sha256": "70f8e02b77cf3cbaaf6100ef36577cc054e3e032fcfeece6222339c6b949350e",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 60,
+          "expression": "Assert.True(keyboard.RowCount > 0, $\"{subtype.Id} {mode} has no rows\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "every_subtype_preset_computes_all_modes"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Every_subtype_preset_computes_all_modes",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:65:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Qwerty_is_merged_with_modifier_layout",
+      "method_sha256": "78879ee337252e11aa293a6bf23a540513fb1b83fdf5df84552a92a164465407",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 71,
+          "expression": "Assert.Equal(4, keyboard.RowCount)"
+        },
+        {
+          "line": 72,
+          "expression": "Assert.Equal(\"q\", keyboard.Rows[0][0].Label)"
+        },
+        {
+          "line": 73,
+          "expression": "Assert.Equal(KeyCode.Shift, keyboard.Rows[2][0].Code)"
+        },
+        {
+          "line": 74,
+          "expression": "Assert.Equal(KeyCode.Delete, keyboard.Rows[2][^1].Code)"
+        },
+        {
+          "line": 75,
+          "expression": "Assert.Contains(keyboard.Rows[3], k => k.Code == KeyCode.Space)"
+        },
+        {
+          "line": 76,
+          "expression": "Assert.Contains(keyboard.Rows[3], k => k.Code == KeyCode.Enter)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "qwerty_is_merged_with_modifier_layout"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Qwerty_is_merged_with_modifier_layout",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:79:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Number_row_adds_a_row",
+      "method_sha256": "1da08d72aa60e4252bcc54dfa8c24aab2ee7eefcf7c322c42865350e194d3147",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 85,
+          "expression": "Assert.Equal(5, keyboard.RowCount)"
+        },
+        {
+          "line": 86,
+          "expression": "Assert.Equal(\"1\", keyboard.Rows[0][0].Label)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "number_row_adds_a_row"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Number_row_adds_a_row",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:89:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Shift_uppercases_auto_text_keys",
+      "method_sha256": "24446a0c0924f37590adc13d394e3a941e3e8157f824c2acfc988d687bae61be",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 95,
+          "expression": "Assert.Equal(\"Q\", keyboard.Rows[0][0].Label)"
+        },
+        {
+          "line": 96,
+          "expression": "Assert.Equal(KeyIcon.ShiftActive, keyboard.Rows[2][0].Icon)"
+        },
+        {
+          "line": 98,
+          "expression": "Assert.Equal(KeyIcon.CapsLock, keyboard.Rows[2][0].Icon)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "shift_uppercases_auto_text_keys"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Shift_uppercases_auto_text_keys",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:101:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Keys_have_hints_and_popups",
+      "method_sha256": "4fe0f5b298db3a8bd6b46c3e6e010b7cc95ff18b118fded2bf9cb5967aceb9de",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 108,
+          "expression": "Assert.Equal(\"1\", q.HintLabel)"
+        },
+        {
+          "line": 109,
+          "expression": "Assert.Contains(q.PopupKeys, k => k.AsString(false) == \"1\")"
+        },
+        {
+          "line": 111,
+          "expression": "Assert.Equal(\"a\", a.Label)"
+        },
+        {
+          "line": 112,
+          "expression": "Assert.Contains(a.PopupKeys, k => k.AsString(false) == \"\u00e1\")"
+        },
+        {
+          "line": 113,
+          "expression": "Assert.Equal(\"@\", a.HintLabel)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "keys_have_hints_and_popups"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Keys_have_hints_and_popups",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:116:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Popups_are_uppercased_when_shifted",
+      "method_sha256": "4a043e1c87b4d9c64d2f44bddb99bf76332427042d167befd075b2ccce7d07fd",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 123,
+          "expression": "Assert.Contains(a.PopupKeys, k => k.AsString(false) == \"\u00c1\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "popups_are_uppercased_when_shifted"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Popups_are_uppercased_when_shifted",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:126:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Layout_fills_width_without_overlap",
+      "method_sha256": "0f7f573cca6390bb7b91c1078990a0bb2fa39f714a907aa860a0e95a7b144d80",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 136,
+          "expression": "Assert.Equal(0, visible[0].TouchBounds.Left, 3)"
+        },
+        {
+          "line": 137,
+          "expression": "Assert.Equal(1000, visible[^1].TouchBounds.Right, 3)"
+        },
+        {
+          "line": 140,
+          "expression": "Assert.Equal(visible[i - 1].TouchBounds.Right, visible[i].TouchBounds.Left, 3)"
+        },
+        {
+          "line": 141,
+          "expression": "Assert.True(visible[i].VisibleBounds.Left >= visible[i - 1].VisibleBounds.Right)"
+        },
+        {
+          "line": 145,
+          "expression": "Assert.True(space.TouchBounds.Width > 300, \"space should grow\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "layout_fills_width_without_overlap"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Layout_fills_width_without_overlap",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:148:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Split_layout_inserts_a_gap",
+      "method_sha256": "c4a08551c0055c2d310bdb58e6036899279d71e8164d7b91a39452c10d165b58",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 157,
+          "expression": "Assert.True(y.TouchBounds.Left - t.TouchBounds.Right >= 199)"
+        },
+        {
+          "line": 158,
+          "expression": "Assert.Equal(y, keyboard.HitTest(y.TouchBounds.CenterX, y.TouchBounds.CenterY))"
+        },
+        {
+          "line": 163,
+          "expression": "Assert.False(key.VisibleBounds.Left < gapEnd - 0.5 && key.VisibleBounds.Right > mid + 0.5, $\"{key} crosses the split gap\")"
+        },
+        {
+          "line": 165,
+          "expression": "Assert.True(keyboard.VisibleKeys.All(k => k.TouchBounds.Right <= 1000.01))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "split_layout_inserts_a_gap"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Split_layout_inserts_a_gap",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:168:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Hit_test_returns_key_under_point",
+      "method_sha256": "cb186826ffbe8d614f7804be9dd40184d35cb26032e5e028cbc2139c3d74b2bb",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 176,
+          "expression": "Assert.Same(w, keyboard.HitTest(w.TouchBounds.CenterX, w.TouchBounds.CenterY))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "hit_test_returns_key_under_point"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Hit_test_returns_key_under_point",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:179:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Utility_key_visibility_follows_settings",
+      "method_sha256": "1119e0e8951aba6af445d69e5212b47eb5283f44d0eaef8627368b5131cb4b96",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 185,
+          "expression": "Assert.NotNull(keyboard.FindKey(KeyCode.ImeUiModeMedia))"
+        },
+        {
+          "line": 186,
+          "expression": "Assert.Null(keyboard.FindKey(KeyCode.LanguageSwitch))"
+        },
+        {
+          "line": 188,
+          "expression": "Assert.Null(keyboard.FindKey(KeyCode.ImeUiModeMedia))"
+        },
+        {
+          "line": 189,
+          "expression": "Assert.NotNull(keyboard.FindKey(KeyCode.LanguageSwitch))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "utility_key_visibility_follows_settings"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Utility_key_visibility_follows_settings",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:192:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Currency_slots_are_resolved",
+      "method_sha256": "0c7e95808abf5904e093305c2b2e4f68995cb6161d7ed7614b19572099ca5463",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 199,
+          "expression": "Assert.Contains(keyboard.Keys, k => k.Label == \"\u20ac\")"
+        },
+        {
+          "line": 200,
+          "expression": "Assert.DoesNotContain(keyboard.Keys, k => KeyCode.IsCurrencySlot(k.Code))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "currency_slots_are_resolved"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Currency_slots_are_resolved",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:203:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Custom_layout_json_roundtrips",
+      "method_sha256": "a6134689a13240c332f51cf3f2058a4757d21594d2a768517d95d98173ad94ce",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 219,
+          "expression": "Assert.Equal(2, layout.Arrangement.Rows.Count)"
+        },
+        {
+          "line": 222,
+          "expression": "Assert.Equal(4, reparsed.Arrangement.Rows[0].Count)"
+        },
+        {
+          "line": 226,
+          "expression": "Assert.Equal(\"a\", keyboard.Rows[0][0].Label)"
+        },
+        {
+          "line": 227,
+          "expression": "Assert.Contains(keyboard.Keys, k => k.Code == KeyCode.Space)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "custom_layout_json_roundtrips"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Custom_layout_json_roundtrips",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs:230:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/LayoutTests.cs",
+      "class": "LayoutTests",
+      "name": "Popup_arrangement_places_default_above_key",
+      "method_sha256": "206cc865e61d9aa995ac0d939bd7e9bb9da5846711f11e5fe3a1d4bda1f02d78",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 239,
+          "expression": "Assert.Equal(e.PopupKeys.Count, bounds.Count)"
+        },
+        {
+          "line": 240,
+          "expression": "Assert.True(bounds[selected].Bottom <= e.VisibleBounds.Top + 0.01)"
+        },
+        {
+          "line": 241,
+          "expression": "Assert.True(bounds.All(b => b.Left >= 0 && b.Right <= 1000.01))"
+        },
+        {
+          "line": 245,
+          "expression": "Assert.False(bounds[i].Left < bounds[j].Right - 0.01 && bounds[j].Left < bounds[i].Right - 0.01 &&\n                             bounds[i].Top < bounds[j].Bottom - 0.01 && bounds[j].Top < bounds[i].Bottom - 0.01)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/layout_upstream.rs",
+        "test": "popup_arrangement_places_default_above_key"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.LayoutTests.Popup_arrangement_places_default_above_key",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Direct per-method source assertion counterpart in layout_upstream.rs, including reference hit identity, both shift states, popup placement, split exclusion, all 12 layout types, all seven modes and custom case-selector JSON. Fresh explicit resources replace source Default; diagnostics do not exercise ComputedKey.ToString.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:16:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Bundled_dictionary_loads",
+      "method_sha256": "420fc018affab8e3d50a0cda1b09dc34484142416d074c75beecc9dcc11e59c9",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 19,
+          "expression": "Assert.True(English.Count > 40000)"
+        },
+        {
+          "line": 20,
+          "expression": "Assert.True(English.GetFrequency(\"the\") > 200)"
+        },
+        {
+          "line": 21,
+          "expression": "Assert.True(English.Contains(\"Hello\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/dictionary.rs",
+        "test": "dictionary_source_tests_and_shared_concurrent_use"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Bundled_dictionary_loads",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:24:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Completion_is_frequency_ordered",
+      "method_sha256": "73e7c184a7281f086b90f219bb7892bca37f7b1d6297dff807f4483ca1244039",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 28,
+          "expression": "Assert.Equal(5, results.Count)"
+        },
+        {
+          "line": 29,
+          "expression": "Assert.Equal(\"the\", results[0].Word)"
+        },
+        {
+          "line": 32,
+          "expression": "Assert.True(results[i - 1].Frequency >= results[i].Frequency)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/dictionary.rs",
+        "test": "dictionary_source_tests_and_shared_concurrent_use"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Completion_is_frequency_ordered",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:36:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Fuzzy_search_finds_corrections",
+      "method_sha256": "2daef068b27298c32e09369a5cba867efb83854bd8a6a999b607cde8b013707a",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 40,
+          "expression": "Assert.Contains(matches, m => m.Word == \"hello\")"
+        },
+        {
+          "line": 42,
+          "expression": "Assert.Contains(transposed, m => m.Word == \"the\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/dictionary.rs",
+        "test": "dictionary_source_tests_and_shared_concurrent_use"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Fuzzy_search_finds_corrections",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:45:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Provider_suggests_corrections_and_marks_autocorrect",
+      "method_sha256": "7a89cf4071c05c2165d1136bda34dc2dabae91aaf56d448c6a21ae288b58631e",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 50,
+          "expression": "Assert.Contains(result, s => s.Text == \"because\")"
+        },
+        {
+          "line": 51,
+          "expression": "Assert.Contains(result, s => s.IsAutoCommit && s.Text == \"because\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/text_data_upstream.rs",
+        "test": "provider_suggests_corrections_and_marks_autocorrect"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Provider_suggests_corrections_and_marks_autocorrect",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:54:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Provider_keeps_case_pattern",
+      "method_sha256": "e4179afeb244759a61bcda8ae3384881dde8995d796ac41947ce66ef637aae70",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 59,
+          "expression": "Assert.All(result, s => Assert.True(char.IsUpper(s.Text[0])))"
+        },
+        {
+          "line": 59,
+          "expression": "Assert.True(char.IsUpper(s.Text[0]))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/text_data_upstream.rs",
+        "test": "provider_keeps_case_pattern"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Provider_keeps_case_pattern",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:62:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "User_dictionary_roundtrips",
+      "method_sha256": "44cf2a65fef1a7e89f8e47fe17fe6e56fbcde063111b6e43ce698f549785060d",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 71,
+          "expression": "Assert.Equal(1, copy.GetCount(\"foo\"))"
+        },
+        {
+          "line": 72,
+          "expression": "Assert.True(copy.IsBlocked(\"baz\"))"
+        },
+        {
+          "line": 73,
+          "expression": "Assert.Equal(\"bar\", copy.Predict(\"foo\", 1)[0].Word)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/user_dictionary.rs",
+        "test": "snapshots_and_roundtrips_preserve_source_scope"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.User_dictionary_roundtrips",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:76:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Word_list_text_format_is_supported",
+      "method_sha256": "06b8534cf9936aefa8ae0c03fc9b87dc5f95c38f8477184c2c93da1755e55aff",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 80,
+          "expression": "Assert.Equal(200, dict.GetFrequency(\"hallo\"))"
+        },
+        {
+          "line": 81,
+          "expression": "Assert.True(dict.Contains(\"welt\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/dictionary.rs",
+        "test": "dictionary_source_tests_and_shared_concurrent_use"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Word_list_text_format_is_supported",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:84:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Glide_classifier_recognizes_word_from_ideal_path",
+      "method_sha256": "13688ab41c387d294382232dab594cfa987854fcb6fbf88a10b8e13f71139685",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 116,
+          "expression": "Assert.Contains(word, result.Take(3))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/text_data_upstream.rs",
+        "test": "glide_classifier_recognizes_word_from_ideal_path"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Glide_classifier_recognizes_word_from_ideal_path",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:120:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Emoji_catalog_loads_categories_and_searches",
+      "method_sha256": "57869011eb22fe7dee510caf6a1b97827496491fbeedf01007a6d6f9b58a1728",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 124,
+          "expression": "Assert.Equal(9, catalog.Categories.Count)"
+        },
+        {
+          "line": 125,
+          "expression": "Assert.True(catalog.All.Count() > 1800)"
+        },
+        {
+          "line": 126,
+          "expression": "Assert.Equal(\"\ud83c\udf55\", catalog.Search(\"pizza\").First().Value)"
+        },
+        {
+          "line": 128,
+          "expression": "Assert.True(wave.HasSkinTones)"
+        },
+        {
+          "line": 129,
+          "expression": "Assert.Equal(\"\ud83d\udc4b\ud83c\udffd\", wave.WithSkinTone(EmojiSkinTone.Medium))"
+        },
+        {
+          "line": 130,
+          "expression": "Assert.Same(wave, catalog.Get(\"\ud83d\udc4b\ud83c\udfff\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/emoji.rs",
+        "test": "upstream_emoji_catalog_loads_categories_and_searches"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Emoji_catalog_loads_categories_and_searches",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:133:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Emoji_catalog_supports_other_languages",
+      "method_sha256": "194de226e24d95c712e93328df2d1cf7d6c81ca6ac18b53a7770c23e51a73256",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 137,
+          "expression": "Assert.Equal(\"de\", de.Locale)"
+        },
+        {
+          "line": 138,
+          "expression": "Assert.NotEmpty(de.Search(\"Pizza\"))"
+        },
+        {
+          "line": 139,
+          "expression": "Assert.Equal(\"en\", EmojiCatalog.Load(\"xx\").Locale)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/emoji.rs",
+        "test": "upstream_emoji_catalog_supports_other_languages"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Emoji_catalog_supports_other_languages",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:142:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Emoji_history_orders_and_persists",
+      "method_sha256": "bcf19673cbc4def81a1e501c418b65aa290d1548f6dc809f861f839b56841dfa",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 151,
+          "expression": "Assert.Equal([\"\ud83c\udf89\", \"\ud83c\udf55\", \"\ud83d\ude00\"], history.Recent)"
+        },
+        {
+          "line": 152,
+          "expression": "Assert.Equal(EmojiSkinTone.Medium, history.GetPreferredTone(\"\ud83d\udc4b\"))"
+        },
+        {
+          "line": 156,
+          "expression": "Assert.Equal(history.Combined, copy.Combined)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/emoji.rs",
+        "test": "upstream_emoji_history_orders_and_persists"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Emoji_history_orders_and_persists",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:159:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Emoticons_load",
+      "method_sha256": "a9e5ca4981687e6332fe2c13f87e50bffb9014bd493a88632b6ff92cdd624e26",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 162,
+          "expression": "Assert.Contains(EmojiCatalog.LoadEmoticons(), e => e.Text == \":-)\")"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/emoji.rs",
+        "test": "upstream_emoticons_load"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Emoticons_load",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:165:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Clipboard_history_limits_pins_and_expires",
+      "method_sha256": "1b0010e3cbce3f1d8fb6372c3e71b52c7f73290ff808f5ccc488af93667a7f58",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 175,
+          "expression": "Assert.Equal([\"a\", \"d\", \"c\"], history.Items.Select(i => i.Text))"
+        },
+        {
+          "line": 177,
+          "expression": "Assert.Equal([\"a\"], history.Items.Select(i => i.Text))"
+        },
+        {
+          "line": 180,
+          "expression": "Assert.True(copy.Items.Single().IsPinned)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/clipboard.rs",
+        "test": "upstream_clipboard_history_limits_pins_and_expires"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Clipboard_history_limits_pins_and_expires",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:183:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Settings_roundtrip_json",
+      "method_sha256": "3bc6d2c7b9107f8b2eac4def927e8adeba3009dcec8ab2b0a6b20982a500d0ce",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 188,
+          "expression": "Assert.Contains(\"\\\"swipeUp\\\": \\\"Undo\\\"\", json)"
+        },
+        {
+          "line": 190,
+          "expression": "Assert.True(copy.NumberRow)"
+        },
+        {
+          "line": 191,
+          "expression": "Assert.Equal(SwipeAction.Undo, copy.SwipeUp)"
+        },
+        {
+          "line": 192,
+          "expression": "Assert.Equal([\"de-DE/qwertz\"], copy.Subtypes)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/settings.rs",
+        "test": "settings_roundtrip_json"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Settings_roundtrip_json",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:195:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Settings_raise_property_changed",
+      "method_sha256": "1e9a83cf4d887f7aa006bbbb45381dadf3d8260b650f8162e46ba268ce3ebcf0",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 203,
+          "expression": "Assert.Equal([nameof(KeyboardSettings.GlideTyping)], changed)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/settings.rs",
+        "test": "settings_raise_property_changed"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Settings_raise_property_changed",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:206:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Previous_word_boundary",
+      "method_sha256": "2146433dd98f8be84354f5760b7e3727167c2a975070fecdcc8fe5a52fb76ae2",
+      "inline_data": [
+        [
+          "\"hello world\"",
+          "11",
+          "6"
+        ],
+        [
+          "\"hello world  \"",
+          "13",
+          "6"
+        ],
+        [
+          "\"a, b\"",
+          "4",
+          "3"
+        ],
+        [
+          "\"end...\"",
+          "6",
+          "3"
+        ]
+      ],
+      "assertions": [
+        {
+          "line": 213,
+          "expression": "Assert.Equal(expected, TextUtils.FindPreviousWordBoundary(text, index))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/text_utils.rs",
+        "test": "original_source_word_tests_and_utf16_boundaries"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Previous_word_boundary(text: \"hello world\", index: 11, expected: 6)",
+          "outcome": "Passed"
+        },
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Previous_word_boundary(text: \"hello world  \", index: 13, expected: 6)",
+          "outcome": "Passed"
+        },
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Previous_word_boundary(text: \"a, b\", index: 4, expected: 3)",
+          "outcome": "Passed"
+        },
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Previous_word_boundary(text: \"end...\", index: 6, expected: 3)",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:216:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Editor_vertical_navigation_keeps_column",
+      "method_sha256": "498eed8ddc0ebd45dcf00a1e2380e56412cbcbdd2c6a657f5bd4d094c1fbf77d",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 223,
+          "expression": "Assert.Equal(9, target.SelectionStart)"
+        },
+        {
+          "line": 225,
+          "expression": "Assert.Equal(15, target.SelectionStart)"
+        },
+        {
+          "line": 228,
+          "expression": "Assert.Equal(5, target.SelectionStart)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/editor.rs",
+        "test": "source_vertical_navigation_keeps_column"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Editor_vertical_navigation_keeps_column",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs:231:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TextAndDataTests.cs",
+      "class": "TextAndDataTests",
+      "name": "Current_word_is_extracted",
+      "method_sha256": "df08dc57b0686af008a6b5526694b8e60297afe518809ed279364fe9106dd1bd",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 234,
+          "expression": "Assert.Equal(\"don't\", TextUtils.GetCurrentWord(\"I don't\"))"
+        },
+        {
+          "line": 235,
+          "expression": "Assert.Equal(\"\", TextUtils.GetCurrentWord(\"word \"))"
+        },
+        {
+          "line": 236,
+          "expression": "Assert.Equal(\"\u00fcber\", TextUtils.GetCurrentWord(\"(\u00fcber\"))"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/text_utils.rs",
+        "test": "original_source_word_tests_and_utf16_boundaries"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TextAndDataTests.Current_word_is_extracted",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Source assertion expressions inspected against the mapped existing test or exact new request/interpolation counterpart. Dictionary/language resources are fresh equivalents rather than a proof of source process cache/fixture identity; only these inputs and assertions are covered.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:36:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Tap_commits_character",
+      "method_sha256": "b2737c3590cfc8807dea1f72db4e1b56db409596e9b6c5b51da61b54e0ba1334",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 44,
+          "expression": "Assert.Equal(\"hi\", f.Target.Text)"
+        },
+        {
+          "line": 45,
+          "expression": "Assert.Equal(2, pressed.Count)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "tap_commits_character"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Tap_commits_character",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:48:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Rollover_commits_first_key_when_second_finger_goes_down",
+      "method_sha256": "9a64fb8c5e6cecdbf4d277d32e22cb2146cf64e984c9ed52c516fbab0961c0ef",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 56,
+          "expression": "Assert.Equal(\"a\", f.Target.Text)"
+        },
+        {
+          "line": 59,
+          "expression": "Assert.Equal(\"as\", f.Target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "rollover_commits_first_key_when_second_finger_goes_down"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Rollover_commits_first_key_when_second_finger_goes_down",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:62:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Long_press_opens_popup_and_commits_selection",
+      "method_sha256": "b7b832d4df54880c2b99c52867de7072f746dac05c2e3d4e19f7769894f89eae",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 70,
+          "expression": "Assert.NotNull(popup)"
+        },
+        {
+          "line": 75,
+          "expression": "Assert.Equal(targetIndex, f.Touch.Popup!.SelectedIndex)"
+        },
+        {
+          "line": 77,
+          "expression": "Assert.Null(f.Touch.Popup)"
+        },
+        {
+          "line": 78,
+          "expression": "Assert.Equal(popup.Keys[targetIndex].AsString(false), f.Target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "long_press_opens_popup_and_commits_selection"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Long_press_opens_popup_and_commits_selection",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:81:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Delete_repeats_while_held",
+      "method_sha256": "c7420bcbe1f396724ecc30d780b36554d9bb594da3a8821ed0c469a6d5de59c9",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 89,
+          "expression": "Assert.Equal(\"abcdef\", f.Target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "delete_repeats_while_held"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Delete_repeats_while_held",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:92:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Space_drag_moves_cursor",
+      "method_sha256": "02e817e849ffae3d89b0ed5365b9ca9ccc83b81a143437ebdecd590be0ffd4e2",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 105,
+          "expression": "Assert.Equal(\"hello world\", f.Target.Text)"
+        },
+        {
+          "line": 106,
+          "expression": "Assert.Equal(11 - 5, f.Target.SelectionStart)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "space_drag_moves_cursor"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Space_drag_moves_cursor",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:109:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Glide_over_keys_types_word",
+      "method_sha256": "f517b0ac293bb3314f49c02ae8ec0bb24ef34ea262b35601e68ebf340ec033ee",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 124,
+          "expression": "Assert.True(f.Engine.IsGliding)"
+        },
+        {
+          "line": 125,
+          "expression": "Assert.NotEmpty(f.Touch.GlideTrail)"
+        },
+        {
+          "line": 127,
+          "expression": "Assert.Equal(\"hello\", f.Target.Text)"
+        },
+        {
+          "line": 128,
+          "expression": "Assert.False(f.Engine.IsGliding)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "glide_over_keys_types_word"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Glide_over_keys_types_word",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:131:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Swipe_down_hides_keyboard_when_glide_disabled",
+      "method_sha256": "8c9da2a8509cd2386aea03c9133bf3ff01150c15e99a3b6bedd7feb374f5c6a0",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 142,
+          "expression": "Assert.True(hidden)"
+        },
+        {
+          "line": 143,
+          "expression": "Assert.Equal(string.Empty, f.Target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "swipe_down_hides_keyboard_when_glide_disabled"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Swipe_down_hides_keyboard_when_glide_disabled",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:146:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Delete_swipe_left_deletes_words_precisely",
+      "method_sha256": "9269843cd7e478d5f6e8af88c33fb4dfea83bb76f5cf5247bf5ea7cdbcd13dc7",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 157,
+          "expression": "Assert.Equal(\"one \", f.Target.Text)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "delete_swipe_left_deletes_words_precisely"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Delete_swipe_left_deletes_words_precisely",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    },
+    {
+      "id": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs:160:MethodDeclaration",
+      "source": "tests/ScreenKeyboard.Core.Tests/TouchProcessorTests.cs",
+      "class": "TouchProcessorTests",
+      "name": "Long_press_shift_enables_caps_lock",
+      "method_sha256": "2a571c0054c5233fccc3bbafc8dbfd881434140a8d1e6dd683287ef035742952",
+      "inline_data": [],
+      "assertions": [
+        {
+          "line": 168,
+          "expression": "Assert.Equal(ShiftState.CapsLock, f.Engine.ShiftState)"
+        }
+      ],
+      "rust_test": {
+        "path": "src/FerroBoard.Core/tests/touch_upstream.rs",
+        "test": "long_press_shift_enables_caps_lock"
+      },
+      "source_cases": [
+        {
+          "name": "ScreenKeyboard.Core.Tests.TouchProcessorTests.Long_press_shift_enables_caps_lock",
+          "outcome": "Passed"
+        }
+      ],
+      "assertion_audit": "Same source press/move/up coordinates, delays and state/text/popup assertions inspected against touch_upstream.rs. Native deterministic scheduler additionally supplies the engine clock; fresh dependency/Drop differences remain. Not native touch/multitouch proof.",
+      "status": "assertion_counterpart_verified_with_fixture_deviations"
+    }
+  ],
+  "source_methods": 77,
+  "source_cases": 80,
+  "source_assert_expressions": 187,
+  "new_rust_tests": 19,
+  "production_port_changed": false,
+  "framework_changed": false,
+  "framework_patch_sha256": "8b21aa087fe914a5cbc5ff9028315862afc2bea5d8f8a4d5b6348e01788cbe23",
+  "cargo_lock_sha256": "2b896f680c0ff0427b29c0e5668c28b952f7d198065c84c6600c6d439dda121b",
+  "limits": [
+    "Counterpart verification covers exactly the80upstream cases and187source Assert expressions;it is not proof of the full behavioral/public-API/resource/native specification.",
+    "Most source tests use process-wide KeyboardResources.Default and TestHelpers.SharedModels. Native fixtures use explicit fresh resources/models and deterministic disposal;process-wide identity,thread safety,cache scope and CLR GC remain incomplete.",
+    "Touch native fixture also binds the engine clock to the deterministic scheduler;source touch fixture does not. Timing tests establish those assertions,not all ordering or timer lifecycle behavior.",
+    "Readme engine test uses the explicit deterministic Harness instead of the exact source default constructor path. Global-default constructor parity remains separately incomplete.",
+    "Text source theory four rows share one Rust test containing the four source assertions plus an extra boundary case;some source methods intentionally map to combined existing native tests.",
+    "Layout diagnostics use native key code because ComputedKey.ToString public source contract remains unmapped. That does not weaken the success assertions but does not port failure-diagnostic formatting.",
+    "Source xUnit assembly/test-host/build tooling maps to Cargo/Rust test discovery;CLR test classes and helper object identities are not asserted equal.",
+    "Native application interaction and platform scope remain unverified;pending Mac unlock is not bypassed. Reflection method-binding lifetime and all other recorded full-goal gaps remain open."
+  ],
+  "validation": {
+    "status": "passed_selected_assertion_scope",
+    "source_clr_cases": 80,
+    "source_clr_failed": 0,
+    "source_clr_skipped": 0,
+    "source_methods": 77,
+    "source_assert_expressions": 187,
+    "core_tests": 305,
+    "core_suites": 78,
+    "new_rust_tests": 19,
+    "source_assertion_regeneration_check": "passed",
+    "rust_corresponding_functions_executed": 73,
+    "retained_native_test_binaries": 11,
+    "strict_workspace_clippy": "passed",
+    "owned_fmt": "passed",
+    "python_static_checks": 31,
+    "python_generators": 23,
+    "sdk_roslyn_inventory_check": "passed",
+    "locked_packages": 212,
+    "root_lock_unchanged": true,
+    "production_port_unchanged": true,
+    "framework_patch_unchanged": true,
+    "prior_workspace_scope": "docs/method-binding-lifetime.json",
+    "prior_workspace_tests": 698,
+    "prior_workspace_suites": 99,
+    "new_full_workspace_run": false,
+    "release_and_sample_consumer_build": "Unchanged production code;prior verified builds retained,not rerun for test-only changes.",
+    "full_workspace_fmt": "Previously dependency-only red;framework source unchanged,not rerun.",
+    "native_ui_verified": false,
+    "logs_directory": "/tmp/ferrokeyboard/upstream-core-suite-stage"
+  },
+  "retained_test_binaries": [
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/clipboard-d4c85ccd5d41da7d",
+      "sha256": "acc2b254e9908a500b4e2d85722a97fba8de5ab61d0b54c36e4cfb3124f15025",
+      "test_source": "src/FerroBoard.Core/tests/clipboard.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/clipboard-d4c85ccd5d41da7d"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/dictionary-889593dd99d9efa9",
+      "sha256": "162eb49dbd5f3e1b646b5e3781481767b2e42c40a85b9a5f3ba3c062d549b5fb",
+      "test_source": "src/FerroBoard.Core/tests/dictionary.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/dictionary-889593dd99d9efa9"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/editor-c5cab3ec429fe3a2",
+      "sha256": "046acfe6775de60696290117fb5d8f58e04cd34ad5da29797a2a091d5564f3bd",
+      "test_source": "src/FerroBoard.Core/tests/editor.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/editor-c5cab3ec429fe3a2"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/emoji-6caba96ace0fe6fd",
+      "sha256": "f7b3d58f2fe73011f8c8c7a2ba1a60aa7166d5ba649dcbb2488783207b7e9d9a",
+      "test_source": "src/FerroBoard.Core/tests/emoji.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/emoji-6caba96ace0fe6fd"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/engine_upstream-4c8b246fffb76239",
+      "sha256": "c2eaa4ea949373e1faa08293dcb8a4927bb51d0871d019ebf1221d0524e6c7df",
+      "test_source": "src/FerroBoard.Core/tests/engine_upstream.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/engine_upstream-4c8b246fffb76239"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/layout_upstream-2927a72e010a9b5e",
+      "sha256": "1f2d99a41a2a84b786adaa59aacac48fc2ca55467433bc9649b043723a1e5b61",
+      "test_source": "src/FerroBoard.Core/tests/layout_upstream.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/layout_upstream-2927a72e010a9b5e"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/settings-c9b354a0eb43128d",
+      "sha256": "cc52a5eb15275295277cf8d5fbf01633d92fe93c99b2090ef735478d43ed336f",
+      "test_source": "src/FerroBoard.Core/tests/settings.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/settings-c9b354a0eb43128d"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_data_upstream-2a9fccce2cb19aa7",
+      "sha256": "1ea846407d8a75e51ddc8e5526f6a39057fbf6dcede708f1d6f4f03d6eba0166",
+      "test_source": "src/FerroBoard.Core/tests/text_data_upstream.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/text_data_upstream-2a9fccce2cb19aa7"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_utils-c15e22ac5b8df6c6",
+      "sha256": "954d70b37d36441144806c25b100018fe6d42dbdbdf3ffcf094b4935f281f2e7",
+      "test_source": "src/FerroBoard.Core/tests/text_utils.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/text_utils-c15e22ac5b8df6c6"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/touch_upstream-3d15fd0ba2f9638d",
+      "sha256": "f7fb5a306706d70d3efccc04dfd052307c3f0136551fde360994028ec184f7c9",
+      "test_source": "src/FerroBoard.Core/tests/touch_upstream.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/touch_upstream-3d15fd0ba2f9638d"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/user_dictionary-980386dd1f2253cf",
+      "sha256": "8c4c923e293b688a315a61e1f5df94e2f895380bea85c14122c9232cc81562e1",
+      "test_source": "src/FerroBoard.Core/tests/user_dictionary.rs",
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/user_dictionary-980386dd1f2253cf"
+    }
+  ],
+  "source_test_results": {
+    "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/dotnet-results/upstream.trx",
+    "sha256": "c150320f19d887295df9f493a7416ff90e3167f8e9d56f31ac43f75c3e9e9786"
+  },
+  "unchanged_prior_sample": {
+    "path": "/tmp/ferrokeyboard/computed-key-text-stage/prior-ferroboard-sample",
+    "sha256": "1f1ac38606b67f61b6713ab39e9a746f676f8634272c4d993acc8de9af863fcc",
+    "bytes": 314764560,
+    "format": "Mach-O 64-bit executable arm64",
+    "native_launch_verified": false
+  },
+  "evidence_logs": [
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/dotnet-test.log",
+      "sha256": "db559948ce8cccdbfccc3795c2f56573f716a0eacb7319a9c87b9b9139851872"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/assertion-audit.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/assertion-audit-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/layout-first.log",
+      "sha256": "44f230385d12f17fd16c9cbff954a491f2d3ce649563ec63ae8d456f64c72689"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/layout-second.log",
+      "sha256": "fb92935ab8a5ffaafe46a97baaffe4a3fea26df7caadea767dfde23646365e3d"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/selected-third.log",
+      "sha256": "8de0add25a5a28548d20ab76b0912c6ad247126877f255559c7432090c731539"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/selected-fourth.log",
+      "sha256": "cbe61790aa7de85f9c8177bb6314d3555622f1b9fd53985ee584b5e663c2c273"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/core-final.log",
+      "sha256": "54583db361ae9e5064bf6ffa8f1f074865c09dfd7ed96fddd5a1bfd3529e74c6"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/core-final-stderr.log",
+      "sha256": "68ea4678c8398590ea868a24ca67577d78bb37cfe8546d0251e014538c574a6d"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/clippy-final.log",
+      "sha256": "72e377f5d118b6e0c0cf2652f28df6041324ec97cd7b236125a88319d3375d7c"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/fmt-owned-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/metadata-final-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/static-runner.log",
+      "sha256": "d20d2f788d698c62eb75e0fa06e94e4ca3af77739a578eac49b3b649cc05fdde"
+    }
+  ]
+}

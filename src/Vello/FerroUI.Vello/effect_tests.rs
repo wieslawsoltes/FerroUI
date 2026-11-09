@@ -2555,25 +2555,23 @@ mod bitmaps {
         let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../samples/ControlCatalog/Assets");
         let mut decoded_files = 0;
 
-        for folder in ["CurvedHeader", "ModernApp"] {
-            for entry in std::fs::read_dir(directory.join(folder)).expect("the assets of the catalog") {
-                let path = entry.unwrap().path();
-                if path.extension().is_none_or(|extension| extension != "jpg") {
-                    continue;
-                }
-
-                let bitmap = render_interface()
-                    .load_bitmap_from_file(path.to_str().expect("a path that is text"))
-                    .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
-                let size = bitmap.pixel_size();
-                assert!(size.width >= 16 && size.height >= 16, "{}: {size:?}", path.display());
-
-                // A photograph is opaque and not one color.
-                let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
-                let (first, middle) = (read_pixel(readable, 1, 1), read_pixel(readable, size.width / 2, size.height / 2));
-                assert_eq!((255, 255), (first.3, middle.3), "{}", path.display());
-                decoded_files += 1;
+        for entry in std::fs::read_dir(&directory).expect("the assets of the catalog") {
+            let path = entry.unwrap().path();
+            if path.extension().is_none_or(|extension| extension != "jpg") {
+                continue;
             }
+
+            let bitmap = render_interface()
+                .load_bitmap_from_file(path.to_str().expect("a path that is text"))
+                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+            let size = bitmap.pixel_size();
+            assert!(size.width >= 16 && size.height >= 16, "{}: {size:?}", path.display());
+
+            // A photograph is opaque and not one color.
+            let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
+            let (first, middle) = (read_pixel(readable, 1, 1), read_pixel(readable, size.width / 2, size.height / 2));
+            assert_eq!((255, 255), (first.3, middle.3), "{}", path.display());
+            decoded_files += 1;
         }
 
         assert!(decoded_files >= 10, "{decoded_files}");
@@ -2779,7 +2777,8 @@ mod custom_effect_graphs {
 mod custom_shader_effects {
     use super::*;
     use ferroui_base::media::effects::library::{
-        DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        DissolveTransitionEffect, GridShaderEffect, MaskTransitionEffect, PixelateEffect, ScanlineShaderEffect,
+        SpotlightShaderEffect,
     };
     use ferroui_base::media::effects::{
         CustomEffect, EffectImage, EffectParameterValue, ImmutableCustomEffect, ShaderEffectDescription,
@@ -2876,6 +2875,9 @@ mod custom_shader_effects {
             let spotlight =
                 SpotlightShaderEffect { center_x: 0.4, center_y: 0.5, radius: 0.5, strength: 0.8, color: Colors::ORANGE };
             assert_matches_reference(ImmutableCustomEffect::new(spotlight), scale, 3);
+            // The grid (#580), masked by the content as the other overlays.
+            let grid = GridShaderEffect { cell_size: 12.0, strength: 0.6, ..GridShaderEffect::default() };
+            assert_matches_reference(ImmutableCustomEffect::new(grid), scale, 1);
         }
     }
 
@@ -2885,6 +2887,7 @@ mod custom_shader_effects {
             ImmutableCustomEffect::new(PixelateEffect { cell_size: 0.0 }),
             ImmutableCustomEffect::new(ScanlineShaderEffect { strength: 0.0, ..ScanlineShaderEffect::default() }),
             ImmutableCustomEffect::new(SpotlightShaderEffect { strength: 0.0, ..SpotlightShaderEffect::default() }),
+            ImmutableCustomEffect::new(GridShaderEffect { strength: 0.0, ..GridShaderEffect::default() }),
         ] {
             let plain = target(1);
             plain.draw(scene);
@@ -2897,21 +2900,28 @@ mod custom_shader_effects {
 
     #[test]
     fn a_shader_effect_is_drawn_inside_its_area_only() {
-        // An overlay over the right half of the target: nothing outside it.
+        // An overlay over the right half of the target, over white content there: nothing
+        // outside it. The overlay is masked by the content (#580): where there is none it draws
+        // nothing.
         let effect = ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 1.0 });
         let drawn = target(1);
         drawn.draw(|context| {
             let bounds = Rect::new(50.0, 0.0, 50.0, 100.0);
             context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::WHITE)), None, rect(50.0, 0.0, 40.0, 100.0), &no_shadows());
+            context.pop_render_options();
             context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
             // After the pop, drawing is plain again.
             context.push_render_options(aliased());
             context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.0, 0.0, 5.0, 5.0), &no_shadows());
             context.pop_render_options();
         });
-        // Rows 2 and 3 of each band of 4 are black inside the area.
+        // Rows 2 and 3 of each band of 4 are black inside the area, over the content.
         assert_eq!((0, 0, 0, 255), drawn.pixel(60, 2));
-        assert_eq!(TRANSPARENT, drawn.pixel(60, 1));
+        assert_eq!((255, 255, 255, 255), drawn.pixel(60, 1));
+        // Inside the area beside the content, nothing.
+        assert_eq!(TRANSPARENT, drawn.pixel(95, 2));
         assert_eq!(TRANSPARENT, drawn.pixel(40, 2));
         assert_eq!(RED, drawn.pixel(2, 2));
     }
@@ -2920,18 +2930,24 @@ mod custom_shader_effects {
     fn a_shader_effect_is_composed_with_the_opacity_in_effect() {
         // Black bands over the content, the whole at half opacity (as Skia
         // composes the layer of the effect).
+        // The overlay is masked by the content (#580): it is drawn over opaque white content.
         let effect = ImmutableCustomEffect::new(ScanlineShaderEffect { spacing: 4.0, strength: 1.0 });
         let drawn = target(1);
         drawn.draw(|context| {
             context.push_opacity(0.5, None);
             let bounds = Rect::new(0.0, 0.0, 100.0, 100.0);
             context.as_drawing_context_impl_with_effects().expect("effects").push_effect(Some(bounds), &effect);
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::WHITE)), None, rect(0.0, 0.0, 100.0, 100.0), &no_shadows());
+            context.pop_render_options();
             context.as_drawing_context_impl_with_effects().expect("effects").pop_effect();
             context.pop_opacity();
         });
         let (r, g, b, a) = drawn.pixel(60, 2);
         assert!((r, g, b) == (0, 0, 0) && (i32::from(a) - 127).abs() <= 1, "{:?}", (r, g, b, a));
-        assert_eq!(TRANSPARENT, drawn.pixel(60, 1));
+        // Between the bands, the content at half opacity.
+        let (_, _, _, a) = drawn.pixel(60, 1);
+        assert!((i32::from(a) - 127).abs() <= 1, "{a}");
     }
 
     /// A shader effect of an application without a CPU reference.

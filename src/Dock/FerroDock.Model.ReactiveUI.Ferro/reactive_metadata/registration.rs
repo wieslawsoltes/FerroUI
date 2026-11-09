@@ -48,7 +48,7 @@ pub(crate) fn register() {
         std::rc::Rc<dyn ferrodock_model::core::IDockable>,
         super::ToolReference,
     >(super::model_probe::project::<super::ToolReference>);
-    MarkupType::register(<ReactiveObjectReference as MarkupTyped>::MARKUP);
+    MarkupType::register_table(&[<ReactiveObjectReference as MarkupTyped>::MARKUP]);
     ValueTypes::register_nullable::<ReactiveObjectReference>();
     super::reactive_base_reference::register();
     super::dockable_base_reference::register();
@@ -129,7 +129,7 @@ use std::rc::Rc;
 /// Registers a known source class name for a concrete model whose metadata uses
 /// a shared class-reference handle. Custom model classes register their own metadata.
 pub fn register_model_name<T: IDockable + PartialEq>(metadata: &'static MarkupType) {
-    ValueTypes::register_conversion::<Rc<T>, String>(move |_| Some(metadata.full_name()));
+    ValueTypes::register_conversion_with::<Rc<T>, String>(move |_| Some(metadata.full_name()));
 }
 
 // These are views of the original enclosing object, not separate objects. Keep

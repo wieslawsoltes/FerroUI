@@ -32,10 +32,11 @@ fn generate() -> ClassFile {
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<WinUITheme as StaticType>::TYPE, WinUITheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
-    // constructor that takes the service provider, so the compiler would pick `new()`.
+    // constructor that takes the service provider, so the compiler would pick `new()`; it is the
+    // constructor with the units the application registered, as in `build.rs` (#568, step 3).
     generate_class_file(
         <WinUITheme as StaticType>::TYPE,
-        Some(ClassConstructor::ServiceProvider("with_service_provider")),
+        Some(ClassConstructor::ServiceProvider("with_registered_parts")),
         "::ferroui_themes_winui::compiled_xaml",
         &[],
     )
@@ -90,6 +91,74 @@ fn build_script_output_is_the_checked_in_reference() {
     let (built, checked_in) = (read(env!("FERROUI_XAMLMETA")), read(METADATA_PATH));
     assert_eq!((&built.name, &built.crate_name), (&checked_in.name, &checked_in.crate_name));
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
+    // The unit graph of the theme (#568) is the same.
+    assert!(built.theme_units == checked_in.theme_units, "the theme units of the .xamlmeta of the build script differ from the checked-in reference");
+}
+
+/// The compiled markup is partitioned into units (#568, step 2 of
+/// docs/porting/theme-trimming.md): the table of all units is in canonical order, the
+/// `.xamlmeta` describes the same units, and the whole theme, which applies every unit through
+/// the table, has every key every unit of a merged document defines.
+#[test]
+fn the_whole_theme_applies_every_unit() {
+    use ferroui_base::controls::ResourceKey;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    assert!(units.len() > 100, "{} units", units.len());
+    for (position, unit) in units.iter().enumerate() {
+        assert_eq!(unit.index as usize, position, "{unit:?}");
+    }
+    assert_eq!(units[0].name, "ambient");
+
+    let metadata = XamlMetadata::parse(&std::fs::read_to_string(METADATA_PATH).expect("compiled_xaml.xamlmeta can be read"))
+        .expect("compiled_xaml.xamlmeta can be read");
+    let [graph] = metadata.theme_units.as_slice() else { panic!("one class with units: {:?}", metadata.theme_units.len()) };
+    assert_eq!(graph.class, "FerroUI.Themes.WinUI.WinUITheme");
+    assert_eq!(graph.table_path, "::ferroui_themes_winui::compiled_xaml::THEME_UNITS");
+    let names: Vec<&str> = graph.units.iter().map(|unit| unit.name.as_str()).collect();
+    assert_eq!(names, units.iter().map(|unit| unit.name).collect::<Vec<_>>());
+    let ambient = &graph.units[0];
+    for host in ["Controls/Window.xaml", "Controls/PopupRoot.xaml", "Controls/OverlayPopupHost.xaml", "Controls/AdornerLayer.xaml"] {
+        assert!(ambient.documents.iter().any(|document| document == host), "{host} is ambient: {:?}", ambient.documents);
+    }
+    let button = graph.units.iter().find(|unit| unit.name == "Controls/Button.xaml").expect("a unit of the button");
+    assert!(button.type_keys.iter().any(|type_key| type_key == "Button"), "{button:?}");
+    assert!(button.keys.iter().any(|key| key == "AccentButtonStyle"), "{button:?}");
+
+    let application = ferroui_controls::Application::current().expect("an application");
+    let theme = WinUITheme::new();
+    application.styles().add(theme.as_style());
+    let variants = super::support::variants();
+    for unit in &graph.units[1..] {
+        for key in &unit.keys {
+            let key = ResourceKey::from(key.as_str());
+            let found = variants.iter().any(|variant| application.try_get_resource(&key, Some(variant)).is_some());
+            assert!(found, "{key:?} of the unit {} is not in the theme", unit.name);
+        }
+    }
+}
+
+/// Step 3 of #568: a theme constructed from some of its units (`with_parts`) leaves out the
+/// entries of the units it is not given, and has them with the table of all units. The rating
+/// control's unit defines only its control theme, which no other unit references.
+#[test]
+fn a_theme_with_parts_leaves_out_the_units_it_is_not_given() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    let rating = units.iter().position(|unit| unit.name == "Controls/RatingControl.xaml").expect("a unit of the rating control");
+    let parts: Vec<&'static ThemeUnit> = units.iter().enumerate().filter(|(position, _)| *position != rating).map(|(_, unit)| *unit).collect();
+    let parts: &'static [&'static ThemeUnit] = Box::leak(parts.into_boxed_slice());
+    let key = ResourceKey::Type(<ferroui_controls::RatingControl as StaticType>::TYPE);
+
+    let trimmed = WinUITheme::with_parts(None, parts);
+    assert!(trimmed.try_get_resource(&key, None).is_none(), "the control theme of the rating control is left out");
+    let full = WinUITheme::with_parts(None, units);
+    assert!(full.try_get_resource(&key, None).is_some(), "the full table has the control theme of the rating control");
+    // With the tables of types (the tests link the run-time loader), a load by URI and the type
+    // information apply every unit.
+    assert_eq!(crate::compiled_xaml::registered_theme_units().len(), units.len());
 }
 
 #[test]
@@ -98,4 +167,80 @@ fn regenerate_compiled_xaml() {
     let file = generate();
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
+}
+
+/// #612, root D: a namespace table that names classes for reflection-binding paths is reachable
+/// only through the units of the theme, so a unit the application trims takes those classes with
+/// it. From the public functions of the module, following the items each item names, without
+/// passing through the table of a unit (`THEME_UNIT_<n>`, `THEME_UNITS`), no such table is
+/// reached: the code outside every unit names none. (The ambient unit, `THEME_UNIT_0`, is always
+/// applied, so the classes its own paths name are always linked, as everything else in it.)
+#[test]
+fn the_classes_of_reflection_paths_are_reached_only_through_their_units() {
+    use std::collections::{BTreeMap, BTreeSet};
+    let source = std::fs::read_to_string(PATH).expect("the checked-in compiled_xaml.rs");
+    // The top-level items: a line that starts an item at column 0 begins it.
+    let mut items: BTreeMap<String, (bool, String)> = BTreeMap::new();
+    let mut current: Option<(String, bool)> = None;
+    let mut body = String::new();
+    let item_name = |line: &str| -> Option<(String, bool)> {
+        let rest = line.strip_prefix("pub ").unwrap_or(line);
+        let public = line.starts_with("pub ");
+        for keyword in ["fn ", "static ", "const "] {
+            if let Some(after) = rest.strip_prefix(keyword) {
+                let name: String = after.chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+                return (!name.is_empty()).then_some((name, public));
+            }
+        }
+        None
+    };
+    for line in source.lines() {
+        if let Some(found) = item_name(line) {
+            if let Some((name, public)) = current.take() {
+                items.insert(name, (public, std::mem::take(&mut body)));
+            }
+            current = Some(found);
+        }
+        body.push_str(line);
+        body.push('\n');
+    }
+    if let Some((name, public)) = current {
+        items.insert(name, (public, body));
+    }
+    let names: BTreeSet<&str> = items.keys().map(String::as_str).collect();
+    let references = |text: &str| -> Vec<String> {
+        text.split(|c: char| !(c.is_alphanumeric() || c == '_'))
+            .filter(|word| names.contains(word))
+            .map(str::to_string)
+            .collect()
+    };
+    // The channel of the units: the table of each unit and the table of all of them.
+    let selective = |name: &str| {
+        name == "THEME_UNITS" || name.strip_prefix("THEME_UNIT_").is_some_and(|index| index.parse::<u32>().is_ok())
+    };
+    let class_tables: BTreeSet<&str> = items
+        .iter()
+        .filter(|(_, (_, text))| text.contains("rt::XmlNamespaceTable") && text.contains("CastTarget::Class("))
+        .map(|(name, _)| name.as_str())
+        .collect();
+    // Since #603 the bindings of the theme are compiled: their paths name their classes as typed
+    // path elements, and a reflection binding is only an explicit `{ReflectionBinding}`, so the
+    // theme may have no such table at all. The check below holds for the tables there are.
+    let mut reached: BTreeSet<String> = BTreeSet::new();
+    let mut pending: Vec<String> = items.iter().filter(|(_, (public, _))| *public).map(|(name, _)| name.clone()).collect();
+    pending.retain(|name| !selective(name));
+    while let Some(name) = pending.pop() {
+        if !reached.insert(name.clone()) {
+            continue;
+        }
+        let own = items[&name].1.clone();
+        // The item's own name in its first line is not a reference.
+        for referenced in references(&own) {
+            if referenced != name && !selective(&referenced) && !reached.contains(&referenced) {
+                pending.push(referenced);
+            }
+        }
+    }
+    let leaked: Vec<&&str> = class_tables.iter().filter(|table| reached.contains(**table)).collect();
+    assert!(leaked.is_empty(), "namespace tables naming classes reached outside their units: {leaked:?}");
 }

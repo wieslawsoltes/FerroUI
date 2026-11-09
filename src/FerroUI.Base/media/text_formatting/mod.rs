@@ -90,6 +90,10 @@ mod text_formatter_wrap_characterization_tests;
 #[cfg(test)]
 mod text_layout_tests;
 #[cfg(test)]
+mod text_break_table_tests;
+#[cfg(test)]
+mod text_layout_width_hold_tests;
+#[cfg(test)]
 mod text_paragraph_tests;
 #[cfg(test)]
 mod text_line_bounds_tests;

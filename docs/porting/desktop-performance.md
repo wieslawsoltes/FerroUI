@@ -510,3 +510,445 @@ The sizes of the earlier sections are those of the `dist` profile. The workflow
 `.github/workflows/perf.yml` builds with the release profile of each ref, so a comparison of a ref
 before this change with one after it shows the difference of the profiles, not a regression of the
 code.
+
+## 8. The cross-framework gauntlet (2026-11-08)
+
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
+benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
+beside the other frameworks. `PERF_REPORT=1` prints the frame rate the app's animation-frame
+callback sees, for A/B runs of FerroUI builds:
+
+```sh
+PERF_SCENARIO=gauntlet PERF_TIER=16 PERF_REPORT=1 PERF_FONTS=<folder of Roboto-*.ttf> \
+  cargo run --release -p gauntlet-benchmark
+```
+
+Apple M3 Pro, `release`, Skia, own counter, median of the last 8 of 12 seconds, two alternating
+rounds:
+
+| Build | Gauntlet (tier 16) | Still wall (tier 20, pointer outside the window) |
+|---|---:|---|
+| main (d09b86731) | 15.6, 16.6 | 27.0, 29.4 |
+| disposal index and hit-test buckets (section 9.1, 9.2) | 19.3, 19.0 | 33.5, 28.4 |
+
+The run of the benchmark's own harness (external frame counter, every framework) needs the display
+at 60 Hz, as the benchmark is calibrated; it is added here once made.
+
+### 8.1 The local performance gate
+
+A change to layout, text, the property system, composition, rendering, input or the TreeDataGrid
+is measured on the developer's machine against the commit it is based on before it goes up for
+review, and the table of the gate goes into the description of the pull request. The gate is not
+a CI job: hosted runners are too noisy and too unlike a desktop for a few-percent threshold, so it
+is run locally, on a quiet machine (no other build, no VM or emulator, on mains power).
+
+```sh
+python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
+python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
+python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
+```
+
+The script checks the base out, detached, in a git worktree of its own under the scratch folder
+(`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
+delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
+with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
+(default 3), and compares the medians of the rounds. A metric over its tolerance by less than the
+spread of its own rounds on either side is not decided yet: one disturbed round can move a median
+of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
+only). The gate then measures another round of that suite, alternately again, until the change is
+larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
+the rounds. Cargo runs through `FERROUI_CARGO` when it is
+set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
+build starts during a measurement), else `cargo`. The logs of every build and run are kept under
+`<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something
+did or a benchmark failed on the candidate, 2 when a build or a run failed.
+
+What it measures:
+
+- **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
+  and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
+  the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
+  in the render-thread mode of the desktop (`Compositor::with_render_thread`), with no pointer
+  device. The screens drive their own frames through the top level's animation frame callback,
+  which advances the frame index once a frame, so nothing depends on wall time; 60 frames of
+  warm-up, then 240 measured (`--warmup`, `--frames`). Per scenario: the UI thread's busy time a
+  frame (animation callback, layout, recording, commit), the render thread's time a frame, and
+  the wall time a frame. Alone:
+
+  ```sh
+  cargo test -p gauntlet-benchmark --release --test frame_gate -- --ignored --nocapture --test-threads=1
+  ```
+
+  When the base has no frame gate (a commit before it), the candidate's `samples/GauntletBenchmark`
+  is copied into the base worktree, and added to its workspace members when needed, so both sides
+  run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
+  a gate of its own.
+- **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
+  median time of one operation of each benchmark, read from the tables of the harness. The gate
+  runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
+  after 2 of warm-up; `--tdg-iterations`, `--tdg-min-iteration-ms`, `--tdg-warmup`) so that a
+  full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
+  `FERROUI_BENCH_FILTER` does.
+
+Tolerances. A metric regresses when the candidate is slower than the base by more than
+`--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
+the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
+
+| Metric | Factor | Why |
+|---|---:|---|
+| UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
+| Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
+| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+
+A regression the gate reports after its extra rounds is a real one; a change that is meant to
+cost time says so in the pull request, with the table.
+
+## 9. Deviations from upstream for frame cost
+
+Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
+same results) and changes only how much work a frame does.
+
+### 9.1 The disposal queue of the compositor is indexed by id
+
+Upstream keeps the server objects to dispose with the next batch in a list and searches it for an
+earlier entry of the same object before adding one. A frame in which thousands of visuals record
+new draw lists disposes thousands of render data objects, which made that search quadratic: 14 %
+of the UI thread in the gauntlet. `Compositor` keeps the position of each id's entry in a table
+indexed by the id (ids are dense), so queueing is constant time; the batch writes the same entries
+in the same order.
+
+### 9.2 The hit-test tree reads only a bucket's children
+
+The composition hit-test tree splits a collection's children into buckets of 32 in z order and
+checks a bucket again when the readback revision changed. Checking a bucket took a snapshot of the
+whole collection, so a hit test over a collection of thousands of children was quadratic (97 % of
+the UI thread on the still wall with the pointer in the window). A bucket now reads its own 32
+children by index.
+
+### 9.3 A store keeps the results of its inherited lookups
+
+A read of an inherited property the object does not hold walks its inheritance ancestors to the
+nearest one that holds it, as upstream does. A layout pass reads inherited properties about
+400,000 times a frame in the gauntlet (`UseLayoutRounding`, `FlowDirection` and the text
+properties, nearly all of them held by no ancestor), each walk two to three ancestors long. A store
+now keeps what each lookup found, or that it found nothing, tagged with the thread's inheritance
+generation; the generation changes whenever the holder of an inherited value can change (an
+inheriting property's effective value added to or removed from any store, an inheritance parent or
+ancestor changed). A change of the value itself needs no new lookup: the store keeps the holder's
+effective value, which holds the current value. Tests: `ferro_object_tests_inheritance.rs`, the
+last two. Local gate (section 8.1), three rounds: gauntlet UI thread 44.90 to 43.46 ms a frame
+(-3.2 %), still wall UI thread -5.9 %.
+
+### 9.4 The font manager keeps the glyph typefaces it found
+
+Every text line asks for the glyph typeface of its run's typeface, and a run's properties keep the
+answer only for themselves; a text block creates its run properties with each layout, so in the
+gauntlet every line of every text built a `FontFamily` from its name and looked it up in the
+collections again, every frame. `FontManager::try_get_glyph_typeface` now keeps what it found, by
+typeface, until the thread's glyph typeface generation changes: a font collection deriving from
+`FontCollectionBase` gaining a glyph typeface, or a collection added, replaced or removed. A
+collection that implements `IFontCollection` directly and changes what it returns calls
+`FontManager::invalidate_glyph_typefaces`. Local gate, three rounds: gauntlet UI thread 45.09 to
+43.15 ms a frame (-4.3 %; the render thread, which the change does not touch, -1.8 % in the same
+rounds).
+
+### 9.5 Render transform and opacity changes do not record the drawing again
+
+A visual's render transform and opacity are composition properties: the render thread applies them
+to the visual's retained drawing. Upstream nevertheless invalidates the visual when either changes,
+so its `render` runs again, a new draw list is recorded and serialized, and the old one is
+disposed, for every frame of an animation. FerroUI routes these changes through
+`Visual::invalidate_composition_properties` and `IRenderer::add_dirty_properties`: the compositing
+renderer synchronizes the visual's composition properties without calling `render`. The default
+of `add_dirty_properties` is `add_dirty`, so other renderers behave as before. No `render` of the
+framework reads the visual's own transform or opacity (checked over every `render` override).
+Changes of `Bounds` still record the drawing: `TextPresenter::render` tracks its position for the
+caret of input methods. Tests: `visual_render_tests.rs`. Local gate, three rounds: gauntlet UI
+thread -0.5 %, still wall UI thread -5.2 % (its cursor moves by a transform).
+
+### 9.6 The hit-test tree compares readback revisions before reading readbacks
+
+With the pointer in a window, pointer-over and tooltips hit-test the pointer after every frame, and
+each hit test checks the children of every collection it passes through: the readback revision
+changes with every frame, so every bucket of the collection is checked again. Checking a child read
+its whole readback (a lock and a copy, and clones of its root and of the compositor's readback
+indices) only to find, for nearly every child, the revision the tree already has. A child is now
+checked by the revision of the readback slot it would read, from the slots' atomics, and its
+readback is read only when that revision differs; the tree is unchanged for every child whose
+revision it already has, as before. Local gate, three rounds, with the frame gate's scenario of the
+still wall with the pointer in the window (`wall/20+pointer`): UI thread 3.59 to 1.64 ms a frame
+(-54.4 %); gauntlet UI thread -4.1 %.
+
+A first attempt skipped the whole check while no child's readback had been written since the last
+one (a revision of the children kept by each server visual); the gate refused it (+17.8 % on
+`wall/20+pointer`): the still wall's container holds the changing clock and cursor beside its
+static tiles, so the revision of its children changes with every frame and the bookkeeping only
+added cost.
+
+### 9.7 A text block keeps a left-aligned layout whose lines fit a narrower width
+
+A text block lays its text out again whenever its constraint changes, except in the cases upstream
+and section 9 already keep. In the gauntlet each text block builds two layouts a frame: one for its
+measure and one for its arrange, at another width. A layout is now also kept for a new width when
+it is left-aligned, its lines all fit the new width, and the new width is not larger than the one
+it was created for or it was created without a width. Wrapping and trimming are greedy: each line
+ends at the furthest point that fits the larger width, and that point still fits the smaller one,
+so the lines are the ones a new layout has; the height rule of the kept layouts is unchanged.
+Tests: `a_layout_whose_lines_fit_the_new_width_is_kept_and_has_the_lines_of_a_new_one`, and the
+widths of `a_layout_that_depends_on_the_width_is_created_again` now make the lines change.
+Counters (`--features counters`): text layouts created 5,844 to 5,143 a frame (-12 %); local gate:
+gauntlet UI thread -1.6 % (within noise), no metric regressed.
+
+### 9.8 A text block keeps its run properties between layouts
+
+Each layout of a text block made its default run properties anew: about nine property reads (the
+font family, style, weight, stretch and size, the decorations, the foreground and the font
+features, an inherited lookup), an allocation, and a glyph typeface the new properties resolved
+again for the first line. A text block now keeps them until a property they are made of changes:
+the change handler already lays the text out again for each of them (`invalidate_text_layout`:
+the font properties, flow direction, letter spacing, text, decorations, font features and
+foreground), and now also drops the kept properties. Test:
+`a_kept_layouts_run_properties_follow_the_font_size`. Local gate, three rounds: gauntlet UI thread
+40.93 to 37.24 ms a frame (-9.0 %), no metric regressed. The paragraph properties (flow direction,
+wrapping, line height and spacing, letter spacing, text line bounds and the alignment of the
+layout) are kept the same way, by alignment, and dropped by both invalidations of the layout
+(-1.5 %, within noise, eight reads and an allocation fewer a layout).
+
+### 9.9 Layoutables keep a copy of their size, margin and visibility
+
+A layout pass reads a few properties of every element many times: in the gauntlet, `IsVisible`
+about 93,000 times a frame, `Width`, `MaxWidth`, `MaxHeight`, `MinWidth`, `Height`, `MinHeight`
+and `Margin` between 17,000 and 38,000 times each, every read a lookup in the element's value
+store. `Visual::is_visible` and the getters of these `Layoutable` properties now keep a copy of
+the value (`property_store::HotValue`) with the generations it was read at: the value store's,
+which every change of one of its effective values advances (a value set, coerced, added or
+removed, before the new value is written), and the metadata generation, which every override or
+removal of property metadata advances. A read with both generations unchanged returns the copy;
+any other read looks the property up and keeps the new value. Only properties that do not
+inherit are kept this way: an inherited value changes with an ancestor's store. Tests:
+`layout/hot_value_tests.rs` (local, style, current and animation values, a cleared local value,
+margin and visibility). Local gate, three rounds: gauntlet UI thread 37.28 to 36.11 ms a frame
+(-3.1 %), still wall with the pointer -6.2 %, no metric regressed.
+
+### 9.10 Targets track the dirty area as several rectangles by default
+
+Upstream keeps one dirty rectangle per target unless region clipping is asked for
+(`UseRegionDirtyRectClipping`). One rectangle is the union of everything that changed, so two
+small changes far apart repaint the whole area between them: on the still wall the clock line at
+the top and the cursor outline, which steps 37 tiles a frame and so moves down the window over
+time, made a rectangle that grew from 1522 x 138 to 986 x 882 pixels in 900 frames, and the
+render time from 28 to 81 ms a frame. Every backend that renders (Skia, Vello, Quartz) supports
+regions, so `CompositionOptions::use_region_dirty_rect_clipping` now means on when it is `None`
+and only `Some(false)` keeps the single rectangle. The tracker is upstream's
+`MultiDirtyRectTracker` with its defaults (at most 8 rectangles, merge eagerness 1000), and a
+target still renders into its retained layer, so the pixels outside the rectangles are the last
+frame's. Test: `composition_options.rs` (the default). Headless still wall, 900 frames: 81.4 to
+10.8 ms a frame, flat over the run (10.6 ms at 120 frames).
+### 9.11 Skia draws box shadows with a blur mask filter
+
+Upstream gives the paint of a box shadow a blur image filter. An image filter makes Skia draw the
+shadow's shape into a layer of its own and blur the layer's pixels with a full Gaussian pass, for
+every shadow in every frame it is drawn: in the gauntlet, whose cards each have a shadow, that
+pass (`GaussianPass::blurSegment`) was 39 % of the render thread. The Skia backend now gives the
+paint a blur mask filter of the same sigma (`MaskFilter::blur(Normal, sigma, respect_ctm)`): the
+same Gaussian of the shape's coverage, in the shadow's color, under the same clip that keeps it
+outside (or inside) the box. No layer is made, and Skia draws a blurred rounded rectangle from a
+nine-patch it caches on the CPU and with an analytic shader on the GPU, so equal shadows cost a
+lookup. The Vello backend already drew most shadows in closed form, and Quartz with its own GPU
+path. Test: `media/box_shadow_tests.rs` `box_shadows_of_every_kind` (outer and inset, rounded and
+square, offsets, spreads, blurs from 2 to 40, two shadows on one box), whose expected image is the
+image filter's: the two differ by at most 3 of 255 in a channel, in 6 of 120,000 pixels. Local gate,
+three rounds: gauntlet render 88.9 to 50.9 ms a frame (-42.8 %), wall time -42.3 %.
+
+### 9.12 A text block keeps a layout over its width hold and for a taller height
+
+Upstream makes a new text layout whenever the constraint of a text block changes; section 9.7
+keeps a left-aligned layout whose lines fit a narrower width. In the gauntlet that kept nothing:
+every text block is measured twice a frame, by its grid, at an infinite height and then at the
+height of its auto row, and the rule kept a layout only for a height not larger than the one it
+was made for, so the two measures replaced each other's layout: 4,890 layouts a frame.
+
+- `TextLayout::is_truncated_by_height` tells whether a layout left lines out because they did
+  not fit its maximum height. A layout that left nothing out has the lines of a layout made for
+  any height its lines fit, so a text block keeps it for a taller height too.
+- `TextLayout::width_hold` is the range of maximum widths over which a new layout makes the same
+  lines (docs/porting/text-layout-performance.md, step 1): wrapping is greedy, so the lines stay
+  while every line fits (from the widest line without its trailing white space, with it for a
+  line that ends the paragraph or at a required break) and while no line can take the next
+  line's first word (up to a line's width with its trailing white space and that word, read from
+  the advances of the shaped run). It is known for left-to-right text that wraps without
+  trimming, a line limit, letter spacing, tabs or paragraph styles, whose lines are one shaped
+  run each and end at break opportunities, kept 0.01 inside its exact bounds for the tolerance of
+  the formatter's comparisons. `TextLayout::holds_width` answers for one width and stops at the
+  first line that rules it out. A left-aligned text block keeps its layout for any width the
+  layout holds.
+
+Tests: `text_layout_width_hold_tests.rs` (every width a layout holds, in quarter-pixel steps,
+gives a new layout with the same lines, over texts with hyphens, dashes, slashes, runs of spaces,
+required breaks and words wider than the width), the same check with HarfBuzz and Skia over the
+gauntlet's card bodies (`TextPipelineBenchmark` tests), and `text_block_tests.rs`
+(`a_wrapped_layout_is_kept_at_a_wider_width_it_holds`,
+`a_layout_that_left_no_line_out_is_kept_for_a_taller_height`); the reference test that arranges
+a text block wider and expects a new layout centers its text, which the hold does not cover.
+Gauntlet, per frame: text layouts 4,890 to 1,765, text lines formatted 5,533 to 2,263.
+`TextPipelineBenchmark.text_block_measure_sweep` (a width step of 7 a measure): labels 1.97 to
+0.14 ms, card bodies 7.85 to about 5.5 ms, articles unchanged within the noise. Local gate, three
+rounds: gauntlet UI thread 39.0 to 33.6 ms a frame (-13.9 %), no metric regressed.
+### 9.13 A visual that only moves does not record its drawing again
+
+Upstream's `Bounds` affects render: any change of a visual's bounds, its position included,
+records its drawing again. A visual draws in its own coordinates, and its position reaches the
+compositor as the offset of its composition visual, so a change of position alone now
+synchronizes the composition properties (section 9.5's path) and keeps the drawing; a change of
+size records it again. A class whose drawing reads its own position names `Bounds` in its own
+`affects_render` (`TextPresenter`, which records its offset in the root while it draws). Every
+item of a scrolled list moves without changing size, so scrolling no longer records the drawings
+of what it moves. Test: `visual_render_tests.rs`
+(`moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_drawing`). In the
+gauntlet, whose content is resized every frame, it saves the recording of about 650 visuals a
+frame (8,200 to 7,550). The local gate is unchanged within its tolerance (raster Skia): the gain is in
+lists that scroll at a fixed width, where every moved item is no longer recorded.
+
+### 9.14 An unchanged drawing is not sent to the render thread again
+
+A visual recorded again often draws exactly what it drew before: a left-aligned text block
+without a background, resized while its layout was kept (section 9.12), draws the same lines at
+the same places. `RenderDataDrawingContext::get_render_results_unless_same` compares the new
+recording with the render data the visual has: the same operations on the same resources, by
+identity, none of them a custom draw operation (which a dropped recording disposes) or a
+resource not sent. When they are the same, the new recording is dropped, its references
+released, and the render data stays: the render thread neither receives nor deserializes a new
+stream, computes its bounds or disposes the old one, and the UI thread creates no server object
+for it. Because an invalidation can come from something the drawing does not contain (an opacity
+mask, an effect), the visual still has the server draw its area again
+(`CompositionDrawListVisual::invalidate_draw_list_content`, a third state of the draw list in the
+batch).
+
+The identity of a glyph run in a recording was the `Arc` the recording wraps it in, new for every
+recording, so no two recordings of the same text were equal (and a glyph run drawn twice in one
+recording took two slots); it is now the glyph run itself.
+
+Tests: `compositor_tests.rs` (`an_unchanged_drawing_is_not_sent_again_and_its_area_is_drawn_again`;
+`visual_brush_as_opacity_mask_is_a_server_side_scene_brush`, whose mask changes while the drawing
+does not, checks the area is drawn again). A counter, `VisualsRecordedUnchanged`. Gauntlet: 3,820
+of 8,177 recordings a frame are unchanged. Local gate against section 9.12, three rounds: render
+thread 51.8 to 45.7 ms a frame (-11.7 %), UI thread -8.1 %, wall time -11.7 %, no metric
+regressed.
+
+### 9.15 Measure holds: an element is not measured again where its measure cannot change
+
+Upstream measures an element again whenever its available size differs from the last one. When
+the width of a window or a column changes, every element below is measured again, although most
+of them return the same desired size: in the gauntlet, whose content width changes every frame,
+10,765 measures a frame.
+
+An element may now report a measure hold (`ferroui_base::layout::MeasureHold`): the range of
+available sizes over which its measure returns the same desired size and leaves its descendants as
+they are. `LayoutableImpl::measure_hold_override` gives it in the space of the constraint
+`measure_override` received; `Layoutable::measure_core` maps it to the space of the available
+size through the margin, the minimum, maximum and explicit sizes, and the clamp of the desired size
+to the available size (an element whose desired size was clamped holds nothing). `Layoutable::measure`
+returns at once when the measure is valid and the new available size is inside the hold. An
+element whose type reports no hold holds at the constraint it got: an axis fixed by an explicit size
+(or equal limits) gives `measure_override` that constraint at every available size, so a fixed-size
+element holds for every available size it fits, and any other element only at its own available
+size, as upstream compares them. The types that report a hold:
+
+- `TextBlock`: the widths of its layout's width hold (section 9.12), any width for left-aligned
+  text that neither wraps nor trims, and every height its lines fit when none was left out, with
+  its padding; nothing for other alignments or inlines;
+- `Border` and `Decorator`: their child's hold moved by the padding and the border; any size
+  without a child;
+- `StackPanel`: the intersection of its visible children's holds across the stack (they get its
+  constraint across it and an infinite size along it), any size along it;
+- `WrapPanel`, horizontal with items at the start: its lines are the same from the widest line up
+  to the narrowest width at which a line would take the next item, intersected with its
+  children's holds where they get its constraint;
+- `Grid` without definitions: the intersection of its children's holds; with one star column
+  (without limits or a shared size), auto or pixel rows (or any rows at an infinite height, where
+  star rows size to their content) and no spans, at a finite width: a cell of the star column gets
+  the grid's width less the fixed width of the other columns and the spacing, so its hold moves by
+  that amount (less a rounding step on each side when the layout is rounded); the other cells get
+  constraints the grid's width does not change. Other grids hold only their own size.
+
+An infinite upper bound includes infinity, so a child measured at an infinite size along a stack
+is inside its own hold. A hold relies on everything a measure reads either being the available
+size or invalidating the measure when it changes; `UseLayoutRounding`, which upstream does not
+mark as affecting the measure (the next measure at another size picks it up), now invalidates it. Tests: `layout/measure_hold.rs` (the mapping through margins, limits and
+the desired size), `measure_hold_tests.rs` in the controls (a tree of borders, a stack, a
+decorator and wrapped, unwrapped and centered text blocks, measured at a width and then at every
+quarter-pixel width 40 around it, has the desired sizes and arranged bounds of a tree laid out at
+that width from nothing; the tree has a wrap panel of chips, an `Auto,*` header grid with a fixed
+avatar, a `*,Auto` row and, in one variant, a grid of two star columns). Gauntlet, per frame: measures 10,765 to 4,605, arranges 7,600 to 5,630,
+drawings recorded 8,177 to 6,099. Local gate against section 9.14, three rounds: UI thread 33.6 to
+29.4 ms a frame (-12.6 %), no metric regressed.
+
+### 9.16 A shaped run finds its break opportunities once
+
+Upstream finds the UAX #14 break opportunities of a run again for every line it wraps, from the
+start of the line, and again for every layout of the same text: a third of the time of a layout
+whose shaping is cached went there (docs/porting/text-layout-performance.md, section 2). A shaped
+buffer now keeps the break opportunities of the text it was shaped for in a table found once and
+shared with the buffers split from it, as its cluster advances are (`ShapedBuffer::line_breaks`).
+A buffer that reaches the end of that text and starts at one of its break opportunities reads the
+entries after its start; any other finds them again from its start, as upstream does. A line
+starts after the white space of the line before it, at a break opportunity, and no rule of UAX #14
+looks back across one, so the entries are the ones finding them again would give.
+
+Test: `text_break_table_tests.rs` (texts with quotes, brackets, numbers, hyphens, dashes, URLs,
+CJK, Hangul, emoji sequences and flags, no-break and zero-width spaces, soft hyphens, combining
+marks, runs of spaces, required breaks and right-to-left words, at widths every 1.75 from 6 to
+700, wrapping and wrapping with overflow: the lines are the ones of layouts that find the breaks
+again for every line). `TextPipelineBenchmark`, a layout with shaping cached: card bodies 7.15 to
+4.30 ms, articles 2.65 to 1.60 ms, labels 1.44 to 1.17 ms. Local gate, three rounds: gauntlet UI
+thread 27.4 to 25.0 ms a frame (-9.1 %), no metric regressed.
+
+### 9.17 The window's Graphite context inserts its recordings in order
+
+Graphite evicts its glyph atlases at the end of every recording unless the context requires
+recordings to be inserted in the order they were snapped (`fRequireOrderedRecordings`, off by
+default): every frame rasterized and uploaded every glyph it drew again. The window's Graphite
+context on Metal now sets the option, as Skia's own Metal window does; FerroUI inserts its
+recordings in order already. skia-safe has no setter, so the native options are set through
+`skia-bindings` (`ordered_recordings_options` in `skia_metal_gpu.rs`). With the option, a
+recording that fails to insert makes the context refuse the recorder's later ones, so the
+context then reports itself lost (`GraphiteGrContext::is_lost`) and is made again, as after a
+lost device. docs/porting/skia-retained-text.md has what Graphite keeps across frames and what it
+does not. Window (gauntlet tier 16, 60 Hz, the two builds alternately): 28.1 / 29.5 / 28.6 to
+29.9 / 29.8 / 29.8 frames a second.
+
+### 9.18 Removing a control from the queue of Loaded events takes constant time
+
+A control attached to a tree waits in a queue for its `Loaded` event; one detached before the
+dispatcher raised it is removed from the queue. Upstream keeps the queue in a set; FerroUI kept it
+in a vector (for the order of the events) beside a set, and removing a control searched the
+vector, so detaching a tree of n controls that had not been loaded yet took time in n squared:
+detaching 10,000 tiles of the still wall (70,000 elements) took more than a second. The queue now
+keeps each control's slot: removing empties it, which releases the control at once and keeps the
+order of the others, and the vector drops its empty slots when they outnumber the queued controls.
+Tests: `control.rs` (`loaded_queue_tests`), the leak tests of the controls (a removed control is
+not held by the queue). `ElementConstructionBenchmark` (the still wall's tiles, created, attached
+to a styled root and laid out): attaching and detaching 10,000 tiles 1,375 to 195 ms, with layout
+1,517 to 338 ms; 1,000 tiles 26.6 to 12.9 ms. The local gate is unchanged.
+
+### 9.19 The native renderer clips rectangles and rounded rectangles analytically
+
+The native Metal renderer (`ferroui-quartz`) made every clip a mask: a texture the size of the
+clip, the clip's path flattened into edges on the processor and a compute pass writing its
+coverage, for every clip in every frame. A frame's dirty region (section 9.10) was such a mask
+too, so every clip inside it was one as well: the still wall (58,696 tiles, each clipped to its
+rounded bounds) made tens of thousands of masks a frame.
+
+A rectangle clip and a rectangle clip with equal elliptical corners, under a transform that keeps
+the axes, are now coverage functions of the shaders (`qm_clip_rounded`, `clip_rectangle` and
+`clip_rounded` in `shaders.metal`): the parameters of every draw carry the rectangle clip in effect
+(the intersection of the rectangle clips, the area of each pixel inside it) and one rounded
+rectangle, and the work of a draw is cropped to their pixels. A region of one rectangle (the
+dirty area of a frame that changed everywhere) is a rectangle clip. A rounded clip inside a rounded
+clip, a clip under a rotation or a skew, a region of several rectangles and any other geometry
+clip with a mask as before; the mask is drawn through the analytic clips in effect and takes them
+in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
+still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.

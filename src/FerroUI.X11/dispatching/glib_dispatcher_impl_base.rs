@@ -272,6 +272,8 @@ impl GlibDispatcherImplBase {
             state.signaled = false;
         }
 
+        // Boundary (#567): called from a GLib source callback; the event runs the jobs of the
+        // dispatcher. Their panic goes to the frame, which raises it again from `run_loop`.
         if let Err(e) = catch_unwind(AssertUnwindSafe(|| self.signaled.raise())) {
             self.handle_exception(e);
         }
@@ -282,6 +284,8 @@ impl GlibDispatcherImplBase {
         // The source removes itself after this call. The reference keeps its tag and
         // removes it once more at the next update.
         self.glib_timer_source_tag.set(None);
+        // Boundary (#567): a GLib timeout callback; the event runs the timers of the
+        // dispatcher. Their panic goes to the frame, which raises it again from `run_loop`.
         if let Err(e) = catch_unwind(AssertUnwindSafe(|| self.timer.raise())) {
             self.handle_exception(e);
         }
@@ -385,6 +389,8 @@ impl IDispatcherImplWithExplicitBackgroundProcessing for GlibDispatcherImplBase 
         // flushing afterwards; here a panic goes where the panics of the other callbacks go,
         // and the backend is flushed as after them (DEVIATIONS.md).
         self.glib.g_idle_add_once(self.callback(|this| {
+            // Boundary (#567): a GLib idle callback running the background jobs of the
+            // dispatcher. Their panic goes to the frame, which raises it again from `run_loop`.
             if let Err(e) = catch_unwind(AssertUnwindSafe(|| this.ready_for_background_processing.raise())) {
                 this.handle_exception(e);
             }

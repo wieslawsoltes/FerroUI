@@ -2,12 +2,16 @@ use serde_json::json;
 use std::path::{Path, PathBuf};
 #[path = "hot_reload_manifest_types.rs"]
 mod types;
+/// Writes `hot-reload.json` into `out`: the documents under `root` and the event contracts of
+/// their types. `compile_bindings` is whether the build compiles `{Binding}` as a compiled
+/// binding by default (#603); hot reload loads the reloaded documents the same way (#604).
 pub(super) fn write(
     manifest_dir: &Path,
     root: &Path,
     out: &Path,
     assembly: &str,
     system: std::rc::Rc<dyn xamlx::type_system::IXamlTypeSystem>,
+    compile_bindings: bool,
 ) -> Result<PathBuf, String> {
     let catalog = types::Catalog::new(system);
     let mut files = Vec::new();
@@ -96,8 +100,8 @@ pub(super) fn write(
     }
     let path = out.join("hot-reload.json");
     std::fs::create_dir_all(out).map_err(|error| error.to_string())?;
-    let text = serde_json::to_string_pretty(&json!({"version": 1, "documents": documents,
-        "type_contracts": contracts.into_values().collect::<Vec<_>>() }))
+    let text = serde_json::to_string_pretty(&json!({"version": 1, "compile_bindings": compile_bindings,
+        "documents": documents, "type_contracts": contracts.into_values().collect::<Vec<_>>() }))
     .map_err(|error| error.to_string())?;
     if std::fs::read_to_string(&path).ok().as_deref() != Some(&text) {
         std::fs::write(&path, text).map_err(|error| error.to_string())?;
@@ -241,6 +245,7 @@ mod tests {
             &root.join("generated"),
             "Demo",
             ModelTypeSystem::new(vec![model]),
+            true,
         )
         .unwrap();
         let value: serde_json::Value =
@@ -287,14 +292,30 @@ mod tests {
             &root.join("generated"),
             "Demo",
             ModelTypeSystem::new(vec![]),
+            true,
         )
         .unwrap();
         let value: serde_json::Value =
             serde_json::from_str(&std::fs::read_to_string(output).unwrap()).unwrap();
         assert_eq!(value["version"], 1);
+        assert_eq!(value["compile_bindings"], true);
         assert_eq!(value["documents"][0]["class"], "Demo.View");
         assert_eq!(value["documents"][0]["source"], source);
         assert_eq!(value["documents"][0]["includes"][0], "Theme.xaml");
+        std::fs::remove_dir_all(root).unwrap();
+    }
+    /// Not from upstream (#604): the manifest records whether the build compiles bindings, so
+    /// hot reload loads a reloaded document the way the build compiled it.
+    #[test]
+    fn manifest_records_whether_the_build_compiles_bindings() {
+        let root = std::env::temp_dir().join(format!("ferroui-manifest-bindings-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("View.xaml"), r#"<Border xmlns="https://github.com/ferroui"/>"#).unwrap();
+        for compile_bindings in [true, false] {
+            let output = write(&root, &root, &root.join("generated"), "Demo", ModelTypeSystem::new(vec![]), compile_bindings).unwrap();
+            let value: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(output).unwrap()).unwrap();
+            assert_eq!(value["compile_bindings"], compile_bindings);
+        }
         std::fs::remove_dir_all(root).unwrap();
     }
 }

@@ -77,8 +77,10 @@ impl RuntimeTypeValue {
     /// The type in the representation the Rust type `handle` holds types in:
     /// `&'static TypeInfo` (classes of the object model), [`ValueType`] or
     /// [`TypeId`] (the canonical handle of the
-    /// values of the type), each also as `Option<_>`. `None` if the type has
-    /// no such representation.
+    /// values of the type), each also as `Option<_>`, or a type a crate
+    /// registers a cast from `&'static TypeInfo` to (the `PageType` of a
+    /// frame, B3 of #612) for a class. `None` if the type has no such
+    /// representation.
     pub fn to_handle(&self, handle: ValueType) -> Option<BoxedValue> {
         fn boxed<T: PartialEq + 'static>(value: T) -> Option<BoxedValue> {
             Some(Rc::new(value))
@@ -98,7 +100,9 @@ impl RuntimeTypeValue {
         } else if handle.is::<Option<RuntimeTypeValue>>() {
             boxed(Some(self.clone()))
         } else {
-            None
+            // A representation a crate declares with a cast from the class reference.
+            let class: BoxedValue = Rc::new(self.type_info()?);
+            ValueTypes::try_cast(&class, handle)
         }
     }
 }

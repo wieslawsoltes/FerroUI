@@ -101,6 +101,9 @@ impl DefaultRenderLoop {
         if self.in_tick.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
             let _in_tick = InTickGuard(&self.in_tick);
 
+            // Boundary (#567): the top of the render loop, called by the render timer. A panic of
+            // a render loop task is logged and the loop goes on, as the reference catches and
+            // logs the exception of a tick.
             if let Err(error) = catch_unwind(AssertUnwindSafe(|| self.timer_tick_core())) {
                 if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::VISUAL) {
                     logger.log_with_values(

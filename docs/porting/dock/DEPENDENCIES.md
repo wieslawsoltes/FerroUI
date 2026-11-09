@@ -204,7 +204,7 @@ in the existing five loader and one build files with refreshed exact provenance.
 No original Dock or sibling FerroUI files are modified. The live sample/bundle is
 preserved. After build storage pressure, obsolete test executables and older duplicate
 base/control archives were removed only after the active build had terminated; the
-record is /Volumes/SSD/temp/ferrodock-port/ferrodock-layout-cache-cleanup.json. No source or app bundle was removed.
+record is <evidence>/ferrodock-port/ferrodock-layout-cache-cleanup.json. No source or app bundle was removed.
 
 ## Prior ReactiveUI constructor checkpoint
 

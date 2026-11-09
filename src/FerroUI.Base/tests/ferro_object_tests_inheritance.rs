@@ -606,3 +606,44 @@ fn handler_of_an_inherited_change_can_change_the_inheritance_parent_of_another_s
     assert_eq!("bazdefault", grandchild.get_value(Class1::baz_property()));
     assert_eq!("bazdefault", other_child.get_value(Class1::baz_property()));
 }
+
+// Not ports: the cache of inherited lookups (docs/porting/desktop-performance.md, section 9.3). A
+// read caches what it found, or that it found nothing; each change that can move the holder of an
+// inherited value must make the next read find it again.
+
+#[test]
+fn a_read_after_a_cached_miss_sees_a_value_set_on_a_grandparent_later() {
+    let grandparent = Class1::new();
+    let parent = Class2::with_parent(&grandparent);
+    let child = Class2::with_parent(&parent);
+    assert_eq!("bazdefault", child.get_value(Class1::baz_property()));
+
+    grandparent.set_value(Class1::baz_property(), s("grandparent"));
+    assert_eq!("grandparent", child.get_value(Class1::baz_property()));
+
+    parent.set_value(Class1::baz_property(), s("parent"));
+    assert_eq!("parent", child.get_value(Class1::baz_property()));
+
+    parent.clear_value(Class1::baz_property());
+    assert_eq!("grandparent", child.get_value(Class1::baz_property()));
+}
+
+#[test]
+fn a_read_after_a_cached_hit_sees_the_holders_new_value_and_a_new_parent() {
+    let first = Class1::new();
+    first.set_value(Class1::baz_property(), s("first"));
+    let second = Class1::new();
+    second.set_value(Class1::baz_property(), s("second"));
+    let child = Class2::with_parent(&first);
+    assert_eq!("first", child.get_value(Class1::baz_property()));
+
+    first.set_value(Class1::baz_property(), s("first changed"));
+    assert_eq!("first changed", child.get_value(Class1::baz_property()));
+
+    child.set_parent(&second);
+    assert_eq!("second", child.get_value(Class1::baz_property()));
+
+    let unrelated = Class1::new();
+    unrelated.set_value(Class1::baz_property(), s("unrelated"));
+    assert_eq!("second", child.get_value(Class1::baz_property()));
+}

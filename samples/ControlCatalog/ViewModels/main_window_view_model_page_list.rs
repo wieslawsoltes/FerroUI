@@ -61,6 +61,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ToggleSwitchPage.xaml", "ToggleSwitch", Icons::TOGGLE, "An on/off switch with a sliding knob");
         }),
         section("Text", Icons::TEXT_BOX, &mut unavailable, |s| {
+            s.add("/Pages/FerroBoardPage.xaml", "FerroBoard", Icons::TEXT_INPUT, "On-screen keyboard with suggestions, gestures, emoji and native input targets");
             s.add("/Pages/AutoCompleteBoxPage.xaml", "AutoCompleteBox", Icons::TEXT_INPUT, "Text input with completion suggestions");
             // Not from upstream: AutoSuggestBox of WinUI (docs/porting/winui-controls.md).
             s.add("/Pages/AutoSuggestBoxPage.xaml", "AutoSuggestBox", Icons::TEXT_INPUT, "Text input with suggestions the app filters");
@@ -144,6 +145,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
+            s.add_page(|| crate::pages::renderer_parity_page::page().upcast(), "Renderer parity", Icons::BRUSH, "Drawing contracts, native text selection and bitmap inputs");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");

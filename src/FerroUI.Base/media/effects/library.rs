@@ -6,7 +6,7 @@
 //!   [`CustomEffect`] that describe themselves as effect graphs
 //!   ([`CustomEffect::graph`]), so that every backend draws them on the GPU
 //!   with the painter of the composition effects;
-//! - its pixelation, scan lines and spotlight as runtime shader effects
+//! - its pixelation, scan lines, grid and spotlight as runtime shader effects
 //!   ([`CustomEffect::shader`]): SkSL drawn by Skia on every surface, WGSL
 //!   for Vello (drawn from step E5 on) (docs/porting/custom-effects.md);
 //! - two page transitions as runtime shader effects that sample images
@@ -48,7 +48,7 @@ pub use interactive::{
     InteractiveReactiveGridEffect, InteractiveWaterRippleEffect, PointerSpotlightShaderEffect, ReactiveGridShaderEffect,
     RippleWave, WaterRippleShaderEffect,
 };
-pub use shaders::{PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
+pub use shaders::{GridShaderEffect, PixelateEffect, ScanlineShaderEffect, SpotlightShaderEffect};
 pub use transitions::{DissolveTransitionEffect, MaskTransitionEffect};
 
 /// Registers the effects of this module with [`CustomEffectRegistry`], once
@@ -68,6 +68,7 @@ pub fn register_library_effects() {
         let _ = CustomEffectRegistry::register::<EdgeDetectEffect>();
         let _ = CustomEffectRegistry::register::<PixelateEffect>();
         let _ = CustomEffectRegistry::register::<ScanlineShaderEffect>();
+        let _ = CustomEffectRegistry::register::<GridShaderEffect>();
         let _ = CustomEffectRegistry::register::<SpotlightShaderEffect>();
         let _ = CustomEffectRegistry::register::<DissolveTransitionEffect>();
         let _ = CustomEffectRegistry::register::<MaskTransitionEffect>();

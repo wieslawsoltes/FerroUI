@@ -38,6 +38,39 @@ use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use std::sync::{OnceLock, RwLock};
 
+/// The identity of a class: what a type check (`is::<T>()`, `cast::<T>()`,
+/// `downcast_ref::<T>()`) compares. One static per class, made by
+/// [`ferro_class!`]; the [`TypeInfo`] of the class points to it.
+///
+/// A type check names only this, not the [`TypeInfo`] of the class, whose
+/// initialisation, constructor and markup metadata the linker then keeps
+/// only when something uses them: checking whether an object is a
+/// `RichTextBlock` does not link the rich text block into an application
+/// that never creates one (#612).
+pub struct TypeIdentity {
+    name: &'static str,
+}
+
+impl TypeIdentity {
+    /// The identity of the class `name`. Each class has its own static of
+    /// this type; two identities are the same only if they are the same
+    /// static.
+    pub const fn new(name: &'static str) -> Self {
+        Self { name }
+    }
+
+    /// The name of the class, for diagnostics.
+    pub const fn name(&self) -> &'static str {
+        self.name
+    }
+}
+
+impl fmt::Debug for TypeIdentity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("TypeIdentity").field(&self.name).finish()
+    }
+}
+
 /// Describes a class (or a non-instantiable type that owns attached
 /// properties): its name, where it is declared, its base class, how to
 /// initialise it and how to create an instance of it.
@@ -47,8 +80,12 @@ use std::sync::{OnceLock, RwLock};
 pub struct TypeInfo {
     name: &'static str,
     base: Option<&'static TypeInfo>,
+    identity: Option<&'static TypeIdentity>,
     module_path: &'static str,
     class_init: Option<fn()>,
+    /// The default constructor, kept only with the type tables
+    /// ([`with_constructor`](Self::with_constructor)).
+    #[cfg(feature = "type-tables")]
     constructor: Option<fn() -> Ref<FerroObject>>,
     handles: Option<fn() -> [TypeId; 2]>,
     handle_registration: Option<fn()>,
@@ -61,14 +98,47 @@ impl TypeInfo {
         Self {
             name,
             base,
+            identity: None,
             module_path: "",
             class_init: None,
+            #[cfg(feature = "type-tables")]
             constructor: None,
             handles: None,
             handle_registration: None,
             interfaces: &[],
             markup: None,
         }
+    }
+
+    /// States the identity of the class ([`TypeIdentity`]): its own static,
+    /// which type checks compare. Set by [`ferro_class!`] for every class.
+    pub const fn with_identity(mut self, identity: &'static TypeIdentity) -> Self {
+        self.identity = Some(identity);
+        self
+    }
+
+    /// The identity of the class ([`TypeIdentity`]), what type checks compare;
+    /// `None` for a type that is not a class.
+    #[inline]
+    pub fn identity(&self) -> Option<&'static TypeIdentity> {
+        self.identity
+    }
+
+    /// Whether this type is the class with the identity `identity` or derives
+    /// from it: the type check of `is::<T>()` with `T::IDENTITY`, which, unlike
+    /// [`is_assignable_from`](Self::is_assignable_from) with `T::TYPE`, does not
+    /// keep the initialisation, the constructor and the markup metadata of `T`
+    /// in the executable (#612).
+    #[inline]
+    pub fn derives_from(&self, identity: &'static TypeIdentity) -> bool {
+        let mut current = Some(self);
+        while let Some(type_) = current {
+            if type_.identity.is_some_and(|candidate| std::ptr::eq(candidate, identity)) {
+                return true;
+            }
+            current = type_.base;
+        }
+        false
     }
 
     /// States the Rust module that declares the type (`module_path!()` at
@@ -94,8 +164,30 @@ impl TypeInfo {
 
     /// Attaches the default constructor of the class: the function that
     /// creates an instance as its parameterless `new()` does.
+    ///
+    /// The type keeps it only with the tables of types (the feature
+    /// `type-tables` of this crate, which the run-time XAML loader, the
+    /// designer, DevTools and hot reload enable): those builds create any
+    /// class by reflection. Without the feature the constructor is dropped
+    /// here, so a runtime type names no constructor and the linker leaves out
+    /// the constructor of every class the application never creates (#612,
+    /// B3). The decision is made by the features of this crate, wherever the
+    /// class is declared: [`ferro_class!`] passes the constructor to this
+    /// function in the crate of the class. Code that names the class creates
+    /// it statically ([`DefaultConstructible`]), or makes its constructor
+    /// reachable by reflection with
+    /// [`register_constructor`](Self::register_constructor).
+    #[cfg(feature = "type-tables")]
     pub const fn with_constructor(mut self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         self.constructor = constructor;
+        self
+    }
+
+    /// Without the tables of types the constructor is not kept; see the
+    /// other definition.
+    #[cfg(not(feature = "type-tables"))]
+    pub const fn with_constructor(self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
+        let _ = constructor;
         self
     }
 
@@ -212,19 +304,68 @@ impl TypeInfo {
         }
     }
 
-    /// The default constructor of the class, if it declares one (see
-    /// [`ferro_class_info!`]): creates an instance as the parameterless
-    /// `new()` of the class does.
-    #[inline]
+    /// The default constructor of the class (see [`ferro_class_info!`]):
+    /// creates an instance as the parameterless `new()` of the class does.
+    ///
+    /// With the tables of types (the feature `type-tables`), the constructor
+    /// of every class that declares one. Without them a runtime type names
+    /// no constructor ([`with_constructor`](Self::with_constructor)): this is
+    /// the constructor registered for the class with
+    /// [`register_constructor`](Self::register_constructor), if any, and
+    /// `None` otherwise. Code that names the class creates it with
+    /// [`DefaultConstructible::new_instance`] instead.
     pub fn default_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
-        self.constructor
+        self.stored_constructor().or_else(|| {
+            let key = self as *const TypeInfo as usize;
+            read_registry().constructors.get(&key).copied()
+        })
     }
 
-    /// Creates an instance with the default constructor of the class.
-    /// `None` if the class has none (abstract classes, classes that need
-    /// constructor arguments, non-instantiable types).
+    /// Creates an instance with the default constructor of the class
+    /// ([`default_constructor`](Self::default_constructor)). `None` if the
+    /// class has none (abstract classes, classes that need constructor
+    /// arguments, non-instantiable types) and, without the tables of types,
+    /// if no constructor is registered for it.
     pub fn create_instance(&self) -> Option<Ref<FerroObject>> {
-        self.constructor.map(|constructor| constructor())
+        self.default_constructor().map(|constructor| constructor())
+    }
+
+    /// Makes the default constructor of the class `T` reachable through its
+    /// runtime type: after this call, [`default_constructor`](Self::default_constructor)
+    /// and [`create_instance`](Self::create_instance) of `T::TYPE` create an
+    /// instance of `T`, with or without the tables of types. Returns
+    /// `T::TYPE`.
+    ///
+    /// For code that names a class statically and hands its runtime type to
+    /// something that creates it by reflection: compiled markup giving
+    /// `{x:Type local:Page}` to a frame (`Frame.SourcePageType`,
+    /// `Frame.Navigate`), or an application whose view locator creates the
+    /// views it registers by name. Only the constructors of the classes named
+    /// here are linked (#612, B3). With the tables of types the runtime type
+    /// already carries the constructor and nothing is registered.
+    pub fn register_constructor<T: DefaultConstructible>() -> &'static TypeInfo {
+        fn construct<T: DefaultConstructible>() -> Ref<FerroObject> {
+            T::new_instance().upcast::<FerroObject>()
+        }
+        let type_ = T::TYPE;
+        if type_.stored_constructor().is_none() {
+            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(construct::<T>);
+        }
+        type_
+    }
+
+    /// The default constructor the type carries: the declared one with the
+    /// tables of types, none without them.
+    #[inline]
+    fn stored_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
+        #[cfg(feature = "type-tables")]
+        {
+            self.constructor
+        }
+        #[cfg(not(feature = "type-tables"))]
+        {
+            None
+        }
     }
 
     /// The Rust type of the handle of the class (`Ref<T>`). `None` for types
@@ -312,7 +453,36 @@ impl TypeInfo {
     /// that value untyped (a binding, markup) must see null. The run-time
     /// XAML loader initialises a class when it reads it, which hid the
     /// difference; compiled markup names a class without initialising it.
+    ///
+    /// Always registers. An application registers its own types with this
+    /// function; a crate of the framework registers its table of types with
+    /// [`register_table`](Self::register_table).
+    #[inline(always)]
     pub fn register_all(types: &[&'static TypeInfo]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Registers the table of types of a crate of the framework, at start-up
+    /// from the crate's `register_types()` function; as
+    /// [`register_all`](Self::register_all). Without the feature
+    /// `type-tables` the table is trimmed: this does nothing, and what only
+    /// the table reaches is left out of the binary. An application registers
+    /// its own types with [`register_all`](Self::register_all), which always
+    /// registers.
+    #[cfg(any(feature = "type-tables", test))]
+    #[inline(always)]
+    pub fn register_table(types: &[&'static TypeInfo]) {
+        Self::register_all_tables(types);
+    }
+
+    /// Trimmed (without `type-tables`): the table is not kept.
+    #[cfg(not(any(feature = "type-tables", test)))]
+    #[inline(always)]
+    pub fn register_table(types: &[&'static TypeInfo]) {
+        let _ = types;
+    }
+
+    fn register_all_tables(types: &[&'static TypeInfo]) {
         {
             let mut registry = write_registry();
             for type_ in types {
@@ -456,6 +626,9 @@ struct TypeRegistry {
     /// The public Rust paths of classes, by the address of their type.
     #[cfg(feature = "compiler-metadata")]
     rust_paths: HashMap<usize, (&'static TypeInfo, &'static str)>,
+    /// The default constructors registered with
+    /// [`TypeInfo::register_constructor`], by the address of their type.
+    constructors: HashMap<usize, fn() -> Ref<FerroObject>>,
 }
 
 impl TypeRegistry {
@@ -563,6 +736,21 @@ pub trait ClassDefaults {
 
 impl<T: ?Sized> ClassDefaults for T {}
 
+/// A class with a default constructor: the `new` part of [`ferro_class_info!`],
+/// reached through the type rather than through its [`TypeInfo`].
+///
+/// Generic code that creates an instance of a class it names statically
+/// (`PageType::of::<T>()` of `ferroui-controls`) calls this, so the compiler
+/// checks that the class has a default constructor, and the constructor is
+/// linked only where something creates the class (#612). Implemented by
+/// [`ferro_class_info!`] for every class that declares `new`. It works with
+/// and without the tables of types; the constructor a [`TypeInfo`] carries
+/// ([`TypeInfo::default_constructor`]) exists only with them.
+pub trait DefaultConstructible: ObjectType {
+    /// Creates an instance as the parameterless `new()` of the class does.
+    fn new_instance() -> Ref<Self>;
+}
+
 /// The part of a class initialisation that is the same for every class:
 /// makes the type known by name and registers its handle type `Ref<T>` with
 /// the untyped value conversions (as an object handle that casts to the
@@ -604,6 +792,19 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
     /// The virtual table of the class.
     type VTable: Copy + 'static;
 
+    /// The virtual table of the class: [`Subclassable::VTABLE`] of the class
+    /// for itself, a constant. What [`vtable`](Self::vtable) returns is a
+    /// static holding it.
+    #[doc(hidden)]
+    const CLASS_VTABLE: Self::VTable;
+
+    /// The identity of the class ([`TypeIdentity`]): what `is::<Self>()`,
+    /// `cast::<Self>()` and `downcast_ref::<Self>()` compare. A type check names
+    /// this rather than [`StaticType::TYPE`], so it does not keep the
+    /// initialisation, the constructor and the markup metadata of the class in
+    /// the executable (#612).
+    const IDENTITY: &'static TypeIdentity;
+
     /// The virtual table used by instances whose most-derived class is `Self`.
     fn vtable() -> &'static Self::VTable;
 
@@ -629,23 +830,52 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
 }
 
 /// Implemented by a class `C` for every class `T` that can derive from it:
-/// builds `C`'s part of the virtual table with `T`'s overrides.
+/// `C`'s part of the virtual table with `T`'s overrides.
+///
+/// The table is a constant: every slot is known when the program is compiled
+/// (the function of `T`, or the slot of the parent table that a member `T`
+/// does not override forwards to), so a class's table is data in the
+/// executable, not code that builds it at run time (#569).
 pub trait Subclassable<T>: ObjectType {
     #[doc(hidden)]
-    fn build_vtable() -> Self::VTable;
+    const VTABLE: Self::VTable;
 }
 
-/// Initialises a class table through the common callback type for its layout.
+/// Reads the table `V` at the start of the table `P` of a derived class: the
+/// tables are `#[repr(C)]` and start with the tables of all their ancestors
+/// ([`ObjectType`]), so `V` is a prefix of `P`. Used where a constant table
+/// takes a slot of its parent's table.
 ///
-/// The accessor keeps its initialized read inline. This slow path specializes
-/// on the table type, rather than on each class's distinct builder function
-/// item. `OnceLock` retains its synchronization and retry-after-panic behavior.
+/// # Safety
+///
+/// `V` must be the table of `P`'s class or of one of its ancestors.
 #[doc(hidden)]
-#[cold]
-#[inline(never)]
-pub fn __init_vtable<V: 'static>(cell: &'static std::sync::OnceLock<V>, initialize: fn() -> V) -> &'static V {
-    cell.get_or_init(initialize)
+pub const unsafe fn __vtable_prefix<P: Copy, V: Copy>(table: P) -> V {
+    #[repr(C)]
+    union Prefix<P: Copy, V: Copy> {
+        whole: P,
+        prefix: V,
+    }
+    assert!(std::mem::size_of::<V>() <= std::mem::size_of::<P>(), "virtual member has no base implementation");
+    // SAFETY: by the contract `V` is a prefix of `P`, whose bytes are all
+    // initialised (tables hold only pointers).
+    unsafe { Prefix::<P, V> { whole: table }.prefix }
 }
+
+/// The table `V` at the start of the table of `T`'s parent class: the slots a
+/// constant table takes from its parent. A function, so that a table names
+/// its parent's table only where a slot forwards (the root class is its own
+/// parent).
+///
+/// # Safety
+///
+/// `V` must be the table of `T`'s parent class or of one of its ancestors.
+#[doc(hidden)]
+pub const unsafe fn __parent_vtable_part<T: ObjectType, V: Copy>() -> V {
+    // SAFETY: as the caller guarantees.
+    unsafe { __vtable_prefix::<<T::Parent as ObjectType>::VTable, V>(<T::Parent as ObjectType>::CLASS_VTABLE) }
+}
+
 
 /// Reinterprets a reference to base class data as a reference to the derived
 /// class `T`.
@@ -789,7 +1019,7 @@ impl<T: ObjectType> Ref<T> {
     #[inline]
     pub fn is<U: ObjectType>(&self) -> bool {
         let object: &FerroObject = (**self).upcast();
-        U::TYPE.is_assignable_from(object.get_type())
+        object.get_type().derives_from(U::IDENTITY)
     }
 
     /// Creates a weak reference to the object.
@@ -1116,6 +1346,7 @@ macro_rules! ferro_class {
                     stringify!($name),
                     Some(<$base as $crate::StaticType>::TYPE),
                 )
+                .with_identity(<$name>::__IDENTITY)
                 .with_module_path(::std::module_path!())
                 .with_class_init(<$name as $crate::ObjectType>::register_class)
                 .with_constructor({
@@ -1148,6 +1379,13 @@ macro_rules! ferro_class {
             /// The runtime type of this class.
             pub const TYPE: &'static $crate::TypeInfo = <$name as $crate::StaticType>::TYPE;
 
+            /// The identity of this class, which type checks compare (#612).
+            #[doc(hidden)]
+            pub const __IDENTITY: &'static $crate::TypeIdentity = {
+                static IDENTITY: $crate::TypeIdentity = $crate::TypeIdentity::new(stringify!($name));
+                &IDENTITY
+            };
+
             /// Returns a strong reference to this object.
             #[inline]
             pub fn to_ref(&self) -> $crate::Ref<$name> {
@@ -1165,16 +1403,13 @@ macro_rules! ferro_class {
             type Parent = $base;
             type VTable = <$base as $crate::ObjectType>::VTable;
 
+            const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+            const IDENTITY: &'static $crate::TypeIdentity = <$name>::__IDENTITY;
+
+            #[inline]
             fn vtable() -> &'static Self::VTable {
-                static VTABLE: ::std::sync::OnceLock<<$base as $crate::ObjectType>::VTable> =
-                    ::std::sync::OnceLock::new();
-                match VTABLE.get() {
-                    ::std::option::Option::Some(table) => table,
-                    ::std::option::Option::None => $crate::__init_vtable(
-                        &VTABLE,
-                        <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
-                    ),
-                }
+                static VTABLE: <$base as $crate::ObjectType>::VTable = <$name as $crate::ObjectType>::CLASS_VTABLE;
+                &VTABLE
             }
 
             $crate::ferro_class!(@register_class $name: $base);
@@ -1184,10 +1419,7 @@ macro_rules! ferro_class {
         where
             $base: $crate::Subclassable<T>,
         {
-            #[inline]
-            fn build_vtable() -> Self::VTable {
-                <$base as $crate::Subclassable<T>>::build_vtable()
-            }
+            const VTABLE: Self::VTable = <$base as $crate::Subclassable<T>>::VTABLE;
         }
     };
 
@@ -1217,15 +1449,13 @@ macro_rules! ferro_class {
                 type Parent = $base;
                 type VTable = [<$name VTable>];
 
+                const CLASS_VTABLE: Self::VTable = <$name as $crate::Subclassable<$name>>::VTABLE;
+                const IDENTITY: &'static $crate::TypeIdentity = <$name>::__IDENTITY;
+
+                #[inline]
                 fn vtable() -> &'static Self::VTable {
-                    static VTABLE: ::std::sync::OnceLock<[<$name VTable>]> = ::std::sync::OnceLock::new();
-                    match VTABLE.get() {
-                        ::std::option::Option::Some(table) => table,
-                        ::std::option::Option::None => $crate::__init_vtable(
-                            &VTABLE,
-                            <$name as $crate::Subclassable<$name>>::build_vtable as fn() -> Self::VTable,
-                        ),
-                    }
+                    static VTABLE: [<$name VTable>] = <$name as $crate::ObjectType>::CLASS_VTABLE;
+                    &VTABLE
                 }
 
                 $crate::ferro_class!(@register_class $name: $base);
@@ -1268,33 +1498,27 @@ macro_rules! ferro_class {
             where
                 $base: $crate::Subclassable<T>,
             {
-                fn build_vtable() -> [<$name VTable>] {
-                    [<$name VTable>] {
-                        base: <$base as $crate::Subclassable<T>>::build_vtable(),
-                        $(
-                            $method: {
-                                // SAFETY: this table is only attached to objects
-                                // whose most-derived class is `T`.
-                                let own: fn(&$name $(, $arg_ty)*) $(-> $ret)? =
-                                    |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*);
-                                // A member `T` states it does not override is
-                                // the default, which calls this slot of the
-                                // parent table: the slot itself is taken.
-                                let forwards: bool = const {
-                                    $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                                        <T as $impl_trait>::__OVERRIDES,
-                                        ::std::stringify!($method),
-                                    )
-                                };
-                                if forwards {
-                                    $crate::parent_vtable::<T, [<$name VTable>]>().$method
-                                } else {
-                                    own
-                                }
-                            },
-                        )*
-                    }
-                }
+                const VTABLE: [<$name VTable>] = [<$name VTable>] {
+                    base: <$base as $crate::Subclassable<T>>::VTABLE,
+                    $(
+                        // A member `T` states it does not override is the
+                        // default, which calls this slot of the parent
+                        // table: the slot itself is taken.
+                        $method: if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                            <T as $impl_trait>::__OVERRIDES,
+                            ::std::stringify!($method),
+                        ) {
+                            // SAFETY: the parent of `T` is `$name` or derives
+                            // from it (`__forwards_to_parent` checked it), so
+                            // its table starts with this one.
+                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method
+                        } else {
+                            // SAFETY: this table is only attached to objects
+                            // whose most-derived class is `T`.
+                            |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*)
+                        },
+                    )*
+                };
             }
 
             impl $name {
@@ -1337,7 +1561,10 @@ macro_rules! ferro_class {
 /// ```
 ///
 /// * `new` is a function without parameters that returns the handle of a new
-///   instance. It becomes [`TypeInfo::default_constructor`].
+///   instance. It implements [`DefaultConstructible`] for the class, the
+///   static path to the constructor, and becomes
+///   [`TypeInfo::default_constructor`] with the tables of types (the feature
+///   `type-tables`; see [`TypeInfo::with_constructor`]).
 /// * `interfaces` lists the handle types `I` that `Ref<Class>` converts to
 ///   with `Into<I>`, or, as `I => function`, with the given
 ///   `fn(Ref<Class>) -> I` (for an interface of another crate, for which
@@ -1362,6 +1589,13 @@ macro_rules! ferro_class_info {
             #[doc(hidden)]
             pub const __CONSTRUCTOR: ::std::option::Option<fn() -> $crate::Ref<$crate::FerroObject>> =
                 ::std::option::Option::Some(|| $crate::Ref::<$name>::upcast($constructor()));
+        }
+
+        impl $crate::DefaultConstructible for $name {
+            #[inline]
+            fn new_instance() -> $crate::Ref<$name> {
+                $constructor()
+            }
         }
     };
 
@@ -1417,7 +1651,8 @@ macro_rules! ferro_class_info {
                         markup.this = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                         markup.value = ::std::option::Option::Some($crate::data::core::ValueType::of::<$crate::Ref<$name>>);
                     );
-                    $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
+                    // A class handle is no shared handle: its properties have no typed path hook.
+                    $crate::__ferro_markup_items!(markup, $crate::Ref<$name>, untyped; $($body)*);
                     markup
                 };
                 ::std::option::Option::Some(&MARKUP)
@@ -1560,3 +1795,7 @@ macro_rules! ferro_overrides {
         }
     };
 }
+
+#[cfg(test)]
+#[path = "type_identity_tests.rs"]
+mod type_identity_tests;

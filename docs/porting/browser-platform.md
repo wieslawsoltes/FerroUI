@@ -53,7 +53,7 @@ Pinned toolchain **[M]**: Emscripten 6.0.10, Rust 1.99.0 with the `wasm32-unknow
 
 ### Exception handling (2026-10-06)
 
-The browser build unwinds with **WebAssembly exception handling**, not with JavaScript exceptions. With Rust 1.90.0 every call that may unwind went through an `invoke_*` function in JavaScript and back into the module through the function table (sections 18 to 20); that is gone.
+The browser build unwinds with **WebAssembly exception handling**, not with JavaScript exceptions. Since #567 the `browser` profile aborts on panic, as `release` and `dist` do: a panic runs the panic hook and the module traps; Rust unwinding applies to `--debug` builds. Skia's decoders keep failing cleanly through `longjmp` on WebAssembly exceptions (`emscripten_sjlj.cpp`), which the damaged-image check of `themed_view.test.mjs` covers in both. With Rust 1.90.0 every call that may unwind went through an `invoke_*` function in JavaScript and back into the module through the function table (sections 18 to 20); that is gone.
 
 What the toolchain does **[V]**:
 
@@ -809,7 +809,7 @@ The catalog's browser host fetches the asset files of a page before the catalog 
 | no page (the demos of `NavigationDemoPage`, whose class is not ported; prefetched last) | 46 | 13.20 MB | 12.87 MB |
 | all | 94 | 23.53 MB | 20.19 MB |
 
-56 of the 74 pages of the list need no file beyond the start-up files. The build reports the assets no source names, which are kept with the start-up files: `/Pages/teapot.bin`. `/Assets/CurvedHeader/avatar.jpg` was one of them until the curved header page of the NavigationPage samples, whose code names it, was ported; it is no start-up file any more.
+56 of the 74 pages of the list need no file beyond the start-up files. The build reports the assets no source names, which are kept with the start-up files: `/Pages/teapot.bin`. `/Assets/CurvedHeader/avatar.jpg` was one of them until the curved header page of the NavigationPage samples, whose code names it, was ported; it is no start-up file any more. (Since the catalog shows controls only, that page draws no photograph and the folder `Assets/CurvedHeader` is gone, with the other photographs of the sample applications of the NavigationPage, CarouselPage and DrawerPage galleries.)
 
 Bundles against plain files, both built from `main` at `b3de801` with the toolchain of `scripts/browser/setup.sh` (Rust 1.99.0, Emscripten 6.0.10, `wasm-bindgen` of the workspace); before is `main`, after is this change.
 

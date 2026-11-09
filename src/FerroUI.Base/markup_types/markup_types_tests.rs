@@ -190,7 +190,7 @@ fn enumeration_members_are_found_by_name() {
         for member in type_.enum_members {
             let found = type_.find_enum_member(&member.name.to_lowercase(), true).unwrap();
             assert_eq!(found.value, type_.find_enum_member(member.name, false).unwrap().value);
-            let value = (member.get)();
+            let value = member.get(type_).unwrap();
             assert_eq!(Some(ValueType::of_value(&*value)), type_.handle(), "{type_:?}.{}", member.name);
             // The numeric value converts back to the member.
             let from_value = (type_.enum_from_value.unwrap())(member.value).unwrap();
@@ -398,13 +398,13 @@ fn enumerations_follow_the_managed_member_names() {
     // Aliases of the managed enumeration are members too.
     let key = <Key as MarkupTyped>::MARKUP;
     let enter = key.find_enum_member("Enter", false).unwrap();
-    assert_eq!((enter.get)().downcast_ref::<Key>(), Some(&Key::Return));
+    assert_eq!(enter.get(key).unwrap().downcast_ref::<Key>(), Some(&Key::Return));
     assert_eq!(enter.value, key.find_enum_member("Return", false).unwrap().value);
 
     let mode = <RelativeSourceMode as MarkupTyped>::MARKUP;
     let self_ = mode.find_enum_member("Self", false).unwrap();
-    assert_eq!((self_.get)().downcast_ref::<RelativeSourceMode>(), Some(&RelativeSourceMode::SelfMode));
-    assert_eq!(unbox::<Option<RelativeSourceMode>>(&Some((self_.get)())), Some(RelativeSourceMode::SelfMode));
+    assert_eq!(self_.get(mode).unwrap().downcast_ref::<RelativeSourceMode>(), Some(&RelativeSourceMode::SelfMode));
+    assert_eq!(unbox::<Option<RelativeSourceMode>>(&Some(self_.get(mode).unwrap())), Some(RelativeSourceMode::SelfMode));
 }
 
 // Collections.

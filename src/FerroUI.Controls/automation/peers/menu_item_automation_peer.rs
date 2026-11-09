@@ -6,7 +6,8 @@ use crate::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, IToggleProvider, ProviderAdapter, ToggleState,
 };
 use crate::automation::{
-    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, TogglePatternIdentifiers,
+    AutomationError, ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    TogglePatternIdentifiers,
 };
 use crate::i_menu_element::as_menu_element;
 use crate::primitives::AccessText;
@@ -133,11 +134,11 @@ impl IExpandCollapseProvider for ProviderAdapter<MenuItemAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    fn expand(&self) -> Result<(), AutomationError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    fn collapse(&self) -> Result<(), AutomationError> {
         self.0.collapse()
     }
 }
@@ -161,7 +162,7 @@ impl IToggleProvider for ProviderAdapter<MenuItemAutomationPeer> {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    fn toggle(&self) -> Result<(), AutomationError> {
         self.0.toggle()
     }
 }
@@ -239,14 +240,15 @@ impl MenuItemAutomationPeer {
     /// Opens the submenu of the item (the expand/collapse provider
     /// contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the item has no submenu.
-    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
+    /// [`AutomationError::ElementNotEnabled`] if the item is not enabled,
+    /// [`AutomationError::InvalidOperation`] if it has no submenu.
+    pub fn expand(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
         let owner = self.owner();
         if !owner.has_sub_menu() {
-            panic!("Operation is not valid due to the current state of the object.");
+            return Err(AutomationError::invalid_operation());
         }
         owner.open();
         Ok(())
@@ -255,14 +257,15 @@ impl MenuItemAutomationPeer {
     /// Closes the submenu of the item (the expand/collapse provider
     /// contract).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the item has no submenu.
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
+    /// [`AutomationError::ElementNotEnabled`] if the item is not enabled,
+    /// [`AutomationError::InvalidOperation`] if it has no submenu.
+    pub fn collapse(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
         let owner = self.owner();
         if !owner.has_sub_menu() {
-            panic!("Operation is not valid due to the current state of the object.");
+            return Err(AutomationError::invalid_operation());
         }
         if !owner.is_sub_menu_open() {
             return Ok(());
@@ -283,7 +286,7 @@ impl MenuItemAutomationPeer {
         Ok(())
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
+    fn toggle(&self) -> Result<(), AutomationError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();

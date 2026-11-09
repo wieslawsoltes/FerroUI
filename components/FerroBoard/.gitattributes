@@ -1,0 +1,4 @@
+# Frozen reference/data bytes are verified by SHA-256 on every platform.
+reference/** -text -filter -whitespace
+tests/fixtures/** -text -filter -whitespace
+src/FerroBoard.Core/resources/** -text -filter -whitespace

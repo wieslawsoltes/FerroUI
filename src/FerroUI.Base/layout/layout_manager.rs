@@ -195,6 +195,7 @@ impl LayoutManager {
 
     fn inner_layout_pass(&self) {
         for _ in 0..MAX_PASSES {
+            crate::perf_count!(LayoutPassRounds);
             self.execute_measure_pass();
             self.execute_arrange_pass();
 

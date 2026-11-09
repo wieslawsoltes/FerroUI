@@ -146,9 +146,9 @@
   },
   "modified_sha256": {
     "native/src/OSX/StorageProvider.mm": "2a237c5e7fd8277f38edc9346d42d9ac1a95ce1cdce9f63d13285235ee75b055",
-    "storage_provider_api.rs": "45abd02856a8ed0df371ba6f679cc6209aaddd835acb9eb6d71a492ed4b549ca",
+    "storage_provider_api.rs": "5a36079470280799f1579c6fcbc8aaaa91fccb4a8318bbb892848fa831838898",
     "frn_automation_peer.rs": "e40e9a3c0178e2c3e756ce48e479216dea1a80e14077fddc0746e50611d6b066"
   },
   "patch_file": "ferroui-native-borrowed-storage-uri.patch",
-  "patch_sha256": "f56b6be95e42eecd24ceacec200835864d0aa50baa39e4fc74900cdeee74a288"
+  "patch_sha256": "0c2fa0dc53a4a5084169d9a5481eb4c43c2a920a1419b7bf0831d9d441e7f87e"
 }

@@ -2,6 +2,7 @@ use super::{draw_with_painted_brushes, IRenderDataVisitor, PaintedShape, RenderD
 use crate::media::{BoxShadows, IBrush, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
 use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::sync::Arc;
@@ -116,6 +117,14 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
             let mut context = ImmediateDrawingContext::borrowed(self.context);
             operation.render(&mut context);
             context.dispose();
+        }
+    }
+
+    fn on_draw_scene_3d(&mut self, scene: Option<&Arc<Scene3DSnapshot>>, bounds: Rect) {
+        // Drawn by the 3D capability of the context; without one nothing is
+        // drawn, and the scene is counted and reported (#608).
+        if let Some(scene) = scene {
+            crate::rendering::scene3d::draw_scene_3d(self.context, scene, bounds);
         }
     }
 

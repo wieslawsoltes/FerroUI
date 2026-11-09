@@ -1,5 +1,6 @@
 use crate::entry_points::{gl_entry_points, GetProcAddress};
 use crate::gl_consts;
+use crate::OpenGlError;
 use std::ffi::{c_char, CStr};
 
 /// The entry points needed to find out what a context is: its strings, its
@@ -41,9 +42,19 @@ impl GlBasicInfoInterface {
     /// of that implementation is current.
     ///
     /// # Panics
-    /// Panics when a required entry point cannot be resolved.
+    /// Panics when a required entry point cannot be resolved; see
+    /// [`GlBasicInfoInterface::try_new`].
     pub unsafe fn new(get_proc_address: &GetProcAddress) -> Self {
-        Self { basic: BasicInfoEntryPoints::load(get_proc_address, &()) }
+        // SAFETY: the caller upholds the contract of the loader.
+        unsafe { Self::try_new(get_proc_address) }.unwrap_or_else(|error| panic!("{error}"))
+    }
+
+    /// Resolves the entry points; fails when a required one cannot be resolved.
+    ///
+    /// # Safety
+    /// See [`GlBasicInfoInterface::new`].
+    pub unsafe fn try_new(get_proc_address: &GetProcAddress) -> Result<Self, OpenGlError> {
+        Ok(Self { basic: BasicInfoEntryPoints::load(get_proc_address, &())? })
     }
 
     /// `glGetIntegerv` for a parameter with one value.
@@ -180,5 +191,15 @@ mod tests {
         fake.remove("glGetStringi");
         // SAFETY: as above.
         let _ = unsafe { GlBasicInfoInterface::new(&fake.loader()) };
+    }
+
+    #[test]
+    fn try_new_reports_a_missing_required_entry_point_as_an_error() {
+        let fake = FakeGl::install(GlVersion::new(GlProfileType::OpenGLES, 3, 0));
+        fake.remove("glGetError");
+        // SAFETY: as above.
+        let error = unsafe { GlBasicInfoInterface::try_new(&fake.loader()) }.err().unwrap();
+
+        assert_eq!("Unable to find an entry point named 'get_error'.", error.message());
     }
 }

@@ -1,4 +1,4 @@
-use crate::data::{BindingMode, BindingPriority};
+use crate::data::{BindingMode, BindingPriority, BindingValue};
 use crate::ferro_property_metadata::Coercion;
 use crate::property_store::{EffectiveValue, EffectiveValueDyn, IValueEntry};
 use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
@@ -189,24 +189,88 @@ pub(crate) type InheritedValueChanged = fn(
 /// of the property, see
 /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
 pub(crate) fn convert_property_value<T: PropertyValue>(property: &FerroProperty, value: &dyn Any) -> Option<T> {
-    let mut typed = None;
-    copy_converted_property_value(property, value, &mut |value| {
-        typed = value.downcast_ref::<T>().cloned();
-        typed.is_some()
-    });
+    let mut typed = None::<T>;
+    copy_converted_property_value(property, value, &mut typed);
     typed
+}
+
+/// The typed destination of an untyped value: `Option<T>`, which takes a copy of
+/// the payload when it is a `T`. The one typed operation of the untyped routes
+/// of a property (conversion, binding values, notifications), shared by all of
+/// them: one implementation per value type.
+pub(crate) trait PayloadSlot {
+    /// Stores a copy of `value` if it is of the type of the slot (and nothing
+    /// otherwise); whether it was.
+    fn copy_payload(&mut self, value: &dyn Any) -> bool;
+}
+
+impl<T: Clone + 'static> PayloadSlot for Option<T> {
+    fn copy_payload(&mut self, value: &dyn Any) -> bool {
+        *self = value.downcast_ref::<T>().cloned();
+        self.is_some()
+    }
+}
+
+/// The untyped destination of an untyped value: a box of its own, which takes
+/// a copy of the payload when it is of the property's value type. The slot of
+/// the type-erased binding observers, which keep their values boxed; the copy
+/// is the [`route_box_value`](PropertyRoutes::route_box_value) of the
+/// property.
+pub(crate) struct BoxedPayloadSlot {
+    routes: &'static dyn PropertyRoutes,
+    value: Option<BoxedValue>,
+}
+
+impl BoxedPayloadSlot {
+    #[inline]
+    pub(crate) fn new(property: &FerroProperty) -> Self {
+        Self { routes: property.routes(), value: None }
+    }
+
+    /// The copy of the payload, if there is one.
+    #[inline]
+    pub(crate) fn into_value(self) -> Option<BoxedValue> {
+        self.value
+    }
+}
+
+impl PayloadSlot for BoxedPayloadSlot {
+    fn copy_payload(&mut self, value: &dyn Any) -> bool {
+        self.value = self.routes.route_box_value(value);
+        self.value.is_some()
+    }
+}
+
+/// The value of `value` if it holds exactly a `T`: moved out of the box when
+/// no one else holds it, else a clone. The typed end of the type-erased
+/// binding observers, which hand a box they made themselves (the copy of a
+/// converted or notified value) without a second copy.
+pub(crate) fn take_boxed_value<T: PropertyValue>(value: BoxedValue) -> Option<T> {
+    let value: Rc<dyn Any> = value;
+    let value = value.downcast::<T>().ok()?;
+    Some(Rc::try_unwrap(value).unwrap_or_else(|value| T::clone(&value)))
+}
+
+/// The parts of `value` if it is a `BindingValue<T>`, with its value copied
+/// into a box of its own: the binding value case of an untyped binding, the
+/// one that names `T` (see
+/// [`route_unpack_binding_value`](PropertyRoutes::route_unpack_binding_value)).
+pub(crate) fn unpack_binding_value<T: PropertyValue>(value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+    let value = value.downcast_ref::<BindingValue<T>>()?;
+    let payload = value.has_value().then(|| Rc::new(value.value().clone()) as BoxedValue);
+    Some(BindingValue::from_notification_parts(value.value_type(), payload, value.error().cloned()))
 }
 
 #[inline(never)]
 pub(crate) fn copy_converted_property_value(
     property: &FerroProperty,
     value: &dyn Any,
-    copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+    copy_value: &mut dyn PayloadSlot,
 ) -> bool {
     let Some(converted) = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type()) else {
         return false;
     };
-    let copied = copy_value(converted.as_any());
+    let copied = copy_value.copy_payload(converted.as_any());
     // A converter's temporary may have an observable destructor. Release it
     // before validation, coercion or publication; it also drops if Clone panics.
     drop(converted);
@@ -243,22 +307,26 @@ pub(crate) trait PropertyRoutes {
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
-    /// Creates the typed cache for shared local boxed-source installation.
-    /// Direct properties keep their own binding path.
-    fn route_create_boxed_local_binding(
-        &'static self,
-        _owner: &FerroObject,
-    ) -> Rc<dyn crate::property_store::BoxedLocalBindingValue> {
+    /// Whether the metadata of the property for the type of `owner` enables
+    /// data validation; read without copying the metadata. The binding
+    /// observers of untyped sources read it once, when they are created.
+    fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool>;
+    /// The parts of `value` if it is a `BindingValue<T>` of the property's
+    /// value type `T`, with the value in a box of its own; `None` if it is not.
+    fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>>;
+    /// Sets the local value of a styled property from a box that holds exactly
+    /// the property's value type: the typed `set_local_value` of the store,
+    /// for an untyped local binding. Only supported by styled properties.
+    fn route_set_local_value(&'static self, _o: &FerroObject, _value: BoxedValue) {
         panic!("not supported for direct properties");
     }
-    /// Creates a value entry for `frame` that reads its values from `source`.
-    /// Only supported by styled properties.
-    fn route_create_binding_entry(
-        &'static self,
-        o: &FerroObject,
-        frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
-        source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn crate::property_store::BoxedBindingValue>;
+    /// Sets a direct property from an untyped binding value whose value, if
+    /// any, holds exactly the property's value type: the typed
+    /// `set_direct_value_unchecked` of an untyped direct binding. Only
+    /// supported by direct properties.
+    fn route_set_direct_binding_value(&'static self, _o: &FerroObject, _value: BindingValue<BoxedValue>) {
+        panic!("not supported for styled properties");
+    }
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
@@ -917,6 +985,7 @@ macro_rules! ferro_property {
                         ::std::option::Option::None => {
                             let property: &'static $ty = $body;
                             CELL.set(::std::option::Option::Some(property));
+                            $crate::__register_value_markup!(property);
                             $crate::__record_property_accessor!($owner, $vis, $name, property);
                             property
                         }
@@ -939,12 +1008,245 @@ macro_rules! ferro_property {
                 ::std::option::Option::None => {
                     let property: &'static $ty = $body;
                     CELL.set(::std::option::Option::Some(property));
+                    $crate::__register_value_markup!(property);
                     property
                 }
             }
         }
     };
 }
+
+/// Registers the markup metadata of the value type of a property that is registered
+/// ([`MarkupType::register_used`](crate::metadata::MarkupType::register_used)), when the value
+/// type has metadata ([`MarkupTyped`](crate::metadata::MarkupTyped)); nothing otherwise. The
+/// choice is made where the property is declared, by the method a reference to a reference to
+/// the probe resolves to: the implementation for a value type with metadata (on `&Probe`) takes
+/// that receiver as it is and is found first; the one of every type (on `Probe`) is found after
+/// one dereference.
+///
+/// In the same way it makes the value type a used type of the untyped value conversions
+/// ([`ValueTypes::register_used`](crate::data::core::ValueTypes::register_used)) when the type
+/// (`T`, `Option<T>`, `Rc<T>`, `Option<Rc<T>>`) has registrations
+/// ([`ValueTypeRegistration`](crate::data::core::ValueTypeRegistration), #566): its nullable
+/// form and its casts are registered with its first property.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __register_value_markup {
+    ($property:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::{__NoPropertyValueType as _, __NoValueMarkup as _, __RegisterPropertyValueType as _, __RegisterValueMarkup as _};
+        let probe = $crate::__ValueMarkupProbe($property);
+        (&&probe).__register_value_markup();
+        (&&probe).__register_property_value_type();
+    }};
+}
+
+#[doc(hidden)]
+pub struct __ValueMarkupProbe<'a, P: ?Sized>(pub &'a P);
+
+#[doc(hidden)]
+pub trait __RegisterValueMarkup {
+    fn __register_value_markup(&self);
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, T>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+// A nullable value type (`Option<T>`) is found by its metadata too (the nullable form of the type).
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::metadata::MarkupTyped> __RegisterValueMarkup
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<T>>>
+{
+    #[inline(always)]
+    fn __register_value_markup(&self) {
+        crate::metadata::MarkupType::register_used(T::MARKUP);
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoValueMarkup {
+    #[inline(always)]
+    fn __register_value_markup(&self) {}
+}
+
+impl<P: ?Sized> __NoValueMarkup for __ValueMarkupProbe<'_, P> {}
+
+/// The registration of the value type of a property with the untyped value conversions
+/// ([`__register_value_markup!`](crate::__register_value_markup)): for a property of `T`,
+/// `Option<T>`, `Rc<T>` or `Option<Rc<T>>` of a type `T` with registrations.
+#[doc(hidden)]
+pub trait __RegisterPropertyValueType {
+    fn __register_property_value_type(&self);
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::StyledProperty<Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::AttachedProperty<Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, T>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: PropertyValue + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<T>>>
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Rc<T>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+impl<O: crate::ObjectType, T: ?Sized + crate::data::core::ValueTypeRegistration> __RegisterPropertyValueType
+    for &__ValueMarkupProbe<'_, crate::DirectProperty<O, Option<Rc<T>>>>
+where
+    Rc<T>: PropertyValue,
+{
+    #[inline(always)]
+    fn __register_property_value_type(&self) {
+        crate::data::core::ValueTypes::register_used::<T>();
+    }
+}
+
+#[doc(hidden)]
+pub trait __NoPropertyValueType {
+    #[inline(always)]
+    fn __register_property_value_type(&self) {}
+}
+
+impl<P: ?Sized> __NoPropertyValueType for __ValueMarkupProbe<'_, P> {}
 
 /// Declares the property definitions of a type: the accessors, as
 /// [`ferro_property!`] declares them one by one, and their registration as

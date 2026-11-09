@@ -50,6 +50,23 @@ impl LayoutableImpl for StackPanel {
     /// "stacking" direction (size to content). Children in this dimension are
     /// encouraged to be as large as they like. In the other dimension, the
     /// stack panel will assume the maximum size of its children.
+    /// Its children get its constraint across the stack and an infinite size along it: its hold
+    /// is the intersection of its visible children's holds across the stack, any size along it
+    /// (desktop-performance.md section 9.15).
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        let horizontal = this.orientation() == Orientation::Horizontal;
+        let mut hold = ferroui_base::layout::MeasureHold::ANY;
+        for child in this.children().snapshot().iter() {
+            if !child.is_visible() {
+                continue;
+            }
+            let child_hold = child.measure_hold()?;
+            let across = if horizontal { child_hold.any_width() } else { child_hold.any_height() };
+            hold = hold.intersect(across)?;
+        }
+        Some(if horizontal { hold.any_width() } else { hold.any_height() })
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let mut stack_desired_size = Size::default();
         let children = this.children().snapshot();

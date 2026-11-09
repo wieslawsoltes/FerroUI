@@ -32,6 +32,8 @@ mod picture_render_target;
 mod platform_render_interface;
 mod rectangle_geometry_impl;
 mod runtime_effects;
+#[cfg(feature = "media3d")]
+mod scene3d;
 mod render_target_bitmap_impl;
 mod sk_cache_base;
 mod sk_paint_cache;

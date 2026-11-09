@@ -17,8 +17,6 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-# The about dialog of the application menu.
-ferroui-dialogs.workspace = true
 ferroui-microcom.workspace = true
 # The Metal contracts the platform implements; which backend draws with them is the application's
 # choice.

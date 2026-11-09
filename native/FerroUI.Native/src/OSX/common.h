@@ -117,6 +117,7 @@ public:
     virtual HRESULT HideApp() override;
     virtual HRESULT ShowAll() override;
     virtual HRESULT HideOthers() override;
+    virtual HRESULT ShowAboutPanel(const char* applicationName, const char* version) override;
 };
 #define NSApp [NSApplication sharedApplication]
 

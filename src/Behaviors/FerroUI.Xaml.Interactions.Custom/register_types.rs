@@ -49,14 +49,14 @@ pub fn register_types() {
         ferroui_xaml_behaviors_animations::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         for types in TYPE_LISTS {
-            TypeInfo::register_all(types);
+            TypeInfo::register_table(types);
         }
         crate::part_a::register();
         crate::part_b::register();
         crate::part_c::register();
         crate::part_d::register();
         crate::converters::register();
-        MarkupAssembly::register(&ASSEMBLY);
+        MarkupAssembly::register_table(&ASSEMBLY);
     });
 }
 

@@ -387,12 +387,12 @@ ferroui_base::ferro_markup_type!(class DockableLocatorMapReference as "Dictionar
 });
 pub(crate) fn register() {
     register_rust_paths();
-    MarkupType::register(ContextFactoryReference::MARKUP);
+    MarkupType::register_table(&[ContextFactoryReference::MARKUP]);
     ValueTypes::register_nullable::<ContextFactoryReference>();
     ValueTypes::register_reference_identity::<ContextFactoryReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()
     });
-    MarkupType::register(ContextLocatorMapReference::MARKUP);
+    MarkupType::register_table(&[ContextLocatorMapReference::MARKUP]);
     ValueTypes::register_nullable::<ContextLocatorMapReference>();
     ValueTypes::register_reference_identity::<ContextLocatorMapReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()
@@ -400,12 +400,12 @@ pub(crate) fn register() {
     ValueTypes::register_boxed_cast::<MarkupDelegate, ContextFactoryReference>(|value| {
         ContextFactoryReference::from_delegate(value.downcast_ref::<MarkupDelegate>()?.clone())
     });
-    MarkupType::register(HostWindowFactoryReference::MARKUP);
+    MarkupType::register_table(&[HostWindowFactoryReference::MARKUP]);
     ValueTypes::register_nullable::<HostWindowFactoryReference>();
     ValueTypes::register_reference_identity::<HostWindowFactoryReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()
     });
-    MarkupType::register(HostWindowLocatorMapReference::MARKUP);
+    MarkupType::register_table(&[HostWindowLocatorMapReference::MARKUP]);
     ValueTypes::register_nullable::<HostWindowLocatorMapReference>();
     ValueTypes::register_reference_identity::<HostWindowLocatorMapReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()
@@ -414,12 +414,12 @@ pub(crate) fn register() {
         HostWindowFactoryReference::from_delegate(value.downcast_ref::<MarkupDelegate>()?.clone())
     });
     crate::document_factory_reference::register();
-    MarkupType::register(DockableFactoryReference::MARKUP);
+    MarkupType::register_table(&[DockableFactoryReference::MARKUP]);
     ValueTypes::register_nullable::<DockableFactoryReference>();
     ValueTypes::register_reference_identity::<DockableFactoryReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()
     });
-    MarkupType::register(DockableLocatorMapReference::MARKUP);
+    MarkupType::register_table(&[DockableLocatorMapReference::MARKUP]);
     ValueTypes::register_nullable::<DockableLocatorMapReference>();
     ValueTypes::register_reference_identity::<DockableLocatorMapReference>(|value| {
         Rc::as_ptr(&value.0).cast::<()>()

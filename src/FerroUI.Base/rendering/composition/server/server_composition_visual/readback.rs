@@ -43,6 +43,11 @@ pub struct ReadbackData {
     pub target_id: i64,
     pub visible: bool,
     pub transformed_subtree_bounds: Option<LtrbRect>,
+    /// The bounds of the subtree in the coordinates of the visual, before its
+    /// own transform (not from upstream, #580): the area the renderer drew the
+    /// effect of the visual over, its padding included, which the interactive
+    /// effects normalize the pointer to.
+    pub subtree_bounds: Option<LtrbRect>,
 }
 
 struct Slot {
@@ -60,6 +65,7 @@ impl Slot {
                 target_id: 0,
                 visible: false,
                 transformed_subtree_bounds: None,
+                subtree_bounds: None,
             }),
         }
     }
@@ -105,6 +111,19 @@ impl VisualReadback {
 
         // No readback was written for this visual yet
         None
+    }
+
+    /// The revision of the readback [`get_readback`](Self::get_readback) would return for
+    /// `reader_revision`, read without taking a slot's lock or copying its data.
+    pub fn readback_revision(&self, reader_revision: u64) -> Option<u64> {
+        let slot0_revision = self.readback0.revision.load(Ordering::SeqCst);
+        let slot1_revision = self.readback1.revision.load(Ordering::SeqCst);
+        match (slot0_revision <= reader_revision, slot1_revision <= reader_revision) {
+            (true, true) => Some(slot0_revision.max(slot1_revision)),
+            (true, false) => Some(slot0_revision),
+            (false, true) => Some(slot1_revision),
+            (false, false) => None,
+        }
     }
 
     pub fn update_readback(&self, writer_revision: u64, reader_revision: u64, mut data: ReadbackData) {
@@ -154,6 +173,7 @@ impl ServerCompositionVisual {
                 revision: writer_revision,
                 target_id: self.root().map_or(-1, |root| root.id()),
                 transformed_subtree_bounds: self.transformed_sub_tree_bounds.get(),
+                subtree_bounds: self.sub_tree_bounds.get(),
                 visible: self.visible(),
             },
         );

@@ -80,12 +80,18 @@ script. It is no longer a build-script input or a rustc `include_bytes!` input.
 Ordinary assets still use their existing file-backed embedding. Default branding,
 runtime markup, separate assets, and document-test table placement are preserved.
 
-The regression fixture executes the actual source functions and asset-emission
-loop in small Cargo projects. It checks source and geometry edits, file creation
+Since the catalog's artwork is its own assets (`samples/ControlCatalog/Assets`)
+and the resource `AppIcon` of `App.xaml` holds the project's mark, the build script
+transforms no document and writes no `OUT_DIR/placeholder`: every asset is embedded
+from its file and watched as it is. The regression fixture described next
+(`scripts/build-perf/catalog-inputs.py`) tested the substitution and is retired with it.
+
+The regression fixture executed the actual source functions and asset-emission
+loop in small Cargo projects. It checked source and geometry edits, file creation
 and deletion, ordinary binary assets, escaping and Unicode, feature modes, and
-deleted generated intermediates. In particular it forces rustc to recompile a
-consumer while the build script stays fresh and its intermediate remains absent;
-the resulting program must still return the exact asset bytes.
+deleted generated intermediates. In particular it forced rustc to recompile a
+consumer while the build script stayed fresh and its intermediate remained absent;
+the resulting program had to return the exact asset bytes.
 
 The real catalog benchmark uses three independent population/immediate-repeat
 pairs of `control-catalog --lib` with default features. It cleans only that
@@ -235,10 +241,8 @@ python3 scripts/build-perf/sample-freshness.py \
   --baseline ../FerroUI-baseline --candidate . --output target/build-perf/freshness \
   --repetitions 3
 
-# Catalog input controls and three independent first-repeat pairs.
+# Three independent first-repeat pairs of the catalog.
 # These outputs must be outside both source trees; native Skia dependencies are needed.
-python3 scripts/build-perf/catalog-inputs.py \
-  --baseline ../FerroUI-baseline --candidate . --output ../catalog-input-evidence
 python3 scripts/build-perf/catalog-freshness.py \
   --baseline ../FerroUI-baseline --candidate . --output ../catalog-repeat-evidence \
   --repetitions 3 --jobs 4
@@ -290,9 +294,19 @@ purpose acknowledges it with the label `build-output-changes`. With the label:
 - `catalog-freshness.py`, `sample-freshness.py`, `compare.py` (source mode) and `scanner.py`
   (source mode) run with `--accept-output-changes`. They compare the outputs of each revision
   with its own first sample, which keeps every build deterministic. They still compare the
-  dependency graph, features and profiles across revisions, and the runtime results of the
+  dependency graph, features (but see below) and profiles across revisions, and the runtime results of the
   sample fixture with the baseline's. The generated files that differ from the baseline are
   listed in the summary of the job instead of failing it.
+- `compare.py`, `sample-freshness.py` and `catalog-freshness.py` also accept a change of features: a pull request that
+  enables a feature of a crate on purpose (for example the feature `type-tables` of
+  `ferroui-base`, docs/binary-size.md section 4.6) builds the same units with the same profiles,
+  some with other features. Every other field of a unit, the set of units and each revision's
+  repetition of its own graph are still required; the units built with other features are
+  listed in the summary of the job.
+- `sample-freshness.py` also accepts samples whose files the pull request changes (a demo's
+  markup, for example): the changed files are listed in `changed_sample_inputs` of its report,
+  and the repeated builds still compare each revision's unchanged rebuild of its own samples.
+  Without the label, changed sample files fail the job.
 - The optimized-build-tools legs of `compare.py` and `scanner.py` compare the candidate built
   with optimized build tools with the candidate built from source (both checkouts are the head
   of the pull request), strictly. The equivalence of the two modes is checked as before; the

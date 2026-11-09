@@ -1,7 +1,7 @@
 use crate::data::core::ValueTypes;
 use crate::data::{BindingError, BindingOperations, BindingValueType};
+use crate::ferro_property::PayloadSlot;
 use crate::{BoxedValue, DoNothingType, FerroProperty, UnsetValueType};
-use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
@@ -198,28 +198,22 @@ impl BindingNotification {
         }
     }
 
-    /// Converts the notification to a typed binding value (the notification
-    /// part of the reference's untyped-to-typed binding value conversion).
+    /// Resolves the notification into the parts of a binding value (the
+    /// notification part of the reference's untyped-to-typed binding value
+    /// conversion): its kind and error, with the value copied into
+    /// `copy_value`.
     ///
-    /// The notification's value must hold exactly `T`; a value that cannot be
-    /// converted produces a binding error, aggregated with the notification's
-    /// own error if it has one. `target_type` names `T` in that error.
-    pub(crate) fn to_binding_value<T: Clone + 'static>(&self, target_type: &str) -> crate::data::BindingValue<T> {
-        let mut typed = None;
-        let (kind, error) = self.resolve_binding_value(target_type, &mut |value| {
-            typed = value.downcast_ref::<T>().cloned();
-            typed.is_some()
-        });
-        crate::data::BindingValue::from_notification_parts(kind, typed, error)
-    }
-
+    /// The notification's value must hold exactly the type of the slot; a
+    /// value that cannot be copied produces a binding error, aggregated with
+    /// the notification's own error if it has one. `target_type` names the
+    /// type in that error.
     // Only copying the payload needs the destination Rust type. Keep the
     // error policy, including aggregation for an invalid fallback, shared
     // across all property types. The callback runs outside any RefCell borrow.
     pub(crate) fn resolve_binding_value(
         &self,
         target_type: &str,
-        copy_value: &mut dyn FnMut(&dyn Any) -> bool,
+        copy_value: &mut dyn PayloadSlot,
     ) -> (BindingValueType, Option<BindingError>) {
         let error = self.error();
         let error_type = self.error_type();
@@ -232,7 +226,7 @@ impl BindingNotification {
         }
 
         let value = self.value();
-        if value.as_ref().is_some_and(|value| copy_value(value.as_any())) {
+        if value.as_ref().is_some_and(|value| copy_value.copy_payload(value.as_any())) {
             if error_type != BindingErrorType::None && error.is_some() {
                 return (error_type.to_binding_value_type() | BindingValueType::HAS_VALUE, error);
             }

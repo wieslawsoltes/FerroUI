@@ -7,7 +7,7 @@ extraction), project list and data files:
 | Reference | Checkout | Project list | Data | Pages |
 |---|---|---|---|---|
 | `avalonia` (default) | `../Avalonia`, or `$UPSTREAM` | `scripts/api-extract/projects.json` | `docs/porting/data/` | `docs/porting/TRACKING.md`, `REMAINING.md`, `TESTS.md`, `docs/porting/tracking/` |
-| `reactive` (Rx.NET) | `/Volumes/1TB-macOS/reactive-ref/reactive`, or `$RX_UPSTREAM` | `scripts/api-extract/projects-reactive.json` | `docs/porting/data/reactive/` | `docs/porting/tracking/reactive/` |
+| `reactive` (Rx.NET) | `../reactive`, or `$RX_UPSTREAM` | `scripts/api-extract/projects-reactive.json` | `docs/porting/data/reactive/` | `docs/porting/tracking/reactive/` |
 
 The framework reference (`documents = "framework"`) writes the documents below. Another reference
 (`documents = "library"`) writes a page per project and an index, `<tracking>/TRACKING.md` (totals, projects, tests,

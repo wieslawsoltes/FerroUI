@@ -17,7 +17,6 @@ use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{AnyValue, BoxedValue, FerroObject, Ref};
 use std::cell::{Cell, RefCell};
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 fn create_submenu_item() -> Ref<MenuItem> {
@@ -294,7 +293,7 @@ fn expand_throws_for_leaf_item() {
     let menu_item = MenuItem::new();
     let peer = cast_to_expand_collapse_provider(&menu_item);
 
-    assert!(catch_unwind(AssertUnwindSafe(|| peer.expand())).is_err());
+    assert_eq!(Err(crate::automation::AutomationError::invalid_operation()), peer.expand());
 }
 
 #[test]
@@ -314,7 +313,7 @@ fn collapse_throws_for_leaf_item() {
     let menu_item = MenuItem::new();
     let peer = cast_to_expand_collapse_provider(&menu_item);
 
-    assert!(catch_unwind(AssertUnwindSafe(|| peer.collapse())).is_err());
+    assert_eq!(Err(crate::automation::AutomationError::invalid_operation()), peer.collapse());
 }
 
 #[test]

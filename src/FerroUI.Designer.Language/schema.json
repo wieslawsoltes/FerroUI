@@ -7298,8 +7298,8 @@
     "properties": {
       "SourcePageType": {
         "name": "SourcePageType",
-        "type_name": "Option<&'static TypeInfo>",
-        "documentation": "Frame.SourcePageType: Option<&'static TypeInfo>",
+        "type_name": "Option<PageType>",
+        "documentation": "Frame.SourcePageType: Option<PageType>",
         "values": [],
         "attached": false
       },
@@ -12912,8 +12912,8 @@
       },
       "SourcePageType": {
         "name": "SourcePageType",
-        "type_name": "&'static TypeInfo",
-        "documentation": "NavigatingCancelEventArgs.SourcePageType: &'static TypeInfo",
+        "type_name": "PageType",
+        "documentation": "NavigatingCancelEventArgs.SourcePageType: PageType",
         "values": []
       },
       "Parameter": {
@@ -12954,8 +12954,8 @@
       },
       "SourcePageType": {
         "name": "SourcePageType",
-        "type_name": "&'static TypeInfo",
-        "documentation": "NavigationEventArgs.SourcePageType: &'static TypeInfo",
+        "type_name": "PageType",
+        "documentation": "NavigationEventArgs.SourcePageType: PageType",
         "values": []
       },
       "Parameter": {
@@ -12988,8 +12988,8 @@
       },
       "SourcePageType": {
         "name": "SourcePageType",
-        "type_name": "&'static TypeInfo",
-        "documentation": "NavigationFailedEventArgs.SourcePageType: &'static TypeInfo",
+        "type_name": "PageType",
+        "documentation": "NavigationFailedEventArgs.SourcePageType: PageType",
         "values": []
       },
       "Exception": {
@@ -14745,8 +14745,8 @@
     "properties": {
       "SourcePageType": {
         "name": "SourcePageType",
-        "type_name": "&'static TypeInfo",
-        "documentation": "PageStackEntry.SourcePageType: &'static TypeInfo",
+        "type_name": "PageType",
+        "documentation": "PageStackEntry.SourcePageType: PageType",
         "values": []
       },
       "Parameter": {

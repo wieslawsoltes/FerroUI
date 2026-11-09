@@ -76,6 +76,11 @@ pub struct Compositor {
     invoke_before_commit_write: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     invoke_before_commit_read: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     dispose_on_next_batch: RefCell<Vec<PendingDisposal>>,
+    /// The position, plus one, of each id's entry in `dispose_on_next_batch` (0: none), indexed by
+    /// the id: queueing a disposal finds an earlier entry of the same object in constant time, where
+    /// a search of the list made a frame that replaces many draw lists quadratic (FerroUI deviation,
+    /// docs/porting/desktop-performance.md, section 9).
+    dispose_on_next_batch_index: RefCell<Vec<u32>>,
     pending_creations: RefCell<Vec<(ServerObjectId, ServerObjectFactory)>>,
     next_server_object_id: Cell<u32>,
     /// The ids that can be handed out again: each was released by a batch
@@ -418,6 +423,7 @@ impl Compositor {
             invoke_before_commit_write: RefCell::new(VecDeque::new()),
             invoke_before_commit_read: RefCell::new(VecDeque::new()),
             dispose_on_next_batch: RefCell::new(Vec::new()),
+            dispose_on_next_batch_index: RefCell::new(Vec::new()),
             pending_creations: RefCell::new(Vec::new()),
             next_server_object_id: Cell::new(0),
             free_server_object_ids: RefCell::new(Vec::new()),
@@ -693,6 +699,7 @@ impl Compositor {
             drop(serialized);
 
             disposed = std::mem::take(&mut *self.dispose_on_next_batch.borrow_mut());
+            self.clear_disposal_index(&disposed);
             if !disposed.is_empty() {
                 writer.write_marker(BatchMarker::RenderThreadDisposeStart);
                 writer.write(disposed.len() as i32);
@@ -800,14 +807,22 @@ impl Compositor {
     /// would never be disposed.
     pub(crate) fn oob_dispose(&self, server: ServerObjectId) -> Arc<CompositionBatch> {
         // A disposal that was queued for the next batch is done here.
-        self.dispose_on_next_batch.borrow_mut().retain_mut(|entry| {
-            if entry.id == server {
-                entry.dispose = false;
-                entry.release
-            } else {
-                true
+        {
+            let mut list = self.dispose_on_next_batch.borrow_mut();
+            self.clear_disposal_index(&list);
+            list.retain_mut(|entry| {
+                if entry.id == server {
+                    entry.dispose = false;
+                    entry.release
+                } else {
+                    true
+                }
+            });
+            let mut index = self.dispose_on_next_batch_index.borrow_mut();
+            for (position, entry) in list.iter().enumerate() {
+                index[entry.id.index()] = position as u32 + 1;
             }
-        });
+        }
         let pending_creation = {
             let mut creations = self.pending_creations.borrow_mut();
             creations.iter().position(|(id, _)| *id == server).map(|index| creations.remove(index))
@@ -907,7 +922,11 @@ impl Compositor {
             return false;
         }
         let Ok(mut list) = self.dispose_on_next_batch.try_borrow_mut() else { return false };
-        match list.iter_mut().find(|entry| entry.id == obj) {
+        let mut index = self.dispose_on_next_batch_index.borrow_mut();
+        if index.len() <= obj.index() {
+            index.resize(obj.index() + 1, 0);
+        }
+        match index[obj.index()].checked_sub(1).and_then(|position| list.get_mut(position as usize)) {
             Some(entry) => {
                 let changed = (dispose && !entry.dispose) || (release && !entry.release);
                 entry.dispose |= dispose;
@@ -916,7 +935,18 @@ impl Compositor {
             }
             None => {
                 list.push(PendingDisposal { id: obj, dispose, release });
+                index[obj.index()] = list.len() as u32;
                 true
+            }
+        }
+    }
+
+    /// Forgets the positions of `entries` in the disposal index.
+    fn clear_disposal_index(&self, entries: &[PendingDisposal]) {
+        let mut index = self.dispose_on_next_batch_index.borrow_mut();
+        for entry in entries {
+            if let Some(slot) = index.get_mut(entry.id.index()) {
+                *slot = 0;
             }
         }
     }

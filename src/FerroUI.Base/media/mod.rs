@@ -91,6 +91,7 @@ mod media_collection;
 mod path_figure;
 mod path_geometry;
 mod path_geometry_collections;
+mod path_commands;
 mod path_markup_parser;
 mod path_segment;
 mod pen;
@@ -176,6 +177,7 @@ pub use media_collection::{track_item_property_changed, MediaCollection, ResetBe
 pub use path_figure::PathFigure;
 pub use path_geometry::PathGeometry;
 pub use path_geometry_collections::{PathFigures, PathSegments};
+pub use path_commands::PathCommand;
 pub use path_markup_parser::PathMarkupParser;
 pub use path_segment::{PathSegment, PathSegmentImpl, PathSegmentImplExt, PathSegmentVTable};
 pub use pen::{Pen, StrokeDashArray};

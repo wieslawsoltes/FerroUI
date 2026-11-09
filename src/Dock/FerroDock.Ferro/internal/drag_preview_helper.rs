@@ -487,8 +487,7 @@ impl DragPreviewHelper {
         #[cfg(debug_assertions)]
         eprintln!("[Dock PreviewSize Window] preferredDip={} appliedWindowDip=({:.2},{:.2}) sizeToContent={} previewContentDip=({:.2},{:.2})",preferred.map_or_else(|| "null".into(),|p|format!("({:.2},{:.2})",p.width,p.height)),state.expect_window().width(),state.expect_window().height(),{
             let mode=state.expect_window().size_to_content();
-            <SizeToContent as ferroui_base::metadata::MarkupTyped>::MARKUP.enum_members.iter()
-                .find(|member| (*(member.get)()).value_eq(&mode))
+            <SizeToContent as ferroui_base::metadata::MarkupTyped>::MARKUP.find_enum_member_of(&mode)
                 .map_or_else(||mode.bits().to_string(),|member|member.name.to_owned())
         },state.expect_control().preview_content_width(),state.expect_control().preview_content_height());
         if !state.expect_window().is_visible() {

@@ -1428,6 +1428,9 @@ impl FontCollectionBase {
         let publish = glyph_typeface.is_some() && glyph_typefaces.values().all(Option::is_none);
 
         glyph_typefaces.insert(key, glyph_typeface);
+        // A lookup of the font manager may find another glyph typeface now (desktop-performance.md,
+        // section 9.4).
+        crate::media::font_manager::advance_glyph_typeface_generation();
 
         if publish {
             let font_family = FontFamily::new(&format!("{}#{}", this.key(), family_name));

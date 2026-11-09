@@ -25,7 +25,7 @@ pub(crate) fn register() {
         data::core::ValueTypes,
         metadata::{MarkupType, MarkupTyped},
     };
-    MarkupType::register(<dyn IDockItemContainerMetadataDescriptor>::MARKUP);
+    MarkupType::register_table(&[<dyn IDockItemContainerMetadataDescriptor>::MARKUP]);
     ValueTypes::register_nullable::<Rc<dyn IDockItemContainerMetadata>>();
     ValueTypes::register_reference_identity::<Rc<dyn IDockItemContainerMetadata>>(|value| {
         Rc::as_ptr(value).cast::<()>()

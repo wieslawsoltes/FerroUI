@@ -18,5 +18,5 @@ pub fn register_types() {
     ferrodock_model_ferro::register_types();
     register_rust_paths();
     crate::reactive_metadata::register_reactive_model_classes();
-    MarkupAssembly::register(&ASSEMBLY);
+    MarkupAssembly::register_table(&ASSEMBLY);
 }

@@ -1,0 +1,8 @@
+{"tag":"type","name":"ScreenKeyboard.Text.Suggestion","baseType":"System.Object","sealedType":true,"interfaces":[{"name":"System.IEquatable\u00601","arguments":["ScreenKeyboard.Text.Suggestion"]}]}
+{"tag":"interface-method","name":"Equals","returns":"System.Boolean","parameters":["ScreenKeyboard.Text.Suggestion"]}
+{"tag":"interface","name":"null","sameObject":true,"equals":false,"sameArgument":false}
+{"tag":"interface","name":"alias","sameObject":true,"equals":true,"sameArgument":true}
+{"tag":"interface","name":"copy","sameObject":true,"equals":true,"sameArgument":false}
+{"tag":"interface","name":"different","sameObject":true,"equals":false,"sameArgument":false}
+{"tag":"object-display","sameObject":true,"text":[83,117,103,103,101,115,116,105,111,110,32,123,32,84,101,120,116,32,61,32,115,97,109,101,44,32,75,105,110,100,32,61,32,84,121,112,101,100,44,32,67,111,110,102,105,100,101,110,99,101,32,61,32,48,46,49,44,32,73,115,65,117,116,111,67,111,109,109,105,116,32,61,32,84,114,117,101,44,32,68,101,115,99,114,105,112,116,105,111,110,32,61,32,100,101,115,99,114,105,112,116,105,111,110,44,32,73,115,82,101,109,111,118,97,98,108,101,32,61,32,84,114,117,101,32,125]}
+{"tag":"object-hash","aliasSame":true,"equalCopySame":true}

@@ -1,0 +1,16 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:l="clr-namespace:FerroBoard.Layouts;assembly=FerroBoard.Core"
+ x:DataType="l:Subtype">
+ <StackPanel.DataContext>
+  <l:Subtype LanguageTag="tr-TR" DisplayName="Türkçe">
+   <l:Subtype.Layouts><l:SubtypeLayoutMap Characters="custom:qwerty"/></l:Subtype.Layouts>
+  </l:Subtype>
+ </StackPanel.DataContext>
+ <TextBlock Text="{CompiledBinding Id}"/>
+ <TextBlock Text="{CompiledBinding ShortLabel}"/>
+ <TextBlock Text="{CompiledBinding Layouts.Characters.ComponentId}"/>
+ <ContentControl Content="{CompiledBinding Layouts}"/>
+ <ContentControl Content="{x:Static l:Subtype.Default}"/>
+ <TextBlock Text="{x:Static l:SubtypeLayoutMap.CoreLayouts}"/>
+</StackPanel>

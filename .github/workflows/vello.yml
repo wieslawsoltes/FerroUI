@@ -10,6 +10,8 @@ on:
     paths:
       - 'src/Vello/**'
       - 'tests/FerroUI.RenderBackends.Comparison/**'
+      # The renderer of 3D scenes, whose wgpu executor the GPU modes of Vello draw with.
+      - 'src/FerroUI.Rendering3D/**'
       - 'src/FerroUI.Themes.Fluent/**'
       - 'src/FerroUI.Themes.Simple/**'
       - 'samples/ControlCatalog/ClassicShell/**'

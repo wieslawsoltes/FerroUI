@@ -1,0 +1,2490 @@
+{
+  "schema_version": 1,
+  "status": "ready_for_branch_testing; complete_platform_certification_not_claimed",
+  "date": "2026-11-03",
+  "base": "df8b92d9438a7f1f797f9f86c2c4c602e3a4bf75",
+  "branch": "feature/ferroboard-component",
+  "policy": "rust_native_no_general_dotnet_emulation",
+  "workspace_tests": 746,
+  "independent_consumer_tests": 85,
+  "catalog_tests": 4,
+  "checks": [
+    {
+      "check": "component",
+      "command": "python3 components/FerroBoard/scripts/check_component.py",
+      "exit_code": 0,
+      "log_sha256": "9b6d56d1de02775144a574e52a64f08b370376743deb6d2e5f8bb186f8fad4ce",
+      "passed": 831
+    },
+    {
+      "check": "catalog",
+      "command": "cargo test --locked -p control-catalog ferro_board -- --test-threads=1",
+      "exit_code": 0,
+      "log_sha256": "36a89d08e48324a8462b510be140f164c59cd1f687c912aa68127e0d2e136202",
+      "passed": 4
+    },
+    {
+      "check": "release",
+      "command": "cargo check --locked --release --manifest-path components/FerroBoard/Cargo.toml -p ferroboard-core -p ferroboard-core-ferro -p ferroboard-controls",
+      "exit_code": 0,
+      "log_sha256": "956e5ccd1fba26d8a49a18c5b49819548fa4385a24da16f6b841e974f3569786"
+    },
+    {
+      "check": "desktop",
+      "command": "cargo build --locked -p control-catalog-desktop",
+      "exit_code": 0,
+      "log_sha256": "4a92198625d6960f5f393f1196a7308ee8569bdab8863a43ad64a2abd2fbd895"
+    },
+    {
+      "check": "view",
+      "command": "cargo check --locked -p ferroui-view",
+      "exit_code": 0,
+      "log_sha256": "87660574b6ee5f8f3eaaf04fab4a3bd9669b6d51d9f70074a5f0a0fc005b4757"
+    },
+    {
+      "check": "idioms",
+      "command": "python3 scripts/idioms/inventory.py --check",
+      "exit_code": 0,
+      "log_sha256": "7345ba22ebce64add18ddf0b3af1b368c7132837d61a66657594e227397f41e5"
+    },
+    {
+      "check": "view_generation",
+      "command": "python3 scripts/generate_view_builders.py --check",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "check": "isolated_dependency_wiring",
+      "command": "cargo check --locked -p control-catalog-desktop",
+      "exit_code": 0,
+      "log_sha256": "210a82360d209192b2ad9a21ffe1dff071c4b4ecf248d7652fd399fe84569b0d"
+    },
+    {
+      "check": "sdk_release_metadata",
+      "command": "python3 scripts/release/crates.py check",
+      "exit_code": 0,
+      "log_sha256": "d02e61f5533c348700d6e784222f4418fc533195b3381637ce61bb7299df6f0f"
+    }
+  ],
+  "native_smoke": {
+    "platform": "macOS",
+    "status": "focused_native_smoke_passed",
+    "built_binary_sha256": "85f31ed91c9210cff066a469f51ce7783a5058573e8980142c679d1452bf31c3",
+    "signed_binary_sha256": "37578f428caa632949069e4af290f8b915438e176ba3db0b720c4f3e66568286",
+    "observations": [
+      "Catalog Text section contains FerroBoard and opens the compiled keyboard page.",
+      "Clicking Message opens the hosted keyboard.",
+      "Invoking the visible Q key produces Message=Q and preserves Message focus.",
+      "Native injected a key produces Message=Qa and preserves focus.",
+      "Native injected BackSpace produces Message=Q and preserves focus."
+    ],
+    "limits": [
+      "AX actions and native injected keys only; no physical touch/pen/multitouch or full accessibility/IME/platform certification.",
+      "A-001 remains deferred; no menu/popup contrast investigation."
+    ],
+    "closed_and_process_absent": true
+  },
+  "framework_prerequisites": [
+    "065b2c15e48b58d14195ab6072198e66f027a486",
+    "49ea55f1e2e1b1f48dd8e9af9e92c8826c840362",
+    "3a4b63c0186a326f84f953bdd54b42b72f29cb68",
+    "e495110253c03c40ac066d1c0b47c80a92cf5611",
+    "f926006a1450477788131df3b42897f89beae9f5",
+    "708be08aa6d30f6f09a8e7c83394628537743dc5"
+  ],
+  "source_inputs": [
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/Cargo.toml",
+      "sha256": "e599a0f348aa9f52a6c8b679011a0f440aae6cf88cd6387ae700d044fc45e29d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/build.rs",
+      "sha256": "d7067af4ef37e6798f86a1ca4666bc0922b32d2fefeaa1080f5f2abe99a80ee1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/callback_tokens.rs",
+      "sha256": "dec9aa6fba1fbfa0d340c796374a8cc2e3d3360302a69ea457423dd66c325690"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/enum_bridge.rs",
+      "sha256": "dd6266bc996484a6da5937769c943068221eb6bdd75ef38da99924e44df2a18e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/examples/focus_scope_mapping.rs",
+      "sha256": "0b9bb477eea9b9a68dbfb20694a9055a40a45f50e9690c6dddfe6beed13138fe"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/examples/password_automation_mapping.rs",
+      "sha256": "815137173efa760958af94ef36c5a11b9dca2ce904a085d3ad3d7f3d98d0a9d1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/icons/icon_data.rs",
+      "sha256": "3bd82b6ffee216dcd4cf28ce78959103509d6978a786dec800439eba5a6f4770"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/icons/icon_factory.rs",
+      "sha256": "1b620a3acecf1a68066e95ee8aee3ccda7ec8bb821d5d227a0085a4b6bef860e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/icons/key_icon_tests.rs",
+      "sha256": "5e7f5d68b50bf19d3606cbebdbc87fda6cf83032bc9c30d7405cc84b1f614f1e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/icons/metadata.rs",
+      "sha256": "0b1bc080dfece3a660b88ea9e7ace9483b8bdb8cb12ab6b3c4c058e9fdc7998e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/icons/mod.rs",
+      "sha256": "28c90559d86af190de6c715be20ec491d883bab336a5d346091f1a1edb83cd5a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/input/metadata.rs",
+      "sha256": "069f1e6a06c450f6bca7f6e4b968bd3082f874def86a24620cb090066dd27b50"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/input/mod.rs",
+      "sha256": "6a656e8aba26d6a8c3c4d8bd664e9037909eabe8dd0946d88a7aad56015a964d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/input/protected_password_text_box.rs",
+      "sha256": "8e05ccb3ebeb2b0fba644c1dbe018de245cc03a15926d81527778caa22fb8ccf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/input/screen_keyboard_input.rs",
+      "sha256": "3e27c3b28b0d4dc4c00df4deb69d894b4ec85ed896ed53f496fc4aa82b651342"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/input/text_box_input_target.rs",
+      "sha256": "e0bad97afffd562326cd2e9b28f0bebbce6062c447a0ae04bd8fdb2178e713de"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/items_source.rs",
+      "sha256": "0a09b79774038ef0646876c5ca1ac00fcaf60eeeb49760461f3b1de0ba0bfd44"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/keyboard_strings.rs",
+      "sha256": "0eacea9a2fe0b71483c4dff5c016f1282fa956f9559e7e3a2242e65b566f5534"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/lib.rs",
+      "sha256": "a34a0271f23a767dd409b6ccd2fdecaf93ed4e7864ee683ef7cfffdbe381974b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/native_keyboard_lifetime_tests.rs",
+      "sha256": "2f055026bf097b9efc52ee9636952eb30e1ada263eac35fe579ffcb33641fa88"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/native_markup.rs",
+      "sha256": "c756e8d18267f98fed8e028b0f3b3ceac904725233da1579a4d341a410e8545c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/on_screen_keyboard.rs",
+      "sha256": "d1f930a8b2df7d49b01a6c9b9ffc5df67ebdfb389147c613c6c8049936789eb2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/on_screen_keyboard_tests.rs",
+      "sha256": "03e1dcc6106009f5590e055c4e5d5347e27b75fd46bd59862efee77b96317325"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/focus_neutral.rs",
+      "sha256": "84da49f434e1dbe829a2f5e1a02913f8e79d90a139ce90de109d3ad02699547d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/mod.rs",
+      "sha256": "08a8db812f7e5e20a6d8591e8d6d1e915b2d65933b417b3ec8e59e3bff5b96d7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/padded_stack_panel.rs",
+      "sha256": "a86176f5188275cced806a3e85b196f61d055b693b45e8eeffe30dff4b4a9eb3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/padded_stack_panel_tests.rs",
+      "sha256": "ea66f3bccf08d8301b26870441d3d2ce31bfbc3676c421c29ebc7ee4a5908f9d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/touch_button.rs",
+      "sha256": "b857b3e81e1f6fa39cf1ddfc4645a19747f9607fc8f7d9cb9a320352e7068f3a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/touch_button_automation_peer.rs",
+      "sha256": "1ada2b65c622899fd4e2964ad826a46fe4fad8e246083cfe7d2ca52de1f66893"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/touch_button_lifetime_tests.rs",
+      "sha256": "e2580756699594194fbe02b9aee2fff8a9cd0fd44f07a03f07b3348767099ec2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/uniform_wrap_panel.rs",
+      "sha256": "38b0597bbaf4ea1eb0a7ebafca021ab19aad96aa10993d128254440d595aeecb"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/primitives/uniform_wrap_panel_tests.rs",
+      "sha256": "96ec19539899f441264e392e38a3d61668e60cb66df12a8bb233f52d71370781"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/screen_keyboard_host.rs",
+      "sha256": "1cdf5322b9a2c696edfb435de9ec50255c8f3149ac16a63b8f309794bb4eb966"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/screen_keyboard_host_tests.rs",
+      "sha256": "572b6030be801c3647a0806261c56525e9038c271092f15352f22d1498f92806"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/android_haptics.rs",
+      "sha256": "e793166bdb2f794ee2c125a43132638803a131305211813139444944ef15cac5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/clipboard_monitor.rs",
+      "sha256": "a027fa8d4d1c0a192d662b1f92558e08ef2ed1006b90f91b7ca5146419e54f8c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/emoji_font.rs",
+      "sha256": "6ca04eeab18c7e27ba71912f5f929962b16436cc142e61eb433367e0434f5013"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/emoji_font_fallback.rs",
+      "sha256": "69dba4d4b2467c1fa454c165d4ad256804afc5a0cee99aa482c94ca592c8ace5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/emoji_font_metadata.rs",
+      "sha256": "9b602847b40cd0b423444cbf759c2fa604614ea24cb7351dad4909f6cfda4f92"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/ios_haptics.rs",
+      "sha256": "fe1dc258413b538a9b1935944fa38882d2928bb65880f970e136b401181c7d73"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/mod.rs",
+      "sha256": "146ece3babe835ce7d09d8a6c27408dcfcd1e03b925a54438616d22b44cf68c7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/platform_services.rs",
+      "sha256": "1cfc3abfd480466484a78bda7c6bd702e87a160816ccca3a5fe34477781e3a8e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/services/system_input_method_guard.rs",
+      "sha256": "d3413cc99236cd9c94b9fe805fcc66df67cb3e49f929b25528a966630f9bc1c4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/smartbar_action_metadata.rs",
+      "sha256": "f2ec3668215f95fa0c760651f98b7ab33f65086f845fdc7fa241c4baa466b584"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/focus_interaction.rs",
+      "sha256": "66c0d2dd1db2992db80594abda8a48420b278ba05b8226ece90cd276fd3a527c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/input_enums.rs",
+      "sha256": "306e4b8df45e1008f27a211be271cb52177a9a12a3473984ea0ab0fb924dfb64"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/input_null_punctuation.rs",
+      "sha256": "182184808c1d446faeb596296ae2f30928dff10fa6a32a476c8d4c053b412c68"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/input_record.rs",
+      "sha256": "426e3691d82c09aa272afe830af27ebcb606020512b699cb5830a53130901c8b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/input_static.rs",
+      "sha256": "668f456d4cc17312392f3139cbe30b8d53d9926b8024d1970faf2d7b7670d811"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/input_targets.rs",
+      "sha256": "e3dba1d9cbefa74acf191d52c7a2f61ac7c6a6aa8e9e06539764baeb02fa77e0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/items_source.rs",
+      "sha256": "12b1664aaa22d93b3669d398735b3027dcc6129c6ad09083f94e3ea7856cd777"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_capability_reproducers.rs",
+      "sha256": "034435b5de5b3f6edda4e5eea9eed35f2282fb8f53f633e7cc5688d56b0635f0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_clipboard.rs",
+      "sha256": "6956d482fd4e6f9a58abee3137b8fe2ae1d35084c4c8559bf5eaadd1319d3c73"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_clipboard_executor.rs",
+      "sha256": "d0d148c84a500d99cce3e7f40c8c456bb9105b2855439153aed0b8bd4d23bdcf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_control_input_options.rs",
+      "sha256": "407e9fe4713ea3bad7d57678f2851cd7c2b15abffb162db4207618b075bb6efc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_editing_boundaries.rs",
+      "sha256": "1750bda23c519d5869a01ce38b02395ac22efdc35116d4efb932ed3a60df0597"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_fonts.rs",
+      "sha256": "a85698a051e28a2e799c36662835aef6356629c8017d897867241ff44f92138b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_host_lifetime.rs",
+      "sha256": "7c96ea89c6458fc7ea0e77845145e2d845ee6d1603ff229b10858c3ade3a2547"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_input_adapter_lifetime.rs",
+      "sha256": "d14148d08aa49de543528cccdfddd4abcd5402ca66432480df94bda62301dc84"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_input_cache.rs",
+      "sha256": "ede7317d0cd6b9f1804eca544909da7434af5cdc730f1e2fc6d20b343b47f43d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_input_method.rs",
+      "sha256": "93dca3045b3905df8ca19e7a93353087f6bb98a69a0b1c431cd2ab9c926de43a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_keyboard_lifetime.rs",
+      "sha256": "527b811543e5617d4d5fa95e61bed7ecaece871777cd725e718c30b7e4c70243"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_password_automation.rs",
+      "sha256": "1e1f98ae85a4ac49a08468a54558bd0afaaaf4495d6e438d639a423f0a61ed4e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_password_input_options.rs",
+      "sha256": "f163593ceb7c36a91047e954a2ca297e611943cae33506227d33eae3bb11dd48"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_target_synchronization.rs",
+      "sha256": "2beec9965c7c372ba9b710e60c6b1e2d97e17e06ad359fc1492056068052ca44"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/native_window_focus.rs",
+      "sha256": "c9acbe947e22e25e8e3c6f86d1c8361a3d8317482a8bae920013284921f6ab52"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/platform_services.rs",
+      "sha256": "95e42902164ea313e0c77a4ac7a3c15f76bb23eafe28490c95287273ba17077d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/scheduler.rs",
+      "sha256": "b08d2ec4f61afeb8431962a701396a7c2b61329605b45ff55cfcde9896c7b46d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/support/headless.rs",
+      "sha256": "1b038e8f07234efd51544873bb6b2509d2e64b9c8897ec5647cfb3164ee498db"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/support/headless_session.rs",
+      "sha256": "bb133cded471e8b344cc6014c8549cb520fbf90951ac75123256e438e7bf4301"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/support/view_fixture.rs",
+      "sha256": "49ca645f0e79d062ee5512e68521c72050df796ff7256ad64f3547fa38ec58cb"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/tests/touch_button.rs",
+      "sha256": "1c2c75095ae1d5359b3ceaa7f7bb681e1a163b51de1c3e58a908143da77a393d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/builtin_themes.rs",
+      "sha256": "ae709259c25f702c1c25f1dc3adb7accce7feeb3958a4ce2a6629b3234b4ffcb"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/keyboard_theme.rs",
+      "sha256": "1313225bfdd4f19d450cdc534178a171e4498aa5a901f46ac80f8c831d5e6c94"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/keyboard_theme_properties.rs",
+      "sha256": "6f38200269030e21d9b036e73a18a37ddbc35b44ef790ab3822107cc98b8edb5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/keyboard_themes.rs",
+      "sha256": "c0648420449f71f65e3530f6e9561473f95533de29f7a530d5043094c36c4b0b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/metadata.rs",
+      "sha256": "baa126d27b00986690341dfe45e4f74c64fc98180e260d64c798eaa3eadc2ad6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/mod.rs",
+      "sha256": "660792b430c99a0b7897b646f2798918847c33a5107866296d19ff3bf51d64e9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/themes/shared_list.rs",
+      "sha256": "8a28ad3510cdd8f13025ddc03a92e9e72a4f4580ef06fed901e08d9debd36299"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/emoji_panel_view.rs",
+      "sha256": "c6fec02b828fb3c09f4b631f1481dd7260385da6edf24ec300b79fc2b3faed03"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/emoji_panel_view_tests.rs",
+      "sha256": "b50c2cb61fdc8e7f46e9d311cf91e5138cfb2f6c37a5bc591e455ee0c53dede4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/key_accessibility_tests.rs",
+      "sha256": "95552081d9742e534002e9459604e6b34f1b1d3b7e579ee5cc72e892ffe054e7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/key_automation_peer.rs",
+      "sha256": "e7021c6565f28835fe7565b0e0d8363ed72f5f97d3153e3e79a1a20206c4abc2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/key_view.rs",
+      "sha256": "69bf6122e0ce8ce546387f6c591cbe515e78ebc12eb39ce020360d2c023eae33"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/key_view_tests.rs",
+      "sha256": "f20f2a3bfe5d73d75d9632cba66484efb64ec274f401239f5af1ab8b365a9ca1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/keys_view.rs",
+      "sha256": "cb6a1fb88f0bc3fba3c1daf9bb0458ab3bd82dec06020a9722ebac08e8227096"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/keys_view_tests.rs",
+      "sha256": "6300405fe289cc7a52e1fa9f39acf079ab59070114c52042ab625f2a27b31aeb"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/mod.rs",
+      "sha256": "fe2df693e59e851ff15e350e867bc23f5caf64958d6e299d6aced7bf28a0b45c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/native_lifetime_tests.rs",
+      "sha256": "0c3ae08b422bdb6d95fd8efcf31cdfaea284519bd8fc0dc6bf239e1dc6d9b855"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/padded_grid.rs",
+      "sha256": "3e75015c454984301f2cca102e38285b69185dd51891d8f5308573a6a9edfcf0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/panel_views.rs",
+      "sha256": "04ad69debff75f98c68de569c7bfc6e08b95c4a3223219b1eaadb77159c892c2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/panel_views_tests.rs",
+      "sha256": "e3c0f80c042f2a4360c006274184695578a256fc81c6b013294d1625799c5688"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/smartbar_view.rs",
+      "sha256": "57177dd937c0b107bd8564d38f489f1e5b334e8ad9b1185b86e8dfcd8a3a87e8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/smartbar_view_tests.rs",
+      "sha256": "6b3fda0a58390c1fd5622d337e1080d2af5a394e1a825cf0c9fe5bc0ed3b6cca"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Controls/views/view_helpers.rs",
+      "sha256": "e65ba17e8075fdc8c0b258b5ec53bf39413d2754af81acb70691d2ea9f601586"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/Cargo.toml",
+      "sha256": "4c5f0f7c27c6dbaf7a1f9d91cea34589cfa13ba84d3f3a94ae44932c28671e86"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/build.rs",
+      "sha256": "647b417d82da50bd093acf50c3f90d59d857453d3e813e6403261d81e54fdbd7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/clipboard/clipboard_history.rs",
+      "sha256": "58aa1751ce29d8552a9681eb26e4c8a970419e85bdaa5606924bfbd80f828f0f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/clipboard/mod.rs",
+      "sha256": "06dec27f6ee671d4718704f12def521b369344b827bcc8dcedf23d8351119fc0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/clipboard/timestamp.rs",
+      "sha256": "da5a954871d54075dadf1606c182cdee3aed677a3fe5140ff398b4aef6539c2c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/editor/clock.rs",
+      "sha256": "a3f616c0a8bc5b39f8aceb9f7f8a78edd17e4f9351e863f11073ab0da1362e77"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/editor/editor_controller.rs",
+      "sha256": "e2b6ed43c1ac8373be19c151a789668a13d3e6f0b8ed6d411a37ea43c9c6af89"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/editor/i_text_input_target.rs",
+      "sha256": "b5401583685bd45f34f63253f41b87cd9438236f80cad767a300f82bb837593c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/editor/input_attributes.rs",
+      "sha256": "13aa7a2f76a869bf74e0c09e91cf81260d3775ef1a3f89d0de27579c5a388df3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/editor/mod.rs",
+      "sha256": "f5530f64a37b4bd4763d22191b18daa86933a15fb261eea74640972b6361f026"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/emoji/emoji_catalog.rs",
+      "sha256": "8cbbaa1c291d494f12fe562591f30223857d0ea6dfefe6edacad95d36ae68b12"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/emoji/emoji_history.rs",
+      "sha256": "bf84c34341daecd66231de71ae89a2af1a89b48921f94cc836b5dd9b741ad721"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/emoji/emoji_skin_tone.rs",
+      "sha256": "7bce1436820601adb8812fa91fd9a23495e6d2e7ecdb4be02adf344ef2e39248"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/emoji/mod.rs",
+      "sha256": "2366a9838685d310f3b78021729ef840020b6ab05f790e2f94ee079daf115c6d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine.rs",
+      "sha256": "2d77cc06edada0f2a7cfb7fa156205ca458b699ba4dafaeca6ac526aa5762828"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine_functions.rs",
+      "sha256": "bd99b57122787621c11c0ce8cf2193d84eb4f2867762a734e7ec0293f0b44eaf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine_glide.rs",
+      "sha256": "621bc8eeebfd3abdcf3433cdb84c3b94791853d48eb375f76a1501148825a1a8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine_input.rs",
+      "sha256": "9fc0d54af0b88aaf93ebe1e44b9ae8c697b2a6ecfecf9229f8717e2c3efa86f1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine_suggestions.rs",
+      "sha256": "0ef50186df57fc4bdf9824faa7daa38eedeedad2858cc4bb64d8dbaa1cdd1a58"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/keyboard_engine_target.rs",
+      "sha256": "d3dc6d1062d1fccbe9d9d537b2a2d3ef1e642555030743001f3d4edf7d9ef089"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/language_models.rs",
+      "sha256": "9c9aee7492972b14673581745367bfe6aeb6c664bae9eeff1e14f98c1d9a1306"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/mod.rs",
+      "sha256": "f0e5bc94d5778eaf0f6beffdd78e3eecce762f24f2d83c90273832fbe6cf6c32"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/shift_state.rs",
+      "sha256": "1d9ca68e5011eb7695e80507b8f0c21321ef5055e470ade5fe53a1d4ba5fb7ee"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/engine/shortcode_numbers.rs",
+      "sha256": "919a4a0dcb3a2ae7608d133c7fd8983c6b6eeb87e23dc4ff2659dcee654a38a0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/events.rs",
+      "sha256": "4cf5c2de04752f879e616196ae130ee2b0bc9dfe53682c748efe6fca0a708623"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/examples/core_profile.rs",
+      "sha256": "13fae579102f588a6a7bc3587f8170333482505910de081d39355f236649cf44"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/examples/emoji_profile.rs",
+      "sha256": "0b2e8dd29bfa0b1daba8a3a91374d5ae2f779ac671f479f07af457e46e7d31d2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/examples/glide_profile.rs",
+      "sha256": "1f0928b80349cbf2d80a901ecf8a0827b64b55605399b7405e3ad91e638b9bb3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/examples/locale_probe.rs",
+      "sha256": "51a7d1eff0020d549dda440ee1aeea6cf880eeffe39747376545d400bd8b3a45"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/examples/performance.rs",
+      "sha256": "492184dc8be9e62f804975e412870d703e62efee1d516984ea272f00b59e0221"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/glide/glide_typing_classifier.rs",
+      "sha256": "93faae39a18beb40075fcd81a5fbe17574c9f2b4ea46a22fb3c79eed05d0deaa"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/glide/mod.rs",
+      "sha256": "28e369f5f3ffd928b8bbe4d84bffd8ba42c1e6d0081a8c15a7f64e2ecbdea9bc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/input/keyboard_touch_processor.rs",
+      "sha256": "581e6aef66f1bdbda6c75badcf621ee5c237bd43e0cd3ace357ba3b2242b5697"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/input/mod.rs",
+      "sha256": "aafffde8f6c5d83c710be15088dad7c4e2f2792455f47218a4e9f91fb6d80870"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/input/scheduled_action.rs",
+      "sha256": "49b761d7a5c0ddeac604e1af700d5605091997ff3ba3049fe157e8cc48466b81"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/input/touch_reference_tests.rs",
+      "sha256": "c8ea21d566ee6cc696dce9a18eaeb4b8485ee459e244c64292191a21b036f56c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/keys/enums.rs",
+      "sha256": "eac11a51195853c82db462539538648086e25ae63171712bca8ca0361ac913d4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/keys/key_code.rs",
+      "sha256": "2d0006491b6a9604606df1a16bf1956ff219bca76bf5b17b19076ecfaa89cf8b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/keys/key_icon.rs",
+      "sha256": "86e0a3a1bffe605a8424ad7025947c89a5a483d015ef9cbc15490d6d440858ea"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/keys/mod.rs",
+      "sha256": "54a2a9b4090cb92782ed5caab657731eb42972448dadaeee6cad4e9407c515d8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/code_point_array.rs",
+      "sha256": "6236099f691e0f7562caebfdc8e4bed0550d1790d442d26a9819993b06f46d2e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/computed_key_text_tests.rs",
+      "sha256": "c8f40879b3a4ce5337a96237e107b9a616664b111a1ba4f69b95faa9aa6decc3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/computed_keyboard.rs",
+      "sha256": "c253a51a76f5ea04c22eb2ec3f74fea843f5841dc622a27fced5b40d15192021"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/computed_list.rs",
+      "sha256": "7acfe3d53f557ddeae648489055e65d0be453baa211b31f191fc776b8afd8251"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/computed_null_context_tests.rs",
+      "sha256": "c4be7f3769061bad4bd1a38c4f55350292769ec3ee7bd09eb2d62a1dd521fcd9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/currency_set.rs",
+      "sha256": "4beb22546df41ea40015f5964a6abc8cf6250feae647c21f0f295bd488f4f099"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/float_hash.rs",
+      "sha256": "cfbc4cb2cfaf2030e73bb8baf62fe0aa9a553a82c4aae617f95c68a3fb167ef1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/geometry_options_tests.rs",
+      "sha256": "301f6d211fbcbda8fc1675b5b2eb20635a84238b3533f289cee3ca789bb323df"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/json_element.rs",
+      "sha256": "b456b93fbee6c2eb4db82b800b3d8bfb248c8231b2420782f6c4ef4263ce1936"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/key_compute_context.rs",
+      "sha256": "5ab9562e6661b065745d86a2e739389976a528ad91877918744c037c5fbd3f44"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/key_compute_context_record.rs",
+      "sha256": "c43588e863894f845e7c9eaa3c3542cf6648436f36a2304e6688b40be9784ca9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/key_data.rs",
+      "sha256": "8f384b459f43900e79f7b85e8e057be7666d1f8ed6b672a481a88c2912bce23c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/key_evaluator.rs",
+      "sha256": "29dde9530f2403afecbc750f4dc699aa32992019603b50ed8aa9a95e62a7d994"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/key_labels.rs",
+      "sha256": "ed69001450253370eb467145c6673ca4ff5b5c3d88b3ac070e7bcb07b010fb9b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/keyboard_geometry_options.rs",
+      "sha256": "c3801ec676686b00604ae9c50afa4fcc5015792dd6ad2f591ab883b9a95b3e4f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/keyboard_resources.rs",
+      "sha256": "19578667d4f51d0da4e8c9ffe623817cfde2ecfec1e28f31d73d69289ad11506"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/layout_computer.rs",
+      "sha256": "ebc254eda1394825373bf630a0ed78bfe1e80c3940067b6d20662a825f5ed634"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/layout_json.rs",
+      "sha256": "9bca1e449c9a5f0ab1cd99bff7f4d68ba0e4ad9d93bb5694161c9c61fe80940a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/layout_models.rs",
+      "sha256": "f2bdcff1ee0ef7e80b6d77eb5da08e512c4e09ca50ee19088da2696e7df4c0ab"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/mod.rs",
+      "sha256": "2d07352c7116b0b33384fcc310fa162ca84cc6be658ce6f79195a9fb095913cc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/popup_mapping.rs",
+      "sha256": "f24c74e4d053544a6fbca53a86a3e6b851a9f0277f632535880681ed3410b1a9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/resource_dictionary.rs",
+      "sha256": "223dff69f96ad7d6619eab1996a0859ba426a908a3e97b6378e3fe0491e81c1c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/resource_object_list.rs",
+      "sha256": "48bd7110d5490561194bba9787178c801c39d0ecc9b303b25cf928249509dda0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/resource_read_only_list.rs",
+      "sha256": "488f49e09f43f5de5812516532c2b9bdac889cf5b35046e7889983f958f01b3e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/resource_read_only_text_list.rs",
+      "sha256": "f36080b04b7849b2fb949cf44055c95c99afc89b75f418216ea99d5c440d9a0b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/resource_text_list.rs",
+      "sha256": "ee5eaaacb8066b37c3f4cac6df3cd08d44a7a60b546374aba8970d3bb5bbe99b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/layouts/subtype_records.rs",
+      "sha256": "cd607a39cb7740c2d3ff9f0c57233fe530b54ea79619c12cebc9bc809d23c8ca"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/lib.rs",
+      "sha256": "b6e3f624d6ddce70874f868af364222068c29bbc80fb870092e35c13c0dc8e18"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/resources/embedded_resources.rs",
+      "sha256": "ebed98829e686659d6db499ef6cc89242a78f95f93055599ee4151b29f6dff55"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/resources/mod.rs",
+      "sha256": "e6cedc86ba00b34223c63d0d54a774107951aa1ed3769b213ca24cd2799d48f1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/resources/resource_data.rs",
+      "sha256": "e6e0a2fa4bf304526fe1f13194f37384869cc760ad5bd9cfd6a58b4de8414288"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/serialization/mod.rs",
+      "sha256": "0c170e51eb3b4436115fddcff8ee2006931ef6a539db4fabe1ca63a68c2c3773"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/serialization/strict_json.rs",
+      "sha256": "e2b215461888c8165ef81afe6bd6e698a5b47d15231bc7992de8e14b36bdc2b4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/settings/keyboard_settings.rs",
+      "sha256": "1ae89f9eab421c42c62951583326b2fc06060d2a5e3e7997ff83f1d0395dbc50"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/settings/mod.rs",
+      "sha256": "409450a936b02460298f64c4a7b27b2da631f1be7816ffa0308060970d497186"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/settings/settings_enums.rs",
+      "sha256": "f765d1c8428dc9dfe83e014e7e498425f535db7cd37c47f671dfbe4af197da4f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/arrangement_rows.rs",
+      "sha256": "1df7775dc7e1f831fb0b05cf669eb5c7ac18275b3913682f6005a38a5ca28ee0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/casing_models.rs",
+      "sha256": "2a7abd0edb190ba64afff0b618947f2a38d8bf69217dc8140a3d089a140a3f7e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/clipboard.rs",
+      "sha256": "9cdfb3fb4e0c1609d78b17c34756fd901ab0edab28640504f878565e4bd2061d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/clipboard_local_time.rs",
+      "sha256": "d3ea929c066175e5080951c004547d3686c69d9a3b66d303c77adf20d32c4dea"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/composer_ownership.rs",
+      "sha256": "ce41f62d4a8ab1809297b6a80b8068c9aa33caaaeacff89e174f49e0c049aec8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/composers.rs",
+      "sha256": "0d25492a2325c83c6ed7f98e0f08db2264ef419ac9ae964039a09194a87f5172"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/compute_context_state.rs",
+      "sha256": "695c7b7cbff81d033c820354046822edfe513cfd8b0d6ce51cdeb2462743d054"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/computed_key_text.rs",
+      "sha256": "7389093b555d2b36c9154bab234216deadc317001657b3eadf92c1b9d7975a8a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/computed_popup_list.rs",
+      "sha256": "acdcf9011d9abeb69bb0f00fee8df0b5fc197625a6b5a2c37b11a2f189b8e01a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/computed_rows_null.rs",
+      "sha256": "473d9368869cd2c0d58744a1462f3165b83051661a154253dc07031e6cf885eb"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/currency_set_api.rs",
+      "sha256": "2ca7c76c046722d77c9451450bbdc2a826b08934029917811fad3b6d00948412"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/currency_slots.rs",
+      "sha256": "8777300431fa33087782e7d2a0b4141837a97334d4cbebe7b75bc1629e7a3625"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/derived_key.rs",
+      "sha256": "76ff133f2f8c560c01758cbcbc2497e4d1e9cbfe9f0375a26784f76b2904bfae"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/dictionary.rs",
+      "sha256": "c9850953da52a1b466bab43ac74f78e59970b2fbcb465e99ef3a2c9c37b772b2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/dictionary_provider.rs",
+      "sha256": "9bad321d54bcd16453d120c153033767ba09eb1ec0680c712c8813a348318ab6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/editor.rs",
+      "sha256": "f9207af195bfd24733d350b60f9127720db7ccd46b7882405806af19508a9831"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/editor_clock.rs",
+      "sha256": "cf2e4efc9eb3134b5758936c38a7455188c5f0f338c4847e9e75b806f4ab0047"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/emoji.rs",
+      "sha256": "d1a574b4ac153362aca0d07ec4580ef082e168b175141763e55f52bdf9a4a6da"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_clock.rs",
+      "sha256": "201b3353bd29eb0802dca3b55fddc9409dbfa5bcefe7588e7fb6493a10dc1099"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_constructor.rs",
+      "sha256": "4297cd50747bda522525ba342c53198cbec92b3b2072048deaf972a7b75989d9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_input.rs",
+      "sha256": "eef79902e9369271c3c44b8d8440a48b420cf1c765f3ed77f7f3fc12e3233bf6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_state.rs",
+      "sha256": "ed6d5687da2c6070190b025a2c282e7bc63418f961602c4e58b73cf0fd775aae"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_target.rs",
+      "sha256": "9da7c8399a515de211c364e2a731741f2c0468bc8e9efa0fbf0437b86d5cc164"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_upstream.rs",
+      "sha256": "9e2b6736f8619ef6bdbaa0a515ce84fa50bdb6dce152e5dbb5a7bb00b212757d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/engine_utf16.rs",
+      "sha256": "87ac7378474f644ca6789f7ae59c0b5787ee1ec740139a6f423e689d36935d91"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/evaluator_culture.rs",
+      "sha256": "c50dc543848749287d5434c8bcfea1f44da9080c5d179ca65a55e3b537359ddc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/evaluator_default_scalars.rs",
+      "sha256": "1fb48370a43e3fafa701c7409edadc832b7558fa5aac86f85228efd8510b8fd8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/geometry.rs",
+      "sha256": "01d9e3f35f9415c8828c22d7c7edcf918c4c5025b514cb662644660db25cddf2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/glide.rs",
+      "sha256": "d522a7feb9a8db216a8f0e3ff7c91729de98946a5c99f7a2e2f5fb96acc0f1c0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/input_enums.rs",
+      "sha256": "78992cf8b7fb262bb7ed7d86e51ccdc17a8e90d6638f014314f2ad3ebd1d1f57"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/input_null_punctuation.rs",
+      "sha256": "5d262d4395b5f2825032ac8100dd914e6cd11d9c8589b4ae25d38c4f2715bbb1"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/input_record.rs",
+      "sha256": "4ea022f45b9561c7ba095accd9f8701950f0f7a35b99c49b98e0641c697a8962"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/input_target.rs",
+      "sha256": "397e137271805009f5c744c383040cebf721288bb60293ad5359a2b3d789b7f5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/key_api.rs",
+      "sha256": "eff9d62287f79bfea3ee35f37be4cfdcdcc93864d2b0b88da15b009008d2d80c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/key_data.rs",
+      "sha256": "e43524f1b83aeca39e5caad7f073ffece2ee1e0e175a32493d786547f78877d0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/key_enums.rs",
+      "sha256": "249b256c0cced39790f52ea4d078b770b794c11cc46762c4434cafa347c2856b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/key_icon.rs",
+      "sha256": "34e70d8a13000c6337dbf28baff52e11cf2eaff61125d85f9fdb3c149157e87c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/key_null.rs",
+      "sha256": "4097dedc65932e6c0d12ace7e0b24cf9149441bb3cf520277dc64ecb5c2877a6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/keyboard_layout.rs",
+      "sha256": "2aaba1cee74b6e24a5599b7ac7d17bba26efb14009ee708398c8c92938f9b15e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/keyboard_mode.rs",
+      "sha256": "c74d15c16494f1a2269ad20b5f4ad4645c7a32cad61fad9f5883e63d372ed759"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/language_models.rs",
+      "sha256": "054c3ba9932e96378501905026ca48c5065025d65ff80eedd2fbf41d999e3745"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_construction.rs",
+      "sha256": "8ef1948a03d55968e08c48523031b4aeaff0b1c6fca7aa9f40b9366f53fab222"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_deferred_json.rs",
+      "sha256": "713f18a1427e6b00b7da0f89f3f929f56105477710c016900d93d335c7b6b84b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_enums.rs",
+      "sha256": "2ae95198fe6cdc0660d0a5781d9ae5f1f7a8d9f989e3e610cc7b5a098244b417"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_initialization.rs",
+      "sha256": "e93712c8330ea2c9b4f6be01bc39ed43c1284de8de4a9a0a10724d50f7c4d448"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_json.rs",
+      "sha256": "f935006ffe20eb1b8d151c996b1371a50085672056ca94c14f3d4fbe2521c85f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_metadata.rs",
+      "sha256": "4e8eede214298ca1766ac2aac3ebfc98af95b8afca5337a91b593571e230c616"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_upstream.rs",
+      "sha256": "fff27b8790ed633ecbff8e85b92ec98c36f8bbd7acb387ed4c00adf23475ea36"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/layout_utf16.rs",
+      "sha256": "cca4f9e1fa2a59b086f10b77a66e254edf9891b8de6ccfcc262ad37f67e0b8c2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_android_glide.rs",
+      "sha256": "5f6bb5a950cb8dd8c07323c23045c9f018005aba499589b96f93c651dc06c881"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_clipboard_futures.rs",
+      "sha256": "70307379a1d06801313bb25fbd64cea9de2cab6c858beaf9dc0508b11eec843f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_clipboard_time.rs",
+      "sha256": "f97aa4d874cc2bc15f96f572256550995f9f4dbc8aafa1a52382425c46f030be"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_clock_callbacks.rs",
+      "sha256": "688b8afed944eb34f75001a7dd2595df4164a93c52f04e5fee0db0c064ac06c5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_codepoint_storage.rs",
+      "sha256": "95f115fc58d39a322fd07707e4dc6350719e170077f82d136d18aa8bf8402f0f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_composer_rules.rs",
+      "sha256": "0151b289fae0e5c857a4a70c6299a41d35d1defa8be9f9afdecc3fc07ea7706f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_dictionary_normalization.rs",
+      "sha256": "9d184a45e3ffc0cc90fd777d6de5bd4447764e44a5bd718eed32011a875e1937"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_duration.rs",
+      "sha256": "1e25dea33976b3c5fe8c46b6fc507ce55803f3bbbf626880cdbf8cf9fc41ecad"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_emoji_allocations.rs",
+      "sha256": "0526c1bfa8d6f6c22c422acf8014726c53ad7c0aee6d6fb93bd7553096b96fa8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_engine_lifetime.rs",
+      "sha256": "4c1720f6886d629035380107c84f3ba6f21add6a92d786b19bf1b215f90966ed"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_evaluator.rs",
+      "sha256": "efc96e59d9a688cc562295770857302a8ab0afbeb28950f397714068b4130bf0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_evaluator_shared_locale.rs",
+      "sha256": "a7640860204a6e0152bbef1d4655712ca5bb47423ef6a11d5d15c9ae54e09c1d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_evaluator_source.rs",
+      "sha256": "b428c8ce9bb5ca230e14f28b795bb3018aabb090349599cd4818ab057c59bcde"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_geometry_hash.rs",
+      "sha256": "1b3ed245524773ff8fc7b133876f53990381b4b4dc63f1016fcd905f26201d86"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_glide_casing.rs",
+      "sha256": "b785109eba6d4426a987075134c6fe47828498d0bfc97a810d991ab42f6a5d03"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_glide_maps.rs",
+      "sha256": "6ffb36b310dc09e9d3b2b5d19b12584c7eace8e4278cf8a13f33b1fb4a5dcb59"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_glide_unit_casing.rs",
+      "sha256": "06bc2bf8876b8c5fd10173be099d8f86ac526e14f964eb5ccb2a15d8d14f3dbf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_glide_workspace.rs",
+      "sha256": "823239d304814708fd81035ecaad7621f8688fa230822e9a760a6578b3d6017e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_intelligence_maps.rs",
+      "sha256": "1fa742277270c64d0a214262f02b3c2a7d7bfed11594b66f3df223677d88a31b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_key_results.rs",
+      "sha256": "51c07d60330e293b5732d6975162baa2a21eea206c7ad46faf613c6118de64b8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_language_registry.rs",
+      "sha256": "c25f545dbc3f9c97994c5d4b1e20de73643e52b65d06b1281a9532585e56667f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_layout_change.rs",
+      "sha256": "9e89d1ffbfbeb62ab930f45bf9ad3dd337df2eb36a65e875dc8aff0f5bfcee0f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_learning_boundary.rs",
+      "sha256": "bb3ebbd525dfb3eaced6e2f855cf98e38b19e2b289165e622411a5503a7c79f3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_model_hashes.rs",
+      "sha256": "b2a2b0c5693e3f2c36fa739974de079375da4a5b9f3de7df71d94d86b1f30cd5"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_request_values.rs",
+      "sha256": "b607a860f1f7cc5f59a6bd15ba434fe44a9e37f00e3678e0736a4714eb7ab1b0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_resource_maps.rs",
+      "sha256": "e5a0794b39724140717f49f7335ee798672236d44273eea6a5b37307a45a285e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_suggestion_equality.rs",
+      "sha256": "cbdab1e8630b801dacf3c4f6da06c5e6e4f612cdb05c12c18913ae76d50bb695"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_suggestion_values.rs",
+      "sha256": "c8e30019b5fb8427d91533b5923b15458ba7efe8132891ced80abf53ef69f772"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_system_time.rs",
+      "sha256": "641b2eae5663e6db2b30cb17590200a6c06b3e295c18bc0844ccc7067561e38d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_touch_lifetime.rs",
+      "sha256": "4e0baf4b19a20db5b4c3987c121290491208619c626fedfb7d8144c98cdf9c54"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_touch_reentrant.rs",
+      "sha256": "23294e56636aa24dd686ffc7e9c123dfce6d5df2130f642b0d69c6613a8af8bf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/native_utf16.rs",
+      "sha256": "9e6b3c5149321fd6d957a240e612a0d7ecc3cae6cb4696f9c6d8f2607b7c3e79"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/normalization.rs",
+      "sha256": "5091e549273ab3a818576911ab1b8ad2e3547a611bc2ee5f594f9b233ef4aecf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/popup_api.rs",
+      "sha256": "f5c1c9b43c1204d967edff920f23d0d87d3579d7c482a94d6e517b02014a92db"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/popup_dictionary.rs",
+      "sha256": "1c074d3d772be02cc0c7c100c8a3c35855a195bd3bc8009b8ad0b6c267a267f4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/popup_mapping_authors.rs",
+      "sha256": "53858661bf72b64f6795fd484c6790f3b7696dd76a657205458b572c8bb110ca"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/popup_mapping_state.rs",
+      "sha256": "f8b7cba616e97d68321d44d92138e35e450c891f2bc690b5554ac3c466ae8a32"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/popup_reentrancy.rs",
+      "sha256": "42b835b8ca64baa9a7e4c620ac0cb3a6f57fc4db00a525f36b3dd1ab02284d57"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/prediction_enumeration.rs",
+      "sha256": "7a0c6b7356902c98ebbf190aaf9e16fc94994d9a6b7373398fab601767049ad0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/registry.rs",
+      "sha256": "87a2fc19e333c9e91a4bdafaaf2690bb63e2b65e9dcccb53748d22175eee9a88"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/resource_json.rs",
+      "sha256": "454b0624e619ba74c43dfc8c1e73880c5c9e2d6b3688dacaa487100d2cbae276"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/resource_text_list.rs",
+      "sha256": "e6465ac6bf35b0e664ed55c0c303b6bc30fac2c487067243430e2334eee104e2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/resource_utf16.rs",
+      "sha256": "1e7961dade02db09c1751644a80a63f40269351546e89b3781480b6f391d42a4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/resources.rs",
+      "sha256": "42432549f5747e5fb154c0bac304b067af3f2f07add1870c8f639b662f9544e7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/row_reentrancy.rs",
+      "sha256": "cfe4d2a947da4a6b4667a4aa77229adfe1eea3d5ecdc26d62d94f48287eed468"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/selector_api.rs",
+      "sha256": "b58ddb994473d1a3295d0313e3900268bf82a7cccc2f36c4930f5954840122c3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/settings.rs",
+      "sha256": "2f918589634b410b24c0a485edbf75cce63a51bb1574e0c536261d993116cf29"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/shared_defaults.rs",
+      "sha256": "a913ae302df1617df466bd3e47a5c5e38b2dabf3ba150dfd3bd4ee4f940e033c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/state_enums.rs",
+      "sha256": "d0f74ace97eff4aa56bd9ae0b267b472c495c6ab3b806df0ae4557a0365c65f3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/subtype_fallback.rs",
+      "sha256": "fc7687bcda16eb6ad2e81c3e03346c720ebb972da13f94a7d5aa75cf40c8e954"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/subtype_records.rs",
+      "sha256": "4be99acfbe2e453853a9374ad817fe137d0eb9bc428cc9ba0fd7340633de228e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestion_edit.rs",
+      "sha256": "420dc1e8b9a550b422a4848c896df9460a8acdccf4125e4af81d562b550c7d58"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestion_list.rs",
+      "sha256": "f8ebcfd44057c66e3efd82df92f15d3ad83c8a585cf2ac3d33ad150e76bea245"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestion_null.rs",
+      "sha256": "1ce46a94dd9c395287f1ce0b4252e5baef9542f55142c116c5e4a7037ddd8eaa"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestion_request.rs",
+      "sha256": "6d5d0726fb8bc7fdf923fe885feb9ceafe609789043d00807e56fc9d64d678b0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestion_snapshot.rs",
+      "sha256": "2cd7831600c5622082408c61f39a690d984055f26f078088b29650aecc702c88"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/suggestions.rs",
+      "sha256": "bbcd9170d6f651b6cdd252164c53c3bfe78e55cb6d435aef383969bd50d81c4f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/support/rust_allocation_counter.rs",
+      "sha256": "339c70602ffc69bc4159607a9931eded5a7a30e6507db32c08dd347970b8edec"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/support/scheduler.rs",
+      "sha256": "db86b8fd02827bba1c6695291c139149fca02aae2606123e63aee203c50ba100"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/text_data_upstream.rs",
+      "sha256": "d7150f126bee3567a92b90a582dbdb0145a3470c750f65a5f4f3a7f43e86d08a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/text_utils.rs",
+      "sha256": "72a2d0b204e4b29434fd83dace7f04a1fe183ef65bf30d664eadcbcf05bd0c1a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/touch_upstream.rs",
+      "sha256": "ac5633f2f1951f1305bce5319306a57f22698fa5d1be7addf2f613c1281c7271"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/tests/user_dictionary.rs",
+      "sha256": "c0fcc5f7aeed0643a331331bdac7de2371eb36af4442c3b8c0b8f277319e9268"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/ascii_casing_data.rs",
+      "sha256": "df2351dcc06e81e727c9962211094e6f9ad16b25d6fc2b753ff54ff1ae14ae79"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/casing_data.rs",
+      "sha256": "13d0edabccba5e5902d143194d395573014a9ac296a90a3d0c1a588af36f2ee9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/composer_data.rs",
+      "sha256": "0b0e0745f9242d5976fdbcfaf146663b3a5836233b9ca8ee2d8284f4e7e1c1e9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/composers.rs",
+      "sha256": "936dc24b2f13d6b96f494dab23e43f85a2449bea1b01bc679d592921325b8f0b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/grapheme.rs",
+      "sha256": "92af38af86d7cad76b5a7112d70dcc2fe86cefc6b8f031c740e6a5f58504a0f0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/android.rs",
+      "sha256": "fec397e74d8d1f2e7894805ec7bd6ff7e63f12092b047ac3aec0c65d67f9e99a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/core_foundation.rs",
+      "sha256": "a6b55d08b8f1afb8e12e4e521689da31f81bf9954b5d527d212258721e1e378c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/current.rs",
+      "sha256": "2573204c1b184c1fc16096a5f4c0d99131831e5ce7728fdd9c9bfe01f6529fe6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/error.rs",
+      "sha256": "5e872cef9845cfe5692bf356a384742735d098fa93610c4cf63adb085ac633fd"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/icu.rs",
+      "sha256": "b651cd11d7226f2d40ec728820c52b43df721295d8ec684fdeacda9d4fe6a675"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/icu_data.rs",
+      "sha256": "4c8c641cdf44e63ca53883831585794c3ca874695ca317c71b2e4fa7879c1199"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/mod.rs",
+      "sha256": "b4b3e931b5e5ec145145308b540199421c74cbfb25b19a3a40ba87724292ce4f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/tests.rs",
+      "sha256": "65c7564e04ff27c2f909eb8706f0d54985f04e162206c235138b67d7775c43ab"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/locale_text/windows.rs",
+      "sha256": "0f86d1ff7ef7857806a83eed45eea87b1955b3a91d95033963a21cea9063feba"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/lower_categories.rs",
+      "sha256": "8a0520dd953c0658b9689832acea2427b2875af703e59302a72b793cfc5cf633"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/lowercase_data.rs",
+      "sha256": "ccc07770a5d9b66e896ca4193130bc0582ef9780e28abbe7cab9ee81fe5ad1c2"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/mod.rs",
+      "sha256": "bc1376f29b112c6e5a55bc42c6ebe198aa1ff021ae40d22fc2a64ca3b85b72c9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/normalization.rs",
+      "sha256": "815c45a3a3afec962c7da3bb1a6d12718c759581ce2d4d4b554f399996f92ce6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/normalization_data.rs",
+      "sha256": "159361c272ce4a4b416939fd36223b4e661875bd9b3937f2e8a1eb06f1f200c7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/ordinal.rs",
+      "sha256": "1fe6c55dc9ad718b561f397c9c86d001513bdedf7cdb7f2cace68affd247d3f3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/ordinal_data.rs",
+      "sha256": "c71393a6e925749a2448f0cd718e1233b7e75f429768beae006838248e7f3ec7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/prediction_list.rs",
+      "sha256": "e5af5ac13c0c209281a6c109128d965452c196a909e011f284c102587b7bfd23"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/suggestion.rs",
+      "sha256": "cfd0a8f31a4aa1cf3855fb9e70395e0d28a4bd67275ccc16151cf51ff1882701"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/suggestion_list.rs",
+      "sha256": "010f2f04adaafa853111fbab53a538f3387005d23031be963b49004c3e440a7d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/suggestion_request.rs",
+      "sha256": "b297f03a73002e4685b44a1546c1e6fe356be00a10e4e0073660d7170362b7bc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/suggestions.rs",
+      "sha256": "1ca2d276ae40d45a5bb55747191538caad059d06a6935906e716dd5cf37a7d4f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/text_culture.rs",
+      "sha256": "abfd7d5d2ea5879297d16d5350874ffa844dbc3472b5b8e5d03ee2e7beb9c82b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/text_properties.rs",
+      "sha256": "80e020e2ba5c562a651091c387b5d6c255b11633ab9f1728364ec60ed3e665ba"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/text_utils.rs",
+      "sha256": "0c1eba226de5360391589205893b8eef4458a4d1fbe5b9c72c1fd78813398630"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/user_dictionary.rs",
+      "sha256": "e25aa35271b5db1136cfecb2ddde1f578894ee4f6cb531397067e8e4b652492a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/utf16_text.rs",
+      "sha256": "6d42b27ae442eb31704c85c3eb11defb842cd045feb19ad43001f7ae5f312933"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core/text/word_dictionary.rs",
+      "sha256": "4cf358ed49ccf36a06ad2d21c43405917d7456ef51b8a64fcc1d8c5645877e8d"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/Cargo.toml",
+      "sha256": "ef389360162813931cbb85fd59177d3ad2759fd6bdd15cdd61376c4dcc68b675"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/build.rs",
+      "sha256": "f8a78c59d60ca9f53f3498a5cdfa0069e4828a7ed421fefe35a6de38c53afb11"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/candidate_metadata.rs",
+      "sha256": "0644a5d8481fca3e38cdca8556c0970d4c441f1cf49b6cd13a0acf5074fd4c86"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/candidate_metadata_tests.rs",
+      "sha256": "7ed1cdb7064445b6d52415edd7c1d494f841546e225a925a525cc30bbaeb35cd"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/clock_metadata.rs",
+      "sha256": "a129f044eb000d4769642af2a40bb4d6fe72bfc493566355c013e84aabd1460a"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/code_point_array.rs",
+      "sha256": "272501182a6610fc2a6b9b3db7704ca9e578986f08218a82c1646ac5d7e76627"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/compute_context_metadata.rs",
+      "sha256": "87861cb3f703669b6ce1e81e7b435c33003b80357a5d925d50e8276bd17f86fe"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/computed_collection_metadata.rs",
+      "sha256": "c1dfe959c38071fb2aa9a48ea4d600bbe3203fc00a9600493149f8178a784e93"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/computed_key_metadata.rs",
+      "sha256": "6cb1c8c595afac9b877a18f6f2ab9a74a1d842b9c32680cb5012f6a62e346881"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/computed_keyboard_metadata.rs",
+      "sha256": "997864c20e6e4e6cf921206455a0b682d33d08553c58cdd442db8892112eeb64"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/concrete_evaluator_metadata.rs",
+      "sha256": "d7dafe5a20ed42fc3493d1328049eb2e576001c9e4eb6d8b6ba3cefae7b6d4df"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/currency_set_metadata.rs",
+      "sha256": "e683c5698902afa4e4d8ed45efa4d119d473305fc7c6975ab84dea0cd8496b43"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/derived_key_metadata.rs",
+      "sha256": "f53512c4ab941f6b20ea11713c8b6fff083b23204ad19f7955a4cec6a6428dc9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/dictionary_provider_metadata.rs",
+      "sha256": "3c0f7443a58cdadf9b12d47bddf875a0e49c8bdc480cfde5ef3fb74bab0d17a0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/editor_metadata.rs",
+      "sha256": "c0f0bb8484cc69892c35ed5c9d3d17721084fb41e4fc5e50097248847e8c35b3"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/engine_metadata.rs",
+      "sha256": "e03ec4bc64f88a3a2ccef1673c25c06565b6cf90d852463e48c3d0aced994564"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/enum_model.rs",
+      "sha256": "2d425474fb60ef65fdbfaa9b50de926e1b5220283596e53050919e71434df73f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/enums.rs",
+      "sha256": "c109b2112dfb66f91d32ea676ccf01e3dfdf745f1b732508e38701d70a78bddc"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/evaluator_metadata.rs",
+      "sha256": "c7bff6850ce0caf52b097c9bf3eca643c337a3220e5e0196282c74e64d2574a7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/geometry_options_metadata.rs",
+      "sha256": "1cb11b4c01160aa0bb97bceeca746818535efa56d64cadb18fcaef5a19faefa4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/input_delegates.rs",
+      "sha256": "7f51f22f0927eb8bdc9a0eb22a41c85ffbbe47f6af7e4d8db3e5be61496c80dd"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/input_metadata.rs",
+      "sha256": "39b2e01daabc3e1db7329050dedb8d532e1e16bd77a90499cb644d193f5d93e9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/input_tests.rs",
+      "sha256": "1f34ad83b3552272c55cfe2fd5d2fe47a4177883099abdfa1f82d6e34f466213"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/key_data_metadata.rs",
+      "sha256": "6693c7816a35621aa9baef23fb8034b6d24d1c003477e0cbcc6e9421bd1f2e1c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/key_list_metadata.rs",
+      "sha256": "d327fcf80bcb10ce0adc121ba5649004cebf8af88713577484d228104492a249"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/key_proximity_metadata.rs",
+      "sha256": "3a89ecc101c4433ea864f76f0a6ddca27919da45e5d4254220d6f14bca35b2ee"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/key_rect_metadata.rs",
+      "sha256": "d34ee9e7af1a6e6b6cd0ce99f8ce371f5cb2513142c0dd19b388c79254f6c73b"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/layout_computer_metadata.rs",
+      "sha256": "595cb2a60b3222d7670ba87bfc66cea99ebb24e475282bb760f154a0c8974743"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/layout_metadata.rs",
+      "sha256": "65ac8d4d745a54ef37e4d8f7bad9a39579a943668fc1c8cd735e7dceee63a4e4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/lib.rs",
+      "sha256": "3cfea19473f6fdc927cec5849475d16d1519bfd1bc6de81fe238b7396c4de986"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/locale_metadata.rs",
+      "sha256": "7aecfa910c6b12cb6766ac29c02506a641015cdf677e62ad48eebf071ff80332"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/native_callback_tests.rs",
+      "sha256": "ee6aafdbff577c8c5878cca87bf56c8bb796ff054ecf9e01daf060806128633e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/native_collection_tests.rs",
+      "sha256": "2016f8ce14ad7f77e08500baf389a35d10feb5ce9e364e828b23c04d0bc33e08"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/native_method_tests.rs",
+      "sha256": "2ddde42b9ce8e5a16455c8d4937de45ef0a6e0b0cbb8b292209c8f347243b7a9"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/native_popup_lookup_tests.rs",
+      "sha256": "4ca8856cb390be54c6d44378f114db5fec6307f10622fad8481a38da6c651b3e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/native_snapshot_tests.rs",
+      "sha256": "fed651aa0e553e4be634a14937443e03d1950b5e6469b704adcd45f7ae9c8628"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/popup_dictionary_metadata.rs",
+      "sha256": "b1184eb97402a471162762cb2c85c2d02b5d59d82b4317b6ddaf18869aa946a6"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/popup_keys_metadata.rs",
+      "sha256": "b67fa69ffd13e94428452a946ffe9a133368f0bf8d1f6898ee160831afefdced"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/popup_mapping_metadata.rs",
+      "sha256": "e95ad31eb5ed8c348608eb6d8c1f4bab0bc784f9e88cf9f1404056fb37e36725"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/request_metadata.rs",
+      "sha256": "799cb92c5f27d13b5628042033ea75a7d89ff8c8ab39363854d34fcafe4fdd89"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/resource_error_metadata.rs",
+      "sha256": "c3c005a11c051eba8097ae852fc18375e039a6baed2f952caf9a418bbd8d5a06"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/resource_string_list.rs",
+      "sha256": "acf5a8b0b660fd8a0b05348521d70c94c23d42c6379a91c6a86f60aec3f58af7"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/selector_metadata.rs",
+      "sha256": "a2954000c3e6cdcd1bae3dc73547e07abe15e9a97d1f4d86a66c3c749c07d283"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/settings_metadata.rs",
+      "sha256": "e8b5bf5fb553f03038cc97c5741a31dd648a2a695fca31c447b58b1581e6e472"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/string_list_metadata.rs",
+      "sha256": "8ea5b2f7ed738ad99596f565fd3a8ae2c7cc8d5bcab853207aaa9facadc86b37"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/subscriptions.rs",
+      "sha256": "72d299e8bddd189c686d1bc00a6ebea800ae74d317b7ce05a32e4c0fe6de4890"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/subtype_list.rs",
+      "sha256": "834ba3f06e9e1b86f924772dffec61aa8157084ea867f1a11887a32e9e11abf0"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/subtype_metadata.rs",
+      "sha256": "9a72243d0965ce8785bad6af6c99d98c9416200a8d4a47d172f44ccf96ba781f"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/suggestion_factory_metadata.rs",
+      "sha256": "bf2683f9f150ac758c5559ed4e00b37e9ac08bdbce9ece9d54a1408a510dfde4"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/suggestion_list_metadata.rs",
+      "sha256": "bee4be1668739e90e29bb612f8f8fe6cc3f506a492ec9beedb1a13f9f9c65a3c"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/suggestion_provider_metadata.rs",
+      "sha256": "3a84752410b90b61d7bf47b0d3287a25729eb7e7f98c385f68e4323630ce8d4e"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/tests.rs",
+      "sha256": "ffb8c32cf1028124b40a1e4b52dfdd79a3945402ab1a82c25abfb194843093e8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/text_key_covariance.rs",
+      "sha256": "dd6aea01b4a7c87577a1e1abea868b7b1a0d4c83f1eb103d4a1a97f098cb4fc8"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/text_key_list_metadata.rs",
+      "sha256": "95cfbccdcd8086815175d4e537347a6e48ec2f5a314c49154c6421048395c485"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/touch_processor_metadata.rs",
+      "sha256": "5efd2e70eee4bf330e6f1fefc9438aa8688e16713c534bdaed1985b37f307bdf"
+    },
+    {
+      "path": "components/FerroBoard/src/FerroBoard.Core.Ferro/utf16_metadata.rs",
+      "sha256": "6ce2b2e789f3b667ad3ec92f51cef33efaeb473a00bc2b55e94b2e08fc810f3d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Android/Cargo.lock",
+      "sha256": "6caad2ead4a79277660bbc864af0e731acc2a23d26f0af0daf0f136a761e4ceb"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Android/Cargo.toml",
+      "sha256": "421b63e536ea3f97de26931fe014eb00be209588e1eb9d5a60a6441b35ce81cb"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Android/host.rs",
+      "sha256": "66b979ecb46734bdd4eb1f9b61097e9ad0527779b7faa8383daaa2a343ab275e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Android/lib.rs",
+      "sha256": "cd5a089d2a529c3c9f20ba47b39949bce917df2530c399180337bc1248466867"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Browser/Cargo.lock",
+      "sha256": "75bc99d9f078c703ce6010c537089bb33b06776cf329cd20747509aab342c125"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Browser/Cargo.toml",
+      "sha256": "c927548fab4f451582dc8c9ab881278dd096a9b9ab806d6036089db0f81879e8"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Browser/program.rs",
+      "sha256": "e43833ce9ec81974ac03560001ddbceb2909fcd5745f1ee521296f054d728ca7"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Browser/storage.rs",
+      "sha256": "bb0755131e8488f516110a9a01e1486e0cc46e14ecdbbbb127591566fa8ce46d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/App.xaml",
+      "sha256": "a4b3ec6b6b46cc8d212e9ff090044248a18582765083b8ab8cda0020087df550"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/Cargo.toml",
+      "sha256": "13f5ae9a195b6ac56a7ff715e3b15a1d7da4ab6c764e75058900d347f9c9761d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/MainView.xaml",
+      "sha256": "c41ab7e1cc752bf92abc70b9669b1ab448366dc6aa2d54e33c565f08efe1c625"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/MainWindow.xaml",
+      "sha256": "6c538d9e753053323ef79b1058001caee21a6aab1a26f09a7d7fc6d634312309"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/SettingsPanel.xaml",
+      "sha256": "eb27663917af2eacbc15cbc663ae78417717ac0012cfd875be9dfd00a745d36c"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/app.rs",
+      "sha256": "d02bd2b325c556cace21f8f1fb2dd9a5abf5e050b17759ed80e9338287720d00"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/bindings.rs",
+      "sha256": "6c12ff1844c6626958240e4f12efb6fa7e73ade76a6fe49d68750ee557191466"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/build.rs",
+      "sha256": "0e0f093bf48f7243bf42f64589863ff6aca97ff7f24c3807a8389e4b33d5e7ae"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/choice_tests.rs",
+      "sha256": "5468e0b87accf6edfd9dfd304ffc8406af37bedccb269c1b5f09a9d49bbffc43"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/composition.rs",
+      "sha256": "a9a3217cad38d9ffd1e4e5f6ce167dbb061b1bc31934e064a81bd41d51d39081"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/custom_layouts.rs",
+      "sha256": "9fc016dfeb08ccbd80a9637cd41a33ff2ef212bef5ab953003ec5ca127722884"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/enum_choices.rs",
+      "sha256": "6dfa6cebdb0259f05fea08ecbe259fec857b5098eb5fd44d61e456474e0dfb7e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/SharedEngine.xaml",
+      "sha256": "4f8f6a45a63dd941924c50e527508c5c17469abdc12ab7b9783092bdb66ceaa3"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/clipboard_read_probe.rs",
+      "sha256": "2953b5baeeb21969588acf045c298596c03743a99417b662599671cc3c2b7732"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/clipboard_timer_probe.rs",
+      "sha256": "d31e76d5d54fe22e6d3d46e23057fe85d9954ec52753c284045f7062a90fdba4"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/emoji_font_probe.rs",
+      "sha256": "2bf8838d2b8a200eab3ea731955fbbf692774b6e78afbebeefc7187896636b8e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/memory_sample.rs",
+      "sha256": "147af9bb8d3583908f90ee852e91fa073529f70cdeca02b10406576364aa2acf"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/render_themes.rs",
+      "sha256": "c8d8b3f2abb129fba0d26206ac9efa64d0dbd48cc5ddd079c5d80282319943ee"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/selection_write_probe.rs",
+      "sha256": "78cdff3954c7c6b9d3aec78cac75154bce9f8424899fec51a4449c9a29139b57"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/shared_engine_probe.rs",
+      "sha256": "697d0a4af8b82987a6512c4ffe51d03c0b9400e15d160fad26897ec2b38ed5f1"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/support/memory_storage.rs",
+      "sha256": "54a646f8aa0e081da308be631dde76a66beaced77b8ac3fc2b4521e2058b7e35"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/wheel_routing_probe.rs",
+      "sha256": "0025cc8f573489d4d2ebe0343b0ab087b9d56faf53a875a8ec979e190ab849ab"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/examples/window_focus_probe.rs",
+      "sha256": "f6ad09c531caddac7b6220d1cfb5ab9ecc6d9b52f0fefd68a5f07d37f6f170f0"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/host_scroll_tests.rs",
+      "sha256": "c81b08665e4502624cb4498fc2a2695f246ab37740531b9cd48c352d45575379"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/integration_tests.rs",
+      "sha256": "0b47f172b865cb72045ed345ac185bf6301269708fff446fcde4c0e124434824"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/language_bindings.rs",
+      "sha256": "d42893eb63e91c90cf097cf2b7428b2bad5ba8aef83473202c95f9926db5ee66"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/language_check_box.rs",
+      "sha256": "08d037aa9880c63111539a387fe88e59d802e16443ed3ae30ad2bd36f63b495d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/language_tests.rs",
+      "sha256": "efd85908b9fe41b206a5afb51845c96903fa697d42389241d08005887529480d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/languages.rs",
+      "sha256": "0d8f695f57e71cb16e637404af6098cda8f88634e14f55e714705622129db6cb"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/lib.rs",
+      "sha256": "37334e68d914a05a78b28cf10febddb944001622fcd410c98567ec8a4b240f0d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/main_view.rs",
+      "sha256": "e5b2a37c9b9e9f3096fc17861797b1798c7d8c066a3b755f451b28e1fbb6da55"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/main_window.rs",
+      "sha256": "d7e359b74c3120618d01c7209b6487e6c9a87390cfba6f498be7e2b754c914be"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/native_command.rs",
+      "sha256": "205a7e32f01c7ea8a459084048ede549e0fa0657c1599980869ad079fc4250a8"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/options_tests.rs",
+      "sha256": "156e5060834656b52a271acc831cebb3c17dc2d1f1774f756838d736be4d78a3"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/panel_context.rs",
+      "sha256": "ddeee0ce80733925eb51d44fc883ee0fef40916d5be863220244f4ab0af2e0a1"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/panel_context_tests.rs",
+      "sha256": "f195cba250bb8d947a6e95e9c5e716a02ca1b66d321deac9c9b0f1c0bf029272"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/program.rs",
+      "sha256": "2b3a8839afddf76185e3d82ae15204ccb16211ee6f9ca746ad35431ac0e6b421"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/registration.rs",
+      "sha256": "115770d492a813f24254287acade825b960949f8b60e6cb1188b404c7536bea4"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/resource_tests.rs",
+      "sha256": "690cb3aa33c497a4402ebc1599de6a258535e4a3b6aa2828f21af8e4da400db9"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/sample_data_paths.rs",
+      "sha256": "08da7754ab0e4be292983c1cbe2aaa1014449e6aea90db8456ecd5660b0d349e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/sample_options.rs",
+      "sha256": "6cd015b688eced9a863e05d51f610021020d289fa9adf9c1fabc052c1b30fb9d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/sample_storage.rs",
+      "sha256": "1dec5916f92080799695a6cba4e42e005fa14a7b6c8c25aa504bbe6d5fecee55"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_callback_owner.rs",
+      "sha256": "ec15c071b89b1850e087934041d6d9c1f037ec4bffbafd065b07e5ed7da0088f"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_field_tests.rs",
+      "sha256": "a9b16a7ef865eb8b06fbf8ad8d571cc9e02b4df135c738ed92f4fe398bb77633"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_field_view.rs",
+      "sha256": "e524fc5809d3645d9f423511a3dbc5dc24271f5041a49444249346ccc3cc5055"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_fields.rs",
+      "sha256": "7a8ce8ff9813bf29c6497829a277b61a7cfcfc5e23640799f23bd5137ce89d50"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_header_tests.rs",
+      "sha256": "53c31165c21935e07261af060b7762b7ef5c4bfdf4045297c4f9c2c36ece7281"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_panel.rs",
+      "sha256": "4e13fe9818b6335781e33e496baeb5071fcad333faf2f2284045128b2544eb01"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_panel_build.rs",
+      "sha256": "cd5f9e7beb1040f0a1b58a4b04b7f257c79199d9869f728f13d4275c9abc12f4"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/settings_panel_tests.rs",
+      "sha256": "714136a2884a658b102c75ac4ffe44e7d7b24fd64dfe7864d3bebaf9a507788a"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/single_view_tests.rs",
+      "sha256": "7d21906cd99e893185d849b5b5d54f7dcf9526bd88ab138e77915a091f9b0977"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/storage_tests.rs",
+      "sha256": "b28a8f60c1709675374d4080ee4cb0a56fa1a234753476130cf343c52d9a5850"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/test_ui.rs",
+      "sha256": "ccc65a3f7b9dfbcde69d3967f18ea23209620c07344d0dd6751ebf79c5fbdc07"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/tests/activity_lifetime.rs",
+      "sha256": "6f1fe73f284fa6542578bedbbd7cf7693e37f9d8f3336b26c1b56bb7a4b99180"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/tests/desktop_storage.rs",
+      "sha256": "fa4cf0b01c0295d9ef749a13486ec41e01bdfd49a1f159be8f7a0c689ed4fc10"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/tests/single_view_lifetime.rs",
+      "sha256": "06951cc19ef40de456ee29df7608e9403826dc00b8cd395e229d4c16e4abf72e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/tests.rs",
+      "sha256": "8720cf239b678d9c77faba7399de7aef32dbd0a56ca8d9549c13bd71f97d3b85"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/theme_choices.rs",
+      "sha256": "2f360b5353ea459817df3655e8195e39d92d97a08edd5d7ea8970635991b3b55"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/theme_tests.rs",
+      "sha256": "cfc65d41a7562da20ef1ce17673baa1c70c62249111336d45b76e81330d5ca50"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/view_model.rs",
+      "sha256": "4c02cf056df73e30d4824c95916dd72eeb49d76710c094b414a48266a2bc07cc"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/DataButtons.xaml",
+      "sha256": "df7c6411424c6ae924ea2b0815b242d158e8a1aa8a84681713045ccd5025b713"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/FieldCombo.xaml",
+      "sha256": "f86ba611f0fd22f1adee8de63c81ee66d5e6934bf5b455e97b1de71e782c76ca"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/FieldSlider.xaml",
+      "sha256": "b8d00041c698acf1c62919cc404b5ad6ba5c9dda69c678a5b1fa67df2b710b23"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/FieldToggle.xaml",
+      "sha256": "b37014a872ea2af8981f618077647d56f816af0ad4399fc2e4b70485f77b3e43"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/Footer.xaml",
+      "sha256": "d26ee60f498b92fe09db2f219f83db34502c0e8118d9e7c07077a3476973c6e1"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/Header.xaml",
+      "sha256": "c940ec1f0aba0a8ee26faadf18f5bb04dd84431063300e53835eb1eecc3f7ba6"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/views/settings/Languages.xaml",
+      "sha256": "c3045829831df5db7ef68b8dad34f17220664f9fb2124b343f7bb0aec3c8d57e"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.Sample/wheel_routing_tests.rs",
+      "sha256": "08937a28b7edcf25dd979ad83f7dad3a6fea0cc22968b41f7d1f71689ed154d6"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/Cargo.lock",
+      "sha256": "cec3d625577ce64ff91cf16f165a4c36da7607fca91840510a2b55448014968d"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/Cargo.toml",
+      "sha256": "f151faa8a5782c86ee96520daaa447449075820d3dab81995f733c451739069a"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/lib.rs",
+      "sha256": "cb7efcf5106d658ff2b705e90a290cd4cea3ef56b755075eedeb9fc9b5191b22"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/lifecycle.rs",
+      "sha256": "10997d4e99c0c699daa20308a4a4cc69062a5fe93e25b6fceb82ab5083f493bb"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/main.rs",
+      "sha256": "586ac19341c9116db3aabc43b15e2ff9bdb805377cb46cb6a48c6bd7f2c481b3"
+    },
+    {
+      "path": "components/FerroBoard/samples/FerroBoard.iOS/storage.rs",
+      "sha256": "c51cafda91a102d6c6dff92cd00dd69ae858939f43212f7d8c46be4f7e88a4e4"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/Cargo.lock",
+      "sha256": "d91547494d5650f82327d7032fed9ac7ab7683cf9b7c3900647aa59541a4b229"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/Cargo.toml",
+      "sha256": "382add0cde7249c5fcd1d241846c4cfba214982cba30c98259cc9d74f0ac21a8"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/cancel_probe.rs",
+      "sha256": "cbebc3bf5508e6738c64bc1584b3b99cfd2ffdd37ae437c5a8f78178cfb6c845"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/clipboard_panel_probe.rs",
+      "sha256": "b948f667fd1d8913af8de821dedb356394acb6cf84b8041969e89c35bcbf488c"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/clipboard_probe.rs",
+      "sha256": "e564e34e8245f35a26c9d919e3536817c7b2804f70fba965410072e62b05059f"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/emoji_probe.rs",
+      "sha256": "c791b24ca5a7c8901dfefff385091bc0f102e152ba39acc24d3b09353bf3c582"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/glide_casing_probe.rs",
+      "sha256": "739fb3759c13012c6509aced713a470beeeeb612c199c1ebc09360cffd43d06b"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/glide_layout_probe.rs",
+      "sha256": "2b385db391237307285635b2edfd08b9bcac20330684a00d6678b55e4b0f2f31"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/glide_probe.rs",
+      "sha256": "73017167db51e854145750a178ed50cfa2d29de28fb6c70f8fb8ab017754e4b4"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/layout_probe.rs",
+      "sha256": "6eeaf344591e3982876cf7f3284310d1af457785467e48bd791e0663e9c7a1cb"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/lib.rs",
+      "sha256": "eb189a12b7801c86eb53b3e9dce92df4abc9dce7130cbd024e4d56875de6bc89"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/lifecycle_probe.rs",
+      "sha256": "fee54fe79f563fa9933fd829855d8e7bde62f64097bfa3cd669a538a2176fa95"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/orientation_probe.rs",
+      "sha256": "1f0e10d65c1fdc30ce2480d5b725c2046e718d59b7ad68af68f7ce596ec5c101"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/password_probe.rs",
+      "sha256": "c4164231a3fa9bd98a53b59b7be2e2cea378a55f1911c58418baaf053d93c117"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/run_glide_checks.py",
+      "sha256": "c71d811468b5876b2a74a696a79356021575dd73d3731c165a0e61e574018811"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/run_pointer_checks.py",
+      "sha256": "7be00ebdfcbd30c638cc46f89f40dab74c94793230f5a9468b8bc5510b92e445"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/run_privacy_checks.py",
+      "sha256": "19ed1aa98ff7d109ec72e1e3fed9c6363e0351224b116c4c6944e2f33dbf118c"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/scroll_probe.rs",
+      "sha256": "b4e3fbdefdc4b229c13408eaad620c8e1098edabe89859c02e9870c0ea55692d"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/selection_probe.rs",
+      "sha256": "94bf1afe9759ac95adbc7b20b93f964fe49f6f3806657b77ba55865e4c1c32e9"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/test_glide_checks.py",
+      "sha256": "5aad149e02f6005dcf05c31e1245da3d130eb7a93c9b7ab92e4e614ab920f4ac"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/test_instrumentation_runner.py",
+      "sha256": "1f68997fd33b0e0597f625a5ea3463d4c1cbc9d86dc39eabab725114ffa66175"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/test_pointer_runner.py",
+      "sha256": "7e9eaea9eddb691478ce4fde45e0facb34ad1cb1a20a98c6d531faf88475860a"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Android/transform_probe.rs",
+      "sha256": "569ae845f23fa327f5edde8e388cdde0591ee7ea738e52f081178cefe4f3a6d5"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/ActionDetails.xaml",
+      "sha256": "60f00ca42ac48757826a264e53c537a596f4adac21c288db7d6f8e41a4518d7c"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Actions.xaml",
+      "sha256": "fa308c0b22417cdd433d5ce3d518ebbb0954ce5169e45eada01391ea827e1394"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Callbacks.xaml",
+      "sha256": "6981a90a1c6acf941fe57cf05fe4d587a50f1bf4548e184c00b4c3ee5626acb2"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Cargo.lock",
+      "sha256": "e00887b2df8f82f24a772a28271e496dae2d2ee30e7a2edf704061e6794a3edb"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Cargo.toml",
+      "sha256": "395da5df9204217106347856e94be46d7037926ce9980bd9ebf224010215203d"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/CodePoints.xaml",
+      "sha256": "659dd3480b8525ac5ab38ba4819f6a51433915057713be80bb90a9a3c7313924"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/ComputedRows.xaml",
+      "sha256": "9ad6867cb2fc0c062118a0f32d6875cc60383f0f385b4286eeaeee0c955fa15a"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/ComputedSnapshot.xaml",
+      "sha256": "c5017337a05a4b1d5bd1786757b554d2a544332384a995d2b887eeec0ae50d02"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/DictionaryModels.xaml",
+      "sha256": "83080b574fa325cd53ab23605c937ee6a9e593361f8c96faa731621d648adfc9"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/EmptyArrangement.xaml",
+      "sha256": "5867161c3293ebb74db217d67d2b9b58bea289b7b4c5c53492470433e1b7f158"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Geometry.xaml",
+      "sha256": "fa6e061cb8a1e630fb90c4f2e32aa59aa3ccad0df9f7cba6ef058491fdfcaa1f"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Hosted.xaml",
+      "sha256": "317b5f4424243eb9698c8b8b5db758bdcfd586cd4067c6966640ce7d195da371"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/KeyList.xaml",
+      "sha256": "90f8b51a0890477ed8ee9020a7d1b42ee53f32a9417a00599c88ec8ccf494738"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/LocaleModels.xaml",
+      "sha256": "251b1c833ee6eb9a4fdbff36016f19f526c5cc6fa7a5169a415002f942242f22"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/NativeModels.xaml",
+      "sha256": "1114cdc172b26c2dd0bf2f350269fd96fda1c2a45e3818125cc89e5aeaf44674"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PerformedActions.xaml",
+      "sha256": "847e877266a1696df8b8c7518224d3cd36ce5129a59c21c6e78c277ef8b553d3"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PopupKeys.xaml",
+      "sha256": "0d1d1578cb583d925e462a0ca339d9629649adb4761dcbfb7998ca96186162bd"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PopupLookup.xaml",
+      "sha256": "321b913ad0224e48cf64ade2832134b63e94040340397cd69ae907b62a4b67b6"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PopupSnapshots.xaml",
+      "sha256": "416c4c7b6821e7d6e91d952eea7657a5d9d3fe9ff94db86224a65d4175d8e8f5"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PredictionList.xaml",
+      "sha256": "90fe95ee97db03a16553d8094391f4fba6dcdfb8a94c4aa3ba528ffa3efe7eff"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/PrivacyHosted.xaml",
+      "sha256": "5af5638b4a3f69891ab75b2fa1f124b6557a43a66a9c9c090ed673d91296a553"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Request.xaml",
+      "sha256": "d4a204c740a468b51cc6a31e231d69cf5d35fe00b9a6f5c3810cdaaa796428e7"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Resources/Defaults.xaml",
+      "sha256": "94bfdb396d967745c23ea446b6a3eaa1966189169e17217b8a5adbe11331db17"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Resources/Keyboard.xaml",
+      "sha256": "3094250247806452066094ffeeac24a42b76e846358295dcd41d75c38b3bbccd"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Settings.xaml",
+      "sha256": "f5d5ea81361f36d308667b5ab953fb6a076716b1c72e716b471c34ed8a627151"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Standalone.xaml",
+      "sha256": "e5395f7e638733d8cc08f11eb1490a78101bd50517acec1ea11d5559bdfd4ed8"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/SubtypeList.xaml",
+      "sha256": "6031850cded1ce61185d56e03a220afd235cc59f04272db887fb8545b19655e4"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Subtypes.xaml",
+      "sha256": "672682758b4af66b75b6dc296ff81140d74dc0d573ed655a0aaf677f2385fb75"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Suggestion.xaml",
+      "sha256": "ab33f8ef36965c72da2566da38e1ce229a697b0df862a33783b7e0c574311edd"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/SuggestionList.xaml",
+      "sha256": "0ab1478bbf750e5c7c13c2cb3a8c21613795ae3f280dd267de22e32f2a0d771b"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/TextKeyList.xaml",
+      "sha256": "14f2c02f9f224361aa0995ec28d37a62f06780f9bcc8de2afe5aefd2294a7b10"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/TimeWindows.xaml",
+      "sha256": "495aaebd9b5395f0f3d9ab6e9eb0c7084bcaf941a6dd1586cf37023ee3ac5a90"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/TouchConfiguration.xaml",
+      "sha256": "b868429ba2573f82f8d4b34f085fc6d346a9f954176ce605aa01f2f16ba0ccbc"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Utf16Buffer.xaml",
+      "sha256": "b3fb2800da528c648f8d987be90f5d1c8a06e71a0cae2b6bc5c56118210e4894"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/Views/ResourceKeyboard.xaml",
+      "sha256": "7182a745d83110886a68afd3c0441ca5cdfe1e33528650d50698ccd2ff8be892"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/build.rs",
+      "sha256": "b3a1eb4db9009b185a28dec675b1b2b2a25ad33fbfc5711466c874606bcfed9b"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/consumer.rs",
+      "sha256": "c377905bd6a6138a981c189a3d68eefc61b3b17e9a5ffa63eca5197fee68e680"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/lib.rs",
+      "sha256": "9502216982abd4430c88ce3eb5c5df75875239a1ed11855250b647e98b84da4c"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/action_metadata.rs",
+      "sha256": "42c8690a55e20b2a28c3504924b8a6d2bfbb6a50ab76243fcdeb94096cc990a5"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/callback_tokens.rs",
+      "sha256": "9d55c9694223ace31a49edabbc76f9a7d32b51d0be73cfbf4db52f38ef20b49d"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/clipboard_time.rs",
+      "sha256": "e9d56bcfd62e29e2652f96db28dc4a4d9d6281c14ec1af41156bbb7065f16411"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/composer_extension.rs",
+      "sha256": "24ae8f09e6c6c64f3e2b96582486e3ca651a426e9b17e8e6c3d392d6c057642f"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/computed_queries.rs",
+      "sha256": "eb4fd3edb7e857f61f22e8e1838e0ffd9928089708be3a775973e6193d187ada"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/computed_storage.rs",
+      "sha256": "251c325055884121d0df55038878ed389ad614d5575a32639c6a4611ff857e1d"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/control_events.rs",
+      "sha256": "97adfe0fb0efd950ee9566bd559347a29c69b7961c3d492bec0cb8f2b41feab0"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/emoji_native.rs",
+      "sha256": "7524e81ac90a4954d86b3ed43320eaf7bb80136c66fd2dd533a7532cd65ec4ad"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/enter_callback.rs",
+      "sha256": "94aee2b332cf010e259bfb0c66cf3612a70dd241744639962af023e0d843008a"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/intelligence_errors.rs",
+      "sha256": "8b6e564864d36215c8a1f4ca40d9708a5dd33989c7b70d05180bda3acf8c1a89"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/key_errors.rs",
+      "sha256": "06937b458bdf262470fb00f36771b94531565eb8c578077bfa292d757ad40a41"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/layout_errors.rs",
+      "sha256": "ba3b2cda27d2493eddfea53ab58a67de7ce399231f963737ef1360f048bf8eda"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/model_errors.rs",
+      "sha256": "0b7f9e69552e455a95355f8cd2693b5d9459f7e4105f0e61f9c3e8caf1134c47"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/model_hash_metadata.rs",
+      "sha256": "f3489ba1b3a3e2b5aca2994a3c72d1554bd143917ac0286023c2d3debe0256a5"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/native_core_traits.rs",
+      "sha256": "76b42abb88d2790d512820597761abe28ac55d9604bc6a23d89045f2f3bae609"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/native_input_targets.rs",
+      "sha256": "6c5ffb829bc5e5659d9331e96cc71f7f85d1f9fb63bb1186b9dc4279b77798d4"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/request_native.rs",
+      "sha256": "2c5217f9304c0d70f1564113114ea7751ccb99e0d08820f998af2c9574736f8f"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/resource_disposal.rs",
+      "sha256": "785457b33f6c70454b199c722ea6fb9fb4ba989a08f8ec3887b7f2a31db60fd3"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/resource_texts.rs",
+      "sha256": "a336e7442103b00a4f1d29f8a7351de7b9c10793c00f38bb3dba54711dc3afee"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/subtype_fallback.rs",
+      "sha256": "b690955dfd9960b065757652a557c0acd82e8b2997f92c18b42b359a37056d6f"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests/theme_subscription.rs",
+      "sha256": "e6b087fcf6ba9b48d5e6776a6f1c14324705d3b9002a43faa3f0276248733845"
+    },
+    {
+      "path": "components/FerroBoard/tests/FerroBoard.Native.Consumer/tests.rs",
+      "sha256": "b146a9761880bf328053f322f066f7d99805554d784a9cd9c260f8ac92e89e30"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/byref_type_cases.rs",
+      "sha256": "68427c4d50feed57b4cc072becb4931e52632990ff2674450d2c7addf7fa9847"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/currency_set_api_contract.rs",
+      "sha256": "f079149643ac7f7c2a5c084940dcb68fa1d035e37d830057f37ddaebbcfd7c3a"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/derived_key_contract.rs",
+      "sha256": "045f1073c584d152f9539a251784c1faa5f68b73ebbdd56df02d3f7ac7006502"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/engine_text_contract.rs",
+      "sha256": "751c7760f147daefd7cacbc030cc354022aec571ea779aaee1777089bad3562f"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/evaluator_default_scalars_contract.rs",
+      "sha256": "36e2c021cf964ed18d15791db6f297a5d598eb6598132574c838dc61ebebd116"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/fixture_clipboard_time.rs",
+      "sha256": "5eca49483bca9694ce7e79170a11ebe71722923e59d363f567effa615227d2f7"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/fixture_clock.rs",
+      "sha256": "5439ae7b606231c83fbb5727c10d54f27ce4e45bf56c82f4e932564682cac736"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/fixture_duration.rs",
+      "sha256": "936232c1b175a77a35177aeb74673c66c8769300fad2e16dd7fb9f7396c5a37c"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/input_static_values.rs",
+      "sha256": "7855bceaf6adaec03d8e94a5acdd669cd0b2185dbf63bf1f8ea198527b42695e"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/key_api_contract.rs",
+      "sha256": "3362d7a124201397f81b1270b4ea957eb8521c4875156addbbfe54ccf9b6b447"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/key_null_contract.rs",
+      "sha256": "541506414553f16b66cdbbc69f4ac2cd10877aecdc11e350f27e27e775d3182c"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/layout_deferred_json_contract.rs",
+      "sha256": "16a3d170f69f0b0e457497ba18601ac21d94c147d31fa74a34bde8152ef84efa"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/layout_utf16_contract.rs",
+      "sha256": "d680a69bf9ee4355e9c77f4b7ca9ad1497373a3fdda3d920fa9e27cfead476c4"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/local_future.rs",
+      "sha256": "10befce628d3343f92c4173b24e90b6bd815858e9413ca569a6c0d4a6cab7dea"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/native_evaluator_culture.rs",
+      "sha256": "73ea64560d91ea94384760aacf8b64ec51c39e3dff420fc3053c343900bff6a0"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/parameter_cases.rs",
+      "sha256": "134d4b263b8c8d667cf810d3465490981cdbe37bbef373652ff55750884a4dff"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/popup_api_contract.rs",
+      "sha256": "e0a1b6fd88c0afe20772ca7c7448a9f5d8e48f7a1c0328175d6c2f058c85ecba"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/popup_mapping_authors_contract.rs",
+      "sha256": "4d2177b2f018f8c38c19f90de0d9fc92f74362ed8a63087396e199257f6ad593"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/popup_mapping_lookup_contract.rs",
+      "sha256": "45990671d842f975f0da645cfea1a3eb3f5c5261054a0ccf49cfd59c76b390de"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/resource_json_contract.rs",
+      "sha256": "166b7bae17ee5315044d002efe48ba107066a60a702843e524e4b526afc3477f"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/resource_text_contract.rs",
+      "sha256": "f40b0fef69acac8ef9e49e3da43cd057ada2dcd125d758e9e8874f79c5403332"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/root_object_signature.rs",
+      "sha256": "d7382902dccff6cf9b29280d1f4a38146cb2bda1f3443fa4e0abc77d07520265"
+    },
+    {
+      "path": "components/FerroBoard/tests/support/selector_api_contract.rs",
+      "sha256": "fe4ab772a650ab6203fa358fb013e28b784825fdcfa072744a606ecd5f782a7b"
+    },
+    {
+      "path": "components/FerroBoard/scripts/check_component.py",
+      "sha256": "1d76967ba8d34f38ad63f43c5bef1bcbe38bf0ad02cd817d371fb043ef1febe4"
+    },
+    {
+      "path": "components/FerroBoard/scripts/env.sh",
+      "sha256": "c5cba33e6ed0e880d6ed936f72671859ec6c70a76aaebe8e1bbf108dd8e08f16"
+    },
+    {
+      "path": "components/FerroBoard/scripts/generate_builtin_themes.py",
+      "sha256": "a696a504fd9b10f129acc73203babea78497c57df3b53bca89d9351a5fb5e384"
+    },
+    {
+      "path": "components/FerroBoard/scripts/generate_icon_data.py",
+      "sha256": "1ccd26fcbc9efa2173e1be1db63f672b581db12984278fb5d8e05f8a6f7192fc"
+    },
+    {
+      "path": "components/FerroBoard/scripts/generate_resources.py",
+      "sha256": "c61ad369a73d80aebde719e87907dbc78456a296c0b63a4b0279235fe7322cef"
+    }
+  ],
+  "immutable_reference_files": 351,
+  "embedded_resource_entries": 206,
+  "frozen_fixture_files": 204,
+  "all_new_commit_author_and_committer": "Wieslaw Soltes <wieslawsoltes@users.noreply.github.com>",
+  "limits": [
+    "Headless/AX smoke does not establish physical mouse/pen/touch/multitouch or full accessibility/IME/privacy/font/performance/platform certification.",
+    "Windows, Linux, mobile and browser native runs were not performed for this branch.",
+    "Native clipboard monitor polls every500ms; host reveal uses native minimal reveal; nine historical local-time offsets retain explicit differences.",
+    "A-001 rendering anomaly remains user-deferred.",
+    "Source-integrated independent packages; crates.io publishing/signing/notarization are separate."
+  ],
+  "prior_attempts": [
+    "Initial catalog test cache was repaired after disposable compiler cache cleanup removed an artifact.",
+    "Catalog test import and styled-window keyboard-device setup were corrected before all4tests passed.",
+    "The sample settings-control manifest was retained before the final complete831test pass.",
+    "SDK view builder regeneration adds five lines required by its native pointer-focus property."
+  ],
+  "catalog_source_inputs": [
+    {
+      "path": "Cargo.toml",
+      "sha256": "5155fe464fb3909f7c70044b1ea36e273a0f6634bddf8eb803feeb3c23477acd"
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "cab58828a2444c62435ab1d3a3350d6e805f2e48ba1e911075889397c0575b90"
+    },
+    {
+      "path": "samples/ControlCatalog/Cargo.toml",
+      "sha256": "132d636dbd26681d1436c63c3eaae906da81b6b729c98b8dfb110ee045bf1683"
+    },
+    {
+      "path": "samples/ControlCatalog/register_types.rs",
+      "sha256": "cc8808fb03e39258cead7a702e573421aecee6f3d1afe805889b32d863f879bb"
+    },
+    {
+      "path": "samples/ControlCatalog/Pages/mod.rs",
+      "sha256": "a1b2ac9f365b29b147e0b592f7a0224057cfd6e460154ca12e5dab9b87a4a222"
+    },
+    {
+      "path": "samples/ControlCatalog/Pages/FerroBoardPage.xaml",
+      "sha256": "1bc227f73fd0e822cfdde935fcfc2280eb5ec70ec64a046c2861907d8a1fe59a"
+    },
+    {
+      "path": "samples/ControlCatalog/Pages/ferro_board_page.rs",
+      "sha256": "e3024a2a5dd7397baef3825d335abc757c9612106655cd8e36e76d02653b47f1"
+    },
+    {
+      "path": "samples/ControlCatalog/ViewModels/main_window_view_model_page_list.rs",
+      "sha256": "5503404454b79fcb94ae3ee19acf8d6f8bcc6188e0f86cc3bca91d6d0ce0a228"
+    },
+    {
+      "path": "samples/ControlCatalog/tests/mod.rs",
+      "sha256": "32a10d2f145634f1ca02d2edc1a54be7e005776d7352b56a9ac8a0322ca3114a"
+    },
+    {
+      "path": "samples/ControlCatalog/tests/ferro_board_page.rs",
+      "sha256": "67211d5665e0d7ec3b56806f9c47755054ed8d1d8cbfa6603c48f9e5910aff8d"
+    }
+  ],
+  "framework_source_inputs": [
+    {
+      "path": "src/FerroUI.Base/ferro_object.rs",
+      "sha256": "8151cbbdfc518d1da2cfa85d316cebcf49a661666b7c056c0c22a16a03e3a075"
+    },
+    {
+      "path": "src/FerroUI.Base/ferro_object_tests.rs",
+      "sha256": "ec3e397064e1cfe786b0920dd32739bae93a0011d278f526b490edfb01fb222b"
+    },
+    {
+      "path": "src/FerroUI.Base/input/focus_manager.rs",
+      "sha256": "c4ed4ee4bea99445a5dae7c46515a1bc571c20dde87bc1a51e176f5b167e1878"
+    },
+    {
+      "path": "src/FerroUI.Base/input/input_element.rs",
+      "sha256": "208d4871df942baa87fd8ef8770e7a2fc5ae6608651efee31f8a1dfe2f3bb74f"
+    },
+    {
+      "path": "src/FerroUI.Base/input/keyboard_device.rs",
+      "sha256": "3e33336bd8d1f1332842ab5bd99ce079896752e8969ecb2b25945c7eba55ed9f"
+    },
+    {
+      "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
+      "sha256": "0bcb6f1428a9c4248ab785411fe4e63b1ca4a4b6da069e606fed57830a7af051"
+    },
+    {
+      "path": "src/FerroUI.Base/input/text_input/text_input_method_client.rs",
+      "sha256": "7ec4a37150d6e37dbe9aff0b171d6a2781edc1d3f2a5a055e3029a41fdfa4cf0"
+    },
+    {
+      "path": "src/FerroUI.Base/metadata/markup_macros.rs",
+      "sha256": "0dfdf0a4f0c2756dac244f450d309679dae53d7e05c178041a5d91f71103c069"
+    },
+    {
+      "path": "src/FerroUI.Base/metadata/markup_type_tests.rs",
+      "sha256": "5076a8fce78b56e6c8c5b4cf5c171b6a11a127c515749f22dbc2db08955ba133"
+    },
+    {
+      "path": "src/FerroUI.Base/property_store/effective_value.rs",
+      "sha256": "0b49ae1dc24abc088061696f7ce38d1acaa90ef230363aa5c3627a90c7b1bb21"
+    },
+    {
+      "path": "src/FerroUI.Base/property_store/value_store.rs",
+      "sha256": "03ad2a7c8fc77c1e0a44daca2c564a8ae660bd74e1fc4feb533d1e8abe8daa8c"
+    },
+    {
+      "path": "src/FerroUI.Controls/automation/peers/text_box_automation_peer.rs",
+      "sha256": "db0ae2244eb92433cb46f577d92dfc00084d889a7be9a194baa7b10643fb09c3"
+    },
+    {
+      "path": "src/FerroUI.Controls/input_element_focus_tests.rs",
+      "sha256": "30441ad9e1757df8b513858a45dd123626ad9a03edd49e1f7867fc26aa67fdb1"
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box.rs",
+      "sha256": "8ce7ad3ff318a7a2a1721a6a4a6d6bca38717bcc7af4b8d1d6f798b8c06cdee5"
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box_tests_input.rs",
+      "sha256": "c3ad5fc429557adecfcb171b86e6557c60270115bb1cd0c2df04a60de25a0e5a"
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box_text_input_method_client.rs",
+      "sha256": "703a4f07f4793201d72606aa367e9bebc984a8b565d988f028df5b443ecc8a49"
+    },
+    {
+      "path": "src/FerroUI.View/generated/builders.rs",
+      "sha256": "ef8bf17fddecea1dbc38d3abfd2940a7f485820fd3ea2085b2d49daf33848f36"
+    }
+  ],
+  "post_validation_formatting": {
+    "files": [
+      "components/FerroBoard/src/FerroBoard.Core/Cargo.toml",
+      "components/FerroBoard/src/FerroBoard.Core.Ferro/Cargo.toml"
+    ],
+    "change": "Remove trailing blank lines at EOF only; package values and dependency declarations unchanged."
+  },
+  "post_validation_manifest_wiring": "Catalog declares the same three component path dependencies directly instead of global workspace aliases; locked desktop check and SDK release-metadata check pass."
+}

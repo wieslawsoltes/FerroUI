@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:app="clr-namespace:FerroBoard.Native.Consumer;assembly=FerroBoard.Native.Consumer"
+ xmlns:e="clr-namespace:FerroBoard.Engine;assembly=FerroBoard.Core"
+ x:DataType="e:KeyboardEngine">
+ <StackPanel.DataContext>
+  <e:KeyboardEngine>
+   <e:KeyboardEngine.DoubleSpaceWindow>
+    <x:Static Member="app:Consumer.TypingWindow"/>
+   </e:KeyboardEngine.DoubleSpaceWindow>
+  </e:KeyboardEngine>
+ </StackPanel.DataContext>
+ <ContentControl Content="{CompiledBinding DoubleSpaceWindow}"/>
+</StackPanel>

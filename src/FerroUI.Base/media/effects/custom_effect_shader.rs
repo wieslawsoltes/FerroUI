@@ -32,7 +32,9 @@ pub enum ShaderEffectMode {
     /// The program does not sample the content: its output is drawn over the
     /// content with the [blend mode](ShaderEffectDescription::blend_mode) of
     /// the description (a procedural overlay: scan lines, a spotlight), inside
-    /// the layer of the content, so it blends with the content only.
+    /// the layer of the content, so it blends with the content only; masked by
+    /// the alpha of the content when the description
+    /// [is masked](ShaderEffectDescription::masked_by_content).
     Overlay,
 }
 
@@ -171,6 +173,18 @@ pub struct ShaderEffectDescription {
     /// without a factory
     /// ([`ImmutableCustomEffect::check_shader_children`]).
     pub children: Vec<Cow<'static, str>>,
+    /// Whether the output of an overlay is masked by the content (#580): the
+    /// output `S` is multiplied by the alpha of the content `D` under it
+    /// before it is blended, `blend(S * D.a, D)`, so that the overlay draws
+    /// nothing over transparent content (the corners of a rounded panel, the
+    /// gaps between its children), as Effector draws its shader overlays
+    /// (`EffectorRuntime.DrawMaskedShaderOverlay`: the output masked
+    /// `DstIn` by the snapshot of the content, then blended over it). Skia
+    /// draws it with a runtime blender, the pass of Vello multiplies the
+    /// output by the alpha of the content texel, and the CPU reference does
+    /// the same. `false` by default; not used by a content-sampling program,
+    /// which composes its output with the content itself.
+    pub masked_by_content: bool,
 }
 
 impl ShaderEffectDescription {
@@ -185,6 +199,7 @@ impl ShaderEffectDescription {
             sample_radius: 0.0,
             padding: ShaderEffectPadding::Effect,
             children: Vec::new(),
+            masked_by_content: false,
         }
     }
 
@@ -219,6 +234,14 @@ impl ShaderEffectDescription {
         self
     }
 
+    /// The description of an overlay [masked by the
+    /// content](Self::masked_by_content): its output is multiplied by the
+    /// alpha of the content before it is blended.
+    pub fn with_content_mask(mut self) -> Self {
+        self.masked_by_content = true;
+        self
+    }
+
     /// Whether the program samples the content.
     pub fn samples_content(&self) -> bool {
         self.mode == ShaderEffectMode::ContentSampling
@@ -248,8 +271,10 @@ impl ShaderEffectDescription {
     /// - The entry points [`SHADER_WGSL_VERTEX_ENTRY`] (a triangle over the
     ///   target) and [`SHADER_WGSL_FRAGMENT_ENTRY`], which calls `effect` at
     ///   the centre of each pixel of the area: a content-sampling program's
-    ///   output is the result; an overlay's output, clamped to 0..1, is
-    ///   composed over the content with the [blend mode](Self::blend_mode)
+    ///   output is the result; an overlay's output, clamped to 0..1 (and
+    ///   multiplied by the alpha of the content texel when the description is
+    ///   [masked by the content](Self::masked_by_content)), is composed over
+    ///   the content with the [blend mode](Self::blend_mode)
     ///   (every mode of `BitmapBlendingMode`, premultiplied, the formulas of
     ///   Skia's blend modes; `Unspecified` is source over). Pixels beyond the
     ///   part of the area the textures hold are transparent.
@@ -266,7 +291,7 @@ impl ShaderEffectDescription {
     /// `vs_main` and `fs_main`: a program that declares one of them does not
     /// compile.
     pub fn wgsl_module(&self) -> String {
-        shader_wgsl_module(&self.wgsl, self.mode, self.blend_mode, &self.children)
+        shader_wgsl_module(&self.wgsl, self.mode, self.blend_mode, self.masked_by_content, &self.children)
     }
 }
 
@@ -365,6 +390,21 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
     let source = clamp(effect(fragment.xy + ferroui_pass.area.xy), vec4<f32>(0.0), vec4<f32>(1.0));
     let destination = ferroui_content_texel(vec2<i32>(floor(fragment.xy)));
     return ferroui_blend(source, destination);
+}
+"#;
+
+/// The fragment stage of an overlay masked by the content (#580): its
+/// output times the alpha of the content, composed over the content by
+/// `ferroui_blend`.
+const MASKED_OVERLAY_WGSL: &str = r#"
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    if (any(fragment.xy >= ferroui_pass.area.zw)) {
+        return vec4<f32>(0.0);
+    }
+    let source = clamp(effect(fragment.xy + ferroui_pass.area.xy), vec4<f32>(0.0), vec4<f32>(1.0));
+    let destination = ferroui_content_texel(vec2<i32>(floor(fragment.xy)));
+    return ferroui_blend(source * destination.a, destination);
 }
 "#;
 
@@ -541,6 +581,7 @@ fn shader_wgsl_module(
     wgsl: &str,
     mode: ShaderEffectMode,
     blend_mode: BitmapBlendingMode,
+    masked_by_content: bool,
     children: &[Cow<'static, str>],
 ) -> String {
     let mut module = String::with_capacity(wgsl.len() + 4096 + children.len() * 640);
@@ -556,7 +597,7 @@ fn shader_wgsl_module(
         ShaderEffectMode::ContentSampling => module.push_str(CONTENT_SAMPLING_WGSL),
         ShaderEffectMode::Overlay => {
             module.push_str(&blend_wgsl(blend_mode));
-            module.push_str(OVERLAY_WGSL);
+            module.push_str(if masked_by_content { MASKED_OVERLAY_WGSL } else { OVERLAY_WGSL });
         }
     }
     module

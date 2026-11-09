@@ -13,7 +13,12 @@
 //!   bound to the child `content`, so the content stays a texture of the GPU
 //!   (Ganesh, Graphite) and is never read back;
 //! - an overlay is drawn over the content inside a save layer, with the blend
-//!   mode of its description, before the layer is composed.
+//!   mode of its description, before the layer is composed; an overlay masked
+//!   by the content (#580,
+//!   [`masked_by_content`](ShaderEffectDescription::masked_by_content)) is
+//!   drawn with a runtime blender ([`MASKED_OVERLAY`]) that multiplies its
+//!   output by the alpha of the layer under it before the blend mode, the
+//!   blend mode a child blender of the program.
 //!
 //! Skia evaluates a runtime shader image filter in the space of the canvas at
 //! its save layer, with the rest of the transform applied to the result (its
@@ -46,7 +51,7 @@
 //! factory: its content unchanged.
 
 use crate::gpu::ISkiaGrContext;
-use crate::runtime_effects::{self, make_shader, ProgramKind, Uniforms};
+use crate::runtime_effects::{self, make_blender, make_shader, ProgramKind, RuntimeProgram, Uniforms};
 use crate::skia_sharp_extensions::to_sk_blend_mode;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::media::effects::{
@@ -68,11 +73,39 @@ pub(crate) struct ShaderEffectProgram {
     effect: sk::RuntimeEffect,
     /// Whether the program samples the content (the child `content`).
     pub(crate) samples_content: bool,
-    /// How an overlay is drawn over the content.
-    pub(crate) blend_mode: sk::BlendMode,
+    /// How an overlay is drawn over the content: the blend mode of its
+    /// description, or the runtime blender of an overlay masked by the
+    /// content ([`MASKED_OVERLAY`]) with the blend mode as its child.
+    pub(crate) blender: sk::Blender,
     /// How far the program samples the content from the pixel it colours,
     /// in device independent pixels.
     sample_radius: f32,
+}
+
+/// The blender of an overlay masked by the content (#580): the output of the
+/// overlay (`src`) times the alpha of the content under it (`dst`), composed
+/// with the blend mode of the description (the child `overlay_blend`), as Effector's
+/// `DrawMaskedShaderOverlay` composes it and as the pass of Vello does.
+pub(crate) static MASKED_OVERLAY: RuntimeProgram = RuntimeProgram {
+    name: "masked overlay",
+    kind: ProgramKind::Blender,
+    source: r#"
+uniform blender overlay_blend;
+half4 main(half4 src, half4 dst) {
+    return overlay_blend.eval(src * dst.a, dst);
+}
+"#,
+};
+
+/// The blender of an overlay drawn with `blend_mode`, masked by the content
+/// when `masked`; `None` when the masked blender does not compile.
+fn overlay_blender(blend_mode: sk::BlendMode, masked: bool) -> Option<sk::Blender> {
+    let mode = sk::Blender::mode(blend_mode);
+    if !masked {
+        return Some(mode);
+    }
+    let effect = MASKED_OVERLAY.effect()?;
+    make_blender(&effect, &Uniforms::new(&effect), &[ChildPtr::Blender(mode)])
 }
 
 ferroui_base::ferro_thread_local! {
@@ -115,10 +148,15 @@ fn build(effect: &ImmutableCustomEffect, description: &ShaderEffectDescription) 
         return None;
     }
     let sample_radius = if description.sample_radius.is_finite() { description.sample_radius.max(0.0) } else { 0.0 };
+    let masked = description.masked_by_content && !description.samples_content();
+    let Some(blender) = overlay_blender(to_sk_blend_mode(description.blend_mode), masked) else {
+        report_failure(name, "the blender of an overlay masked by its content does not compile");
+        return None;
+    };
     Some(ShaderEffectProgram {
         effect: compiled,
         samples_content: description.samples_content(),
-        blend_mode: to_sk_blend_mode(description.blend_mode),
+        blender,
         sample_radius: sample_radius as f32,
     })
 }
@@ -491,7 +529,7 @@ fn child_shader(image: &EffectImage, layer: &ShaderLayer, gr_context: Option<&dy
 mod tests {
     use super::*;
     use ferroui_base::media::effects::library::{
-        BurningFlameShaderEffect, DissolveTransitionEffect, MaskTransitionEffect, PixelateEffect,
+        BurningFlameShaderEffect, DissolveTransitionEffect, GridShaderEffect, MaskTransitionEffect, PixelateEffect,
         PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect,
         WaterRippleShaderEffect,
     };
@@ -504,6 +542,7 @@ mod tests {
             ImmutableCustomEffect::new(PixelateEffect::default()),
             ImmutableCustomEffect::new(ScanlineShaderEffect::default()),
             ImmutableCustomEffect::new(SpotlightShaderEffect::default()),
+            ImmutableCustomEffect::new(GridShaderEffect::default()),
             ImmutableCustomEffect::new(DissolveTransitionEffect::default()),
             ImmutableCustomEffect::new(MaskTransitionEffect::default()),
             // The interactive effects (E7).
@@ -519,6 +558,10 @@ mod tests {
             assert_eq!(Ok(()), check(&compiled, &effect, &description), "{effect}");
             let program = program(&effect).unwrap_or_else(|| panic!("{effect}: a program"));
             assert_eq!(description.samples_content(), program.samples_content, "{effect}");
+            // An overlay masked by the content (#580) is drawn with the masked blender.
+            if description.masked_by_content {
+                assert!(MASKED_OVERLAY.effect().is_some(), "{effect}: the masked blender compiles");
+            }
             // Compiled once per thread and type.
             assert!(Rc::ptr_eq(&program, &super::program(&effect).unwrap()), "{effect}");
             // The uniforms of a frame make a filter or a shader.

@@ -3,7 +3,7 @@
 use ferroui_base::input::ICommand;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinHandle};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinError, JoinHandle};
 use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -25,6 +25,18 @@ use std::time::Duration;
 pub fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> JoinHandle<T> {
     let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
     Dispatcher::current_dispatcher().start_local_with_priority(future, priority)
+}
+
+/// [`start_async`] for a future whose failure is a value: an `Err` of the
+/// future fails the handle with that `JoinError`, as a panic of the future
+/// does with [`start_async`], but without unwinding, so the task fails the
+/// same way in a build that aborts on panic.
+///
+/// # Panics
+/// Panics when called from a thread other than the dispatcher thread.
+pub fn start_async_on_result<T: 'static>(future: impl Future<Output = Result<T, JoinError>> + 'static) -> JoinHandle<T> {
+    let priority = Dispatcher::current_priority().unwrap_or(DispatcherPriority::NORMAL);
+    Dispatcher::current_dispatcher().start_local_on_result_with_priority(future, priority)
 }
 
 /// The state of a [`Delay`]: whether its time has passed, and who waits.

@@ -40,7 +40,7 @@ testing = []
 xamlx = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
 # Compile-time value parsers (`Thickness::parse`, `Color::try_parse`, `TimeSpan`, `Uri`, ...).
-ferroui-base = { workspace = true }
+ferroui-base = { workspace = true, features = ["full-themes"] }
 # `url::Url`, a Rust form of `System.Uri` (C5 of #423): a handle of the run-time type system and a type
 # the emitter names.
 url = { workspace = true }
@@ -51,6 +51,9 @@ ferroui-markup-xaml = { workspace = true, optional = true }
 # writes and reads. The file and its model are owned by the crate the framework crates export their
 # type models with, which links nothing of the framework. Only with the `compiler` feature.
 ferroui-build-scan = { workspace = true, optional = true }
+# The reader of the documents of a group the unit graph of a compiled theme is read from
+# (`rust_emitter::theme_unit_graph`, #568). The XAML parser of `xamlx` already depends on it.
+roxmltree = { workspace = true }
 
 [dev-dependencies]
 # The unit tests of the emitter of Rust source run with the crate's own tests (`rust_emitter` is built

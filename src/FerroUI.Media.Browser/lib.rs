@@ -1,7 +1,10 @@
 //! Immutable WebGL2 storage shared by independent producers, video and camera.
-//! This profile requires page-owned, single-threaded Skia WebGL2. Native media
-//! transfers use TexImageSource directly; no framework preview pixel array or
-//! readback is admitted. Browser decoder/driver internals are opaque.
+//! Two routes, chosen at run time by where the compositor's WebGL2 context lives:
+//! on the page's thread, native media transfers use TexImageSource directly into
+//! a shared texture; on the render worker of a module with threads, each frame is
+//! a WebCodecs `VideoFrame` transferred to the worker and uploaded there when the
+//! compositor imports it (#601). No framework preview pixel array or readback is
+//! admitted on either route. Browser decoder/driver internals are opaque.
 #![deny(unsafe_code)]
 #[allow(unsafe_code)]
 mod native;
@@ -24,19 +27,37 @@ pub struct WebGlFrameProducer {
     generation: u64,
     budget: FrameBudget,
     graphics: Acceleration,
+    /// Frames go to the render worker as transferred `VideoFrame`s (#601).
+    transfer: bool,
 }
 impl WebGlFrameProducer {
     pub fn from_interop(
         interop: &dyn ICompositionGpuInterop,
         budget: FrameBudget,
     ) -> Result<Self, MediaError> {
-        if !cfg!(all(
-            target_os = "emscripten",
-            not(target_feature = "atomics")
-        )) {
-            return Err(unsupported(
-                "Shared WebGL frames require a single-threaded browser module",
-            ));
+        if !cfg!(target_os = "emscripten") {
+            return Err(unsupported("Shared WebGL frames need the browser platform"));
+        }
+        let types = interop.supported_image_handle_types();
+        let has = |kind: &str| types.iter().any(|v| v == kind);
+        // The compositor renders on the render worker: its context cannot sample the page's
+        // media elements, so the frames are transferred to it (#601).
+        if interop.shared_context_id().is_none()
+            && has(KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME)
+        {
+            if !native::can_transfer() {
+                return Err(unsupported(
+                    "Media frames on the render worker need WebCodecs VideoFrame and a started render worker",
+                ));
+            }
+            return Ok(Self {
+                context: 0,
+                generation: interop.shared_context_generation(),
+                budget,
+                // The renderer of the worker's context is not observable from the page.
+                graphics: Acceleration::Unknown,
+                transfer: true,
+            });
         }
         let context = interop
             .shared_context_id()
@@ -66,6 +87,7 @@ impl WebGlFrameProducer {
             generation: interop.shared_context_generation(),
             budget,
             graphics,
+            transfer: false,
         })
     }
     pub fn budget(&self) -> FrameBudget {
@@ -97,7 +119,13 @@ impl WebGlFrameProducer {
         }
     }
     pub fn is_current(&self) -> bool {
-        native::current(self.context as i32, self.generation)
+        // A transferred frame is bound to the worker's context only when it is imported.
+        self.transfer || native::current(self.context as i32, self.generation)
+    }
+    /// Whether frames are transferred to the render worker (#601) rather than written into a
+    /// texture of a context of this thread.
+    pub fn transfers_frames(&self) -> bool {
+        self.transfer
     }
     /// Independent GPU producer. Its framebuffer is bottom-left oriented;
     /// presentation must preserve that origin rather than flip CPU pixels.
@@ -107,6 +135,11 @@ impl WebGlFrameProducer {
         width: u32,
         height: u32,
     ) -> Result<Option<PendingWebGlFrame>, MediaError> {
+        if self.transfer {
+            return Err(unsupported(
+                "A generated GPU test pattern needs the compositor's context on the page's thread",
+            ));
+        }
         self.produce(identity, width, height, Duration::ZERO, false, |texture| {
             native::quadrants(texture, width, height)
         })
@@ -134,6 +167,9 @@ impl WebGlFrameProducer {
                 "CPU-backed image/canvas upload is forbidden in shared GPU preview",
             ));
         }
+        if self.transfer {
+            return self.produce_transferred(identity, width, height, timestamp, source);
+        }
         self.produce(identity, width, height, timestamp, true, |texture| {
             self.budget
                 .counters()
@@ -141,20 +177,43 @@ impl WebGlFrameProducer {
             native::upload(texture, source, width, height)
         })
     }
-    fn produce(
+    /// The route of the render worker (#601): the frame is reserved here and transferred to the
+    /// worker as a WebCodecs `VideoFrame`, a GPU-backed image; the compositor uploads it into its
+    /// context when it imports it. No pixel array is made on either side.
+    fn produce_transferred(
+        &self,
+        identity: FrameIdentity,
+        width: u32,
+        height: u32,
+        timestamp: Duration,
+        source: &JsValue,
+    ) -> Result<Option<PendingWebGlFrame>, MediaError> {
+        let metadata = self.metadata(identity, width, height, timestamp, true, None)?;
+        let reservation = match self.budget.reserve(metadata) {
+            Ok(v) => v,
+            Err(FrameError::BudgetExceeded) => return Ok(None),
+            Err(e) => return Err(unsupported(e.to_string())),
+        };
+        let frame = native::transfer(source, width, height)?;
+        self.budget
+            .counters()
+            .gpu_copy(GpuTransferReason::NativeImageTransfer);
+        let frame = reservation.lease(frame);
+        let ready = GpuCompletion::new();
+        ready.complete();
+        Ok(Some(PendingWebGlFrame { frame, ready }))
+    }
+    /// The metadata of a frame of this producer, within its budget. A transferred frame has no
+    /// device until the compositor imports it (#601).
+    fn metadata(
         &self,
         identity: FrameIdentity,
         width: u32,
         height: u32,
         timestamp: Duration,
         top_left_origin: bool,
-        write: impl FnOnce(u32) -> Result<(), MediaError>,
-    ) -> Result<Option<PendingWebGlFrame>, MediaError> {
-        if !self.is_current() {
-            return Err(unsupported(
-                "The WebGL context generation was lost or replaced",
-            ));
-        }
+        device: Option<DeviceIdentity>,
+    ) -> Result<FrameMetadata, MediaError> {
         let bytes = u64::from(width)
             .checked_mul(u64::from(height))
             .and_then(|v| v.checked_mul(4))
@@ -176,7 +235,7 @@ impl WebGlFrameProducer {
             mirrored: false,
             top_left_origin,
             timestamp,
-            device: Some(self.device()),
+            device,
             device_generation: self.generation,
             planes: vec![FramePlane {
                 offset: 0,
@@ -190,6 +249,30 @@ impl WebGlFrameProducer {
         if self.budget.limits().frames == 0 || bytes > self.budget.limits().bytes {
             return Err(unsupported("Frame exceeds the configured storage budget"));
         }
+        Ok(metadata)
+    }
+    fn produce(
+        &self,
+        identity: FrameIdentity,
+        width: u32,
+        height: u32,
+        timestamp: Duration,
+        top_left_origin: bool,
+        write: impl FnOnce(u32) -> Result<(), MediaError>,
+    ) -> Result<Option<PendingWebGlFrame>, MediaError> {
+        if !self.is_current() {
+            return Err(unsupported(
+                "The WebGL context generation was lost or replaced",
+            ));
+        }
+        let metadata = self.metadata(
+            identity,
+            width,
+            height,
+            timestamp,
+            top_left_origin,
+            Some(self.device()),
+        )?;
         let reservation = match self.budget.reserve(metadata) {
             Ok(v) => v,
             Err(FrameError::BudgetExceeded) => return Ok(None),
@@ -330,14 +413,26 @@ impl ferroui_media_controls::TextureFrameImporter for BrowserTextureImporter {
             PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
         };
         let m = frame.metadata();
-        if m.device != interop.shared_context_id().map(DeviceIdentity::Context)
-            || m.device_generation != interop.shared_context_generation()
-        {
-            return Err(unsupported("Frame and renderer contexts differ"));
-        }
+        // #601: a frame transferred to the render worker is uploaded into the compositor's
+        // context when the compositor imports it.
+        let handle: std::rc::Rc<dyn ferroui_base::platform::IPlatformHandle> =
+            if let Some(transferred) = frame.resource::<native::TransferredFrame>() {
+                std::rc::Rc::new(ferroui_base::platform::LeasedPlatformHandle::new(
+                    transferred.id() as isize,
+                    Some(KnownPlatformGraphicsExternalImageHandleTypes::BROWSER_TRANSFERRED_FRAME),
+                    frame.clone(),
+                ))
+            } else {
+                if m.device != interop.shared_context_id().map(DeviceIdentity::Context)
+                    || m.device_generation != interop.shared_context_generation()
+                {
+                    return Err(unsupported("Frame and renderer contexts differ"));
+                }
+                ferroui_opengl::SharedFrameTexture::handle(frame)
+                    .map_err(|e| unsupported(e.to_string()))?
+            };
         let image = interop.import_image(
-            ferroui_opengl::SharedFrameTexture::handle(frame)
-                .map_err(|e| unsupported(e.to_string()))?,
+            handle,
             PlatformGraphicsExternalImageProperties {
                 width: m.width as i32,
                 height: m.height as i32,

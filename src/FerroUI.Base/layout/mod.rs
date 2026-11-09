@@ -11,6 +11,7 @@ mod layout_information;
 mod layout_manager;
 mod layout_queue;
 mod layoutable;
+pub(crate) mod measure_hold;
 mod min_max;
 mod orientation;
 
@@ -26,6 +27,7 @@ pub use layout_manager::LayoutManager;
 pub use layoutable::{
     HorizontalAlignment, Layoutable, LayoutableImpl, LayoutableImplExt, LayoutableVTable, VerticalAlignment,
 };
+pub use measure_hold::MeasureHold;
 pub use min_max::MinMax;
 pub use orientation::Orientation;
 
@@ -34,6 +36,8 @@ pub mod testing;
 
 #[cfg(test)]
 mod layout_helper_tests;
+#[cfg(test)]
+mod hot_value_tests;
 #[cfg(test)]
 mod layout_manager_tests_bring_into_view;
 #[cfg(test)]

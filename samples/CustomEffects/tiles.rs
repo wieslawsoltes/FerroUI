@@ -22,11 +22,12 @@ use ferroui_base::media::effects::{
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontFamily, FontWeight, IBrush, TextWrapping};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::CancellationToken;
+use ferroui_base::threading::{CancellationToken, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{BoxedValue, CornerRadius, Ref, Thickness, Upcast, Visual};
 use ferroui_controls::{Border, Button, Control, Slider, StackPanel, TextBlock, WrapPanel};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::Duration;
 
 /// The width of a tile.
 pub(crate) const TILE_WIDTH: f64 = 268.0;
@@ -36,6 +37,10 @@ pub const TRANSITION_MS: f64 = 300.0;
 
 /// The duration of one sweep of the key frames of a tile.
 pub const SWEEP_MS: f64 = 1600.0;
+
+/// How often the caption of an interactive tile is rewritten at most while its effect changes on
+/// every frame (a text layout each time).
+pub const CAPTION_MS: u64 = 200;
 
 /// The colours of the swatches of the sample.
 const SWATCHES: [(u8, u8, u8); 4] = [(0xE8, 0x5D, 0x3A), (0x2E, 0x86, 0xDE), (0x3F, 0x9E, 0x5A), (0xD9, 0xA4, 0x41)];
@@ -443,16 +448,58 @@ impl<T: CustomEffect> ValueTile<T> {
     }
 }
 
+/// Whether a throttled caption waits for its next rewrite, and whether it changed since its last.
+#[derive(Default)]
+struct CaptionThrottle {
+    /// A rewrite is due at the end of the interval.
+    waiting: Cell<bool>,
+    /// The effect changed since the last rewrite.
+    stale: Cell<bool>,
+}
+
+impl CaptionThrottle {
+    /// Waits [`CAPTION_MS`], then rewrites the caption with `rewrite` if it changed meanwhile and
+    /// waits again; otherwise the next change rewrites it at once.
+    fn wait(self: &Rc<Self>, rewrite: &Rc<dyn Fn()>) {
+        self.waiting.set(true);
+        let (throttle, rewrite) = (self.clone(), rewrite.clone());
+        DispatcherTimer::run_once(
+            move || {
+                if throttle.stale.replace(false) {
+                    rewrite();
+                    throttle.wait(&rewrite);
+                } else {
+                    throttle.waiting.set(false);
+                }
+            },
+            Duration::from_millis(CAPTION_MS),
+            DispatcherPriority::NORMAL,
+        )
+        .detach();
+    }
+}
+
 /// A caption with the effect string of the current snapshot of `effect`, kept up to date as the
-/// pointer changes it.
+/// pointer changes it: the first change is shown at once, and while the effect changes on every
+/// frame (a ripple spreading, a flame burning) the caption is rewritten every [`CAPTION_MS`] at
+/// most, not on every frame, and with the last snapshot once it stops.
 pub(crate) fn snapshot_caption<T: CustomEffectClass + Upcast<Effect>>(effect: &Ref<T>) -> Ref<TextBlock> {
     let markup = caption(&markup_of(&effect.to_custom_effect()));
     let (weak_effect, weak_markup) = (effect.downgrade(), markup.downgrade());
-    let base: &Effect = Upcast::<Effect>::upcast(&**effect);
-    base.invalidated(move || {
+    let rewrite: Rc<dyn Fn()> = Rc::new(move || {
         if let (Some(effect), Some(markup)) = (weak_effect.upgrade(), weak_markup.upgrade()) {
             markup.set_text(Some(&markup_of(&effect.to_custom_effect())));
         }
+    });
+    let throttle = Rc::new(CaptionThrottle::default());
+    let base: &Effect = Upcast::<Effect>::upcast(&**effect);
+    base.invalidated(move || {
+        if throttle.waiting.get() {
+            throttle.stale.set(true);
+            return;
+        }
+        rewrite();
+        throttle.wait(&rewrite);
     })
     .detach();
     markup

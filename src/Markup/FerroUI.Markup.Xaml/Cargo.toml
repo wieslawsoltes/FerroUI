@@ -46,7 +46,10 @@ ferroui-markup = { workspace = true }
 url = { workspace = true }
 
 [dev-dependencies]
-ferroui-base = { workspace = true, features = ["testing"] }
+# The unit tests look types up by name, which needs the tables of types (`type-tables`): without
+# it, testing this crate alone (`cargo test -p ferroui-markup-xaml`) would register none (#566).
+# `full-themes` includes it and keeps every unit of a theme a test loads by URI (#568).
+ferroui-base = { workspace = true, features = ["testing", "full-themes"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 
 [build-dependencies]

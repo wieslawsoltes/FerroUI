@@ -81,13 +81,18 @@ impl DesignWindowLoader {
             // registered one of that name, if there is one.
             let local_asm =
                 assembly_path.and_then(|assembly_path| MarkupAssembly::find(get_file_name_without_extension(assembly_path)));
-            let use_compiled_bindings =
-                local_asm.and_then(|local_asm| local_asm.metadata_value(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT));
 
             let mut configuration = RuntimeXamlLoaderConfiguration::new();
             configuration.local_assembly = local_asm;
             configuration.design_mode = true;
-            configuration.use_compiled_bindings_by_default = use_compiled_bindings.is_some_and(parse_bool);
+            // Deviation (DEVIATIONS.md, Designer support; #604): `{Binding}` compiles as the
+            // build compiles the documents of the application: compiled bindings, unless the
+            // metadata of its assembly says `FerroUseCompiledBindingsByDefault = False`. Upstream
+            // reads `false` without the entry, which its build always writes; here the entry is
+            // optional and the build compiles bindings by default, also for a document whose
+            // assembly is not registered.
+            configuration.use_compiled_bindings_by_default =
+                local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
             let loaded = loader.load(RuntimeXamlLoaderDocument::with_base_uri(base_uri, xaml), configuration)?;
 
             let control = Design::create_preview_with_control(&preview_target(&loaded))
@@ -132,11 +137,6 @@ impl DesignWindowLoader {
 /// `Path.GetFileNameWithoutExtension`.
 fn get_file_name_without_extension(path: &str) -> &str {
     Path::new(path).file_stem().and_then(|name| name.to_str()).unwrap_or("")
-}
-
-/// `bool.TryParse(text, out var value) && value`.
-fn parse_bool(text: &str) -> bool {
-    text.trim().eq_ignore_ascii_case("true")
 }
 
 /// What `Design.CreatePreviewWithControl(object)` tests its argument for:
@@ -341,7 +341,70 @@ mod tests {
         assert_eq!("MyApp", get_file_name_without_extension("/build/bin/MyApp.dll"));
         assert_eq!("my-app", get_file_name_without_extension("target/debug/my-app"));
         assert_eq!("", get_file_name_without_extension(""));
-        assert!(parse_bool(" True "));
-        assert!(!parse_bool("yes"));
+    }
+
+    /// The document of the tests of the binding default: a binding of the data context without
+    /// `x:DataType`, which a compiled binding refuses and a reflection binding accepts.
+    fn untyped_binding() -> String {
+        format!("<UserControl {XMLNS}><TextBlock Text='{{Binding Title}}'/></UserControl>")
+    }
+
+    /// Not from upstream (#604): a previewed document binds as the build compiles the documents
+    /// of its application: compiled bindings without the metadata entry, and without a
+    /// registered assembly.
+    #[test]
+    fn a_previewed_document_compiles_its_bindings_as_the_build_does() {
+        static SILENT: MarkupAssembly = MarkupAssembly {
+            name: "Tests.DesignWindowLoader.Silent",
+            crate_name: "tests_design_window_loader_silent",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[],
+        };
+        static STATED_ON: MarkupAssembly = MarkupAssembly {
+            name: "Tests.DesignWindowLoader.On",
+            crate_name: "tests_design_window_loader_on",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "True")],
+        };
+        let app = start();
+        MarkupAssembly::register(&SILENT);
+        MarkupAssembly::register(&STATED_ON);
+        for assembly_path in [None, Some("/build/bin/Tests.DesignWindowLoader.Silent.dll"), Some("/build/bin/Tests.DesignWindowLoader.On.dll")] {
+            let error = DesignWindowLoader::load_designer_window(&untyped_binding(), assembly_path, None)
+                .expect_err("a compiled binding without x:DataType does not load");
+            assert!(error.message().contains("x:DataType"), "{assembly_path:?}: {}", error.message());
+        }
+        // A document that states its data type previews with the compiled binding.
+        let window = DesignWindowLoader::load_designer_window(
+            &format!("<UserControl {XMLNS} x:DataType='TextBlock'><TextBlock Text='{{Binding Text}}'/></UserControl>"),
+            Some("/build/bin/Tests.DesignWindowLoader.Silent.dll"),
+            None,
+        )
+        .expect("a typed binding loads");
+        window.close();
+        app.dispose();
+    }
+
+    /// Not from upstream (#604): an application whose assembly opts out of compiled bindings
+    /// (`FerroUseCompiledBindingsByDefault = False`, the metadata of a crate built with
+    /// `compile-bindings = false`) previews its documents with reflection bindings.
+    #[test]
+    fn a_previewed_document_of_an_application_that_opts_out_binds_by_reflection() {
+        static OPTED_OUT: MarkupAssembly = MarkupAssembly {
+            name: "Tests.DesignWindowLoader.OptedOut",
+            crate_name: "tests_design_window_loader_opted_out",
+            xmlns_definitions: &[],
+            xmlns_prefixes: &[],
+            metadata: &[(MarkupAssembly::USE_COMPILED_BINDINGS_BY_DEFAULT, "False")],
+        };
+        let app = start();
+        MarkupAssembly::register(&OPTED_OUT);
+        let window = DesignWindowLoader::load_designer_window(&untyped_binding(), Some("/build/bin/Tests.DesignWindowLoader.OptedOut.dll"), None)
+            .expect("a reflection binding needs no data type");
+        assert!(content_of(&window).is::<UserControl>());
+        window.close();
+        app.dispose();
     }
 }

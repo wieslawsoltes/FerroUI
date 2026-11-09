@@ -364,7 +364,9 @@ mod pager_control_tests;
 pub mod navigation;
 mod frame;
 mod frame_page;
+mod page_type;
 pub use frame::{Frame, PageFactory};
+pub use page_type::PageType;
 pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable};
 // WinUI's NavigationView and its items (docs/porting/winui-controls.md, section 10.4).
 mod navigation_view;
@@ -584,6 +586,8 @@ mod selectable_text_block_tests;
 #[cfg(test)]
 mod text_block_tests;
 #[cfg(test)]
+mod measure_hold_tests;
+#[cfg(test)]
 mod text_layout_rounding_placement_tests;
 #[cfg(test)]
 mod text_line_bounds_tests;
@@ -638,6 +642,7 @@ mod list_box_item;
 mod navigable_containers;
 mod selection_changed_event_args;
 mod selection_mode;
+mod selection_indicator_animation;
 mod tab_control;
 mod tab_item;
 mod tree_view;

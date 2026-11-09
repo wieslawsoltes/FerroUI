@@ -37,6 +37,7 @@
           <ComboBox.SelectionBoxItemTemplate>
             <DataTemplate>
               <Border Padding="20" BorderBrush="Red" BorderThickness="1">
+                <!-- A reflection binding: the template shows the selected item, whose type is not known. -->
                 <TextBlock Text="{ReflectionBinding}"/>
               </Border>
             </DataTemplate>
