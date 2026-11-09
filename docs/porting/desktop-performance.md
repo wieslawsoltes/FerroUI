@@ -614,10 +614,14 @@ What it measures:
 - **The window suite** (`window`): the desktop program of the frame benchmarks (`frame-benchmarks`)
   opened once per scene (`--window-scenes`, default `text,list,transforms,wall`) for
   `--window-seconds` (12): the time from the start of the process to its first animation frame
-  (`first_frame_ms`) and its time a frame (`ms_per_frame`, from its frame rate after the first three
-  seconds) on the backend of the platform (Skia with Graphite on macOS). It measures what the raster
-  frame benchmarks cannot: the GPU backends and the start of a real process. A scene that holds the
-  display's rate shows no change of its time a frame; its first frame still does.
+  (`first_frame_ms`) and to its second (`second_frame_ms`), and its time a frame (`ms_per_frame`,
+  from its frame rate after the first three seconds) on the backend of the platform (Skia with
+  Graphite on macOS). It measures what the raster frame benchmarks cannot: the GPU backends and the
+  start of a real process. The first animation frame comes before the scene has been drawn; the
+  first commit of the composition tree, the first drawing and whatever the platform asks to be
+  painted when a window is shown keep the thread until the second, which is the time by which the
+  scene is on the screen and the application answers. A scene that holds the display's rate shows
+  no change of its time a frame; its first frames still do.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
@@ -1004,6 +1008,9 @@ for every element; what differs is the work done where nothing could change.
   to find nothing. The application keeps the result of each type-key lookup by theme variant and
   forgets them whenever a dictionary or style it owns changes (`notify_hosted_resources_changed`)
   or its dictionary is replaced.
+  A memory of the lookup at each element, tried as well, is not kept: it made attaching slower
+  (5 to 7 % from the leaves up, 4.7 % from the root down, 5.1 % for a changed resource), since
+  every element then holds and clears state that the application's table already answers.
 - **Inherited properties no element sets.** A property no store holds (the flow direction of most
   trees) was looked up through every ancestor holding inherited values, and the per-store results
   are forgotten whenever an inheritance changes anywhere. Each inheriting property counts the
@@ -1027,3 +1034,40 @@ drawn once, and each paid for the cache for nothing. A run's first draw is of it
 Skia, when the run is drawn again (`GlyphRunImpl::draw`). The pixels are the same: both draw the
 same glyphs at the same positions with the same font. Tests: the Skia backend's tests. Gauntlet
 (tier 16), Skia window, interleaved A/B: 27.4 to 31.2 frames a second.
+
+### 9.23 macOS: a render target made by a paint is drawn once
+
+The Metal render target of a window is made by its first paint (`TopLevelImpl::CreateMetalRenderTarget`
+needs the main thread, and the paint is the first that needs the target). Giving the view its target
+(`-[FrnView setRenderTarget:]`) asked for the new layer to be displayed, and so did the target's
+`resize:withScale:`; both requests came from inside the paint that was about to draw that layer, so
+every window was painted twice when shown, the second time with the same content at the same size
+in the same transaction. For a small scene that is a frame; for the still wall it is the whole
+first drawing again, about 100 ms on the UI thread.
+
+The view now knows when it is inside the paint of its top level (`updateLayer`). A target set
+during a paint is given its size and no display request; the paint that set it draws it. At the end
+of that paint the view asks for the display itself if the target has begun no frame on the main
+thread since (`mainThreadFrames` of the render target protocol, counted by the Metal target in
+`BeginDrawing`): a paint that made a target and drew nothing still gets the display it had before.
+The request is the view's (`requestDisplay`: the target's layer and the view), no longer a side
+effect of the target's resize. Every other request is unchanged: a change of the frame size or of
+the backing properties, also inside a paint (the second display of a cooperative resize), and
+`Invalidate` of the top level. The IOSurface target counts no frames, so its windows are asked to
+display as before. Upstream's sources are changed by
+`native/FerroUI.Native/patches/0005-one-display-for-a-render-target-set-in-a-paint.patch`. Test:
+`src/FerroUI.Native/tests/first_paint.rs` counts the paints of a real window (one when shown with
+Metal, where it counted two before; another for a changed size; none while nothing changes).
+
+Measured with the window program of the frame benchmarks (the still wall, 60 Hz, six launches each,
+alternately): the second animation frame 1.30 to 1.33 s after the start of the process before, 1.11
+to 1.18 s after; the frame rate of the first second 28 to 30 against 37 to 39. The first animation
+frame is unchanged (0.73 to 0.76 s), which is why the gate's window suite now also measures the
+second (`second_frame_ms`).
+
+The comparison found a fault of the build: `ferroui-native` carries its static libraries
+(`+whole-archive`), and nothing in the command line of the Rust compiler names their content, so a
+compiler cache (sccache) gave the crate compiled before a change of the native sources back after
+it, and the program ran the other side's native code. The build script now writes a fingerprint of
+what the library is compiled from (the script, the generated header, the headers and the sources)
+as a Rust source of the crate (`interop::NATIVE_SOURCES`), which every such cache reads.

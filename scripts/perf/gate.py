@@ -362,8 +362,10 @@ def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_g
 
 def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
     """Opens `scene` in the desktop program of the frame benchmarks for `seconds` and returns its
-    first frame (the time from the start of the process to its first animation frame) and its time
-    a frame (from the median of its `PERF fps` lines after the first three)."""
+    first frame (the time from the start of the process to its first animation frame), its second
+    frame where the program reports one (the first frame is not drawn yet when it is reported: the
+    second is the time by which the scene is on the screen) and its time a frame (from the median
+    of its `PERF fps` lines after the first three)."""
     import time
 
     binary = side.target / "release" / FRAMES_BINARY
@@ -373,6 +375,7 @@ def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) ->
     log.parent.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
     first_frame = None
+    second_frame = None
     rates = []
     with open(log, "w", encoding="utf-8") as out:
         process = subprocess.Popen([str(binary)], cwd=side.root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -391,6 +394,8 @@ def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) ->
                             sys.stdout.write(f"  {line}\n")
                         if line.startswith("PERF first_frame") and first_frame is None:
                             first_frame = (time.monotonic() - start) * 1000.0
+                        elif line.startswith("PERF second_frame") and second_frame is None:
+                            second_frame = (time.monotonic() - start) * 1000.0
                         elif line.startswith("PERF fps "):
                             rates.append(float(line.split()[2]))
                 else:
@@ -401,10 +406,15 @@ def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) ->
     if first_frame is None or len(rates) < 5:
         raise GateError(f"[{side.name}] {scene} drew no frames in {seconds:g} s; the log is {log}")
     rate = statistics.median(rates[3:])
-    return [
+    found = [
         (Metric(f"window/{scene} ms_per_frame", "ms", WINDOW_FACTOR, WINDOW_FRAME_FLOOR_MS), 1000.0 / rate),
         (Metric(f"window/{scene} first_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), first_frame),
     ]
+    if second_frame is not None:
+        found.append(
+            (Metric(f"window/{scene} second_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), second_frame)
+        )
+    return found
 
 
 def record(side: Side, found: list[tuple[Metric, float]]) -> None:

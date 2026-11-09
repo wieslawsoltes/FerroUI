@@ -1010,3 +1010,43 @@ fn set_parent_does_not_crash_due_to_reentrancy() {
     root.set_child(None);
 }
 
+#[test]
+fn control_themes_follow_resources_added_between_an_element_and_the_application() {
+    // The contract any kept result of a control theme lookup has to honour (the application keeps
+    // its own): a theme added to an ancestor after a lookup that found nothing is seen by the next
+    // lookup through the same parents, with no parent change in between; so is a theme removed,
+    // and an element moved under another ancestor.
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    let outer = crate::StackPanel::new();
+    let middle = crate::StackPanel::new();
+    let first = crate::Border::new();
+    let second = crate::Border::new();
+    let third = crate::Border::new();
+    let resources = outer.resources();
+    outer.children().add(&middle);
+    middle.children().add(&first);
+    middle.children().add(&second);
+    middle.children().add(&third);
+    let key = ferroui_base::controls::ResourceKey::Type(crate::Border::TYPE);
+    assert!(first.get_effective_theme().is_none());
+
+    resources.add_value(key.clone(), ferroui_base::styling::ControlTheme::new());
+    assert!(second.get_effective_theme().is_some(), "a theme added to an ancestor after a miss");
+
+    resources.remove(&key);
+    assert!(third.get_effective_theme().is_none(), "a theme removed from an ancestor after a hit");
+
+    resources.add_value(key, ferroui_base::styling::ControlTheme::new());
+    let other = crate::StackPanel::new();
+    let fourth = crate::Border::new();
+    other.children().add(&fourth);
+    assert!(fourth.get_effective_theme().is_none(), "an element under an ancestor without the theme");
+    other.children().remove(&fourth);
+    middle.children().add(&fourth);
+    assert!(fourth.get_effective_theme().is_none(), "the implicit theme is found once, as before");
+    let fifth = crate::Border::new();
+    other.children().add(&fifth);
+    other.children().remove(&fifth);
+    middle.children().add(&fifth);
+    assert!(fifth.get_effective_theme().is_some(), "an element moved under the ancestor with the theme");
+}

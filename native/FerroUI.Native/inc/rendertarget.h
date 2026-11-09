@@ -8,6 +8,13 @@
 
 -(void) resize: (FrnPixelSize) size withScale: (float) scale;
 -(CALayer*) layer;
+// Asks for the layer to be displayed again, where the view's own request does
+// not reach it.
+-(void) setNeedsDisplay;
+// The frames the target has begun on the main thread so far, each of the size
+// and the scale of the last `resize:withScale:` before it and shown with the
+// transaction it was drawn in; 0 for a target that does not count them.
+-(uint64_t) mainThreadFrames;
 
 @end
 

@@ -233,6 +233,8 @@ class FrnMetalRenderTarget : public ComSingleObject<IFrnMetalRenderTarget, &IID_
 public:
     double PendingScaling = 1;
     FrnPixelSize PendingSize = {1,1};
+    // The frames begun on the main thread: read and written by that thread alone.
+    uint64_t MainThreadFrames = 0;
     FORWARD_IUNKNOWN()
     FrnMetalRenderTarget(CAMetalLayer* layer, ComPtr<FrnMetalDevice> device)
     {
@@ -267,6 +269,8 @@ public:
             *ret = nullptr;
             return E_FAIL;
         }
+        if(onMainThread)
+            MainThreadFrames++;
         *ret = new FrnMetalRenderSession(_device, _layer, drawable, _size, _scaling, onMainThread);
         return 0;
     }
@@ -303,7 +307,14 @@ public:
     CGSize layerSize = {(CGFloat)size.Width, (CGFloat)size.Height};
     _target->PendingScaling = scale;
     _target->PendingSize = size;
+}
+
+- (void)setNeedsDisplay {
     [_layer setNeedsDisplay];
+}
+
+- (uint64_t)mainThreadFrames {
+    return _target->MainThreadFrames;
 }
 
 - (CALayer *)layer {
