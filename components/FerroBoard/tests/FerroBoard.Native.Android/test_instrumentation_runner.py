@@ -10,7 +10,7 @@ import unittest
 
 class RunnerChecks(unittest.TestCase):
     def setUp(self):
-        base = Path('/Volumes/SSD/temp/ferrokeyboard')
+        base = Path('/tmp/ferrokeyboard').resolve()
         base.mkdir(parents=True, exist_ok=True)
         self.folder = tempfile.TemporaryDirectory(prefix='instrumentation-runner-', dir=base)
         self.addCleanup(self.folder.cleanup)

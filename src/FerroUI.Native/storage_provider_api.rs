@@ -589,18 +589,18 @@ mod tests {
             let dropped = Rc::new(Cell::new(false));
             // Avoid releasing an already consumed pointer if the assertion fails.
             let uri = ManuallyDrop::new(IFrnString::from_impl(TrackedString {
-                value: FrnString::new("file:///Volumes/SSD/temp/ferrodock-port/"),
+                value: FrnString::new("file:///tmp/ferrodock-port/"),
                 dropped: dropped.clone(),
             }));
             if opening { native.open_security_scope(Some(&uri)); }
             else { native.close_security_scope(Some(&uri)); }
             assert!(!dropped.get(), "native scope call consumed its borrowed URI");
-            assert_eq!(frn_string_to_string(&uri).as_deref(), Some("file:///Volumes/SSD/temp/ferrodock-port/"));
+            assert_eq!(frn_string_to_string(&uri).as_deref(), Some("file:///tmp/ferrodock-port/"));
             drop(ManuallyDrop::into_inner(uri));
             assert!(dropped.get(), "the caller must release the final URI reference");
         }
         let api = StorageProviderApi::new(native, false);
-        let uri = Url::parse("file:///Volumes/SSD/temp/ferrodock-port/").unwrap();
+        let uri = Url::parse("file:///tmp/ferrodock-port/").unwrap();
         // Non-sandboxed hosts may decline bookmarks, but must preserve the input.
         let _ = api.save_bookmark(&UriRef::from(uri.clone()));
         let _ = api.try_resolve_file_reference_uri(&uri);

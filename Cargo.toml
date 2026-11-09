@@ -175,6 +175,7 @@ members = [
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
     "tests/FerroUI.RenderBackends.Comparison",
+    "tests/FerroUI.Rendering.Benchmarks",
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
     "tests/FerroUI.FrameBenchmarks",
@@ -380,7 +381,7 @@ ferroui-win32 = { version = "=0.5.0-preview.1", path = "src/Windows/FerroUI.Win3
 ferroui-desktop = { version = "=0.5.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.5.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-wayland = { version = "=0.5.0-preview.1", path = "src/FerroUI.Wayland" }
-ferroui-ios = { version = "=0.5.0-preview.1", path = "src/iOS/FerroUI.iOS" }
+ferroui-ios = { version = "=0.5.0-preview.1", path = "src/iOS/FerroUI.iOS", default-features = false }
 ferroui-freedesktop = { version = "=0.5.0-preview.1", path = "src/FerroUI.FreeDesktop" }
 ferroui-android = { version = "=0.5.0-preview.1", path = "src/Android/FerroUI.Android" }
 ferroui-browser = { version = "=0.5.0-preview.1", path = "src/Browser/FerroUI.Browser" }

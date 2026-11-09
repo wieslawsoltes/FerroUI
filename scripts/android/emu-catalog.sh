@@ -10,8 +10,7 @@
 #
 # Options:
 #   --keep            leave the emulator running and the application installed
-#   --out DIR         where the pictures go (default: /Volumes/1TB-macOS/ferroui-screenshots/android
-#                     when that volume exists, else <build directory>/emu-catalog)
+#   --out DIR         where the pictures go (default: <build directory>/emu-catalog)
 #   --logs DIR        where the logs go (default: <build directory>/emu-catalog)
 #   --apk FILE        the package to run (default: the debug package apk.sh builds)
 #   --build           build the package first (scripts/android/apk.sh catalog)
@@ -59,13 +58,7 @@ repo="$(cd "$(dirname "$0")/../.." && pwd)"
 
 build_dir="${FERROUI_ANDROID_BUILD_DIR:-${CARGO_TARGET_DIR:-$repo/target}/android}"
 logs="${logs:-$build_dir/emu-catalog}"
-if [ -z "$out" ]; then
-    if [ -d /Volumes/1TB-macOS ]; then
-        out="/Volumes/1TB-macOS/ferroui-screenshots/android"
-    else
-        out="$logs"
-    fi
-fi
+out="${out:-$logs}"
 apk="${apk:-$build_dir/catalog-arm64-v8a-debug.apk}"
 application_id="org.ferroui.controlcatalog"
 activity="$application_id/org.ferroui.android.FerroMainActivity"

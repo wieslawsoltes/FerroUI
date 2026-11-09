@@ -2,8 +2,8 @@
 
 The Quartz render backend is an addition of FerroUI: it has no counterpart in
 the upstream project. It draws and shapes text with the system frameworks of
-macOS (Core Graphics, Core Text, ImageIO, Metal and Metal Performance
-Shaders), which it links from the operating system. No source of another
+macOS and iOS (Core Graphics, Core Text, ImageIO, Metal and, where available,
+Metal Performance Shaders), which it links from the operating system. No source of another
 project is copied into the crate.
 
 ## Crates the backend links

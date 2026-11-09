@@ -583,6 +583,36 @@ mod smoke {
         let frames = view.frames_presented();
         check(&mut checks, "frames", frames >= FRAMES, format!("{frames} frame(s) presented on the layer"));
 
+        #[cfg(feature = "quartz-metal")]
+        {
+            use ferroui_base::platform::{IPlatformRenderInterface, RenderTargetSceneInfo};
+            let backend = ferroui_quartz::QuartzRenderInterface;
+            let unavailable = backend.create_backend_context(None);
+            let scene = RenderTargetSceneInfo::new(
+                ferroui_base::PixelSize::new(10, 10), 1.,
+                ferroui_base::rendering::composition::CompositionTransparencyLevel::None,
+            );
+            check(
+                &mut checks, "Quartz unavailable Metal",
+                !unavailable.is_ready_to_create_render_target(&[])
+                    && unavailable.create_render_target(&[]).try_create_drawing_context(&scene).is_err(),
+                "missing Metal reports not ready without panicking".into(),
+            );
+            let oversized = unavailable.create_offscreen_render_target(
+                ferroui_base::PixelSize::new(16385, 1), ferroui_base::Vector::new(1., 1.), false,
+            );
+            let mut discarded = oversized.create_drawing_context();
+            discarded.clear(ferroui_base::media::Colors::RED);
+            discarded.dispose();
+            check(
+                &mut checks, "Quartz allocation limit", oversized.is_corrupted(),
+                "oversized GPU surface is rejected without a CPU fallback".into(),
+            );
+            let stats = ferroui_quartz::metal_statistics();
+            check(&mut checks, "Quartz GPU", stats[3] >= FRAMES && stats[6] == 0,
+                  format!("surfaces, compute, images, presents, readbacks, uploads, errors: {stats:?}"));
+        }
+
         // The pixels of a frame.
         match frame {
             None => check(&mut checks, "pixels", false, "no frame was read back yet".to_string()),

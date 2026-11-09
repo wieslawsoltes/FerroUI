@@ -30,13 +30,14 @@ url.workspace = true
 # What the example shows its content with. Optional, behind the feature the example requires.
 ferroui-themes-simple = { workspace = true, optional = true }
 
-# The platform selects its renderer and its text shaper, as the original does (`use_ios`). Not in
+# The platform selects Skia/HarfBuzz by default, or opt-in Quartz/Core Text. Not in
 # the documentation build of docs.rs, which sets the `ferroui_docsrs` configuration (`rustc-args`
 # for Cargo and the compiler, `rustdoc-args` for the sources): on its Linux host neither HarfBuzz
 # nor Skia builds for an iOS target, and the documentation needs neither (docs/release.md, section 7).
 [target.'cfg(not(ferroui_docsrs))'.dependencies]
-ferroui-harfbuzz.workspace = true
-ferroui-skia.workspace = true
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-quartz = { workspace = true, optional = true }
 
 # The run loop of the main thread and the main dispatch queue (Core Foundation and libdispatch,
 # declared in `interop.rs`) exist on every Apple system, which is what lets the dispatcher be
@@ -177,6 +178,11 @@ objc2-ui-kit = { version = "=0.3.2", default-features = false, features = [
 ] }
 
 [features]
+default = ["skia"]
+skia = ["dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+# Opt in with --no-default-features to exclude Skia and HarfBuzz entirely.
+quartz-metal = ["dep:ferroui-quartz", "ferroui-quartz/metal"]
+quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
 # Builds `examples/ios_view.rs`: a view with the Simple theme and the smoke mode.
 example = ["dep:ferroui-themes-simple"]
 

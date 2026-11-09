@@ -170,7 +170,7 @@ failed browser camera check used an invalid test permission name; the passing
 test uses the existing harness's `camera` permission helper.
 
 Logs and screenshots are outside Git in
-`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/catalog-final-2026-11-02/`.
+`<workspace>/build-cache/ferroui-portable-media-evidence/catalog-final-2026-11-02/`.
 No camera captures or build products are committed.
 
 ## Integration status (2026-11-03)

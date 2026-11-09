@@ -27,9 +27,9 @@ def main():
     if (args.repeat < 1 or args.expected_checks < 1
             or not all(re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)+', value)
                        for value in [args.package, args.instrumentation])
-            or not log.is_relative_to(Path('/Volumes/SSD/temp/ferrokeyboard'))
+            or not log.is_relative_to(Path('/tmp/ferrokeyboard').resolve())
             or any(path.exists() for path in paths + [log, summary])):
-        parser.error('positive repeat count and new SSD-local logs are required')
+        parser.error('positive repeat count and new temporary-directory logs are required')
     log.parent.mkdir(parents=True, exist_ok=True)
     command = [str(args.adb), '-s', args.serial, 'shell', 'am', 'instrument', '-w', '-r',
                args.package + '/' + args.instrumentation]

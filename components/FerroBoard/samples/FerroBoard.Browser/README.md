@@ -9,10 +9,10 @@ Activate Emscripten 6.0.10 and put wasm-bindgen 0.2.129 on PATH. From the reposi
 
 ```sh
 source scripts/env.sh
-python3 scripts/build_browser.py --work-dir /Volumes/SSD/temp/ferrokeyboard/browser-work \
-  --out /Volumes/SSD/temp/ferrokeyboard/new-browser-site
-python3 scripts/check_browser_bundle.py /Volumes/SSD/temp/ferrokeyboard/new-browser-site
-python3 -m http.server --bind 127.0.0.1 --directory /Volumes/SSD/temp/ferrokeyboard/new-browser-site
+python3 scripts/build_browser.py --work-dir /tmp/ferrokeyboard/browser-work \
+  --out /tmp/ferrokeyboard/new-browser-site
+python3 scripts/check_browser_bundle.py /tmp/ferrokeyboard/new-browser-site
+python3 -m http.server --bind 127.0.0.1 --directory /tmp/ferrokeyboard/new-browser-site
 ```
 
 Work/output directories must be external to the checkout; output must be new.

@@ -62,7 +62,7 @@ Types and members waived with a reason (`docs/porting/data/reactive/member-waive
 ## How to regenerate
 
 ```sh
-scripts/port-status/run.sh --reference reactive            # the checkout at /Volumes/1TB-macOS/reactive-ref/reactive, or $RX_UPSTREAM
+scripts/port-status/run.sh --reference reactive            # the checkout at ../reactive, or $RX_UPSTREAM
 scripts/port-status/run.sh --reference reactive --check    # exit 1 when a document is out of date; writes nothing
 python3 scripts/port-status/test_gaps.py --reference reactive --all   # the test reports, before run.sh
 python3 scripts/port-status/port_status.py --reference reactive --explain <Project> <File.cs>

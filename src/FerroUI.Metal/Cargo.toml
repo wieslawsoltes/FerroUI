@@ -14,9 +14,17 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+# Offscreen platform surface for common renderer tests and benchmarks.
+offscreen = ["dep:objc2", "dep:objc2-metal"]
+
 [dependencies]
 ferroui-base.workspace = true
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "rendering"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = { version = "0.6.3", optional = true }
+objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLAllocation", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent"] }

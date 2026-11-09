@@ -1,6 +1,6 @@
 # StaticViewLocator port
 
-The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocator>, MIT, Copyright (c) Wiesław Šoltés) to FerroUI: the source generator, its attributes and options, its tests and its samples. The reference is the checkout at `/Volumes/1TB-macOS/staticviewlocator-ref`, branch `main`, commit `fc362d57018c90d2aea18b642e3a071f493f9a9d` (2026-09-01), read only.
+The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocator>, MIT, Copyright (c) Wiesław Šoltés) to FerroUI: the source generator, its attributes and options, its tests and its samples. The reference is the checkout at `<workspace>/staticviewlocator-ref`, branch `main`, commit `fc362d57018c90d2aea18b642e3a071f493f9a9d` (2026-09-01), read only.
 
 StaticViewLocator is a C# incremental source generator for Avalonia. A class annotated with `[StaticViewLocator]` gets, at compile time, a table that maps each view-model type to a factory of its view: by naming convention (`MyApp.ViewModels.SettingsViewModel` to `MyApp.Views.SettingsView`), by generic MVVM contracts that views implement, by ReactiveUI's `IViewFor<TViewModel>`, and by explicit `[StaticViewMapping]` attributes. Nothing is looked up by name at run time and no assembly is scanned, so the locator is trimming and AOT friendly. Optionally the generator also writes the complete `IDataTemplate` and ReactiveUI `IViewLocator` adapters.
 
