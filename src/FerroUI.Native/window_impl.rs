@@ -10,10 +10,9 @@ use crate::top_level_impl::{
 };
 use crate::window_impl_base::{impl_window_base_contract, WindowBaseImpl, WindowBaseParent, WindowEventsParent};
 use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
-use ferroui_base::input::{InputElement, PointerPressedEventArgs, WindowDecorationsElementRole};
+use ferroui_base::input::{PointerPressedEventArgs, WindowDecorationsElementRole};
 use ferroui_base::media::Color;
-use ferroui_base::{PixelPoint, Ref, Size, Thickness, Visual};
-use ferroui_controls::chrome::WindowDecorationProperties;
+use ferroui_base::{PixelPoint, Size, Thickness};
 use ferroui_controls::platform::{
     ITopLevelNativeMenuExporter, IPopupImpl, ITopLevelImpl, IWindowBaseImpl, IWindowIconImpl, IWindowImpl, PlatformRequestedDrawnDecoration,
     PlatformThemeVariant,
@@ -164,29 +163,13 @@ impl TopLevelParent for WindowImpl {
 
     fn chrome_hit_test(&self, e: &RawPointerEventArgs) -> bool {
         if self.is_extended.get() && e.type_() == RawPointerEventType::LeftButtonDown {
-            // The presentation source behind the input root hit-tests its
-            // visual tree.
-            let root: Option<Ref<Visual>> = self.top_level().input_root().map(|root| root.root_element().upcast());
-            let source = root.as_ref().and_then(|root| root.presentation_source());
-            let visual = match (&source, &root) {
-                (Some(source), Some(root)) => source.hit_tester().hit_test_first(
-                    e.position(),
-                    root,
-                    Some(&|x: &Visual| {
-                        if let Some(ie) = x.to_ref().cast::<InputElement>() {
-                            if !ie.is_hit_test_visible() || !ie.is_effectively_visible() {
-                                return false;
-                            }
-                        }
-                        true
-                    }),
-                ),
-                _ => None,
-            };
-
-            if visual.is_none_or(|visual| {
-                WindowDecorationProperties::get_element_role(&visual) == WindowDecorationsElementRole::TitleBar
-            }) {
+            // Resolve the role through the shared chrome hit tester, as the
+            // Windows and Wayland backends do. The immediate hit can be an
+            // unmarked template Grid/TextBlock inside a title bar, or a child
+            // of an interactive search box; its local role alone is insufficient.
+            let role = self.top_level().input_root()
+                .and_then(|root| root.hit_test_chrome_element(e.position()));
+            if role == Some(WindowDecorationsElementRole::TitleBar) {
                 if self.double_click_helper.is_double_click(e.timestamp(), e.position()) {
                     match self.window_state() {
                         WindowState::Maximized | WindowState::FullScreen if self.can_resize.get() => {
@@ -200,6 +183,10 @@ impl TopLevelParent for WindowImpl {
                 } else {
                     self.live_native().begin_move_drag().check();
                 }
+                // AppKit owns the caption gesture, including its mouse-up.
+                // Do not deliver a late client mouse-down after native tracking
+                // returns, which could leave the framework pointer pressed.
+                return true;
             }
         }
 

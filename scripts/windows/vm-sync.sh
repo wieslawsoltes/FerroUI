@@ -6,7 +6,7 @@
 #
 #   <commit>  what to copy: a commit, a branch or a tag. Default: HEAD.
 #   <base>    the directory on the shared volume the copies are made in. Default:
-#             /Volumes/1TB-macOS/ferroui-vm-windows
+#             <shared-directory>/ferroui-vm-windows
 #
 # What is copied is the tree of the commit, not the working tree: changes that are not committed
 # are not part of it, and neither is anything Git ignores.
@@ -29,9 +29,8 @@
 set -eu
 
 commit=${1:-HEAD}
-base=${2:-/Volumes/1TB-macOS/ferroui-vm-windows}
-
 root=$(git rev-parse --show-toplevel)
+base=${2:-$root/target/vm-windows}
 hash=$(git -C "$root" rev-parse --verify "$commit^{commit}")
 subject=$(git -C "$root" log -1 --format=%s "$hash" | cut -c 1-100)
 name=src-$(printf %s "$hash" | cut -c 1-12)

@@ -25,10 +25,10 @@ Build from the FerroBoard root, keeping all caches and generated output on SSD:
 source scripts/env.sh
 cargo build --locked --offline --manifest-path samples/FerroBoard.iOS/Cargo.toml \
   --target aarch64-apple-ios-sim \
-  --target-dir /Volumes/SSD/temp/ferrokeyboard/native-ios-host-stage/cross-target
+  --target-dir /tmp/ferrokeyboard/native-ios-host-stage/cross-target
 python3 scripts/bundle_ios.py \
-  --binary /Volumes/SSD/temp/ferrokeyboard/native-ios-host-stage/cross-target/aarch64-apple-ios-sim/debug/ferroboard-ios \
-  --out /Volumes/SSD/temp/ferrokeyboard/ios-bundles/FerroBoard.app
+  --binary /tmp/ferrokeyboard/native-ios-host-stage/cross-target/aarch64-apple-ios-sim/debug/ferroboard-ios \
+  --out /tmp/ferrokeyboard/ios-bundles/FerroBoard.app
 ```
 
 The bundler verifies the executable's actual iOS platform/minimum version,

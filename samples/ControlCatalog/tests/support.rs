@@ -66,6 +66,8 @@ pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> Uni
 pub enum TestRenderer {
     /// The Skia backend: the default.
     Skia,
+    #[cfg(target_os = "macos")]
+    Quartz,
     /// The Vello backend in one of its rendering modes.
     Vello(ferroui_vello::VelloRenderingMode),
 }
@@ -75,6 +77,8 @@ impl TestRenderer {
     pub fn vello_mode(self) -> Option<ferroui_vello::VelloRenderingMode> {
         match self {
             TestRenderer::Skia => None,
+            #[cfg(target_os = "macos")]
+            TestRenderer::Quartz => None,
             TestRenderer::Vello(mode) => Some(mode),
         }
     }
@@ -83,6 +87,8 @@ impl TestRenderer {
     pub fn name(self) -> &'static str {
         match self {
             TestRenderer::Skia => "skia",
+            #[cfg(target_os = "macos")]
+            TestRenderer::Quartz => "quartz",
             TestRenderer::Vello(ferroui_vello::VelloRenderingMode::Cpu) => "vello-cpu",
             TestRenderer::Vello(ferroui_vello::VelloRenderingMode::Hybrid) => "vello-hybrid",
             TestRenderer::Vello(ferroui_vello::VelloRenderingMode::Gpu) => "vello-gpu",
@@ -91,7 +97,7 @@ impl TestRenderer {
 }
 
 /// The render backend the environment variable `FERROUI_TEST_RENDERER` asks
-/// for: `vello-cpu`, `vello-hybrid` or `vello-gpu`; Skia for anything else
+/// for: `quartz` (macOS), `vello-cpu`, `vello-hybrid` or `vello-gpu`; Skia for anything else
 /// and without it. The benchmarks of the frames are run once a backend
 /// (`frame_benchmark.rs`); the tests of the catalog were written against the
 /// Skia backend.
@@ -99,6 +105,8 @@ pub fn test_renderer() -> TestRenderer {
     use ferroui_vello::VelloRenderingMode;
 
     match std::env::var("FERROUI_TEST_RENDERER").ok().as_deref() {
+        #[cfg(target_os = "macos")]
+        Some("quartz") => TestRenderer::Quartz,
         Some("vello-cpu") => TestRenderer::Vello(VelloRenderingMode::Cpu),
         Some("vello-hybrid") => TestRenderer::Vello(VelloRenderingMode::Hybrid),
         Some("vello-gpu") => TestRenderer::Vello(VelloRenderingMode::Gpu),
@@ -117,18 +125,11 @@ fn catalog_services() -> TestServices {
 /// [`catalog_services`] with `clock` as the global clock.
 pub(super) fn catalog_services_with_clock(clock: Rc<TestGlobalClock>) -> TestServices {
     let services = TestServices::styled_window();
-    let services = match test_renderer().vello_mode() {
-        None => services
-            .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
-            .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new())),
-        Some(mode) => services
-            .with_render_interface(Rc::new(ferroui_vello::PlatformRenderInterface::new(
-                ferroui_vello::VelloOptions::with_rendering_mode(mode),
-            )))
-            .with_font_manager_impl(Rc::new(ferroui_vello::FontManagerImpl::new())),
-    };
+    let backend = ferroui_rendering_benchmarks::Backend::new(test_renderer().name()).expect("enabled renderer adapter");
     services
-        .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
+        .with_render_interface(backend.renderer)
+        .with_font_manager_impl(backend.fonts)
+        .with_text_shaper_impl(backend.shaper)
         .with_global_clock(clock)
         .with_icon_loader(Rc::new(TestIconLoader))
 }

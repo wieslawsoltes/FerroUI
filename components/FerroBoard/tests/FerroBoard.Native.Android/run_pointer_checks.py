@@ -11,7 +11,7 @@ import sys
 import time
 
 EXPECTED_CHECKS = 31
-TEMP = Path('/Volumes/SSD/temp/ferrokeyboard')
+TEMP = Path('/tmp/ferrokeyboard').resolve()
 
 
 def successful_result(returncode, output):
@@ -43,7 +43,7 @@ def main():
              for i in range(args.repeat)])
     if (not log.is_relative_to(TEMP) or log.exists() or summary.exists()
             or any(p.exists() for p in logs)):
-        parser.error('all logs/summary must be new SSD-local files')
+        parser.error('all logs/summary must be new temporary-directory files')
     log.parent.mkdir(parents=True, exist_ok=True)
     command = [str(args.adb), '-s', args.serial, 'shell', 'am', 'instrument',
                '-w', '-r', 'org.ferroboard.consumer/org.ferroboard.consumer.PointerChecks']

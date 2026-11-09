@@ -50,6 +50,39 @@ fn chrome_hit_test_should_return_null_after_closing() {
 }
 
 #[test]
+fn chrome_hit_test_resolves_title_bar_through_unmarked_template_children() {
+    let child = Border::new();
+    child.set_background(Some(Brushes::red()));
+    let title_bar = Border::new();
+    title_bar.set_child(Some(child.clone().upcast()));
+    WindowDecorationProperties::set_element_role(&title_bar, WindowDecorationsElementRole::TitleBar);
+    let content = Border::new();
+    content.set_background(Some(Brushes::blue()));
+    do_chrome_hit_test(
+        None, Some(content), Some(title_bar), Some(child.upcast()),
+        Some(WindowDecorationsElementRole::TitleBar),
+    );
+}
+
+#[test]
+fn chrome_hit_test_resolves_interactive_child_before_title_bar_ancestor() {
+    let child = Border::new();
+    child.set_background(Some(Brushes::red()));
+    let interactive = Border::new();
+    interactive.set_child(Some(child.clone().upcast()));
+    WindowDecorationProperties::set_element_role(&interactive, WindowDecorationsElementRole::User);
+    let title_bar = Border::new();
+    title_bar.set_child(Some(interactive.upcast()));
+    WindowDecorationProperties::set_element_role(&title_bar, WindowDecorationsElementRole::TitleBar);
+    let content = Border::new();
+    content.set_background(Some(Brushes::blue()));
+    do_chrome_hit_test(
+        None, Some(content), Some(title_bar), Some(child.upcast()),
+        Some(WindowDecorationsElementRole::User),
+    );
+}
+
+#[test]
 fn chrome_hit_test_prefers_overlay_over_content() {
     let overlay = Border::new();
     overlay.set_background(Some(Brushes::red()));

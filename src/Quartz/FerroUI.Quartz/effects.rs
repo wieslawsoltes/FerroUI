@@ -3,8 +3,25 @@ use super::*;
 use ferroui_base::media::{effects::IEffect, ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
 
+// Repeated box shadows reuse their GPU-filtered image. Keys include all
+// geometry, transform, paint and surface dimensions; no canvas pixels enter
+// this cache. Bound it independently of the native texture pool.
+#[derive(Default)]
+struct ShadowCache {
+    generation: u64,
+    bytes: usize,
+    entries: Vec<(Vec<u64>, Rc<Bitmap>)>,
+}
+ferroui_base::ferro_thread_local! {
+    static BOX_SHADOWS: std::cell::RefCell<ShadowCache> = Default::default();
+}
+
 pub(super) enum Filter {
     None,
+    Graph {
+        effect: ferroui_base::media::effects::ImmutableCustomEffect,
+        bounds: Rect,
+    },
     #[cfg(feature = "runtime-shaders")]
     Custom {
         effect: ferroui_base::media::effects::ImmutableCustomEffect,
@@ -52,6 +69,10 @@ impl DrawingContext {
             }
         }
         self.push_layer(bounds.unwrap_or_default());
+        if matches!(filter, Filter::Blur { .. } | Filter::Shadow { .. }) {
+            self.bitmap
+                .context(|c| unsafe { ffi::qm_reset_effect_input_clip(c) });
+        }
         if !clip_output {
             if let Some(bounds) = bounds {
                 self.push_clip(bounds);
@@ -64,15 +85,16 @@ impl DrawingContext {
         });
     }
     fn finish_filter(&mut self) {
-        let Some(state) = self.effects.pop() else {
-            return; // Unbalanced pop: nothing was pushed.
-        };
+        let state = self.effects.pop().expect("Unbalanced Quartz effect layer");
         if state.input_clip {
             self.pop_clip();
         }
         self.bitmap.context(|c| unsafe {
             match state.filter {
                 Filter::None => {}
+                Filter::Graph { .. } => {
+                    unreachable!("Graph markers are popped through the shared painter")
+                }
                 #[cfg(feature = "runtime-shaders")]
                 Filter::Custom {
                     effect,
@@ -88,21 +110,19 @@ impl DrawingContext {
                     offset,
                     color,
                 } => {
-                    // Without a snapshot of the unblurred content the shadow is skipped.
-                    if let Some(original) = ffi::Owned::new(ffi::qm_layer_snapshot(c)) {
-                        ffi::qm_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
-                        let data = [
-                            offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
-                        ];
-                        ffi::qm_filter(c, 2, data.as_ptr(), data.len(), original.0);
-                    }
+                    let original = ffi::Owned::new(ffi::qm_layer_snapshot(c));
+                    ffi::qm_blur(c, sigma, axes[0], axes[1], axes[2], axes[3]);
+                    let data = [
+                        offset[0], offset[1], 0., 0., color[0], color[1], color[2], color[3],
+                    ];
+                    ffi::qm_filter(c, 2, data.as_ptr(), data.len(), original.0);
                 }
                 Filter::Kernel {
                     kind,
                     data,
                     secondary,
                 } => {
-                    let secondary = secondary.and_then(|b| b.retained_surface());
+                    let secondary = secondary.map(|b| b.retained_surface());
                     ffi::qm_filter(
                         c,
                         kind,
@@ -148,6 +168,21 @@ fn sigma(radius: f64) -> f64 {
 }
 impl IDrawingContextImplWithEffects for DrawingContext {
     fn push_effect(&mut self, bounds: Option<Rect>, effect: &dyn IEffect) {
+        if let (Some(custom), Some(bounds)) = (effect.as_custom_effect(), bounds) {
+            if ferroui_base::rendering::composition::effects::push_custom_effect_graph(
+                self, custom, bounds,
+            ) {
+                self.effects.push(State {
+                    filter: Filter::Graph {
+                        effect: custom.clone(),
+                        bounds,
+                    },
+                    input_clip: false,
+                    output_clip: false,
+                });
+                return;
+            }
+        }
         let filter = if let Some(blur) = effect.as_blur_effect() {
             Filter::Blur {
                 sigma: sigma(blur.radius()),
@@ -201,7 +236,24 @@ impl IDrawingContextImplWithEffects for DrawingContext {
         self.begin_filter(bounds, filter, false);
     }
     fn pop_effect(&mut self) {
-        self.finish_filter();
+        if self
+            .effects
+            .last()
+            .is_some_and(|s| matches!(s.filter, Filter::Graph { .. }))
+        {
+            let State {
+                filter: Filter::Graph { effect, bounds },
+                ..
+            } = self.effects.pop().unwrap()
+            else {
+                unreachable!()
+            };
+            ferroui_base::rendering::composition::effects::pop_custom_effect_graph(
+                self, &effect, bounds,
+            );
+        } else {
+            self.finish_filter();
+        }
     }
 }
 impl IDrawingContextImplWithLayerEffects for DrawingContext {
@@ -350,21 +402,16 @@ impl IDrawingContextImplWithLayerEffects for DrawingContext {
         true
     }
     fn next_pixel_operation_source(&mut self) {
-        let Some(state) = self.pixels.last_mut() else {
-            return;
-        };
+        let state = self.pixels.last_mut().expect("Unbalanced pixel operation");
         self.bitmap.context(|c| unsafe {
             if let Some(previous) = state.accumulated.take() {
                 ffi::qm_filter(c, 7, state.data.as_ptr(), state.data.len(), previous.0);
             }
-            // Without a new texture the layer keeps accumulating into the current one.
-            state.accumulated = ffi::Owned::new(ffi::qm_take_layer(c));
+            state.accumulated = Some(ffi::Owned::new(ffi::qm_take_layer(c)));
         });
     }
     fn pop_pixel_operation(&mut self) {
-        let Some(state) = self.pixels.pop() else {
-            return;
-        };
+        let state = self.pixels.pop().expect("Unbalanced pixel operation");
         if let Some(previous) = state.accumulated {
             self.bitmap.context(|c| unsafe {
                 ffi::qm_filter(c, 7, state.data.as_ptr(), state.data.len(), previous.0)
@@ -479,43 +526,108 @@ impl DrawingContext {
             return;
         }
         let size = PixelSize::new((right - x) as i32, (bottom - y) as i32);
-        let mask = Bitmap::new(size, Vector::new(96., 96.));
-        let cast = Bitmap::new(size, Vector::new(96., 96.));
-        let transform = matrix * Matrix::create_translation(-x, -y);
-        for (target, shape) in [(&mask, rect), (&cast, caster)] {
-            if shape.rect.width <= 0. || shape.rect.height <= 0. {
-                continue;
+        let mut key: Vec<u64> = [
+            rect.rect.x,
+            rect.rect.y,
+            rect.rect.width,
+            rect.rect.height,
+            rect.radii_top_left.x,
+            rect.radii_top_left.y,
+            rect.radii_top_right.x,
+            rect.radii_top_right.y,
+            rect.radii_bottom_left.x,
+            rect.radii_bottom_left.y,
+            rect.radii_bottom_right.x,
+            rect.radii_bottom_right.y,
+            matrix.m11,
+            matrix.m12,
+            matrix.m21,
+            matrix.m22,
+            matrix.m31,
+            matrix.m32,
+            shadow.offset_x,
+            shadow.offset_y,
+            shadow.blur,
+            shadow.spread,
+            x,
+            y,
+        ]
+        .map(f64::to_bits)
+        .to_vec();
+        key.extend([
+            shadow.color.a as u64,
+            shadow.color.r as u64,
+            shadow.color.g as u64,
+            shadow.color.b as u64,
+            shadow.is_inset as u64,
+            size.width as u64,
+            size.height as u64,
+        ]);
+        let generation = unsafe { ffi::qm_generation() };
+        let cached = BOX_SHADOWS.with(|cache| {
+            let mut cache = cache.borrow_mut();
+            if cache.generation != generation {
+                cache.entries.clear();
+                cache.bytes = 0;
+                cache.generation = generation;
             }
-            let mut draw = target.drawing(false, None);
-            draw.set_transform(transform);
-            draw.draw_rectangle(
-                Some(&immutable::ImmutableSolidColorBrush::new(Colors::WHITE)),
-                None,
-                shape,
-                &Default::default(),
-            );
-            draw.dispose();
-        }
-        let (Some(mask), Some(cast_surface)) = (mask.retained_surface(), cast.retained_surface())
-        else {
-            return;
-        };
-        let [r, g, b, a] = color(shadow.color, 1.);
-        cast.context(|c| unsafe {
-            ffi::qm_blur(c, sigma(shadow.blur), axes[0], axes[1], axes[2], axes[3]);
-            let data = [
-                offset.x as f32,
-                offset.y as f32,
-                if shadow.is_inset { 1. } else { 0. },
-                0.,
-                r as f32,
-                g as f32,
-                b as f32,
-                a as f32,
-            ];
-            ffi::qm_filter(c, 5, data.as_ptr(), data.len(), mask.0);
+            cache
+                .entries
+                .iter()
+                .find(|(k, _)| *k == key)
+                .map(|(_, b)| b.clone())
         });
-        let cast = cast_surface;
+        let cast = if let Some(cached) = cached {
+            cached
+        } else {
+            let mask = Bitmap::new(size, Vector::new(96., 96.));
+            let cast = Rc::new(Bitmap::new(size, Vector::new(96., 96.)));
+            let transform = matrix * Matrix::create_translation(-x, -y);
+            for (target, shape) in [(&mask, rect), (&*cast, caster)] {
+                if shape.rect.width <= 0. || shape.rect.height <= 0. {
+                    continue;
+                }
+                let mut draw = target.drawing(false, None);
+                draw.set_transform(transform);
+                draw.draw_rectangle(
+                    Some(&immutable::ImmutableSolidColorBrush::new(Colors::WHITE)),
+                    None,
+                    shape,
+                    &Default::default(),
+                );
+                draw.dispose();
+            }
+            let mask = mask.retained_surface();
+            let [r, g, b, a] = color(shadow.color, 1.);
+            cast.context(|c| unsafe {
+                ffi::qm_blur(c, sigma(shadow.blur), axes[0], axes[1], axes[2], axes[3]);
+                let data = [
+                    offset.x as f32,
+                    offset.y as f32,
+                    if shadow.is_inset { 1. } else { 0. },
+                    0.,
+                    r as f32,
+                    g as f32,
+                    b as f32,
+                    a as f32,
+                ];
+                ffi::qm_filter(c, 5, data.as_ptr(), data.len(), mask.0);
+            });
+            let bytes = size.width as usize * size.height as usize * 4;
+            if bytes <= 32 * 1024 * 1024 {
+                BOX_SHADOWS.with(|cache| {
+                    let mut cache = cache.borrow_mut();
+                    if cache.entries.len() >= 64 || cache.bytes + bytes > 32 * 1024 * 1024 {
+                        cache.entries.clear();
+                        cache.bytes = 0;
+                    }
+                    cache.bytes += bytes;
+                    cache.entries.push((key, cast.clone()));
+                });
+            }
+            cast
+        };
+        let cast = cast.retained_surface();
         self.bitmap.context(|c| unsafe {
             ffi::q_save(c);
             ffi::q_set_transform(c, 1., 0., 0., 1., 0., 0., 1., 1.);
@@ -544,9 +656,7 @@ pub(super) struct PixelState {
 }
 impl DrawingContext {
     fn blit_device_bitmap(&self, image: &Bitmap) {
-        let Some(source) = image.retained_surface() else {
-            return;
-        };
+        let source = image.retained_surface();
         let size = image.pixel_size();
         self.bitmap.context(|c| unsafe {
             ffi::q_save(c);
@@ -697,22 +807,21 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContext {
         if rect.rect.width <= 0. || rect.rect.height <= 0. || !self.prepare() {
             return;
         }
-        static NOISE: std::sync::OnceLock<Option<Bitmap>> = std::sync::OnceLock::new();
-        // The crate's copy of the acrylic noise asset (NOTICE.md). ImageIO decodes it once.
+        static NOISE: std::sync::OnceLock<Bitmap> = std::sync::OnceLock::new();
+        // Shared theme asset, not a dependency on the Skia renderer. ImageIO decodes it once.
         let noise = NOISE.get_or_init(|| {
             Bitmap::decode(&mut std::io::Cursor::new(include_bytes!(
                 "assets/noise_asset_256x256_png.png"
             )))
-            .ok()
+            // Image decoding can fail because GPU storage is unavailable. Keep
+            // material drawing recoverable rather than panicking on allocation.
+            .unwrap_or_else(|_| Bitmap::new(PixelSize::new(1, 1), Vector::new(96., 96.)))
         });
-        let Some(source) = noise.as_ref().and_then(Bitmap::retained_surface) else {
-            crate::warn_once("the acrylic noise texture is unavailable; acrylic is not drawn");
-            return;
-        };
         self.push_clip_rounded(rect);
         let base = color(material.material_color(), 1.);
         let tint = color(material.tint_color(), 1.);
         let data: Vec<f64> = base.into_iter().chain(tint).collect();
+        let source = noise.retained_surface();
         self.bitmap.context(|c| unsafe {
             ffi::qm_acrylic(
                 c,

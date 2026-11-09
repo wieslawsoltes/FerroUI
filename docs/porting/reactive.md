@@ -11,7 +11,7 @@ Status: plan (2026-10-18). Nothing in this document is built yet. Section 9 list
 
 ## 1. References
 
-All references are shallow checkouts in `/Volumes/1TB-macOS/reactive-ref/`, read-only, at the latest `main` on 2026-10-18.
+All references are shallow checkouts in `<workspace>/reactive-ref/`, read-only, at the latest `main` on 2026-10-18.
 
 | Reference | Repository | Commit | Version | Port |
 |---|---|---|---|---|

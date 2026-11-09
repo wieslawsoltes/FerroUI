@@ -18,5 +18,5 @@ path = "main.rs"
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
-ferroui-ios = { workspace = true }
+ferroui-ios = { workspace = true, features = ["skia"] }
 safe-area-demo = { path = "../SafeAreaDemo" }

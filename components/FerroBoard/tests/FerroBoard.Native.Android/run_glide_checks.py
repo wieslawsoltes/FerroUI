@@ -163,14 +163,14 @@ def main():
     parser.add_argument('--expected-checks', type=int, default=38)
     parser.add_argument('--record-only', action='store_true')
     parser.add_argument('--oracle', type=Path, help='built unchanged-C# reference harness DLL')
-    parser.add_argument('--dotnet', type=Path, default=Path('/Volumes/SSD/dotnet/dotnet'))
+    parser.add_argument('--dotnet', type=Path, default=Path('dotnet'))
     parser.add_argument('--reference', type=Path,
                         default=Path(__file__).parents[1] / 'fixtures/native-layout-change.json')
     args = parser.parse_args()
     out = args.out.resolve()
     if (args.repeat < 1 or args.record_only and args.repeat != 1
-            or not out.is_relative_to(Path('/Volumes/SSD/temp/ferrokeyboard')) or out.exists()):
-        parser.error('new SSD output directory and positive repeat count required; record mode is one run')
+            or not out.is_relative_to(Path('/tmp/ferrokeyboard').resolve()) or out.exists()):
+        parser.error('new temporary output directory and positive repeat count required; record mode is one run')
     expected = None if args.record_only or args.oracle else json.loads(args.reference.read_text())
     out.mkdir(parents=True)
     summary = {'status': 'running', 'source_rankings_verified': False,

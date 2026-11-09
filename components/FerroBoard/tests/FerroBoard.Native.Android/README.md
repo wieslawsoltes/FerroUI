@@ -14,7 +14,7 @@ cargo build --locked --offline --manifest-path tests/FerroBoard.Native.Android/C
 Package with the installed JDK on PATH. Choose a new SSD-local output directory:
 
 ```
-python3 scripts/bundle_android.py --library /Volumes/SSD/temp/ferrokeyboard/target/aarch64-linux-android/debug/libferroboard_native_android.so --manifest tests/FerroBoard.Native.Android/AndroidManifest.xml --java-source-root tests/FerroBoard.Native.Android/java --out /Volumes/SSD/temp/ferrokeyboard/independent-android-package
+python3 scripts/bundle_android.py --library /tmp/ferrokeyboard/target/aarch64-linux-android/debug/libferroboard_native_android.so --manifest tests/FerroBoard.Native.Android/AndroidManifest.xml --java-source-root tests/FerroBoard.Native.Android/java --out /tmp/ferrokeyboard/independent-android-package
 ```
 
 The packager includes library-owned Java assets without sample Java. Mobile hosts
@@ -27,7 +27,7 @@ Native contacts can be exercised through the packaged PointerChecks instrumentat
 Install this development APK only on an explicitly selected test device, then run:
 
 ```
-python3 tests/FerroBoard.Native.Android/run_pointer_checks.py --adb /Volumes/SSD/sdks/Android/platform-tools/adb --serial emulator-5584 --log /Volumes/SSD/temp/ferrokeyboard/android-pointer-result.log
+python3 tests/FerroBoard.Native.Android/run_pointer_checks.py --adb <workspace>/sdks/Android/platform-tools/adb --serial emulator-5584 --log /tmp/ferrokeyboard/android-pointer-result.log
 ```
 
 The runner fails unless instrumentation reports success; adb shell's exit status

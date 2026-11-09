@@ -27,7 +27,9 @@ extern "C" {
     pub fn q_font_name(font: Ptr, out: *mut u8, n: usize);
     pub fn q_font_table(font: Ptr, tag: u32) -> Ptr;
     pub fn q_font_names() -> Ptr;
-    pub fn q_font_match(font: Ptr, text: *const u16, n: usize) -> Ptr;
+    pub fn q_font_traits(font: Ptr) -> u32;
+    pub fn q_font_info(font: Ptr, info: *mut i32);
+    pub fn q_font_match(font: Ptr, text: *const u16, n: usize, language: *const i8) -> Ptr;
     pub fn q_data_len(data: Ptr) -> usize;
     pub fn q_data_bytes(data: Ptr) -> *const u8;
     pub fn q_shape(
@@ -41,6 +43,8 @@ extern "C" {
         rtl: i32,
         tags: *const u32,
         values: *const i32,
+        starts: *const u32,
+        ends: *const u32,
         features: usize,
         info: Ptr,
         emit: extern "C" fn(Ptr, Glyph),
@@ -61,28 +65,10 @@ extern "C" {
         phase: f64,
     ) -> Ptr;
     pub fn q_surface(w: usize, h: usize) -> Ptr;
-    /// Returns 0 on success, or a status code.
-    pub fn q_read_pixels(ctx: Ptr, out: *mut u8, len: usize) -> i32;
-    /// Returns 0 on success, or a status code.
-    pub fn q_write_pixels(ctx: Ptr, data: *const u8, len: usize) -> i32;
+    pub fn q_read_pixels(ctx: Ptr, out: *mut u8, len: usize);
+    pub fn q_write_pixels(ctx: Ptr, data: *const u8, len: usize);
+    #[cfg(feature = "metal")]
     pub fn q_retain(p: Ptr) -> Ptr;
-    /// Whether a drawing context is a GPU surface (always 0 without `metal`).
-    pub fn q_is_gpu(ctx: Ptr) -> i32;
-    /// A +1 drawable source of a drawing context, for `q_draw_source`.
-    pub fn q_source(ctx: Ptr) -> Ptr;
-    pub fn q_draw_source(
-        ctx: Ptr,
-        source: Ptr,
-        sx: f64,
-        sy: f64,
-        sw: f64,
-        sh: f64,
-        dx: f64,
-        dy: f64,
-        dw: f64,
-        dh: f64,
-        alpha: f64,
-    );
     pub fn q_snapshot(ctx: Ptr) -> Ptr;
     pub fn q_save(ctx: Ptr);
     pub fn q_restore(ctx: Ptr);
@@ -133,25 +119,24 @@ extern "C" {
     pub fn q_image_height(image: Ptr) -> usize;
     pub fn q_encode(image: Ptr, jpeg: i32, quality: f64) -> Ptr;
 }
-/// An owned +1 Core Foundation reference. Its thread rules are enforced by its container:
-/// fonts/paths/images are immutable; bitmap contexts are only used under Surface's mutex.
+/// An owned +1 Core Foundation reference, or NULL after a native allocation failure.
+/// Fonts/paths/images are immutable; bitmap contexts are only used under Surface's mutex.
+#[derive(Default)]
 pub struct Owned(pub Ptr);
 impl Owned {
-    /// Takes ownership of a +1 reference; `None` when the framework returned NULL.
-    ///
-    /// # Safety
-    /// `p` is NULL or a +1 Core Foundation (or Objective-C) reference that nothing else releases.
-    pub unsafe fn new(p: Ptr) -> Option<Self> {
-        (!p.is_null()).then_some(Self(p))
+    pub unsafe fn new(p: Ptr) -> Self {
+        Self(p)
     }
     pub fn bytes(&self) -> Vec<u8> {
         unsafe {
+            if self.0.is_null() {
+                return Vec::new();
+            }
             let length = q_data_len(self.0);
-            let bytes = q_data_bytes(self.0);
-            if length == 0 || bytes.is_null() {
+            if length == 0 {
                 Vec::new()
             } else {
-                std::slice::from_raw_parts(bytes, length).to_vec()
+                std::slice::from_raw_parts(q_data_bytes(self.0), length).to_vec()
             }
         }
     }
@@ -163,33 +148,6 @@ impl Drop for Owned {
 }
 // SAFETY: ownership can move between threads; mutable CGContext access is mutex protected.
 unsafe impl Send for Owned {}
-
-/// The bytes of a +1 CFData, empty for NULL.
-///
-/// # Safety
-/// As [`Owned::new`].
-pub unsafe fn owned_bytes(p: Ptr) -> Vec<u8> {
-    Owned::new(p).map(|data| data.bytes()).unwrap_or_default()
-}
-
-/// Status codes returned by the native layer (`metal.h`).
-pub const STATUS_OK: i32 = 0;
-
-/// What a native status code means.
-pub fn status_message(status: i32) -> &'static str {
-    match status {
-        0 => "success",
-        1 => "no Metal device",
-        2 => "the Metal device lacks tier-2 read/write texture support",
-        3 => "Metal shader compilation failed",
-        4 => "out of GPU memory",
-        5 => "size beyond the device limit",
-        6 => "the Metal objects belong to another GPU",
-        7 => "the GPU command failed",
-        8 => "invalid argument",
-        _ => "unknown native status",
-    }
-}
 extern "C" {
     pub fn q_set_transform(
         ctx: Ptr,
@@ -202,19 +160,48 @@ extern "C" {
         sx: f64,
         sy: f64,
     );
+    #[cfg(any(not(feature = "metal"), test))]
     pub fn q_shadow(ctx: Ptr, x: f64, y: f64, blur: f64, r: f64, g: f64, b: f64, a: f64);
 }
 
 #[cfg(feature = "metal")]
 extern "C" {
-    /// Makes `device` the GPU of new surfaces. Returns 0, or why it cannot be used.
-    pub fn qm_configure(device: Ptr) -> i32;
-    /// 0 when a GPU renderer is available for new surfaces, or why not.
-    pub fn qm_status() -> i32;
-    /// The largest GPU surface side, 0 without a GPU renderer.
-    pub fn qm_max_texture_size() -> usize;
-    /// A GPU surface, or NULL (no renderer, empty or oversized, out of memory).
-    pub fn qm_surface(w: usize, h: usize) -> Ptr;
+    pub fn qm_text_options(surface: Ptr, hinting: i32);
+    pub fn qm_end_context(surface: Ptr);
+    pub fn qm_rectangle(surface: Ptr, rect: *const f64, r: f64, g: f64, b: f64, a: f64);
+    pub fn qm_begin_layer_bounds(surface: Ptr, opacity: f64, blend: i32, bounds: *const f64);
+    pub fn qm_prepare(
+        surface: Ptr,
+        matrix: *const f64,
+        blend: i32,
+        aliased: i32,
+        interpolation: i32,
+    );
+    pub fn qm_glyphs_options(
+        surface: Ptr,
+        font: Ptr,
+        size: f64,
+        glyphs: *const u16,
+        positions: *const f64,
+        count: usize,
+        r: f64,
+        g: f64,
+        b: f64,
+        a: f64,
+        hinting: i32,
+        aliased: i32,
+        interpolation: i32,
+    );
+    pub fn qm_configure(device: Ptr) -> u64;
+    pub fn qm_attach_queue(queue: Ptr) -> i32;
+    pub fn qm_surface_external(texture: Ptr) -> Ptr;
+    pub fn qm_validate_texture(texture: Ptr, width: i32, height: i32, bgra: i32) -> i32;
+    pub fn qm_reset_effect_input_clip(surface: Ptr);
+    pub fn qm_finish_context(generation: u64);
+    pub fn qm_generation() -> u64;
+    pub fn qm_is_lost(generation: u64) -> i32;
+    #[cfg(test)]
+    pub fn qm_record_fault(generation: u64);
     pub fn qm_draw_surface(
         ctx: Ptr,
         source: Ptr,
@@ -229,7 +216,6 @@ extern "C" {
         alpha: f64,
     );
     pub fn qm_copy_surface(ctx: Ptr, source: Ptr);
-    /// Returns 0 on success, or a status code.
     pub fn qm_present(ctx: Ptr, texture: Ptr, platform_queue: Ptr, flipped: i32) -> i32;
     pub fn qm_snapshot_external(
         surface: Ptr,

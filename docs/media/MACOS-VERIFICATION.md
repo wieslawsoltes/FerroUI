@@ -58,7 +58,7 @@ and untagged-color probes alongside them. Native heap snapshots are
 are `malloc-full-stacks.log.gz`. Evidence is outside Git in:
 
 ```text
-/Volumes/SSD/build-cache/ferroui-portable-media-evidence/macos-verification-2026-11-02/
+<workspace>/build-cache/ferroui-portable-media-evidence/macos-verification-2026-11-02/
 ```
 
 ## Replay and observed results
@@ -229,7 +229,7 @@ preview CPU transfers remain zero. This is the same lifecycle workload, not
 full-resolution performance acceptance or universal leak-freedom evidence.
 
 Evidence is outside Git in
-`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/main-integration-f6ccf8b2-2026-11-02/`.
+`<workspace>/build-cache/ferroui-portable-media-evidence/main-integration-f6ccf8b2-2026-11-02/`.
 The audit executable's SHA-256 is
 `948298d45178a67c04567e88a6a3a74a99a844d49938e98887e596e97814a428`.
 The JSON report links a supplemental `integration-source.json` containing both
@@ -252,4 +252,4 @@ orientation negative control and native accessibility/keyboard transport checks.
 It was stopped during the memory soak at the user's request, before completing
 that stage and the remaining suite. This is partial integration evidence, not a
 new full-profile pass. Logs are outside Git in
-`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/main-integration-1549651d-2026-11-03/`.
+`<workspace>/build-cache/ferroui-portable-media-evidence/main-integration-1549651d-2026-11-03/`.

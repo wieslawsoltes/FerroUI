@@ -15,8 +15,7 @@ ferroui_base::ferro_thread_local! {
 }
 fn compile(effect: &ImmutableCustomEffect) -> Result<Rc<Module>, String> {
     effect.check_shader_children()?;
-    let shader = effect.shader().ok_or("No WGSL shader")?;
-    let source = shader.wgsl_module();
+    let source = effect.shader().ok_or("No WGSL shader")?.wgsl_module();
     let module = naga::front::wgsl::parse_str(&source).map_err(|e| e.emit_to_string(&source))?;
     let info = naga::valid::Validator::new(
         naga::valid::ValidationFlags::all(),
@@ -72,7 +71,7 @@ fn compile(effect: &ImmutableCustomEffect) -> Result<Rc<Module>, String> {
         ..Default::default()
     };
     let mut resources = naga::back::msl::EntryPointResources::default();
-    for binding in 0..3 + shader.children.len() as u32 {
+    for binding in 0..3 + effect.shader().unwrap().children.len() as u32 {
         resources.resources.insert(
             naga::ResourceBinding { group: 0, binding },
             naga::back::msl::BindTarget {
@@ -118,15 +117,14 @@ fn compile(effect: &ImmutableCustomEffect) -> Result<Rc<Module>, String> {
             error.len(),
         )
     };
-    // SAFETY: qm_shader_compile returns NULL or a +1 render pipeline.
-    let Some(pipeline) = (unsafe { ffi::Owned::new(pipeline) }) else {
+    if pipeline.is_null() {
         return Err(String::from_utf8_lossy(
             &error[..error.iter().position(|b| *b == 0).unwrap_or(error.len())],
         )
         .into_owned());
-    };
+    }
     Ok(Rc::new(Module {
-        pipeline,
+        pipeline: unsafe { ffi::Owned::new(pipeline) },
         offsets,
         size,
     }))
@@ -160,23 +158,18 @@ pub(crate) fn apply(surface: ffi::Ptr, effect: &ImmutableCustomEffect, area: Rec
                 ShaderUniformValue::Float2(v) => v.into_iter().flat_map(f32::to_ne_bytes).collect(),
                 ShaderUniformValue::Float4(v) => v.into_iter().flat_map(f32::to_ne_bytes).collect(),
             };
-            // The layout was validated at compile time; anything beyond it is ignored.
-            if let Some(&offset) = module.offsets.get(index) {
-                let offset = offset as usize;
-                if let Some(slot) = bytes.get_mut(offset..offset + values.len()) {
-                    slot.copy_from_slice(&values);
-                }
-            }
+            let offset = module.offsets[index] as usize;
+            bytes[offset..offset + values.len()].copy_from_slice(&values);
             index += 1;
         },
     );
     let mut children = Vec::new();
     effect.for_each_shader_child(&mut |_, image| {
-        children.push(image.bitmap().and_then(|b| {
-            b.as_any()
-                .downcast_ref::<Bitmap>()
-                .and_then(Bitmap::retained_surface)
-        }));
+        children.push(
+            image
+                .bitmap()
+                .and_then(|b| Bitmap::from_impl(&*b).map(Bitmap::retained_surface)),
+        );
     });
     let handles: Vec<_> = children
         .iter()

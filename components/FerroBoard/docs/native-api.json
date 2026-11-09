@@ -1441,7 +1441,7 @@
     "native_workspaces": 7,
     "public_api_changes": false,
     "validation": "fresh extracted consumer25/strict lint/sample build passed; separate pinned native rendering prerequisite; no GUI runtime proof",
-    "receipt": "/Volumes/SSD/temp/ferrokeyboard/native-source-refresh-stage/FerroBoard-source-20261031-current.tar.gz.validation.json",
+    "receipt": "/tmp/ferrokeyboard/native-source-refresh-stage/FerroBoard-source-20261031-current.tar.gz.validation.json",
     "archive_sha256": "8a39be3511e50e188e44ec8104a6ea7df4b4b00a3b188e7ae91df254a2f5f8bb"
   },
   "native_browser_selection_scope": {
@@ -1500,11 +1500,11 @@
     "scope": "docs/native-source-input-refresh.json",
     "status": "partially_verified",
     "archive": {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz",
+      "path": "/tmp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz",
       "sha256": "f9f4aa1d16d950d790482f6eac6b100966e0d98480683617d818589c0f71fabd"
     },
     "receipt": {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz.validation.json",
+      "path": "/tmp/ferrokeyboard/native-source-input-refresh-stage/FerroBoard-source-20261031-input-fixes.tar.gz.validation.json",
       "sha256": "a3f040dd483ce31723920868580d01a3b54c21c149a7d46722bc0724eedb6b01"
     },
     "validation": "Fresh extracted consumer34, strict lint and desktop sample build with original paths/network denied; native runtime not rerun",
@@ -1534,11 +1534,11 @@
     "scope": "docs/native-source-control-refresh.json",
     "status": "partially_verified",
     "archive": {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz",
+      "path": "/tmp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz",
       "sha256": "70694c6f38054f08c6e343c6d3ad84ccd42d2c982d83074ba4c3a31bce58334e"
     },
     "receipt": {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz.validation.json",
+      "path": "/tmp/ferrokeyboard/native-source-control-refresh-stage/FerroBoard-source-20261031-control-delivery.tar.gz.validation.json",
       "sha256": "0e822d57ff29b9ebf7d67822dfe2a9f5176bd17db6bec5fc2cd9289d95fbcc6b"
     },
     "source_equivalent_consumer_tests": 39,

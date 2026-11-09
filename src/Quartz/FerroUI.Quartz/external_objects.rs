@@ -1,4 +1,4 @@
-//! GPU-only IOSurface interop through FerroNative. Producer leases live through actual GPU completion.
+//! GPU-only interop through the Apple platform Metal contracts. Producer leases live through actual GPU completion.
 use crate::{bitmap::Bitmap, ffi};
 use ferroui_base::platform::{
     IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle,
@@ -27,6 +27,7 @@ pub struct ExternalObjects {
     /// The generation of the device's graphics resources: a frame made for another generation
     /// (before the device was recreated) is refused.
     generation: u64,
+    backend_generation: u64,
     inner: Rc<dyn IMetalExternalObjectsFeature>,
 }
 
@@ -34,13 +35,116 @@ impl ExternalObjects {
     pub(crate) fn new(
         device: Rc<dyn ferroui_metal::IMetalDevice>,
         generation: u64,
+        backend_generation: u64,
         inner: Rc<dyn IMetalExternalObjectsFeature>,
     ) -> Self {
         Self {
             device,
             generation,
+            backend_generation,
             inner,
         }
+    }
+}
+
+/// An in-process Metal texture for composition import, retained independently
+/// of the producer's wrapper. Synchronize mutable storage with shared events.
+/// No pixel mapping, IOSurface or CPU copy is required.
+pub struct SharedMetalImage {
+    source: std::sync::Mutex<Option<ffi::Owned>>,
+    properties: PlatformGraphicsExternalImageProperties,
+    generation: u64,
+}
+impl SharedMetalImage {
+    /// Retains an `id<MTLTexture>` and validates its sampling format and device.
+    ///
+    /// # Safety
+    /// `texture` must be a live Objective-C Metal texture for this call. Its
+    /// producer must not overwrite it until the snapshot's signal event fires,
+    /// or until the acquired frame lease retires after actual GPU completion.
+    pub unsafe fn from_raw_texture(
+        texture: ffi::Ptr,
+        properties: PlatformGraphicsExternalImageProperties,
+    ) -> Result<Arc<Self>, FrameError> {
+        if properties.width <= 0
+            || properties.height <= 0
+            || properties.width > MAX_FRAME_SIDE as i32
+            || properties.height > MAX_FRAME_SIDE as i32
+        {
+            return Err(FrameError::InvalidDimensions);
+        }
+        let format = match properties.format {
+            PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm => 1,
+            PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm => 0,
+        };
+        match ffi::qm_validate_texture(texture, properties.width, properties.height, format) {
+            1 => {}
+            -1 => return Err(FrameError::DeviceMismatch),
+            -2 => return Err(FrameError::InvalidDimensions),
+            _ => return Err(FrameError::UnsupportedFormat),
+        }
+        if properties.memory_offset != 0 {
+            return Err(FrameError::UnsupportedFormat);
+        }
+        let generation = ffi::qm_generation();
+        if ffi::qm_is_lost(generation) != 0 {
+            return Err(FrameError::StaleGeneration);
+        }
+        Ok(Arc::new(Self {
+            source: std::sync::Mutex::new(Some(ffi::Owned::new(ffi::q_retain(texture)))),
+            properties,
+            generation,
+        }))
+    }
+    fn texture(&self) -> Rc<dyn IMetalExternalTexture> {
+        assert_eq!(
+            unsafe { ffi::qm_is_lost(self.generation) },
+            0,
+            "Shared Metal texture belongs to a lost generation"
+        );
+        let source = self.source.lock().unwrap();
+        let source = source.as_ref().expect("Shared Metal image was disposed");
+        Rc::new(RetainedTexture {
+            source: std::cell::RefCell::new(Some(unsafe {
+                ffi::Owned::new(ffi::q_retain(source.0))
+            })),
+            width: self.properties.width,
+            height: self.properties.height,
+        })
+    }
+}
+impl ICompositionImportableSharedGpuContextImage for SharedMetalImage {
+    fn dispose(&self) {
+        self.source.lock().unwrap().take();
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+struct RetainedTexture {
+    source: std::cell::RefCell<Option<ffi::Owned>>,
+    width: i32,
+    height: i32,
+}
+impl IMetalExternalTexture for RetainedTexture {
+    fn width(&self) -> i32 {
+        self.width
+    }
+    fn height(&self) -> i32 {
+        self.height
+    }
+    fn samples(&self) -> i32 {
+        1
+    }
+    fn handle(&self) -> ffi::Ptr {
+        self.source
+            .borrow()
+            .as_ref()
+            .expect("Imported Metal texture was disposed")
+            .0
+    }
+    fn dispose(&self) {
+        self.source.borrow_mut().take();
     }
 }
 
@@ -66,6 +170,7 @@ impl IPlatformRenderInterfaceImportedSemaphore for ImportedSemaphore {
 pub struct ImportedImage {
     device: Rc<dyn ferroui_metal::IMetalDevice>,
     generation: u64,
+    backend_generation: u64,
     device_luid: Option<Vec<u8>>,
     imported: Rc<dyn IMetalExternalTexture>,
     /// The wrapped texture, or why the imported texture cannot be wrapped.
@@ -80,76 +185,6 @@ impl IPlatformRenderInterfaceImportedObject for ImportedImage {
     }
 }
 
-/// Why a timeline snapshot of an imported image failed.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SnapshotError {
-    /// The Metal device was lost.
-    DeviceLost,
-    /// A semaphore was not imported by this backend.
-    ForeignSemaphore,
-    /// No GPU surface of the image's size could be allocated.
-    Allocation(String),
-    /// The texture or the shared events do not fit the renderer's device, or the copy could
-    /// not be encoded.
-    CopyFailed,
-}
-impl std::fmt::Display for SnapshotError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::DeviceLost => f.write_str("the Metal device has been lost"),
-            Self::ForeignSemaphore => {
-                f.write_str("the timeline event was not imported by Quartz Metal")
-            }
-            Self::Allocation(error) => write!(f, "no GPU surface for the snapshot: {error}"),
-            Self::CopyFailed => f.write_str("invalid Metal texture or shared event"),
-        }
-    }
-}
-impl std::error::Error for SnapshotError {}
-impl ImportedImage {
-    /// [`IPlatformRenderInterfaceImportedImage::snapshot_with_timeline_semaphores`], reporting
-    /// failures.
-    pub fn try_snapshot_with_timeline_semaphores(
-        &self,
-        wait: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
-        wait_value: u64,
-        signal: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
-        signal_value: u64,
-    ) -> Result<Bitmap, SnapshotError> {
-        if self.device.is_lost() {
-            return Err(SnapshotError::DeviceLost);
-        }
-        let (Some(wait), Some(signal)) = (
-            wait.as_any().downcast_ref::<ImportedSemaphore>(),
-            signal.as_any().downcast_ref::<ImportedSemaphore>(),
-        ) else {
-            return Err(SnapshotError::ForeignSemaphore);
-        };
-        let bitmap = Bitmap::try_new_gpu(
-            ferroui_base::PixelSize::new(self.properties.width, self.properties.height),
-            ferroui_base::Vector::new(96., 96.),
-        )
-        .map_err(|error| SnapshotError::Allocation(error.to_string()))?;
-        // SAFETY: the texture and events stay alive for the call; the native side retains
-        // what the GPU work references.
-        let copied = bitmap.context(|p| unsafe {
-            ffi::qm_snapshot_external(
-                p,
-                self.imported.handle(),
-                (!self.top_left_origin) as i32,
-                wait.event.handle(),
-                wait_value,
-                signal.event.handle(),
-                signal_value,
-            )
-        });
-        if copied == 0 {
-            return Err(SnapshotError::CopyFailed);
-        }
-        Ok(bitmap)
-    }
-}
-
 impl IPlatformRenderInterfaceImportedImage for ImportedImage {
     fn acquire_shared_bitmap(
         &self,
@@ -157,7 +192,11 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
     ) -> Result<Arc<SharedBitmapImpl>, FrameError> {
         let m = frame.metadata();
         m.validate(MAX_FRAME_SIDE)?;
-        if self.device.is_lost() || !frame.is_current() || m.device_generation != self.generation {
+        if self.device.is_lost()
+            || unsafe { ffi::qm_is_lost(self.backend_generation) != 0 }
+            || !frame.is_current()
+            || m.device_generation != self.generation
+        {
             return Err(FrameError::StaleGeneration);
         }
 
@@ -196,6 +235,7 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         Ok(Arc::new(SharedFrameBitmap::new(
             self.imported.handle(),
             frame,
+            self.backend_generation,
         )))
     }
 
@@ -220,10 +260,6 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
     }
 
     /// Takes an independent GPU copy, ordered between the producer's shared events.
-    ///
-    /// The interface cannot report a failure: when the copy fails the error is logged and a
-    /// transparent bitmap of the image's size is returned. The producer's signal is encoded
-    /// either way, so it never waits for a copy that did not happen.
     fn snapshot_with_timeline_semaphores(
         &self,
         wait: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
@@ -231,16 +267,35 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         signal: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         signal_value: u64,
     ) -> Arc<SharedBitmapImpl> {
-        match self.try_snapshot_with_timeline_semaphores(wait, wait_value, signal, signal_value) {
-            Ok(bitmap) => Arc::new(bitmap),
-            Err(error) => {
-                eprintln!("Quartz Metal: timeline snapshot failed: {error}");
-                Arc::new(Bitmap::new(
-                    ferroui_base::PixelSize::new(self.properties.width, self.properties.height),
-                    ferroui_base::Vector::new(96., 96.),
-                ))
-            }
-        }
+        assert!(
+            !self.device.is_lost() && unsafe { ffi::qm_is_lost(self.backend_generation) == 0 },
+            "The Metal device has been lost"
+        );
+        let wait = wait
+            .as_any()
+            .downcast_ref::<ImportedSemaphore>()
+            .expect("Timeline event must be imported by Quartz Metal");
+        let signal = signal
+            .as_any()
+            .downcast_ref::<ImportedSemaphore>()
+            .expect("Timeline event must be imported by Quartz Metal");
+        let bitmap = Bitmap::new(
+            ferroui_base::PixelSize::new(self.properties.width, self.properties.height),
+            ferroui_base::Vector::new(96., 96.),
+        );
+        let copied = bitmap.context(|p| unsafe {
+            ffi::qm_snapshot_external(
+                p,
+                self.imported.handle(),
+                (!self.top_left_origin) as i32,
+                wait.event.handle(),
+                wait_value,
+                signal.event.handle(),
+                signal_value,
+            )
+        });
+        assert_ne!(copied, 0, "Invalid Metal texture or shared event");
+        Arc::new(bitmap)
     }
 
     /// # Panics
@@ -273,6 +328,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for ExternalObjects {
         Rc::new(ImportedImage {
             device: self.device.clone(),
             generation: self.generation,
+            backend_generation: self.backend_generation,
             device_luid: self.inner.device_luid(),
             imported,
             properties,
@@ -281,13 +337,25 @@ impl IExternalObjectsRenderInterfaceContextFeature for ExternalObjects {
         })
     }
 
-    /// # Panics
-    /// Always: a Metal device has no share group.
     fn import_shared_image(
         &self,
-        _image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
+        image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
-        panic!("Specified method is not supported.");
+        let image = image
+            .as_any()
+            .downcast_ref::<SharedMetalImage>()
+            .expect("Expected a Quartz SharedMetalImage");
+        let properties = image.properties.clone();
+        Rc::new(ImportedImage {
+            device: self.device.clone(),
+            generation: self.generation,
+            backend_generation: self.backend_generation,
+            device_luid: self.inner.device_luid(),
+            imported: image.texture(),
+            format: properties.format,
+            top_left_origin: properties.top_left_origin,
+            properties,
+        })
     }
 
     fn import_semaphore(
@@ -321,6 +389,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for ExternalObjects {
 pub(crate) struct SharedFrameBitmap {
     size: ferroui_base::PixelSize,
     state: std::sync::Mutex<FrameState>,
+    generation: u64,
 }
 struct FrameState {
     source: Option<ffi::Owned>,
@@ -328,21 +397,25 @@ struct FrameState {
     converted: Option<Bitmap>,
 }
 impl SharedFrameBitmap {
-    fn new(texture: ffi::Ptr, frame: FrameLease) -> Self {
+    fn new(texture: ffi::Ptr, frame: FrameLease, generation: u64) -> Self {
         let m = frame.metadata();
         Self {
             size: ferroui_base::PixelSize::new(m.width as i32, m.height as i32),
+            generation,
             state: std::sync::Mutex::new(FrameState {
                 // The Metal texture's immutable sampling view can be retained on the render thread
                 // and later released on any thread. Access is serialized by this mutex.
-                source: unsafe { ffi::Owned::new(ffi::q_retain(texture)) },
+                source: Some(unsafe { ffi::Owned::new(ffi::q_retain(texture)) }),
                 frame: Some(frame),
                 converted: None,
             }),
         }
     }
     pub(crate) fn bitmap(&self) -> Option<Bitmap> {
-        let mut state = self.state.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        if unsafe { ffi::qm_is_lost(self.generation) != 0 } {
+            return None;
+        }
+        let mut state = self.state.lock().unwrap();
         if let Some(b) = &state.converted {
             return Some(b.clone());
         }
@@ -359,15 +432,14 @@ impl SharedFrameBitmap {
         } else {
             ferroui_base::rendering::composition::frames::GpuTransferReason::PixelFormatConversion
         };
-        let source = state.source.as_ref()?.0;
-        let output = Bitmap::try_new_gpu(self.size, ferroui_base::Vector::new(96., 96.)).ok()?;
         let completion = ferroui_base::rendering::composition::frames::GpuCompletion::new();
         completion.retain(frame.clone()).ok()?;
+        let output = Bitmap::new(self.size, ferroui_base::Vector::new(96., 96.));
         let callback = Box::into_raw(Box::new(completion.clone())).cast();
         let submitted = output.context(|p| unsafe {
             ffi::qm_convert_frame(
                 p,
-                source,
+                state.source.as_ref().unwrap().0,
                 rec709 as i32,
                 flipped as i32,
                 opaque as i32,
@@ -424,7 +496,7 @@ impl ferroui_base::platform::IBitmapImpl for SharedFrameBitmap {
         ))
     }
     fn dispose(&self) {
-        let mut state = self.state.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut state = self.state.lock().unwrap();
         state.source = None;
         state.frame = None;
         state.converted = None;

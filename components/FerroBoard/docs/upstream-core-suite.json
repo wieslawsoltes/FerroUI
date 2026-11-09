@@ -104,13 +104,13 @@
       "path": "scripts/check_dependencies.py",
       "before_sha256": "9daa540f856c382cd15eb9d13f0500d31b0f9d21bab0b14aae224b828ecece9b",
       "after_sha256": "f6324215e49c3a1090591c252e88695e558c6b06ec553153b3a4f8f259ae7578",
-      "before_snapshot": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_dependencies.py"
+      "before_snapshot": "/tmp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_dependencies.py"
     },
     {
       "path": "scripts/check_branding.py",
       "before_sha256": "0b2a868868829025295bbf80f1a852eb35fa4ef15058c1b3cfa08fc0b9add68f",
       "after_sha256": "2c0a41f442240b8514111c7449b4adfc321c5c232522ef96c23fe8cce0903968",
-      "before_snapshot": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_branding.py"
+      "before_snapshot": "/tmp/ferrokeyboard/upstream-core-suite-stage/before/scripts/check_branding.py"
     }
   ],
   "methods": [
@@ -2637,82 +2637,82 @@
     "release_and_sample_consumer_build": "Unchanged production code;prior verified builds retained,not rerun for test-only changes.",
     "full_workspace_fmt": "Previously dependency-only red;framework source unchanged,not rerun.",
     "native_ui_verified": false,
-    "logs_directory": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage"
+    "logs_directory": "/tmp/ferrokeyboard/upstream-core-suite-stage"
   },
   "retained_test_binaries": [
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/clipboard-d4c85ccd5d41da7d",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/clipboard-d4c85ccd5d41da7d",
       "sha256": "acc2b254e9908a500b4e2d85722a97fba8de5ab61d0b54c36e4cfb3124f15025",
       "test_source": "src/FerroBoard.Core/tests/clipboard.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/clipboard-d4c85ccd5d41da7d"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/clipboard-d4c85ccd5d41da7d"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/dictionary-889593dd99d9efa9",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/dictionary-889593dd99d9efa9",
       "sha256": "162eb49dbd5f3e1b646b5e3781481767b2e42c40a85b9a5f3ba3c062d549b5fb",
       "test_source": "src/FerroBoard.Core/tests/dictionary.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/dictionary-889593dd99d9efa9"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/dictionary-889593dd99d9efa9"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/editor-c5cab3ec429fe3a2",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/editor-c5cab3ec429fe3a2",
       "sha256": "046acfe6775de60696290117fb5d8f58e04cd34ad5da29797a2a091d5564f3bd",
       "test_source": "src/FerroBoard.Core/tests/editor.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/editor-c5cab3ec429fe3a2"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/editor-c5cab3ec429fe3a2"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/emoji-6caba96ace0fe6fd",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/emoji-6caba96ace0fe6fd",
       "sha256": "f7b3d58f2fe73011f8c8c7a2ba1a60aa7166d5ba649dcbb2488783207b7e9d9a",
       "test_source": "src/FerroBoard.Core/tests/emoji.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/emoji-6caba96ace0fe6fd"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/emoji-6caba96ace0fe6fd"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/engine_upstream-4c8b246fffb76239",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/engine_upstream-4c8b246fffb76239",
       "sha256": "c2eaa4ea949373e1faa08293dcb8a4927bb51d0871d019ebf1221d0524e6c7df",
       "test_source": "src/FerroBoard.Core/tests/engine_upstream.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/engine_upstream-4c8b246fffb76239"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/engine_upstream-4c8b246fffb76239"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/layout_upstream-2927a72e010a9b5e",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/layout_upstream-2927a72e010a9b5e",
       "sha256": "1f2d99a41a2a84b786adaa59aacac48fc2ca55467433bc9649b043723a1e5b61",
       "test_source": "src/FerroBoard.Core/tests/layout_upstream.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/layout_upstream-2927a72e010a9b5e"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/layout_upstream-2927a72e010a9b5e"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/settings-c9b354a0eb43128d",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/settings-c9b354a0eb43128d",
       "sha256": "cc52a5eb15275295277cf8d5fbf01633d92fe93c99b2090ef735478d43ed336f",
       "test_source": "src/FerroBoard.Core/tests/settings.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/settings-c9b354a0eb43128d"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/settings-c9b354a0eb43128d"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_data_upstream-2a9fccce2cb19aa7",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_data_upstream-2a9fccce2cb19aa7",
       "sha256": "1ea846407d8a75e51ddc8e5526f6a39057fbf6dcede708f1d6f4f03d6eba0166",
       "test_source": "src/FerroBoard.Core/tests/text_data_upstream.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/text_data_upstream-2a9fccce2cb19aa7"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/text_data_upstream-2a9fccce2cb19aa7"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_utils-c15e22ac5b8df6c6",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/text_utils-c15e22ac5b8df6c6",
       "sha256": "954d70b37d36441144806c25b100018fe6d42dbdbdf3ffcf094b4935f281f2e7",
       "test_source": "src/FerroBoard.Core/tests/text_utils.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/text_utils-c15e22ac5b8df6c6"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/text_utils-c15e22ac5b8df6c6"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/touch_upstream-3d15fd0ba2f9638d",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/touch_upstream-3d15fd0ba2f9638d",
       "sha256": "f7fb5a306706d70d3efccc04dfd052307c3f0136551fde360994028ec184f7c9",
       "test_source": "src/FerroBoard.Core/tests/touch_upstream.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/touch_upstream-3d15fd0ba2f9638d"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/touch_upstream-3d15fd0ba2f9638d"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/user_dictionary-980386dd1f2253cf",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/retained-test-binaries/user_dictionary-980386dd1f2253cf",
       "sha256": "8c4c923e293b688a315a61e1f5df94e2f895380bea85c14122c9232cc81562e1",
       "test_source": "src/FerroBoard.Core/tests/user_dictionary.rs",
-      "original_binary": "/Volumes/SSD/temp/ferrokeyboard/target/debug/deps/user_dictionary-980386dd1f2253cf"
+      "original_binary": "/tmp/ferrokeyboard/target/debug/deps/user_dictionary-980386dd1f2253cf"
     }
   ],
   "source_test_results": {
-    "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/dotnet-results/upstream.trx",
+    "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/dotnet-results/upstream.trx",
     "sha256": "c150320f19d887295df9f493a7416ff90e3167f8e9d56f31ac43f75c3e9e9786"
   },
   "unchanged_prior_sample": {
-    "path": "/Volumes/SSD/temp/ferrokeyboard/computed-key-text-stage/prior-ferroboard-sample",
+    "path": "/tmp/ferrokeyboard/computed-key-text-stage/prior-ferroboard-sample",
     "sha256": "1f1ac38606b67f61b6713ab39e9a746f676f8634272c4d993acc8de9af863fcc",
     "bytes": 314764560,
     "format": "Mach-O 64-bit executable arm64",
@@ -2720,55 +2720,55 @@
   },
   "evidence_logs": [
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/dotnet-test.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/dotnet-test.log",
       "sha256": "db559948ce8cccdbfccc3795c2f56573f716a0eacb7319a9c87b9b9139851872"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/assertion-audit.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/assertion-audit.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/assertion-audit-check.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/assertion-audit-check.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/layout-first.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/layout-first.log",
       "sha256": "44f230385d12f17fd16c9cbff954a491f2d3ce649563ec63ae8d456f64c72689"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/layout-second.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/layout-second.log",
       "sha256": "fb92935ab8a5ffaafe46a97baaffe4a3fea26df7caadea767dfde23646365e3d"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/selected-third.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/selected-third.log",
       "sha256": "8de0add25a5a28548d20ab76b0912c6ad247126877f255559c7432090c731539"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/selected-fourth.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/selected-fourth.log",
       "sha256": "cbe61790aa7de85f9c8177bb6314d3555622f1b9fd53985ee584b5e663c2c273"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/core-final.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/core-final.log",
       "sha256": "54583db361ae9e5064bf6ffa8f1f074865c09dfd7ed96fddd5a1bfd3529e74c6"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/core-final-stderr.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/core-final-stderr.log",
       "sha256": "68ea4678c8398590ea868a24ca67577d78bb37cfe8546d0251e014538c574a6d"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/clippy-final.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/clippy-final.log",
       "sha256": "72e377f5d118b6e0c0cf2652f28df6041324ec97cd7b236125a88319d3375d7c"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/fmt-owned-final.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/fmt-owned-final.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/metadata-final-stderr.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/metadata-final-stderr.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "/Volumes/SSD/temp/ferrokeyboard/upstream-core-suite-stage/static-runner.log",
+      "path": "/tmp/ferrokeyboard/upstream-core-suite-stage/static-runner.log",
       "sha256": "d20d2f788d698c62eb75e0fa06e94e4ca3af77739a578eac49b3b649cc05fdde"
     }
   ]

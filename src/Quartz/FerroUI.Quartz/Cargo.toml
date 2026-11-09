@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-quartz"
-description = "Experimental macOS renderer using system Core Graphics, Core Text and ImageIO"
+description = "Apple native renderer using Metal, Core Graphics, Core Text and ImageIO on macOS and iOS"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

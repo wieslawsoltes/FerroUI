@@ -21,8 +21,17 @@ fn rect(r: kurbo::Rect) -> Rect {
 pub fn affine(m: Matrix) -> Affine {
     Affine::new([m.m11, m.m12, m.m21, m.m22, m.m31, m.m32])
 }
-/// The path as a Core Graphics path; `None` only when Core Graphics cannot allocate one.
-pub fn native(path: &BezPath) -> Option<Owned> {
+#[cfg(feature = "metal")]
+#[derive(Default)]
+struct NativePaths {
+    bytes: usize,
+    paths: std::collections::HashMap<Vec<u64>, Owned>,
+}
+#[cfg(feature = "metal")]
+ferroui_base::ferro_thread_local! {
+    static NATIVE_PATHS: std::cell::RefCell<NativePaths> = Default::default();
+}
+pub fn native(path: &BezPath) -> Owned {
     let commands: Vec<Command> = path
         .elements()
         .iter()
@@ -49,8 +58,35 @@ pub fn native(path: &BezPath) -> Option<Owned> {
             },
         })
         .collect();
-    // SAFETY: q_path returns NULL or a +1 CGPath built from `commands`.
-    unsafe { Owned::new(ffi::q_path(commands.as_ptr(), commands.len())) }
+    #[cfg(feature = "metal")]
+    {
+        let key: Vec<u64> = commands
+            .iter()
+            .flat_map(|c| std::iter::once(c.kind as u64).chain(c.p.into_iter().map(f64::to_bits)))
+            .collect();
+        return NATIVE_PATHS.with(|cache| {
+            let mut cache = cache.borrow_mut();
+            if let Some(path) = cache.paths.get(&key) {
+                return unsafe { Owned::new(ffi::q_retain(path.0)) };
+            }
+            let path = unsafe { Owned::new(ffi::q_path(commands.as_ptr(), commands.len())) };
+            let bytes = key.len() * 8;
+            if !path.0.is_null() && bytes <= 4 * 1024 * 1024 {
+                if cache.paths.len() >= 2048 || cache.bytes + bytes > 4 * 1024 * 1024 {
+                    cache.paths.clear();
+                    cache.bytes = 0;
+                }
+                let retained = unsafe { Owned::new(ffi::q_retain(path.0)) };
+                cache.paths.insert(key, retained);
+                cache.bytes += bytes;
+            }
+            path
+        });
+    }
+    #[cfg(not(feature = "metal"))]
+    unsafe {
+        Owned::new(ffi::q_path(commands.as_ptr(), commands.len()))
+    }
 }
 pub fn from_native(p: ffi::Ptr) -> BezPath {
     let mut path = BezPath::new();
@@ -72,6 +108,12 @@ pub fn from_native(p: ffi::Ptr) -> BezPath {
     }
     path
 }
+#[cfg(feature = "metal")]
+struct ImmutableNativePath(Owned);
+// CGPath instances created here are immutable after construction and Core
+// Graphics permits concurrent reads; the owner only performs CFRelease.
+#[cfg(feature = "metal")]
+unsafe impl Sync for ImmutableNativePath {}
 #[derive(Clone)]
 pub struct Geometry {
     pub stroke: BezPath,
@@ -79,8 +121,20 @@ pub struct Geometry {
     pub rule: FillRule,
     source: Option<Arc<dyn IGeometryImpl>>,
     transform: Matrix,
+    #[cfg(feature = "metal")]
+    native_fill: std::sync::OnceLock<Arc<ImmutableNativePath>>,
 }
 impl Geometry {
+    #[cfg(feature = "metal")]
+    pub fn native_fill(&self) -> Option<ffi::Ptr> {
+        let fill = self.fill.as_ref()?;
+        Some(
+            self.native_fill
+                .get_or_init(|| Arc::new(ImmutableNativePath(native(fill))))
+                .0
+                 .0,
+        )
+    }
     pub fn new(path: BezPath, rule: FillRule) -> Arc<Self> {
         Arc::new(Self {
             fill: Some(path.clone()),
@@ -88,6 +142,8 @@ impl Geometry {
             rule,
             source: None,
             transform: Matrix::IDENTITY,
+            #[cfg(feature = "metal")]
+            native_fill: Default::default(),
         })
     }
     pub fn paths(stroke: BezPath, fill: Option<BezPath>, rule: FillRule) -> Arc<Self> {
@@ -97,6 +153,8 @@ impl Geometry {
             rule,
             source: None,
             transform: Matrix::IDENTITY,
+            #[cfg(feature = "metal")]
+            native_fill: Default::default(),
         })
     }
     pub fn rectangle(r: Rect) -> Arc<Self> {
@@ -117,46 +175,38 @@ impl Geometry {
         b: &dyn IGeometryImpl,
         mode: GeometryCombineMode,
     ) -> Arc<Self> {
-        let (Some(a), Some(b)) = (
-            a.as_any().downcast_ref::<Self>(),
-            b.as_any().downcast_ref::<Self>(),
-        ) else {
-            return Self::new(BezPath::new(), FillRule::NonZero);
-        };
+        let a = a
+            .as_any()
+            .downcast_ref::<Self>()
+            .expect("Quartz geometry required");
+        let b = b
+            .as_any()
+            .downcast_ref::<Self>()
+            .expect("Quartz geometry required");
         let empty = BezPath::new();
-        let (Some(na), Some(nb)) = (
-            native(a.fill.as_ref().unwrap_or(&empty)),
-            native(b.fill.as_ref().unwrap_or(&empty)),
-        ) else {
-            return Self::new(BezPath::new(), FillRule::NonZero);
-        };
+        let na = native(a.fill.as_ref().unwrap_or(&empty));
+        let nb = native(b.fill.as_ref().unwrap_or(&empty));
         let op = match mode {
             GeometryCombineMode::Union => 0,
             GeometryCombineMode::Intersect => 1,
             GeometryCombineMode::Xor => 2,
             GeometryCombineMode::Exclude => 3,
         };
-        // SAFETY: q_combine returns NULL or a +1 CGPath.
-        let combined = unsafe {
-            Owned::new(ffi::q_combine(
+        unsafe {
+            let p = ffi::q_combine(
                 na.0,
                 nb.0,
                 op,
                 i32::from(a.rule == FillRule::EvenOdd),
                 i32::from(b.rule == FillRule::EvenOdd),
-            ))
-        };
-        match combined {
-            Some(p) => Self::new(from_native(p.0), FillRule::NonZero),
-            None => Self::new(BezPath::new(), FillRule::NonZero),
+            );
+            assert!(!p.is_null(), "Core Graphics geometry combination failed");
+            let p = Owned::new(p);
+            Self::new(from_native(p.0), FillRule::NonZero)
         }
     }
-    /// The outline of `path` stroked with `pen`; empty for a degenerate pen or when Core
-    /// Graphics cannot stroke it.
     pub fn stroked(path: &BezPath, pen: &dyn IPen) -> BezPath {
-        let Some(p) = native(path) else {
-            return BezPath::new();
-        };
+        let p = native(path);
         let cap = match pen.line_cap() {
             PenLineCap::Flat => 0,
             PenLineCap::Round => 1,
@@ -179,10 +229,8 @@ impl Geometry {
             })
             .unwrap_or_default();
         let offset = dash.as_ref().map_or(0., |d| d.offset() * pen.thickness());
-        // SAFETY: q_stroke never returns NULL in practice (an empty path for degenerate
-        // input); a NULL is still handled as an empty outline.
-        let stroked = unsafe {
-            Owned::new(ffi::q_stroke(
+        unsafe {
+            let p = Owned::new(ffi::q_stroke(
                 p.0,
                 pen.thickness(),
                 cap,
@@ -191,14 +239,18 @@ impl Geometry {
                 values.as_ptr(),
                 values.len(),
                 offset,
-            ))
-        };
-        stroked.map_or_else(BezPath::new, |p| from_native(p.0))
+            ));
+            from_native(p.0)
+        }
     }
 }
 impl IGeometryImpl for Geometry {
     fn bounds(&self) -> Rect {
-        rect(self.stroke.bounding_box())
+        match self.fill.as_ref().filter(|p| !p.is_empty()) {
+            Some(fill) if self.stroke.is_empty() => rect(fill.bounding_box()),
+            Some(fill) => rect(self.stroke.bounding_box().union(fill.bounding_box())),
+            None => rect(self.stroke.bounding_box()),
+        }
     }
     fn contour_length(&self) -> f64 {
         PathMeasure::new(&self.stroke).length()
@@ -206,7 +258,14 @@ impl IGeometryImpl for Geometry {
     fn get_render_bounds(&self, pen: Option<&dyn IPen>) -> Rect {
         pen.map_or_else(
             || self.bounds(),
-            |p| rect(Self::stroked(&self.stroke, p).bounding_box()),
+            |p| {
+                let stroke = Self::stroked(&self.stroke, p);
+                match self.fill.as_ref().filter(|p| !p.is_empty()) {
+                    Some(fill) if stroke.is_empty() => rect(fill.bounding_box()),
+                    Some(fill) => rect(stroke.bounding_box().union(fill.bounding_box())),
+                    None => rect(stroke.bounding_box()),
+                }
+            },
         )
     }
     fn get_widened_geometry(&self, pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
@@ -226,19 +285,30 @@ impl IGeometryImpl for Geometry {
         pen.is_some_and(|pen| Self::stroked(&self.stroke, pen).winding(point(p)) != 0)
     }
     fn get_fill_intersection_result(&self, g: &dyn IGeometryImpl) -> IntersectionResult {
-        let combined = Self::combine(self, g, GeometryCombineMode::Intersect);
-        if combined
-            .fill
-            .as_ref()
-            .is_none_or(|p| p.area().abs() < 1e-10)
-        {
-            IntersectionResult::Empty
-        } else {
-            IntersectionResult::Intersects
+        if !g.as_any().is::<Self>() {
+            return IntersectionResult::Empty;
         }
+        let combined = Self::combine(self, g, GeometryCombineMode::Intersect);
+        let empty = |g: &Self| g.fill.as_ref().is_none_or(|p| p.is_empty());
+        if empty(&combined) {
+            return IntersectionResult::Empty;
+        }
+        // Match the established Ferro/Skia orientation: FullyInside means
+        // the argument lies inside the receiver. Boolean differences preserve
+        // holes and disjoint contours; signed areas can cancel and cannot
+        // establish whether a filled path is empty.
+        if empty(&Self::combine(g, self, GeometryCombineMode::Exclude)) {
+            return IntersectionResult::FullyInside;
+        }
+        if empty(&Self::combine(self, g, GeometryCombineMode::Exclude)) {
+            return IntersectionResult::FullyContains;
+        }
+        IntersectionResult::Intersects
     }
     fn intersect(&self, g: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
-        Some(Self::combine(self, g, GeometryCombineMode::Intersect))
+        g.as_any().is::<Self>().then(|| {
+            Self::combine(self, g, GeometryCombineMode::Intersect) as Arc<dyn IGeometryImpl>
+        })
     }
     fn with_transform(&self, m: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         Arc::new(Self {
@@ -247,6 +317,8 @@ impl IGeometryImpl for Geometry {
             rule: self.rule,
             source: Some(Arc::new(self.clone())),
             transform: m,
+            #[cfg(feature = "metal")]
+            native_fill: Default::default(),
         })
     }
     fn try_get_point_at_distance(&self, d: f64) -> Option<Point> {
@@ -314,22 +386,31 @@ pub struct Builder {
     rule: FillRule,
     filled: bool,
     start: kurbo::Point,
+    broken: bool,
+    built: bool,
 }
 impl Builder {
     pub fn new(source: Option<&dyn IGeometryImpl>) -> Self {
-        let g = source.and_then(|s| s.as_any().downcast_ref::<Geometry>());
+        let g = source.map(|s| {
+            s.as_any()
+                .downcast_ref::<Geometry>()
+                .expect("Quartz geometry required")
+        });
         Self {
             stroke: g.map_or_else(BezPath::new, |g| g.stroke.clone()),
             fill: g.and_then(|g| g.fill.clone()).unwrap_or_default(),
             rule: g.map_or(FillRule::EvenOdd, |g| g.rule),
             filled: true,
             start: kurbo::Point::ZERO,
+            broken: false,
+            built: false,
         }
     }
     fn command(&mut self, e: PathEl, stroked: bool) {
         if stroked {
             self.stroke.push(e)
         } else {
+            self.broken = true;
             let p = match e {
                 PathEl::LineTo(p) | PathEl::QuadTo(_, p) | PathEl::CurveTo(_, _, p) => p,
                 _ => self.start,
@@ -343,6 +424,8 @@ impl Builder {
 }
 impl IStreamGeometryBuilder for Builder {
     fn to_geometry(&mut self) -> Arc<dyn IGeometryImpl> {
+        assert!(!self.built, "The geometry has already been built");
+        self.built = true;
         Geometry::paths(self.stroke.clone(), Some(self.fill.clone()), self.rule)
     }
 }
@@ -350,6 +433,7 @@ impl IGeometryContext for Builder {
     fn begin_figure(&mut self, p: Point, filled: bool) {
         self.filled = filled;
         self.start = point(p);
+        self.broken = false;
         self.stroke.move_to(self.start);
         if filled {
             self.fill.move_to(self.start)
@@ -357,7 +441,14 @@ impl IGeometryContext for Builder {
     }
     fn end_figure(&mut self, closed: bool) {
         if closed {
-            self.command(PathEl::ClosePath, true)
+            if self.broken {
+                self.stroke.line_to(self.start);
+            } else {
+                self.stroke.close_path();
+            }
+            if self.filled {
+                self.fill.close_path();
+            }
         }
     }
     fn set_fill_rule(&mut self, r: FillRule) {

@@ -300,7 +300,7 @@ floor and verify packaging with an appropriate toolchain rather than raising
 the floor to silence that warning.
 
 Local raw logs are under
-`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/`; they are not repository
+`<workspace>/build-cache/ferroui-portable-media-evidence/`; they are not repository
 files or automatically available on another machine. Important names include
 `browser-integration.log`, `browser-webapp.log`, `browser-tooling-tests.log`,
 `queued-handle-contract.log`, `browser-foundation-contracts.log`,

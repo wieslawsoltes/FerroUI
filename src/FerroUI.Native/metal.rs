@@ -174,7 +174,7 @@ impl IOptionalFeatureProvider for MetalDevice {
 
 impl IPlatformGraphicsContext for MetalDevice {
     fn is_lost(&self) -> bool {
-        false
+        self.native.borrow().is_none()
     }
 
     /// Takes the lock of the device: the UI thread and the render thread
@@ -918,7 +918,9 @@ mod tests {
             .expect("the device has the feature");
         let wrapped = wrap.wrap_semaphore_handle_on_any_thread(&shared_event(9)).expect("a shared event is wrapped");
 
+        assert!(!device.is_lost());
         device.dispose();
+        assert!(device.is_lost(), "disposed devices must reject stale interop frames");
         wrapped.dispose();
         assert_eq!(vec!["RetainNSObject(9)", "ReleaseNSObject(9)"], take(&log));
     }

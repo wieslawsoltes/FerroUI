@@ -4,7 +4,7 @@
 
 ## What was seen
 
-The screenshot run of the ControlCatalog on macOS (scaling 2, a window of 1100 by 800; `FERROUI_SMOKE_SCREENSHOTS`, pictures in `/Volumes/1TB-macOS/ferroui-screenshots/macos-gl/catalog-metal/` and `catalog-opengl/`) showed, on the Buttons page, the selected navigation item "Buttons" as an empty rounded box at its place, and its content (the selection bar, the icon and the text) twice as large and away from its place, down and to the left, over the item "Slider". The same page at scaling 1 (the Linux framebuffer, DRM and headless VNC runs) is correct.
+The screenshot run of the ControlCatalog on macOS (scaling 2, a window of 1100 by 800; `FERROUI_SMOKE_SCREENSHOTS`, pictures in `<workspace>/ferroui-screenshots/macos-gl/catalog-metal/` and `catalog-opengl/`) showed, on the Buttons page, the selected navigation item "Buttons" as an empty rounded box at its place, and its content (the selection bar, the icon and the text) twice as large and away from its place, down and to the left, over the item "Slider". The same page at scaling 1 (the Linux framebuffer, DRM and headless VNC runs) is correct.
 
 The item is a `SelectableButton` with the theme `SelectableItemButton` of the sample (`samples/ControlCatalog/CustomThemes.xaml`): selected (and under the pointer), its `Border` `PART_LayoutRoot` gets a background and the box shadow `NavigationItemShadow`. Nothing of the selection is animated; the transform that goes wrong is the one of the drawing context.
 
@@ -19,7 +19,7 @@ The screenshot run writes a second picture of every page since this investigatio
 | `01-buttons.png` (render target bitmap of 192 DPI) | an empty box at its place; its content at twice its size and twice its distance from the origin of the window |
 | `01-buttons-composed.png` (the compositor) | correct: the box with its shadow, the bar, the icon and the text in it |
 
-Pictures: `/Volumes/1TB-macOS/ferroui-screenshots/macos-render-fixes/before/` (`01-buttons-navigation-bitmap-vs-composed.png` puts the navigation panes of the two side by side). **The window shows the item correctly; only a render target bitmap of more than 96 DPI is wrong.**
+Pictures: `<workspace>/ferroui-screenshots/macos-render-fixes/before/` (`01-buttons-navigation-bitmap-vs-composed.png` puts the navigation panes of the two side by side). **The window shows the item correctly; only a render target bitmap of more than 96 DPI is wrong.**
 
 ## What the host test shows
 
@@ -70,7 +70,7 @@ fn restore_canvas(&mut self) {
 }
 ```
 
-Verified on macOS (26.6, Metal, scaling 2): with it the ignored acceptance test passes and the known-difference test fails, as they should, the tests of the Skia backend and of the headless platform pass otherwise, and the render target bitmap of the catalog matches the compositor's picture (`/Volumes/1TB-macOS/ferroui-screenshots/macos-render-fixes/after-fix-branch/`: of the 3.5 million pixels of the Buttons page, 6,440 differed between the two pictures by more than 40 in a channel before the fix and 287 after it, about what the TextBlock page, without a selected item in view, differs by in both runs: 243). The post transform is a scale by the DPI over 96, so it is always invertible. Upstream's form would be the same correction in the getter (`Canvas.TotalMatrix44.ToAvaloniaMatrix() * _postTransform.Value.Invert()`). The Vello backend keeps the logical transform itself and never reads it back from a canvas, so it is not affected and needs nothing.
+Verified on macOS (26.6, Metal, scaling 2): with it the ignored acceptance test passes and the known-difference test fails, as they should, the tests of the Skia backend and of the headless platform pass otherwise, and the render target bitmap of the catalog matches the compositor's picture (`<workspace>/ferroui-screenshots/macos-render-fixes/after-fix-branch/`: of the 3.5 million pixels of the Buttons page, 6,440 differed between the two pictures by more than 40 in a channel before the fix and 287 after it, about what the TextBlock page, without a selected item in view, differs by in both runs: 243). The post transform is a scale by the DPI over 96, so it is always invertible. Upstream's form would be the same correction in the getter (`Canvas.TotalMatrix44.ToAvaloniaMatrix() * _postTransform.Value.Invert()`). The Vello backend keeps the logical transform itself and never reads it back from a canvas, so it is not affected and needs nothing.
 
 What it costs, and why it is a decision:
 

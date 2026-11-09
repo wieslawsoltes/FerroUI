@@ -237,7 +237,7 @@
     "static_checks": "23 generators and all source/member/resource/metadata/input/settings/header/Unicode/name/pin/patch/lock/license/corpus integrity checks passed; fresh Roslyn output matches 2,208 declarations and all 351 source hashes remain unchanged.",
     "dependencies": "212 exact package versions/sources/licenses verified by fresh locked metadata. Sole additional dev edge to existing sha2 checked separately against retained lock.",
     "diagnostics": "Initial named-macro/test invoker syntax corrected. Native emitter first lacked public actual signature paths and nullable UTF16 carrier; separate native nullable storage and public spelling preserve the ABI. Source identity comparisons corrected after measuring nonvirtual ToUpper, TextInfo culture-name equality and per-culture ASCII flags. Locator scope test corrected to explicit disposal. Initial Clippy unnecessary unwrap corrected, affected tests rerun. Existing dependency/linker warnings remain.",
-    "logs_directory": "/Volumes/SSD/temp/ferrokeyboard/native-text-info-stage",
+    "logs_directory": "/tmp/ferrokeyboard/native-text-info-stage",
     "native_application_launched": false,
     "cargo_processes": "All stage commands terminal after final gate runner; no native application launched."
   },
@@ -271,11 +271,11 @@
     "sha256": "98999e9d328cb9ed58f03ce09258381cd2f8376e2b8ef500439db181bed022ec",
     "historical_exit_code": 101,
     "current_compile_exit_code": 0,
-    "current_compile_log": "/Volumes/SSD/temp/ferrokeyboard/native-text-info-stage/native-repro-final-stderr.log",
+    "current_compile_log": "/tmp/ferrokeyboard/native-text-info-stage/native-repro-final-stderr.log",
     "limits": "Original unchanged Base-only probe now compiles. Executing casing requires a configured exact host service. SDK registration and actual behavior are independently exercised by NativeTextInfo compiled/runtime consumers; full CultureInfo reference/virtual behavior is still incomplete."
   },
   "built_sample": {
-    "path": "/Volumes/SSD/temp/ferrokeyboard/native-culture-stage/prior-ferroboard-sample",
+    "path": "/tmp/ferrokeyboard/native-culture-stage/prior-ferroboard-sample",
     "sha256": "6dccd0bdd8b6a1475b12f16d0e1538b9619ff008d76d785b3c5b76e28d552a3d",
     "native_launch": false
   },

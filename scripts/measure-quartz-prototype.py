@@ -26,11 +26,13 @@ def output(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', choices=('hello-world', 'control-catalog-desktop'), default='hello-world')
-    parser.add_argument('--native-backend', choices=('quartz', 'quartz-metal'), default='quartz-metal')
+    parser.add_argument('--native-backend', choices=('quartz', 'quartz-metal', 'quartz-runtime-shaders'), default='quartz-metal')
     parser.add_argument('--output', type=Path, default=ROOT / 'target' / 'quartz-prototype')
     parser.add_argument('--skip-build', action='store_true', help='Measure already copied package-backend executables')
     parser.add_argument('--stock-baseline', type=Path, help='Also record the untouched upstream executable')
     args = parser.parse_args()
+    if args.package == 'control-catalog-desktop' and args.native_backend == 'quartz-runtime-shaders':
+        parser.error('ControlCatalog already enables runtime shaders with quartz-metal')
     if platform.system() != 'Darwin':
         parser.error('This prototype comparison runs on macOS')
     args.output.mkdir(parents=True, exist_ok=True)
@@ -44,6 +46,13 @@ def main():
               'commands': {}, 'measurements': {},
               'build_environment': {key: os.environ.get(key) for key in
                   ('MACOSX_DEPLOYMENT_TARGET', 'RUSTFLAGS', 'SKIA_LIBRARY_SEARCH_PATH', 'SKIA_NINJA_COMMAND')}}
+    tracked = output(['git', 'ls-files', '-co', '--exclude-standard', '--',
+                      'Cargo.toml', 'Cargo.lock', 'src/Quartz', 'src/FerroUI.Desktop',
+                      'samples/HelloWorld', 'src/FerroUI.Native/metal.rs',
+                      'src/FerroUI.Native/window_impl.rs', 'native/FerroUI.Native/src/OSX',
+                      'src/FerroUI.Base/rendering/platform_render_interface_context_manager.rs']).splitlines()
+    result['source_sha256'] = {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+                               for path in sorted(set(tracked)) if (ROOT / path).is_file()}
     for backend in ('skia', args.native_backend):
         binary = args.output / f'{args.package}-{backend}'
         command = ['cargo', 'build', '--locked', '--profile', 'dist', '-p',
@@ -72,6 +81,9 @@ def main():
     if included:
         raise RuntimeError(f'Native-only graph includes unexpected dependencies: {included}')
     result['native_dependency_exclusion_verified'] = True
+    result['runtime_shader_compiler_included'] = 'naga v' in tree
+    if args.package == 'hello-world' and args.native_backend != 'quartz-runtime-shaders' and result['runtime_shader_compiler_included']:
+        raise RuntimeError('The size-first backend unexpectedly includes the optional shader compiler')
     (args.output / 'native-dependencies.txt').write_text(tree + '\n')
     report = args.output / 'sizes.json'
     report.write_text(json.dumps(result, indent=2) + '\n')

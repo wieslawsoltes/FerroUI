@@ -6,9 +6,9 @@ borrowed-input fix. The released-control case verifies callback rejection withou
 a removed control alive. Full workspace tests pass **1,967 tests/57 suites**, zero failed
 or ignored. Strict workspace/all-target Clippy, formatting,24Python tests and source/theme/
 inspector/seven-package provenance guards pass. The clean desktop sample builds and is
-packaged as `/Volumes/SSD/temp/ferrodock-port/FerroDock Core Review.app`.
+packaged as `<evidence>/ferrodock-port/FerroDock Core Review.app`.
 
-Proof: `/Volumes/SSD/temp/ferrodock-port/ferrodock-native-desktop-checkpoint.json`.
+Proof: `<evidence>/ferrodock-port/ferrodock-native-desktop-checkpoint.json`.
 The earlier 23-stage proof below remains historical; release-library and all standalone
 checks were not repeated for this native-only revision. No Dock engine/model/app behavior
 or original C# source was changed. Temporary menu tracing has been removed from source.
@@ -758,7 +758,7 @@ lightweight evidence. All owned jobs terminal; entire goal remains active and in
 # Current validation: native source-generation markers and Rust registration discovery
 
 Full44357 terminal0 passes **1837 Rust tests/55suites**,zero failed/ignored. All21 stages pass
-in /Volumes/SSD/temp/ferrodock-port/ferrodock-json-registration-final-validation-summary.json:
+in <evidence>/ferrodock-port/ferrodock-json-registration-final-validation-summary.json:
 strict workspace/debug/all-target and selected release-library Clippy;8 standalone targets;
 10 normal dependency boundaries;format/21Python/source/theme/inspector/two generators/six
 retained package integrity guards and expected completion rejection. Adapter14,compiled
@@ -797,7 +797,7 @@ lightweight results. All owned jobs terminal; full goal stays active and incompl
 # Current validation: shared declaration-to-Rust JSON bindings
 
 Final7639 terminal0 passes **1828 Rust tests across55 suites**, zero failed/ignored. All21
-stages pass in /Volumes/SSD/temp/ferrodock-port/ferrodock-shared-bindings-final-validation-summary.json:
+stages pass in <evidence>/ferrodock-port/ferrodock-shared-bindings-final-validation-summary.json:
 strict debug workspace/all-target and selected release-library Clippy;8 standalone packages
 (adapter8,consumer4,semantic compiler4,JSON21,CoreSDK62,recyclingSDK2,ReactiveSDK7,runtime3);
 10 normal dependency boundaries;format,21 Python tests,source/theme/inspector/two generators,
@@ -849,7 +849,7 @@ actual desktop binary excluded. Other projects untouched. Retry exec53537/Python
 All20stage driver checks pass, including strict workspace debug/all-target and selected
 release Clippy,7 standalone packages,9 normal boundaries,format/21Python/source/theme/
 inspector/two generator/six provenance guards and expected full-completion rejection.
-Summary: /Volumes/SSD/temp/ferrodock-port/ferrodock-json-emission-final-validation-summary.json.
+Summary: <evidence>/ferrodock-port/ferrodock-json-emission-final-validation-summary.json.
 No stale run is restarted on an observation timeout. All temp/TMPDIR/NuGet caches remain SSD.
 
 Schema bindings in generated consumer are EXPLICIT LIMITED projections, not default model
@@ -935,7 +935,7 @@ temp record these checks. All owned build/validation jobs terminal; goal remains
 
 Full96955 terminal0 passes **1805 Rust tests /49 suites**, zero failed/ignored. JSON14,
 ReactiveUI568,Domain225,UI373,markup189,diagnostics49,settings33,sample27,CoreSDK62.
-All18 stages pass in /Volumes/SSD/temp/ferrodock-port/ferrodock-json-numeric-validation-summary.json:
+All18 stages pass in <evidence>/ferrodock-port/ferrodock-json-numeric-validation-summary.json:
 strict debug/all-target and release-library Clippy, standalone14+62+2+7+3, seven normal
 dependency boundaries, format/21Python, source/theme/inspector/two generators/six provenance
 guards and expected full-completion rejection. No code/test change follows the green run.
@@ -971,7 +971,7 @@ The latest locked workspace passes **1,803 tests /49 suites**, zero failed/ignor
 pass. All18 driver stages pass, including standalone12+62+2+7+3, seven dependency boundaries,
 format/21Python, source/theme/inspector/two generators/six provenance guards and expected
 full-completion rejection. No production/test change follows the full green run. Results:
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-fallback-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-json-fallback-validation-summary.json.
 
 Source44813 terminal0 records28 actual-model checks, two model wire goldens, five fallback
 depth/getter cases and two fallback cases plus a wire golden. The model projection is
@@ -992,7 +992,7 @@ No actual desktop rebuild/restart; final binary preservation check is recorded b
 
 Final lightweight checks confirm explicit include-file rustfmt, original source diff empty,
 intent-to-add with no staged contents, and unchanged actual desktop size/mtime/SHA256.
-Preservation manifest: /Volumes/SSD/temp/ferrodock-port/ferrodock-json-fallback-desktop-preserved.json.
+Preservation manifest: <evidence>/ferrodock-port/ferrodock-json-fallback-desktop-preserved.json.
 No owned Cargo/validation process remains running. Source and generator checks are repeated
 following this documentation update; the whole goal remains active and incomplete.
 
@@ -1005,7 +1005,7 @@ ReactiveUI567, Domain225, UI373, markup189, diagnostics49, settings33, sample27,
 Targeted71588 passes6JSON+16workspace+5stream before the final IO/finally test.58283 passes
 final7JSON tests; the earlier locked invocation only requested a lock refresh after adding
 a test dependency. Final full50330 terminal0: all **18 values zero** in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-json-validation-summary.json. Strict debug and
+<evidence>/ferrodock-port/ferrodock-json-validation-summary.json. Strict debug and
 selected release-library Clippy, standalone7+62+2+7+3 tests, seven normal boundaries,
 fmt/21Python, source/theme/inspector, both generators and all six package guards pass.
 Complete-port rejection remains expected at232/455/1241. No production/test change after
@@ -1064,7 +1064,7 @@ library test harness. Six stale owned harnesses had already been retired (2,452,
 bytes); three obsolete variants were then retired (510,264,880bytes), all with manifests
 and no owned Cargo live. The other observed Cargo was FerroBoard and was untouched.
 Retry81373 completes all **17 checks**, every result zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-serializer-stream-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-serializer-stream-validation-summary.json.
 No production or test changes follow that green full run. Strict debug/release-library
 Clippy, standalone62+2+7+3, six dependency boundaries, fmt/21Python, source/theme/inspector,
 both generators and six retained-package guards pass. Full completion correctly rejects
@@ -1098,7 +1098,7 @@ Full driver52232 passes all1,784 workspace tests. Strict Clippy first rejects a 
 borrow in test failure formatting, then resume95088 rejects test Boolean comparisons.
 Both corrections affect tests only; production remains identical to the green full run.
 Final resume75818 completes successfully with all **17 values zero** in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-query-dispose-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-query-dispose-validation-summary.json.
 Strict debug all-target and selected release-library Clippy, standalone62+2+7+3 tests,
 six normal dependency boundaries, fmt/21Python, source/theme/inspector, both generators
 and all six package guards pass. Full completion still correctly rejects232/454/1242.
@@ -1130,7 +1130,7 @@ session 3663 passes all four tests. Initial workspace check 34442 is superseded 
 successful Some-only caller migration/check 58987. Fixed Find dispatch is unchanged.
 
 Full sequential driver session 28615 completed successfully. All **17 values** in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-search-validation-summary.json are zero:
+<evidence>/ferrodock-port/ferrodock-null-search-validation-summary.json are zero:
 workspace tests, strict debug all-target and selected release-library Clippy,
 standalone 62+2+7+3 tests, six normal dependency boundaries, fmt, 21 Python tests,
 source/theme/inspector checks, both generators and all six package integrity guards.
@@ -1168,7 +1168,7 @@ comparison and old CloseWindow declaration lookup. Both now retain exact raw inp
 identity while checking the canonical optional type. Full55335 then passes all1,767 tests;
 strict Clippy requests aliases for nested window-list storage types. Added only equivalent
 private aliases in the reactive root and shared test fixtures. Resume47994 terminal0:
-all17 values zero in /Volumes/SSD/temp/ferrodock-port/ferrodock-null-windows-validation-summary.json.
+all17 values zero in <evidence>/ferrodock-port/ferrodock-null-windows-validation-summary.json.
 No runtime behavior change follows the passing workspace run.
 
 Strict all-target/selected release-library Clippy, standalone62+2+7+3 tests, six normal
@@ -1196,7 +1196,7 @@ call sites; they now wrap the original target in Some without changing assertion
 Workspace92613 passes all1,751 tests, then strict Clippy rejects err().expect() in
 one new test. Replaced with equivalent expect_err(); production did not change.
 Resumed62657 terminal0 runs strict Clippy and all remaining checks. All **17 values**
-are zero in /Volumes/SSD/temp/ferrodock-port/ferrodock-null-window-options-validation-summary.json.
+are zero in <evidence>/ferrodock-port/ferrodock-null-window-options-validation-summary.json.
 The resume preserves the successful workspace result and records the test-only style
 correction rather than rerunning unchanged production tests.
 
@@ -1230,7 +1230,7 @@ before initialization, then all-target strict Clippy passes. That last change st
 a test only; production is identical to the full green workspace run.
 
 Full validation71072 terminal0: all **17 checks** in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-focus-validation-summary.json are zero.
+<evidence>/ferrodock-port/ferrodock-null-focus-validation-summary.json are zero.
 Workspace/all-target and selected release-library Clippy; standalone62+2+7+3 tests;
 six normal dependency boundaries; fmt;21 Python; source/theme/inspector; both generators
 and all six retained package integrity guards pass. Source-only Some adaptation71425
@@ -1275,7 +1275,7 @@ retained dependency integrity guards pass. Full completion correctly rejected:
 232 full/454 partial/1242 pending of1928. No source status upgrade.
 
 All17 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-floating-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-floating-validation-summary.json.
 Driver ferrodock-null-floating-validate.py and all logs share that SSD prefix. All owned
 jobs terminal. Prior all4,428 controls tests cover unchanged retained dependency. Source
 original/sibling files, staged contents and actual desktop executable/bundle/window
@@ -1308,7 +1308,7 @@ and all six retained dependency guards pass. Full completion correctly rejected:
 232 full/454 partial/1242 pending of1928. No source status upgrade.
 
 All17 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-hidden-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-hidden-validation-summary.json.
 Driver ferrodock-null-hidden-validate.py and all stage logs use the same SSD prefix.
 All owned jobs terminal. Prior all4,428 native controls tests cover unchanged patch.
 Original C#/sibling source, staged contents and actual desktop executable/bundle/window
@@ -1341,7 +1341,7 @@ six dependency integrity guards pass. Full completion correctly rejected:
 232 full/454 partial/1242 pending of1928. No source status upgrade.
 
 All17 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-preview-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-preview-validation-summary.json.
 Driver ferrodock-null-preview-validate.py and all logs use that SSD prefix. All owned
 jobs terminal. Prior all4,428 native controls tests cover unchanged retained patch.
 All new files intent-to-add and staged contents empty; initial subdirectory pathspec
@@ -1376,7 +1376,7 @@ strict workspace all-target and selected release-library Clippy plus all remaini
 checks. Already-passing workspace behavior was not rerun for those syntax-only edits.
 
 All **17 gate values** are zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-move-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-move-validation-summary.json.
 Drivers ferrodock-null-move-validate.py and -resume-validation.py; logs same SSD prefix.
 Failed run logs preserved as attempt1/attempt2. Standalone62+2+7+3 tests; six normal
 dependency boundaries; fmt;21 Python; source/theme/inspector; both generators and all
@@ -1412,7 +1412,7 @@ both generators and six retained dependency integrity guards pass. Full completi
 correctly rejected:232 full/454 partial/1242 pending of1928. No source status upgrade.
 
 All17 values zero in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-null-target-validation-summary.json.
+<evidence>/ferrodock-port/ferrodock-null-target-validation-summary.json.
 Driver ferrodock-null-target-validate.py and all logs use that SSD prefix. All owned
 jobs terminal. Previous all4,428 native controls tests still cover the unchanged
 retained patch. Original C#/sibling sources, staged contents and actual desktop
@@ -1444,7 +1444,7 @@ diff showed only whitespace in the generated InsertDockable macro signature afte
 trait formatting; a.split()==b.split() proved token identity. Regenerated the file,
 then resume63749 terminal0 passed formatting and remaining structural/generator gates.
 No behavioral assertion or completion requirement was removed or relaxed. All17 values
-are zero in /Volumes/SSD/temp/ferrodock-port/ferrodock-null-mutation-validation-summary.json.
+are zero in <evidence>/ferrodock-port/ferrodock-null-mutation-validation-summary.json.
 Drivers ferrodock-null-mutation-validate.py and -resume-validation.py and all stage
 logs use that SSD prefix. All owned jobs are terminal.
 
@@ -1477,7 +1477,7 @@ Driver30816 completed code gates then required the new test file's original-sour
 mapping. That mapping was added; resume46890 is terminal0 and completed the remaining
 documentation/generator gates. No failed behavioral assertion was removed or relaxed.
 All17 entries are zero in
-`/Volumes/SSD/temp/ferrodock-port/ferrodock-null-state-validation-summary.json`.
+`<evidence>/ferrodock-port/ferrodock-null-state-validation-summary.json`.
 Drivers are `ferrodock-null-state-validate.py` and
 `ferrodock-null-state-resume-validation.py`; logs share that prefix. Reference78108
 and targeted-model79957 are terminal0. All temp artifacts/TMPDIR use SSD.
@@ -1518,7 +1518,7 @@ files out of 1,928. Protected nullable state hooks, remaining factory/service ar
 generic/CLR/lifetime behavior, serializers and the remaining original scope stay open.
 
 Final driver session18467 is terminal0. All 17 values in
-`/Volumes/SSD/temp/ferrodock-port/ferrodock-null-list-validation-summary.json` are zero.
+`<evidence>/ferrodock-port/ferrodock-null-list-validation-summary.json` are zero.
 The driver is `ferrodock-null-list-validate.py`; per-stage logs share that prefix.
 Additional evidence: `ferrodock-null-list-controls-all-tests.log`,
 `ferrodock-null-list-reference-final.log` and `ferrodock-null-list-test-counts.json`.
@@ -1559,10 +1559,10 @@ and release-library Clippy pass. Standalone Core/recyclingSDK/backendSDK/runtime
 pass61+2+7+3. All six normal dependency boundaries, formatting, 21 Python tests,
 source/theme/inspector checks, both generators and all five vendor integrity guards
 pass. The owned sequential validation session10004 closed0, with all17 stages zero in
-`/Volumes/SSD/temp/ferrodock-port/ferrodock-null-factory-validation-summary.json`.
+`<evidence>/ferrodock-port/ferrodock-null-factory-validation-summary.json`.
 The final gate correctly rejects full completion (232 ported / 454 partial / 1242 pending).
 
-Command: `/Volumes/SSD/temp/ferrodock-port/ferrodock-null-factory-validate.py`; all
+Command: `<evidence>/ferrodock-port/ferrodock-null-factory-validate.py`; all
 stage logs use that prefix. Every subprocess inherited TMPDIR on that SSD directory,
 per user request. Original C# reference command is recorded in its harness README.
 No dependency/vendor changes or actual desktop sample refresh was made. All new files
@@ -1587,14 +1587,14 @@ assertion passing). The formerly source-only no-Factory null/virtual cases now h
 Rust parity coverage. Five new source assertions cover the compiled three-command
 flow, document/tool overrides and detached ToolDock.AddTool(null).
 
-Workspace validation log: `/Volumes/SSD/temp/ferrodock-port/ferrodock-null-virtual-workspace-tests.log`.
-Reference log: `/Volumes/SSD/temp/ferrodock-port/ferrodock-null-virtual-reference.log`.
+Workspace validation log: `<evidence>/ferrodock-port/ferrodock-null-virtual-workspace-tests.log`.
+Reference log: `<evidence>/ferrodock-port/ferrodock-null-virtual-reference.log`.
 Strict all-target workspace and release-library Clippy pass. Standalone Core,
 recycling SDK, backend SDK and runtime tests pass 61+2+7+3. All six normal dependency
 boundaries, formatting, 21 Python tests, source/theme/inspector checks, both generators
 and all five retained dependency integrity guards pass. The owned sequential pipeline
 is terminal with all 17 stages recorded as successful in
-`/Volumes/SSD/temp/ferrodock-port/ferrodock-null-virtual-validation-summary.json`; its final stage confirms that
+`<evidence>/ferrodock-port/ferrodock-null-virtual-validation-summary.json`; its final stage confirms that
 full completion remains rejected. No vendor/dependency changes were made.
 Authored whitespace is clean, all new files are intent-to-add, staged contents are
 empty and original parent README/src/tests/samples are unchanged. The actual desktop
@@ -1635,7 +1635,7 @@ formatting, 21 Python tests, both generators, source/theme/inspector checks and 
 retained dependency integrity guards pass. A final Core-test needless-borrow lint fix
 is covered by subsequent strict Clippy and standalone Core tests; production behavior
 is unchanged. Final job 62205 closed 0 and every stage in
-/Volumes/SSD/temp/ferrodock-port/ferrodock-delegate-validation-summary.json is 0. Commands and logs are listed in
+<evidence>/ferrodock-port/ferrodock-delegate-validation-summary.json is 0. Commands and logs are listed in
 CONTINUATION.md. No vendor/dependency patches or engine algorithms changed.
 The completion gate correctly rejects the unfinished original scope.
 
@@ -1675,8 +1675,8 @@ Strict all-target workspace and release-library Clippy pass. Standalone Core,
 recycling SDK, backend SDK and runtime pass 59+2+7+3 tests. All six normal dependency
 boundaries pass. Formatting, 21 Python tests, both generators, source/theme/inspector
 checks and all five retained dependency integrity guards pass. Job 65941 closed 0;
-every stage in /Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-validation-summary.json is 0. Exact commands
-are in /Volumes/SSD/temp/ferrodock-port/ferrodock-native-factory-validate.py; logs are listed in CONTINUATION.md.
+every stage in <evidence>/ferrodock-port/ferrodock-native-factory-validation-summary.json is 0. Exact commands
+are in <evidence>/ferrodock-port/ferrodock-native-factory-validate.py; logs are listed in CONTINUATION.md.
 The completion gate correctly rejects the unfinished original scope.
 
 The inventory records 232 ported / 454 partial / 1242 pending of 1928. Eleven
@@ -1716,8 +1716,8 @@ Strict all-target workspace and release-library Clippy pass. Standalone Core,
 recycling SDK, backend SDK and runtime pass 53+2+6+3 tests. All six normal dependency
 boundaries pass. Formatting, 21 Python tests, both generators, source/theme/inspector
 checks and all five retained dependency integrity guards pass. Job 26479 closed 0;
-every stage in /Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-validation-summary.json is 0. Exact commands
-are in /Volumes/SSD/temp/ferrodock-port/ferrodock-core-controls-validate.py; logs are listed in CONTINUATION.md.
+every stage in <evidence>/ferrodock-port/ferrodock-core-controls-validation-summary.json is 0. Exact commands
+are in <evidence>/ferrodock-port/ferrodock-core-controls-validate.py; logs are listed in CONTINUATION.md.
 The completion gate correctly rejects the unfinished original scope.
 
 Inventory: 221 ported / 465 partial / 1242 pending of 1928. IDocumentDockFactory is correctly
@@ -2181,7 +2181,7 @@ Standalone plain model XAML roots, complete generated fields/custom/interface/CL
 arbitrary managed GC cycles and wider source/API/lifetime/platform parity remain open.
 The full goal remains ACTIVE. Completion rejects **222 ported, 464 partial, 1,242 pending
 / 1,928**. The clean final test log supersedes the artifact conflict caused by overlapping
-initial validation; only /Volumes/SSD/temp/ferrodock-port/ferrodock-namescope-final-workspace-tests.log is authoritative.
+initial validation; only <evidence>/ferrodock-port/ferrodock-namescope-final-workspace-tests.log is authoritative.
 
 ## Historical factory and markup-extension validation
 
@@ -2338,13 +2338,13 @@ separately claimed; those branches have native Headless evidence. Remaining F11 
 full custom/generic type/culture/metadata, callback/GC and platform scope stay partial.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-overlay-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-overlay-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-app-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-debug-desktop-build.log
+- <evidence>/ferrodock-port/ferrodock-debug-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-debug-overlay-tests.log
+- <evidence>/ferrodock-port/ferrodock-debug-overlay-reference.log
+- <evidence>/ferrodock-port/ferrodock-debug-app-tests.log
+- <evidence>/ferrodock-port/ferrodock-debug-clippy.log
+- <evidence>/ferrodock-port/ferrodock-debug-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-debug-desktop-build.log
 
 ## Historical diagnostics selection and native visual validation
 
@@ -2397,13 +2397,13 @@ identity. No original source file outside FerroDock changed. The completion gate
 correctly exits 1 for remaining partial/pending source scope.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-overlay-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-overlay-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-desktop-build.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-selection-final-clippy.log
+- <evidence>/ferrodock-port/ferrodock-selection-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-selection-overlay-tests.log
+- <evidence>/ferrodock-port/ferrodock-selection-overlay-reference.log
+- <evidence>/ferrodock-port/ferrodock-selection-clippy.log
+- <evidence>/ferrodock-port/ferrodock-selection-desktop-build.log
+- <evidence>/ferrodock-port/ferrodock-selection-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-selection-final-clippy.log
 
 ## Historical Browser overlay and delayed panel validation
 
@@ -2454,12 +2454,12 @@ normal packaging helper. Its executable matches the build byte-for-byte (SHA256
 The old app process has not been restarted; no refreshed visual verification is claimed.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-browser-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-browser-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-browser-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-delayed-reference.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-delayed-final-corpus.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-browser-desktop-build.log
+- <evidence>/ferrodock-port/ferrodock-browser-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-browser-clippy.log
+- <evidence>/ferrodock-port/ferrodock-browser-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-delayed-reference.log
+- <evidence>/ferrodock-port/ferrodock-delayed-final-corpus.log
+- <evidence>/ferrodock-port/ferrodock-browser-desktop-build.log
 
 ## Historical Simple theme validation
 
@@ -2494,13 +2494,13 @@ The sample visual refresh still awaits a manual Mac unlock; it is not claimed ve
 Strict release checking of the new Simple library passes. Both source generators,
 unchanged-original-source and workspace whitespace checks pass too (the latter excludes
 the exact vendor copy/literal patch). Full completion was rerun and correctly rejects
-remaining source scope. Release log: /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-release-clippy.log.
+remaining source scope. Release log: <evidence>/ferrodock-port/ferrodock-simple-release-clippy.log.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-color-matrix.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-simple-clippy.log
+- <evidence>/ferrodock-port/ferrodock-simple-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-simple-tests.log
+- <evidence>/ferrodock-port/ferrodock-simple-color-matrix.log
+- <evidence>/ferrodock-port/ferrodock-simple-clippy.log
 
 ## Historical docking-state metadata validation
 
@@ -2534,17 +2534,17 @@ Strict all-target workspace Clippy and strict release library checks for setting
 native UI, Fluent and the sample pass. Formatting, both source generators, NINE Python
 checks, unchanged-original-source and provenance checks pass; workspace whitespace
 checks exclude the exact vendor copy/literal patch. Existing native warnings persist.
-Strict log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-clippy.log.
-Release log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-release-clippy.log.
+Strict log: <evidence>/ferrodock-port/ferrodock-flags-clippy.log.
+Release log: <evidence>/ferrodock-port/ferrodock-flags-release-clippy.log.
 
 The actual desktop executable was rebuilt and physically repackaged; the bundle
 matches the new executable byte-for-byte. Visual refresh remains pending the manual
-unlock. Desktop build log: /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-desktop-build.log.
+unlock. Desktop build log: <evidence>/ferrodock-port/ferrodock-flags-desktop-build.log.
 
 Current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-flags-metadata-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-original-proportional-view.log
+- <evidence>/ferrodock-port/ferrodock-flags-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-flags-metadata-tests.log
+- <evidence>/ferrodock-port/ferrodock-original-proportional-view.log
 
 ## Historical original application validation
 
@@ -2589,10 +2589,10 @@ Headless regression evidence and a packaged build, pending the final visual chec
 
 
 Authoritative current logs:
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-app-workspace-tests.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-app-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-app-release-clippy.log
-- /Volumes/SSD/temp/ferrodock-port/ferrodock-app-desktop-build.log
+- <evidence>/ferrodock-port/ferrodock-app-workspace-tests.log
+- <evidence>/ferrodock-port/ferrodock-app-clippy.log
+- <evidence>/ferrodock-port/ferrodock-app-release-clippy.log
+- <evidence>/ferrodock-port/ferrodock-app-desktop-build.log
 
 ## Historical compiled sample view validation
 

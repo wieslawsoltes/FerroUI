@@ -3,7 +3,7 @@
 Run from this folder with the installed .NET10 SDK:
 
 ```sh
-TMPDIR=/Volumes/SSD/temp/ferrodock-port DOTNET_CLI_HOME=/Volumes/SSD/temp/ferrodock-port/dotnet-home NUGET_PACKAGES=/Volumes/SSD/NuGetCaches/packages NUGET_HTTP_CACHE_PATH=/Volumes/SSD/temp/ferrodock-port/nuget-http dotnet run -p:UseArtifactsOutput=true -p:ArtifactsPath=/Volumes/SSD/temp/ferrodock-port/core-model-reference -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ -- ../../../tests/Dock/data/serializer-stream-reference.tsv ../../../tests/Dock/data/serializer-json-audit.tsv
+TMPDIR=<evidence>/ferrodock-port DOTNET_CLI_HOME=<evidence>/ferrodock-port/dotnet-home NUGET_PACKAGES=<workspace>/NuGetCaches/packages NUGET_HTTP_CACHE_PATH=<evidence>/ferrodock-port/nuget-http dotnet run -p:UseArtifactsOutput=true -p:ArtifactsPath=<evidence>/ferrodock-port/core-model-reference -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ -- ../../../tests/Dock/data/serializer-stream-reference.tsv ../../../tests/Dock/data/serializer-json-audit.tsv
 ```
 
 The project compiles four unchanged original SystemTextJson serializer files and both

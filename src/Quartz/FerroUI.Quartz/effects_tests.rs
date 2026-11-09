@@ -957,9 +957,7 @@ fn batches_and_texture_pool_bound_submissions_and_retain_snapshot_aliases() {
     let mut d = b.drawing(false, None);
     rectangle(&mut d, Colors::RED, Rect::new(0., 0., 64., 64.));
     d.dispose();
-    let alias = b
-        .context(|p| unsafe { ffi::Owned::new(ffi::qm_layer_snapshot(p)) })
-        .unwrap();
+    let alias = b.context(|p| unsafe { ffi::Owned::new(ffi::qm_layer_snapshot(p)) });
     drop(b);
     for _ in 0..8 {
         let b = bitmap();
@@ -998,6 +996,22 @@ fn mipmapped_sampling_averages_minification_and_invalidates_after_source_writes(
     let nearest = Bitmap::resized(&source, PixelSize::new(128, 128), Mode::None);
     let cubic = Bitmap::resized(&source, PixelSize::new(128, 128), Mode::HighQuality);
     assert_eq!(nearest.pixels(), cubic.pixels());
+    let palette = [
+        [0, 0, 255, 255],
+        [0, 0, 0, 255],
+        [0, 0, 0, 0],
+        [64, 0, 0, 64],
+    ];
+    let edges: Vec<_> = (0..4096).flat_map(|i| palette[i % 4]).collect();
+    source.write(&edges);
+    let cubic = Bitmap::resized(&source, PixelSize::new(128, 128), Mode::HighQuality);
+    assert!(
+        cubic
+            .pixels()
+            .chunks_exact(4)
+            .all(|p| p[..3].iter().all(|c| *c <= p[3])),
+        "Cubic reconstruction must preserve premultiplied alpha at translucent edges"
+    );
 }
 #[cfg(feature = "runtime-shaders")]
 #[test]
@@ -1053,4 +1067,128 @@ fn native_shader_passes_match_pixel_references_at_translated_bounds() {
         }
         assert_eq!(pixel(&pixels, 0, 0), [0; 4]);
     }
+}
+#[test]
+fn direct_custom_effect_graphs_use_the_shared_gpu_painter() {
+    use ferroui_base::media::effects::{library::*, ImmutableCustomEffect};
+    for effect in [
+        ImmutableCustomEffect::new(InvertEffect::default()),
+        ImmutableCustomEffect::new(GrayscaleEffect::default()),
+        ImmutableCustomEffect::new(SharpenEffect::default()),
+    ] {
+        let b = bitmap();
+        let mut d = b.drawing(false, None);
+        d.as_drawing_context_impl_with_effects()
+            .unwrap()
+            .push_effect(Some(Rect::new(0., 0., 64., 64.)), &effect);
+        rectangle(
+            &mut d,
+            Color::from_rgb(80, 120, 160),
+            Rect::new(0., 0., 64., 64.),
+        );
+        d.as_drawing_context_impl_with_effects()
+            .unwrap()
+            .pop_effect();
+        d.dispose();
+        let mut reference = vec![80, 120, 160, 255].repeat(64 * 64);
+        assert!(effect.cpu_reference(&mut reference, 64, 64, 1.));
+        let actual = pixel(&b.pixels(), 32, 32);
+        let expected = &reference[(32 * 64 + 32) * 4..][..4];
+        for c in 0..4 {
+            let channel = if c == 0 {
+                2
+            } else if c == 2 {
+                0
+            } else {
+                c
+            };
+            assert!(
+                (i32::from(actual[c]) - i32::from(expected[channel])).abs() <= 2,
+                "{}: {actual:?} vs {expected:?}",
+                effect.name()
+            );
+        }
+    }
+}
+
+#[cfg(feature = "runtime-shaders")]
+#[test]
+fn shader_image_children_are_sampled_on_gpu_without_a_bitmap_readback() {
+    use ferroui_base::media::effects::{
+        library::DissolveTransitionEffect, EffectImage, ImmutableCustomEffect,
+    };
+    const FLAG: &str = "FERRO_QUARTZ_ISOLATED_SHADER_IMAGE_TEST";
+    if std::env::var_os(FLAG).is_none() {
+        assert!(std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "effects_tests::shader_image_children_are_sampled_on_gpu_without_a_bitmap_readback",
+                "--nocapture"
+            ])
+            .env(FLAG, "1")
+            .status()
+            .unwrap()
+            .success());
+        return;
+    }
+    let child = bitmap();
+    let mut paint = child.drawing(false, None);
+    paint.clear(Color::from_argb(128, 0, 0, 255));
+    paint.dispose();
+    let effect = ImmutableCustomEffect::new(DissolveTransitionEffect {
+        to_page: EffectImage::from_impl(Arc::new(child)),
+        progress: 1.,
+        ..Default::default()
+    });
+    let b = bitmap();
+    let before = crate::metal_statistics();
+    let mut d = b.drawing(false, None);
+    d.as_drawing_context_impl_with_effects()
+        .unwrap()
+        .push_effect(Some(Rect::new(0., 0., 64., 64.)), &effect);
+    rectangle(&mut d, Colors::RED, Rect::new(0., 0., 64., 64.));
+    d.as_drawing_context_impl_with_effects()
+        .unwrap()
+        .pop_effect();
+    d.dispose();
+    let after = crate::metal_statistics();
+    assert_eq!(before[4], after[4]);
+    assert_eq!(before[5], after[5]);
+    let p = pixel(&b.pixels(), 32, 32);
+    assert!(
+        (i32::from(p[0]) - 128).abs() <= 1
+            && p[1] == 0
+            && (i32::from(p[2]) - 128).abs() <= 1
+            && p[3] == 255,
+        "{p:?}"
+    );
+}
+
+#[test]
+fn parent_output_clips_do_not_truncate_gaussian_inputs_or_reveal_a_sharp_backdrop() {
+    let b = bitmap();
+    let mut d = b.drawing(false, None);
+    d.push_clip(Rect::new(16., 16., 32., 32.));
+    d.as_drawing_context_impl_with_effects()
+        .unwrap()
+        .push_effect(
+            Some(Rect::new(0., 0., 64., 64.)),
+            &ImmutableBlurEffect::new(10.),
+        );
+    rectangle(&mut d, Colors::WHITE, Rect::new(0., 0., 64., 64.));
+    d.as_drawing_context_impl_with_effects()
+        .unwrap()
+        .pop_effect();
+    d.pop_clip();
+    d.dispose();
+    let data = b.pixels();
+    for (x, y) in [(16, 32), (47, 32), (32, 16), (32, 47)] {
+        assert!(
+            pixel(&data, x, y)[3] >= 253,
+            "Opaque backdrop faded at parent clip edge {x},{y}: {:?}",
+            pixel(&data, x, y)
+        );
+    }
+    assert_eq!(pixel(&data, 15, 32), [0; 4]);
+    assert_eq!(pixel(&data, 48, 32), [0; 4]);
 }
