@@ -64,7 +64,7 @@ See `ios-platform.md`, section 7, for the files `eagl/eagl_display.rs`, `eagl/ea
 
 ## 6. Runs
 
-All on 2026-10-15, on the development Mac, branch `apple-completion` **[M]**. Pictures and logs under `/Volumes/1TB-macOS/ferroui-screenshots/macos-gl/`; each is a frame the application draws, never a capture of the screen.
+All on 2026-10-15, on the development Mac, branch `apple-completion` **[M]**. Pictures and logs under `<workspace>/ferroui-screenshots/macos-gl/`; each is a frame the application draws, never a capture of the screen.
 
 | Run | Build | Result |
 |---|---|---|
@@ -74,7 +74,7 @@ All on 2026-10-15, on the development Mac, branch `apple-completion` **[M]**. Pi
 | The same, before the patch `0002` of the native library | `ferro_skia_apple_ganesh` | The run passed and the process crashed at its exit, three of three, in `PlatformRenderTimer::OnTick` (a display link tick on a freed timer); `--metal` in the default build exited cleanly, three of three. With the patch: exit 0, three of three |
 | ControlCatalog, `FERROUI_SMOKE_RENDERING=opengl`, `FERROUI_SMOKE_SCREENSHOTS` | `ferro_skia_apple_ganesh` | Exit 0; "Platform graphics: OpenGL (CGL)"; Home, Buttons, TextBlock, ListBox, Image, Calendar and Slider shown and written (`catalog-opengl/`, the frames the framework draws of the window) |
 | ControlCatalog, `FERROUI_SMOKE_RENDERING=metal` | `ferro_skia_apple_ganesh` | Exit 0; "Platform graphics: Metal" (Metal on Ganesh); the same seven pages (`catalog-metal/`), the same pictures as with OpenGL |
-| iOS simulator (iPhone 17 Pro), smoke mode, `FERROUI_IOS_RENDERING_MODE=OpenGl`, run by the orchestrator on `69462a42` | `ferro_skia_apple_ganesh` | **[S]** Passed, no check failed: the OpenGL ES graphics applied, 8 frames presented on the EAGL layer, the frame read back (1206x2622) with exactly the colours drawn; the Metal mode of the same build (Metal on Ganesh) passed too; the catalog's host shown in the OpenGL ES mode, four pages (pictures under `/Volumes/1TB-macOS/ferroui-screenshots/ios-gl/`); `ios-platform.md`, section 12, run 10 |
+| iOS simulator (iPhone 17 Pro), smoke mode, `FERROUI_IOS_RENDERING_MODE=OpenGl`, run by the orchestrator on `69462a42` | `ferro_skia_apple_ganesh` | **[S]** Passed, no check failed: the OpenGL ES graphics applied, 8 frames presented on the EAGL layer, the frame read back (1206x2622) with exactly the colours drawn; the Metal mode of the same build (Metal on Ganesh) passed too; the catalog's host shown in the OpenGL ES mode, four pages (pictures under `<workspace>/ferroui-screenshots/ios-gl/`); `ios-platform.md`, section 12, run 10 |
 | `cargo check` and `cargo test -p ferroui-ios`; the example and the catalog host for `aarch64-apple-ios-sim` | both | Built for both iOS targets in both configurations; 104 host tests and the ten checks of the dispatcher pass |
 
 Not verified: the OpenGL mode of macOS driven by hand (live resize, several windows sharing the context, popups), the external objects feature of the CGL context with a producer of another API (the tests import a real IOSurface and a real shared event, without a picture drawn into either), a device build of iOS (the runs are in the simulator).

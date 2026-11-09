@@ -26,7 +26,7 @@ An SSD-local macOS development bundle is available after building:
 source scripts/env.sh
 cargo build --locked -p ferroboard-sample
 python3 scripts/bundle_sample.py
-open /Volumes/SSD/temp/ferrokeyboard/FerroBoard.app
+open /tmp/ferrokeyboard/FerroBoard.app
 ```
 
 The bundler/checker now use native schema2 with the selected SDK patch and MIT license.
@@ -62,7 +62,7 @@ The first narrow layout starts closed. Host visibility, floating placement and k
 in the library.
 
 Source settings, emoji history, pinned clipboard entries and learned words persist synchronously in
-/Volumes/SSD/temp/ferrokeyboard/sample-data; FERROBOARD_DATA_DIR selects another SSD folder.
+/tmp/ferrokeyboard/sample-data; FERROBOARD_DATA_DIR selects another SSD folder.
 Windows ApplicationData settings deliberately migrate to a keyboard.settings JSON file. Source
 history/dictionary filenames and save triggers are retained. Text-field contents/passwords are not
 persisted. Loading restores only the English learned dictionary; saving writes every live one.

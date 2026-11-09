@@ -13,7 +13,7 @@ program, and what animates changes its uniforms, never its pixels or textures.
 
 ## 1. What Effector provides
 
-Effector (`/Volumes/1TB-macOS/upstream/Effector`, runtime in `src/Effector`) adds extensible,
+Effector (`../Effector`, runtime in `src/Effector`) adds extensible,
 Skia-backed effects to the .NET framework FerroUI was ported from. That framework has a closed set
 of effects (blur, drop shadow) and no extension point, so Effector weaves IL into the consumer's
 assemblies and patches the framework's own binaries after build (`src/Effector.Build.Tasks`,

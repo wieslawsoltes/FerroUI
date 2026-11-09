@@ -1,0 +1,4442 @@
+{
+  "schema": 1,
+  "source_commit": "pre-rewrite revision",
+  "working_tree_modified": true,
+  "binary": {
+    "path": "target/release/rendering-benchmarks",
+    "bytes": 23212576,
+    "sha256": "b949376837ee60e7dfe9485861d42e07cff015cbdcee5ebb0f99cb77179082f4"
+  },
+  "machine": {
+    "os": "macOS-27.2-arm64-arm-64bit",
+    "cpu": "Apple M4",
+    "memory_bytes": 25769803776
+  },
+  "other_work_paused_by_user": true,
+  "runtime_environment": {
+    "MallocNanoZone": "0",
+    "MallocStackLogging": null,
+    "RUSTFLAGS": null,
+    "FERROUI_QUARTZ_FORCE_SEPARATE_DESTINATION": null
+  },
+  "source_files": {
+    "tests/FerroUI.Rendering.Benchmarks/lib.rs": {
+      "path": "tests/FerroUI.Rendering.Benchmarks/lib.rs",
+      "bytes": 4484,
+      "sha256": "041c9ef1a75d23712261686353d06d486790bb4b6d6405fe4881b55ca265a39e"
+    },
+    "tests/FerroUI.Rendering.Benchmarks/main.rs": {
+      "path": "tests/FerroUI.Rendering.Benchmarks/main.rs",
+      "bytes": 17252,
+      "sha256": "47e2fa660b2509ef8abd7c96526b7fdd985330cece99f34dab9981745bad6cef"
+    },
+    "src/FerroUI.Metal/offscreen.rs": {
+      "path": "src/FerroUI.Metal/offscreen.rs",
+      "bytes": 15797,
+      "sha256": "b838e31cc7b256bafa77054c642b73900fb4ef119dcbb9bab83f9dff85933f42"
+    },
+    "scripts/rendering-perf/compare.py": {
+      "path": "scripts/rendering-perf/compare.py",
+      "bytes": 6093,
+      "sha256": "6c6772d50d62035615cda8198cc70d8996b9816ea366bd41161732d880840af4"
+    }
+  },
+  "font_files": [
+    {
+      "path": "src/Skia/FerroUI.Skia/test_assets/assets/Inter-Regular.ttf",
+      "bytes": 309828,
+      "sha256": "41ab0f707a2bfab8133ccdfcdab52282f5f79e5751f43a264805451c7bb95fb8"
+    },
+    {
+      "path": "src/Skia/FerroUI.Skia/test_assets/assets/NotoSansArabic-Regular.ttf",
+      "bytes": 177004,
+      "sha256": "90f50de40af560ad55f2fcf460af8205f842b534b057bd8b8bcf7d3e10d3223a"
+    },
+    {
+      "path": "src/Skia/FerroUI.Skia/test_assets/assets/NotoSansHebrew-Regular.ttf",
+      "bytes": 42284,
+      "sha256": "16093be74b6b1766aa350316e42e62833f45c0cd1c7f4482f29ca2fa5879ed29"
+    }
+  ],
+  "config": {
+    "backends": [
+      "skia",
+      "quartz",
+      "quartz-harfbuzz",
+      "vello-hybrid",
+      "vello-gpu",
+      "vello-cpu"
+    ],
+    "trials": 4,
+    "samples": 100,
+    "warmup": 20,
+    "scale": 2.0,
+    "order": "alternating forward/reverse; fresh process per backend/trial"
+  },
+  "rows": [
+    {
+      "name": "rounded-rects",
+      "backends": {
+        "skia": {
+          "median_ms": 0.744062,
+          "p95_ms": 1.0124795,
+          "trial_medians_ms": [
+            0.825041,
+            0.663083,
+            0.661,
+            0.8282079999999999
+          ],
+          "median_range_ms": [
+            0.661,
+            0.8282079999999999
+          ],
+          "cpu_before_wait_median_ms": 0.1099375,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 5.2283954999999995,
+          "p95_ms": 8.492437,
+          "trial_medians_ms": [
+            5.216584,
+            5.240125,
+            5.234666,
+            5.222125
+          ],
+          "median_range_ms": [
+            5.216584,
+            5.240125
+          ],
+          "cpu_before_wait_median_ms": 2.1392914999999997,
+          "time_relative_to_first_backend": 7.026827737473489
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 5.2456665000000005,
+          "p95_ms": 8.788083499999999,
+          "trial_medians_ms": [
+            5.270875,
+            5.177083,
+            8.311167,
+            5.220458
+          ],
+          "median_range_ms": [
+            5.177083,
+            8.311167
+          ],
+          "cpu_before_wait_median_ms": 2.1254999999999997,
+          "time_relative_to_first_backend": 7.050039512836297
+        },
+        "vello-hybrid": {
+          "median_ms": 2.6254375,
+          "p95_ms": 4.0791255,
+          "trial_medians_ms": [
+            2.627,
+            2.578084,
+            2.623875,
+            2.629416
+          ],
+          "median_range_ms": [
+            2.578084,
+            2.629416
+          ],
+          "cpu_before_wait_median_ms": 1.0114165000000002,
+          "time_relative_to_first_backend": 3.5285198007692906
+        },
+        "vello-gpu": {
+          "median_ms": 2.656396,
+          "p95_ms": 4.0133335,
+          "trial_medians_ms": [
+            2.669292,
+            2.651625,
+            2.661167,
+            2.6454579999999996
+          ],
+          "median_range_ms": [
+            2.6454579999999996,
+            2.669292
+          ],
+          "cpu_before_wait_median_ms": 0.595938,
+          "time_relative_to_first_backend": 3.570127220581081
+        },
+        "vello-cpu": {
+          "median_ms": 3.9084795000000003,
+          "p95_ms": 4.6406255000000005,
+          "trial_medians_ms": [
+            4.093042,
+            3.918292,
+            3.898667,
+            3.893958
+          ],
+          "median_range_ms": [
+            3.893958,
+            4.093042
+          ],
+          "cpu_before_wait_median_ms": 2.8236255000000003,
+          "time_relative_to_first_backend": 5.252894920046986
+        }
+      }
+    },
+    {
+      "name": "geometry",
+      "backends": {
+        "skia": {
+          "median_ms": 0.7625,
+          "p95_ms": 0.8723335000000001,
+          "trial_medians_ms": [
+            0.790458,
+            0.662542,
+            0.734542,
+            0.835125
+          ],
+          "median_range_ms": [
+            0.662542,
+            0.835125
+          ],
+          "cpu_before_wait_median_ms": 0.1734375,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 5.336625,
+          "p95_ms": 5.804521,
+          "trial_medians_ms": [
+            5.252541,
+            5.338167,
+            5.507667,
+            5.335083
+          ],
+          "median_range_ms": [
+            5.252541,
+            5.507667
+          ],
+          "cpu_before_wait_median_ms": 2.233708,
+          "time_relative_to_first_backend": 6.998852459016393
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 5.332395999999999,
+          "p95_ms": 5.735875,
+          "trial_medians_ms": [
+            5.456875,
+            5.232708,
+            5.319208,
+            5.345584
+          ],
+          "median_range_ms": [
+            5.232708,
+            5.456875
+          ],
+          "cpu_before_wait_median_ms": 2.2141455,
+          "time_relative_to_first_backend": 6.993306229508196
+        },
+        "vello-hybrid": {
+          "median_ms": 2.5670005,
+          "p95_ms": 2.673521,
+          "trial_medians_ms": [
+            2.555167,
+            2.5614589999999997,
+            2.575791,
+            2.5725420000000003
+          ],
+          "median_range_ms": [
+            2.555167,
+            2.575791
+          ],
+          "cpu_before_wait_median_ms": 1.0215204999999998,
+          "time_relative_to_first_backend": 3.366558032786885
+        },
+        "vello-gpu": {
+          "median_ms": 2.421125,
+          "p95_ms": 2.7907915,
+          "trial_medians_ms": [
+            2.4321669999999997,
+            2.415916,
+            2.423083,
+            2.419167
+          ],
+          "median_range_ms": [
+            2.415916,
+            2.4321669999999997
+          ],
+          "cpu_before_wait_median_ms": 0.366584,
+          "time_relative_to_first_backend": 3.1752459016393444
+        },
+        "vello-cpu": {
+          "median_ms": 3.7306875,
+          "p95_ms": 4.4017915,
+          "trial_medians_ms": [
+            3.785708,
+            3.724917,
+            3.692584,
+            3.736458
+          ],
+          "median_range_ms": [
+            3.692584,
+            3.785708
+          ],
+          "cpu_before_wait_median_ms": 2.6540415,
+          "time_relative_to_first_backend": 4.892704918032788
+        }
+      }
+    },
+    {
+      "name": "bitmaps",
+      "backends": {
+        "skia": {
+          "median_ms": 0.564479,
+          "p95_ms": 0.6304164999999999,
+          "trial_medians_ms": [
+            0.5656669999999999,
+            0.5355829999999999,
+            0.5632910000000001,
+            0.603625
+          ],
+          "median_range_ms": [
+            0.5355829999999999,
+            0.603625
+          ],
+          "cpu_before_wait_median_ms": 0.078437,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 1.976292,
+          "p95_ms": 2.3621665,
+          "trial_medians_ms": [
+            2.5311660000000002,
+            1.9315,
+            2.014959,
+            1.937625
+          ],
+          "median_range_ms": [
+            1.9315,
+            2.5311660000000002
+          ],
+          "cpu_before_wait_median_ms": 0.464646,
+          "time_relative_to_first_backend": 3.5010903860019593
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 1.9341665,
+          "p95_ms": 2.3363544999999997,
+          "trial_medians_ms": [
+            2.7237910000000003,
+            1.934125,
+            1.934208,
+            1.9337499999999999
+          ],
+          "median_range_ms": [
+            1.9337499999999999,
+            2.7237910000000003
+          ],
+          "cpu_before_wait_median_ms": 0.450166,
+          "time_relative_to_first_backend": 3.426463163377203
+        },
+        "vello-hybrid": {
+          "median_ms": 1.79875,
+          "p95_ms": 2.004229,
+          "trial_medians_ms": [
+            1.798667,
+            1.798833,
+            1.792333,
+            1.8025
+          ],
+          "median_range_ms": [
+            1.792333,
+            1.8025
+          ],
+          "cpu_before_wait_median_ms": 0.27360399999999996,
+          "time_relative_to_first_backend": 3.1865667279030756
+        },
+        "vello-gpu": {
+          "median_ms": 2.216979,
+          "p95_ms": 2.543958,
+          "trial_medians_ms": [
+            2.2404170000000003,
+            2.213667,
+            2.2167499999999998,
+            2.217208
+          ],
+          "median_range_ms": [
+            2.213667,
+            2.2404170000000003
+          ],
+          "cpu_before_wait_median_ms": 0.16379149999999998,
+          "time_relative_to_first_backend": 3.9274782587129016
+        },
+        "vello-cpu": {
+          "median_ms": 3.8891665,
+          "p95_ms": 4.3861035,
+          "trial_medians_ms": [
+            3.8740419999999998,
+            3.9042909999999997,
+            3.837208,
+            3.9221250000000003
+          ],
+          "median_range_ms": [
+            3.837208,
+            3.9221250000000003
+          ],
+          "cpu_before_wait_median_ms": 2.8077294999999998,
+          "time_relative_to_first_backend": 6.88983381135525
+        }
+      }
+    },
+    {
+      "name": "text-latin",
+      "backends": {
+        "skia": {
+          "median_ms": 0.7518119999999999,
+          "p95_ms": 0.8649375,
+          "trial_medians_ms": [
+            0.7416659999999999,
+            0.649125,
+            0.761958,
+            0.823166
+          ],
+          "median_range_ms": [
+            0.649125,
+            0.823166
+          ],
+          "cpu_before_wait_median_ms": 0.142396,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 46.0618125,
+          "p95_ms": 47.4143955,
+          "trial_medians_ms": [
+            43.7375,
+            46.152834,
+            46.4225,
+            45.970791
+          ],
+          "median_range_ms": [
+            43.7375,
+            46.4225
+          ],
+          "cpu_before_wait_median_ms": 43.28075,
+          "time_relative_to_first_backend": 61.2677271711545
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 45.45025,
+          "p95_ms": 46.980833000000004,
+          "trial_medians_ms": [
+            44.69575,
+            45.181292,
+            46.276375,
+            45.719207999999995
+          ],
+          "median_range_ms": [
+            44.69575,
+            46.276375
+          ],
+          "cpu_before_wait_median_ms": 42.664938,
+          "time_relative_to_first_backend": 60.4542758029933
+        },
+        "vello-hybrid": {
+          "median_ms": 2.2406455000000003,
+          "p95_ms": 2.6014375000000003,
+          "trial_medians_ms": [
+            2.264208,
+            2.230833,
+            2.2430000000000003,
+            2.238291
+          ],
+          "median_range_ms": [
+            2.230833,
+            2.264208
+          ],
+          "cpu_before_wait_median_ms": 0.6625829999999999,
+          "time_relative_to_first_backend": 2.980326863630802
+        },
+        "vello-gpu": {
+          "median_ms": 2.9610830000000004,
+          "p95_ms": 3.3947705,
+          "trial_medians_ms": [
+            3.0242080000000002,
+            2.956916,
+            2.96525,
+            2.9477499999999996
+          ],
+          "median_range_ms": [
+            2.9477499999999996,
+            3.0242080000000002
+          ],
+          "cpu_before_wait_median_ms": 0.547792,
+          "time_relative_to_first_backend": 3.9385950210957
+        },
+        "vello-cpu": {
+          "median_ms": 4.7998545,
+          "p95_ms": 5.532979,
+          "trial_medians_ms": [
+            4.807792,
+            5.066959000000001,
+            4.791917,
+            4.78725
+          ],
+          "median_range_ms": [
+            4.78725,
+            5.066959000000001
+          ],
+          "cpu_before_wait_median_ms": 3.606875,
+          "time_relative_to_first_backend": 6.3843813346953775
+        }
+      }
+    },
+    {
+      "name": "text-arabic",
+      "backends": {
+        "skia": {
+          "median_ms": 0.7740625,
+          "p95_ms": 0.9610000000000001,
+          "trial_medians_ms": [
+            0.707,
+            0.669084,
+            0.841125,
+            0.8727919999999999
+          ],
+          "median_range_ms": [
+            0.669084,
+            0.8727919999999999
+          ],
+          "cpu_before_wait_median_ms": 0.156209,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 40.350396,
+          "p95_ms": 41.163187,
+          "trial_medians_ms": [
+            38.370334,
+            40.727375,
+            40.416124999999994,
+            40.284667000000006
+          ],
+          "median_range_ms": [
+            38.370334,
+            40.727375
+          ],
+          "cpu_before_wait_median_ms": 37.997020500000005,
+          "time_relative_to_first_backend": 52.128085264432784
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 40.0884375,
+          "p95_ms": 41.797624500000005,
+          "trial_medians_ms": [
+            39.578458,
+            39.853874999999995,
+            40.512166,
+            40.323
+          ],
+          "median_range_ms": [
+            39.578458,
+            40.512166
+          ],
+          "cpu_before_wait_median_ms": 37.681792,
+          "time_relative_to_first_backend": 51.789664917238596
+        },
+        "vello-hybrid": {
+          "median_ms": 2.1670415,
+          "p95_ms": 2.568104,
+          "trial_medians_ms": [
+            2.201625,
+            2.1615409999999997,
+            2.172542,
+            2.157417
+          ],
+          "median_range_ms": [
+            2.157417,
+            2.201625
+          ],
+          "cpu_before_wait_median_ms": 0.6206875000000001,
+          "time_relative_to_first_backend": 2.799569156237384
+        },
+        "vello-gpu": {
+          "median_ms": 2.9875835000000004,
+          "p95_ms": 3.3527915000000004,
+          "trial_medians_ms": [
+            3.102042,
+            2.981875,
+            2.982917,
+            2.9922500000000003
+          ],
+          "median_range_ms": [
+            2.981875,
+            3.102042
+          ],
+          "cpu_before_wait_median_ms": 0.5716669999999999,
+          "time_relative_to_first_backend": 3.8596153411384746
+        },
+        "vello-cpu": {
+          "median_ms": 4.7984165,
+          "p95_ms": 5.5557085,
+          "trial_medians_ms": [
+            4.77675,
+            4.796333,
+            4.804875,
+            4.8005
+          ],
+          "median_range_ms": [
+            4.77675,
+            4.804875
+          ],
+          "cpu_before_wait_median_ms": 3.6240215,
+          "time_relative_to_first_backend": 6.19900395639887
+        }
+      }
+    },
+    {
+      "name": "text-hebrew",
+      "backends": {
+        "skia": {
+          "median_ms": 0.7610625,
+          "p95_ms": 0.9737084999999999,
+          "trial_medians_ms": [
+            0.703042,
+            0.649292,
+            0.866958,
+            0.819083
+          ],
+          "median_range_ms": [
+            0.649292,
+            0.866958
+          ],
+          "cpu_before_wait_median_ms": 0.14745800000000003,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 37.56925,
+          "p95_ms": 38.543729,
+          "trial_medians_ms": [
+            36.0905,
+            38.228709,
+            37.634333999999996,
+            37.504166
+          ],
+          "median_range_ms": [
+            36.0905,
+            38.228709
+          ],
+          "cpu_before_wait_median_ms": 35.324625,
+          "time_relative_to_first_backend": 49.36421121786975
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 37.16681249999999,
+          "p95_ms": 38.0111665,
+          "trial_medians_ms": [
+            36.566334,
+            36.968666999999996,
+            37.556125,
+            37.364957999999994
+          ],
+          "median_range_ms": [
+            36.566334,
+            37.556125
+          ],
+          "cpu_before_wait_median_ms": 34.927645999999996,
+          "time_relative_to_first_backend": 48.835427445183534
+        },
+        "vello-hybrid": {
+          "median_ms": 2.1190625,
+          "p95_ms": 2.3781045,
+          "trial_medians_ms": [
+            2.129625,
+            2.11175,
+            2.123375,
+            2.11475
+          ],
+          "median_range_ms": [
+            2.11175,
+            2.129625
+          ],
+          "cpu_before_wait_median_ms": 0.565542,
+          "time_relative_to_first_backend": 2.7843475404451015
+        },
+        "vello-gpu": {
+          "median_ms": 2.7615,
+          "p95_ms": 3.2123955,
+          "trial_medians_ms": [
+            2.854,
+            2.777292,
+            2.745708,
+            2.739792
+          ],
+          "median_range_ms": [
+            2.739792,
+            2.854
+          ],
+          "cpu_before_wait_median_ms": 0.4706045,
+          "time_relative_to_first_backend": 3.628479921162848
+        },
+        "vello-cpu": {
+          "median_ms": 4.442292,
+          "p95_ms": 5.194687999999999,
+          "trial_medians_ms": [
+            4.429125,
+            4.455959,
+            4.412292,
+            4.455459
+          ],
+          "median_range_ms": [
+            4.412292,
+            4.455959
+          ],
+          "cpu_before_wait_median_ms": 3.318646,
+          "time_relative_to_first_backend": 5.836960827790096
+        }
+      }
+    },
+    {
+      "name": "shadows",
+      "backends": {
+        "skia": {
+          "median_ms": 10.369375000000002,
+          "p95_ms": 12.408625,
+          "trial_medians_ms": [
+            10.076459,
+            10.392708,
+            10.346042,
+            10.584625
+          ],
+          "median_range_ms": [
+            10.076459,
+            10.584625
+          ],
+          "cpu_before_wait_median_ms": 2.1439795000000004,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 6.499667,
+          "p95_ms": 9.290041500000001,
+          "trial_medians_ms": [
+            6.485042,
+            6.4645,
+            6.5255410000000005,
+            6.514291999999999
+          ],
+          "median_range_ms": [
+            6.4645,
+            6.5255410000000005
+          ],
+          "cpu_before_wait_median_ms": 1.126354,
+          "time_relative_to_first_backend": 0.6268137664999095
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 6.5361460000000005,
+          "p95_ms": 11.518104000000001,
+          "trial_medians_ms": [
+            6.476375,
+            6.4963750000000005,
+            6.575917,
+            6.967208
+          ],
+          "median_range_ms": [
+            6.476375,
+            6.967208
+          ],
+          "cpu_before_wait_median_ms": 1.1412084999999998,
+          "time_relative_to_first_backend": 0.6303317220179615
+        },
+        "vello-hybrid": {
+          "median_ms": 2.4651875,
+          "p95_ms": 2.7891665000000003,
+          "trial_medians_ms": [
+            2.457209,
+            2.454333,
+            2.479084,
+            2.473166
+          ],
+          "median_range_ms": [
+            2.454333,
+            2.479084
+          ],
+          "cpu_before_wait_median_ms": 0.853479,
+          "time_relative_to_first_backend": 0.23773732746669876
+        },
+        "vello-gpu": {
+          "median_ms": 16.578709,
+          "p95_ms": 17.250458000000002,
+          "trial_medians_ms": [
+            16.725917,
+            16.080750000000002,
+            16.619084,
+            16.538334
+          ],
+          "median_range_ms": [
+            16.080750000000002,
+            16.725917
+          ],
+          "cpu_before_wait_median_ms": 5.1361455,
+          "time_relative_to_first_backend": 1.5988146826592728
+        },
+        "vello-cpu": {
+          "median_ms": 6.296354,
+          "p95_ms": 6.836604,
+          "trial_medians_ms": [
+            6.341709,
+            6.153125,
+            6.326416,
+            6.266292
+          ],
+          "median_range_ms": [
+            6.153125,
+            6.341709
+          ],
+          "cpu_before_wait_median_ms": 4.7045829999999995,
+          "time_relative_to_first_backend": 0.6072067024290277
+        }
+      }
+    },
+    {
+      "name": "opacity-layers",
+      "backends": {
+        "skia": {
+          "median_ms": 0.719125,
+          "p95_ms": 0.8919585,
+          "trial_medians_ms": [
+            0.7122499999999999,
+            0.726,
+            0.527708,
+            0.7370420000000001
+          ],
+          "median_range_ms": [
+            0.527708,
+            0.7370420000000001
+          ],
+          "cpu_before_wait_median_ms": 0.0843125,
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 40.385146,
+          "p95_ms": 41.253979,
+          "trial_medians_ms": [
+            40.004999999999995,
+            40.367582999999996,
+            40.402709,
+            40.892042000000004
+          ],
+          "median_range_ms": [
+            40.004999999999995,
+            40.892042000000004
+          ],
+          "cpu_before_wait_median_ms": 2.7112295,
+          "time_relative_to_first_backend": 56.15872901095081
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 40.031875,
+          "p95_ms": 40.825979000000004,
+          "trial_medians_ms": [
+            40.008042,
+            40.034417000000005,
+            40.869083,
+            40.029333
+          ],
+          "median_range_ms": [
+            40.008042,
+            40.869083
+          ],
+          "cpu_before_wait_median_ms": 0.8098125,
+          "time_relative_to_first_backend": 55.66747783764992
+        },
+        "vello-hybrid": {
+          "median_ms": 1.630104,
+          "p95_ms": 1.8426035,
+          "trial_medians_ms": [
+            1.628541,
+            1.63725,
+            1.624208,
+            1.631667
+          ],
+          "median_range_ms": [
+            1.624208,
+            1.63725
+          ],
+          "cpu_before_wait_median_ms": 0.1793535,
+          "time_relative_to_first_backend": 2.266788110551017
+        },
+        "vello-gpu": {
+          "median_ms": 2.1670415,
+          "p95_ms": 2.6517705000000005,
+          "trial_medians_ms": [
+            2.1986250000000003,
+            2.169042,
+            2.165041,
+            2.161208
+          ],
+          "median_range_ms": [
+            2.161208,
+            2.1986250000000003
+          ],
+          "cpu_before_wait_median_ms": 0.17704150000000002,
+          "time_relative_to_first_backend": 3.013442030245089
+        },
+        "vello-cpu": {
+          "median_ms": 3.2492919999999996,
+          "p95_ms": 3.8765835,
+          "trial_medians_ms": [
+            3.230375,
+            3.26825,
+            3.2682089999999997,
+            3.215708
+          ],
+          "median_range_ms": [
+            3.215708,
+            3.26825
+          ],
+          "cpu_before_wait_median_ms": 2.2410835000000002,
+          "time_relative_to_first_backend": 4.518396662610811
+        }
+      }
+    },
+    {
+      "name": "shape-latin",
+      "backends": {
+        "skia": {
+          "median_ms": 0.012130859375,
+          "p95_ms": 0.018506500000000002,
+          "trial_medians_ms": [
+            0.01100390625,
+            0.013003906249999999,
+            0.0116953125,
+            0.012566406249999999
+          ],
+          "median_range_ms": [
+            0.01100390625,
+            0.013003906249999999
+          ],
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 0.01893425,
+          "p95_ms": 0.03331834375,
+          "trial_medians_ms": [
+            0.01960415625,
+            0.019875,
+            0.01826434375,
+            0.01797525
+          ],
+          "median_range_ms": [
+            0.01797525,
+            0.019875
+          ],
+          "time_relative_to_first_backend": 1.5608333601674447
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 0.008365234374999999,
+          "p95_ms": 0.008618500000000001,
+          "trial_medians_ms": [
+            0.00818359375,
+            0.00830859375,
+            0.014321625000000001,
+            0.008421875
+          ],
+          "median_range_ms": [
+            0.00818359375,
+            0.014321625000000001
+          ],
+          "time_relative_to_first_backend": 0.6895829979069392
+        },
+        "vello-hybrid": {
+          "median_ms": 0.007973968750000001,
+          "p95_ms": 0.008338546875,
+          "trial_medians_ms": [
+            0.00772525,
+            0.007884125,
+            0.0080638125,
+            0.008132812500000001
+          ],
+          "median_range_ms": [
+            0.00772525,
+            0.008132812500000001
+          ],
+          "time_relative_to_first_backend": 0.657329254548382
+        },
+        "vello-gpu": {
+          "median_ms": 0.007882156250000001,
+          "p95_ms": 0.0083170625,
+          "trial_medians_ms": [
+            0.00794790625,
+            0.007816406250000001,
+            0.007522125,
+            0.008053375
+          ],
+          "median_range_ms": [
+            0.007522125,
+            0.008053375
+          ],
+          "time_relative_to_first_backend": 0.6497607470616649
+        },
+        "vello-cpu": {
+          "median_ms": 0.008586578125,
+          "p95_ms": 0.008816406249999999,
+          "trial_medians_ms": [
+            0.0087018125,
+            0.00797265625,
+            0.00865103125,
+            0.008522124999999998
+          ],
+          "median_range_ms": [
+            0.00797265625,
+            0.0087018125
+          ],
+          "time_relative_to_first_backend": 0.7078293350507163
+        }
+      }
+    },
+    {
+      "name": "shape-arabic",
+      "backends": {
+        "skia": {
+          "median_ms": 0.004910171875000001,
+          "p95_ms": 0.005275390625,
+          "trial_medians_ms": [
+            0.00479165625,
+            0.00503125,
+            0.0047981875,
+            0.005022156250000001
+          ],
+          "median_range_ms": [
+            0.00479165625,
+            0.00503125
+          ],
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 0.01450584375,
+          "p95_ms": 0.0161360625,
+          "trial_medians_ms": [
+            0.01422915625,
+            0.01450259375,
+            0.01477996875,
+            0.014509093749999999
+          ],
+          "median_range_ms": [
+            0.01422915625,
+            0.01477996875
+          ],
+          "time_relative_to_first_backend": 2.954243582359324
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 0.004384125,
+          "p95_ms": 0.00450196875,
+          "trial_medians_ms": [
+            0.0042734374999999995,
+            0.0044817812500000005,
+            0.00527734375,
+            0.0042864687499999995
+          ],
+          "median_range_ms": [
+            0.0042734374999999995,
+            0.00527734375
+          ],
+          "time_relative_to_first_backend": 0.8928658938237267
+        },
+        "vello-hybrid": {
+          "median_ms": 0.00430078125,
+          "p95_ms": 0.00436784375,
+          "trial_medians_ms": [
+            0.0042526249999999995,
+            0.0043255,
+            0.0043072812499999995,
+            0.00429428125
+          ],
+          "median_range_ms": [
+            0.0042526249999999995,
+            0.0043255
+          ],
+          "time_relative_to_first_backend": 0.8758922008203631
+        },
+        "vello-gpu": {
+          "median_ms": 0.004306640625,
+          "p95_ms": 0.004365875,
+          "trial_medians_ms": [
+            0.00434115625,
+            0.0043020624999999995,
+            0.004303375,
+            0.0043099062499999995
+          ],
+          "median_range_ms": [
+            0.0043020624999999995,
+            0.00434115625
+          ],
+          "time_relative_to_first_backend": 0.8770855144454591
+        },
+        "vello-cpu": {
+          "median_ms": 0.0044140625000000005,
+          "p95_ms": 0.004496734375,
+          "trial_medians_ms": [
+            0.004390625,
+            0.0044375000000000005,
+            0.004350250000000001,
+            0.00445703125
+          ],
+          "median_range_ms": [
+            0.004350250000000001,
+            0.00445703125
+          ],
+          "time_relative_to_first_backend": 0.8989629309055499
+        }
+      }
+    },
+    {
+      "name": "shape-hebrew",
+      "backends": {
+        "skia": {
+          "median_ms": 0.001884109375,
+          "p95_ms": 0.0019446562500000002,
+          "trial_medians_ms": [
+            0.00186590625,
+            0.00187759375,
+            0.00189584375,
+            0.001890625
+          ],
+          "median_range_ms": [
+            0.00186590625,
+            0.00189584375
+          ],
+          "time_relative_to_first_backend": 1.0
+        },
+        "quartz": {
+          "median_ms": 0.009589203125000001,
+          "p95_ms": 0.009844390625000001,
+          "trial_medians_ms": [
+            0.00932421875,
+            0.0096171875,
+            0.009561218750000001,
+            0.00968228125
+          ],
+          "median_range_ms": [
+            0.00932421875,
+            0.00968228125
+          ],
+          "time_relative_to_first_backend": 5.089515105777764
+        },
+        "quartz-harfbuzz": {
+          "median_ms": 0.001784515625,
+          "p95_ms": 0.0018685,
+          "trial_medians_ms": [
+            0.00176825,
+            0.00175521875,
+            0.00198565625,
+            0.0018007812499999999
+          ],
+          "median_range_ms": [
+            0.00175521875,
+            0.00198565625
+          ],
+          "time_relative_to_first_backend": 0.9471401441330868
+        },
+        "vello-hybrid": {
+          "median_ms": 0.001759765625,
+          "p95_ms": 0.001800125,
+          "trial_medians_ms": [
+            0.0018007812499999999,
+            0.00174740625,
+            0.001772125,
+            0.0017382812499999998
+          ],
+          "median_range_ms": [
+            0.0017382812499999998,
+            0.0018007812499999999
+          ],
+          "time_relative_to_first_backend": 0.9340039640745379
+        },
+        "vello-gpu": {
+          "median_ms": 0.00176628125,
+          "p95_ms": 0.0017877812499999999,
+          "trial_medians_ms": [
+            0.00177475,
+            0.00177734375,
+            0.00174346875,
+            0.0017578125
+          ],
+          "median_range_ms": [
+            0.00174346875,
+            0.00177734375
+          ],
+          "time_relative_to_first_backend": 0.9374621629914666
+        },
+        "vello-cpu": {
+          "median_ms": 0.0018059843749999999,
+          "p95_ms": 0.00185415625,
+          "trial_medians_ms": [
+            0.0018111875,
+            0.0018007812499999999,
+            0.00179559375,
+            0.0018229062499999999
+          ],
+          "median_range_ms": [
+            0.00179559375,
+            0.0018229062499999999
+          ],
+          "time_relative_to_first_backend": 0.9585347851687219
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Offscreen throughput; no display/vsync/input-to-photon measurements",
+    "Completed frame includes CPU encoding, queueing and GPU execution; it is not GPU timestamp time",
+    "CPU-before-wait subtracts an explicitly timed completion fence from a serial frame; not asynchronous throughput",
+    "Fixed font files, Light hinting and grayscale AA requested; backend rasterization quality can differ",
+    "Not full application startup, layout, scrolling or catalog navigation performance"
+  ],
+  "date": "2026-11-08",
+  "raw_report": {
+    "path": "target/rendering-perf/macos/comparison.json",
+    "sha256": "6756cbde9743190afc880938f72fa1da37a7e15cd51c92447fabe932cd400d2b",
+    "bytes": 1578146
+  },
+  "runs": [
+    {
+      "trial": 0,
+      "backend": "skia",
+      "seconds": 2.2733965830000002,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-skia.json",
+        "bytes": 49041,
+        "sha256": "5048fbba732a66ba6c9d10d5022e11e0d350d7200a309d6891aa65bfc081c053"
+      },
+      "load_before": {
+        "load_average": [
+          2.80615234375,
+          5.31640625,
+          7.98046875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 5.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.6611328125,
+          5.24462890625,
+          7.939453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 20.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 18.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1111040
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 761376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 520416
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 663936
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065344
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "backend": "quartz",
+      "seconds": 22.368183666,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-quartz.json",
+        "bytes": 48723,
+        "sha256": "9fde81521c5670f66fbe40209c241d3c9e9a3b0b8add3c46160e7d50efa27430"
+      },
+      "load_before": {
+        "load_average": [
+          2.6611328125,
+          5.24462890625,
+          7.939453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.755859375,
+          5.09814453125,
+          7.82373046875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "CoreText",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "backend": "quartz-harfbuzz",
+      "seconds": 23.021029624999997,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-quartz-harfbuzz.json",
+        "bytes": 48522,
+        "sha256": "e646e53a6984d6abdf3f82a7c32b80a6a9414dd02f42d745b5ea137255b5f986"
+      },
+      "load_before": {
+        "load_average": [
+          2.615234375,
+          5.02978515625,
+          7.78369140625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.66162109375,
+          4.880859375,
+          7.666015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "backend": "vello-hybrid",
+      "seconds": 2.6777117920000038,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-vello-hybrid.json",
+        "bytes": 48465,
+        "sha256": "1fa687c09fe6fe87cdb0d5ee73da93540c0ea64cc493d75f2373f481222b82d3"
+      },
+      "load_before": {
+        "load_average": [
+          2.7685546875,
+          4.8662109375,
+          7.64453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.7685546875,
+          4.8662109375,
+          7.64453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 11.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115648
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 682848
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453600
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 579072
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "backend": "vello-gpu",
+      "seconds": 4.800271541999997,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-vello-gpu.json",
+        "bytes": 48635,
+        "sha256": "4c2a68c8a06ef96b9aec02d73c9cd98993f62641d1cb69ecb959547c60d0b207"
+      },
+      "load_before": {
+        "load_average": [
+          2.78662109375,
+          4.8349609375,
+          7.6171875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 130.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 114.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 54.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 25.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 10.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.4,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.96337890625,
+          4.83740234375,
+          7.6015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 219.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 94.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 12.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115904
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453456
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 582912
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065008
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "backend": "vello-cpu",
+      "seconds": 4.764890500000007,
+      "artifact": {
+        "path": "target/rendering-perf/macos/00-vello-cpu.json",
+        "bytes": 48203,
+        "sha256": "546ea1c0c6b4775a2084cdd390a5b1bb6033ebc9406d40ff5c3dfe36b70511ca"
+      },
+      "load_before": {
+        "load_average": [
+          2.96337890625,
+          4.83740234375,
+          7.6015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 149.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 102.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 80.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 27.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 26.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 10.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.0,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.12646484375,
+          4.83984375,
+          7.5859375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115980
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683136
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453360
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 581280
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "vello-cpu",
+      "seconds": 4.652693624999998,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-vello-cpu.json",
+        "bytes": 48266,
+        "sha256": "c38f313bab7ced9b0546a83476facf8fa4452e66c76833aafee2ed584dfc118a"
+      },
+      "load_before": {
+        "load_average": [
+          3.0361328125,
+          4.79248046875,
+          7.552734375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.0361328125,
+          4.79248046875,
+          7.552734375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115980
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683136
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453360
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 581280
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "vello-gpu",
+      "seconds": 4.521534666999997,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-vello-gpu.json",
+        "bytes": 48353,
+        "sha256": "59cac1cb2733e3c95df849591ba77da3a1603dee6fabef84e588a0766ebc21a5"
+      },
+      "load_before": {
+        "load_average": [
+          2.953125,
+          4.74609375,
+          7.52001953125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 18.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 5.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.95654296875,
+          4.716796875,
+          7.4931640625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115904
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453456
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 582912
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065008
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "vello-hybrid",
+      "seconds": 2.3967594580000053,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-vello-hybrid.json",
+        "bytes": 48796,
+        "sha256": "75e51d07a9dba5cd14fd1f30cfaee1e53cd1a8aaed9681db3aa8010264884af6"
+      },
+      "load_before": {
+        "load_average": [
+          2.95654296875,
+          4.716796875,
+          7.4931640625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 22.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 10.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.9599609375,
+          4.68798828125,
+          7.466796875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115648
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 682848
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453600
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 579072
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "quartz-harfbuzz",
+      "seconds": 22.368510208000004,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-quartz-harfbuzz.json",
+        "bytes": 49061,
+        "sha256": "000e68870299da17189b48981ffd55dda400e0d3d13f4b9567f33bb2dbb40ad6"
+      },
+      "load_before": {
+        "load_average": [
+          2.9599609375,
+          4.68798828125,
+          7.466796875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.05126953125,
+          4.56787109375,
+          7.34228515625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 46.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 33.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 11.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "quartz",
+      "seconds": 22.915843542000005,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-quartz.json",
+        "bytes": 48590,
+        "sha256": "1f0fedfd44d963ee4b232b51461b979dd88266fcf4166a79f461460fa344d371"
+      },
+      "load_before": {
+        "load_average": [
+          3.05126953125,
+          4.56787109375,
+          7.34228515625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 98.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 53.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 25.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.67529296875,
+          4.599609375,
+          7.27294921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 37.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 29.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 5.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 5.8,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "CoreText",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "backend": "skia",
+      "seconds": 2.136443249999985,
+      "artifact": {
+        "path": "target/rendering-perf/macos/01-skia.json",
+        "bytes": 49041,
+        "sha256": "f01218bcf4d114d2c560f84a7c97e3977f452c4548bf8f0e58d943a5f598f920"
+      },
+      "load_before": {
+        "load_average": [
+          3.67529296875,
+          4.599609375,
+          7.27294921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 98.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 20.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 16.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.67529296875,
+          4.599609375,
+          7.27294921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 20.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.6,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1111040
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 761376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 520416
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 663936
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065344
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "skia",
+      "seconds": 2.1787628749999897,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-skia.json",
+        "bytes": 48598,
+        "sha256": "d4415b4fff79ee127fdf734a3454f574e05bf2157b5611d007b8d4ff8d1a6b2e"
+      },
+      "load_before": {
+        "load_average": [
+          3.541015625,
+          4.55615234375,
+          7.24169921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 31.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 20.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.541015625,
+          4.55615234375,
+          7.24169921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 18.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1111040
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 761376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 520416
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 663936
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065344
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "quartz",
+      "seconds": 22.883281667000006,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-quartz.json",
+        "bytes": 48646,
+        "sha256": "d725ed9a568075f19091a528b25f9cf2c8b31221c6c37769b01fb1a2f0471a49"
+      },
+      "load_before": {
+        "load_average": [
+          3.33740234375,
+          4.4970703125,
+          7.205078125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 28.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 18.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.4,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.36474609375,
+          4.4306640625,
+          7.11767578125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 98.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 50.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 41.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 12.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.5,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "CoreText",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "quartz-harfbuzz",
+      "seconds": 23.171390332999977,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-quartz-harfbuzz.json",
+        "bytes": 48667,
+        "sha256": "85bd5e8daa5707a96379cbfdaeac0426b6666d3d18635f824b9401f2d268d91b"
+      },
+      "load_before": {
+        "load_average": [
+          3.17529296875,
+          4.37353515625,
+          7.08154296875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 37.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 30.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 13.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.19189453125,
+          4.2998046875,
+          6.99169921875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 5.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.0,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "vello-hybrid",
+      "seconds": 2.453379959000017,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-vello-hybrid.json",
+        "bytes": 48540,
+        "sha256": "d647b3c7adcf7b80227fc1327b706da1542d6b4d8733213bfa60f05c830d8f4f"
+      },
+      "load_before": {
+        "load_average": [
+          3.09619140625,
+          4.26123046875,
+          6.96240234375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 25.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 20.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 9.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.09619140625,
+          4.26123046875,
+          6.96240234375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.0,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115648
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 682848
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453600
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 579072
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "vello-gpu",
+      "seconds": 4.544523791000017,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-vello-gpu.json",
+        "bytes": 48434,
+        "sha256": "b548b3f0ffe6c0f463ffbb7bafc0db43647d7a6c9b5265653e7a255b04c65eff"
+      },
+      "load_before": {
+        "load_average": [
+          2.92822265625,
+          4.20703125,
+          6.92724609375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.92822265625,
+          4.20703125,
+          6.92724609375
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 16.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115904
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453456
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 582912
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065008
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "backend": "vello-cpu",
+      "seconds": 4.524400458000002,
+      "artifact": {
+        "path": "target/rendering-perf/macos/02-vello-cpu.json",
+        "bytes": 48152,
+        "sha256": "833d1686d7cfa8e74f91c622e15ea178a61b237a4f6937fac53c02f7c7bf2b5d"
+      },
+      "load_before": {
+        "load_average": [
+          3.013671875,
+          4.203125,
+          6.90966796875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 29.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 14.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 10.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.01220703125,
+          4.18310546875,
+          6.88671875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 18.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115980
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683136
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453360
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 581280
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "vello-cpu",
+      "seconds": 4.626876959000015,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-vello-cpu.json",
+        "bytes": 48249,
+        "sha256": "54cfc599e564bb362bdbd23ce6c15e84d4d52c670e84059f18e457188a84ff5c"
+      },
+      "load_before": {
+        "load_average": [
+          3.01220703125,
+          4.18310546875,
+          6.88671875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.9306640625,
+          4.146484375,
+          6.85791015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 12.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115980
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683136
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453360
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 581280
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "vello-gpu",
+      "seconds": 4.548084083999981,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-vello-gpu.json",
+        "bytes": 48607,
+        "sha256": "335dd001fc9d158511e911f47876adecf7036f16ccd9d3b5cbe8ebf4c677fc45"
+      },
+      "load_before": {
+        "load_average": [
+          2.85595703125,
+          4.11083984375,
+          6.8291015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.85595703125,
+          4.11083984375,
+          6.8291015625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.0,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115904
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 683376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453456
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 582912
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065008
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "vello-hybrid",
+      "seconds": 2.406632000000002,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-vello-hybrid.json",
+        "bytes": 48420,
+        "sha256": "86f2e0b2fd47ce82cbe924149ef103c60c38ab7de2e27bdfe5aa0d417271bd16"
+      },
+      "load_before": {
+        "load_average": [
+          2.787109375,
+          4.07568359375,
+          6.80078125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 98.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 40.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 27.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 11.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.6,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.787109375,
+          4.07568359375,
+          6.80078125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 1.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1115648
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 682848
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 453600
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 579072
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065056
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "quartz-harfbuzz",
+      "seconds": 22.738295832999967,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-quartz-harfbuzz.json",
+        "bytes": 49278,
+        "sha256": "2ad419864a4d4f136addeebeba23f88f7e95d2a42ab292468b8bfaa88d7b4c6e"
+      },
+      "load_before": {
+        "load_average": [
+          2.8837890625,
+          4.07421875,
+          6.7841796875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 31.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 12.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 10.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 3.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          3.0458984375,
+          4.03564453125,
+          6.70654296875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 15.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "quartz",
+      "seconds": 22.88571991699996,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-quartz.json",
+        "bytes": 48899,
+        "sha256": "219f0cc5ad3bfb5593852ada71c5526b8f9c9c3ef5cae8ffdd5f4463b4353daf"
+      },
+      "load_before": {
+        "load_average": [
+          3.2021484375,
+          4.05126953125,
+          6.6962890625
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 19.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.4,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 2.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.916015625,
+          3.93310546875,
+          6.591796875
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 21.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.7,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.4,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "CoreText",
+      "quartz_counters": [
+        5916,
+        93036,
+        1783056,
+        968,
+        0,
+        92,
+        0
+      ],
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2278400
+        },
+        "geometry": {
+          "validation_ink_pixels": 1107712
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 896832
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 612384
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 778656
+        },
+        "shadows": {
+          "validation_ink_pixels": 2066328
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "backend": "skia",
+      "seconds": 2.3175785419999784,
+      "artifact": {
+        "path": "target/rendering-perf/macos/03-skia.json",
+        "bytes": 49167,
+        "sha256": "52def065a514c6084fc51f954a809dca32c7ba4797735b50d897f860cb73f481"
+      },
+      "load_before": {
+        "load_average": [
+          2.84228515625,
+          3.90087890625,
+          6.564453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 99.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 17.3,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 8.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 7.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.8,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          }
+        ]
+      },
+      "load_after": {
+        "load_average": [
+          2.84228515625,
+          3.90087890625,
+          6.564453125
+        ],
+        "top_processes": [
+          {
+            "cpu_percent": 100.0,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 26.6,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 6.5,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 4.9,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.2,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          },
+          {
+            "cpu_percent": 0.1,
+            "process": "Background process"
+          }
+        ]
+      },
+      "text_backend": "HarfBuzz",
+      "quartz_counters": null,
+      "validation": {
+        "rounded-rects": {
+          "validation_ink_pixels": 2282496
+        },
+        "geometry": {
+          "validation_ink_pixels": 1111040
+        },
+        "bitmaps": {
+          "validation_ink_pixels": 967680
+        },
+        "text-latin": {
+          "validation_ink_pixels": 761376
+        },
+        "text-arabic": {
+          "validation_ink_pixels": 520416
+        },
+        "text-hebrew": {
+          "validation_ink_pixels": 663936
+        },
+        "shadows": {
+          "validation_ink_pixels": 2065344
+        },
+        "opacity-layers": {
+          "validation_ink_pixels": 494124
+        },
+        "shape-latin": {
+          "glyphs": 56,
+          "utf16_units": 56
+        },
+        "shape-arabic": {
+          "glyphs": 50,
+          "utf16_units": 50
+        },
+        "shape-hebrew": {
+          "glyphs": 46,
+          "utf16_units": 46
+        }
+      }
+    }
+  ],
+  "timed_render_frames": 19200,
+  "timed_shape_calls": 230400,
+  "validation_passed_all_runs": true,
+  "text_quality_reference": "Core Text native appearance; no Skia-identical rasterization gate",
+  "validation_checks": {
+    "library_tests": {
+      "path": "target/rendering-benchmark-tests.log",
+      "sha256": "2d17e2c46792ec46b3291f23d902b0d34478faa7be5c54f166c76d77267fecca",
+      "bytes": 11505,
+      "passed": 2,
+      "features": "quartz only, verifies offscreen feature isolation"
+    },
+    "catalog_tests_typecheck": {
+      "path": "target/rendering-benchmark-catalog-check.log",
+      "sha256": "fe79e5339786d2b38217d5281905d274523ed11c95dcf714f5b7a6eb1f9fcbde",
+      "bytes": 30355,
+      "passed": true
+    },
+    "all_adapters_smoke_checked": 6,
+    "all_repeated_runs_passed": 24
+  },
+  "load_snapshot_export": "Application names are normalized in this committed summary; local raw artifacts retain sampled process basenames.",
+  "published_path_policy": "Checkout-relative paths and ~/ home placeholders; recorded measurements and artifact/source hashes are unchanged.",
+  "privacy_history_policy": "Personal paths, background process names and local device identifiers are omitted. Source commit IDs from the superseded branch are redacted; content hashes and measurements are historical and predate the upstream rebase."
+}

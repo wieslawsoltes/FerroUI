@@ -60,7 +60,7 @@ acceptance still requires that hardware.
 Earlier failures remain in the evidence directory, outside Git:
 
 ```text
-/Volumes/SSD/build-cache/ferroui-portable-media-evidence/macos-cgl-2026-11-02/
+<workspace>/build-cache/ferroui-portable-media-evidence/macos-cgl-2026-11-02/
 ```
 
 `pixels-initial.log` caught an untagged native presentation IOSurface: projected

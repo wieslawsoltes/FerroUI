@@ -1,10 +1,13 @@
-//! Experimental macOS 13+ system text/drawing backend, with optional direct Metal GPU rendering.
-#![cfg(target_os = "macos")]
+//! Apple system text/drawing backend for macOS 13+ and iOS 16+, with direct Metal GPU rendering.
+#![cfg(any(target_os = "macos", target_os = "ios"))]
 mod bitmap;
 #[cfg(feature = "runtime-shaders")]
 mod custom_shaders;
 #[cfg(feature = "metal")]
 mod external_objects;
+mod writeable_bitmap;
+#[cfg(feature = "metal")]
+pub use external_objects::SharedMetalImage;
 #[cfg(feature = "metal")]
 mod metal;
 #[cfg(feature = "metal")]
@@ -14,9 +17,10 @@ pub use metal::submission_count as metal_submission_count;
 mod drawing;
 mod ffi;
 mod fonts;
-pub use fonts::FontManager as QuartzFontManager;
+pub use fonts::{FontManager as QuartzFontManager, TextShaper as QuartzTextShaper};
 mod geometry;
 mod path_measure;
+mod png_compression;
 mod region;
 use bitmap::Bitmap;
 use drawing::GlyphRun;
@@ -32,43 +36,28 @@ use ferroui_controls::AppBuilder;
 use geometry::{Builder, Geometry};
 use kurbo::BezPath;
 use std::{
-    any::{Any, TypeId},
     io::{self, Read},
     rc::Rc,
-    sync::{Arc, Mutex, PoisonError},
+    sync::Arc,
 };
 
+#[cfg(not(feature = "metal"))]
 use ferroui_base::platform::surfaces::*;
+#[cfg(not(feature = "metal"))]
+use std::any::{Any, TypeId};
 
-/// Prints `message` once per process: the renderer degrades instead of failing.
-pub(crate) fn warn_once(message: &'static str) {
-    static WARNED: Mutex<Vec<&'static str>> = Mutex::new(Vec::new());
-    let mut warned = WARNED.lock().unwrap_or_else(PoisonError::into_inner);
-    if !warned.contains(&message) {
-        eprintln!("Quartz: {message}");
-        warned.push(message);
-    }
-}
-
-/// Whether this macOS release can run the Quartz renderer: macOS 13 or later.
+/// Whether the OS provides the public path APIs used by Quartz.
 pub fn is_quartz_supported() -> bool {
-    // SAFETY: an availability query without arguments.
     unsafe { ffi::q_supported() != 0 }
 }
 
 pub trait QuartzApplicationExtensions {
-    /// Selects Core Graphics for rendering (Metal with the `metal` feature) and Core Text for
-    /// text shaping.
-    ///
-    /// On macOS earlier than 13 this logs once and returns the builder unchanged, so whatever
-    /// rendering and text shaping subsystems were selected before stay in effect. Call
-    /// [`is_quartz_supported`] first to choose another backend explicitly.
     fn use_quartz(&self) -> AppBuilder;
 }
 impl QuartzApplicationExtensions for AppBuilder {
     fn use_quartz(&self) -> AppBuilder {
         if !is_quartz_supported() {
-            warn_once("the renderer requires macOS 13 or later and was not selected");
+            eprintln!("Quartz requires macOS 13+ or iOS 16+");
             return self.clone();
         }
         self.use_rendering_subsystem(
@@ -98,19 +87,25 @@ fn resized(
     width: bool,
     mode: BitmapInterpolationMode,
 ) -> io::Result<Bitmap> {
+    if dimension <= 0 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Decode dimension must be positive",
+        ));
+    }
     let bitmap = Bitmap::decode(stream)?;
     let s = bitmap.pixel_size();
     let size = if width {
         PixelSize::new(
             dimension,
             (s.height as f64 * dimension as f64 / s.width as f64)
-                .round()
+                .floor()
                 .max(1.) as i32,
         )
     } else {
         PixelSize::new(
             (s.width as f64 * dimension as f64 / s.height as f64)
-                .round()
+                .floor()
                 .max(1.) as i32,
             dimension,
         )
@@ -144,11 +139,13 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
         let mut stroke = BezPath::new();
         let mut fill = BezPath::new();
         for child in children {
-            if let Some(g) = child.as_any().downcast_ref::<Geometry>() {
-                stroke.extend(g.stroke.elements().iter().copied());
-                if let Some(p) = &g.fill {
-                    fill.extend(p.elements().iter().copied())
-                }
+            let g = child
+                .as_any()
+                .downcast_ref::<Geometry>()
+                .expect("Quartz geometry group requires Quartz children");
+            stroke.extend(g.stroke.elements().iter().copied());
+            if let Some(p) = &g.fill {
+                fill.extend(p.elements().iter().copied())
             }
         }
         Geometry::paths(stroke, Some(fill), rule)
@@ -163,10 +160,11 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
     }
     fn build_glyph_run_geometry(&self, g: &MediaGlyphRun) -> Arc<dyn IGeometryImpl> {
         let run = g.platform_impl();
-        match run.as_any().downcast_ref::<GlyphRun>() {
-            Some(run) => Geometry::new(run.outlines.clone(), FillRule::NonZero),
-            None => Geometry::new(BezPath::new(), FillRule::NonZero),
-        }
+        let run = run
+            .as_any()
+            .downcast_ref::<GlyphRun>()
+            .expect("Quartz glyph run");
+        Geometry::new(run.outlines.clone(), FillRule::NonZero)
     }
     fn create_glyph_run(
         &self,
@@ -191,9 +189,7 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
         f: PixelFormat,
         a: AlphaFormat,
     ) -> Arc<dyn IWriteableBitmapImpl> {
-        // Pixels are stored as premultiplied BGRA; `lock` exposes `f` and `a` and converts
-        // back when the lock is disposed.
-        Arc::new(Bitmap::with_format(s, d, f, a))
+        Arc::new(writeable_bitmap::WriteableBitmap::new(s, d, f, a))
     }
     fn load_bitmap_from_file(&self, p: &str) -> io::Result<Arc<SharedBitmapImpl>> {
         self.load_bitmap(&mut std::fs::File::open(p)?)
@@ -267,21 +263,18 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
     ) -> Rc<dyn IPlatformRenderInterfaceContext> {
         #[cfg(feature = "metal")]
         {
-            // Without a usable Metal device the context still draws into framebuffer
-            // surfaces, on the CPU when no GPU renderer exists at all.
-            let metal = match metal::MetalContext::new(graphics) {
-                Ok(metal) => Some(metal),
+            match metal::MetalContext::new(graphics) {
+                Ok(context) => Rc::new(context),
                 Err(error) => {
-                    eprintln!("Quartz: Metal rendering unavailable ({error}); using framebuffer surfaces");
-                    None
+                    eprintln!("Quartz Metal unavailable: {error}");
+                    Rc::new(UnavailableContext)
                 }
-            };
-            Rc::new(QuartzContext { metal })
+            }
         }
         #[cfg(not(feature = "metal"))]
         {
             let _ = graphics;
-            Rc::new(QuartzContext {})
+            Rc::new(QuartzContext)
         }
     }
     fn supports_individual_round_rects(&self) -> bool {
@@ -297,7 +290,10 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
         PixelFormat::BGRA8888
     }
     fn is_supported_bitmap_pixel_format(&self, f: PixelFormat) -> bool {
-        f == PixelFormat::BGRA8888 || f == PixelFormat::RGBA8888
+        matches!(
+            f,
+            PixelFormat::BGRA8888 | PixelFormat::RGBA8888 | PixelFormat::RGB565
+        )
     }
     fn supports_regions(&self) -> bool {
         true
@@ -306,63 +302,33 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
         Rc::new(region::QuartzRegionImpl::new())
     }
 }
-/// The render context: direct Metal presentation when the platform supplied a usable Metal
-/// device, framebuffer surfaces otherwise.
-struct QuartzContext {
-    #[cfg(feature = "metal")]
-    metal: Option<metal::MetalContext>,
-}
+#[cfg(not(feature = "metal"))]
+struct QuartzContext;
+#[cfg(not(feature = "metal"))]
 impl IOptionalFeatureProvider for QuartzContext {
-    fn try_get_feature(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
-        #[cfg(feature = "metal")]
-        if let Some(metal) = &self.metal {
-            return metal.try_get_feature(kind);
-        }
-        let _ = kind;
+    fn try_get_feature(&self, _: TypeId) -> Option<Rc<dyn Any>> {
         None
     }
 }
-fn framebuffer_ready(surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> bool {
-    surfaces
-        .iter()
-        .any(|surface| surface.as_framebuffer_surface().is_some() && surface.is_ready())
-}
+#[cfg(not(feature = "metal"))]
 impl IPlatformRenderInterfaceContext for QuartzContext {
-    fn public_features(&self) -> std::collections::HashMap<TypeId, Rc<dyn Any>> {
-        #[cfg(feature = "metal")]
-        if let Some(metal) = &self.metal {
-            return metal.public_features();
-        }
-        std::collections::HashMap::new()
-    }
     fn is_ready_to_create_render_target(
         &self,
         surfaces: &[Arc<dyn IPlatformRenderSurface>],
     ) -> bool {
-        #[cfg(feature = "metal")]
-        if self.metal.as_ref().is_some_and(|metal| metal.is_ready(surfaces)) {
-            return true;
-        }
-        framebuffer_ready(surfaces)
+        surfaces
+            .iter()
+            .any(|surface| surface.as_framebuffer_surface().is_some() && surface.is_ready())
     }
     fn create_render_target(
         &self,
         surfaces: &[Arc<dyn IPlatformRenderSurface>],
     ) -> Rc<dyn IRenderTarget> {
-        #[cfg(feature = "metal")]
-        if let Some(target) = self
-            .metal
-            .as_ref()
-            .and_then(|metal| metal.create_render_target(surfaces))
-        {
-            return target;
-        }
         for s in surfaces {
             if let Some(f) = s.as_framebuffer_surface() {
                 return Rc::new(Target(f.create_framebuffer_render_target()));
             }
         }
-        warn_once("no surface to render to: select macOS Metal or Software rendering");
         Rc::new(UnavailableTarget)
     }
     fn create_offscreen_render_target(
@@ -374,29 +340,16 @@ impl IPlatformRenderInterfaceContext for QuartzContext {
         Rc::new(Bitmap::new(s, scaling * 96.0))
     }
     fn is_lost(&self) -> bool {
-        #[cfg(feature = "metal")]
-        if let Some(metal) = &self.metal {
-            return metal.is_lost();
-        }
         false
     }
     fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
-        #[cfg(feature = "metal")]
-        {
-            // SAFETY: a query of the native renderer.
-            let max = unsafe { ffi::qm_max_texture_size() };
-            if max > 0 {
-                let side = i32::try_from(max).unwrap_or(i32::MAX);
-                return Some(PixelSize::new(side, side));
-            }
-        }
         Some(PixelSize::new(16384, 16384))
     }
     fn dispose(&self) {}
 }
-/// A framebuffer surface: the frame is drawn into a Quartz bitmap (on the GPU when a renderer
-/// exists) and copied into the framebuffer when the drawing context is disposed.
+#[cfg(not(feature = "metal"))]
 struct Target(Rc<dyn IFramebufferRenderTarget>);
+#[cfg(not(feature = "metal"))]
 impl IRenderTarget for Target {
     fn properties(&self) -> RenderTargetProperties {
         RenderTargetProperties {
@@ -413,44 +366,30 @@ impl IRenderTarget for Target {
     ) {
         let (frame, props) = self.0.lock(scene);
         let bitmap = Bitmap::new(frame.size(), frame.dpi());
-        let layout_supported = matches!(
-            frame.format(),
-            PixelFormat::BGRA8888 | PixelFormat::RGBA8888
-        );
-        if !layout_supported {
-            warn_once("the framebuffer pixel format is not BGRA8888 or RGBA8888; frames are not shown");
-        }
-        if props.previous_frame_is_retained && layout_supported {
-            frame.with_data(&mut |data| {
-                match bitmap::convert(
-                    data,
-                    frame.row_bytes().max(0) as usize,
-                    frame.size(),
-                    frame.format(),
-                    frame.alpha_format(),
-                ) {
-                    Ok(pixels) => bitmap.write(&pixels),
-                    Err(_) => warn_once("the framebuffer is smaller than its size and stride"),
-                }
-            });
-        }
+        frame.with_data(&mut |data| {
+            bitmap.write(&bitmap::convert(
+                data,
+                frame.row_bytes() as usize,
+                frame.size(),
+                frame.format(),
+                frame.alpha_format(),
+            ))
+        });
         let output = bitmap.clone();
         let done = Box::new(move || {
-            if layout_supported {
-                let bytes = bitmap::export(&output.pixels(), frame.format(), frame.alpha_format());
-                let row = output.pixel_size().width.max(0) as usize * 4;
-                frame.with_data(&mut |data| {
-                    let stride = frame.row_bytes().max(0) as usize;
-                    if row == 0 || stride < row {
-                        return;
-                    }
-                    for (y, source) in bytes.chunks_exact(row).enumerate() {
-                        if let Some(target) = data.get_mut(y * stride..y * stride + row) {
-                            target.copy_from_slice(source)
-                        }
-                    }
-                });
+            let mut bytes = output.pixels();
+            if frame.format() == PixelFormat::RGBA8888 {
+                for p in bytes.chunks_exact_mut(4) {
+                    p.swap(0, 2)
+                }
             }
+            let row = output.pixel_size().width as usize * 4;
+            frame.with_data(&mut |data| {
+                let stride = frame.row_bytes() as usize;
+                for (y, source) in bytes.chunks_exact(row).enumerate() {
+                    data[y * stride..y * stride + row].copy_from_slice(source)
+                }
+            });
             frame.dispose();
         });
         (
@@ -467,8 +406,45 @@ impl IRenderTarget for Target {
         self.0.dispose()
     }
 }
-/// Stands in when none of the surfaces can be drawn to: the compositor is told the target is
-/// not ready, and a direct drawing context draws nowhere.
+/// GPU-only builds report unavailable surfaces instead of silently switching to CPU rendering.
+#[cfg(feature = "metal")]
+struct UnavailableContext;
+#[cfg(feature = "metal")]
+impl IOptionalFeatureProvider for UnavailableContext {
+    fn try_get_feature(&self, _: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+        None
+    }
+}
+#[cfg(feature = "metal")]
+impl IPlatformRenderInterfaceContext for UnavailableContext {
+    fn is_ready_to_create_render_target(
+        &self,
+        _: &[Arc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>],
+    ) -> bool {
+        false
+    }
+    fn create_render_target(
+        &self,
+        _: &[Arc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>],
+    ) -> Rc<dyn IRenderTarget> {
+        Rc::new(UnavailableTarget)
+    }
+    fn create_offscreen_render_target(
+        &self,
+        size: PixelSize,
+        scaling: Vector,
+        _: bool,
+    ) -> Rc<dyn IDrawingContextLayerImpl> {
+        Rc::new(Bitmap::new(size, scaling * 96.))
+    }
+    fn is_lost(&self) -> bool {
+        false
+    }
+    fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
+        Some(PixelSize::new(16384, 16384))
+    }
+    fn dispose(&self) {}
+}
 struct UnavailableTarget;
 impl IRenderTarget for UnavailableTarget {
     fn properties(&self) -> RenderTargetProperties {
@@ -481,9 +457,8 @@ impl IRenderTarget for UnavailableTarget {
         Box<dyn IDrawingContextImpl>,
         RenderTargetDrawingContextProperties,
     ) {
-        let bitmap = Bitmap::new(PixelSize::new(1, 1), Vector::new(96., 96.));
         (
-            Box::new(bitmap.drawing(false, None)),
+            Box::new(Bitmap::new(PixelSize::new(1, 1), Vector::new(96., 96.)).drawing(false, None)),
             RenderTargetDrawingContextProperties::default(),
         )
     }
@@ -499,7 +474,7 @@ impl IRenderTarget for UnavailableTarget {
     > {
         Err(RenderTargetError::NotReady(
             ferroui_base::RenderTargetNotReadyError::new_with_message(
-                "Quartz has no Metal or framebuffer surface to render to",
+                "Quartz has no usable render surface",
             ),
         ))
     }
@@ -508,6 +483,8 @@ impl IRenderTarget for UnavailableTarget {
     }
     fn dispose(&self) {}
 }
+#[cfg(test)]
+mod parity_tests;
 #[cfg(test)]
 mod tests;
 

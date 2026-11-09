@@ -39,6 +39,7 @@ mod custom_drawing;
 // The section Custom effects: the pages of the families of the custom effects gallery (#455).
 pub(crate) mod custom_effects_pages;
 mod custom_drawing_example_control;
+pub(crate) mod renderer_parity_page;
 mod data_validation_page;
 mod dialogs_page;
 mod drag_and_drop_page;
@@ -319,6 +320,7 @@ pub(crate) fn register_lists() {
 
 /// The classes of the files directly under `Pages/`.
 const ROOT_TYPES: &[&TypeInfo] = &[
+    renderer_parity_page::ParityDrawingControl::TYPE,
     InkCanvasPage::TYPE,
     InkToolbarPage::TYPE,
     IconElementPage::TYPE,

@@ -252,7 +252,7 @@ Regenerate the semantic compiler corpus with the installed .NET10 SDK:
 
 ```sh
 cd scripts/dock/json-generator-reference
-TMPDIR=/Volumes/SSD/temp/ferrodock-port NUGET_PACKAGES=/Volumes/SSD/NuGetCaches/packages NUGET_HTTP_CACHE_PATH=/Volumes/SSD/temp/ferrodock-port/nuget-http dotnet run -- ../../../../tests/Dock/data/json-generator-semantics.json
+TMPDIR=<evidence>/ferrodock-port NUGET_PACKAGES=<workspace>/NuGetCaches/packages NUGET_HTTP_CACHE_PATH=<evidence>/ferrodock-port/nuget-http dotnet run -- ../../../../tests/Dock/data/json-generator-semantics.json
 ```
 
 The actual source includes readonly payload properties and throws on empty Load, while

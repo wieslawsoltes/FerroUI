@@ -59,7 +59,7 @@ Types and members waived with a reason (`docs/porting/data/behaviors/member-waiv
 ## How to regenerate
 
 ```sh
-scripts/port-status/run.sh --reference behaviors            # the checkout at /Volumes/1TB-macOS/behaviors-ref, or $BEHAVIORS_UPSTREAM
+scripts/port-status/run.sh --reference behaviors            # the checkout at ../Xaml.Behaviors, or $BEHAVIORS_UPSTREAM
 scripts/port-status/run.sh --reference behaviors --check    # exit 1 when a document is out of date; writes nothing
 python3 scripts/port-status/test_gaps.py --reference behaviors --all   # the test reports, before run.sh
 python3 scripts/port-status/port_status.py --reference behaviors --explain <Project> <File.cs>

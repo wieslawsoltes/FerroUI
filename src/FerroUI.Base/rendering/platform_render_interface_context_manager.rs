@@ -156,7 +156,11 @@ impl PlatformRenderInterfaceContextManager {
         }
 
         let gpu_context_is_lost = self.gpu_context().is_some_and(|context| context.is_lost());
-        if self.backend.borrow().is_none() || gpu_context_is_lost {
+        // A renderer can own an additional queue/context beyond the platform
+        // device (for example Quartz Metal). Its failure must also invalidate
+        // the backend even when the platform device remains healthy.
+        let backend_is_lost = self.backend.borrow().as_ref().is_some_and(|context| context.is_lost());
+        if self.backend.borrow().is_none() || gpu_context_is_lost || backend_is_lost {
             let backend = self.backend.borrow_mut().take();
             if let Some(backend) = backend {
                 backend.dispose();
@@ -456,6 +460,7 @@ mod tests {
         id: i32,
         log: Log,
         ready_to_create_render_target: Cell<bool>,
+        lost: Cell<bool>,
     }
 
     impl IOptionalFeatureProvider for BackendContext {
@@ -479,9 +484,7 @@ mod tests {
             unimplemented!()
         }
 
-        fn is_lost(&self) -> bool {
-            false
-        }
+        fn is_lost(&self) -> bool { self.lost.get() }
 
         fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
             None
@@ -510,6 +513,7 @@ mod tests {
                 id: self.backends.borrow().len() as i32 + 1,
                 log: self.log.clone(),
                 ready_to_create_render_target: Cell::new(true),
+                lost: Cell::new(false),
             });
             let gpu = match &graphics_api_context {
                 Some(context) => {
@@ -784,6 +788,22 @@ mod tests {
             Rc::as_ptr(&value) as *const (),
             Rc::as_ptr(&fixture.render_interface.backends.borrow()[1]) as *const ()
         ));
+    }
+
+    #[test]
+    fn backend_queue_loss_recreates_context_even_when_platform_device_is_healthy() {
+        let fixture=Fixture::new();
+        let graphics=Graphics::new(&fixture.log,false,None);
+        let manager=fixture.manager(Some(graphics.clone()));
+        let old=manager.value(); take(&fixture.log);
+        fixture.render_interface.backends.borrow()[0].lost.set(true);
+        assert!(!graphics.created.borrow()[0].is_lost());
+        let replacement=manager.value();
+        assert!(!Rc::ptr_eq(&old,&replacement));
+        assert_eq!(take(&fixture.log),["backend1.dispose","gpu1.dispose","ContextDisposed",
+            "graphics.create_context -> gpu2","create_backend_context(gpu2) -> backend2","ContextCreated(backend2)"]);
+        assert!(!replacement.is_lost());
+        assert!(Rc::ptr_eq(&replacement,&manager.value()));
     }
 
     #[test]

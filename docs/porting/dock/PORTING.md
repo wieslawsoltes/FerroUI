@@ -509,7 +509,7 @@ remains 232 ported / 458 partial / 1,238 pending of 1,928; no source unit promot
 Default/application catalogs, sample save/load, complete compiler adaptation, other codecs/
 backends, cyclic lifetime, full API/platform/accessibility and performance parity remain
 required. Entire original goal remains active, incomplete and unblocked. Scratch/artifacts
-stay on /Volumes/SSD/temp/ferrodock-port; actual desktop executable/app/window preserved.
+stay on <evidence>/ferrodock-port; actual desktop executable/app/window preserved.
 
 ## Previous validated checkpoint
 
@@ -1313,7 +1313,7 @@ not presented as Rust parity. Do not replace the list engine or use a UI-specifi
 workaround. Other public factory slots and original serialization remain required.
 
 Temporary artifacts and subprocess TMPDIR now use
-`/Volumes/SSD/temp/ferrodock-port`, per the user's requirement. The 138 previous
+`<evidence>/ferrodock-port`, per the user's requirement. The 138 previous
 owned-prefix files were moved from /tmp; historical documentation links were updated.
 No dependency/vendor changes or desktop executable/window refresh was performed.
 

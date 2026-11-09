@@ -120,6 +120,7 @@ unicode-normalization = "0.1"
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-rendering-benchmarks = { path = "../../tests/FerroUI.Rendering.Benchmarks", features = ["vello"] }
 ferroui-base = { workspace = true, features = ["testing"] }
 # `url::Url`, the base URI of the recording asset loader of the tests (C5 of #423).
 url.workspace = true

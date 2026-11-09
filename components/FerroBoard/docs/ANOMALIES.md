@@ -18,7 +18,7 @@ build. No root cause or renderer correction is verified. No caret suppression or
 rendering fallback was applied.
 
 Evidence, extracted frames, the temporary probe source/binaries and anomaly.json
-are retained at `/Volumes/SSD/temp/ferrokeyboard/caret-contrast-stage`. The diagnostic
+are retained at `/tmp/ferrokeyboard/caret-contrast-stage`. The diagnostic
 window/process is closed and its example entry/source were removed from the
 reusable library/sample project. Existing app data and neighboring ports are
 unchanged. The original recording remains on the user's Desktop.

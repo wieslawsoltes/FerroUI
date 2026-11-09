@@ -49,7 +49,7 @@ page table. What several pages share is ported already and registered by the sha
 1. Convert the page with the helper of the port (outside the repository):
 
    ```text
-   python3 -I /Volumes/1TB-macOS/behaviors-port-notes/convert_gallery_page.py <worktree> <ViewName> --apply
+   python3 -I <workspace>/behaviors-port-notes/convert_gallery_page.py <worktree> <ViewName> --apply
    ```
 
    It writes `pages/<ViewName>.xaml` (the document of the reference with the names of the port:

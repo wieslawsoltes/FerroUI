@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-rendering-benchmarks"
+description = "Common rendering and text workloads measured through FerroUI platform contracts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+[[bin]]
+name = "rendering-benchmarks"
+path = "main.rs"
+
+[features]
+default = ["skia", "quartz"]
+skia = ["dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+quartz = ["dep:ferroui-quartz"]
+vello = ["dep:ferroui-vello", "dep:ferroui-harfbuzz"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-skia = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
+serde_json.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-quartz = { workspace = true, optional = true, features = ["metal"] }
+ferroui-metal = { workspace = true, features = ["offscreen"] }

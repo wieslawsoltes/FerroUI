@@ -3,7 +3,7 @@
 Run from this directory:
 
 ```sh
-TMPDIR=/Volumes/SSD/temp/ferrodock-port dotnet run -p:NuGetPackageRoot=/Volumes/SSD/NuGetCaches/packages/ -- ../../../tests/Dock/data/factory-markup-reference.tsv
+TMPDIR=<evidence>/ferrodock-port dotnet run -p:NuGetPackageRoot=<workspace>/NuGetCaches/packages/ -- ../../../tests/Dock/data/factory-markup-reference.tsv
 ```
 
 This standalone reference uses the UNCHANGED original Dock.MarkupExtension,
@@ -202,7 +202,7 @@ endpoints, nullable settings, original options ApplyTo/parent identity and the o
 Int32 narrowing of oversized literals. A further namescope case verifies boxed-scalar
 identity. The retained900 earlier reference assertions remain unchanged; the fresh output
 has908 assertions. Native numeric cases live in tests/Dock/data/numeric-enum-markup-reference.tsv.
-All scratch/build outputs use /Volumes/SSD/temp/ferrodock-port.
+All scratch/build outputs use <evidence>/ferrodock-port.
 
 The numeric-enum reference now also compiles real RootDock and settings-option properties
 with unnamed docking-mode/pinned-display/host-mode values. Six additional assertions cover
