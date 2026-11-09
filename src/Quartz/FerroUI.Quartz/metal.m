@@ -37,8 +37,10 @@ typedef struct {
   vector_uint4 flags;
 } QImageParams;
 typedef struct {
-  // `radii`: the corner radii of a rounded box (`x`, `y`), zero for a box.
-  vector_float4 bounds, color, radii;
+  // `radii`: the corner radii of a rounded box (`x`, `y`), zero for a box;
+  // `shape`: the whole rounded box (low and high corners), which `bounds` may
+  // crop to the pixels of the canvas.
+  vector_float4 bounds, color, radii, shape;
 } QSolidParams;
 typedef struct {
   QImageParams image;
@@ -787,6 +789,7 @@ static void flush_draws(void) {
       QSolidParams clear = {
           {rect.origin.x, rect.origin.y, rect.size.width, rect.size.height},
           {0, 0, 0, 0},
+          {0, 0, 0, 0},
           {0, 0, 0, 0}};
       [enc setRenderPipelineState:r.clearPipeline];
       [enc setVertexBytes:&clear length:sizeof(clear) atIndex:0];
@@ -1529,7 +1532,9 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
           {p.color.x * p.color.w, p.color.y * p.color.w, p.color.z * p.color.w,
            p.color.w},
           (p.reserved & 16) ? (vector_float4){p.src.x, p.src.y, 0, 0}
-                            : (vector_float4){0, 0, 0, 0}};
+                            : (vector_float4){0, 0, 0, 0},
+          p.gradient - (vector_float4){p.target.x, p.target.y, p.target.x,
+                                       p.target.y}};
       [drawImages appendBytes:&compact length:sizeof(compact)];
     } else if (kind == 3) {
       QRectImageParams compact = rect_image_params(p, image);

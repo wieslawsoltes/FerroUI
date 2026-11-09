@@ -1126,6 +1126,8 @@ fn rounded_boxes_match_their_path_coverage() {
         (Rect::new(7.25, 9.125, 31.5, 25.75), 6.5),
         (Rect::new(7., 9., 32., 26.), 4.),
         (Rect::new(3.5, 4.5, 20., 12.), 40.),
+        // Off the canvas: the part drawn keeps the corners of the whole box.
+        (Rect::new(-6.5, -4.25, 30., 20.), 8.),
     ] {
         let rounded = RoundedRect::new(
             rect,

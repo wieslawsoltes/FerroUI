@@ -941,13 +941,14 @@ fragment float4 image_fragment(ImageVertex v [[stage_in]],
 // Integral solid rectangles need neither sampled textures nor per-fragment
 // path parameters. Fractional/transformed paths keep their exact coverage.
 struct SolidParams {
-  float4 bounds, color, radii;
+  float4 bounds, color, radii, shape;
 };
 struct SolidVertex {
   float4 position [[position]];
   float4 color [[flat]];
   float4 bounds [[flat]];
   float2 radii [[flat]];
+  float4 shape [[flat]];
 };
 vertex SolidVertex solid_vertex(uint id [[vertex_id]],
                                 device const SolidParams *draws [[buffer(0)]],
@@ -959,12 +960,12 @@ vertex SolidVertex solid_vertex(uint id [[vertex_id]],
   float2 low = p.bounds.xy, high = low + p.bounds.zw;
   float2 pixel = mix(floor(low), ceil(high), corner);
   return {float4(pixel.x / size.x * 2 - 1, 1 - pixel.y / size.y * 2, 0, 1),
-          p.color, float4(low, high), p.radii.xy};
+          p.color, float4(low, high), p.radii.xy, p.shape};
 }
 fragment float4 solid_fragment(SolidVertex v [[stage_in]]) {
   float2 center = floor(v.position.xy) + 0.5f;
   if (v.radii.x > 0 && v.radii.y > 0)
-    return v.color * box_coverage(center, v.bounds, v.radii, false, false,
+    return v.color * box_coverage(center, v.shape, v.radii, false, false,
                                   float4(1, 0, 0, 1), float2(0));
   float2 a = center - 0.25f, b = center + 0.25f;
   float2 covered = float2((a >= v.bounds.xy) & (a < v.bounds.zw)) +
