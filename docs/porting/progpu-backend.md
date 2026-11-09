@@ -8,7 +8,10 @@ font catalog, fallback, Unicode bidi and line breaking, the OpenType shaper) and
 scene model, on the desktop (Metal, Direct3D 12, Vulkan) and in the browser on WebGPU. The goal is
 a retained GPU mode as fast as the engine allows, measured against the Skia and Vello backends.
 
-Status: plan (P0). The owner's request of 2026-11-05: top priority; the PR is open from the start;
+Status: P1 to P3 are in the branch. The backend draws shapes, paths, brushes, clips, opacity,
+layers and analytic shadows into offscreen targets and into the Metal drawables of macOS windows,
+behind `use_progpu()`; text, images from files and effects are drawn as nothing and said once in the
+log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
 performance and published size are measured locally against Skia (no new workflows), with
 screenshots of the ControlCatalog.
 
@@ -173,6 +176,77 @@ the device requested by the page (`navigator.gpu`, high-performance adapter) bef
 starts, the surface of the canvas of the view, and the same retained mode as the desktop. It sits
 beside the WebGL2 and 2D modes, which stay.
 
+### 2.7 The platform render interface (P3)
+
+What the backend implements today, and the rules it follows.
+
+**Devices and engines.** A render context owns a device and the engines on it (`device.rs`,
+`gpu.rs`). The offscreen context has a device of its own (the default adapter); the context of a
+window surface on macOS is made on the Metal device and the command queue of the platform
+(`wgpuInstanceCreateDeviceFromMetal`). An engine has one retained scene and one target format, so a
+device keeps one engine per format it draws to (RGBA8 for offscreen targets, BGRA8 for drawables)
+and a target sends its scene before it renders. The engine guards against concurrent entry with
+the thread that owns it; the compositor renders from the render thread and, during a synchronous
+resize, from the UI thread, always under the lock of the render loop, so the backend adopts the
+engine on the thread that enters next (`progpu_native_engine_adopt_owner_thread`).
+
+**Render targets** (`targets.rs`, `bitmap.rs`, `layer.rs`):
+
+| Target | How a frame is drawn |
+|---|---|
+| Metal surface of a window | The platform owns and presents the drawables. A frame begins a session of the surface, wraps the texture of the drawable (`wgpuDeviceCreateTextureFromMetal`), the engine renders the scene into it, the wrapper is released and ending the session presents. The texture is the size of the surface at that moment, so a resized window is drawn at its new size in the frame that presents it: no stretched and no stale frame. A drawable holds nothing of the frame before, so every frame draws the whole scene. |
+| Framebuffer of a surface | The frame is kept in a texture of the device and drawn over (`PRESERVE_TARGET`); the pixels are read back into the locked framebuffer (RGBA8888 and BGRA8888). |
+| Render target bitmap, layer | A texture of the device; a drawing context draws over what the bitmap holds; reading pixels reads the texture back. A layer drawn into another target is an external image of the scene, without a copy. |
+| Context without a device | Never ready; what is drawn is drawn as nothing. |
+
+**The scene of a frame** (`scene.rs`, `drawing_context.rs`). A drawing context records into the
+scene builder of the engine through its C ABI in the bindings; ending the frame sends the stream (`update_scene`) and renders it.
+The rules of the engine the recorder keeps:
+- a scene identifier keeps its stream generation strictly increasing; a resource keeps its
+  identifier, and its generation changes only with its content;
+- resource identifiers ascend in the order of the resource table;
+- an external image is bound under the identity the builder gave it, and the bound table is sorted
+  by identifier.
+
+**Brushes.** The engine evaluates a brush in the coordinates of the shape or path it fills, before
+the transform of the state. A brush record carries the rows that map those coordinates into the
+space of the brush, so the backend passes the inverse of the transforms of the brush alone: the
+relative transform (on the box of the fill as a unit square) and then the absolute transform about
+the transform origin.
+
+**The end of a thread.** In a build with debug assertions the WebGPU implementation keeps the
+state of one of its locks in a thread-local, and releasing a device needs that lock. The objects of
+a render context are released when the thread-locals of its thread are destroyed, in an order the
+backend does not choose; a release after the lock state is gone would abort the process. The
+backend therefore never calls the WebGPU implementation while the locals of the calling thread are
+being destroyed: the device, its engines and its textures are then left to the end of the process
+(`device.rs`, `thread_is_ending`). The detection is a thread-local mark registered after the first
+call into the implementation on the thread, which the reverse order of destruction puts before the
+lock state. Objects released while the thread runs are released as usual.
+
+**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): text (glyph runs and the
+outlines of text; the backend binds no font manager and no text shaper yet, and an application names
+a text shaping subsystem itself until P4), bitmaps decoded from files or streams, bitmaps drawn
+under an opacity mask, inset shadows and the shadows of rectangles with different corner radii, and
+a clear under a rounded or geometry clip. Content under an opacity mask is drawn without the mask.
+The backend refuses compositing layers with a blend mode (`try_push_compositing_layer` answers
+no); blend modes are step P5. A frame that fails is logged every time and leaves the target as it
+was. None of these crashes.
+
+**Known limits of the step.**
+- A layer drawn into a target and drawn into again before the target renders shows its later
+  content: the scene holds the texture, not a copy.
+- The window target draws the whole scene every frame and the whole stream is sent every frame;
+  P6 changes both.
+- The headless frame benchmarks are not in this branch; the test of the compositor on an offscreen
+  target of the backend (`platform_tests.rs`) stands in for them.
+
+Tests: `cargo test -p ferroui-progpu` renders through the public contracts and reads pixels back
+(clears, rectangles, rounded rectangles, ellipses, paths, strokes, gradients, clips, opacity,
+transforms, layers, the framebuffer target, the Metal texture target on a device made on a Metal
+device, a compositor frame, the safe failures, the end of a thread). The example
+`progpu_window` opens a window through the application builder with `use_progpu()`.
+
 ## 3. Bindings in the ProGPU repository
 
 The C++ builder never crosses the C ABI, and a call across the boundary for every command would
@@ -204,6 +278,38 @@ calls a frame:
    - the C ABI of the native Geometry module (section 2.5).
 4. **Image decoders** in the native image module beside PNG: JPEG (baseline and progressive), GIF and
    BMP, bounded and allocation-checked as the PNG decoder.
+
+What the work on P1 to P3 and the reading of the engine for P4 found, beyond the list above:
+
+- **One scene and one target format per engine.** Every target of a device shares the retained
+  scene of the engine of its format, so a target sends its stream before it renders and two
+  windows on one device replace each other's scene. Retained mode (P6) needs a scene per target:
+  several retained scenes in one engine, or engines that share the pipelines and caches of a
+  device.
+- **No update smaller than a stream.** `progpu_native_engine_update_scene` replaces the retained
+  snapshot and releases the render bundle of the scene; there is no call that changes one state
+  record (a transform, an opacity, a clip) or the records of one visual.
+- **Glyph outlines without the hinting provider.** The scene takes glyph outlines as segments in
+  design units with a raster scale and a horizontal quarter-pixel phase, and the text module parses
+  TrueType, CFF and variable outlines, but the C ABI hands outlines out only through the hinted
+  entry points (`progpu_native_text_context_capture_outline_batch` and the hinted runs and
+  paragraphs), which answer that the dependency is unavailable unless the engine is built with a
+  prepared FreeType. The bindings build the engine without it. P4 needs an entry point for the
+  outlines and metrics of the text module itself, or the build of the hinting provider in the
+  bindings.
+- **Fonts are bytes.** A text context is created from the bytes of a font and of its fallback
+  fonts; the system font catalog and fallback itemization are C++ only, as listed above.
+- **The glyph cache is per frame payload.** The glyph atlas is kept while the outline array and
+  the segment arena of a frame are byte-equal to those of the frame before; a frame with another
+  set of glyphs rasterizes all its outlines again. Retained text needs an atlas keyed by outline,
+  scale and phase that keeps entries across frames.
+- **Text quality.** Coverage is 8x8 supersampled on the GPU into an R8 atlas and sampled with a
+  linear filter; the subpixel phase is horizontal only and quarter-pixel; the subpixel text mode
+  samples the grayscale atlas three times and is not a filtered LCD raster (the separate RGB glyph
+  run is one, for opaque targets and whole-pixel positions only); the coverage transfer is a fixed
+  gamma and contrast or the GDI+ grayscale contrast table. Parity with the text of the macOS
+  platform (unhinted outlines, stem darkening, linear blending of coverage) needs a transfer for
+  that, and a comparison against the Skia backend on real text, which has not been made.
 
 These land in ProGPU as their own pull requests, each with the tests of the engine; the FerroUI
 backend starts on the existing C ABI with a small C++ shim over the builder (step P2) and moves to
@@ -318,19 +424,19 @@ The tables go into section 6 and the pull request as each step lands.
 
 ## 5. Steps
 
-| Step | Content | Done when |
-|---|---|---|
-| P0 | This plan | merged with the draft PR |
-| P1 | `ferroui-progpu`: the SDK package fetched and verified at build time (version and hashes pinned), linked; the engine created headless; a test renders a cleared target and reads it back | the headless test passes on macOS |
-| P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass |
-| P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots |
-| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog |
-| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests |
-| P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements |
-| P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them |
-| P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs |
-| P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU |
-| P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 |
+| Step | Content | Done when | Status |
+|---|---|---|---|
+| P0 | This plan | merged with the draft PR | done |
+| P1 | `ferroui-progpu`: the SDK package fetched and verified at build time (version and hashes pinned), linked; the engine created headless; a test renders a cleared target and reads it back | the headless test passes on macOS | done (the engine is built from the submodule instead of fetched packages) |
+| P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
+| P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
+| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | open |
+| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | open (render target bitmaps, layers and writeable pixel bitmaps are in P3) |
+| P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements | open |
+| P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
+| P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
+| P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
+| P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 | open |
 
 ## 6. Results
 
