@@ -4,7 +4,7 @@ resolver = "2"
 # patched skia-bindings (external/rust-skia-bindings) is not a member either. The comparison of
 # the TreeDataGrid with GPUI tables is a workspace of its own too, so that no GPUI crate enters
 # this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
-exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison"]
+exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison"]
 members = [
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",
