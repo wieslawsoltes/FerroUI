@@ -6,7 +6,7 @@ import { FerroExports } from "../ferroExports";
 
 export class CanvasSurface {
     public targetId: number;
-    private sizeParams?: [number, number, number];
+    private sizeParams: [number, number, number];
 
     constructor(public canvas: HTMLCanvasElement, container: HTMLElement, modes: BrowserRenderingMode[], topLevelId: number, threadId: number) {
         this.targetId = WebRenderTargetRegistry.create(threadId, canvas, modes);
@@ -21,8 +21,12 @@ export class CanvasSurface {
             canvas.style.left = "0px";
             canvas.style.top = "0px";
         }
+        // The framework reads these synchronously while constructing its top-level, before the
+        // first ResizeObserver delivery. Start with the CSS content size and the real scale, so
+        // initial layout and composition do not use a 1x1 surface at scale 1 on a Retina display.
+        this.sizeParams = ResizeHandler.getInitialSize(canvas);
         ResizeHandler.observeSize(canvas, (width, height, dpr) => {
-            const changed = this.sizeParams != null && (this.sizeParams[0] !== width || this.sizeParams[1] !== height);
+            const changed = this.sizeParams[0] !== width || this.sizeParams[1] !== height;
             this.sizeParams = [width, height, dpr];
             if (changed) { presenter?.resized(width, height); }
 
@@ -31,18 +35,15 @@ export class CanvasSurface {
     }
 
     public get width() {
-        if (this.sizeParams) { return this.sizeParams[0]; }
-        return 1;
+        return this.sizeParams[0];
     }
 
     public get height() {
-        if (this.sizeParams) { return this.sizeParams[1]; }
-        return 1;
+        return this.sizeParams[1];
     }
 
     public get scaling() {
-        if (this.sizeParams) { return this.sizeParams[2]; }
-        return 1;
+        return this.sizeParams[2];
     }
 
     public destroy(): void {
