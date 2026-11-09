@@ -170,7 +170,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
         } else if property == Self::is_pointer_over_property().as_property() {
             this.update_pseudo_classes(None, Some(change.get_new_value::<bool>()));
         } else if property == Self::is_keyboard_focus_within_property().as_property() {
-            this.pseudo_classes().set(":focus-within", change.get_new_value::<bool>());
+            this.set_pseudo_class(":focus-within", change.get_new_value::<bool>());
         } else if property == Visual::is_visible_property().as_property()
             && !change.get_new_value::<bool>()
             && this.is_keyboard_focus_within()
@@ -878,7 +878,7 @@ impl InputElement {
 
     fn set_is_effectively_enabled(&self, value: bool) {
         self.set_and_raise_cell(Self::is_effectively_enabled_property(), &self.is_effectively_enabled, value);
-        self.pseudo_classes().set(":disabled", !value);
+        self.set_pseudo_class(":disabled", !value);
 
         if !self.is_effectively_enabled() {
             if let Some(focus_manager) = FocusManager::get_focus_manager(self) {
@@ -1132,12 +1132,12 @@ impl InputElement {
 
     fn update_pseudo_classes(&self, is_focused: Option<bool>, is_pointer_over: Option<bool>) {
         if let Some(is_focused) = is_focused {
-            self.pseudo_classes().set(":focus", is_focused);
-            self.pseudo_classes().set(":focus-visible", self.is_focus_visible.get());
+            self.set_pseudo_class(":focus", is_focused);
+            self.set_pseudo_class(":focus-visible", self.is_focus_visible.get());
         }
 
         if let Some(is_pointer_over) = is_pointer_over {
-            self.pseudo_classes().set(":pointerover", is_pointer_over);
+            self.set_pseudo_class(":pointerover", is_pointer_over);
         }
     }
 }

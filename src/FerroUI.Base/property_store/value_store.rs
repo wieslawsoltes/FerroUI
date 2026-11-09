@@ -92,6 +92,11 @@ pub(crate) struct ValueStore {
     is_evaluating: Cell<u32>,
     frame_generation: Cell<u32>,
     styling: Cell<u32>,
+    /// Whether a re-evaluation was put off by a styling pass, or a frame inserted during one: the
+    /// end of the pass re-evaluates then, and only then. An addition (FerroUI deviation,
+    /// desktop-performance.md section 9.21): upstream re-evaluates every value at the end of every
+    /// styling pass; an element no style applies to (most of a large tree) changed nothing.
+    reevaluation_pending: Cell<bool>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.
     inheritance_ancestor: RefCell<Option<WeakRef<FerroObject>>>,
@@ -116,6 +121,7 @@ impl ValueStore {
             is_evaluating: Cell::new(0),
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
+            reevaluation_pending: Cell::new(false),
             inheritance_ancestor: RefCell::new(None),
             inherited_lookups: RefCell::new(Vec::new()),
             inherited_lookups_generation: Cell::new(0),
@@ -181,7 +187,7 @@ impl ValueStore {
     pub fn end_styling(&self, owner: &FerroObject) {
         let styling = self.styling.get() - 1;
         self.styling.set(styling);
-        if styling == 0 {
+        if styling == 0 && self.reevaluation_pending.replace(false) {
             self.reevaluate_effective_values(owner, None);
         }
     }
@@ -932,6 +938,9 @@ impl ValueStore {
         frame.base().set_owner(Some(owner.to_weak()));
         self.frames.borrow_mut().insert(index, frame);
         self.frame_generation.set(self.frame_generation.get().wrapping_add(1));
+        if self.styling.get() > 0 {
+            self.reevaluation_pending.set(true);
+        }
         index
     }
 
@@ -1095,6 +1104,7 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                self.reevaluation_pending.set(true);
                 return;
             }
 
@@ -1182,6 +1192,7 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                self.reevaluation_pending.set(true);
                 return;
             }
 
