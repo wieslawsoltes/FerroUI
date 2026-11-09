@@ -707,4 +707,7 @@ the change handler already lays the text out again for each of them (`invalidate
 the font properties, flow direction, letter spacing, text, decorations, font features and
 foreground), and now also drops the kept properties. Test:
 `a_kept_layouts_run_properties_follow_the_font_size`. Local gate, three rounds: gauntlet UI thread
-40.93 to 37.24 ms a frame (-9.0 %), no metric regressed.
+40.93 to 37.24 ms a frame (-9.0 %), no metric regressed. The paragraph properties (flow direction,
+wrapping, line height and spacing, letter spacing, text line bounds and the alignment of the
+layout) are kept the same way, by alignment, and dropped by both invalidations of the layout
+(-1.5 %, within noise, eight reads and an allocation fewer a layout).
