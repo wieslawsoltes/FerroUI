@@ -382,6 +382,10 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 @property(nonatomic) NSMutableArray<QUploadBuffer *> *buffers;
 @property(nonatomic) CFMutableDictionaryRef rectanglePaths;
 @property(nonatomic) NSUInteger bufferBytes;
+// The upload arena of the current command buffer (`upload_slice`).
+@property(nonatomic) id<MTLBuffer> arena;
+@property(nonatomic) id<MTLCommandBuffer> arenaCommands;
+@property(nonatomic) NSUInteger arenaOffset, arenaGeneration;
 @property(nonatomic) id<MTLRenderCommandEncoder> encoder;
 @property(nonatomic) id<MTLTexture> encoderTarget;
 @property(nonatomic) NSMutableSet<id<MTLTexture>> *encoderInputs;
@@ -642,14 +646,10 @@ static id<MTLCommandBuffer> raw_batch_buffer(void) {
 // Poll completion at reuse instead of scheduling a callback per upload. The
 // completed command buffers are released on the next pool access. All access
 // is serialized by the renderer lock.
-static id<MTLBuffer> upload_buffer(const void *bytes, NSUInteger length,
+// A shared buffer of `capacity` bytes the GPU no longer reads, for `cb`.
+static id<MTLBuffer> pooled_buffer(NSUInteger capacity,
                                    id<MTLCommandBuffer> cb) {
-  if (!cb)
-    return nil;
   QMetalRenderer *r = renderer();
-  NSUInteger capacity = 4096;
-  while (capacity < length)
-    capacity *= 2;
   id<MTLBuffer> buffer = nil;
   for (QUploadBuffer *entry in r.buffers) {
     id<MTLCommandBuffer> previous = entry.lastUse;
@@ -683,8 +683,37 @@ static id<MTLBuffer> upload_buffer(const void *bytes, NSUInteger length,
       r.bufferBytes += capacity;
     }
   }
-  memcpy(buffer.contents, bytes, length);
   return buffer;
+}
+// Uploads `bytes` for the commands of `cb` and returns the buffer holding
+// them at `*offset`. The uploads of a command buffer are slices of one arena,
+// a pooled buffer of at least 1 MiB taken for that command buffer: the draws
+// and passes of a frame bind slices of a few buffers, where each took a buffer
+// of its own, and past the pool's 32 a new one every time.
+static id<MTLBuffer> upload_slice(const void *bytes, NSUInteger length,
+                                  id<MTLCommandBuffer> cb,
+                                  NSUInteger *offset) {
+  if (!cb)
+    return nil;
+  QMetalRenderer *r = renderer();
+  NSUInteger aligned = (MAX(length, 16) + 255) & ~(NSUInteger)255;
+  if (!r.arena || r.arenaCommands != cb ||
+      r.arenaGeneration != qm_generation() ||
+      r.arenaOffset + aligned > r.arena.length) {
+    NSUInteger capacity = 1024 * 1024;
+    while (capacity < aligned)
+      capacity *= 2;
+    r.arena = pooled_buffer(capacity, cb);
+    r.arenaCommands = cb;
+    r.arenaGeneration = qm_generation();
+    r.arenaOffset = 0;
+    if (!r.arena)
+      return nil;
+  }
+  *offset = r.arenaOffset;
+  memcpy((uint8_t *)r.arena.contents + r.arenaOffset, bytes, length);
+  r.arenaOffset += aligned;
+  return r.arena;
 }
 static void end_render_encoder(void) {
   QMetalRenderer *r = renderer();
@@ -758,12 +787,15 @@ static void flush_draws(void) {
   id<MTLCommandBuffer> cb = raw_batch_buffer();
   NSMutableData *vertexData = r.drawKind >= 2 ? r.drawImages : r.drawParams;
   BOOL inlineDraws = vertexData.length <= 4096;
+  NSUInteger drawsOffset = 0, edgesOffset = 0;
   id<MTLBuffer> draws =
       inlineDraws ? nil
-                  : upload_buffer(vertexData.bytes, vertexData.length, cb);
+                  : upload_slice(vertexData.bytes, vertexData.length, cb,
+                                 &drawsOffset);
   id<MTLBuffer> edges =
       (r.drawKind < 2 && r.drawEdges.length > 4096)
-          ? upload_buffer(r.drawEdges.bytes, r.drawEdges.length, cb)
+          ? upload_slice(r.drawEdges.bytes, r.drawEdges.length, cb,
+                         &edgesOffset)
           : nil;
   id<MTLRenderCommandEncoder> enc = r.encoder;
   if (!enc) {
@@ -814,7 +846,7 @@ static void flush_draws(void) {
                      length:vertexData.length
                     atIndex:0];
       else
-        [enc setVertexBuffer:draws offset:0 atIndex:0];
+        [enc setVertexBuffer:draws offset:drawsOffset atIndex:0];
     }
     [enc setVertexBytes:&size length:sizeof(size) atIndex:1];
     if (r.drawKind < 2 && r.drawParams.length) {
@@ -823,9 +855,9 @@ static void flush_draws(void) {
                        length:r.drawParams.length
                       atIndex:0];
       else
-        [enc setFragmentBuffer:draws offset:0 atIndex:0];
+        [enc setFragmentBuffer:draws offset:drawsOffset atIndex:0];
       if (edges)
-        [enc setFragmentBuffer:edges offset:0 atIndex:1];
+        [enc setFragmentBuffer:edges offset:edgesOffset atIndex:1];
       else {
         vector_float4 zero = {0};
         [enc setFragmentBytes:r.drawEdges.length ? r.drawEdges.bytes : &zero
@@ -1506,11 +1538,24 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
             ? ((p.reserved & 8) ? 3 : 2)
             : 1;
     NSMutableData *drawParams = r.drawParams;
+    // Paths (kind 0) and general draws (kind 1) share one format, and the
+    // general pipeline draws paths too: a batch of either takes the other
+    // (then drawn by the general pipeline), and a draw that samples no image
+    // takes the image of the batch, so text and the shapes around it make one
+    // batch instead of one a draw.
+    BOOL general = kind < 2 && r.drawKind < 2;
+    BOOL sameImage = general ? (!image || !r.drawImage || image == r.drawImage)
+                             : r.drawImage == image;
     if (r.drawTarget != target ||
-        (r.drawCount && (r.drawKind != kind || r.drawClip != state.clip ||
-                         r.drawImage != image || r.drawCount >= 4096))) {
+        (r.drawCount && ((!general && r.drawKind != kind) ||
+                         r.drawClip != state.clip || !sameImage ||
+                         r.drawCount >= 4096))) {
       flush_draws();
       drawParams = r.drawParams;
+    }
+    if (r.drawCount && general) {
+      kind = MAX(kind, r.drawKind);
+      image = image ?: r.drawImage;
     }
     NSMutableData *drawImages = r.drawImages, *drawEdges = r.drawEdges;
     if (kind == 4) {
@@ -1610,22 +1655,21 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
   if (r.separateDestination)
     [enc setTexture:previous ?: r.white atIndex:3];
   vector_float4 zero = {0};
-  id<MTLBuffer> e =
-      [r.device newBufferWithBytes:edges.length ? edges.bytes : &zero
-                            length:MAX(edges.length, sizeof(zero))
-                           options:MTLResourceStorageModeShared];
-  id<MTLBuffer> g =
-      [r.device newBufferWithBytes:stops.length ? stops.bytes : &zero
-                            length:MAX(stops.length, sizeof(zero))
-                           options:MTLResourceStorageModeShared];
+  NSUInteger edgesOffset = 0, stopsOffset = 0;
+  id<MTLBuffer> e = upload_slice(edges.length ? edges.bytes : &zero,
+                                 MAX(edges.length, sizeof(zero)), cb,
+                                 &edgesOffset);
+  id<MTLBuffer> g = upload_slice(stops.length ? stops.bytes : &zero,
+                                 MAX(stops.length, sizeof(zero)), cb,
+                                 &stopsOffset);
   if (!e || !g) {
     [enc endEncoding];
     qm_record_fault(qm_generation());
     return;
   }
-  [enc setBuffer:e offset:0 atIndex:0];
+  [enc setBuffer:e offset:edgesOffset atIndex:0];
   [enc setBytes:&p length:sizeof(p) atIndex:1];
-  [enc setBuffer:g offset:0 atIndex:2];
+  [enc setBuffer:g offset:stopsOffset atIndex:2];
   [enc dispatchThreads:MTLSizeMake(p.extent.x, p.extent.y, 1)
       threadsPerThreadgroup:MTLSizeMake(8, 8, 1)];
   [enc endEncoding];
@@ -1859,6 +1903,8 @@ uint64_t qm_configure(void *device) {
     clear_coverage_paths(r);
     [r.buffers removeAllObjects];
     r.bufferBytes = 0;
+    r.arena = nil;
+    r.arenaCommands = nil;
     r.preparedBytes = r.pathBytes = r.pathEntries = 0;
     r.capture = nil;
     [r.coverageImages removeAllObjects];
@@ -3507,6 +3553,8 @@ void qm_finish_context(uint64_t generation) {
     flush_batch();
   [r.buffers removeAllObjects];
   r.bufferBytes = 0;
+  r.arena = nil;
+  r.arenaCommands = nil;
   UNLOCK
 }
 
