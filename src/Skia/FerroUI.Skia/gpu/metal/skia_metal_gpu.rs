@@ -70,7 +70,7 @@ impl SkiaMetalGpu {
         // of the backend context.
         let backend_context = unsafe { BackendContext::new(device.device(), device.command_queue()) };
 
-        let context = context_factory::make_metal(&backend_context, None)
+        let context = context_factory::make_metal(&backend_context, &ordered_recordings_options())
             .and_then(GraphiteGrContext::new)
             .unwrap_or_else(|| panic!("Unable to create a Skia GPU context from the Metal device."));
 
@@ -390,4 +390,23 @@ impl ISkiaGpuRenderSession for SkiaMetalRenderSession {
 
         self.auto_release_pool.dispose();
     }
+}
+
+/// The options of the window's Graphite context: recordings are inserted in the order they were
+/// snapped (desktop-performance.md section 9.17). Without it Graphite cannot keep its glyph atlas
+/// from one recording to the next and evicts it at every snap (`Recorder::snap`), so every frame
+/// rasterizes and uploads every glyph it draws again; Skia's own Metal window sets it too
+/// (`tools/window/GraphiteNativeMetalWindowContext.mm`). The window inserts its recordings in
+/// order already. skia-safe has no setter for the option.
+#[cfg(not(ferro_skia_apple_ganesh))]
+fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
+    let mut options = skia_safe::gpu::graphite::ContextOptions::new();
+    // SAFETY: `Handle<N>` is `repr(transparent)` over `UnsafeCell<N>`, itself transparent over the
+    // native `skgpu::graphite::ContextOptions`, whose `fRequireOrderedRecordings` is a plain bool.
+    unsafe {
+        let native = &mut *(&mut options as *mut skia_safe::gpu::graphite::ContextOptions)
+            .cast::<skia_bindings::skgpu_graphite_ContextOptions>();
+        native.fRequireOrderedRecordings = true;
+    }
+    options
 }
