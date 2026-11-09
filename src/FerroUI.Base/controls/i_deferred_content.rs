@@ -51,6 +51,17 @@ pub trait IDeferredResourceGroup {
         index: usize,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
     ) -> Result<Option<BoxedValue>, DeferredContentFailed>;
+
+    /// Tells the group that the dictionary holds the built value of row `index` and no longer
+    /// the deferred entry: the group can drop what it kept to build that row. The other rows
+    /// keep their indices. A group whose row is registered under one key of one dictionary is
+    /// never asked for a released row again. The default keeps everything.
+    ///
+    /// Not called in a development build with hot reload (`debug_assertions` and the
+    /// `hot-reload` feature), where a reload can put a saved deferred entry back.
+    fn release(&self, index: usize) {
+        let _ = index;
+    }
 }
 
 /// A thin shared handle: an indexed dictionary entry has the same payload size

@@ -10,6 +10,8 @@ autotests = false
 [[bin]]
 name = "ferroui-resource-benchmarks"
 path = "program.rs"
+# A measurement program without unit tests: the workspace test run does not build it as a test.
+test = false
 
 [[bin]]
 name = "ferroui-selector-benchmarks"
