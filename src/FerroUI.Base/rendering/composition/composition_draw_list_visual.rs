@@ -33,6 +33,8 @@ pub(crate) struct DrawListData {
     /// benchmark passes `null` for the visual.
     visual: Option<WeakRef<Visual>>,
     draw_list_changed: Cell<bool>,
+    /// The drawing is the same but what it shows changed (section 9.14): the server redraws it.
+    content_invalidated: Cell<bool>,
     draw_list: RefCell<Option<Rc<CompositionRenderData>>>,
     /// The properties of the acrylic visual, when the visual is one.
     pub(super) acrylic: Option<CompositionExperimentalAcrylicVisualProps>,
@@ -53,11 +55,17 @@ impl DrawListData {
     }
 
     fn serialize_draw_list(&self, host: &CompositionVisual, writer: &mut BatchStreamWriter<'_>) {
-        writer.write(u8::from(self.draw_list_changed.get()));
+        // 0: unchanged; 1: a new drawing; 2: the same drawing, drawn again (section 9.14).
         if self.draw_list_changed.get() {
+            writer.write(1u8);
             writer.write_server_object(self.draw_list.borrow().as_ref().map(|draw_list| draw_list.server()));
             self.draw_list_changed.set(false);
+        } else if self.content_invalidated.get() {
+            writer.write(2u8);
+        } else {
+            writer.write(0u8);
         }
+        self.content_invalidated.set(false);
         self.props.serialize_changes_core(host, writer);
     }
 
@@ -172,6 +180,7 @@ impl CompositionDrawListVisual {
             props: CompositionContainerVisualProps::new(),
             visual: visual.map(|visual| visual.to_ref().downgrade()),
             draw_list_changed: Cell::new(false),
+            content_invalidated: Cell::new(false),
             draw_list: RefCell::new(None),
             acrylic: acrylic.then(CompositionExperimentalAcrylicVisualProps::new),
             extension,
@@ -204,6 +213,18 @@ impl CompositionDrawListVisual {
 
     pub fn draw_list(&self) -> Option<Rc<CompositionRenderData>> {
         self.data().draw_list.borrow().clone()
+    }
+
+    /// Keeps the drawing but has the server draw it again: the visual was invalidated and
+    /// recorded the drawing it has, while something it draws through (a mask, an effect, a
+    /// brush) may have changed (an addition, desktop-performance.md section 9.14).
+    pub fn invalidate_draw_list_content(&self) {
+        let data = self.data();
+        if data.draw_list.borrow().is_none() {
+            return;
+        }
+        data.content_invalidated.set(true);
+        self.0.register_for_serialization();
     }
 
     pub fn set_draw_list(&self, value: Option<Rc<CompositionRenderData>>) {

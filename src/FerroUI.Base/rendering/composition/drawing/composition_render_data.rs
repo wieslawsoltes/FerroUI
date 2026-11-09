@@ -34,6 +34,15 @@ impl CompositionRenderData {
         })
     }
 
+    /// Whether this render data holds `stream` with `resources`: the same operations on the same
+    /// resources, by identity (an addition, desktop-performance.md section 9.14).
+    pub(crate) fn has_recording(&self, stream: &RenderDataStream, resources: &[RecordedResource]) -> bool {
+        let mine = self.resources.borrow();
+        mine.len() == resources.len()
+            && mine.iter().zip(resources).all(|(a, b)| a.identity() == b.identity())
+            && self.stream.borrow().same_recording(stream)
+    }
+
     /// The id of the server-side render data.
     pub fn server(&self) -> ServerObjectId {
         self.server

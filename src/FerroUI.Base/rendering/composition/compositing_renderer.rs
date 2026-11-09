@@ -295,6 +295,7 @@ impl CompositingRenderer {
             visual.synchronize_composition_properties();
             crate::perf_count!(VisualsRecorded);
 
+            let previous = comp.draw_list();
             let draw_list = {
                 struct ResetRecorder<'a>(&'a RefCell<RenderDataDrawingContext>);
                 impl Drop for ResetRecorder<'_> {
@@ -310,9 +311,16 @@ impl CompositingRenderer {
                     let mut context = DrawingContext::new(&mut *recorder);
                     visual.render(&mut context);
                 }
-                recorder.get_render_results()
+                // A drawing equal to the one the visual has is not sent again (section 9.14).
+                recorder.get_render_results_unless_same(previous.as_ref())
             };
-            comp.set_draw_list(draw_list);
+            match draw_list {
+                Some(draw_list) => comp.set_draw_list(draw_list),
+                None => {
+                    crate::perf_count!(VisualsRecordedUnchanged);
+                    comp.invalidate_draw_list_content();
+                }
+            }
 
             visual.synchronize_composition_child_visuals();
         }
