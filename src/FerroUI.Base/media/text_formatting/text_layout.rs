@@ -87,7 +87,19 @@ pub struct TextLayout {
     max_width: f64,
     max_height: f64,
     max_lines: i32,
+    /// [`TextLayout::width_hold`], computed when first asked for.
+    width_hold: std::cell::Cell<Option<Option<(f64, f64)>>>,
+    /// Whether lines were left out because they did not fit the maximum height.
+    truncated_by_height: bool,
 }
+
+/// How far inside its exact bounds a width hold is kept: the formatter compares widths with a
+/// tolerance, so a width within it of a bound may break either way.
+const WIDTH_HOLD_MARGIN: f64 = 0.01;
+
+/// The code units on each side of a line end that the break check reads: the rules of UAX #14 look
+/// at a few units around a break (and across the spaces before it).
+const WIDTH_HOLD_CONTEXT: usize = 32;
 
 impl TextLayout {
     /// Initializes a new instance of the `TextLayout` class.
@@ -198,6 +210,8 @@ impl TextLayout {
             max_width,
             max_height,
             max_lines,
+            width_hold: std::cell::Cell::new(None),
+            truncated_by_height: false,
         };
 
         text_layout.text_lines = text_layout.create_text_lines();
@@ -293,6 +307,153 @@ impl TextLayout {
     /// end of the line.
     pub fn width_including_trailing_whitespace(&self) -> f64 {
         self.metrics.width_including_trailing_whitespace
+    }
+
+    /// The range of maximum widths `[low, high)` over which a layout of the same text with the
+    /// same properties makes the same lines as this one, or `None` when it is not known (the
+    /// layout is then only known to hold at its own maximum width). An addition (FerroUI
+    /// deviation, desktop-performance.md section 9.12): a text block keeps its layout for any
+    /// width inside the range.
+    ///
+    /// Wrapping is greedy: a line ends at the last break opportunity whose text (without the
+    /// white space after it) fits the width. The lines stay the same while every line still fits,
+    /// from the width of the widest line without its trailing white space (with it for the last
+    /// line and a line that ends at a required break, which have no break after it), and while no line
+    /// can take the first word of the next one, up to the width of a line with its trailing white
+    /// space and that word. The range is known for left-to-right text that wraps without
+    /// trimming, a line limit, letter spacing, tabs or paragraph styles, and that left no line
+    /// out for the maximum height (the same lines have the same height), whose lines are one
+    /// shaped run each and end at break opportunities (no line was broken inside a word).
+    pub fn width_hold(&self) -> Option<(f64, f64)> {
+        if let Some(hold) = self.width_hold.get() {
+            return hold;
+        }
+        let hold = self.compute_width_hold(None);
+        self.width_hold.set(Some(hold));
+        hold
+    }
+
+    /// Whether lines of the text were left out because they did not fit the maximum height. An
+    /// addition: a layout that left nothing out has the lines a layout with a larger maximum
+    /// height has (desktop-performance.md section 9.12).
+    pub fn is_truncated_by_height(&self) -> bool {
+        self.truncated_by_height
+    }
+
+    /// Whether `width` is inside [`TextLayout::width_hold`]. Stops at the first line that shows
+    /// it is not, without computing the whole hold.
+    pub fn holds_width(&self, width: f64) -> bool {
+        if let Some(hold) = self.width_hold.get() {
+            return hold.is_some_and(|(low, high)| low <= width && width < high);
+        }
+        match self.compute_width_hold(Some(width)) {
+            // Stopped early: the hold is not known.
+            None => false,
+            Some(hold) => {
+                self.width_hold.set(Some(Some(hold)));
+                hold.0 <= width && width < hold.1
+            }
+        }
+    }
+
+    /// The width hold; with `probe`, `None` as soon as a line shows the probe is outside it.
+    fn compute_width_hold(&self, probe: Option<f64>) -> Option<(f64, f64)> {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        use crate::media::text_formatting::ShapedTextRun;
+
+        let properties = &self.paragraph_properties;
+        if properties.text_wrapping() != TextWrapping::Wrap
+            || properties.flow_direction() != FlowDirection::LeftToRight
+            || !Rc::ptr_eq(&self.text_trimming, &<dyn TextTrimming>::none())
+            || self.max_lines != 0
+            || self.truncated_by_height
+            || self.letter_spacing() != 0.0
+            || self.paragraph_styles.is_some()
+            || self.text_lines.is_empty()
+        {
+            return None;
+        }
+
+        // The one shaped run of a line, left to right, without tabs.
+        let shaped_run = |line: &Rc<dyn TextLine>| -> Option<Rc<dyn TextRun>> {
+            if line.has_collapsed() || line.has_overflowed() {
+                return None;
+            }
+            let mut shaped = None;
+            for run in line.text_runs().iter() {
+                if let Some(shaped_run) = run.downcast_ref::<ShapedTextRun>() {
+                    if shaped.is_some() || shaped_run.bidi_level() != 0 || run.text_span().contains(&u16::from(b'\t')) {
+                        return None;
+                    }
+                    shaped = Some(run.clone());
+                } else if run.as_text_end_of_line().is_none() {
+                    return None;
+                }
+            }
+            shaped
+        };
+
+        let lines = &self.text_lines;
+        let mut low = 0.0f64;
+        let mut high = f64::INFINITY;
+        for (index, line) in lines.iter().enumerate() {
+            let run = shaped_run(line)?;
+            // A line that ends the paragraph or at a required break has no break opportunity
+            // after its white space: the white space has to fit too. It holds at any larger width.
+            let next = lines.get(index + 1);
+            if next.is_none() || line.new_line_length() > 0 {
+                low = low.max(line.width_including_trailing_whitespace());
+                continue;
+            }
+            low = low.max(line.width());
+            let Some(next) = next else { break };
+            let next_run = shaped_run(next)?;
+
+            // The line must end at a break opportunity: a line broken inside a word (a word wider
+            // than the width) is not held. A line that ends with white space ends at one (the
+            // formatter breaks inside a word only where no opportunity fits, and white space
+            // before a word is one); the others are checked.
+            if line.trailing_whitespace_length() == 0 && !Self::ends_at_break_opportunity(&run, &next_run) {
+                return None;
+            }
+
+            // The width of the next line's first word, without the white space after it, from the
+            // advances of its shaped run (the ones wrapping adds up).
+            let mut next_breaks = LineBreakEnumerator::new(next_run.text_span());
+            let word = next_breaks.move_next()?.position_measure() as i32;
+            let word_width = next_run.downcast_ref::<ShapedTextRun>()?.shaped_buffer().get_char_range_width(0, word);
+            high = high.min(line.width_including_trailing_whitespace() + word_width);
+            if probe.is_some_and(|probe| probe >= high - WIDTH_HOLD_MARGIN) {
+                return None;
+            }
+        }
+
+        let (low, high) = (low + WIDTH_HOLD_MARGIN, high - WIDTH_HOLD_MARGIN);
+        (low < high).then_some((low, high))
+    }
+
+    /// Whether UAX #14 has a break opportunity between the text of `run` and the text of `next`,
+    /// read from a few code units on each side.
+    fn ends_at_break_opportunity(run: &Rc<dyn TextRun>, next_run: &Rc<dyn TextRun>) -> bool {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+
+        let tail = run.text_span();
+        let head = next_run.text_span();
+        let tail = &tail[tail.len().saturating_sub(WIDTH_HOLD_CONTEXT)..];
+        let head = &head[..head.len().min(WIDTH_HOLD_CONTEXT)];
+        let mut joined = [0u16; 2 * WIDTH_HOLD_CONTEXT];
+        joined[..tail.len()].copy_from_slice(tail);
+        joined[tail.len()..tail.len() + head.len()].copy_from_slice(head);
+        let mut breaks = LineBreakEnumerator::new(&joined[..tail.len() + head.len()]);
+        let mut at_end = false;
+        while let Some(line_break) = breaks.move_next() {
+            let position = line_break.position_wrap() as usize;
+            if position >= tail.len() {
+                at_end = position == tail.len();
+                break;
+            }
+        }
+        at_end
     }
 
     /// Draws the text layout.
@@ -653,6 +814,7 @@ impl TextLayout {
                     text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),
                         &self.line_placements[last].properties);
                 }
+                self.truncated_by_height = true;
                 break;
             }
             if self.max_lines > 0 && text_lines.len() as i32 >= self.max_lines {
