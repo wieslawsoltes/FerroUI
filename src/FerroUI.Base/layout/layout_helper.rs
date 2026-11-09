@@ -124,14 +124,25 @@ impl LayoutHelper {
 
     /// Invalidates measure for the control and all of its visual descendants.
     pub fn invalidate_self_and_children_measure(control: &Layoutable) {
+        // An element whose subtree was invalidated by this walk and not measured since is
+        // skipped with its subtree (FerroUI deviation, desktop-performance.md section 9.21):
+        // upstream walks the subtree of every element whose visual parent changes, so a tree
+        // built from the leaves up was walked once for every level above each element.
         fn inner(target: &Visual) {
-            if let Some(layoutable) = target.downcast_ref::<Layoutable>() {
+            let layoutable = target.downcast_ref::<Layoutable>();
+            if let Some(layoutable) = layoutable {
+                if layoutable.subtree_measure_invalid.get() {
+                    return;
+                }
                 layoutable.invalidate_measure();
             }
             if let Some(children) = target.visual_children_snapshot() {
                 for child in children.iter() {
                     inner(child);
                 }
+            }
+            if let Some(layoutable) = layoutable {
+                layoutable.subtree_measure_invalid.set(!layoutable.is_measure_valid());
             }
         }
         inner(control);

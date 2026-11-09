@@ -1109,9 +1109,16 @@ impl InputElement {
     /// Updates the `is_effectively_enabled` property based on the parent's
     /// `is_effectively_enabled`.
     fn update_is_effectively_enabled_from(&self, parent: Option<&InputElement>) {
-        self.set_is_effectively_enabled(
-            self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled),
-        );
+        let value = self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled);
+        // An addition (FerroUI deviation, desktop-performance.md section 9.21): upstream updates
+        // the entire hierarchy below every element whose parent or enabled state changes. The
+        // value of every child is derived from its parent's, and every change of it is passed
+        // down when it happens: when this element's value is unchanged, so are the values below
+        // it. A tree built from the leaves up visited each element once for every ancestor.
+        if value == self.is_effectively_enabled() {
+            return;
+        }
+        self.set_is_effectively_enabled(value);
 
         // PERF-SENSITIVE: this is called on the entire hierarchy.
         if let Some(children) = self.visual_children_snapshot() {

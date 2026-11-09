@@ -39,6 +39,11 @@ pub struct TextBlock {
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
     inlines: RefCell<Option<InlineCollection>>,
+    /// Whether `inlines` holds the collection made on first use or one set. An addition
+    /// (FerroUI deviation, desktop-performance.md section 9.21): upstream makes the collection,
+    /// its logical children and its subscription in the constructor of every text block; most
+    /// text blocks show `Text` and never use it.
+    inlines_made: Cell<bool>,
     inlines_invalidated: RefCell<Option<Subscription>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
@@ -88,11 +93,7 @@ ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
-
-        let inlines = InlineCollection::new();
-        inlines.set_logical_children(Some(this));
-        inlines.set_inline_host(Some(this.as_inline_host()));
-        this.set_inlines(Some(inlines));
+        // The inline collection is made on first use (`inlines`), not here.
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -641,6 +642,7 @@ impl TextBlock {
             constraint: Cell::new(Size::new(f64::NAN, f64::NAN)),
             text_runs: RefCell::new(None),
             inlines: RefCell::new(None),
+            inlines_made: Cell::new(false),
             inlines_invalidated: RefCell::new(None),
             inline_host: OnceCell::new(),
             clear_text_internal: Cell::new(false),
@@ -922,10 +924,20 @@ impl TextBlock {
 
     /// The inlines.
     pub fn inlines(&self) -> Option<InlineCollection> {
+        if !self.inlines_made.get() {
+            // Made on first use and set as upstream's constructor sets it: the change it raises
+            // connects the collection (here and in derived controls).
+            self.inlines_made.set(true);
+            self.set_and_raise(Self::inlines_property(), &self.inlines, Some(InlineCollection::new()));
+        }
         self.inlines.borrow().clone()
     }
 
     pub fn set_inlines(&self, value: Option<InlineCollection>) {
+        if !self.inlines_made.get() {
+            // The collection a getter would make is replaced: it is the old value.
+            self.inlines();
+        }
         self.set_and_raise(Self::inlines_property(), &self.inlines, value);
     }
 
@@ -1458,7 +1470,8 @@ impl TextBlock {
         build_base_debug_display(self, builder);
 
         if include_content {
-            let text = self.text().or_else(|| self.inlines().and_then(|inlines| inlines.text()));
+            let inlines = self.inlines.borrow().clone();
+            let text = self.text().or_else(|| inlines.and_then(|inlines| inlines.text()));
             append_optional_value(builder, "Text", text.as_deref());
         }
     }

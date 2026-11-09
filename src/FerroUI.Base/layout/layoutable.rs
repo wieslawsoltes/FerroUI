@@ -48,6 +48,11 @@ pub struct Layoutable {
     /// (desktop-performance.md, section 9.9).
     hot_sizes: HotSizes,
     is_measure_valid: Cell<bool>,
+    /// Whether the measure of this element and of every layoutable element below it is invalid
+    /// (`LayoutHelper::invalidate_self_and_children_measure`): set by that walk, cleared when
+    /// this element or one below it is measured. An addition (FerroUI deviation,
+    /// desktop-performance.md section 9.21).
+    pub(crate) subtree_measure_invalid: Cell<bool>,
     is_arrange_valid: Cell<bool>,
     measuring: Cell<bool>,
     previous_measure: Cell<Option<Size>>,
@@ -533,6 +538,7 @@ impl Layoutable {
             desired_size: Cell::new(Size::default()),
             hot_sizes: HotSizes::default(),
             is_measure_valid: Cell::new(false),
+            subtree_measure_invalid: Cell::new(false),
             is_arrange_valid: Cell::new(false),
             measuring: Cell::new(false),
             previous_measure: Cell::new(None),
@@ -797,6 +803,7 @@ impl Layoutable {
             crate::perf_count!(MeasuresExecuted);
 
             self.is_measure_valid.set(true);
+            self.clear_subtree_measure_invalid();
 
             self.measuring.set(true);
             let guard = MeasuringGuard(&self.measuring);
@@ -847,6 +854,23 @@ impl Layoutable {
 
     /// Invalidates the measurement of the control and queues a new layout
     /// pass.
+    /// Clears `subtree_measure_invalid` of this element and of the ancestors that have it: one
+    /// of their descendants is measured. The flagged elements are closed downwards (the
+    /// descendants of a flagged element are flagged), so the first ancestor without it ends the
+    /// walk; in a layout pass that is the parent, measured first.
+    fn clear_subtree_measure_invalid(&self) {
+        self.subtree_measure_invalid.set(false);
+        let mut parent = self.get_visual_parent();
+        while let Some(visual) = parent {
+            if let Some(layoutable) = visual.downcast_ref::<Layoutable>() {
+                if !layoutable.subtree_measure_invalid.replace(false) {
+                    break;
+                }
+            }
+            parent = visual.get_visual_parent();
+        }
+    }
+
     pub fn invalidate_measure(&self) {
         if self.is_measure_valid.get() {
             self.is_measure_valid.set(false);
