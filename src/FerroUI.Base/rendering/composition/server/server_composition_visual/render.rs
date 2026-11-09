@@ -119,6 +119,7 @@ impl<'a> RenderContext<'a> {
         if visual_opacity != 1.0 {
             self.opacity_stack.push(self.opacity);
             self.opacity = effective_opacity;
+            crate::perf_count!(RenderVisualOpacitiesPushed);
             self.canvas.push_opacity(visual_opacity, Some(transformed_sub_tree_bounds.to_rect()));
         }
 
@@ -126,6 +127,7 @@ impl<'a> RenderContext<'a> {
 
         if visual.own_transform.get().is_some() {
             self.walk_context.push_set_transform(effective_new_transform); // Reuse one computed before
+            crate::perf_count!(RenderVisualTransformsSet);
             self.canvas.set_transform(effective_new_transform);
         }
 
@@ -134,6 +136,7 @@ impl<'a> RenderContext<'a> {
         }
 
         if visual.clip_to_bounds() {
+            crate::perf_count!(RenderVisualClipsPushed);
             visual.content.push_clip_to_bounds(visual, self.canvas);
         }
 
@@ -186,6 +189,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
             // If caching is enabled, draw from cache and skip rendering
             if let Some(cache) = visual.cache() {
+                crate::perf_count!(RenderCachedVisualsDrawn);
                 let (visited, rendered) = cache.draw(self.canvas);
                 self.visited_visuals += visited;
                 self.rendered_visuals += rendered;
@@ -308,6 +312,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
             if visual.own_transform.get().is_some() {
                 self.walk_context.pop_transform();
+                crate::perf_count!(RenderVisualTransformsSet);
                 self.canvas.set_transform(self.walk_context.transform);
             }
 
@@ -401,6 +406,11 @@ impl ServerCompositionVisual {
             render_context.stop_at = stop_at;
             walk(&mut render_context, self, pools);
             let result = (render_context.visited_visuals, render_context.rendered_visuals);
+            {
+                use crate::diagnostics::perf_counters::{add, PerfCounter};
+                add(PerfCounter::RenderVisualsVisited, result.0.max(0) as u64);
+                add(PerfCounter::RenderVisualsRendered, result.1.max(0) as u64);
+            }
             render_context.dispose();
             result
         })

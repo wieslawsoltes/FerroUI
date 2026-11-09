@@ -175,6 +175,60 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
     /// was not sent again.
     VisualsRecordedUnchanged => "visuals recorded unchanged",
+    /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
+    UiRenderPasses => "ui: render passes",
+
+    // --- the frames of the render thread (counted on the thread that draws) ---
+    /// `ServerCompositionTarget::render_frame`: a frame was drawn.
+    RenderFramesDrawn => "render: frames drawn",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the bounds of the dirty region.
+    RenderDirtyBoundsPixels => "render: pixels of the dirty bounds",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the target.
+    RenderTargetPixels => "render: pixels of the target",
+    /// The update pass (`UpdateContext::pre_subgraph`): a visual was visited.
+    RenderUpdateVisualsVisited => "render: visuals visited by the update pass",
+    /// The update pass (`UpdateContext::post_subgraph`): a visual was dirty for render.
+    RenderVisualsDirty => "render: visuals dirty for render",
+    /// The update pass (`UpdateContext::add_to_dirty_region`): a rectangle was added to the
+    /// dirty region.
+    RenderDirtyRectsAdded => "render: dirty rectangles added",
+    /// The render walk (`ServerCompositionVisual::render`): a visual was visited.
+    RenderVisualsVisited => "render: visuals visited by the render walk",
+    /// The render walk: a visual was drawn (it meets the clip and the dirty region).
+    RenderVisualsRendered => "render: visuals rendered",
+    /// The render walk: a visual with its own transform set the transform of the canvas.
+    RenderVisualTransformsSet => "render: visual transforms set",
+    /// The render walk: a visual pushed its clip to bounds.
+    RenderVisualClipsPushed => "render: visual clips to bounds pushed",
+    /// The render walk: a visual pushed its opacity.
+    RenderVisualOpacitiesPushed => "render: visual opacities pushed",
+    /// The render walk: a visual was drawn from its bitmap cache.
+    RenderCachedVisualsDrawn => "render: visuals drawn from a cache",
+    /// The replay of a drawing (`RenderDataStreamReplay`): a line.
+    RenderLinesDrawn => "render: lines drawn",
+    /// The replay of a drawing: a rectangle.
+    RenderRectanglesDrawn => "render: rectangles drawn",
+    /// The replay of a drawing: an ellipse.
+    RenderEllipsesDrawn => "render: ellipses drawn",
+    /// The replay of a drawing: a geometry.
+    RenderGeometriesDrawn => "render: geometries drawn",
+    /// The replay of a drawing: a glyph run.
+    RenderGlyphRunsDrawn => "render: glyph runs drawn",
+    /// The drawing context of the backend: the glyphs of the glyph runs drawn.
+    RenderGlyphsDrawn => "render: glyphs drawn",
+    /// The drawing context of the backend: a glyph run was drawn for the first time, from its
+    /// glyphs and without a retained blob.
+    RenderGlyphRunsFirstDrawn => "render: glyph runs drawn for the first time",
+    /// The replay of a drawing: a bitmap.
+    RenderBitmapsDrawn => "render: bitmaps drawn",
+    /// The replay of a drawing: a clip was pushed.
+    RenderClipsPushed => "render: clips pushed by drawings",
+    /// The replay of a drawing: a geometry clip was pushed.
+    RenderGeometryClipsPushed => "render: geometry clips pushed by drawings",
+    /// The replay of a drawing: an opacity, a layer, an opacity mask or an effect was pushed.
+    RenderLayersPushed => "render: opacities, layers, masks and effects pushed by drawings",
+    /// The replay of a drawing: a transform was pushed.
+    RenderTransformsPushed => "render: transforms pushed by drawings",
 }
 
 /// The number of counters.
@@ -245,6 +299,14 @@ mod counting {
         });
     }
 
+    #[inline]
+    pub(super) fn add(counter: PerfCounter, amount: u64) {
+        let _ = COUNTS.try_with(|counts| {
+            let cell = &counts[counter as usize];
+            cell.set(cell.get() + amount);
+        });
+    }
+
     pub(super) fn count_virtual_call(member: &'static str) {
         let _ = VIRTUAL_CALLS.try_with(|calls| {
             // The table is never borrowed across a call of the framework;
@@ -295,6 +357,19 @@ pub fn count(counter: PerfCounter) {
 #[cfg(not(feature = "perf-counters"))]
 #[inline(always)]
 pub fn count(_counter: PerfCounter) {}
+
+/// Adds `amount` occurrences of `counter` on this thread.
+#[cfg(feature = "perf-counters")]
+#[inline]
+pub fn add(counter: PerfCounter, amount: u64) {
+    counting::add(counter, amount)
+}
+
+/// Adds `amount` occurrences of `counter` on this thread: nothing, since
+/// the feature `perf-counters` is off.
+#[cfg(not(feature = "perf-counters"))]
+#[inline(always)]
+pub fn add(_counter: PerfCounter, _amount: u64) {}
 
 /// Counts one virtual call of `member` (`"Class::member"`) on this thread.
 /// Call it through [`perf_count_virtual!`](crate::perf_count_virtual).

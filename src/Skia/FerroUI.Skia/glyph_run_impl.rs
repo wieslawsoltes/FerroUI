@@ -208,10 +208,18 @@ impl GlyphRunImpl {
         if self.glyph_indices.is_empty() {
             return;
         }
+        ferroui_base::diagnostics::perf_counters::add(
+            ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphsDrawn,
+            self.glyph_indices.len() as u64,
+        );
         let text_options = Self::resolve_text_options(text_options, render_options);
         let origin = skia_safe::Point::new(origin.x as f32, origin.y as f32);
         let cached = self.text_blob_cache.lock().unwrap().try_get(&text_options);
         if cached.is_none() && !self.drawn.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            ferroui_base::diagnostics::perf_counters::add(
+                ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphRunsFirstDrawn,
+                1,
+            );
             let font = create_font(&self.font, text_options);
             canvas.draw_glyphs_at(&self.glyph_indices, &self.glyph_positions[..], origin, &font, paint);
             return;

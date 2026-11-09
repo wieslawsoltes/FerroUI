@@ -65,6 +65,9 @@ pub struct ServerCompositionTarget {
     /// (docs/porting/gpu-rendering.md, "Pipelines made ahead of their first
     /// draw"). Not from the reference.
     slow_frame_ms: Option<f64>,
+    /// The counters of the render thread at the last report of them
+    /// (`report_render_counters`).
+    render_counters_reported: RefCell<Option<crate::diagnostics::perf_counters::PerfCountersSnapshot>>,
     /// How many frames the target drew while it measures them.
     frames_drawn: Cell<u64>,
     /// The generation of the effect prewarm list
@@ -173,6 +176,7 @@ impl ServerCompositionTarget {
                 frame_times: RefCell::new(
                     std::env::var("FERROUI_FRAME_TIMES").is_ok_and(|value| value == "1").then(Vec::new),
                 ),
+                render_counters_reported: RefCell::new(None),
                 slow_frame_ms: std::env::var("FERROUI_SLOW_FRAME_MS")
                     .ok()
                     .and_then(|value| value.trim().parse::<f64>().ok())
@@ -487,6 +491,13 @@ impl ServerCompositionTarget {
             if !self.dirty_rects.is_empty() {
                 super::take_backdrop_regions();
                 self.dirty_rects.finalize_frame(render_bounds);
+                {
+                    use crate::diagnostics::perf_counters::{add, PerfCounter};
+                    let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
+                    add(PerfCounter::RenderFramesDrawn, 1);
+                    add(PerfCounter::RenderDirtyBoundsPixels, (dirty.width().max(0.0) * dirty.height().max(0.0)) as u64);
+                    add(PerfCounter::RenderTargetPixels, (pixel_size.width as u64) * (pixel_size.height as u64));
+                }
                 let layer = self.layer.borrow().clone();
                 match layer {
                     Some(layer) => {
@@ -521,8 +532,31 @@ impl ServerCompositionTarget {
             self.dirty_rects.initialize(render_bounds);
         }
         render_target_context.dispose();
+        self.report_render_counters();
 
         self.prewarm_effects(&compositor, &render_target, &scene_info);
+    }
+
+    /// With the feature `perf-counters` and `FERROUI_FRAME_TIMES=1`: every 300 frames drawn,
+    /// prints what the render thread counted since the last report, a frame. The counters are
+    /// those of this thread, so with several targets a report covers the frames of all of them.
+    fn report_render_counters(&self) {
+        use crate::diagnostics::perf_counters::{self, PerfCounter};
+        if !perf_counters::ENABLED || self.frame_times.borrow().is_none() {
+            return;
+        }
+        let now = perf_counters::snapshot();
+        let mut last = self.render_counters_reported.borrow_mut();
+        let counted = match last.as_ref() {
+            Some(last) => now.since(last),
+            None => now.clone(),
+        };
+        let frames = counted.get(PerfCounter::RenderFramesDrawn);
+        if frames < 300 {
+            return;
+        }
+        eprintln!("render thread counters of composition target {}:\n{}", self.id, counted.report_per(frames, "frame"));
+        *last = Some(now);
     }
 
     /// After a frame: has the render target make the GPU programs of the
