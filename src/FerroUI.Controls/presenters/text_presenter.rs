@@ -523,6 +523,9 @@ ferroui_base::ferro_properties! { impl TextPresenter {
 impl TextPresenter {
     fn static_constructor() {
         Visual::affects_render::<TextPresenter>(&[
+            // Its drawing records its position in the root (`previous_offset`): it records the
+            // drawing again when it moves (desktop-performance.md section 9.13).
+            Visual::bounds_property().as_property(),
             Self::caret_brush_property().as_property(),
             Self::selection_brush_property().as_property(),
             Self::selection_foreground_brush_property().as_property(),

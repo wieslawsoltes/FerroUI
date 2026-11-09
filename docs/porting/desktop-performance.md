@@ -762,3 +762,18 @@ path. Test: `media/box_shadow_tests.rs` `box_shadows_of_every_kind` (outer and i
 square, offsets, spreads, blurs from 2 to 40, two shadows on one box), whose expected image is the
 image filter's: the two differ by at most 3 of 255 in a channel, in 6 of 120,000 pixels. Local gate,
 three rounds: gauntlet render 88.9 to 50.9 ms a frame (-42.8 %), wall time -42.3 %.
+
+### 9.13 A visual that only moves does not record its drawing again
+
+Upstream's `Bounds` affects render: any change of a visual's bounds, its position included,
+records its drawing again. A visual draws in its own coordinates, and its position reaches the
+compositor as the offset of its composition visual, so a change of position alone now
+synchronizes the composition properties (section 9.5's path) and keeps the drawing; a change of
+size records it again. A class whose drawing reads its own position names `Bounds` in its own
+`affects_render` (`TextPresenter`, which records its offset in the root while it draws). Every
+item of a scrolled list moves without changing size, so scrolling no longer records the drawings
+of what it moves. Test: `visual_render_tests.rs`
+(`moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_drawing`). In the
+gauntlet, whose content is resized every frame, it saves the recording of about 650 visuals a
+frame (8,200 to 7,550). The local gate is unchanged within its tolerance (raster Skia): the gain is in
+lists that scroll at a fixed width, where every moved item is no longer recorded.

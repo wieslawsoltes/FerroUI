@@ -323,3 +323,26 @@ fn opacity_and_render_transform_changes_invalidate_the_composition_properties_on
     transform.set_x(20.0);
     assert_eq!((0, 4), (renderer.dirty.get(), renderer.properties.get()));
 }
+
+/// Desktop-performance.md section 9.13: moving a visual synchronizes its composition properties
+/// (the offset) without recording its drawing again; resizing it records the drawing again.
+#[test]
+fn moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_drawing() {
+    let (visual, renderer) = attached();
+    visual.set_bounds(crate::Rect::new(0.0, 0.0, 10.0, 10.0));
+    renderer.dirty.set(0);
+    renderer.properties.set(0);
+
+    visual.set_bounds(crate::Rect::new(5.0, 7.0, 10.0, 10.0));
+    assert_eq!(0, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
+
+    visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
+    assert_eq!(1, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
+
+    // The same bounds again: nothing.
+    visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
+    assert_eq!(1, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
+}

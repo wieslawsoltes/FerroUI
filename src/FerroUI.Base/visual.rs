@@ -778,7 +778,6 @@ crate::ferro_properties! { impl Visual {
 impl Visual {
     fn static_constructor() {
         Self::affects_render::<Visual>(&[
-            Self::bounds_property().as_property(),
             Self::clip_property().as_property(),
             Self::clip_to_bounds_property().as_property(),
             Self::is_visible_property().as_property(),
@@ -786,6 +785,24 @@ impl Visual {
             Self::effect_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
+        // A visual draws in its own coordinates and its position reaches the compositor as the
+        // offset of its composition visual: a change of position alone does not record the
+        // drawing again, it synchronizes the composition properties (FerroUI deviation,
+        // desktop-performance.md section 9.13; upstream's bounds affect render). A class whose
+        // drawing reads its position names the bounds in its own `affects_render`.
+        Self::bounds_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(visual) = e.sender().downcast_ref::<Visual>() {
+                    let resized = e.get_old_value::<Rect>().is_none_or(|old| old.size() != e.get_new_value::<Rect>().size());
+                    if resized {
+                        visual.invalidate_visual();
+                    } else {
+                        visual.invalidate_composition_properties();
+                    }
+                }
+            })
+            .detach();
         Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
         // Opacity is a composition property: its change does not record the drawing again.
         Self::opacity_property()
