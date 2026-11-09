@@ -34,7 +34,11 @@ pub struct FerroObject {
     vtable: Cell<Option<&'static FerroObjectVTable>>,
     values: ValueStore,
     inheritance_parent: RefCell<Option<WeakRef<FerroObject>>>,
-    inheritance_children: RefCell<Vec<WeakRef<FerroObject>>>,
+    /// The inheritance children, in the order they were added. A deque searched from both ends:
+    /// a panel unlinks its children from the first or from the last, and each is found at once
+    /// and removed without moving the others (FerroUI deviation, desktop-performance.md section
+    /// 9.21: removing every child of a parent was quadratic in their number).
+    inheritance_children: RefCell<std::collections::VecDeque<WeakRef<FerroObject>>>,
     property_changed: HandlerList<PropertyChangedHandler>,
     /// The dispatcher of the thread that owns this object; resolved the first
     /// time it is asked for, so that constructing an object costs nothing.
@@ -249,7 +253,7 @@ impl FerroObject {
             vtable: Cell::new(None),
             values: ValueStore::new(),
             inheritance_parent: RefCell::new(None),
-            inheritance_children: RefCell::new(Vec::new()),
+            inheritance_children: RefCell::new(std::collections::VecDeque::new()),
             property_changed: HandlerList::new(),
             dispatcher: OnceCell::new(),
         }
@@ -444,14 +448,28 @@ impl FerroObject {
                 // being detached (amortised constant time).
                 children.retain(|c| c.upgrade().is_some());
             }
-            children.push(self.to_weak());
+            children.push_back(self.to_weak());
         }
         self.values.set_inheritance_parent(self, value);
     }
 
     fn remove_inheritance_child(&self, child: &FerroObject) {
         let child = child.to_ref();
-        self.inheritance_children.borrow_mut().retain(|c| !c.points_to(&child));
+        // A child is in the list once at most: the first entry found from either end is it.
+        let mut children = self.inheritance_children.borrow_mut();
+        let (mut front, mut back) = (0, children.len());
+        while front < back {
+            if children[front].points_to(&child) {
+                children.remove(front);
+                return;
+            }
+            back -= 1;
+            if children[back].points_to(&child) {
+                children.remove(back);
+                return;
+            }
+            front += 1;
+        }
     }
 
     /// Calls `f` for each inheritance child, by index over the count at the

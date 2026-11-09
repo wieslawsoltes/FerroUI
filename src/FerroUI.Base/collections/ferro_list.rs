@@ -600,6 +600,25 @@ impl<T: Clone + PartialEq> FerroList<T> {
         }
     }
 
+    /// Where `items` are, in order, a run of the list that no item of `items` precedes or follows
+    /// (`None` when they are not, or are too few to be worth looking for).
+    fn contiguous_run(&self, items: &[T]) -> Option<usize> {
+        if items.len() < 8 {
+            return None;
+        }
+        let list = self.0.items.borrow();
+        let start = list.iter().position(|item| *item == items[0])?;
+        let end = start + items.len();
+        if end > list.len() || list[start..end] != *items {
+            return None;
+        }
+        let outside = |index: usize| !items.contains(&list[index]);
+        if (start > 0 && !outside(start - 1)) || (end < list.len() && !outside(end)) {
+            return None;
+        }
+        Some(start)
+    }
+
     /// Removes multiple items from the collection.
     ///
     /// Each run of adjacent items that are removed is notified as one
@@ -610,6 +629,14 @@ impl<T: Clone + PartialEq> FerroList<T> {
         // ported and membership is a linear search by equality, which keeps
         // the behaviour without a `Hash` bound.
         let h_items: Vec<T> = items.into_iter().collect();
+        // An addition (FerroUI deviation, desktop-performance.md section 9.21): items that are one
+        // run of the list (a panel cleared, a range removed) are removed as that run, which the
+        // search below notifies as one removal too, without searching the items for every item
+        // of the list (quadratic in their number).
+        if let Some(start) = self.contiguous_run(&h_items) {
+            self.remove_range(start, h_items.len());
+            return;
+        }
         let mut counter = 0;
 
         let mut i = self.count();
