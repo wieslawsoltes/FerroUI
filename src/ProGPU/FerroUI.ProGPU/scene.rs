@@ -256,6 +256,51 @@ impl SceneBuilder {
         self.check("draw_strokes", ok)
     }
 
+    /// Adds an image of pixels (four bytes per pixel, `RGBA` or `BGRA` with `bgra`), copied into
+    /// the scene.
+    pub fn add_pixel_image(&mut self, width: u32, height: u32, row_bytes: u32, pixels: &[u8], bgra: bool) -> Result<u32, SceneBuildError> {
+        let mut index = NO_INDEX;
+        // SAFETY: the pixels are borrowed for the call.
+        let ok = unsafe {
+            if bgra {
+                progpu_native_scene_builder_add_bgra8_image(self.raw, width, height, row_bytes, pixels.as_ptr() as *const c_void, pixels.len(), &mut index)
+            } else {
+                progpu_native_scene_builder_add_rgba8_image(self.raw, width, height, row_bytes, pixels.as_ptr() as *const c_void, pixels.len(), &mut index)
+            }
+        };
+        self.check("add_image", ok)?;
+        Ok(index)
+    }
+
+    /// Adds an image the engine samples from a same-device texture view bound outside the stream
+    /// (`ProGpuEngine::bind_external_images`). Returns the index of the image and the identity
+    /// of its resource, an identifier and a generation: the view is bound under that pair.
+    ///
+    /// The identity is the one the builder gives every resource, the position of the resource
+    /// in the scene and the generation of the scene. The engine holds a scene to both: the
+    /// identifiers of a scene ascend with its resources, and the generation of an identifier
+    /// never goes back from one generation of the scene to the next.
+    pub fn add_external_image(&mut self, width: u32, height: u32) -> Result<(u32, u64, u64), SceneBuildError> {
+        let mut index = NO_INDEX;
+        // SAFETY: the builder is alive.
+        let ok = unsafe { progpu_native_scene_builder_add_external_image(self.raw, width, height, &mut index) };
+        self.check("add_external_image", ok)?;
+        Ok((index, u64::from(index) + 1, self.generation))
+    }
+
+    /// Draws an image resource.
+    pub fn draw_image(
+        &mut self,
+        image_index: u32,
+        image: &progpu_native_scene_image_draw,
+        bounds: progpu_native_image_rect,
+        state_index: u32,
+    ) -> Result<(), SceneBuildError> {
+        // SAFETY: the record is borrowed for the call.
+        let ok = unsafe { progpu_native_scene_builder_draw_image(self.raw, image_index, image, bounds, state_index, std::ptr::null()) };
+        self.check("draw_image", ok)
+    }
+
     /// Builds the stream of what was recorded into the builder's buffer (reused across
     /// generations) and returns it.
     pub fn build(&mut self) -> Result<&[u8], SceneBuildError> {

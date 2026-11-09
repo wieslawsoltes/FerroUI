@@ -18,9 +18,22 @@ path = "lib.rs"
 
 [dependencies]
 ferroui-base.workspace = true
+ferroui-controls.workspace = true
 progpu-native-sys.workspace = true
 
+# The Metal device and the Metal surfaces of the platform, which the engine draws windows into.
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-metal.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
 [target.'cfg(target_os = "macos")'.dev-dependencies]
+# The offscreen Metal surface of the tests of the window target.
+ferroui-metal = { workspace = true, features = ["offscreen"] }
+# The example of a window (examples/progpu_window.rs) runs on the macOS platform.
+ferroui-native.workspace = true
 # The Metal device, queue and texture of a host, for the tests of the Metal interop.
 objc2 = "0.6.3"
 objc2-metal = { version = "0.3.2", default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLAllocation"] }

@@ -1,10 +1,13 @@
-//! The WebGPU device and the ProGPU engine on it (docs/porting/progpu-backend.md, section 2.2).
+//! The WebGPU device and the ProGPU engines on it (docs/porting/progpu-backend.md, section 2.2).
 
 use progpu_native_sys::progpu::*;
 use progpu_native_sys::webgpu::*;
+use std::cell::Cell;
 use std::ffi::{c_char, c_void, CStr};
 use std::fmt;
 use std::ptr;
+use std::rc::Rc;
+use std::thread::ThreadId;
 
 /// Why a device could not be created.
 #[derive(Debug)]
@@ -32,17 +35,72 @@ impl fmt::Display for ProGpuDeviceError {
 
 impl std::error::Error for ProGpuDeviceError {}
 
-/// A WebGPU device of the statically linked wgpu-native with the ProGPU engine on it, which
-/// calls WebGPU through the procedures of that implementation (`resolve_webgpu_proc`).
-///
-/// The engine renders into the views of textures of `RGBA8Unorm`, the target format it is created
-/// for. Every call is on the thread that created the device (the engine refuses others).
+/// A WebGPU device of the statically linked wgpu-native: the device the engines of the backend
+/// render with ([`ProGpuEngine`]), which call WebGPU through the procedures of that
+/// implementation (`resolve_webgpu_proc`).
 pub struct ProGpuDevice {
     instance: WGPUInstance,
     adapter: WGPUAdapter,
     device: WGPUDevice,
     queue: WGPUQueue,
+}
+
+/// The format of the targets an engine renders into (an engine has one, its pipelines are built
+/// for it).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum TargetFormat {
+    /// `RGBA8Unorm`: the offscreen targets of the backend.
+    Rgba8,
+    /// `BGRA8Unorm`: the drawables of a window.
+    Bgra8,
+}
+
+impl TargetFormat {
+    fn engine_format(self) -> u32 {
+        match self {
+            TargetFormat::Rgba8 => PROGPU_NATIVE_TEXTURE_FORMAT_RGBA8_UNORM as u32,
+            TargetFormat::Bgra8 => PROGPU_NATIVE_TEXTURE_FORMAT_BGRA8_UNORM as u32,
+        }
+    }
+
+    /// The WebGPU format.
+    pub fn texture_format(self) -> WGPUTextureFormat {
+        match self {
+            TargetFormat::Rgba8 => WGPUTextureFormat_RGBA8Unorm,
+            TargetFormat::Bgra8 => WGPUTextureFormat_BGRA8Unorm,
+        }
+    }
+}
+
+/// A same-device texture view a scene samples as an external image: the identity of the image
+/// resource of the scene and the view bound to it for the frame.
+#[derive(Clone, Copy, Debug)]
+pub struct ExternalImage {
+    /// The identifier of the image resource in the scene.
+    pub resource_id: u64,
+    /// The generation of the image resource in the scene.
+    pub generation: u64,
+    /// The view of the texture (borrowed for the frame; the engine retains it until the next
+    /// table).
+    pub view: WGPUTextureView,
+    /// The width of the texture in pixels.
+    pub width: u32,
+    /// The height of the texture in pixels.
+    pub height: u32,
+}
+
+/// An engine of ProGPU on a device: one retained scene (replaced by `update_scene`), rendered
+/// into the views of textures of one format.
+///
+/// The engine is entered by one thread at a time. The compositor renders from more than one
+/// thread under its lock (the thread of the render loop, and the thread of the window at the
+/// synchronous points: a resize, the first frame), so every entry adopts the engine for the
+/// calling thread when another thread entered it last (`progpu_native_engine_adopt_owner_thread`).
+pub struct ProGpuEngine {
+    device: Rc<ProGpuDevice>,
     engine: *mut progpu_native_engine,
+    format: TargetFormat,
+    thread: Cell<ThreadId>,
 }
 
 fn no_label() -> WGPUStringView {
@@ -69,7 +127,7 @@ unsafe extern "C" fn on_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, sl
 }
 
 impl ProGpuDevice {
-    /// Creates a device on the default adapter of the WebGPU implementation and the engine on it.
+    /// Creates a device on the default adapter of the WebGPU implementation.
     pub fn new() -> Result<Self, ProGpuDeviceError> {
         if !progpu_native_sys::abi_matches() {
             return Err(ProGpuDeviceError::AbiMismatch);
@@ -117,25 +175,14 @@ impl ProGpuDevice {
                 return Err(ProGpuDeviceError::NoDevice);
             }
             let queue = wgpuDeviceGetQueue(device);
-            match Self::create_engine(instance, device, queue) {
-                Ok(engine) => Ok(Self { instance, adapter, device, queue, engine }),
-                Err(status) => {
-                    wgpuQueueRelease(queue);
-                    wgpuDeviceRelease(device);
-                    wgpuAdapterRelease(adapter);
-                    wgpuInstanceRelease(instance);
-                    Err(ProGpuDeviceError::Engine(status))
-                }
-            }
+            Ok(Self { instance, adapter, device, queue })
         }
     }
 
-    /// Creates the device on a host's Metal device, with the host's command queue of it, and the
-    /// engine on it: the device of a window platform that presents its own frames (the drawables
-    /// of its layer, inside its window's Core Animation transaction), so a frame the engine
-    /// renders is committed to the queue before the host commits its presentation. The queue must
-    /// have room for the command buffers a frame leaves uncommitted until it is submitted
-    /// (`newCommandQueueWithMaxCommandBufferCount`, 4096 as wgpu gives its own queues).
+    /// Creates the device on a host's Metal device, with the host's command queue of it: the
+    /// device of a window platform that presents its own frames (the drawables of its layer,
+    /// inside its window's Core Animation transaction), so a frame an engine renders is committed
+    /// to the queue before the host commits its presentation.
     ///
     /// # Safety
     /// `mtl_device` is a live `id<MTLDevice>` and `mtl_queue` a live `id<MTLCommandQueue>` of it;
@@ -158,22 +205,14 @@ impl ProGpuDevice {
                 return Err(ProGpuDeviceError::NoDevice);
             }
             let queue = wgpuDeviceGetQueue(device);
-            match Self::create_engine(instance, device, queue) {
-                Ok(engine) => Ok(Self { instance, adapter: ptr::null_mut(), device, queue, engine }),
-                Err(status) => {
-                    wgpuQueueRelease(queue);
-                    wgpuDeviceRelease(device);
-                    wgpuInstanceRelease(instance);
-                    Err(ProGpuDeviceError::Engine(status))
-                }
-            }
+            Ok(Self { instance, adapter: ptr::null_mut(), device, queue })
         }
     }
 
     /// Wraps a host's two-dimensional `id<MTLTexture>` of the device's Metal device as a texture
-    /// of the device (`RGBA8Unorm` or `BGRA8Unorm`, one level and one sample, usable as a render
-    /// attachment, a copy source and a sampled texture), with a view the engine renders into: the
-    /// texture of a drawable, wrapped for the frame. Its content is treated as uninitialized.
+    /// of the device (one level and one sample, with the usages the host's texture allows:
+    /// `usage`), with a view an engine renders into: the texture of a drawable, wrapped for the
+    /// frame. Its content is treated as uninitialized.
     ///
     /// # Safety
     /// `mtl_texture` is a live `id<MTLTexture>` of the device's Metal device of that size and
@@ -185,6 +224,7 @@ impl ProGpuDevice {
         width: u32,
         height: u32,
         format: WGPUTextureFormat,
+        usage: WGPUTextureUsage,
     ) -> Option<(WGPUTexture, WGPUTextureView)> {
         // SAFETY: the texture is valid (the contract of this function); the descriptor is borrowed.
         unsafe {
@@ -194,7 +234,7 @@ impl ProGpuDevice {
                 &WGPUTextureDescriptor {
                     nextInChain: ptr::null_mut(),
                     label: no_label(),
-                    usage: WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc | WGPUTextureUsage_TextureBinding,
+                    usage,
                     dimension: WGPUTextureDimension_2D,
                     size: WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
                     format,
@@ -211,38 +251,13 @@ impl ProGpuDevice {
         }
     }
 
-    /// The engine on `device`, resolving its procedures from the linked wgpu-native.
-    ///
-    /// # Safety
-    /// The handles are live handles of the linked implementation, `queue` the queue of `device`.
-    unsafe fn create_engine(
-        instance: WGPUInstance,
-        device: WGPUDevice,
-        queue: WGPUQueue,
-    ) -> Result<*mut progpu_native_engine, progpu_native_status> {
-        let options = progpu_native_dawn_engine_options {
-            struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
-            native_abi_version: PROGPU_NATIVE_ABI_VERSION,
-            adapter_abi_version: PROGPU_NATIVE_DAWN_ADAPTER_ABI_VERSION,
-            provider_abi_version: PROGPU_NATIVE_DAWN_REQUIRED_PROVIDER_ABI_VERSION,
-            target_format: PROGPU_NATIVE_TEXTURE_FORMAT_RGBA8_UNORM as u32,
-            reserved: 0,
-            resolver_context: progpu_native_sys::resolver_context(),
-            resolve_proc: Some(progpu_native_sys::resolve_webgpu_proc),
-            instance: instance as usize,
-            device: device as usize,
-            queue: queue as usize,
-            flags: 0,
-        };
-        let mut engine: *mut progpu_native_engine = ptr::null_mut();
-        // SAFETY: the options are borrowed for the call; the handles are valid (the contract).
-        let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
-        if status == PROGPU_NATIVE_STATUS_SUCCESS { Ok(engine) } else { Err(status) }
-    }
-
-    /// The engine.
-    pub fn engine(&self) -> *mut progpu_native_engine {
-        self.engine
+    /// Releases a texture of the device and its view (`create_target`, `wrap_metal_texture`).
+    pub fn release_texture(&self, texture: WGPUTexture, view: WGPUTextureView) {
+        // SAFETY: the handles are owned by the caller, which gives them up here.
+        unsafe {
+            wgpuTextureViewRelease(view);
+            wgpuTextureRelease(texture);
+        }
     }
 
     /// The WebGPU device.
@@ -255,70 +270,8 @@ impl ProGpuDevice {
         self.queue
     }
 
-    /// The last error the engine reported.
-    pub fn last_error(&self) -> String {
-        let mut message = [0 as c_char; 512];
-        // SAFETY: the engine is alive; the buffer is owned here.
-        unsafe {
-            progpu_native_engine_get_last_error(self.engine, message.as_mut_ptr(), message.len());
-            CStr::from_ptr(message.as_ptr()).to_string_lossy().into_owned()
-        }
-    }
-
-    /// Sends a scene stream to the engine (`progpu_native_engine_update_scene`): only when its
-    /// generation changed; the engine keeps the scene and renders it until the next stream.
-    pub fn update_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
-        // SAFETY: the engine is alive; the stream is borrowed for the call.
-        unsafe {
-            let mut metrics: progpu_native_scene_metrics = std::mem::zeroed();
-            metrics.struct_size = std::mem::size_of::<progpu_native_scene_metrics>() as u32;
-            let status = progpu_native_engine_update_scene(
-                self.engine,
-                stream.as_ptr() as *const c_void,
-                stream.len(),
-                &mut metrics,
-            );
-            if status == PROGPU_NATIVE_STATUS_SUCCESS {
-                Ok(metrics)
-            } else {
-                Err(format!("the engine refused the scene (status {status}, validation error {} at {}): {}", metrics.validation_error, metrics.error_offset, self.last_error()))
-            }
-        }
-    }
-
-    /// Renders the retained scene `scene_id` at `generation` into `target_view` (an
-    /// `RGBA8Unorm` view of `width` by `height` pixels) and submits the work.
-    pub fn render_scene(
-        &self,
-        scene_id: u64,
-        generation: u64,
-        target_view: WGPUTextureView,
-        width: u32,
-        height: u32,
-        dpi_scale: f32,
-    ) -> Result<progpu_native_scene_frame_metrics, String> {
-        // SAFETY: the engine is alive; the view is borrowed for the call.
-        unsafe {
-            let mut frame: progpu_native_scene_frame = std::mem::zeroed();
-            frame.struct_size = std::mem::size_of::<progpu_native_scene_frame>() as u32;
-            frame.width = width;
-            frame.height = height;
-            frame.dpi_scale = dpi_scale;
-            frame.target_view = target_view as usize;
-            frame.scene_id = scene_id;
-            frame.generation = generation;
-            let mut metrics: progpu_native_scene_frame_metrics = std::mem::zeroed();
-            metrics.struct_size = std::mem::size_of::<progpu_native_scene_frame_metrics>() as u32;
-            let status = progpu_native_engine_render_scene(self.engine, &frame, &mut metrics);
-            if status == PROGPU_NATIVE_STATUS_SUCCESS {
-                Ok(metrics)
-            } else {
-                Err(format!("the engine could not render the scene (status {status}): {}", self.last_error()))
-            }
-        }
-    }
-
-    /// Creates a texture of `RGBA8Unorm` that can be rendered to and read back, with its view.
+    /// Creates a texture of `RGBA8Unorm` that can be rendered to, sampled and read back, with its
+    /// view.
     pub fn create_target(&self, width: u32, height: u32) -> (WGPUTexture, WGPUTextureView) {
         // SAFETY: the calls of the WebGPU C ABI with the device; the descriptor is borrowed.
         unsafe {
@@ -408,9 +361,8 @@ impl ProGpuDevice {
 
 impl Drop for ProGpuDevice {
     fn drop(&mut self) {
-        // SAFETY: the handles are owned here; the engine goes before the device it retains.
+        // SAFETY: the handles are owned here.
         unsafe {
-            progpu_native_engine_destroy(self.engine);
             wgpuQueueRelease(self.queue);
             wgpuDeviceRelease(self.device);
             if !self.adapter.is_null() {
@@ -418,5 +370,165 @@ impl Drop for ProGpuDevice {
             }
             wgpuInstanceRelease(self.instance);
         }
+    }
+}
+
+impl ProGpuEngine {
+    /// An engine on `device` rendering into targets of `format`, resolving its procedures from the
+    /// linked wgpu-native.
+    pub fn new(device: &Rc<ProGpuDevice>, format: TargetFormat) -> Result<Self, ProGpuDeviceError> {
+        let options = progpu_native_dawn_engine_options {
+            struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
+            native_abi_version: PROGPU_NATIVE_ABI_VERSION,
+            adapter_abi_version: PROGPU_NATIVE_DAWN_ADAPTER_ABI_VERSION,
+            provider_abi_version: PROGPU_NATIVE_DAWN_REQUIRED_PROVIDER_ABI_VERSION,
+            target_format: format.engine_format(),
+            reserved: 0,
+            resolver_context: progpu_native_sys::resolver_context(),
+            resolve_proc: Some(progpu_native_sys::resolve_webgpu_proc),
+            instance: device.instance as usize,
+            device: device.device as usize,
+            queue: device.queue as usize,
+            flags: 0,
+        };
+        let mut engine: *mut progpu_native_engine = ptr::null_mut();
+        // SAFETY: the options are borrowed for the call; the handles are those of the device.
+        let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()) })
+        } else {
+            Err(ProGpuDeviceError::Engine(status))
+        }
+    }
+
+    /// The device of the engine.
+    pub fn device(&self) -> &Rc<ProGpuDevice> {
+        &self.device
+    }
+
+    /// The format of the targets the engine renders into.
+    pub fn format(&self) -> TargetFormat {
+        self.format
+    }
+
+    /// The engine, entered by the calling thread.
+    fn enter(&self) -> *mut progpu_native_engine {
+        let thread = std::thread::current().id();
+        if self.thread.get() != thread {
+            // SAFETY: the engine is alive; the owner of the engine serializes its entries (the
+            // contract of this type), so no other thread is inside it.
+            unsafe { progpu_native_engine_adopt_owner_thread(self.engine) };
+            self.thread.set(thread);
+        }
+        self.engine
+    }
+
+    /// The engine of the C ABI, entered by the calling thread (for the calls this type does not
+    /// wrap).
+    pub fn raw(&self) -> *mut progpu_native_engine {
+        self.enter()
+    }
+
+    /// The last error the engine reported.
+    pub fn last_error(&self) -> String {
+        let mut message = [0 as c_char; 512];
+        // SAFETY: the engine is alive; the buffer is owned here.
+        unsafe {
+            progpu_native_engine_get_last_error(self.enter(), message.as_mut_ptr(), message.len());
+            CStr::from_ptr(message.as_ptr()).to_string_lossy().into_owned()
+        }
+    }
+
+    /// Sends a scene stream to the engine (`progpu_native_engine_update_scene`): only when its
+    /// generation changed; the engine keeps the scene and renders it until the next stream.
+    pub fn update_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
+        // SAFETY: the engine is alive; the stream is borrowed for the call.
+        unsafe {
+            let mut metrics: progpu_native_scene_metrics = std::mem::zeroed();
+            metrics.struct_size = std::mem::size_of::<progpu_native_scene_metrics>() as u32;
+            let status = progpu_native_engine_update_scene(
+                self.enter(),
+                stream.as_ptr() as *const c_void,
+                stream.len(),
+                &mut metrics,
+            );
+            if status == PROGPU_NATIVE_STATUS_SUCCESS {
+                Ok(metrics)
+            } else {
+                Err(format!("the engine refused the scene (status {status}, validation error {} at {}): {}", metrics.validation_error, metrics.error_offset, self.last_error()))
+            }
+        }
+    }
+
+    /// Binds the same-device texture views the retained scene samples as external images: the
+    /// complete table of the scene (it replaces the one before).
+    pub fn bind_external_images(&self, images: &[ExternalImage]) -> Result<(), String> {
+        let bindings: Vec<progpu_native_scene_external_image_binding> = images
+            .iter()
+            .map(|image| progpu_native_scene_external_image_binding {
+                struct_size: std::mem::size_of::<progpu_native_scene_external_image_binding>() as u32,
+                flags: PROGPU_NATIVE_SCENE_EXTERNAL_IMAGE_PRIMARY as u32,
+                resource_id: image.resource_id,
+                generation: image.generation,
+                texture_view: image.view as usize,
+                width: image.width,
+                height: image.height,
+                reserved0: 0,
+                reserved1: 0,
+            })
+            .collect();
+        // SAFETY: the engine is alive; the table is borrowed for the call and the engine retains
+        // the views of it.
+        let status = unsafe { progpu_native_engine_bind_scene_external_images(self.enter(), bindings.as_ptr(), bindings.len()) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            Ok(())
+        } else {
+            Err(format!("the engine refused the external images of the scene (status {status}): {}", self.last_error()))
+        }
+    }
+
+    /// Renders the retained scene `scene_id` at `generation` into `target_view` (a view of the
+    /// engine's format of `width` by `height` pixels) and submits the work. With `preserve` the
+    /// scene is drawn over the content of the target; without it the target is cleared to
+    /// transparent first.
+    pub fn render_scene(
+        &self,
+        scene_id: u64,
+        generation: u64,
+        target_view: WGPUTextureView,
+        width: u32,
+        height: u32,
+        preserve: bool,
+    ) -> Result<progpu_native_scene_frame_metrics, String> {
+        // SAFETY: the engine is alive; the view is borrowed for the call.
+        unsafe {
+            let mut frame: progpu_native_scene_frame = std::mem::zeroed();
+            frame.struct_size = std::mem::size_of::<progpu_native_scene_frame>() as u32;
+            frame.width = width;
+            frame.height = height;
+            // The scenes of the backend are recorded in pixels (the compositor scales).
+            frame.dpi_scale = 1.0;
+            frame.target_view = target_view as usize;
+            frame.scene_id = scene_id;
+            frame.generation = generation;
+            if preserve {
+                frame.flags = PROGPU_NATIVE_SCENE_FRAME_PRESERVE_TARGET as u32;
+            }
+            let mut metrics: progpu_native_scene_frame_metrics = std::mem::zeroed();
+            metrics.struct_size = std::mem::size_of::<progpu_native_scene_frame_metrics>() as u32;
+            let status = progpu_native_engine_render_scene(self.enter(), &frame, &mut metrics);
+            if status == PROGPU_NATIVE_STATUS_SUCCESS {
+                Ok(metrics)
+            } else {
+                Err(format!("the engine could not render the scene (status {status}): {}", self.last_error()))
+            }
+        }
+    }
+}
+
+impl Drop for ProGpuEngine {
+    fn drop(&mut self) {
+        // SAFETY: the engine is owned here and goes before the device it retains.
+        unsafe { progpu_native_engine_destroy(self.enter()) };
     }
 }

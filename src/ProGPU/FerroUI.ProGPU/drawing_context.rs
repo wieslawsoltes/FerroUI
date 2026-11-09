@@ -11,17 +11,22 @@
 //!   pen (computed once per geometry and pen).
 //! - Group opacity, layers and compositing blend modes are layers of the scene.
 
+use crate::bitmap::ProGpuBitmap;
 use crate::geometry::{path_data_of, PathData};
+use crate::gpu::{Gpu, Recording, SampledTexture};
+use crate::layer::ProGpuLayer;
+use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder, NO_INDEX};
-use ferroui_base::media::imaging::BitmapBlendingMode;
+use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{BoxShadows, Color, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions};
 use ferroui_base::platform::{
-    IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
-    IPlatformRenderInterfaceRegion,
+    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
+    IPlatformRenderInterfaceRegion, PixelFormat,
 };
-use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect};
+use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use progpu_native_sys::progpu::*;
 use std::any::{Any, TypeId};
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// The coverage sampling of path fills and clips: a 4x4 grid per pixel (the engine accepts 1, 4
@@ -117,10 +122,27 @@ struct Current {
     mask: u32,
 }
 
+/// The image a scene draws: its resource and the measures its draws repeat.
+#[derive(Clone, Copy)]
+struct SceneImage {
+    index: u32,
+    width: u32,
+    height: u32,
+    row_bytes: u32,
+    premultiplied: bool,
+    opaque: bool,
+}
+
 /// A drawing context recording into a scene of the engine. The owner takes the scene back with
 /// [`ProGpuDrawingContext::finish`] (or receives it through the completion of `dispose`).
 pub struct ProGpuDrawingContext {
     scene: Option<SceneBuilder>,
+    /// The device the scene is rendered on: what its layers are made on.
+    gpu: Option<Rc<Gpu>>,
+    /// The textures the scene samples, with their image resources.
+    textures: Vec<(SampledTexture, SceneImage)>,
+    /// The image resources of the bitmaps of pixels the scene draws, by bitmap and version.
+    bitmaps: HashMap<(usize, i32), SceneImage>,
     current: Current,
     state: Option<u32>,
     clips: Vec<ClipEntry>,
@@ -128,16 +150,29 @@ pub struct ProGpuDrawingContext {
     render_options: Vec<RenderOptions>,
     text_options: Vec<TextOptions>,
     error: Option<SceneBuildError>,
-    complete: Option<Box<dyn FnOnce(SceneBuilder, Option<SceneBuildError>)>>,
+    complete: Option<Box<dyn FnOnce(Recording)>>,
 }
 
 impl ProGpuDrawingContext {
     /// A context recording the next generation of `scene`; `complete` receives the scene at
-    /// `dispose`.
-    pub fn new(mut scene: SceneBuilder, complete: Option<Box<dyn FnOnce(SceneBuilder, Option<SceneBuildError>)>>) -> Self {
+    /// `dispose`. The context has no device: it records, and draws no layers.
+    pub fn new(scene: SceneBuilder, complete: Option<Box<dyn FnOnce(SceneBuilder, Option<SceneBuildError>)>>) -> Self {
+        Self::with_gpu(
+            scene,
+            None,
+            complete.map(|complete| Box::new(move |recording: Recording| complete(recording.scene, recording.error)) as Box<dyn FnOnce(Recording)>),
+        )
+    }
+
+    /// A context recording the next generation of `scene` for a frame on the device of `gpu`;
+    /// `complete` receives what was recorded at `dispose`.
+    pub(crate) fn with_gpu(mut scene: SceneBuilder, gpu: Option<Rc<Gpu>>, complete: Option<Box<dyn FnOnce(Recording)>>) -> Self {
         let error = scene.begin_generation().err();
         ProGpuDrawingContext {
             scene: Some(scene),
+            gpu,
+            textures: Vec::new(),
+            bitmaps: HashMap::new(),
             current: Current { transform: Matrix::IDENTITY, clip_rect: None, mask: NO_INDEX },
             state: None,
             clips: Vec::new(),
@@ -393,12 +428,13 @@ impl ProGpuDrawingContext {
         let uniform = rect.is_uniform() && rect.radii_top_left.x == rect.radii_top_left.y;
         let opaque = Self::opaque(brush);
         for shadow in shadows.iter() {
-            if shadow.is_inset || shadow.color.a == 0 {
-                // Inset shadows: the group effect (step P5 of the plan).
+            if shadow.color.a == 0 {
                 continue;
             }
-            if !uniform {
-                // Shadows of rounded rectangles with different radii: the group effect (P5).
+            if shadow.is_inset || !uniform {
+                // Inset shadows and the shadows of rounded rectangles with different radii: the
+                // group effect (step P5 of the plan).
+                notes::note_once("box-shadow", "inset box shadows and the shadows of rectangles with different corner radii are not drawn by the ProGPU backend yet");
                 continue;
             }
             let sigma = blur_radius_to_sigma(shadow.blur);
@@ -441,6 +477,56 @@ impl ProGpuDrawingContext {
                 self.changed();
             }
         }
+    }
+
+    /// The image resource of the scene for a bitmap: a layer of the same device (sampled from
+    /// its texture) or a bitmap of pixels (copied into the stream), added once per scene. None
+    /// (with a note) for what the backend cannot sample.
+    fn image(&mut self, source: &dyn IBitmapImpl) -> Option<SceneImage> {
+        let any = source.as_any();
+        if let Some(layer) = any.downcast_ref::<ProGpuLayer>() {
+            let texture = layer.texture()?;
+            if let Some((_, image)) = self.textures.iter().find(|(own, _)| Rc::ptr_eq(&own.texture, texture)) {
+                return Some(*image);
+            }
+            if !self.gpu.as_ref().is_some_and(|gpu| Rc::ptr_eq(gpu.device(), texture.device())) {
+                notes::note_once("layer-device", "a layer of another device is not drawn by the ProGPU backend");
+                return None;
+            }
+            let (width, height) = (texture.width(), texture.height());
+            let result = self.scene().add_external_image(width, height);
+            let (index, resource_id, generation) = self.record(result)?;
+            let image = SceneImage { index, width, height, row_bytes: width * 4, premultiplied: true, opaque: false };
+            self.textures.push((SampledTexture { texture: texture.clone(), resource_id, generation }, image));
+            return Some(image);
+        }
+        if let Some(bitmap) = any.downcast_ref::<ProGpuBitmap>() {
+            let key = (bitmap as *const ProGpuBitmap as usize, bitmap.version());
+            if let Some(image) = self.bitmaps.get(&key) {
+                return Some(*image);
+            }
+            let size = bitmap.pixel_size();
+            if size.width <= 0 || size.height <= 0 {
+                return None;
+            }
+            let (width, height, row_bytes) = (size.width as u32, size.height as u32, bitmap.row_bytes() as u32);
+            let bgra = bitmap.pixel_format() == PixelFormat::BGRA8888;
+            let result = bitmap.with_pixels(|pixels| self.scene().add_pixel_image(width, height, row_bytes, pixels, bgra));
+            let index = self.record(result)?;
+            let alpha = bitmap.pixel_alpha_format();
+            let image = SceneImage {
+                index,
+                width,
+                height,
+                row_bytes,
+                premultiplied: alpha == AlphaFormat::Premul,
+                opaque: alpha == AlphaFormat::Opaque,
+            };
+            self.bitmaps.insert(key, image);
+            return Some(image);
+        }
+        notes::note_once("bitmap-kind", "a bitmap of another backend is not drawn by the ProGPU backend");
+        None
     }
 
     fn push_mask_clip(&mut self, mask: Option<u32>) {
@@ -514,17 +600,66 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn clear(&mut self, color: Color) {
+        if self.current.mask != NO_INDEX {
+            // The engine clears through a clip rectangle; under a coverage mask it needs a layer.
+            notes::note_once("clear-under-mask", "a clear under a rounded or geometry clip is not drawn by the ProGPU backend yet");
+            return;
+        }
         let color = native_color(color, 1.0);
-        let result = self.scene().clear_target(color);
+        if self.current.clip_rect.is_none() {
+            let result = self.scene().clear_target(color);
+            self.record(result);
+            return;
+        }
+        // The clear goes through the clip rectangle of the state of its scope.
+        let Some(state) = self.state() else { return };
+        let result = self.scene().save(state);
+        if self.record(result).is_some() {
+            let result = self.scene().clear_target(color);
+            self.record(result);
+            let result = self.scene().restore();
+            self.record(result);
+        }
+    }
+
+    fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+        if opacity <= 0.0 || source_rect.width <= 0.0 || source_rect.height <= 0.0 || dest_rect.width <= 0.0 || dest_rect.height <= 0.0 {
+            return;
+        }
+        let Some(image) = self.image(source) else { return };
+        let mut flags = 0u32;
+        if image.premultiplied {
+            flags |= PROGPU_NATIVE_SCENE_IMAGE_SOURCE_PREMULTIPLIED as u32;
+        }
+        if image.opaque {
+            flags |= PROGPU_NATIVE_SCENE_IMAGE_SOURCE_ALPHA_IGNORE as u32;
+        }
+        let sampling = match self.render_options.last().map(|options| options.bitmap_interpolation_mode) {
+            Some(BitmapInterpolationMode::None) => PROGPU_NATIVE_IMAGE_SAMPLING_NEAREST,
+            _ => PROGPU_NATIVE_IMAGE_SAMPLING_LINEAR,
+        } as u32;
+        let draw = progpu_native_scene_image_draw {
+            struct_size: std::mem::size_of::<progpu_native_scene_image_draw>() as u32,
+            flags,
+            image_width: image.width,
+            image_height: image.height,
+            row_bytes: image.row_bytes,
+            sampling,
+            source_rect: image_rect(source_rect),
+            destination_rect: image_rect(dest_rect),
+            transform: identity(),
+            opacity: opacity.min(1.0) as f32,
+            max_anisotropy: 1,
+        };
+        let bounds = transform_bounds(dest_rect, &self.current.transform);
+        let Some(state) = self.state() else { return };
+        let result = self.scene().draw_image(image.index, &draw, image_rect(bounds), state);
         self.record(result);
     }
 
-    fn draw_bitmap(&mut self, _source: &dyn IBitmapImpl, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {
-        // Bitmaps: step P5 of the plan.
-    }
-
     fn draw_bitmap_with_mask(&mut self, _source: &dyn IBitmapImpl, _opacity_mask: &dyn IBrush, _opacity_mask_rect: Rect, _dest_rect: Rect) {
-        // Bitmaps: step P5 of the plan.
+        // Step P5 of the plan.
+        notes::note_once("bitmap-mask", "bitmaps under an opacity mask are not drawn by the ProGPU backend yet");
     }
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
@@ -614,11 +749,12 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn draw_glyph_run(&mut self, _foreground: Option<&dyn IBrush>, _glyph_run: &dyn IGlyphRunImpl) {
-        // Text: step P4 of the plan.
+        // Step P4 of the plan: the text stack of ProGPU.
+        notes::note_once("text", "text is not drawn by the ProGPU backend yet");
     }
 
-    fn create_layer(&mut self, _size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
-        todo!("offscreen layers of the ProGPU backend: step P5 of docs/porting/progpu-backend.md")
+    fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
+        Rc::new(ProGpuLayer::new(self.gpu.clone(), size, Vector::new(96.0, 96.0)))
     }
 
     fn push_clip(&mut self, clip: Rect) {
@@ -708,6 +844,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
 
     fn push_opacity_mask(&mut self, _mask: &dyn IBrush, bounds: Rect) {
         // Opacity masks (a brush layer mask): step P5 of the plan; the layer keeps the stack.
+        notes::note_once("opacity-mask", "opacity masks are not applied by the ProGPU backend yet");
         self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
     }
 
@@ -761,7 +898,8 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
             self.pop_clip();
         }
         if let (Some(scene), Some(complete)) = (self.scene.take(), self.complete.take()) {
-            complete(scene, self.error.take());
+            let images = self.textures.drain(..).map(|(texture, _)| texture).collect();
+            complete(Recording { scene, error: self.error.take(), images });
         }
     }
 }

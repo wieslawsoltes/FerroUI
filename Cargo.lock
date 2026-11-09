@@ -2692,6 +2692,9 @@ name = "ferroui-progpu"
 version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-controls",
+ "ferroui-metal",
+ "ferroui-native",
  "objc2",
  "objc2-metal",
  "progpu-native-sys",

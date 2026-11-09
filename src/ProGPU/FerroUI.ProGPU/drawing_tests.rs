@@ -1,7 +1,7 @@
 //! The drawing context on the device: what is drawn is checked in the read-back pixels.
 
 use crate::geometry::{PathData, ProGpuGeometry};
-use crate::{ProGpuDevice, ProGpuDrawingContext, SceneBuilder};
+use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, SceneBuilder, TargetFormat};
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::{BoxShadow, BoxShadows, Color, IBrush, PenLineCap, PenLineJoin};
 use ferroui_base::platform::IDrawingContextImpl;
@@ -10,9 +10,9 @@ use std::rc::Rc;
 
 const SIZE: u32 = 96;
 
-fn device() -> Option<ProGpuDevice> {
-    match ProGpuDevice::new() {
-        Ok(device) => Some(device),
+fn device() -> Option<ProGpuEngine> {
+    match ProGpuDevice::new().and_then(|device| ProGpuEngine::new(&Rc::new(device), TargetFormat::Rgba8)) {
+        Ok(engine) => Some(engine),
         Err(error) => {
             eprintln!("skipped: {error}");
             None
@@ -21,17 +21,20 @@ fn device() -> Option<ProGpuDevice> {
 }
 
 /// Draws with `draw` on a white target and returns the read-back RGBA8 pixels.
-fn render(device: &ProGpuDevice, draw: impl FnOnce(&mut ProGpuDrawingContext)) -> Vec<u8> {
+fn render(engine: &ProGpuEngine, draw: impl FnOnce(&mut ProGpuDrawingContext)) -> Vec<u8> {
     let mut context = ProGpuDrawingContext::new(SceneBuilder::new(), None);
     context.clear(Color::from_rgb(255, 255, 255));
     draw(&mut context);
     let (mut scene, error) = context.finish();
     assert!(error.is_none(), "recording: {error:?}");
     let stream = scene.build().expect("the stream of the scene").to_vec();
-    device.update_scene(&stream).expect("the scene");
+    engine.update_scene(&stream).expect("the scene");
+    let device = engine.device();
     let (texture, view) = device.create_target(SIZE, SIZE);
-    device.render_scene(scene.scene_id(), scene.generation(), view, SIZE, SIZE, 1.0).expect("the frame");
-    device.read_rgba8(texture, SIZE, SIZE)
+    engine.render_scene(scene.scene_id(), scene.generation(), view, SIZE, SIZE, false).expect("the frame");
+    let pixels = device.read_rgba8(texture, SIZE, SIZE);
+    device.release_texture(texture, view);
+    pixels
 }
 
 fn pixel(pixels: &[u8], x: u32, y: u32) -> [u8; 4] {

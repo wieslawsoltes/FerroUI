@@ -1,14 +1,15 @@
 //! The engine on the device of the backend, headless.
 
-use crate::ProGpuDevice;
+use crate::{ProGpuDevice, ProGpuEngine, TargetFormat};
+use std::rc::Rc;
 use progpu_native_sys::progpu::*;
 use progpu_native_sys::webgpu::*;
 use std::ptr;
 
 /// A device, or `None` (with a message) where no GPU is available.
-fn device() -> Option<ProGpuDevice> {
+fn device() -> Option<Rc<ProGpuDevice>> {
     match ProGpuDevice::new() {
-        Ok(device) => Some(device),
+        Ok(device) => Some(Rc::new(device)),
         Err(error) => {
             eprintln!("skipped: {error}");
             None
@@ -19,6 +20,7 @@ fn device() -> Option<ProGpuDevice> {
 #[test]
 fn the_engine_clears_a_target_and_draws_rectangles() {
     let Some(device) = device() else { return };
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
     let (width, height) = (40u32, 30u32);
     // SAFETY: the calls of the C ABIs with the handles of the device.
     unsafe {
@@ -43,8 +45,8 @@ fn the_engine_clears_a_target_and_draws_rectangles() {
         };
         let mut metrics: progpu_native_frame_metrics = std::mem::zeroed();
         metrics.struct_size = std::mem::size_of::<progpu_native_frame_metrics>() as u32;
-        let status = progpu_native_engine_render(device.engine(), &frame, &mut metrics);
-        assert_eq!(PROGPU_NATIVE_STATUS_SUCCESS, status, "{}", device.last_error());
+        let status = progpu_native_engine_render(engine.raw(), &frame, &mut metrics);
+        assert_eq!(PROGPU_NATIVE_STATUS_SUCCESS, status, "{}", engine.last_error());
         let pixels = device.read_rgba8(texture, width, height);
         let pixel = |x: u32, y: u32| &pixels[((y * width + x) * 4) as usize..][..4];
         assert_eq!([0, 0, 0, 255], pixel(2, 2));
@@ -58,6 +60,7 @@ fn the_engine_clears_a_target_and_draws_rectangles() {
 fn a_retained_scene_renders_and_a_stable_frame_uploads_nothing() {
     use crate::scene::{SceneBuilder, NO_INDEX};
     let Some(device) = device() else { return };
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
     let (width, height) = (32u32, 32u32);
     let mut builder = SceneBuilder::new();
     builder.clear_target(progpu_native_color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 }).unwrap();
@@ -77,10 +80,10 @@ fn a_retained_scene_renders_and_a_stable_frame_uploads_nothing() {
     let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 24.0, height: 24.0 };
     builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
     let (scene_id, generation) = (builder.scene_id(), builder.generation());
-    device.update_scene(builder.build().unwrap()).unwrap();
+    engine.update_scene(builder.build().unwrap()).unwrap();
     let (texture, view) = device.create_target(width, height);
-    device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
-    let stable = device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
+    engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
+    let stable = engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
     assert_eq!(0, stable.vertex_upload_bytes + stable.index_upload_bytes + stable.texture_upload_bytes);
     let pixels = device.read_rgba8(texture, width, height);
     let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
@@ -106,7 +109,7 @@ fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
         eprintln!("skipped: no Metal device");
         return;
     };
-    let mtl_queue = mtl_device.newCommandQueueWithMaxCommandBufferCount(4096).expect("a command queue");
+    let mtl_queue = mtl_device.newCommandQueue().expect("a command queue");
     let (width, height) = (24u32, 16u32);
     // SAFETY: a descriptor of a two-dimensional texture, then the texture of the device.
     let mtl_texture = unsafe {
@@ -128,6 +131,8 @@ fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
         )
     }
     .expect("the device on the Metal device");
+    let device = Rc::new(device);
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
     // SAFETY: the texture is a texture of the device's Metal device of that size and format.
     let (texture, view) = unsafe {
         device.wrap_metal_texture(
@@ -135,6 +140,7 @@ fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
             width,
             height,
             WGPUTextureFormat_RGBA8Unorm,
+            WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc,
         )
     }
     .expect("the wrapped texture");
@@ -156,8 +162,8 @@ fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
     let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 8.0, height: 8.0 };
     builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
     let (scene_id, generation) = (builder.scene_id(), builder.generation());
-    device.update_scene(builder.build().unwrap()).unwrap();
-    device.render_scene(scene_id, generation, view, width, height, 1.0).unwrap();
+    engine.update_scene(builder.build().unwrap()).unwrap();
+    engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
     let pixels = device.read_rgba8(texture, width, height);
     let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
     assert_eq!(vec![0, 0, 255, 255], pixel(1, 1), "the cleared host texture");
