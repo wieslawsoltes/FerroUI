@@ -164,7 +164,7 @@ impl IPlatformRenderInterface for QuartzRenderInterface {
             .as_any()
             .downcast_ref::<GlyphRun>()
             .expect("Quartz glyph run");
-        Geometry::new(run.outlines.clone(), FillRule::NonZero)
+        Geometry::new(run.outlines().clone(), FillRule::NonZero)
     }
     fn create_glyph_run(
         &self,

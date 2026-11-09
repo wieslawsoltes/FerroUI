@@ -8,7 +8,7 @@ struct Params {
   float4 color, gradient, inverse, translation, src, dst, clip, shadow, target;
   uint stops, clipped, flipped, reserved;
   uint edgeRows, edgeOriginY, edgeStride, edgePad;
-  float4 rclip, rradius, sclip;
+  float4 rclip, rradius, sclip, rmap;
 };
 
 // The coverage of a rectangle clip (`clipped & 4`): the area of the pixel
@@ -19,21 +19,30 @@ static float clip_rectangle(float2 c, float4 rect) {
 }
 
 // The coverage of the analytic clip (`clipped & 2`) at a pixel center: a
-// rectangle with elliptical corners of radii `rad`, antialiased over a pixel.
-static float clip_rounded(float2 c, float4 rect, float2 rad) {
+// rectangle with elliptical corners of radii `rad.xy` (none when zero),
+// antialiased over a pixel. A turned clip (`map` not zero) is in its own space:
+// the center is mapped into it through the inverse transform `map` and the
+// translation `rad.zw`, and its distances scaled back to pixels.
+static float clip_rounded(float2 c, float4 rect, float4 rad, float4 map) {
+  float scale = 1;
+  if (any(map != 0)) {
+    c = float2(map.x * c.x + map.z * c.y, map.y * c.x + map.w * c.y) + rad.zw;
+    scale = rsqrt(abs(map.x * map.w - map.y * map.z));
+  }
   float2 mid = (rect.xy + rect.zw) * 0.5f;
   float2 halfSize = (rect.zw - rect.xy) * 0.5f;
   float2 d = abs(c - mid) - halfSize;
-  float coverage = saturate(0.5f - max(d.x, d.y));
+  float coverage = saturate(0.5f - max(d.x, d.y) * scale);
   if (rad.x > 0 && rad.y > 0) {
-    float2 k = d + rad;
+    float2 k = d + rad.xy;
     if (k.x > 0 && k.y > 0) {
-      float distance = (length(k / rad) - 1.0f) * min(rad.x, rad.y);
-      coverage = min(coverage, saturate(0.5f - distance));
+      float distance = (length(k / rad.xy) - 1.0f) * min(rad.x, rad.y);
+      coverage = min(coverage, saturate(0.5f - distance * scale));
     }
   }
   return coverage;
 }
+
 // Whether the sample `q` is inside the box `box` (low and high corners, the
 // low edge included, the high one excluded) with elliptical corners of radii
 // `rad` (none when either is zero).
@@ -51,17 +60,24 @@ static bool inside_box(float2 q, float4 box, float2 rad) {
 
 // The coverage of a solid box (`reserved & 8`, rounded with `reserved & 16`)
 // at a pixel: the four samples the path coverage takes, tested against the box
-// itself instead of its edges, or the pixel center when aliased.
-static float box_coverage(float2 center, float4 box, float2 rad, bool aliased) {
-  if (aliased)
-    return inside_box(center, box, rad);
+// itself instead of its edges, or the pixel center when aliased. A box under a
+// transform that turns it (`reserved & 32`) is in its own space: the samples
+// are mapped into it through the inverse transform (`inverse`, `translation`).
+static float box_coverage(float2 center, float4 box, float2 rad, bool aliased,
+                          bool mapped, float4 inverse, float2 translation) {
   float value = 0;
-  for (uint y = 0; y < 2; y++)
-    for (uint x = 0; x < 2; x++)
-      value += inside_box(
-          center + float2(float(x) * 0.5f - 0.25f, float(y) * 0.5f - 0.25f),
-          box, rad);
-  return value * 0.25f;
+  uint count = aliased ? 1 : 4;
+  for (uint i = 0; i < count; i++) {
+    float2 q = aliased ? center
+                       : center + float2(float(i & 1) * 0.5f - 0.25f,
+                                         float(i >> 1) * 0.5f - 0.25f);
+    if (mapped)
+      q = float2(inverse.x * q.x + inverse.z * q.y,
+                 inverse.y * q.x + inverse.w * q.y) +
+          translation;
+    value += inside_box(q, box, rad);
+  }
+  return value / float(count);
 }
 struct Stop {
   float4 color;
@@ -261,7 +277,7 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
@@ -282,7 +298,8 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (p.mode == 1) {
     target.write(float4(cov), tid);
@@ -767,7 +784,7 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
@@ -786,7 +803,8 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -855,7 +873,7 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
@@ -874,7 +892,8 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -922,13 +941,14 @@ fragment float4 image_fragment(ImageVertex v [[stage_in]],
 // Integral solid rectangles need neither sampled textures nor per-fragment
 // path parameters. Fractional/transformed paths keep their exact coverage.
 struct SolidParams {
-  float4 bounds, color, radii;
+  float4 bounds, color, radii, shape;
 };
 struct SolidVertex {
   float4 position [[position]];
   float4 color [[flat]];
   float4 bounds [[flat]];
   float2 radii [[flat]];
+  float4 shape [[flat]];
 };
 vertex SolidVertex solid_vertex(uint id [[vertex_id]],
                                 device const SolidParams *draws [[buffer(0)]],
@@ -940,12 +960,13 @@ vertex SolidVertex solid_vertex(uint id [[vertex_id]],
   float2 low = p.bounds.xy, high = low + p.bounds.zw;
   float2 pixel = mix(floor(low), ceil(high), corner);
   return {float4(pixel.x / size.x * 2 - 1, 1 - pixel.y / size.y * 2, 0, 1),
-          p.color, float4(low, high), p.radii.xy};
+          p.color, float4(low, high), p.radii.xy, p.shape};
 }
 fragment float4 solid_fragment(SolidVertex v [[stage_in]]) {
   float2 center = floor(v.position.xy) + 0.5f;
   if (v.radii.x > 0 && v.radii.y > 0)
-    return v.color * box_coverage(center, v.bounds, v.radii, false);
+    return v.color * box_coverage(center, v.shape, v.radii, false, false,
+                                  float4(1, 0, 0, 1), float2(0));
   float2 a = center - 0.25f, b = center + 0.25f;
   float2 covered = float2((a >= v.bounds.xy) & (a < v.bounds.zw)) +
                    float2((b >= v.bounds.xy) & (b < v.bounds.zw));
