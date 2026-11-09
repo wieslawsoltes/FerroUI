@@ -13,6 +13,7 @@ pub struct StyleChildren(Rc<StyleChildrenData>);
 struct StyleChildrenData {
     owner: WeakRef<StyleBase>,
     items: RefCell<Rc<Vec<Rc<dyn IStyle>>>>,
+    candidates: super::selector_candidates::CandidateCache,
 }
 
 fn as_style_base(item: &Rc<dyn IStyle>) -> Option<&StyleBase> {
@@ -33,7 +34,7 @@ impl std::fmt::Debug for StyleChildren {
 
 impl StyleChildren {
     pub(crate) fn new(owner: WeakRef<StyleBase>) -> Self {
-        Self(Rc::new(StyleChildrenData { owner, items: RefCell::new(Rc::new(Vec::new())) }))
+        Self(Rc::new(StyleChildrenData { owner, items: RefCell::new(Rc::new(Vec::new())), candidates: Default::default() }))
     }
 
     /// The number of child styles.
@@ -58,6 +59,10 @@ impl StyleChildren {
         self.0.items.borrow().clone()
     }
 
+    pub(crate) fn candidates<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        self.0.candidates.select(self.snapshot(), target)
+    }
+
     /// Adds a child style.
     pub fn add(&self, item: impl Into<Rc<dyn IStyle>>) {
         self.insert(self.count(), item)
@@ -71,6 +76,7 @@ impl StyleChildren {
             style.set_parent(owner.as_ref());
         }
         Rc::make_mut(&mut *self.0.items.borrow_mut()).insert(index, item);
+        super::selector_candidates::invalidate();
     }
 
     /// Removes the child style at `index`.
@@ -85,6 +91,7 @@ impl StyleChildren {
             }
         }
         Rc::make_mut(&mut *self.0.items.borrow_mut()).remove(index);
+        super::selector_candidates::invalidate();
     }
 
     /// Removes a child style. Returns whether it was present.
@@ -108,6 +115,7 @@ impl StyleChildren {
             style.set_parent(owner.as_ref());
         }
         Rc::make_mut(&mut *self.0.items.borrow_mut())[index] = item.clone();
+        super::selector_candidates::invalidate();
         if let Some(host) = owner.and_then(|o| o.owner()) {
             if let Some(provider) = item.as_resource_provider() {
                 provider.add_owner(&host);
@@ -118,5 +126,6 @@ impl StyleChildren {
     /// Removes all child styles.
     pub fn clear(&self) {
         *self.0.items.borrow_mut() = Rc::new(Vec::new());
+        super::selector_candidates::invalidate();
     }
 }

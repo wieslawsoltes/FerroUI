@@ -11,8 +11,13 @@ autotests = false
 name = "ferroui-resource-benchmarks"
 path = "program.rs"
 
+[[bin]]
+name = "ferroui-selector-benchmarks"
+path = "selectors.rs"
+
 [features]
 count-allocations = []
+perf-counters = ["ferroui-base/perf-counters"]
 
 [dependencies]
 ferroui-base.workspace = true

@@ -106,6 +106,35 @@ impl Selector {
         self.0.target_type()
     }
 
+    // Only known conjunctive nodes in the target compound are traversed.
+    // OR/NOT/nesting/custom nodes deliberately keep the ordinary matcher.
+    pub(super) fn type_candidate(&self) -> Option<super::selector_candidates::TypeCandidate> {
+        let mut current = self;
+        loop {
+            if let Some(node) = current.node::<super::TypeNameAndClassSelector>() {
+                // A custom/property/nesting node before the type can run user
+                // code before the type check. Only the first node of the
+                // target compound supplies a bound; combinators run after it.
+                if current.0.move_previous().is_some_and(|previous| !previous.is_combinator()) {
+                    return None;
+                }
+                return node.own_target_type().map(|type_| super::selector_candidates::TypeCandidate {
+                    type_, exact: node.is_concrete_type(),
+                });
+            }
+            if current.node::<super::PropertyEqualsSelector>().is_none()
+                && current.node::<super::NthChildSelector>().is_none()
+                && current.node::<super::NthLastChildSelector>().is_none()
+            {
+                return None;
+            }
+            current = current.0.move_previous()?;
+            if current.is_combinator() {
+                return None;
+            }
+        }
+    }
+
     pub(crate) fn node<T: 'static>(&self) -> Option<&T> {
         self.0.as_any().downcast_ref::<T>()
     }

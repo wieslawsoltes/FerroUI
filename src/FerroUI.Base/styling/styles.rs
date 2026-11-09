@@ -22,6 +22,7 @@ use std::rc::Rc;
 pub struct Styles {
     base: FerroObject,
     styles: FerroList<Rc<dyn IStyle>>,
+    candidates: super::selector_candidates::CandidateCache,
     owner: RefCell<Option<WeakResourceHost>>,
     resources: RefCell<Option<Ref<ResourceDictionary>>>,
     collection_changed: HandlerList<CollectionChangedHandler<Rc<dyn IStyle>>>,
@@ -64,6 +65,7 @@ impl Styles {
         Self {
             base: FerroObject::construct(),
             styles: FerroList::new(),
+            candidates: Default::default(),
             owner: RefCell::new(None),
             resources: RefCell::new(None),
             collection_changed: HandlerList::new(),
@@ -197,6 +199,10 @@ impl Styles {
     #[inline]
     pub fn snapshot(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         self.styles.snapshot()
+    }
+
+    pub(crate) fn candidates<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        self.candidates.select(self.snapshot(), target)
     }
 
     /// Tries to find a resource in the collection's resources and then in
@@ -437,6 +443,10 @@ impl IResourceProvider for StylesHandle {
 }
 
 impl IStyle for StylesHandle {
+    fn children_for_target<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        self.0.candidates(target)
+    }
+
     fn children(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         self.0.styles.snapshot()
     }

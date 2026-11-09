@@ -4,7 +4,7 @@ use super::{
 };
 use crate::property_store::FrameType;
 use crate::{ferro_class, instantiate, FerroObjectImpl, Ref, StyledElement};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// Defines a style.
@@ -12,6 +12,7 @@ use std::rc::Rc;
 pub struct Style {
     base: StyleBase,
     selector: RefCell<Option<Selector>>,
+    type_candidate: Cell<Option<super::selector_candidates::TypeCandidate>>,
 }
 
 ferro_class!(Style: StyleBase);
@@ -37,6 +38,9 @@ impl StyleBaseImpl for Style {
         }
 
         Self::parent_set_parent(this, parent);
+        if this.type_candidate.get().is_some() {
+            super::selector_candidates::invalidate();
+        }
     }
 
     /// Returns a string representation of the style.
@@ -51,7 +55,7 @@ impl StyleBaseImpl for Style {
 impl Style {
     /// Creates the class data; see [`FerroObject::construct`](crate::FerroObject::construct).
     pub fn construct() -> Self {
-        Self { base: StyleBase::construct(), selector: RefCell::new(None) }
+        Self { base: StyleBase::construct(), selector: RefCell::new(None), type_candidate: Cell::new(None) }
     }
 
     /// Creates a style without a selector.
@@ -77,7 +81,30 @@ impl Style {
     }
 
     pub fn set_selector(&self, value: Option<Selector>) {
-        *self.selector.borrow_mut() = Self::validate_selector(value);
+        let value = Self::validate_selector(value);
+        if self.type_candidate.take().is_some() {
+            super::selector_candidates::invalidate();
+        }
+        *self.selector.borrow_mut() = value;
+    }
+
+    /// Enables conservative type indexing for a generated selector. Replacing
+    /// the selector automatically returns the style to the ordinary matcher.
+    #[doc(hidden)]
+    pub fn enable_selector_index(&self) {
+        let candidate = self.selector.borrow().as_ref().and_then(Selector::type_candidate);
+        if self.type_candidate.replace(candidate) != candidate {
+            super::selector_candidates::invalidate();
+        }
+    }
+
+    pub(super) fn type_candidate(&self) -> Option<super::selector_candidates::TypeCandidate> {
+        let candidate = self.type_candidate.get()?;
+        // Parent container queries run before the selector's type check.
+        if self.parent().is_some_and(|p| p.is::<ContainerQuery>()) {
+            return None;
+        }
+        Some(candidate)
     }
 
     /// Creates a style with a selector and setters.

@@ -1904,7 +1904,7 @@ fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transac
 #[test]
 fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     use ferroui_base::{
-        styling::{style_ptr_eq, IStyle},
+        styling::{style_ptr_eq, IStyle, Style},
         threading::Dispatcher,
     };
     use ferroui_controls::Border;
@@ -1915,19 +1915,32 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
     let source = |width| {
+        let unrelated = r#"<Style Selector="Button"/>"#.repeat(8);
         format!(
-            r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
+            r#"<Styles xmlns="https://github.com/ferroui">{unrelated}<Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
         )
     };
+    fn index_generated(style: &dyn IStyle) {
+        if let Some(style) = style.as_object().and_then(|o| o.downcast_ref::<Style>()) {
+            style.enable_selector_index();
+        }
+        for child in style.children().iter() {
+            index_generated(&**child);
+        }
+    }
     let load = |text: &str| {
-        Rc::<dyn IStyle>::from_xaml_object(
+        let style = Rc::<dyn IStyle>::from_xaml_object(
             &ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
                 RuntimeXamlLoaderDocument::with_base_uri(None, text),
                 None,
             )
             .unwrap(),
         )
-        .unwrap()
+        .unwrap();
+        // Begin with the opt-in metadata installed by generated theme tables.
+        // Runtime reload replacements must safely return to generic matching.
+        index_generated(&*style);
+        style
     };
     let root = Border::new();
     let child = Border::new();
