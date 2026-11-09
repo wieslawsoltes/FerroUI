@@ -2909,6 +2909,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-render3d",
  "ferroui-vulkan",
+ "skia-bindings",
  "skia-safe",
  "url",
 ]

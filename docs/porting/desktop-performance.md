@@ -905,3 +905,17 @@ marks, runs of spaces, required breaks and right-to-left words, at widths every 
 again for every line). `TextPipelineBenchmark`, a layout with shaping cached: card bodies 7.15 to
 4.30 ms, articles 2.65 to 1.60 ms, labels 1.44 to 1.17 ms. Local gate, three rounds: gauntlet UI
 thread 27.4 to 25.0 ms a frame (-9.1 %), no metric regressed.
+
+### 9.17 The window's Graphite context inserts its recordings in order
+
+Graphite evicts its glyph atlases at the end of every recording unless the context requires
+recordings to be inserted in the order they were snapped (`fRequireOrderedRecordings`, off by
+default): every frame rasterized and uploaded every glyph it drew again. The window's Graphite
+context on Metal now sets the option, as Skia's own Metal window does; FerroUI inserts its
+recordings in order already. skia-safe has no setter, so the native options are set through
+`skia-bindings` (`ordered_recordings_options` in `skia_metal_gpu.rs`). With the option, a
+recording that fails to insert makes the context refuse the recorder's later ones, so the
+context then reports itself lost (`GraphiteGrContext::is_lost`) and is made again, as after a
+lost device. docs/porting/skia-retained-text.md has what Graphite keeps across frames and what it
+does not. Window (gauntlet tier 16, 60 Hz, the two builds alternately): 28.1 / 29.5 / 28.6 to
+29.9 / 29.8 / 29.8 frames a second.

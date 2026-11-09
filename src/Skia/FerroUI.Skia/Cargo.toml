@@ -48,6 +48,9 @@ cc.workspace = true
 # `ferro_skia_ganesh_gl` configuration.
 [target.'cfg(all(target_vendor = "apple", not(ferro_skia_apple_ganesh)))'.dependencies]
 skia-safe = { workspace = true, features = ["graphite", "metal"] }
+# The native Graphite context options, for the option skia-safe has no setter for
+# (`fRequireOrderedRecordings`, desktop-performance.md section 9.17). The features are skia-safe's.
+skia-bindings = { version = "=0.153.3", default-features = false }
 
 # Apple targets with OpenGL: the rendering mode OpenGL of the macOS backend (CGL) and of the iOS
 # backend (EAGL) needs Ganesh on OpenGL, and no published binary of Skia has Ganesh on OpenGL next
