@@ -10,7 +10,7 @@
 
 use std::cell::Cell;
 
-thread_local! {
+crate::ferro_thread_local! {
     static METADATA_GENERATION: Cell<u32> = const { Cell::new(1) };
 }
 

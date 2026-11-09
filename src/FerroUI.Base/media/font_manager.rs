@@ -41,7 +41,7 @@ pub struct FontManager {
     resolved_generation: Cell<u64>,
 }
 
-thread_local! {
+crate::ferro_thread_local! {
     static GLYPH_TYPEFACE_GENERATION: Cell<u64> = const { Cell::new(1) };
 }
 
