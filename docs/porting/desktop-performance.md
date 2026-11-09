@@ -871,3 +871,23 @@ that width from nothing; the tree has a wrap panel of chips, an `Auto,*` header 
 avatar, a `*,Auto` row and, in one variant, a grid of two star columns). Gauntlet, per frame: measures 10,765 to 4,605, arranges 7,600 to 5,630,
 drawings recorded 8,177 to 6,099. Local gate against section 9.14, three rounds: UI thread 33.6 to
 29.4 ms a frame (-12.6 %), no metric regressed.
+
+### 9.16 A shaped run finds its break opportunities once
+
+Upstream finds the UAX #14 break opportunities of a run again for every line it wraps, from the
+start of the line, and again for every layout of the same text: a third of the time of a layout
+whose shaping is cached went there (docs/porting/text-layout-performance.md, section 2). A shaped
+buffer now keeps the break opportunities of the text it was shaped for in a table found once and
+shared with the buffers split from it, as its cluster advances are (`ShapedBuffer::line_breaks`).
+A buffer that reaches the end of that text and starts at one of its break opportunities reads the
+entries after its start; any other finds them again from its start, as upstream does. A line
+starts after the white space of the line before it, at a break opportunity, and no rule of UAX #14
+looks back across one, so the entries are the ones finding them again would give.
+
+Test: `text_break_table_tests.rs` (texts with quotes, brackets, numbers, hyphens, dashes, URLs,
+CJK, Hangul, emoji sequences and flags, no-break and zero-width spaces, soft hyphens, combining
+marks, runs of spaces, required breaks and right-to-left words, at widths every 1.75 from 6 to
+700, wrapping and wrapping with overflow: the lines are the ones of layouts that find the breaks
+again for every line). `TextPipelineBenchmark`, a layout with shaping cached: card bodies 7.15 to
+4.30 ms, articles 2.65 to 1.60 ms, labels 1.44 to 1.17 ms. Local gate, three rounds: gauntlet UI
+thread 27.4 to 25.0 ms a frame (-9.1 %), no metric regressed.

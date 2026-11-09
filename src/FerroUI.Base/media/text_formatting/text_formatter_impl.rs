@@ -903,7 +903,9 @@ impl TextFormatterImpl {
             let mut current_run_length = current_run.length();
 
             if current_run.is::<ShapedTextRun>() {
-                let mut line_breaker = LineBreakEnumerator::new(current_run.text_span());
+                // The run's break opportunities, from the table of the text it was split from
+                // (section 9.16).
+                let mut line_breaker = Self::run_line_breaks(&**current_run);
 
                 while let Some(mut line_break) = line_breaker.move_next() {
                     if line_break.required() && current_length + line_break.position_measure() as i32 <= measured_length {
@@ -954,7 +956,7 @@ impl TextFormatterImpl {
                                     current_run = &text_runs[index];
                                     current_run_length = current_run.length();
 
-                                    line_breaker = LineBreakEnumerator::new(current_run.text_span());
+                                    line_breaker = Self::run_line_breaks(&**current_run);
                                 }
                             } else {
                                 current_position = current_length + line_break.position_wrap() as i32;
@@ -999,6 +1001,14 @@ impl TextFormatterImpl {
         }
 
         measured_length
+    }
+
+    /// The break opportunities of a shaped run's text.
+    fn run_line_breaks(run: &dyn TextRun) -> super::shaped_buffer::RunLineBreaks<'_> {
+        match run.downcast_ref::<ShapedTextRun>() {
+            Some(shaped) => shaped.shaped_buffer().line_breaks(),
+            None => super::shaped_buffer::RunLineBreaks::Enumerator(LineBreakEnumerator::new(run.text_span())),
+        }
     }
 
     fn reset_trailing_whitespace_bidi_levels(

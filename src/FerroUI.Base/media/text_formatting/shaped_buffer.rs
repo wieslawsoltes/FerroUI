@@ -49,7 +49,49 @@ pub struct ShapedBuffer {
     font_rendering_em_size: f64,
     bidi_level: i8,
     cache: RefCell<ClusterCache>,
+    /// The UAX #14 break opportunities of the text this buffer was shaped for, found once and
+    /// shared with the buffers split from it (desktop-performance.md section 9.16).
+    breaks: RefCell<Option<Rc<BreakTable>>>,
     disposed: Cell<bool>,
+}
+
+/// The break opportunities of a text, from its start in the storage it shares.
+pub(crate) struct BreakTable {
+    start: usize,
+    end: usize,
+    breaks: Box<[crate::media::text_formatting::unicode::LineBreak]>,
+}
+
+/// The break opportunities of a run's text, from the shared table of the text it was split from
+/// or found again from its start.
+pub(crate) enum RunLineBreaks<'a> {
+    Table { table: Rc<BreakTable>, index: usize, shift: usize },
+    Enumerator(crate::media::text_formatting::unicode::LineBreakEnumerator<'a>),
+}
+
+impl RunLineBreaks<'_> {
+    /// The next break opportunity, relative to the start of the run's text.
+    pub(crate) fn move_next(&mut self) -> Option<crate::media::text_formatting::unicode::LineBreak> {
+        use crate::media::text_formatting::unicode::LineBreak;
+        match self {
+            RunLineBreaks::Table { table, index, shift } => {
+                let line_break = *table.breaks.get(*index)?;
+                *index += 1;
+                Some(LineBreak::new(
+                    line_break.position_measure() - *shift,
+                    line_break.position_wrap() - *shift,
+                    line_break.required(),
+                ))
+            }
+            RunLineBreaks::Enumerator(enumerator) => enumerator.move_next(),
+        }
+    }
+}
+
+#[cfg(test)]
+crate::ferro_thread_local! {
+    /// Off: every run finds its breaks again from its start, as upstream does (the tests compare).
+    pub(crate) static BREAK_TABLES: Cell<bool> = Cell::new(true);
 }
 
 impl ShapedBuffer {
@@ -71,6 +113,7 @@ impl ShapedBuffer {
             font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
+            breaks: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -93,6 +136,7 @@ impl ShapedBuffer {
             font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(ClusterCache::default()),
+            breaks: RefCell::new(None),
             disposed: Cell::new(false),
         })
     }
@@ -133,12 +177,50 @@ impl ShapedBuffer {
             font_rendering_em_size: source.font_rendering_em_size,
             bidi_level,
             cache: RefCell::new(cache),
+            breaks: RefCell::new(source.breaks.borrow().clone()),
             disposed: Cell::new(false),
         })
     }
 
     /// The buffer's length (number of glyphs).
     #[inline]
+    /// The break opportunities of the buffer's text (desktop-performance.md section 9.16): read
+    /// from the table of the text it was split from when the buffer reaches the end of that text
+    /// and starts at one of its break opportunities (a line starts after the white space of the
+    /// line before it, and no rule of UAX #14 looks back across it), found again from its start
+    /// otherwise, as upstream finds them for every line.
+    pub(crate) fn line_breaks(&self) -> RunLineBreaks<'_> {
+        use crate::media::text_formatting::unicode::LineBreakEnumerator;
+        #[cfg(test)]
+        if !BREAK_TABLES.with(Cell::get) {
+            return RunLineBreaks::Enumerator(LineBreakEnumerator::new(self.text.span()));
+        }
+        let start = self.text.offset_in_owner();
+        let end = start + self.text.len();
+        let table = self
+            .breaks
+            .borrow_mut()
+            .get_or_insert_with(|| {
+                let mut enumerator = LineBreakEnumerator::new(self.text.span());
+                let mut breaks = Vec::new();
+                while let Some(line_break) = enumerator.move_next() {
+                    breaks.push(line_break);
+                }
+                Rc::new(BreakTable { start, end, breaks: breaks.into_boxed_slice() })
+            })
+            .clone();
+        if table.end == end && table.start <= start {
+            let shift = start - table.start;
+            if shift == 0 {
+                return RunLineBreaks::Table { table, index: 0, shift: 0 };
+            }
+            if let Ok(found) = table.breaks.binary_search_by(|line_break| line_break.position_wrap().cmp(&shift)) {
+                return RunLineBreaks::Table { table, index: found + 1, shift };
+            }
+        }
+        RunLineBreaks::Enumerator(LineBreakEnumerator::new(self.text.span()))
+    }
+
     pub fn length(&self) -> usize {
         if self.disposed.get() {
             return 0;
