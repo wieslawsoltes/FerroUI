@@ -547,6 +547,8 @@ is run locally, on a quiet machine (no other build, no VM or emulator, on mains 
 python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
 python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
+python3 scripts/perf/gate.py --only window --window-scenes text,wall
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
@@ -586,6 +588,36 @@ What it measures:
   is copied into the base worktree, and added to its workspace members when needed, so both sides
   run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
   a gate of its own.
+- **The frame benchmarks** (`tests/FerroUI.FrameBenchmarks`, suite `frames`): FerroUI's own
+  regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
+  follows the Cranpose benchmark and is synced with it). Each scene does one kind of per-frame work
+  of a heavy screen, so that a change of that work shows in its own numbers, and each names the
+  sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
+  of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
+  layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
+  canvas that move). The harness is the frame gate's; besides the times a frame, every scene
+  reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
+  layout, recording and commit) and their sum (`startup_ms`). Alone:
+
+  ```sh
+  cargo test -p ferroui-frame-benchmarks --release --test frames -- --ignored --nocapture --test-threads=1
+  ```
+- **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
+  framework's tree mechanics on walls of small tiles, in an application with a desktop's services
+  (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
+  root down), laying out, detaching and clearing; inherited properties, the enabled and visible
+  states, the flow direction, the data context, the theme variant and styles passed down an
+  attached wall; class styles and resources on it; and the text of many short labels. The suite
+  runs `trees::` and `layout::ElementConstructionBenchmark` (`--framework-filter`) with the
+  TreeDataGrid suite's iterations. When the base has no `trees` category, the candidate's
+  `tests/FerroUI.Benchmarks` is copied into it.
+- **The window suite** (`window`): the desktop program of the frame benchmarks (`frame-benchmarks`)
+  opened once per scene (`--window-scenes`, default `text,list,transforms,wall`) for
+  `--window-seconds` (12): the time from the start of the process to its first animation frame
+  (`first_frame_ms`) and its time a frame (`ms_per_frame`, from its frame rate after the first three
+  seconds) on the backend of the platform (Skia with Graphite on macOS). It measures what the raster
+  frame benchmarks cannot: the GPU backends and the start of a real process. A scene that holds the
+  display's rate shows no change of its time a frame; its first frame still does.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
@@ -601,7 +633,10 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
-| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
+| Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
+| Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
 cost time says so in the pull request, with the table.
@@ -932,3 +967,63 @@ Tests: `control.rs` (`loaded_queue_tests`), the leak tests of the controls (a re
 not held by the queue). `ElementConstructionBenchmark` (the still wall's tiles, created, attached
 to a styled root and laid out): attaching and detaching 10,000 tiles 1,375 to 195 ms, with layout
 1,517 to 338 ms; 1,000 tiles 26.6 to 12.9 ms. The local gate is unchanged.
+
+### 9.21 Walks of the tree stop where nothing changes; per-element work made on use
+
+Building a large tree from its leaves up and attaching it (the still wall: 58,696 tiles of seven
+elements) did work that grows with the number of elements times their depth, or that most elements
+never need. Each change keeps upstream's observable behaviour: the same values, events and order
+for every element; what differs is the work done where nothing could change.
+
+- **Measure invalidation.** Every element whose visual parent changes invalidates its own measure
+  and that of its whole subtree (`LayoutHelper::invalidate_self_and_children_measure`); a tree
+  built from the leaves up was walked once for every level above each element. An element whose
+  subtree that walk invalidated, and which has not been measured since
+  (`Layoutable::subtree_measure_invalid`), ends the walk; the flag is cleared when the element or
+  one below it is measured. The flagged elements are closed downwards, so clearing stops at the
+  first ancestor without it.
+- **Effective enabled state.** `InputElement::update_is_effectively_enabled_from` updated the whole
+  subtree of every element whose parent or enabled state changed. A child's value is derived from
+  its parent's and every change is passed down as it happens: an unchanged value ends the walk.
+- **Inline collections.** Every text block made an inline collection, its logical children and its
+  subscription when constructed; most show their `Text`. The collection is made, and its change
+  raised, on first use of `inlines()`.
+- **Styling passes.** Every styling pass ended with a re-evaluation of every value of the element
+  (`ValueStore::end_styling`), even when no style applied. The store remembers whether a
+  re-evaluation was put off, or a frame inserted, during the pass, and re-evaluates only then.
+- **Classes.** Every input element removed its focus, pointer-over and disabled pseudoclasses when
+  constructed, which made its collection of classes. Removing a pseudoclass from an element without
+  classes makes nothing (`StyledElement::set_pseudo_class`).
+- **Removing many children.** `FerroList::remove_all` searched the removed items for every item of
+  the list, and every child unlinked from its inheritance parent was searched for among its
+  siblings: clearing a panel was quadratic. Items that are one run of the list are removed as that
+  run (the one notification the search raised for it); the inheritance children are a deque
+  searched from both ends.
+- **Control themes.** Every styled element looks up the control theme of its type when attached;
+  most types have none, and each lookup walked the whole of the theme's styles at the application
+  to find nothing. The application keeps the result of each type-key lookup by theme variant and
+  forgets them whenever a dictionary or style it owns changes (`notify_hosted_resources_changed`)
+  or its dictionary is replaced.
+- **Inherited properties no element sets.** A property no store holds (the flow direction of most
+  trees) was looked up through every ancestor holding inherited values, and the per-store results
+  are forgotten whenever an inheritance changes anywhere. Each inheriting property counts the
+  stores holding an effective value of it (`FerroProperty::holders`, shared with the properties
+  added to other owners); while none does, a lookup returns the default at once.
+
+Tests: the tests of the base and controls crates, and tests of the inline collection made on use
+(`selectable_text_block_tests`), of type-key lookups following the application's resources
+(`application_tests`) and of inherited values held through another owner and released with their
+holder (`text_block_tests`). Measured with the `trees` benchmarks (2,000 tiles, against the commit
+before): attach -33 %, first layout -44 % (part of it the benchmark itself, which freed the
+previous wall inside the measurement), detach -25 %, clear -38 %, attach with class styles -19 %, a
+style added to the root -20 %. Still wall (tier 20), launch to first frame: 2.26 s to about 1.9 s.
+
+### 9.22 Skia: a glyph run's first draw skips the text blob cache
+
+A text blob is a key of Skia's text blob cache: drawing one hashes it, keeps the GPU blob made of it
+and posts a purge message when it is dropped. Text that changes every frame makes runs that are
+drawn once, and each paid for the cache for nothing. A run's first draw is of its glyphs alone
+(`Canvas::draw_glyphs_at`), which Skia draws without the cache; the blob is made, and cached by
+Skia, when the run is drawn again (`GlyphRunImpl::draw`). The pixels are the same: both draw the
+same glyphs at the same positions with the same font. Tests: the Skia backend's tests. Gauntlet
+(tier 16), Skia window, interleaved A/B: 27.4 to 31.2 frames a second.
