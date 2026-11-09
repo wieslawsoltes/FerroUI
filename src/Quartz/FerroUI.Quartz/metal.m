@@ -2028,30 +2028,35 @@ void qm_rectangle(void *surface, const double *rect, double red, double green,
   if (!(rx > 0) || !(ry > 0) || !isfinite(rx) || !isfinite(ry))
     rx = ry = 0;
   QMetalSurface *s = (__bridge QMetalSurface *)surface;
-  if (rx == 0 && ry == 0 && s.state.shadowColor.w <= 0 &&
-      s.state.transform.b == 0 && s.state.transform.c == 0 && !s.state.clip) {
-    // Axis-aligned solid rectangles use exact compact coverage bounds.
-    // Preparing four generic path edges (including a fractional NSData
-    // allocation) cannot affect that pipeline and only adds recording work.
-    CGAffineTransform transform = s.state.transform;
+  double scale =
+      MIN(1, MIN(rx > 0 ? w / (2 * rx) : 1, ry > 0 ? h / (2 * ry) : 1));
+  rx *= scale;
+  ry *= scale;
+  CGAffineTransform transform = s.state.transform;
+  if (s.state.shadowColor.w <= 0 && transform.b == 0 && transform.c == 0 &&
+      !s.state.clip && (rx == 0 || !s.state.aliased)) {
+    // Axis-aligned solid boxes, rounded or not, use exact compact coverage:
+    // the shaders test the coverage samples against the box and its
+    // elliptical corners, where a path would test them against the edges of
+    // its flattened curves. Preparing those edges and their coverage image
+    // cannot change the samples' outcome beyond the flattening tolerance, and
+    // costs a path, its edges and a coverage cache entry per position.
     CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), transform);
     CGPoint b =
         CGPointApplyAffineTransform(CGPointMake(x + w, y + h), transform);
     CGRect box = CGRectMake(MIN(a.x, b.x), MIN(a.y, b.y), fabs(b.x - a.x),
                             fabs(b.y - a.y));
     QParams p = params(s);
-    p.reserved = 8;
+    p.reserved = rx > 0 ? 8 | 16 : 8;
     p.gradient = (vector_float4){box.origin.x, box.origin.y, CGRectGetMaxX(box),
                                  CGRectGetMaxY(box)};
+    p.src = (vector_float4){rx * fabs(transform.a), ry * fabs(transform.d), 0,
+                            0};
     p.color = (vector_float4){red, green, blue, alpha};
     bounds(&p, crop(s, box));
     dispatch(s, s.texture, p, nil, nil, nil);
     return;
   }
-  double scale =
-      MIN(1, MIN(rx > 0 ? w / (2 * rx) : 1, ry > 0 ? h / (2 * ry) : 1));
-  rx *= scale;
-  ry *= scale;
   double keyBytes[] = {x, y, w, h, rx, ry};
   QSmallKey key = small_key(keyBytes, sizeof(keyBytes));
   CGPathRef path = (CGPathRef)small_get(r.rectanglePaths, &key);

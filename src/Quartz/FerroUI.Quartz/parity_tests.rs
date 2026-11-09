@@ -1117,6 +1117,91 @@ fn plain_rectangles_match_native_geometry_at_fractional_edges() {
 
 #[cfg(feature = "metal")]
 #[test]
+fn rounded_boxes_match_their_path_coverage() {
+    use ferroui_base::media::{EdgeMode, RenderOptions};
+    use kurbo::Shape;
+    let brush =
+        ImmutableSolidColorBrush::new(ferroui_base::media::Color::from_argb(160, 90, 130, 200));
+    for (rect, radius) in [
+        (Rect::new(7.25, 9.125, 31.5, 25.75), 6.5),
+        (Rect::new(7., 9., 32., 26.), 4.),
+        (Rect::new(3.5, 4.5, 20., 12.), 40.),
+    ] {
+        let rounded = RoundedRect::new(
+            rect,
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+        );
+        let fitted = radius.min(rect.width / 2.).min(rect.height / 2.);
+        let geometry = Geometry::new(
+            kurbo::RoundedRect::new(rect.x, rect.y, rect.right(), rect.bottom(), fitted)
+                .to_path(0.001),
+            FillRule::NonZero,
+        );
+        for transform in [
+            Matrix::IDENTITY,
+            Matrix::create_scale(1.5, 2.),
+            Matrix::create_scale(-1., 1.) * Matrix::create_translation(70.25, 0.75),
+        ] {
+            for clip in [None, Some(Rect::new(10.5, 0., 30.25, 100.))] {
+                let mut outputs = Vec::new();
+                for rectangle in [false, true] {
+                    let target = Bitmap::new(PixelSize::new(100, 100), Vector::new(96., 96.));
+                    let mut draw = target.drawing(false, None);
+                    draw.clear(Colors::WHITE);
+                    if let Some(clip) = clip {
+                        draw.push_clip(clip);
+                    }
+                    draw.set_transform(transform);
+                    draw.push_render_options(RenderOptions {
+                        edge_mode: EdgeMode::Unspecified,
+                        ..Default::default()
+                    });
+                    if rectangle {
+                        draw.draw_rectangle(Some(&brush), None, rounded, &Default::default());
+                    } else {
+                        draw.draw_geometry(Some(&brush), None, &*geometry);
+                    }
+                    draw.pop_render_options();
+                    draw.set_transform(Matrix::IDENTITY);
+                    if clip.is_some() {
+                        draw.pop_clip();
+                    }
+                    draw.dispose();
+                    outputs.push(target.pixels());
+                }
+                // The box tests the same four samples a pixel against the
+                // corner ellipses themselves, the path against its curves
+                // flattened to a quarter of a pixel: a sample that close to a
+                // corner may land on either side. Where a corner runs nearly
+                // along a row of samples (a pill's ends), both samples of the
+                // row may: at most two samples (a quarter of the pixel's
+                // coverage each, 26 levels with this brush) apart.
+                let differing = outputs[0]
+                    .chunks(4)
+                    .zip(outputs[1].chunks(4))
+                    .filter(|(a, b)| a.iter().zip(*b).any(|(a, b)| a.abs_diff(*b) > 1))
+                    .count();
+                let largest = outputs[0]
+                    .iter()
+                    .zip(&outputs[1])
+                    .map(|(a, b)| a.abs_diff(*b))
+                    .max()
+                    .unwrap_or(0);
+                assert!(
+                    differing <= 48 && largest <= 53,
+                    "rounded box changed coverage: {rect:?} {radius} {transform:?} {clip:?}: \
+                     {differing} pixels, up to {largest}"
+                );
+            }
+        }
+    }
+}
+
+#[cfg(feature = "metal")]
+#[test]
 fn boxes_keep_fractional_coverage_inside_analytic_clips() {
     let brush =
         ImmutableSolidColorBrush::new(ferroui_base::media::Color::from_argb(160, 90, 130, 200));
