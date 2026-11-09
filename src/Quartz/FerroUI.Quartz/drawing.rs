@@ -162,11 +162,7 @@ impl DrawingContext {
             #[cfg(feature = "metal")]
             ffi::qm_text_options(
                 c,
-                self.text_options
-                    .last()
-                    .copied()
-                    .unwrap_or_default()
-                    .text_hinting_mode as i32,
+                native_hinting(self.text_options.last().copied().unwrap_or_default().text_hinting_mode),
             );
             ffi::q_glyphs(
                 c,
@@ -924,7 +920,7 @@ impl IDrawingContextImpl for DrawingContext {
                         g,
                         b,
                         a,
-                        text.text_hinting_mode as i32,
+                        native_hinting(text.text_hinting_mode),
                         (mode == TextRenderingMode::Alias || options.edge_mode == EdgeMode::Aliased)
                             as i32,
                         options.bitmap_interpolation_mode as i32,
@@ -1165,5 +1161,17 @@ impl IDrawingContextImpl for DrawingContext {
 impl Drop for DrawingContext {
     fn drop(&mut self) {
         self.dispose()
+    }
+}
+
+/// The hinting the renderer is given for `mode`: an unspecified mode is strong hinting, as the Skia
+/// backend resolves it (`text_rendering_settings.rs`). The renderer draws hinted text from Core
+/// Text glyph images in its atlas and unhinted text (`None`) as outlines; passing the unspecified
+/// mode through drew every text that asked for nothing as outlines flattened on the processor.
+#[cfg(feature = "metal")]
+fn native_hinting(mode: ferroui_base::media::TextHintingMode) -> i32 {
+    match mode {
+        ferroui_base::media::TextHintingMode::Unspecified => ferroui_base::media::TextHintingMode::Strong as i32,
+        mode => mode as i32,
     }
 }
