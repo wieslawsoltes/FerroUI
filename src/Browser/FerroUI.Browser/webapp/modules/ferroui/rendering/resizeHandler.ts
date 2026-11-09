@@ -5,6 +5,23 @@ type ResizeObserverWithCallbacks = {
 export class ResizeHandler {
     private static resizeObserver?: ResizeObserverWithCallbacks;
 
+    // A synchronous estimate for construction, before the first observer delivery. Measure the
+    // untransformed content box; the observer will refine its device-pixel rounding.
+    public static getInitialSize(element: HTMLElement): [number, number, number] {
+        const dpr = window.devicePixelRatio;
+        if (element.getClientRects().length === 0) { return [0, 0, dpr]; }
+        const style = getComputedStyle(element);
+        let width = parseFloat(style.width);
+        let height = parseFloat(style.height);
+        if (style.boxSizing === "border-box") {
+            width -= parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+                parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+            height -= parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) +
+                parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+        }
+        return [Math.max(0, Math.round(width * dpr)), Math.max(0, Math.round(height * dpr)), dpr];
+    }
+
     public static observeSize(element: HTMLElement, callback: (width: number, height: number, dpr: number) => void) : (() => void) {
         if (!this.resizeObserver) {
             this.resizeObserver = new ResizeObserver(this.onResize) as ResizeObserverWithCallbacks;

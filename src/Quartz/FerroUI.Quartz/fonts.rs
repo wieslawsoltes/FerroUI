@@ -17,9 +17,55 @@ pub struct NativeFont {
     style: FontStyle,
     stretch: FontStretch,
     data: Option<Arc<[u8]>>,
+    /// The shapes of the glyphs drawn with the font so far (`GlyphShapes`).
+    pub(crate) shapes: GlyphShapes,
 }
 // SAFETY: a CTFont is immutable and Core Text permits concurrent access to font objects.
 unsafe impl Sync for NativeFont {}
+
+/// The ink bounds and the outline of one glyph at one size and simulation, relative to its
+/// origin.
+#[derive(Clone)]
+pub(crate) struct GlyphShape {
+    /// `x`, `y`, `width`, `height`; not finite or empty for a glyph without ink.
+    pub bounds: [f64; 4],
+    /// The outline, simulations applied, and its bounds (`None` for an empty outline); `None`
+    /// for a glyph without one (a bitmap glyph).
+    pub outline: Option<(Arc<kurbo::BezPath>, Option<kurbo::Rect>)>,
+}
+
+/// The glyph shapes of a font, by size, simulations and glyph. An addition: a glyph run asked
+/// Core Text for the bounds and the outline of every glyph it held, each through a copy of the
+/// font at the run's size, every time it was created; text that changes every frame created its
+/// runs every frame. A glyph's shape at a size does not change: it is asked for once.
+#[derive(Default)]
+pub(crate) struct GlyphShapes(std::sync::Mutex<std::collections::HashMap<(u64, u8, u16), GlyphShape>>);
+
+impl GlyphShapes {
+    /// The most shapes kept: past it the cache starts again (a font drawn at many sizes).
+    const LIMIT: usize = 16384;
+
+    /// The shape of `glyph` at `size` with `simulations`, made with `make` the first time.
+    pub(crate) fn get(
+        &self,
+        size: f64,
+        simulations: FontSimulations,
+        glyph: u16,
+        make: impl FnOnce() -> GlyphShape,
+    ) -> GlyphShape {
+        let key = (size.to_bits(), simulations.bits(), glyph);
+        if let Some(shape) = self.0.lock().unwrap_or_else(|e| e.into_inner()).get(&key) {
+            return shape.clone();
+        }
+        let shape = make();
+        let mut shapes = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        if shapes.len() >= Self::LIMIT {
+            shapes.clear();
+        }
+        shapes.insert(key, shape.clone());
+        shape
+    }
+}
 impl NativeFont {
     pub unsafe fn from_raw(p: ffi::Ptr) -> Arc<Self> {
         let handle = Owned::new(p);
@@ -40,6 +86,7 @@ impl NativeFont {
                 FontStyle::Italic
             },
             stretch: FontStretch::from_i32(info[2]).unwrap_or(FontStretch::Normal),
+            shapes: GlyphShapes::default(),
         })
     }
     pub fn raw(&self) -> ffi::Ptr {

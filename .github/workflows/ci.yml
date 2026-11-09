@@ -757,6 +757,7 @@ jobs:
         run: |
           node scripts/browser/build-webapp.mjs build
           (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
+          node scripts/browser/tests/canvas_size.test.mjs
       - name: Skia features of the target
         run: |
           # An unsupported feature combination makes the Skia bindings build Skia from source.
