@@ -682,3 +682,17 @@ one (a revision of the children kept by each server visual); the gate refused it
 `wall/20+pointer`): the still wall's container holds the changing clock and cursor beside its
 static tiles, so the revision of its children changes with every frame and the bookkeeping only
 added cost.
+
+### 9.7 A text block keeps a left-aligned layout whose lines fit a narrower width
+
+A text block lays its text out again whenever its constraint changes, except in the cases upstream
+and section 9 already keep. In the gauntlet each text block builds two layouts a frame: one for its
+measure and one for its arrange, at another width. A layout is now also kept for a new width when
+it is left-aligned, its lines all fit the new width, and the new width is not larger than the one
+it was created for or it was created without a width. Wrapping and trimming are greedy: each line
+ends at the furthest point that fits the larger width, and that point still fits the smaller one,
+so the lines are the ones a new layout has; the height rule of the kept layouts is unchanged.
+Tests: `a_layout_whose_lines_fit_the_new_width_is_kept_and_has_the_lines_of_a_new_one`, and the
+widths of `a_layout_that_depends_on_the_width_is_created_again` now make the lines change.
+Counters (`--features counters`): text layouts created 5,844 to 5,143 a frame (-12 %); local gate:
+gauntlet UI thread -1.6 % (within noise), no metric regressed.

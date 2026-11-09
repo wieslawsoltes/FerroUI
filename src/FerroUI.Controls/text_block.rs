@@ -1134,10 +1134,25 @@ impl TextBlock {
 
         let created_for = self.constraint.get();
 
+        // Whether the lines of the layout are the ones a layout created for the width of
+        // `constraint` would have (FerroUI deviation, desktop-performance.md, section 9.7):
+        // - a left-aligned layout that neither wraps nor trims has the same lines at any width;
+        // - every layout has its own lines at the width it was created for;
+        // - a left-aligned layout whose lines all fit the new width has the same lines when the
+        //   new width is not larger (wrapping and trimming are greedy: each line already ends at
+        //   the furthest point that fits the larger width, and that point still fits) or when it
+        //   was created without a width (no line was wrapped or trimmed for width).
+        let left = self.layout_text_alignment.get() == TextAlignment::Left;
+        let width_independent = left
+            && self.text_wrapping() == TextWrapping::NoWrap
+            && Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none());
+        let same_lines = width_independent
+            || constraint.width == created_for.width
+            || (left
+                && text_layout.width_including_trailing_whitespace() <= constraint.width
+                && (constraint.width <= created_for.width || created_for.width == f64::INFINITY));
         if self.has_complex_content()
-            || self.text_wrapping() != TextWrapping::NoWrap
-            || !Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none())
-            || self.layout_text_alignment.get() != TextAlignment::Left
+            || !same_lines
             || created_for.width.is_nan()
             || created_for.height.is_nan()
             || MathUtilities::is_zero(created_for.width)
