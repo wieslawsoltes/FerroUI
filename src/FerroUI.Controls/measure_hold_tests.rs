@@ -165,3 +165,15 @@ fn a_centered_text_holds_only_its_width_and_so_do_its_parents() {
     assert!(header_hold.is_some_and(|hold| hold.width.1 - hold.width.0 > 1.0), "the header grid holds a range");
 }
 
+
+/// A change of `UseLayoutRounding` invalidates the measure (section 9.15): a hold must not keep a
+/// size measured with the other rounding.
+#[test]
+fn a_change_of_layout_rounding_invalidates_the_measure() {
+    let _scope = test_scope();
+    let root = tree(false, false);
+    layout(&root, 200.0);
+    assert!(root.is_measure_valid());
+    root.set_use_layout_rounding(!root.use_layout_rounding());
+    assert!(!root.is_measure_valid());
+}

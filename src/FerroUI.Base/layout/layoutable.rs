@@ -503,6 +503,10 @@ impl Layoutable {
             Self::margin_property().as_property(),
             Self::horizontal_alignment_property().as_property(),
             Self::vertical_alignment_property().as_property(),
+            // Upstream measures with the new rounding at the next measure at another size; with
+            // measure holds that measure may not come, so the change invalidates the measure
+            // (desktop-performance.md section 9.15).
+            Self::use_layout_rounding_property().as_property(),
         ]);
     }
 

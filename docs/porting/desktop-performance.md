@@ -861,7 +861,9 @@ size, as upstream compares them. The types that report a hold:
   constraints the grid's width does not change. Other grids hold only their own size.
 
 An infinite upper bound includes infinity, so a child measured at an infinite size along a stack
-is inside its own hold. Tests: `layout/measure_hold.rs` (the mapping through margins, limits and
+is inside its own hold. A hold relies on everything a measure reads either being the available
+size or invalidating the measure when it changes; `UseLayoutRounding`, which upstream does not
+mark as affecting the measure (the next measure at another size picks it up), now invalidates it. Tests: `layout/measure_hold.rs` (the mapping through margins, limits and
 the desired size), `measure_hold_tests.rs` in the controls (a tree of borders, a stack, a
 decorator and wrapped, unwrapped and centered text blocks, measured at a width and then at every
 quarter-pixel width 40 around it, has the desired sizes and arranged bounds of a tree laid out at
