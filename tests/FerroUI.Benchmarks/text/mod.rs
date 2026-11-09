@@ -8,6 +8,7 @@ pub mod huge_text_layout;
 pub mod rich_text_editing;
 pub mod shaped_buffer_ops;
 pub mod text_layout_profile;
+pub mod text_pipeline_benchmark;
 pub mod text_run_cache_benchmark;
 pub mod unicode_break_enumerator_benchmark;
 pub mod unicode_segmentation_scaling_benchmark;
@@ -26,4 +27,5 @@ pub fn register(registry: &mut Registry) {
     unicode_trie_benchmark::register(registry);
     glyph_bounds_benchmark::register(registry);
     rich_text_editing::register(registry);
+    text_pipeline_benchmark::register(registry);
 }
