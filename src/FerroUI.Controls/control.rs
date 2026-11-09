@@ -23,7 +23,7 @@ use ferroui_base::{
     Ref, Size, StyledElement, StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use std::cell::{Cell, OnceCell, RefCell};
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -44,27 +44,49 @@ enum LoadState {
 #[derive(Default)]
 struct LoadedQueues {
     is_loaded_processing: bool,
-    /// The queued controls in insertion order.
-    queue: Vec<Ref<Control>>,
-    /// The members of `queue`, for constant time lookups.
-    queued: HashSet<Ref<Control>>,
+    /// The queued controls in insertion order; a removed control leaves an empty slot, so that
+    /// removing is a constant time operation, as upstream's set, the order of the others is kept
+    /// and the control is released at once (a FerroUI deviation, desktop-performance.md section
+    /// 9.18; removing a control searched the queue, so detaching a tree of n controls waiting
+    /// for Loaded took time in n squared).
+    queue: Vec<Option<Ref<Control>>>,
+    /// The queued controls, with their slot in `queue`.
+    queued: HashMap<Ref<Control>, usize>,
     processing_queue: VecDeque<Ref<Control>>,
 }
 
 impl LoadedQueues {
     fn add(&mut self, control: Ref<Control>) -> bool {
-        if self.queued.insert(control.clone()) {
-            self.queue.push(control);
-            true
-        } else {
-            false
+        if self.queued.contains_key(&control) {
+            return false;
         }
+        self.queued.insert(control.clone(), self.queue.len());
+        self.queue.push(Some(control));
+        true
     }
 
     fn remove(&mut self, control: &Ref<Control>) {
-        if self.queued.remove(control) {
-            self.queue.retain(|c| c != control);
+        let Some(slot) = self.queued.remove(control) else { return };
+        self.queue[slot] = None;
+        if self.queue.len() > 64 && self.queue.len() > 2 * self.queued.len() {
+            // More empty slots than queued controls: drop them, a cost spread over the removals.
+            self.queue.retain(Option::is_some);
+            for (slot, control) in self.queue.iter().enumerate() {
+                if let Some(control) = control {
+                    self.queued.insert(control.clone(), slot);
+                }
+            }
         }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.queued.is_empty()
+    }
+
+    /// The queued controls in their order, the queue left empty.
+    fn take(&mut self) -> Vec<Ref<Control>> {
+        self.queued.clear();
+        std::mem::take(&mut self.queue).into_iter().flatten().collect()
     }
 }
 
@@ -554,8 +576,7 @@ impl Control {
         // Loaded callback/event itself.
         LOADED.with(|loaded| {
             let mut loaded = loaded.borrow_mut();
-            let queue = std::mem::take(&mut loaded.queue);
-            loaded.queued.clear();
+            let queue = loaded.take();
             loaded.processing_queue.extend(queue);
         });
 
@@ -578,7 +599,7 @@ impl Control {
 
                     // Restart if any controls were added to the queue while
                     // processing.
-                    if !loaded.queue.is_empty() {
+                    if !loaded.is_empty() {
                         loaded.is_loaded_processing = true;
                         true
                     } else {
@@ -696,5 +717,50 @@ impl ISetterValue for Control {
         }
 
         panic!("Cannot use a control as a Setter value. Wrap the control in a <Template>.");
+    }
+}
+
+#[cfg(test)]
+mod loaded_queue_tests {
+    use super::{Control, LoadedQueues};
+    use ferroui_base::Ref;
+
+    /// Desktop-performance.md section 9.18: removing keeps the order of the other controls,
+    /// releases the removed one at once and, past many removals, compacts the queue.
+    #[test]
+    fn removing_keeps_the_order_and_releases_the_control() {
+        let _scope = crate::test_support::test_scope();
+        let controls: Vec<Ref<Control>> = (0..200).map(|_| Control::new()).collect();
+        let mut queue = LoadedQueues::default();
+        for control in &controls {
+            assert!(queue.add(control.clone()));
+        }
+        assert!(!queue.add(controls[0].clone()), "a queued control is not queued twice");
+
+        queue.remove(&controls[5]);
+        // A removed control is released at once: nothing else holds this one.
+        let released = Control::new();
+        queue.add(released.clone());
+        let weak = released.downgrade();
+        queue.remove(&released);
+        drop(released);
+        assert!(weak.upgrade().is_none(), "the queue keeps no reference to a removed control");
+
+        // Remove most of them: the queue compacts, and the order of the rest stays.
+        for control in controls.iter().skip(10).take(150) {
+            queue.remove(control);
+        }
+        assert!(queue.queue.len() < 200);
+        queue.add(controls[5].clone());
+        let taken = queue.take();
+        let expected: Vec<Ref<Control>> = controls
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| *index != 5 && !(10..160).contains(index))
+            .map(|(_, control)| control.clone())
+            .chain(std::iter::once(controls[5].clone()))
+            .collect();
+        assert_eq!(expected, taken);
+        assert!(queue.is_empty());
     }
 }
