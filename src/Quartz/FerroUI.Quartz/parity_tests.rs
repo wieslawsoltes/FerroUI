@@ -1210,6 +1210,82 @@ fn rounded_boxes_match_their_path_coverage() {
 
 #[cfg(feature = "metal")]
 #[test]
+fn analytic_clips_match_mask_clips_of_their_shapes() {
+    use kurbo::Shape;
+    let brush = ImmutableSolidColorBrush::new(Colors::BLACK);
+    let rect = Rect::new(12.25, 10.5, 40.5, 30.75);
+    for radius in [0., 6.] {
+        let rounded = RoundedRect::new(
+            rect,
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+            Vector::new(radius, radius),
+        );
+        let shape = Geometry::new(
+            kurbo::RoundedRect::new(rect.x, rect.y, rect.right(), rect.bottom(), radius)
+                .to_path(0.001),
+            FillRule::NonZero,
+        );
+        for transform in [
+            Matrix::IDENTITY,
+            Matrix::create_scale(1.5, 1.25),
+            Matrix::create_rotation(0.3) * Matrix::create_translation(20., 5.),
+            Matrix::create_rotation(-0.8) * Matrix::create_scale(1.2, 0.9) * Matrix::create_translation(30., 60.),
+        ] {
+            let mut outputs = Vec::new();
+            for analytic in [false, true] {
+                let target = Bitmap::new(PixelSize::new(100, 100), Vector::new(96., 96.));
+                let mut draw = target.drawing(false, None);
+                draw.clear(Colors::WHITE);
+                draw.set_transform(transform);
+                if analytic {
+                    draw.push_clip_rounded(rounded);
+                } else {
+                    draw.push_geometry_clip(&*shape);
+                }
+                draw.set_transform(Matrix::IDENTITY);
+                draw.draw_rectangle(
+                    Some(&brush),
+                    None,
+                    RoundedRect::from_rect(Rect::new(0., 0., 100., 100.)),
+                    &Default::default(),
+                );
+                if analytic {
+                    draw.pop_clip();
+                } else {
+                    draw.pop_geometry_clip();
+                }
+                draw.dispose();
+                outputs.push(target.pixels());
+            }
+            // The mask takes four samples a pixel, the analytic clip its
+            // distance to the edge: they differ only on the edge, by part of
+            // a pixel's coverage.
+            let edge = 2.5 * (rect.width + rect.height) * 1.5 + 16.;
+            let differing = outputs[0]
+                .chunks(4)
+                .zip(outputs[1].chunks(4))
+                .filter(|(a, b)| a.iter().zip(*b).any(|(a, b)| a.abs_diff(*b) > 2))
+                .count();
+            let largest = outputs[0].iter().zip(&outputs[1]).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            assert!(
+                (differing as f64) <= edge && largest <= 96,
+                "analytic clip differs: {radius} {transform:?}: {differing} pixels, up to {largest}"
+            );
+            // The covered area: the coverage of every pixel, summed.
+            let area = |pixels: &[u8]| pixels.chunks(4).map(|p| (255 - p[0]) as f64 / 255.).sum::<f64>();
+            let (mask, clip) = (area(&outputs[0]), area(&outputs[1]));
+            assert!(
+                (mask - clip).abs() <= mask * 0.01 + 2.,
+                "analytic clip changed the area: {radius} {transform:?}: {mask} {clip}"
+            );
+        }
+    }
+}
+
+#[cfg(feature = "metal")]
+#[test]
 fn boxes_keep_fractional_coverage_inside_analytic_clips() {
     let brush =
         ImmutableSolidColorBrush::new(ferroui_base::media::Color::from_argb(160, 90, 130, 200));

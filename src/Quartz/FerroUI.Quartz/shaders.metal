@@ -8,7 +8,7 @@ struct Params {
   float4 color, gradient, inverse, translation, src, dst, clip, shadow, target;
   uint stops, clipped, flipped, reserved;
   uint edgeRows, edgeOriginY, edgeStride, edgePad;
-  float4 rclip, rradius, sclip;
+  float4 rclip, rradius, sclip, rmap;
 };
 
 // The coverage of a rectangle clip (`clipped & 4`): the area of the pixel
@@ -19,21 +19,30 @@ static float clip_rectangle(float2 c, float4 rect) {
 }
 
 // The coverage of the analytic clip (`clipped & 2`) at a pixel center: a
-// rectangle with elliptical corners of radii `rad`, antialiased over a pixel.
-static float clip_rounded(float2 c, float4 rect, float2 rad) {
+// rectangle with elliptical corners of radii `rad.xy` (none when zero),
+// antialiased over a pixel. A turned clip (`map` not zero) is in its own space:
+// the center is mapped into it through the inverse transform `map` and the
+// translation `rad.zw`, and its distances scaled back to pixels.
+static float clip_rounded(float2 c, float4 rect, float4 rad, float4 map) {
+  float scale = 1;
+  if (any(map != 0)) {
+    c = float2(map.x * c.x + map.z * c.y, map.y * c.x + map.w * c.y) + rad.zw;
+    scale = rsqrt(abs(map.x * map.w - map.y * map.z));
+  }
   float2 mid = (rect.xy + rect.zw) * 0.5f;
   float2 halfSize = (rect.zw - rect.xy) * 0.5f;
   float2 d = abs(c - mid) - halfSize;
-  float coverage = saturate(0.5f - max(d.x, d.y));
+  float coverage = saturate(0.5f - max(d.x, d.y) * scale);
   if (rad.x > 0 && rad.y > 0) {
-    float2 k = d + rad;
+    float2 k = d + rad.xy;
     if (k.x > 0 && k.y > 0) {
-      float distance = (length(k / rad) - 1.0f) * min(rad.x, rad.y);
-      coverage = min(coverage, saturate(0.5f - distance));
+      float distance = (length(k / rad.xy) - 1.0f) * min(rad.x, rad.y);
+      coverage = min(coverage, saturate(0.5f - distance * scale));
     }
   }
   return coverage;
 }
+
 // Whether the sample `q` is inside the box `box` (low and high corners, the
 // low edge included, the high one excluded) with elliptical corners of radii
 // `rad` (none when either is zero).
@@ -268,7 +277,7 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
@@ -775,7 +784,7 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;
@@ -864,7 +873,7 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
                : 0;
   }
   if (p.clipped & 2)
-    mask *= clip_rounded(center, p.rclip, p.rradius.xy);
+    mask *= clip_rounded(center, p.rclip, p.rradius, p.rmap);
   if (p.clipped & 4)
     mask *= clip_rectangle(center, p.sclip);
   device const float4 *pathEdges = edges;

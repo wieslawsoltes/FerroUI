@@ -25,6 +25,9 @@ typedef struct {
   // bottom) with corner radii (x, y) (`clipped & 2`), and a rectangle
   // (`clipped & 4`), the intersection of the rectangle clips in effect.
   vector_float4 rclip, rradius, sclip;
+  // The inverse transform of a turned analytic clip (`rclip` then in its own
+  // space, its translation in `rradius.zw`); zero when the clip is in pixels.
+  vector_float4 rmap;
 } QParams;
 typedef struct {
   vector_float4 color, location;
@@ -212,7 +215,7 @@ void qm_record_fault(uint64_t generation) {
 @property(nonatomic) id<MTLTexture> clip;
 @property(nonatomic) CGRect clipRect;
 // The analytic clip: a rounded rectangle in canvas pixels (`rclipped`).
-@property(nonatomic) vector_float4 rclip, rradius, sclip;
+@property(nonatomic) vector_float4 rclip, rradius, sclip, rmap;
 @property(nonatomic) int rclipped, sclipped;
 @property(nonatomic) vector_float4 shadow, shadowColor, gradientOptions;
 @property(nonatomic) int blendMode, aliased, interpolation, hinting;
@@ -1130,6 +1133,7 @@ static QState *copy_state(QState *s) {
   n.hinting = s.hinting;
   n.rclip = s.rclip;
   n.rradius = s.rradius;
+  n.rmap = s.rmap;
   n.rclipped = s.rclipped;
   n.sclip = s.sclip;
   n.sclipped = s.sclipped;
@@ -1160,6 +1164,7 @@ static QParams params(QMetalSurface *s) {
     p.clipped |= 2;
     p.rclip = state.rclip;
     p.rradius = state.rradius;
+    p.rmap = state.rmap;
   }
   if (state.sclipped) {
     p.clipped |= 4;
@@ -1979,10 +1984,35 @@ int qm_clip_rounded(void *surface, const double *rect) {
          ry = rect[5];
   BOOL axes = t.b == 0 && t.c == 0 && t.a != 0 && t.d != 0;
   BOOL rounded = rx > 0 && ry > 0 && isfinite(rx) && isfinite(ry);
+  BOOL finite = w >= 0 && h >= 0 && isfinite(x) && isfinite(y) &&
+                isfinite(w) && isfinite(h);
+  double determinant = t.a * t.d - t.b * t.c;
+  // A clip under a transform that turns it is the analytic clip in its own
+  // space, mapped through the inverse transform, when no other is in effect.
+  BOOL turned = !axes && finite && !s.state.clip && !s.state.rclipped &&
+                fabs(determinant) > 1e-12 && isfinite(determinant);
   // A mask holds every clip before it; a rounded clip in a rounded clip is
   // not one rounded rectangle. Those clip with the path.
-  if (axes && !s.state.clip && !(rounded && s.state.rclipped) && w >= 0 &&
-      h >= 0 && isfinite(x) && isfinite(y) && isfinite(w) && isfinite(h)) {
+  if (turned) {
+    BOOL clipped = s.state.sclipped;
+    CGRect device = CGRectApplyAffineTransform(CGRectMake(x, y, w, h), t);
+    CGAffineTransform inverse = CGAffineTransformInvert(t);
+    double radiusX = rounded ? MIN(rx, w / 2) : 0;
+    double radiusY = rounded ? MIN(ry, h / 2) : 0;
+    s.state.rclip = (vector_float4){x, y, x + w, y + h};
+    s.state.rradius =
+        (vector_float4){radiusX, radiusY, inverse.tx, inverse.ty};
+    s.state.rmap = (vector_float4){inverse.a, inverse.b, inverse.c, inverse.d};
+    s.state.rclipped = 1;
+    CGRect box = CGRectIntersection(
+        CGRectIntegral(device),
+        CGRectMake(0, 0, s.storage.canvas.width, s.storage.canvas.height));
+    if (clipped)
+      box = CGRectIntersection(box, s.state.clipRect);
+    s.state.clipRect = CGRectIsNull(box) ? CGRectZero : box;
+    applied = 1;
+  } else if (axes && !s.state.clip && !(rounded && s.state.rclipped) &&
+             finite) {
     BOOL clipped = s.state.rclipped || s.state.sclipped;
     CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), t);
     CGPoint b = CGPointApplyAffineTransform(CGPointMake(x + w, y + h), t);
@@ -1993,6 +2023,7 @@ int qm_clip_rounded(void *surface, const double *rect) {
       double radiusY = MIN(ry * fabs(t.d), (bottom - top) / 2);
       s.state.rclip = (vector_float4){left, top, right, bottom};
       s.state.rradius = (vector_float4){radiusX, radiusY, 0, 0};
+      s.state.rmap = (vector_float4){0, 0, 0, 0};
       s.state.rclipped = 1;
     } else if (s.state.sclipped) {
       vector_float4 old = s.state.sclip;
