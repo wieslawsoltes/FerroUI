@@ -147,6 +147,14 @@ impl ServerCompositor {
         lights.push(light);
     }
 
+    /// Whether a light was registered and may still be alive: a render walk
+    /// asks once, and looks for the lights of a visual only then
+    /// (desktop-performance.md, section 9.24). Lights are registered while
+    /// batches are applied, never during a walk.
+    pub(super) fn has_registered_lights(&self) -> bool {
+        self.lights.borrow().iter().any(|light| light.strong_count() > 0)
+    }
+
     pub(super) fn live_lights(&self) -> Vec<Rc<dyn IServerCompositionLight>> {
         self.lights.borrow().iter().filter_map(Weak::upgrade).filter(|light| !light.is_disposed()).collect()
     }

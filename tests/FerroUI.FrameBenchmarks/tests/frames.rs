@@ -481,11 +481,12 @@ scenes! {
     wall => "wall",
     wall_with_the_pointer => "wall+pointer",
     moves => "moves",
+    lines => "lines",
 }
 
 #[test]
 fn every_scene_has_a_test() {
-    let tested = ["text", "list", "transforms", "width", "wall", "wall+pointer", "moves"];
+    let tested = ["text", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines"];
     for scene in SCENES {
         assert!(tested.contains(&scene.name), "the scene {} has no test", scene.name);
     }

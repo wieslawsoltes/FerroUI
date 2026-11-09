@@ -29,6 +29,9 @@ pub(super) struct RenderContext<'a> {
     stop_at: Option<*const ServerCompositionVisual>,
     /// Whether the render reached `stop_at`.
     stopped: bool,
+    /// Whether the compositor has lights at all, asked once for the walk
+    /// (not from upstream): without lights no visual looks for its light map.
+    lights_registered: bool,
 }
 
 impl<'a> RenderContext<'a> {
@@ -53,12 +56,15 @@ impl<'a> RenderContext<'a> {
             clip = clip.intersect_or_empty(dirty_clip);
         }
 
+        let lights_registered = root_visual.compositor().is_some_and(|compositor| compositor.has_registered_lights());
+
         Self {
             canvas,
             dirty_rects,
             pools,
             render_children,
             root_visual,
+            lights_registered,
             walk_context: TreeWalkContext::new(pools, matrix, clip),
             opacity: 1.0,
             opacity_stack: pools.double_stack_pool.rent(),
@@ -219,7 +225,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
         let clip = self.walk_context.clip;
         // The WinUI lights that reach the content (not from upstream): the
         // content is drawn into a layer and the light map over it.
-        let lit = LitContent::begin(visual, self.canvas);
+        let lit = if self.lights_registered { LitContent::begin(visual, self.canvas) } else { None };
         // The brushes the content paints learn which visual paints them
         // (backdrops, scene lighting).
         let canvas = &mut *self.canvas;

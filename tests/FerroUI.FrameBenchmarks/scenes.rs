@@ -10,9 +10,11 @@ use ferroui_base::media::{
     BoxShadow, BoxShadows, Color, FontFamily, FontWeight, IBrush, RotateTransform, TextWrapping, Transform,
     TransformGroup, Transforms, TranslateTransform,
 };
-use ferroui_base::{CornerRadius, ObjectType, Ref, Thickness, Upcast, Vector};
+use ferroui_base::media::Points;
+use ferroui_base::{CornerRadius, ObjectType, Point, Ref, Thickness, Upcast, Vector};
 use ferroui_controls::documents::TextElement;
 use ferroui_controls::primitives::ScrollBarVisibility;
+use ferroui_controls::shapes::Polyline;
 use ferroui_controls::templates::{FuncDataTemplate, FuncTemplate};
 use ferroui_controls::{
     Border, Canvas, Control, Grid, ItemsControl, ItemsSource, Panel, ScrollViewer, StackPanel, TextBlock,
@@ -82,6 +84,13 @@ pub const SCENES: &[Scene] = &[
         pointer: false,
         guards: "tiles of a canvas that move every frame: arrange only, moves without recording \
                  (section 9.13)",
+    },
+    Scene {
+        name: "lines",
+        build: lines,
+        pointer: false,
+        guards: "charts whose lines change every frame: new geometries, their stroke bounds and \
+                 their drawing, the render walk over plain visuals (section 9.24)",
     },
 ];
 
@@ -420,4 +429,44 @@ fn moves() -> Ref<Control> {
         }
     });
     root(&canvas)
+}
+
+// --- lines ---------------------------------------------------------------------------------------
+
+const CHARTS: usize = 600;
+const CHART_POINTS: usize = 32;
+const CHART_WIDTH: f64 = 96.0;
+const CHART_HEIGHT: f64 = 32.0;
+
+fn lines() -> Ref<Control> {
+    let ink = brush(0xFF0F766E);
+    let panel = WrapPanel::new();
+    panel.set_item_spacing(4.0);
+    panel.set_line_spacing(4.0);
+    let charts: Rc<Vec<Ref<Polyline>>> = Rc::new(
+        (0..CHARTS)
+            .map(|_| {
+                let chart = Polyline::new();
+                chart.set_stroke(Some(ink.clone()));
+                chart.set_stroke_thickness(1.5);
+                chart.set_width(CHART_WIDTH);
+                chart.set_height(CHART_HEIGHT);
+                panel.children().add(&chart);
+                chart
+            })
+            .collect(),
+    );
+    let draw = move |frame: i32| {
+        let step = CHART_WIDTH / (CHART_POINTS - 1) as f64;
+        for (index, chart) in charts.iter().enumerate() {
+            let points = (0..CHART_POINTS).map(|point| {
+                let angle = 0.11 * f64::from(frame) + 0.37 * index as f64 + 0.53 * point as f64;
+                Point::new(point as f64 * step, CHART_HEIGHT * (0.5 + 0.45 * angle.sin()))
+            });
+            chart.set_points(Some(Points::from_items(points)));
+        }
+    };
+    draw(0);
+    Clock::follow(draw);
+    root(&panel)
 }

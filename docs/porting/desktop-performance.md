@@ -595,7 +595,7 @@ What it measures:
   sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
   of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
   layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
-  canvas that move). The harness is the frame gate's; besides the times a frame, every scene
+  canvas that move), `lines` (charts whose lines change every frame). The harness is the frame gate's; besides the times a frame, every scene
   reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
   layout, recording and commit) and their sum (`startup_ms`). Alone:
 
@@ -1071,3 +1071,17 @@ compiler cache (sccache) gave the crate compiled before a change of the native s
 it, and the program ran the other side's native code. The build script now writes a fingerprint of
 what the library is compiled from (the script, the generated header, the headers and the sources)
 as a Rust source of the crate (`interop::NATIVE_SOURCES`), which every such cache reads.
+
+### 9.24 A render walk asks once whether a light is registered
+
+The lights of the composition (`CompositionLight` and its targets, the WinUI lighting API) are
+applied where a visual is drawn: `LitContent::begin` looked, for every visual of every walk, through
+the lights registered with the compositor for those that light the visual (`light_map_of`). An
+application that registers no light, which is most, paid for the look at every visual: 2.5 % of the
+render thread of the gauntlet. The walk now asks the compositor once, when its context is made
+(`ServerCompositor::has_registered_lights`, kept in `RenderContext::lights_registered`), and looks
+for the lights of a visual only when one is registered and alive. Lights are registered while
+batches are applied, never during a walk, so the answer holds for the whole walk. With a light
+registered nothing changes. Tests: the lighting tests of the composition
+(`composition_light_tests.rs`, `composition_winui_lighting_tests.rs`). Gauntlet (tier 16), Skia
+window, render thread: the light lookups go from about 70 to 0 of about 3,070 samples.

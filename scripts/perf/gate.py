@@ -69,7 +69,7 @@ FRAMEWORK_PACKAGE = "ferroui-benchmarks"
 FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
 FRAMEWORK_FILTER = "trees::,layout::ElementConstructionBenchmark"
 # The scenes the window suite opens, and how long each runs.
-WINDOW_SCENES = ["text", "list", "transforms", "wall"]
+WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
@@ -384,7 +384,12 @@ def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) ->
             os.set_blocking(process.stdout.fileno(), False)
             buffer = ""
             while time.monotonic() - start < seconds and process.poll() is None:
-                chunk = process.stdout.read()
+                try:
+                    chunk = process.stdout.read()
+                except BlockingIOError:
+                    # A text stream over a pipe that does not block raises where there is nothing
+                    # to read yet (it does not always return an empty string).
+                    chunk = ""
                 if chunk:
                     buffer += chunk
                     *lines, buffer = buffer.split("\n")
