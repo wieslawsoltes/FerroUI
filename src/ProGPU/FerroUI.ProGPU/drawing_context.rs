@@ -230,9 +230,10 @@ impl ProGpuDrawingContext {
     }
 
     /// The brush of the scene for a brush of the base library, over `bounds` (the local box a
-    /// relative brush is laid out on), with the evaluation space of analytic shapes (`local`)
-    /// or of paths (target coordinates). None for a brush that paints nothing.
-    fn brush(&mut self, brush: &dyn IBrush, bounds: Rect, local: bool) -> Option<u32> {
+    /// relative brush is laid out on). The engine evaluates a brush in the coordinates of the
+    /// shape or the path it fills, before the transform of the state. None for a brush that
+    /// paints nothing.
+    fn brush(&mut self, brush: &dyn IBrush, bounds: Rect) -> Option<u32> {
         let opacity = brush.opacity();
         if let Some(solid) = brush.as_solid_color_brush() {
             let color = native_color(solid.color(), 1.0);
@@ -294,19 +295,29 @@ impl ProGpuDrawingContext {
         } else {
             return None;
         }
-        // Evaluation coordinates to brush coordinates: the inverse of the brush's transform
-        // (about its origin), and for paths the inverse of the draw transform before it.
-        let brush_transform = brush
+        // Evaluation coordinates to brush coordinates: the inverse of the transforms of the
+        // brush. Its relative transform acts on the box as a unit square and comes first, its
+        // transform acts about its origin in the coordinates of the box.
+        let relative = brush
+            .relative_transform()
+            .filter(|_| bounds.width > 0.0 && bounds.height > 0.0)
+            .map(|transform| {
+                Matrix::create_translation(-bounds.x, -bounds.y)
+                    * Matrix::create_scale(1.0 / bounds.width, 1.0 / bounds.height)
+                    * transform.value()
+                    * Matrix::create_scale(bounds.width, bounds.height)
+                    * Matrix::create_translation(bounds.x, bounds.y)
+            })
+            .unwrap_or(Matrix::IDENTITY);
+        let absolute = brush
             .transform()
             .map(|transform| {
                 let origin = brush.transform_origin().to_pixels_rect(bounds);
                 Matrix::create_translation(-origin.x, -origin.y) * transform.value() * Matrix::create_translation(origin.x, origin.y)
             })
             .unwrap_or(Matrix::IDENTITY);
-        let mut coordinate = brush_transform.try_invert().unwrap_or(Matrix::IDENTITY);
-        if !local {
-            coordinate = self.current.transform.try_invert().unwrap_or(Matrix::IDENTITY) * coordinate;
-        }
+        let brush_transform = relative * absolute;
+        let coordinate = brush_transform.try_invert().unwrap_or(Matrix::IDENTITY);
         native.coordinate_transform0 = [coordinate.m11 as f32, coordinate.m21 as f32, coordinate.m31 as f32, 0.0];
         native.coordinate_transform1 = [coordinate.m12 as f32, coordinate.m22 as f32, coordinate.m32 as f32, 0.0];
         let result = self.scene().add_brush(&native, &stops);
@@ -326,7 +337,7 @@ impl ProGpuDrawingContext {
             return;
         }
         let bounds = data.bounds();
-        let Some(brush_index) = self.brush(brush, bounds, false) else { return };
+        let Some(brush_index) = self.brush(brush, bounds) else { return };
         let Some(state) = self.state() else { return };
         let path = progpu_native_scene_path_fill {
             segment_offset: 0,
@@ -693,13 +704,13 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
             let radius = rect.radii_top_left.x;
             let kind = if radius > 0.0 { PROGPU_NATIVE_PRIMITIVE_ROUNDED_RECTANGLE } else { PROGPU_NATIVE_PRIMITIVE_RECTANGLE } as u32;
             if let Some(brush) = brush {
-                if let Some(index) = self.brush(brush, local, true) {
+                if let Some(index) = self.brush(brush, local) {
                     self.analytic(Self::primitive(kind, local, radius, 0.0), index, bounds);
                 }
             }
             if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0 && pen.dash_style().is_none()) {
                 if let Some(stroke_brush) = pen.brush() {
-                    if let Some(index) = self.brush(stroke_brush.as_ref(), local, true) {
+                    if let Some(index) = self.brush(stroke_brush.as_ref(), local) {
                         let half = pen.thickness() / 2.0;
                         let outer = transform_bounds(Rect::new(local.x - half, local.y - half, local.width + pen.thickness(), local.height + pen.thickness()), &self.current.transform);
                         self.analytic(Self::primitive(kind, local, radius, pen.thickness()), index, outer);
@@ -729,14 +740,14 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     fn draw_ellipse(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: Rect) {
         let bounds = transform_bounds(rect, &self.current.transform);
         if let Some(brush) = brush {
-            if let Some(index) = self.brush(brush, rect, true) {
+            if let Some(index) = self.brush(brush, rect) {
                 self.analytic(Self::primitive(PROGPU_NATIVE_PRIMITIVE_ELLIPSE as u32, rect, 0.0, 0.0), index, bounds);
             }
         }
         if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0) {
             let Some(stroke_brush) = pen.brush() else { return };
             if pen.dash_style().is_none() {
-                if let Some(index) = self.brush(stroke_brush.as_ref(), rect, true) {
+                if let Some(index) = self.brush(stroke_brush.as_ref(), rect) {
                     let half = pen.thickness() / 2.0;
                     let outer = transform_bounds(Rect::new(rect.x - half, rect.y - half, rect.width + pen.thickness(), rect.height + pen.thickness()), &self.current.transform);
                     self.analytic(Self::primitive(PROGPU_NATIVE_PRIMITIVE_ELLIPSE as u32, rect, 0.0, pen.thickness()), index, outer);

@@ -2,10 +2,10 @@
 
 use crate::geometry::{PathData, ProGpuGeometry};
 use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, SceneBuilder, TargetFormat};
-use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
-use ferroui_base::media::{BoxShadow, BoxShadows, Color, IBrush, PenLineCap, PenLineJoin};
+use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableSolidColorBrush};
+use ferroui_base::media::{BoxShadow, BoxShadows, Color, GradientSpreadMethod, IBrush, PenLineCap, PenLineJoin};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Matrix, Point, Rect, RoundedRect, Vector};
+use ferroui_base::{Matrix, Point, Rect, RelativePoint, RelativeUnit, RoundedRect, Vector};
 use std::rc::Rc;
 
 const SIZE: u32 = 96;
@@ -121,4 +121,112 @@ fn geometries_fill_and_stroke() {
     assert_eq!([255, 255, 255, 255], pixel(&pixels, 5, 5), "outside");
     let _ = Vector::new(0.0, 0.0);
     let _ = PathData::default();
+}
+
+/// A gradient from red on the left of the box it fills to blue on its right.
+fn left_to_right() -> Rc<ImmutableLinearGradientBrush> {
+    Rc::new(ImmutableLinearGradientBrush::new(
+        &[
+            ImmutableGradientStop::new(0.0, Color::from_rgb(255, 0, 0)),
+            ImmutableGradientStop::new(1.0, Color::from_rgb(0, 0, 255)),
+        ],
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0.0, 0.5, RelativeUnit::Relative)),
+        Some(RelativePoint::new(1.0, 0.5, RelativeUnit::Relative)),
+        None,
+    ))
+}
+
+fn is_reddish(pixel: [u8; 4]) -> bool {
+    pixel[0] > 190 && pixel[2] < 65 && pixel[1] < 10
+}
+
+fn is_bluish(pixel: [u8; 4]) -> bool {
+    pixel[2] > 190 && pixel[0] < 65 && pixel[1] < 10
+}
+
+fn is_purple(pixel: [u8; 4]) -> bool {
+    (100..156).contains(&pixel[0]) && (100..156).contains(&pixel[2]) && pixel[1] < 10
+}
+
+/// A gradient is laid out on the box of what it fills, wherever the transform puts that box:
+/// under a translation and a scale, for the analytic shapes and for a path.
+#[test]
+fn gradients_follow_the_box_they_fill() {
+    let Some(device) = device() else { return };
+    let brush = left_to_right();
+    let brush: &dyn IBrush = brush.as_ref();
+    let transform = Matrix::create_scale(2.0, 2.0) * Matrix::create_translation(8.0, 8.0);
+
+    // Local box (4, 4) to (36, 20): device (16, 16) to (80, 48).
+    let shapes: [(&str, Box<dyn Fn(&mut ProGpuDrawingContext)>); 4] = [
+        ("rectangle", Box::new(|context| {
+            context.draw_rectangle(Some(brush), None, RoundedRect::from(Rect::new(4.0, 4.0, 32.0, 16.0)), &BoxShadows::default());
+        })),
+        ("rounded rectangle", Box::new(|context| {
+            let rect = RoundedRect::from_uniform_radii(Rect::new(4.0, 4.0, 32.0, 16.0), Vector::new(2.0, 2.0));
+            context.draw_rectangle(Some(brush), None, rect, &BoxShadows::default());
+        })),
+        ("ellipse", Box::new(|context| {
+            context.draw_ellipse(Some(brush), None, Rect::new(4.0, 4.0, 32.0, 16.0));
+        })),
+        ("path", Box::new(|context| {
+            let geometry = ProGpuGeometry::new(PathData::ellipse(Rect::new(4.0, 4.0, 32.0, 16.0)));
+            context.draw_geometry(Some(brush), None, geometry.as_ref());
+        })),
+    ];
+    for (name, draw) in &shapes {
+        let pixels = render(&device, |context| {
+            context.set_transform(transform);
+            draw(context);
+        });
+        let (left, middle, right) = (pixel(&pixels, 20, 32), pixel(&pixels, 48, 32), pixel(&pixels, 76, 32));
+        assert!(is_reddish(left), "{name}: the left of the gradient: {left:?}");
+        assert!(is_purple(middle), "{name}: the middle of the gradient: {middle:?}");
+        assert!(is_bluish(right), "{name}: the right of the gradient: {right:?}");
+    }
+
+    // Turned a quarter: the box is device (48, 16) to (80, 80) and the gradient runs down.
+    let turned = Matrix::create_scale(2.0, 2.0) * Matrix::create_rotation(std::f64::consts::FRAC_PI_2) * Matrix::create_translation(88.0, 8.0);
+    for (name, draw) in &shapes {
+        let pixels = render(&device, |context| {
+            context.set_transform(turned);
+            draw(context);
+        });
+        let (top, middle, bottom) = (pixel(&pixels, 64, 20), pixel(&pixels, 64, 48), pixel(&pixels, 64, 76));
+        assert!(is_reddish(top), "{name}, turned: the start of the gradient: {top:?}");
+        assert!(is_purple(middle), "{name}, turned: the middle of the gradient: {middle:?}");
+        assert!(is_bluish(bottom), "{name}, turned: the end of the gradient: {bottom:?}");
+    }
+}
+
+/// The relative transform of a brush acts on the box as a unit square: mirrored there, the
+/// gradient runs the other way.
+#[test]
+fn the_relative_transform_of_a_brush_acts_on_the_unit_square() {
+    use ferroui_base::media::immutable::ImmutableTransform;
+    let Some(device) = device() else { return };
+    let mirrored = Matrix::create_scale(-1.0, 1.0) * Matrix::create_translation(1.0, 0.0);
+    let brush = ImmutableLinearGradientBrush::new(
+        &[
+            ImmutableGradientStop::new(0.0, Color::from_rgb(255, 0, 0)),
+            ImmutableGradientStop::new(1.0, Color::from_rgb(0, 0, 255)),
+        ],
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0.0, 0.5, RelativeUnit::Relative)),
+        Some(RelativePoint::new(1.0, 0.5, RelativeUnit::Relative)),
+        Some(Rc::new(ImmutableTransform::new(mirrored))),
+    );
+    let pixels = render(&device, |context| {
+        context.draw_rectangle(Some(&brush as &dyn IBrush), None, RoundedRect::from(Rect::new(16.0, 16.0, 64.0, 32.0)), &BoxShadows::default());
+    });
+    let (left, right) = (pixel(&pixels, 20, 32), pixel(&pixels, 76, 32));
+    assert!(is_bluish(left), "the left of the mirrored gradient: {left:?}");
+    assert!(is_reddish(right), "the right of the mirrored gradient: {right:?}");
 }
