@@ -421,7 +421,9 @@ fn measure(bench: &str, pointer: Option<Point>, screen: impl FnOnce() -> Ref<Con
     gate.run(warmup);
     gate.move_pointer();
     gate.run(warmup.min(10));
+    let counters = ferroui_base::diagnostics::perf_counters::snapshot();
     let run = gate.run(frames);
+    let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
 
     let per_frame = |time: Duration| time.as_secs_f64() * 1000.0 / f64::from(run.frames);
@@ -440,6 +442,10 @@ fn measure(bench: &str, pointer: Option<Point>, screen: impl FnOnce() -> Ref<Con
         (HEIGHT * SCALING) as i32,
         1000.0 / wall
     );
+    // With the feature `counters`: the work of the framework per frame (nothing without it).
+    if cfg!(feature = "counters") {
+        println!("{bench} counters:\n{}", counters.report_per(u64::from(run.frames), "frame"));
+    }
 }
 
 #[test]

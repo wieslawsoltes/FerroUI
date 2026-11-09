@@ -744,6 +744,7 @@ impl Layoutable {
 
         if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
             let previous_desired_size = self.desired_size();
+            crate::perf_count!(MeasuresExecuted);
 
             self.is_measure_valid.set(true);
 
@@ -781,6 +782,7 @@ impl Layoutable {
 
         if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
             self.is_arrange_valid.set(true);
+            crate::perf_count!(ArrangesExecuted);
             self.arrange_core(rect);
             self.previous_arrange.set(Some(rect));
         }

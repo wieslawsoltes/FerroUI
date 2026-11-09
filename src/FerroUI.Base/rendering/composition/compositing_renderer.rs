@@ -293,6 +293,7 @@ impl CompositingRenderer {
             let Some(comp) = visual.composition_visual() else { continue };
 
             visual.synchronize_composition_properties();
+            crate::perf_count!(VisualsRecorded);
 
             let draw_list = {
                 struct ResetRecorder<'a>(&'a RefCell<RenderDataDrawingContext>);
