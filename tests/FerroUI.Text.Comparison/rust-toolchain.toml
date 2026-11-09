@@ -1,0 +1,4 @@
+# epaint 0.37 uses library features stabilized after the repository's minimum Rust (it requires
+# Rust 1.95).
+[toolchain]
+channel = "1.99.0"

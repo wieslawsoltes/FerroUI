@@ -41,6 +41,26 @@ What it shows:
 - For comparison, Pretext's `layout` takes about 0.19 us for a text of this size (JavaScript),
   70 times less: it only adds up widths it measured once.
 
+### 2.1 The same texts in other libraries
+
+`tests/FerroUI.Text.Comparison` lays out the same corpora with the same font (Roboto Regular,
+14 px) in FerroUI, parley 0.12, cosmic-text 0.19 and epaint 0.37; one operation lays out every
+text of the corpus (5 iterations, `release`). FerroUI, parley and cosmic-text break all 500 card
+bodies into the same lines at 240 px; epaint, whose breaking is heuristic, differs on 22.
+
+| Scenario | Corpus | FerroUI | parley | cosmic-text | epaint |
+|---|---|---|---|---|---|
+| From nothing | Card | 22.1 ms | 14.0 ms | 20.1 ms | 12.9 ms |
+| Wrapped again at the next width | Card | 4.58 ms | 0.73 ms | 1.66 ms | 14.1 ms |
+| Laid out again at the same width | Card | 4.57 ms | 0.69 ms | 0.02 ms | 0.06 ms |
+| Wrapped again at the next width | Article | 3.21 ms | 0.46 ms | 0.94 ms | 8.44 ms |
+| Wrapped again at the next width | Label | 3.76 ms | 0.86 ms | 1.31 ms | 17.9 ms |
+
+parley wraps a shaped paragraph again six to seven times faster than FerroUI, with the same
+lines: the target of step 3. cosmic-text and epaint answer an unchanged width from what they
+kept (a buffer that is not dirty, a cached galley): the target of steps 1 and 2. epaint shapes
+again at every new width.
+
 ## 3. How the others do it
 
 ### Cranpose (`crates/cranpose-text`, `crates/cranpose-ui`)
