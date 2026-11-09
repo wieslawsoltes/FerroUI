@@ -2743,6 +2743,17 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     runs = (__bridge NSMutableDictionary *)CFDictionaryGetValue(r.preparedRuns,
                                                                 font);
     QPreparedDraw *ready = runs[runKey];
+    if (!ready) {
+      // Prepare a run when it repeats: one seen once is remembered by its
+      // hash and drawn directly. Text that changes or moves every frame never
+      // repeats, and preparing it would only copy every draw it makes.
+      static uint64_t seen[4096];
+      uint64_t *slot = &seen[discriminator & 4095];
+      BOOL repeated = *slot == discriminator;
+      *slot = discriminator;
+      if (!repeated)
+        runKey = nil;
+    }
     if (ready) {
       const QParams *first = ready.params.bytes;
       NSUInteger kind =
