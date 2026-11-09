@@ -345,14 +345,16 @@ impl CompositionVisualProps {
     /// `InitializeDefaults` of this class alone.
     pub fn initialize_own_defaults(&self, host: &dyn CompositionVisualHooks) {
         CompositionVisualHooks::initialize_defaults_extra(host);
-        self.set_visible(host, true);
-        self.set_opacity(host, 1.0);
-        self.set_clip_to_bounds(host, true);
-        self.set_orientation(host, Quaternion::IDENTITY);
-        self.set_scale(host, Vector3D::new(1.0, 1.0, 1.0));
-        self.set_transform_matrix(host, Matrix::IDENTITY);
-        self.set_rotation_axis(host, Vector3D::new(0.0, 0.0, 1.0));
-        self.set_is_hit_test_visible(host, true);
+        self.visible.set(true);
+        self.opacity.set(1.0);
+        self.clip_to_bounds.set(true);
+        self.orientation.set(Quaternion::IDENTITY);
+        self.scale.set(Vector3D::new(1.0, 1.0, 1.0));
+        self.transform_matrix.set(Matrix::IDENTITY);
+        self.rotation_axis.set(Vector3D::new(0.0, 0.0, 1.0));
+        self.is_hit_test_visible.set(true);
+        self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::VISIBLE | CompositionVisualChangedFields::OPACITY | CompositionVisualChangedFields::CLIP_TO_BOUNDS | CompositionVisualChangedFields::ORIENTATION | CompositionVisualChangedFields::SCALE | CompositionVisualChangedFields::TRANSFORM_MATRIX | CompositionVisualChangedFields::ROTATION_AXIS | CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE);
+        host.register_for_serialization();
     }
 
     /// `Root` (internal).

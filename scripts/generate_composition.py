@@ -661,6 +661,23 @@ class Generator:
     def field_init(info):
         return "Cell::new(Default::default())" if info.is_copy else "RefCell::new(None)"
 
+    # The classes whose schema defaults of copy types are written to their fields directly when an
+    # object is made, rather than through the setters: the fields are marked changed and the object
+    # registered for serialization once, so the first batch carries the same values to the server
+    # as before. On a new object a setter's work beyond that (the change hooks, which do nothing for
+    # these properties here, the bookkeeping of animations and the lookup of an implicit animation,
+    # neither of which a new object has) changes nothing; a visual is made for every element of a
+    # tree, and its eight defaults cost a setter each.
+    DIRECT_DEFAULTS = {"CompositionVisual"}
+
+    def direct_default(self, cl, prop):
+        """The default of `prop` when it is written directly (see `DIRECT_DEFAULTS`), else None."""
+        if cl.name not in self.DIRECT_DEFAULTS or prop.default_value is None:
+            return None
+        if not self.get_type_info(prop.type).is_copy:
+            return None
+        return self.default_value(prop)
+
     def default_value(self, prop):
         key = (prop.type.rstrip("?"), prop.default_value)
         if key not in DEFAULTS:
@@ -820,9 +837,19 @@ class Generator:
         unit.emit("    /// `InitializeDefaults` of this class alone.")
         unit.emit("    pub fn initialize_own_defaults(&self, host: &dyn %s) {" % hooks)
         unit.emit("        %s::initialize_defaults_extra(host);" % hooks)
+        direct_flags = []
         for prop in props:
-            if prop.default_value is not None:
+            direct = self.direct_default(cl, prop)
+            if direct is not None:
+                unit.emit("        " + self.field_set(self.get_type_info(prop.type), snake(prop.name), direct))
+                direct_flags.append("%s::%s" % (changed_fields_type_name(cl), screaming(prop.name)))
+            elif prop.default_value is not None:
                 unit.emit("        self.set_%s(host, %s);" % (snake(prop.client_name or prop.name), self.default_value(prop)))
+        if direct_flags:
+            # The defaults written directly go to the server with the first batch (`DIRECT_DEFAULTS`).
+            field = changed_fields_field_name(cl)
+            unit.emit("        self.%s.set(self.%s.get() | %s);" % (field, field, " | ".join(direct_flags)))
+            unit.emit("        host.register_for_serialization();")
         unit.emit("    }")
 
         for prop in props:
