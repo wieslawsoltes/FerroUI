@@ -939,22 +939,46 @@ clip with a mask as before; the mask is drawn through the analytic clips in effe
 in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
 still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.
 
-### 9.20 The native renderer keeps glyph shapes and draws rounded boxes as boxes
+### 9.20 The native renderer: glyph shapes, boxes, turned clips and repeated runs
 
-A glyph run of the native renderer asked Core Text for the ink bounds and the outline of every
-glyph it held, each through a copy of the font at the run's size (`CTFontCreateCopyWithAttributes`),
-and built the outline of the whole run when it was created. Text that changes every frame creates
-its runs every frame (the line metrics of a text layout come from its runs): on the gauntlet that
-was 80% of the user interface thread. The font now keeps the bounds and the outline of each glyph
-at each size and simulation (`GlyphShapes`, at most 16,384 a font), and a run builds its outline
-only when it is asked for one (its geometry, its intersections with an underline, drawing it as
-outlines); drawing it through native glyphs never asks.
+Glyph shapes. A glyph run of the native renderer asked Core Text for the ink bounds and the
+outline of every glyph it held, each through a copy of the font at the run's size
+(`CTFontCreateCopyWithAttributes`), and built the outline of the whole run when it was created.
+Text that changes every frame creates its runs every frame (the line metrics of a text layout come
+from its runs): on the gauntlet that was 80% of the user interface thread. The font now keeps the
+bounds and the outline of each glyph at each size and simulation (`GlyphShapes`, at most 16,384 a
+font), and a run builds its outline only when it is asked for one (its geometry, its intersections
+with an underline, drawing it as outlines); drawing it through native glyphs never asks.
 
-An axis-aligned rounded rectangle without a shadow or a mask clip was a path: its curves flattened
-to a quarter of a pixel, its edges prepared and a coverage image looked up or rasterized at every
-position. It is now a box, as a rectangle is: the shaders test the same four samples a pixel
-against the box and its elliptical corners (`box_coverage` in `shaders.metal`). A sample within the
-flattening tolerance of a corner may land on the other side of it than with the path; the box is
-the exact one. Aliased rounded rectangles stay paths. Tests: the renderer's tests, a parity test of
-rounded boxes against their paths, clipped and transformed. Window, frames a second, gauntlet
-(tier 16): 3.7 to 5.1 (rounded boxes 3.7 to 4.0, glyph shapes 3.85 to 5.1).
+Boxes. A rounded rectangle, a rectangle under a transform that turns it, and either inside a mask
+clip were paths: curves flattened to a quarter of a pixel, edges prepared and a coverage image
+looked up or rasterized at every position. Every solid box without a shadow is now a box: the
+shaders test the same four samples a pixel against the box and its elliptical corners
+(`box_coverage` in `shaders.metal`), in the box's own space when the transform turns it (the
+samples mapped through the inverse transform). A sample within the flattening tolerance of a
+corner may land on the other side of it than with the path; the box is the exact one. Aliased
+rounded rectangles stay paths.
+
+Turned clips. A rectangle or rounded rectangle clip under a transform that turns it was a mask (a
+texture, a compute pass, and the end of the render pass around it). When no other analytic clip
+with corners is in effect it is now the analytic clip of section 9.19 kept in its own space.
+
+Glyph strikes and repeated runs. Every glyph run made two copies of its font (at its size and its
+device size) and looked its caches up by hashing them; the copies are now kept by font, size and
+scale and the caches key fonts by identity. Every glyph run with native hinting was also prepared
+for reuse (a copy of each of its draws); on the gauntlet not one of a million prepared runs was
+reused, as its text changes or moves every frame. A run is now prepared when it repeats: one seen
+once is remembered by its hash and drawn directly. Still text is prepared one frame later.
+
+Uploads and batches. The uploads of a command buffer are slices of one pooled arena where each
+flush took a buffer of its own; paths and general draws, which share a format, share a batch, and a
+draw that samples no image takes the batch's image, so text and the shapes around it make one
+batch: half the command buffers of a gauntlet frame.
+
+Tests: the renderer's tests, parity tests of rounded boxes against their paths (clipped, turned and
+cut by the canvas), of boxes inside analytic clips, and of analytic clips (axis-aligned and turned)
+against mask clips of the same shapes. Window, frames a second, gauntlet (tier 16), interleaved
+A/B: 3.7 (section 9.19) to 4.0 (rounded boxes), 5.1 (glyph shapes), 5.7 (glyph strikes and boxes in
+mask clips), 6.3 (turned boxes), 6.65 (turned clips), 8.5 (repeated runs). The still wall stays at
+the display's rate. The uploads and the batches change the frame rate by less than the noise; the
+gauntlet's frame is now held about evenly by the render thread and by the GPU.
