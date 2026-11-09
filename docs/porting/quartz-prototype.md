@@ -1,13 +1,19 @@
 # macOS Quartz prototype
 
+For the latest contract audit and size checkpoint, see [Quartz/Skia parity](quartz-skia-parity.md)
+and [its recorded results](quartz-parity-results.json). Measurements below retain their stated
+prototype checkpoints.
+
 The opt-in `ferroui-quartz` backend uses macOS Core Text, Core Graphics geometry and ImageIO,
 with **direct Metal GPU drawing** selected by `quartz-metal`. Paths and ordinary glyph outlines
 are rasterized by Metal compute shaders; images, clips, opacity groups, retained layers and
 window presentation remain GPU textures. It bundles neither Skia/HarfBuzz nor wgpu/Vello.
 The earlier CPU-only `quartz` configuration remains available as a reference.
 
-This is an experimental macOS 13+ prototype. It requires Metal RGBA8 read/write texture tier 2
-and a shared-event-capable device. It fails explicitly if the GPU requirements are unavailable;
+The shared backend now also supports [native iOS rendering](ios-quartz.md) on iOS 16+.
+The macOS configuration requires macOS 13+ and a shared-event-capable Metal device. Tier 2
+RGBA8 read/write textures use the original fast path; other devices use separate GPU
+destination textures without CPU framebuffer transfers. It fails if GPU creation is unavailable;
 Metal mode does not silently switch to CPU framebuffer rendering. HelloWorld is the primary
 binary size benchmark; ControlCatalog supplies broader rendering smoke coverage because its
 many embedded assets and 200+ pages obscure the size of a minimal application.
@@ -66,43 +72,52 @@ not a signed installer or application bundle. The two renderers do not yet have 
 
 ## Metal GPU HelloWorld results
 
-These measurements precede the active gap-closure work below; the final comparison will be rerun
-after those changes are validated.
-
-Measured on 7 November 2026, macOS 27.0.1 ARM64 with rustc 1.99.1. Both builds use
-`dist` (fat LTO, one codegen unit, stripped symbols, panic unwinding). All three generated
-HelloWorld theme-parts manifests have SHA-256
-`20b22207c88715089b4a6ee004e758eebefd2c288ead7bc723f3f445399299fd`.
-MB means 1,000,000 bytes; only the backend feature differs.
+Measured after the gap-closure implementation on 7 November 2026, macOS 27.0.1 ARM64 with
+rustc 1.99.1. All builds use `dist` (fat LTO, one codegen unit, stripped symbols, panic unwinding)
+and the same HelloWorld XAML and trimmed WinUI theme. The generated theme-parts manifests
+have identical SHA-256 `20b22207c88715089b4a6ee004e758eebefd2c288ead7bc723f3f445399299fd`.
+MB means 1,000,000 bytes.
 
 | Backend | Executable bytes | MB | gzip bytes |
 |---|---:|---:|---:|
-| Skia/HarfBuzz, Metal presentation | 28,282,256 | 28.28 | 10,801,706 |
-| Native Metal/Core Text | 23,466,800 | 23.47 | 8,583,627 |
-| Reduction | 4,815,456 | 4.82 | 2,218,079 |
+| Skia/HarfBuzz, Metal presentation | 28,282,256 | 28.28 | 10,801,627 |
+| Native Metal/Core Text | 23,569,440 | 23.57 | 8,626,238 |
+| Native Metal/Core Text + runtime WGSL compiler | 24,992,992 | 24.99 | 9,270,066 |
 
-The GPU prototype is **17.03 percent smaller**, retaining GPU rendering. This saves almost
-all of the earlier CPU prototype's reduction; the Metal implementation adds 66,800 bytes
-relative to that historical result. The remaining executable still includes Ferro's shared
-framework, property/control system, compiled XAML and trimmed theme. Removing the rendering
-and shaping dependencies alone does not remove those costs.
+The minimal GPU backend saves **4,712,816 bytes (16.66%)**. Enabling runtime WGSL effects costs
+1,423,552 bytes over that configuration and still saves **3,289,264 bytes (11.63%)** relative
+to Skia. ControlCatalog enables this optional compiler; size-first HelloWorld omits it.
+Measure it separately with:
 
-Thirteen Metal backend tests pass, including imported-frame validation, color/orientation
-conversion, completion-driven retirement, and the reflected TextBox border gradient. The CPU
-reference also passes nine regression tests. Both GPU HelloWorld executables exit through the smoke
-timer and render an 800 by 480 PNG. The native build's normal dependency graph excludes
-Skia, HarfBuzz, Vello, wgpu and ANGLE.
+```sh
+python3 scripts/measure-quartz-prototype.py --native-backend quartz-runtime-shaders \
+  --output target/quartz-prototype/runtime-shaders
+```
 
-A native run without a screenshot recorded one GPU surface, 17 compute dispatches, two
-presentations, **zero readbacks, zero uploads and zero GPU errors**. Its screenshot run recorded
-one expected readback. The Metal catalog's debug build rendered Home, TextBlock, TextBox, Image
-and TabbedPage overview pages and saved ten immediate/composed PNGs without render-loop errors.
-Home, text, image and navigation content were visually reviewed. This is overview coverage,
-not validation of every catalog demo or interaction.
+Both native feature graphs exclude Skia, HarfBuzz, Vello, wgpu and ANGLE. Naga is absent from
+the minimal build and present only in the runtime-shader configuration. Apple's shared
+frameworks add no application-shipped framework files. Ferro's property/control system,
+compiled XAML and trimmed theme remain part of each executable; the saving is not a claim
+about installer size or the percentage achievable in other applications.
 
-Artifacts are under `target/quartz-prototype`: `hello-world-skia`, `hello-world-quartz-metal`,
-`hello-metal.png`, `sizes.json`, `native-dependencies.txt` and `metal-debug-screenshots/`.
-Exact bytes, hashes, commands, validation and historical CPU results are retained in
+The completed validation includes 42 Metal backend tests, 12 CPU-reference tests, 10 shared
+context-manager tests and 13 native Metal-device tests. All three release HelloWorld binaries
+rendered and exited successfully. Each native run without screenshot export recorded two GPU
+surfaces, 18 compute dispatches, two presentations, zero readbacks, one startup image upload
+and zero GPU errors. A screenshot run added the expected single readback. Native image/glyph
+inputs may upload pixels; the renderer does not use a CPU canvas for GPU presentation.
+
+The final catalog comparison captures 15 pages in separate processes, with both immediate
+and composed output, against the original Skia catalog at the same display scaling. The
+native runs report zero completed GPU errors. Visual review covers text/border placement,
+brushes, shadows, acrylic, color/image effects and runtime shaders. This establishes the named
+regressions and overview coverage, not every interaction on the catalog's 200+ pages or
+pixel-identical Skia output.
+
+Artifacts are under `target/quartz-prototype/goal-complete`: the three `hello-world-*`
+executables, `hello-*.png`, `sizes.json`, `runtime-shaders/sizes.json`, test/media logs,
+`catalog/`, `skia-catalog/` and `validation-audit.json`. Exact bytes, hashes, source fingerprints,
+commands, validation and historical results are retained in
 [quartz-prototype-results.json](quartz-prototype-results.json).
 
 ## Historical CPU-only HelloWorld results
@@ -166,53 +181,88 @@ It retains its animated dip, buttons and separately trimmed icon contours withou
 lease. Headless/VNC retain their default HarfBuzz behavior, with a feature to keep an explicitly
 configured text shaper in a native-only build.
 
-## Prototype coverage and limits
+## Native GPU coverage and platform policy
 
-The first implementation covers solid and basic linear/radial brushes, paths, geometry booleans,
-rectangles with separate corner radii, ellipses, clipping, opacity groups and masks, standard
-composition blend modes, glyph drawing, bitmap drawing and readback, PNG/JPEG encoding, and
-Core Text system/embedded fonts and shaping. It uses standard premultiplied BGRA bitmap storage;
-RGBA input can be converted when loading images or presenting framebuffers.
+`quartz-metal` implements paths, geometry booleans/strokes, separate corner radii, clips,
+opacity/masks and retained GPU snapshots; linear/conic/focal elliptical radial gradients with
+transforms and pad/repeat/reflect spread; image/scene brushes with layout and mirrored tiles;
+and nearest, bilinear, mipmapped and cubic image sampling. Box shadows include spread,
+inset/outset ordering and caster exclusion. Bitmap storage is premultiplied RGBA on Metal;
+the public readable interface converts explicitly to BGRA. ImageIO handles PNG/JPEG codecs.
 
-Conic gradients, repeating gradients/tiles, image/scene-brush transforms, elliptical radial gradients,
-inset shadows, custom effects/shaders, external GPU image types beyond IOSurface, advanced text rendering options,
-font simulations/variation selection, shaping context across styled run boundaries and exact underline ink skipping need further work.
-Some standard effects may be omitted by Ferro's optional-feature fallback. Unimplemented conic-brush
-and inset-shadow paths log a diagnostic once per feature. Writable bitmap requests in unsupported
-formats fail explicitly. This configuration is for evaluating the native approach, not for
-shipping arbitrary existing Ferro applications unchanged.
+GPU filter/layer operations cover Gaussian blur, drop shadow, luminance-to-alpha, blending,
+color matrices, multiply factors, convolution, pixel-operation folds and the shared material/
+lighting contract. Acrylic tint/luminosity/noise stays on the GPU; the shared render walk supplies
+backdrop content. Direct custom-effect graphs use Ferro's shared composition painter. Runtime
+WGSL effects use an optional Naga-to-MSL adapter and native Metal pipelines; they require
+`runtime-shaders` on the crate, or `quartz-runtime-shaders` on Desktop/HelloWorld. ControlCatalog
+turns that option on with its `quartz-metal` feature. Size-first applications can omit it.
+The normal native dependency graph contains no Skia/HarfBuzz, wgpu, Vello or ANGLE.
 
-The historical `quartz` reference runs drawing and framebuffer copies on the CPU. The
-`quartz-metal` configuration uses private RGBA8 GPU textures and a fullscreen Metal render pass
-to the native drawable. CPU readback occurs only for an explicit bitmap lock, encoding or
-screenshot. Image decoding and color-glyph rasterization produce CPU image inputs which are
-uploaded to textures. Shaping and path preparation run on the CPU, as they do in many GPU UIs.
-Binary size results do not establish frame-rate, startup or memory parity with Metal/Skia.
+Core Text supplies system/embedded fonts, fallback, family styles, localized shaping and OpenType
+features. UTF-16 slices retain their surrounding joining context with local cluster indices.
+System UI family descriptors preserve all nine standard weights (100–900) instead of collapsing
+them to regular/bold. Simulated bold/oblique outlines and underline ink intervals are supported. The public
+`QuartzFontManager::create_variable_typeface_from_stream` extension selects validated OpenType
+variation axes; Ferro's generic font-manager trait does not expose arbitrary axis coordinates.
+Normal glyphs use GPU outline coverage. Explicit light/strong hinting uses bounded, DPI-aware
+Core Text glyph-image inputs, cached independently of brush tint and composed on the GPU.
+Color glyph inputs use the same cache; non-solid text brushes preserve their intrinsic colors
+while applying brush opacity and alpha through a GPU mask. Baseline alignment and alias/antialias selection apply
+to solid and outline-brush text; native text uses grayscale coverage, including when an
+application asks for LCD subpixel antialiasing. This follows this backend's macOS policy for
+transparency and avoids promising Skia's exact edge weights or hinting behavior.
+
+The historical CPU-only `quartz` configuration is a reference, not the GPU coverage target.
+It still has a narrower brush/effect implementation. Both configurations fail explicitly for
+unsupported writable formats rather than accepting invalid pixel layouts. Metal mode uses
+no CPU canvas or framebuffer presentation; CPU transfers are explicit bitmap lock/export/
+screenshot operations and decoded/native glyph image inputs. Video/camera frames stay on the GPU.
+
+The supported device is FerroNative's system-default GPU on macOS 13+, with RGBA8 read/write
+tier 2, shared events and system MPS support. A different presentation device is rejected before
+cross-device texture use. Arbitrary adapter switching, Intel/eGPU behavior and physical GPU
+removal are hardware-unverified on this Apple Silicon Mac. No webcam is available. These are
+explicit platform/hardware limits; the implementation does not silently fall back to CPU rendering.
+Full wide-gamut/HDR color-management fidelity and pixel-identical Skia text are not claimed.
 
 ## Metal rendering design
 
-The `metal` feature of `ferroui-quartz` links Apple's Metal framework and a small Objective-C
-bridge. It compiles the embedded Metal shader source through the system compiler at first use.
-The C ABI is also used for immutable paths/fonts and explicit pixel transfers. Each surface
-owns a private RGBA8 texture. GPU resources are serialized through one renderer lock and one
-command queue; the Rust bitmap mutex guards ownership and drawing access. The presentation
-queue waits on an `MTLSharedEvent` signaled by the drawing queue before presenting. This avoids
-CPU pixel transfer and avoids filling the native platform queue with per-draw command buffers.
+The `metal` feature links Apple's Metal and Metal Performance Shaders frameworks through a small
+Objective-C bridge. It compiles embedded MSL through the system compiler at first use. Offscreen
+surfaces use private RGBA8 textures. A renderer lock and ordered queue serialize drawing, copies,
+filters and external-event waits/signals. Presentation signals an `MTLSharedEvent` before the
+platform queue presents, with no pixel transfer or blocking CPU wait in normal presentation.
 
-Core Text supplies glyph outlines and shaping. Core Graphics transforms, strokes and flattens
-paths at a quarter-device-pixel tolerance. The compute kernel evaluates winding and four
-coverage samples per pixel within the path's bounding box, applies a GPU clip mask and blends
-into the destination texture. Gradients are evaluated in inverse-transformed logical coordinates.
-Snapshots, resize operations, image draws and layer composition use GPU copies/sampling.
-Color glyphs without outlines use small Core Text bitmap inputs, uploaded separately.
+Core Graphics transforms/strokes/flattens paths at quarter-device-pixel tolerance. Winding
+coverage uses four samples per pixel; aliased mode uses one. Paths with at least 32 edges use
+8-pixel spatial row bins, cached within a 16 MB budget. Glyph outlines are cached per Core Text
+font, and glyph-image inputs are capped at 16 MB. Metal commands share batches capped at 256
+operations and an estimated 64 MB of newly acquired render storage; presentation, explicit
+readback and producer-frame completion flush them. A 64 MB texture pool shares storage owners
+with snapshots and layer parents, preventing reuse while another bitmap aliases the texture.
+Storage owners carry the renderer generation, preventing an old owner's late release from
+recycling storage into a recovered queue.
+An isolated regression checks fewer than eight submissions and at most two fresh texture
+allocations for 64 repeated surfaces, then checks snapshot contents after pool reuse.
 
-This deliberately small renderer establishes feasibility, not production performance. The
-coverage algorithm examines every edge for each covered pixel, and the prototype submits a
-command buffer per operation. Production work should add spatial edge bins, batching, cached
-glyph/path coverage, resource pools and precompiled shaders. Antialiasing is a basic four-sample
-approximation. Full color-management fidelity needs validation. Radial gradients and shadow blur are approximate; all the other coverage gaps
-listed above still apply. Arbitrary GPU effects, device recovery, multiple GPUs and additional
-external texture types require separate work. Validate on Intel and Apple Silicon before widening support.
+MPS implements isotropic Gaussian blur; a separable GPU pass handles general affine blur axes.
+Other effects use small compute kernels. Sampling generates/caches mip chains entirely on the
+GPU and invalidates them on writes; high-quality magnification uses Mitchell reconstruction.
+Native glyph input generation uses Core Text, while tint, clips and composition remain GPU work.
+
+Completed command-buffer errors invalidate the renderer generation. The shared context manager
+now recreates a lost backend even if its platform device is still healthy; Quartz starts a new
+queue/event, clears caches and rejects old-generation imports. Late failures from an old queue
+cannot poison its replacement. Indeterminate producer reads retain their quarantine semantics;
+loss is not a completion proof. Healthy context disposal submits remaining UI commands without
+waiting on the CPU. This policy has fault-injection and context-manager tests; physical driver
+reset/removal remains unverified. Device access revoked by the OS may still require application
+restart; a new queue does not claim to restore access the OS has revoked.
+
+The renderer remains experimental: four-sample coverage, full-canvas effect intermediates and
+runtime MSL compilation leave performance/quality tradeoffs. The tests prove specific resource,
+ordering and rendering contracts, not production frame-rate or memory parity with Skia.
 
 Set `FERROUI_METAL_STATS=1` for HelloWorld to print cumulative surfaces, compute dispatches,
 image dispatches, presentations, readbacks, uploads and completed-command errors at shutdown.
@@ -228,8 +278,11 @@ and its public compositor feature map. It delegates owning IOSurface handle wrap
 Metal texture import to FerroNative. Imported frames validate device identity, renderer
 generation, dimensions, storage format, alpha and color encoding. Supported inputs are
 BGRA8/RGBA8 with premultiplied or opaque sRGB, and opaque full-range Rec.709. Unsupported
-formats fail explicitly. Arbitrary shared-image snapshots and generic semaphore snapshots
-remain unsupported; media uses immutable frame leases and actual GPU completion.
+formats fail explicitly. Timeline-event snapshots run wait/copy/signal on the renderer queue
+and own independent GPU pixels. The `SharedMetalImage` extension also imports a retained native
+Metal texture through the shared-context-image contract without an IOSurface or CPU copy.
+Binary semaphores, keyed mutexes and automatic synchronization are not advertised Metal
+contracts; producers use shared timeline events or immutable frame leases with GPU completion.
 
 The first draw of an imported frame converts it into a private GPU texture using a Metal
 compute pass. That pass handles BGRA/RGBA sampling, bottom-up storage, opaque alpha and
@@ -243,7 +296,7 @@ A synthetic camera using GPU-generated immutable CoreVideo IOSurfaces exercised 
 CameraPreview, camera session, mailbox, native importer and compositor at 640 by 480 / 30 fps.
 Both media flows reported zero CPU pixel transfer counters and retired all frames on navigation.
 The global Metal counters were read at startup, after video and after camera: readbacks stayed
-at seven and uploads at eleven, with zero GPU errors throughout. Those existing transfers
+at seven and uploads at fourteen, with zero GPU errors throughout. Those existing transfers
 occurred before media playback; media added neither readbacks nor uploads. The later QR image
 demo adds unrelated image processing.
 
@@ -261,14 +314,14 @@ FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA=1 FERROUI_METAL_STATS=1 \
 With a webcam attached, use `--features quartz-metal` and omit
 `FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA` to test actual capture. For video plus camera discovery
 without acquiring hardware, set only `FERROUI_SMOKE_MEDIA=1`. Evidence logs are under
-`target/quartz-prototype/media-interop/` and structured results are recorded in the results JSON.
+`target/quartz-prototype/goal-complete/` and structured results are recorded in the results JSON.
 
 The WinUI TextBox border brush reflects a two-unit gradient around its vertical center using
 `ScaleY=-1`. Ignoring that brush transform placed the highlight at the top. Gradient painting
 now applies relative and absolute brush transforms around the declared origin, independently
 of the geometry clip and visual transform. A high-DPI translated regression test and catalog
 screenshots confirm that the highlight appears at the bottom. Image/scene-brush transforms
-still require further work.
+are also covered by the completed GPU brush regressions.
 
 ## GPUI findings and platform recommendations
 
@@ -307,42 +360,63 @@ provide GPU access but not Ferro's complete 2D API. Investigate public NDK text 
 minimum Android versions before promising removal of bundled text libraries. GPUI's inspected
 platform code does not establish a complete Android solution.
 
-Recommended stages are: measure and validate this macOS GPU option; optimize and close the
-listed rendering gaps; introduce Windows Direct2D/DirectWrite with the same feature selection;
-then assess iOS reuse and separate Linux/Android prototypes. Keep benchmark applications,
+Next steps are to measure startup/frame time/memory, broaden catalog interaction and device
+coverage, introduce Windows Direct2D/DirectWrite with the same feature selection, then assess
+iOS reuse and separate Linux/Android prototypes. Keep benchmark applications,
 theme settings and release profiles identical for each backend, and publish executable size,
 compressed size, startup, frame time and memory measurements with rendering coverage.
 
-## Active gap-closure goal
+## Completed gap-closure validation
 
-The remaining-gap implementation goal is active. The historical measurements above and the
-recorded JSON remain the last completed benchmark, not measurements of this work in progress.
+The requested macOS GPU gap categories are implemented and validated for the supported device
+policy described above. The tests assert rendering behavior and ownership contracts:
 
-Implemented in the current working tree (coverage is being expanded and revalidated):
+| Area | Validation |
+|---|---|
+| Effects/composition | GPU blur with transformed axes and parent output clips; shadow/luminance; matrix, convolution, factors, lighting and pixel operations against shared references; acrylic; direct custom graphs; runtime shader reference pixels and GPU image children |
+| Brushes/sampling | Conic/focal elliptical gradients, repeat/reflect and transforms; image/scene layout and mirrored tiles; nearest/bilinear, mip invalidation and cubic premultiplied coverage |
+| Shadows/render options | Inset/outset spread and ordering; geometry/text aliasing; merged/restored options and baseline alignment |
+| Text/fonts | UTF-16/RTL/contextual joining; fallback and all system UI weights; variable axes, simulations, underline ink; DPI-aware hinted glyph caching; color glyphs with non-solid brush alpha |
+| External textures | Native shared-image import, timeline wait/copy/signal and snapshot independence; device/generation validation; completion-driven media retirement and failure quarantine |
+| Performance/recovery | Spatial bins, bounded batching/cache/pool reuse and aliased snapshots; lost backend recreation with a healthy platform device; late old-generation completion and texture-owner release |
 
-- GPU Gaussian blur through the system Metal Performance Shaders framework, including a general
-  affine separable pass, drop-shadow and luminance-to-alpha effects.
-- Layer blend, color matrix, multiply-factor and convolution effects. Matrix and convolution
-  results are checked against Ferro's shared pixel references.
-- Conic gradients, repeat/reflect spread, elliptical/focal radial gradients and gradient transforms.
-- GPU intermediate tiles shared by image and scene brushes, including mirror modes, source/destination
-  layout and brush transforms. Pixel fixtures cover image tiling and transformed clipping.
-- Aliased/antialiased geometry, nearest/bilinear bitmap sampling, merged/restored rendering options,
-  text antialias selection and baseline alignment.
-- GPU inset/outset box shadows with spread, caster exclusion and correct background/inset/stroke order.
+The final native catalog and original Skia catalog were captured for Home, TextBlock, TextBox,
+Image, Visuals, Composition brushes, Shadows and lights, Effect brushes, Acrylic brush, Blend
+and colour effects, Colour effects, Image effects, Shader effects, Interactive effects and
+Page transitions. Each backend has 30 PNGs covering the two drawing paths. Animations and
+native font metrics can differ; these captures do not establish universal rendering parity.
 
-The Visuals catalog page now shows its Gaussian-blurred LayerVisual, with immediate and composed
-screenshots under `target/quartz-prototype/goal-effects-visuals/` and zero completed GPU errors.
-Additional catalog comparisons and coverage tests are still in progress.
+Video playback and the explicit GPU IOSurface synthetic camera test both passed with zero CPU
+media pixel transfers. Normal camera discovery reports zero cameras with permission granted.
+Physical camera capture, Intel/eGPU behavior and actual device removal remain hardware-unverified.
+The historical CPU renderer remains narrower. These limits do not imply CPU fallback in Metal
+mode, and the tests do not claim production frame-rate or full HDR/color-management parity.
 
-The current work also includes GPU lighting, pixel-operation folding, acrylic material drawing,
-GPU mipmap/cubic sampling, bounded command batching and texture pooling, and an optional
-`runtime-shaders` WGSL-to-MSL adapter. ControlCatalog enables the shader adapter; size-first
-HelloWorld does not. Font-family enumeration, variable-font axis selection, outline simulations,
-contextual shaping and underline ink skipping have regression fixtures. Generic imported-image
-timeline snapshots are being validated on the renderer queue.
+## Capture validation correctly
 
-Remaining goal work includes final catalog comparisons and media regressions for these changes,
-text/rendering policy refinement, device recovery/selection robustness, and repeated HelloWorld
-size measurements. Do not treat the historical size table as a benchmark of this snapshot.
-Physical camera capture remains hardware-unverified because no webcam is available.
+The catalog's multi-page smoke runner can advance navigation before an asynchronous composed
+snapshot consumes its server scene. A filename can then describe the previous page while the
+pixels show the next. For backend comparisons, capture one page per process:
+
+```sh
+python3 scripts/capture-quartz-comparison.py \
+  --binary target/quartz-prototype/catalog-stock \
+  --output target/quartz-prototype/goal-complete/skia-catalog --macos-bundle \
+  --expected-pixel-size 2200x1600
+python3 scripts/capture-quartz-comparison.py \
+  --binary target/quartz-prototype/goal-complete/control-catalog-quartz-metal \
+  --output target/quartz-prototype/goal-complete/catalog --macos-bundle \
+  --window-position 2150,100 --expected-pixel-size 2200x1600
+```
+
+The script captures both immediate and composed paths, preserving per-page logs and a manifest.
+`--macos-bundle` copies the executable unchanged into a temporary app bundle declaring
+`NSHighResolutionCapable`. On this mixed-DPI setup, the original Skia captures rendered at 2×;
+the native captures were pinned to desktop position 2150,100 on the 2× display. Adapt that
+position and expected PNG size to your display setup. `--window-position` needs the updated
+catalog's `FERROUI_SMOKE_WINDOW_POSITION` hook; the original catalog predates that hook.
+`--expected-pixel-size` fails if a process ends up at a different pixel density. A successful
+process exit alone does not establish that screenshots are comparable.
+The original multi-page captures remain diagnostic artifacts, not authoritative page comparisons.
+Compare static content within each named page; animated samples and native font metrics can
+differ in timing and layout. Direct bitmap captures and live composed output are separate paths.

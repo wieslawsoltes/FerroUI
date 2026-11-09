@@ -6,6 +6,7 @@
 #
 #   scripts/ios/sim-smoke.sh <device name or udid> [--keep] [--timeout <seconds>] [--no-build]
 #
+#   --backend <name> skia (default), quartz-metal, quartz-runtime-shaders
 #   --keep       leave the device booted and the application installed
 #   --timeout    how long the application may run                 (default: 180)
 #   --no-build   bundle the executable that is already built
@@ -20,6 +21,7 @@
 set -uo pipefail
 
 device=
+backend=skia
 keep=0
 timeout=180
 build_args=()
@@ -27,6 +29,7 @@ build_args=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --keep) keep=1; shift ;;
+    --backend) backend="$2"; shift 2 ;;
     --timeout) timeout="$2"; shift 2 ;;
     --no-build) build_args+=(--no-build); shift ;;
     -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -34,6 +37,12 @@ while [ $# -gt 0 ]; do
     *) device="$1"; shift ;;
   esac
 done
+
+case "$backend" in
+  skia) ;;
+  quartz-metal|quartz-runtime-shaders) ;;
+  *) echo "Unknown renderer: $backend (skia, quartz-metal, quartz-runtime-shaders)" >&2; exit 2 ;;
+esac
 
 if [ -z "$device" ]; then
   echo "usage: scripts/ios/sim-smoke.sh <device name or udid> [--keep] [--timeout <seconds>] [--no-build]" >&2
@@ -44,6 +53,11 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 target_dir="${CARGO_TARGET_DIR:-$root/target}"
 out="$target_dir/ios-smoke"
 bundle_id=org.ferroui.ios-view
+if [ "$backend" != skia ]; then
+  bundle_id="$bundle_id-$backend"
+  out="$out/$backend"
+  build_args+=(--no-default-features --features "example,$backend")
+fi
 udid_pattern='[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'
 
 # The device: an identifier as it is, a name through the list of the available devices (the first
@@ -70,6 +84,7 @@ rm -f "$out/screenshot-early.log" "$out/console.log" "$out/ios_view_smoke.txt" "
 # The screenshots go under the home directory: the simulator service, which writes them, may not
 # write to every volume a build directory can be on.
 shots="$HOME/Library/Caches/ferroui-ios-smoke"
+if [ "$backend" != skia ]; then shots="$shots/$backend"; fi
 mkdir -p "$shots"
 rm -f "$shots/screenshot-early.png" "$shots/screenshot.png"
 

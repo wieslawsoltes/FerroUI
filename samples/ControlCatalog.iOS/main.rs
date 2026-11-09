@@ -19,6 +19,9 @@
 //! without it); with `FERROUI_SMOKE_EXIT_MS=<n>` the process exits after
 //! `n` milliseconds, and without it after the last page.
 //!
+//! Build with `--no-default-features --features quartz-metal` for native Metal/Core Text,
+//! or `quartz-runtime-shaders` to include the optional WGSL compiler.
+//!
 //! `FERROUI_IOS_RENDERING_MODE=<modes>` sets the rendering modes of the
 //! platform (`OpenGl`, `Metal`, separated by commas, in their order); the
 //! OpenGL ES mode needs the Skia backend built with
@@ -102,6 +105,16 @@ mod host {
             })
             .collect();
         Some(modes)
+    }
+
+    fn exit_smoke() {
+        #[cfg(feature = "quartz-metal")]
+        {
+            let stats = ferroui_quartz::metal_statistics();
+            println!("IOS_QUARTZ_GPU_STATS {stats:?}");
+            assert!(stats[3] > 0 && stats[6] == 0, "Quartz must present without GPU errors");
+        }
+        std::process::exit(0);
     }
 
     fn environment_milliseconds(name: &str) -> Option<u64> {
@@ -222,7 +235,7 @@ mod host {
                     }
                     println!("Selected every page ({})", pages.len());
                     if exit_after.is_none() {
-                        std::process::exit(0);
+                        exit_smoke();
                     }
                     false
                 },
@@ -237,7 +250,7 @@ mod host {
             let _timer = DispatcherTimer::run_once(
                 || {
                     println!("Timer fired: exiting");
-                    std::process::exit(0);
+                    exit_smoke();
                 },
                 Duration::from_millis(ms),
                 DispatcherPriority::NORMAL,
