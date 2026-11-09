@@ -1144,15 +1144,21 @@ fn rounded_boxes_match_their_path_coverage() {
             Matrix::IDENTITY,
             Matrix::create_scale(1.5, 2.),
             Matrix::create_scale(-1., 1.) * Matrix::create_translation(70.25, 0.75),
+            Matrix::create_rotation(0.23) * Matrix::create_translation(15., 0.),
+            Matrix::create_rotation(-1.1) * Matrix::create_scale(1.25, 0.8) * Matrix::create_translation(20., 60.),
         ] {
-            for clip in [None, Some(Rect::new(10.5, 0., 30.25, 100.))] {
+            for clip in [None, Some(Rect::new(10.5, 0., 30.25, 100.)), Some(Rect::new(-1., -1., -1., -1.))] {
                 let mut outputs = Vec::new();
                 for rectangle in [false, true] {
                     let target = Bitmap::new(PixelSize::new(100, 100), Vector::new(96., 96.));
                     let mut draw = target.drawing(false, None);
                     draw.clear(Colors::WHITE);
-                    if let Some(clip) = clip {
-                        draw.push_clip(clip);
+                    // A clip of negative size stands for a mask clip: an ellipse.
+                    let ellipse = Geometry::ellipse(Rect::new(4., 2., 60., 50.));
+                    match clip {
+                        Some(clip) if clip.width < 0. => draw.push_geometry_clip(&*ellipse),
+                        Some(clip) => draw.push_clip(clip),
+                        None => {}
                     }
                     draw.set_transform(transform);
                     draw.push_render_options(RenderOptions {
@@ -1166,8 +1172,10 @@ fn rounded_boxes_match_their_path_coverage() {
                     }
                     draw.pop_render_options();
                     draw.set_transform(Matrix::IDENTITY);
-                    if clip.is_some() {
-                        draw.pop_clip();
+                    match clip {
+                        Some(clip) if clip.width < 0. => draw.pop_geometry_clip(),
+                        Some(_) => draw.pop_clip(),
+                        None => {}
                     }
                     draw.dispose();
                     outputs.push(target.pixels());

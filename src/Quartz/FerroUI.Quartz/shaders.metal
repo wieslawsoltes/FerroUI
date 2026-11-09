@@ -51,17 +51,24 @@ static bool inside_box(float2 q, float4 box, float2 rad) {
 
 // The coverage of a solid box (`reserved & 8`, rounded with `reserved & 16`)
 // at a pixel: the four samples the path coverage takes, tested against the box
-// itself instead of its edges, or the pixel center when aliased.
-static float box_coverage(float2 center, float4 box, float2 rad, bool aliased) {
-  if (aliased)
-    return inside_box(center, box, rad);
+// itself instead of its edges, or the pixel center when aliased. A box under a
+// transform that turns it (`reserved & 32`) is in its own space: the samples
+// are mapped into it through the inverse transform (`inverse`, `translation`).
+static float box_coverage(float2 center, float4 box, float2 rad, bool aliased,
+                          bool mapped, float4 inverse, float2 translation) {
   float value = 0;
-  for (uint y = 0; y < 2; y++)
-    for (uint x = 0; x < 2; x++)
-      value += inside_box(
-          center + float2(float(x) * 0.5f - 0.25f, float(y) * 0.5f - 0.25f),
-          box, rad);
-  return value * 0.25f;
+  uint count = aliased ? 1 : 4;
+  for (uint i = 0; i < count; i++) {
+    float2 q = aliased ? center
+                       : center + float2(float(i & 1) * 0.5f - 0.25f,
+                                         float(i >> 1) * 0.5f - 0.25f);
+    if (mapped)
+      q = float2(inverse.x * q.x + inverse.z * q.y,
+                 inverse.y * q.x + inverse.w * q.y) +
+          translation;
+    value += inside_box(q, box, rad);
+  }
+  return value / float(count);
 }
 struct Stop {
   float4 color;
@@ -282,7 +289,8 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (p.mode == 1) {
     target.write(float4(cov), tid);
@@ -786,7 +794,8 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -874,7 +883,8 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
   if (p.mode == 0 && (p.reserved & 8))
     cov = box_coverage(center, p.gradient,
                        (p.reserved & 16) ? p.src.xy : float2(0),
-                       p.flipped & 1);
+                       p.flipped & 1, p.reserved & 32, p.inverse,
+                       p.translation.xy);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -945,7 +955,8 @@ vertex SolidVertex solid_vertex(uint id [[vertex_id]],
 fragment float4 solid_fragment(SolidVertex v [[stage_in]]) {
   float2 center = floor(v.position.xy) + 0.5f;
   if (v.radii.x > 0 && v.radii.y > 0)
-    return v.color * box_coverage(center, v.bounds, v.radii, false);
+    return v.color * box_coverage(center, v.bounds, v.radii, false, false,
+                                  float4(1, 0, 0, 1), float2(0));
   float2 a = center - 0.25f, b = center + 0.25f;
   float2 covered = float2((a >= v.bounds.xy) & (a < v.bounds.zw)) +
                    float2((b >= v.bounds.xy) & (b < v.bounds.zw));

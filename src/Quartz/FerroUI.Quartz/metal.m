@@ -361,6 +361,11 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 @property(nonatomic) NSUInteger edgeCacheBytes;
 @property(nonatomic) CFMutableDictionaryRef glyphCache, glyphImages,
     preparedRuns, pathCache;
+// Glyph strikes: the copies of a font at a run's size and at its device size,
+// by font, size and scale (`QStrikeKey`), each an array of the font, its sized
+// copy and its device-sized copy. The glyph caches use those copies as keys
+// by identity: one copy a strike, and they retain their keys.
+@property(nonatomic) CFMutableDictionaryRef strikes;
 @property(nonatomic) QPreparedDraw *capture;
 @property(nonatomic) NSUInteger preparedBytes, pathBytes, pathEntries,
     coverageBytes, coveragePathBytes;
@@ -524,15 +529,19 @@ static QMetalRenderer *renderer(void) {
       r.texturePool = [NSMutableDictionary new];
       r.edgeCache = [NSMutableDictionary new];
       r.coverageImages = [NSMutableDictionary new];
-      r.glyphCache =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
-      r.glyphImages =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
-      r.preparedRuns =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
+      // Fonts are keys by identity: hashing a font is costly, and the strikes
+      // give one copy of a font at a size; the dictionaries retain their keys,
+      // so an address is never reused while it is one.
+      CFDictionaryKeyCallBacks fontKeys = kCFTypeDictionaryKeyCallBacks;
+      fontKeys.equal = NULL;
+      fontKeys.hash = NULL;
+      r.glyphCache = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.glyphImages = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.preparedRuns = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.strikes = small_dictionary();
       // CGPath hashes collide for distinct paths on current OS releases. The
       // Rust path cache retains immutable paths, so retained pointer identity
       // gives constant-time lookup without geometric equality scans.
@@ -550,6 +559,7 @@ static QMetalRenderer *renderer(void) {
                                               &kCFTypeDictionaryValueCallBacks);
       r.event = [r.device newSharedEvent];
       if (!r.queue || !r.event || !r.glyphCache || !r.glyphImages ||
+          !r.strikes ||
           !r.preparedRuns || !r.pathCache || !r.coveragePaths ||
           !r.rectanglePaths) {
         r = nil;
@@ -773,6 +783,7 @@ static void flush_draws(void) {
       CGRect rect = r.drawStorage.region;
       QSolidParams clear = {
           {rect.origin.x, rect.origin.y, rect.size.width, rect.size.height},
+          {0, 0, 0, 0},
           {0, 0, 0, 0}};
       [enc setRenderPipelineState:r.clearPipeline];
       [enc setVertexBytes:&clear length:sizeof(clear) atIndex:0];
@@ -1479,7 +1490,10 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
       }
     }
     NSUInteger kind =
-        p.mode == 0 ? ((!p.clipped && (!p.edges || (p.reserved & 8))) ? 4 : 0)
+        p.mode == 0 ? ((!p.clipped && !(p.reserved & 32) &&
+                        (!p.edges || (p.reserved & 8)))
+                           ? 4
+                           : 0)
         : ((!p.edges || (p.reserved & 8)) && !p.clipped && (p.flipped >> 2) < 3)
             ? ((p.reserved & 8) ? 3 : 2)
             : 1;
@@ -1699,6 +1713,15 @@ static NSData *path_edges(QMetalSurface *s, CGPathRef path, CGRect *box) {
     }
   }
   return data;
+}
+// The device bounds of `rect` under a transform that keeps the axes.
+static CGRect axis_box(QMetalSurface *s, CGRect rect) {
+  CGAffineTransform transform = s.state.transform;
+  CGPoint a = CGPointApplyAffineTransform(rect.origin, transform);
+  CGPoint c = CGPointApplyAffineTransform(
+      CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect)), transform);
+  return CGRectMake(MIN(a.x, c.x), MIN(a.y, c.y), fabs(c.x - a.x),
+                    fabs(c.y - a.y));
 }
 static NSData *rect_edges(QMetalSurface *s, CGRect rect, CGRect *box) {
   CGAffineTransform transform = s.state.transform;
@@ -2033,25 +2056,29 @@ void qm_rectangle(void *surface, const double *rect, double red, double green,
   rx *= scale;
   ry *= scale;
   CGAffineTransform transform = s.state.transform;
-  if (s.state.shadowColor.w <= 0 && transform.b == 0 && transform.c == 0 &&
-      !s.state.clip && (rx == 0 || !s.state.aliased)) {
-    // Axis-aligned solid boxes, rounded or not, use exact compact coverage:
-    // the shaders test the coverage samples against the box and its
-    // elliptical corners, where a path would test them against the edges of
-    // its flattened curves. Preparing those edges and their coverage image
-    // cannot change the samples' outcome beyond the flattening tolerance, and
-    // costs a path, its edges and a coverage cache entry per position.
-    CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), transform);
-    CGPoint b =
-        CGPointApplyAffineTransform(CGPointMake(x + w, y + h), transform);
-    CGRect box = CGRectMake(MIN(a.x, b.x), MIN(a.y, b.y), fabs(b.x - a.x),
-                            fabs(b.y - a.y));
+  if (s.state.shadowColor.w <= 0 && (rx == 0 || !s.state.aliased)) {
+    // Solid boxes, rounded or not, use exact coverage: the shaders test the
+    // four samples a pixel takes against the box and its elliptical corners
+    // (inside a mask clip the general pipelines test the same samples), where
+    // a path would test them against the edges of its curves flattened to a
+    // quarter of a pixel. Preparing those edges and their coverage image costs
+    // a path, its edges and a coverage cache entry at every position.
     QParams p = params(s);
-    p.reserved = rx > 0 ? 8 | 16 : 8;
-    p.gradient = (vector_float4){box.origin.x, box.origin.y, CGRectGetMaxX(box),
-                                 CGRectGetMaxY(box)};
-    p.src = (vector_float4){rx * fabs(transform.a), ry * fabs(transform.d), 0,
-                            0};
+    CGRect local = CGRectMake(x, y, w, h);
+    CGRect box = CGRectApplyAffineTransform(local, transform);
+    if (transform.b == 0 && transform.c == 0) {
+      // Axis-aligned: the box in device space, a compact draw unclipped.
+      p.reserved = rx > 0 ? 8 | 16 : 8;
+      p.gradient = (vector_float4){box.origin.x, box.origin.y,
+                                   CGRectGetMaxX(box), CGRectGetMaxY(box)};
+      p.src = (vector_float4){rx * fabs(transform.a), ry * fabs(transform.d),
+                              0, 0};
+    } else {
+      // Turned: the box in its own space, the samples mapped into it.
+      p.reserved = (rx > 0 ? 8 | 16 : 8) | 32;
+      p.gradient = (vector_float4){x, y, x + w, y + h};
+      p.src = (vector_float4){rx, ry, 0, 0};
+    }
     p.color = (vector_float4){red, green, blue, alpha};
     bounds(&p, crop(s, box));
     dispatch(s, s.texture, p, nil, nil, nil);
@@ -2624,13 +2651,15 @@ static void draw_glyph_image(QMetalSurface *s, QGlyphImage *image, double scale,
   p.dst = (vector_float4){dx, dy, w, h};
   p.translation.w = colored ? tint.a : 1;
   CGRect box;
-  NSData *edges = rect_edges(s, CGRectMake(dx, dy, w, h), &box);
+  NSData *edges = nil;
   // Native raster inputs carry two transparent padding pixels. For an
   // axis-aligned, linearly/nearest sampled mask the outer quad cannot affect
   // coverage; keep every interior Core Text sample and omit redundant edges.
   if (s.state.transform.b == 0 && s.state.transform.c == 0 &&
       s.state.interpolation < 3)
-    edges = nil;
+    box = axis_box(s, CGRectMake(dx, dy, w, h));
+  else
+    edges = rect_edges(s, CGRectMake(dx, dy, w, h), &box);
   p.edges = edges.length / 16;
   bounds(&p, crop(s, box));
   dispatch(s, s.texture, p, edges, nil, image.atlas ?: image.surface.texture);
@@ -2714,10 +2743,37 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
       return;
     }
   }
-  CTFontRef f =
-      font ? CTFontCreateCopyWithAttributes(font, size, NULL, NULL) : NULL;
-  if (!f)
+  if (!font)
     return;
+  struct {
+    const void *font;
+    double size, scale;
+  } strikeKey = {font, size, scale};
+  QSmallKey strikeLookup = small_key(&strikeKey, sizeof(strikeKey));
+  CFArrayRef strike = small_get(r.strikes, &strikeLookup);
+  if (!strike) {
+    if (CFDictionaryGetCount(r.strikes) >= 64)
+      CFDictionaryRemoveAllValues(r.strikes);
+    CTFontRef sized = CTFontCreateCopyWithAttributes(font, size, NULL, NULL);
+    CTFontRef scaled =
+        sized ? CTFontCreateCopyWithAttributes(sized, size * scale, NULL, NULL)
+              : NULL;
+    if (scaled) {
+      // The array owns the font too: its address is never reused while it is
+      // part of a key.
+      const void *values[] = {font, sized, scaled};
+      strike = CFArrayCreate(NULL, values, 3, &kCFTypeArrayCallBacks);
+    }
+    if (sized)
+      CFRelease(sized);
+    if (scaled)
+      CFRelease(scaled);
+    if (!strike)
+      return;
+    small_set(r.strikes, &strikeLookup, strike);
+    CFAutorelease(strike);
+  }
+  CTFontRef f = CFArrayGetValueAtIndex(strike, 1);
   CFMutableDictionaryRef glyphsOfFont =
       (CFMutableDictionaryRef)CFDictionaryGetValue(r.glyphCache, f);
   if (!glyphsOfFont) {
@@ -2726,19 +2782,12 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     glyphsOfFont =
         CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
                                   &kCFTypeDictionaryValueCallBacks);
-    if (!glyphsOfFont) {
-      CFRelease(f);
+    if (!glyphsOfFont)
       return;
-    }
     CFDictionarySetValue(r.glyphCache, f, glyphsOfFont);
     CFRelease(glyphsOfFont);
   }
-  CTFontRef scaledFont =
-      CTFontCreateCopyWithAttributes(f, size * scale, NULL, NULL);
-  if (!scaledFont) {
-    CFRelease(f);
-    return;
-  }
+  CTFontRef scaledFont = CFArrayGetValueAtIndex(strike, 2);
   if (CFDictionaryGetCount(r.glyphImages) >= 32 ||
       r.glyphImageBytes >= 16 * 1024 * 1024) {
     flush_draws();
@@ -2802,10 +2851,9 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     r.preparedBytes += runKey.length + captured.params.length +
                        captured.edges.length + captured.images.length;
   }
-  qm_fill(surface, combined, 0, red, green, blue, alpha);
+  if (!CGPathIsEmpty(combined))
+    qm_fill(surface, combined, 0, red, green, blue, alpha);
   CGPathRelease(combined);
-  CFRelease(scaledFont);
-  CFRelease(f);
   UNLOCK
 }
 void qm_glyphs_options(void *surface, void *font, double size,
