@@ -6,6 +6,7 @@ resolver = "2"
 # this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
 exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison"]
 members = [
+    "tests/FerroUI.ResourceBenchmarks",
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",
     "src/FerroUI.Media.Windows",

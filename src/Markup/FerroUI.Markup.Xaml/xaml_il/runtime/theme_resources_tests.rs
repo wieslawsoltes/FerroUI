@@ -18,6 +18,214 @@ static DOCUMENT: DocumentInfo = DocumentInfo { base_uri: Some("ferres://tests/Th
 
 const ACCENT: u32 = 0xFF33_6699;
 
+static IDENTITY_BRUSHES: &[LiteralBrushRow] = &[
+    LiteralBrushRow { key: "Identity", color: ACCENT, namespaces: None, line: 2, position: 8 },
+];
+
+#[test]
+fn compiled_rows_capture_each_declaration_after_reentrant_registration_notifications() {
+    use ferroui_controls::Border;
+    use std::cell::Cell;
+    static ROWS: &[ResourceAliasRow] = &[
+        ResourceAliasRow { key: "Before", target: "Accent", namespaces: None, line: 1, position: 2, value_line: 1, value_position: 10 },
+        ResourceAliasRow { key: "After", target: "Accent", namespaces: None, line: 2, position: 2, value_line: 2, value_position: 10 },
+    ];
+    crate::register_types();
+    let host = Border::new();
+    let dictionary = host.resources();
+    dictionary.add("Accent", Some(Rc::new(Color::from_uint32(ACCENT))));
+    let context = populate_context(None, &DOCUMENT, to_value(dictionary.clone()));
+    context.push_parent(to_value(dictionary.clone()));
+    let nearer = ResourceDictionary::new();
+    nearer.add("Accent", Some(Rc::new(Color::from_uint32(0xFF00_0000))));
+    let done = Rc::new(Cell::new(false));
+    let notification_context = context.clone();
+    let weak = dictionary.downgrade();
+    let _subscription = host.resources_changed(move |_| {
+        if !done.replace(true) {
+            let dictionary = weak.upgrade().unwrap();
+            // An observer can realize the just-inserted row immediately.
+            assert_eq!(resource(&dictionary, "Before").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+            notification_context.push_parent(to_value(nearer.clone()));
+        }
+    });
+    add_resource_aliases(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+    assert_eq!(resource(&dictionary, "After").downcast_ref::<Color>(), Some(&Color::from_uint32(0xFF00_0000)));
+}
+
+#[test]
+fn compiled_dynamic_brush_keeps_its_resource_subscription_after_realization() {
+    use ferroui_controls::Border;
+    static ROWS: &[DynamicBrushRow] = &[
+        DynamicBrushRow { key: "Brush", color_key: "Accent", namespaces: None, line: 1, position: 2, value_line: 1, value_position: 10 },
+    ];
+    crate::register_types();
+    let host = Border::new();
+    let dictionary = host.resources();
+    dictionary.add("Accent", Some(Rc::new(Color::from_uint32(ACCENT))));
+    let context = populate_context(None, &DOCUMENT, to_value(host.clone()));
+    context.push_parent(to_value(host.clone()));
+    context.push_parent(to_value(dictionary.clone()));
+    add_dynamic_brushes(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+    let value = resource(&dictionary, "Brush");
+    assert_eq!(brush_color(&value), Color::from_uint32(ACCENT));
+    drop(context);
+    dictionary.set("Accent", Some(Rc::new(Color::from_uint32(0xFF00_0000))));
+    assert_eq!(brush_color(&value), Color::from_uint32(0xFF00_0000));
+    assert!(Rc::ptr_eq(&value, &resource(&dictionary, "Brush")));
+}
+
+#[cfg(not(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions))))]
+#[test]
+fn compiled_rows_release_owned_plain_roots_per_resource_in_mixed_groups() {
+    use ferroui_controls::Border;
+    use std::cell::Cell;
+    #[derive(PartialEq)]
+    struct Root { id: u8, drops: Rc<Cell<usize>> }
+    impl Drop for Root { fn drop(&mut self) { self.drops.set(self.drops.get()+1); } }
+    static ROWS: &[LiteralBrushRow] = &[
+        LiteralBrushRow { key: "Before", color: ACCENT, namespaces: None, line: 1, position: 2 },
+        LiteralBrushRow { key: "Middle", color: 0xFF00_0000, namespaces: None, line: 2, position: 2 },
+        LiteralBrushRow { key: "After", color: ACCENT, namespaces: None, line: 3, position: 2 },
+    ];
+    crate::register_types();
+    let host = Border::new();
+    let dictionary = host.resources();
+    let drops = Rc::new(Cell::new(0));
+    let first: BoxedValue = Rc::new(Root { id: 1, drops: drops.clone() });
+    let second: BoxedValue = Rc::new(Root { id: 2, drops: drops.clone() });
+    let weak = Rc::downgrade(&first);
+    let context = populate_context(None, &DOCUMENT, Some(first.clone()));
+    context.set_intermediate_root_object(None);
+    context.push_parent(to_value(dictionary.clone()));
+    let notification_context = context.clone();
+    let dictionary_weak = dictionary.downgrade();
+    let events = Cell::new(0);
+    let _subscription = host.resources_changed(move |_| {
+        let event = events.get();
+        events.set(event + 1);
+        match event {
+            0 => notification_context.set_root_object(to_value(dictionary_weak.upgrade().unwrap())),
+            1 => notification_context.set_root_object(Some(second.clone())),
+            _ => {},
+        }
+    });
+    add_literal_brushes(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+    drop(first);
+    assert!(weak.upgrade().is_some());
+    assert_eq!(drops.get(), 0);
+    assert_eq!(brush_color(&resource(&dictionary, "Before")), Color::from_uint32(ACCENT));
+    assert!(weak.upgrade().is_none());
+    assert_eq!(drops.get(), 1);
+    assert!(deferred(&dictionary, "After"));
+    // The compact descriptor's index must still refer to the middle static row.
+    assert_eq!(brush_color(&resource(&dictionary, "Middle")), Color::from_uint32(0xFF00_0000));
+}
+
+#[test]
+fn compiled_rows_are_lazy_shared_per_dictionary_and_do_not_keep_owners_alive() {
+    static ROWS: &[LiteralBrushRow] = &[
+        LiteralBrushRow { key: "Identity", color: ACCENT, namespaces: None, line: 2, position: 8 },
+        LiteralBrushRow { key: "Unbuilt", color: ACCENT, namespaces: None, line: 3, position: 8 },
+    ];
+    let (first, first_context) = populated();
+    let (second, second_context) = populated();
+    add_literal_brushes(&first, &first_context, &DOCUMENT, ROWS).unwrap();
+    add_literal_brushes(&second, &second_context, &DOCUMENT, ROWS).unwrap();
+    assert!(deferred(&first, "Identity") && deferred(&second, "Identity"));
+    let value = resource(&first, "Identity");
+    assert!(Rc::ptr_eq(&value, &resource(&first, "Identity")));
+    let other = resource(&second, "Identity");
+    let brush = ValueTypes::as_object(&*value).unwrap().cast::<SolidColorBrush>().unwrap();
+    let other_brush = ValueTypes::as_object(&*other).unwrap().cast::<SolidColorBrush>().unwrap();
+    assert!(!brush.ptr_eq(&other_brush));
+    brush.set_color(Color::from_uint32(0xFF00_0000));
+    assert_eq!(other_brush.color(), Color::from_uint32(ACCENT));
+    assert!(deferred(&first, "Unbuilt"));
+    let weak = first.downgrade();
+    drop(first_context);
+    drop(first);
+    assert!(weak.upgrade().is_none());
+}
+
+#[test]
+fn compiled_failed_alias_retries_and_removal_replacement_clear_work_without_realization() {
+    static ROWS: &[ResourceAliasRow] = &[
+        ResourceAliasRow { key: "Retry", target: "Later", namespaces: None, line: 6, position: 2, value_line: 6, value_position: 20 },
+    ];
+    let (dictionary, context) = populated();
+    add_resource_aliases(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+    let failed = crate::xaml_error_scope::with_xaml_errors(|| {
+        assert!(dictionary.try_get_value(&ResourceKey::from("Retry")).is_none());
+        Ok(())
+    });
+    assert!(failed.is_err());
+    assert!(deferred(&dictionary, "Retry"));
+    let brush = SolidColorBrush::new();
+    dictionary.add("Later", to_value(brush.clone()));
+    assert!(ValueTypes::as_object(&*resource(&dictionary, "Retry")).unwrap().ptr_eq(&brush));
+    add_literal_brushes(&dictionary, &context, &DOCUMENT, IDENTITY_BRUSHES).unwrap();
+    assert!(dictionary.remove(&ResourceKey::from("Identity")));
+    assert!(!dictionary.contains_key(&ResourceKey::from("Identity")));
+    add_literal_brushes(&dictionary, &context, &DOCUMENT, IDENTITY_BRUSHES).unwrap();
+    dictionary.set("Identity", to_value(brush.clone()));
+    assert!(!deferred(&dictionary, "Identity"));
+    dictionary.clear();
+    assert_eq!(dictionary.count(), 0);
+}
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[test]
+fn compiled_alias_hot_reload_rebases_to_preserved_dictionary_before_first_lookup() {
+    use ferroui_base::controls::ResourceDictionaryOwnership;
+    use crate::xaml_il::runtime::DeferredContentReloadScope;
+    static ROWS: &[ResourceAliasRow] = &[
+        ResourceAliasRow { key: "Alias", target: "ApplicationAccent", namespaces: None, line: 6, position: 2, value_line: 6, value_position: 20 },
+    ];
+    crate::register_types();
+    let live = ResourceDictionary::new();
+    let ownership = ResourceDictionaryOwnership::capture(&live);
+    let brush = SolidColorBrush::new();
+    live.add("ApplicationAccent", to_value(brush.clone()));
+    let scope = DeferredContentReloadScope::new();
+    let (candidate, context) = populated();
+    add_resource_aliases(&candidate, &context, &DOCUMENT, ROWS).unwrap();
+    let mut change = ownership.prepare(&candidate).unwrap();
+    let mut rebase = scope.prepare_rebase(&[(to_value(candidate.clone()).unwrap(), to_value(live.clone()).unwrap())]);
+    rebase.commit();
+    change.commit().unwrap();
+    drop(change);
+    drop(rebase);
+    drop(scope);
+    let weak = candidate.downgrade();
+    drop(context);
+    drop(candidate);
+    assert!(weak.upgrade().is_none());
+    assert!(deferred(&live, "Alias"));
+    let resolved = resource(&live, "Alias");
+    assert!(ValueTypes::as_object(&*resolved).unwrap().ptr_eq(&brush));
+    assert!(Rc::ptr_eq(&resolved, &resource(&live, "Alias")));
+}
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[test]
+fn compiled_rows_reload_rollback_restores_realized_identity_and_detects_application_writes() {
+    use ferroui_base::controls::ResourceDictionaryOwnership;
+    let (live, context) = populated();
+    add_literal_brushes(&live, &context, &DOCUMENT, IDENTITY_BRUSHES).unwrap();
+    let ownership = ResourceDictionaryOwnership::capture(&live);
+    let original = resource(&live, "Identity");
+    let (candidate, candidate_context) = populated();
+    add_literal_brushes(&candidate, &candidate_context, &DOCUMENT, IDENTITY_BRUSHES).unwrap();
+    let mut change = ownership.prepare(&candidate).unwrap();
+    change.commit().unwrap();
+    assert!(!Rc::ptr_eq(&original, &resource(&live, "Identity")));
+    change.rollback();
+    assert!(Rc::ptr_eq(&original, &resource(&live, "Identity")));
+    live.set("Identity", Some(original));
+    assert!(ownership.prepare(&candidate).is_err());
+}
+
 /// A dictionary being populated, as generated code populates one: the context of the document
 /// with the dictionary as its root and on its parent stack, and the resources the rows refer to.
 fn populated() -> (Ref<ResourceDictionary>, Rc<XamlIlContext>) {

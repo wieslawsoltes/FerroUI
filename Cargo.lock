@@ -2907,6 +2907,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-resource-benchmarks"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-rich-text-oracle"
 version = "0.5.0-preview.1"
 dependencies = [

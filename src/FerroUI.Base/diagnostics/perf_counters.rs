@@ -82,8 +82,27 @@ perf_counters! {
     /// reaches (the object itself and its inheritance descendants, once per
     /// property).
     InheritedValueWalkVisits => "objects visited by inherited value walks",
+    /// `ValueStore::on_inheritance_ancestor_changed`: visits that update the
+    /// nearest inherited-value holder, including stops at local holders.
+    InheritanceAncestorWalkVisits => "objects visited by inheritance ancestor maintenance",
+    /// `ValueStore::on_ancestor_inherited_value_changed`: visits for a change
+    /// to an existing inherited effective value, including local overrides.
+    InheritedEffectiveValueWalkVisits => "objects visited by inherited effective value changes",
 
     // --- tree attachment, styles and resources (design 04) ---
+    /// `ValueStore::end_styling`: completed outermost styling batches.
+    StylingPassesCompleted => "outermost styling batches completed",
+    /// `ValueStore::reevaluate_effective_value`: non-deferred single-property
+    /// reevaluation attempts (including restarts).
+    SingleValueReevaluations => "single property reevaluations",
+    /// `ValueStore::reevaluate_effective_values`: non-deferred full-store
+    /// reevaluation attempts (including restarts).
+    FullValueReevaluations => "full value store reevaluations",
+    /// Existing effective values reset by a full-store reevaluation.
+    ReevaluatedEffectiveValues => "effective values reset by full reevaluations",
+    /// Frame entries visited by a full-store reevaluation, before priority
+    /// and value availability checks.
+    ReevaluatedFrameEntries => "frame entries visited by full reevaluations",
     /// `StyledElement::on_attached_to_logical_tree_core`: an element that
     /// was not in a logical tree enters one.
     LogicalTreeAttachments => "elements attached to a logical tree",

@@ -42,6 +42,28 @@ impl std::fmt::Display for DeferredContentFailed {
 
 impl std::error::Error for DeferredContentFailed {}
 
+/// A shared source for indexed deferred resources. Each dictionary entry keeps
+/// its own index; successful values are still cached by the owning dictionary.
+#[doc(hidden)]
+pub trait IDeferredResourceGroup {
+    fn try_build(
+        &self,
+        index: usize,
+        service_provider: Option<&Rc<dyn IServiceProvider>>,
+    ) -> Result<Option<BoxedValue>, DeferredContentFailed>;
+}
+
+/// A thin shared handle: an indexed dictionary entry has the same payload size
+/// as an ordinary deferred-content trait-object handle, without a row allocation.
+#[doc(hidden)]
+pub struct DeferredResourceGroup(pub(crate) Rc<dyn IDeferredResourceGroup>);
+
+impl DeferredResourceGroup {
+    pub fn new(source: Rc<dyn IDeferredResourceGroup>) -> Rc<Self> {
+        Rc::new(Self(source))
+    }
+}
+
 /// Handles compare by identity (reference equality), so that they can be
 /// held in property and untyped values.
 impl PartialEq for dyn IDeferredContent {

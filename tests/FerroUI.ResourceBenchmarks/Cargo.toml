@@ -1,0 +1,22 @@
+[package]
+name = "ferroui-resource-benchmarks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+autotests = false
+
+[[bin]]
+name = "ferroui-resource-benchmarks"
+path = "program.rs"
+
+[features]
+count-allocations = []
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-themes-winui.workspace = true
+serde_json.workspace = true

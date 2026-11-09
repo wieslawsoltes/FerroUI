@@ -18,16 +18,17 @@
 //! | a `SolidColorBrush` whose colour is `{DynamicResource Key}` | [`DynamicBrushRow`] | [`add_dynamic_brushes`] |
 //! | a `SolidColorBrush` whose colour is `{StaticResource Key}` | [`StaticBrushRow`] | [`add_static_brushes`] |
 //!
-//! Each row is still added as deferred content of its own (one `DeferredContent` per row,
-//! created with the context of the declaration as `rt::defer` creates it), built on first
-//! lookup. The plain values (section 5.2) are [`ValueRow`]s: [`add_double_resources`],
+//! Deferred rows use a shared indexed source with inline weak declaration captures,
+//! built on first lookup. Development hot reload and source overlays retain the
+//! ordinary `DeferredContent` capture path. The plain values are [`ValueRow`]s: [`add_double_resources`],
 //! [`add_thickness_resources`], [`add_corner_radius_resources`], [`add_color_resources`] and
 //! [`add_string_resources`]. Every builder adds its rows in order and stops at the first error,
 //! as the sequence of statements it replaces does.
 
 use std::rc::Rc;
 
-use ferroui_base::controls::{IDeferredContent, IResourceDictionary, ResourceDictionary};
+use ferroui_base::controls::{IResourceDictionary, ResourceDictionary};
+#[cfg(any(test, feature = "source-overlays", all(feature = "hot-reload", debug_assertions)))]
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingBase;
 use ferroui_base::media::{Color, SolidColorBrush};
@@ -35,13 +36,18 @@ use ferroui_base::metadata::{IServiceProvider, MarkupTyped, MarkupValue};
 use ferroui_base::{CornerRadius, FerroObject, Ref, Thickness, UnsetValueType};
 
 use super::compiled::{
-    bind, bind_dynamic_resource, cast, deferred_content, deferred_context, exact, invoked, is_instance, markup_handle,
+    bind, bind_dynamic_resource, cast, deferred_context, exact, invoked, is_instance, markup_handle,
     no_setter, property_value, provide_value_invoked, static_resource_content, string_object, to_object, to_value,
     unset_value, DocumentInfo, XmlNamespaceTable,
 };
-use super::{DeferredContentBuilder, XamlIlContext};
+use super::XamlIlContext;
+#[cfg(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions)))]
+use {ferroui_base::controls::IDeferredContent, super::compiled::deferred_content, super::DeferredContentBuilder};
 use crate::markup_extensions::StaticResourceExtension;
 use crate::XamlLoadError;
+
+#[path = "compact_resource_rows.rs"]
+mod compact;
 
 /// A resource that is `{StaticResource target}` alone (a resource that names another one),
 /// added under `key`.
@@ -121,6 +127,7 @@ fn row_document(document: &DocumentInfo, namespaces: Option<XmlNamespaceTable>) 
 /// type `object` and the context of the declaration, then `ResourceDictionary.AddDeferred(key,
 /// content)`; a failure of either is the load error at `line`, `position`.
 #[inline(never)]
+#[cfg(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions)))]
 fn add_deferred_row(
     dictionary: &Ref<ResourceDictionary>,
     key: &str,
@@ -147,11 +154,7 @@ pub fn add_resource_aliases(
     document: &'static DocumentInfo,
     rows: &'static [ResourceAliasRow],
 ) -> Result<(), XamlLoadError> {
-    for row in rows {
-        let builder = DeferredContentBuilder::try_new(move |service_provider| build_resource_alias(service_provider, document, row));
-        add_deferred_row(dictionary, row.key, context, builder, row.line, row.position)?;
-    }
-    Ok(())
+    compact::add_rows(dictionary, context, document, rows)
 }
 
 /// The build of a resource alias: [`static_resource_content`] of the target in the document of
@@ -174,11 +177,7 @@ pub fn add_literal_brushes(
     document: &'static DocumentInfo,
     rows: &'static [LiteralBrushRow],
 ) -> Result<(), XamlLoadError> {
-    for row in rows {
-        let builder = DeferredContentBuilder::try_new(move |service_provider| build_literal_brush(service_provider, document, row));
-        add_deferred_row(dictionary, row.key, context, builder, row.line, row.position)?;
-    }
-    Ok(())
+    compact::add_rows(dictionary, context, document, rows)
 }
 
 /// The build of a brush with a literal colour: the context of the build, the brush, the colour
@@ -205,11 +204,7 @@ pub fn add_dynamic_brushes(
     document: &'static DocumentInfo,
     rows: &'static [DynamicBrushRow],
 ) -> Result<(), XamlLoadError> {
-    for row in rows {
-        let builder = DeferredContentBuilder::try_new(move |service_provider| build_dynamic_brush(service_provider, document, row));
-        add_deferred_row(dictionary, row.key, context, builder, row.line, row.position)?;
-    }
-    Ok(())
+    compact::add_rows(dictionary, context, document, rows)
 }
 
 /// The build of a brush whose colour is `{DynamicResource key}`: the context of the build, the
@@ -246,11 +241,7 @@ pub fn add_static_brushes(
     document: &'static DocumentInfo,
     rows: &'static [StaticBrushRow],
 ) -> Result<(), XamlLoadError> {
-    for row in rows {
-        let builder = DeferredContentBuilder::try_new(move |service_provider| build_static_brush(service_provider, document, row));
-        add_deferred_row(dictionary, row.key, context, builder, row.line, row.position)?;
-    }
-    Ok(())
+    compact::add_rows(dictionary, context, document, rows)
 }
 
 /// The build of a brush whose colour is `{StaticResource key}`: the context of the build, the
