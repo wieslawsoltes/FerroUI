@@ -1085,7 +1085,7 @@ impl TextBlock {
 
     /// The default run properties of the layouts: the ones kept since a property they are made of
     /// last changed, else new ones.
-    fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
+    pub(crate) fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
         if let Some(properties) = self.run_properties.borrow().as_ref() {
             return properties.clone();
         }
