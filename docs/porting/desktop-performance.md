@@ -797,6 +797,20 @@ Gauntlet, per frame: text layouts 4,890 to 1,765, text lines formatted 5,533 to 
 `TextPipelineBenchmark.text_block_measure_sweep` (a width step of 7 a measure): labels 1.97 to
 0.14 ms, card bodies 7.85 to about 5.5 ms, articles unchanged within the noise. Local gate, three
 rounds: gauntlet UI thread 39.0 to 33.6 ms a frame (-13.9 %), no metric regressed.
+### 9.13 A visual that only moves does not record its drawing again
+
+Upstream's `Bounds` affects render: any change of a visual's bounds, its position included,
+records its drawing again. A visual draws in its own coordinates, and its position reaches the
+compositor as the offset of its composition visual, so a change of position alone now
+synchronizes the composition properties (section 9.5's path) and keeps the drawing; a change of
+size records it again. A class whose drawing reads its own position names `Bounds` in its own
+`affects_render` (`TextPresenter`, which records its offset in the root while it draws). Every
+item of a scrolled list moves without changing size, so scrolling no longer records the drawings
+of what it moves. Test: `visual_render_tests.rs`
+(`moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_drawing`). In the
+gauntlet, whose content is resized every frame, it saves the recording of about 650 visuals a
+frame (8,200 to 7,550). The local gate is unchanged within its tolerance (raster Skia): the gain is in
+lists that scroll at a fixed width, where every moved item is no longer recorded.
 
 ### 9.14 An unchanged drawing is not sent to the render thread again
 
