@@ -919,6 +919,7 @@ context then reports itself lost (`GraphiteGrContext::is_lost`) and is made agai
 lost device. docs/porting/skia-retained-text.md has what Graphite keeps across frames and what it
 does not. Window (gauntlet tier 16, 60 Hz, the two builds alternately): 28.1 / 29.5 / 28.6 to
 29.9 / 29.8 / 29.8 frames a second.
+
 ### 9.18 Removing a control from the queue of Loaded events takes constant time
 
 A control attached to a tree waits in a queue for its `Loaded` event; one detached before the
@@ -932,3 +933,22 @@ Tests: `control.rs` (`loaded_queue_tests`), the leak tests of the controls (a re
 not held by the queue). `ElementConstructionBenchmark` (the still wall's tiles, created, attached
 to a styled root and laid out): attaching and detaching 10,000 tiles 1,375 to 195 ms, with layout
 1,517 to 338 ms; 1,000 tiles 26.6 to 12.9 ms. The local gate is unchanged.
+
+### 9.19 The native renderer clips rectangles and rounded rectangles analytically
+
+The native Metal renderer (`ferroui-quartz`) made every clip a mask: a texture the size of the
+clip, the clip's path flattened into edges on the processor and a compute pass writing its
+coverage, for every clip in every frame. A frame's dirty region (section 9.10) was such a mask
+too, so every clip inside it was one as well: the still wall (58,696 tiles, each clipped to its
+rounded bounds) made tens of thousands of masks a frame.
+
+A rectangle clip and a rectangle clip with equal elliptical corners, under a transform that keeps
+the axes, are now coverage functions of the shaders (`qm_clip_rounded`, `clip_rectangle` and
+`clip_rounded` in `shaders.metal`): the parameters of every draw carry the rectangle clip in effect
+(the intersection of the rectangle clips, the area of each pixel inside it) and one rounded
+rectangle, and the work of a draw is cropped to their pixels. A region of one rectangle (the
+dirty area of a frame that changed everywhere) is a rectangle clip. A rounded clip inside a rounded
+clip, a clip under a rotation or a skew, a region of several rectangles and any other geometry
+clip with a mask as before; the mask is drawn through the analytic clips in effect and takes them
+in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
+still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.

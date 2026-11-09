@@ -792,6 +792,15 @@ void q_clear(void *c, double w, double h, double r, double g, double b,
     return;
   }
 }
+int q_clip_rounded(void *c, const double *rect) {
+#ifdef QUARTZ_METAL
+  return c ? qm_clip_rounded(c, rect) : 0;
+#else
+  (void)c;
+  (void)rect;
+  return 0;
+#endif
+}
 void q_clip(void *c, void *p, int evenodd) {
   @try {
     if (!c)

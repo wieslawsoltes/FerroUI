@@ -16,6 +16,7 @@ void qm_set_transform(void *surface, double a, double b, double c, double d,
                       double x, double y, double sx, double sy);
 void qm_clear(void *surface, double r, double g, double b, double a);
 void qm_clip(void *surface, CGPathRef path, int evenodd);
+int qm_clip_rounded(void *surface, const double *rect);
 void qm_fill(void *surface, CGPathRef path, int evenodd, double r, double g,
              double b, double a);
 void qm_gradient(void *surface, const double *colors, const double *stops,

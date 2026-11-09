@@ -162,11 +162,7 @@ impl DrawingContext {
             #[cfg(feature = "metal")]
             ffi::qm_text_options(
                 c,
-                self.text_options
-                    .last()
-                    .copied()
-                    .unwrap_or_default()
-                    .text_hinting_mode as i32,
+                native_hinting(self.text_options.last().copied().unwrap_or_default().text_hinting_mode),
             );
             ffi::q_glyphs(
                 c,
@@ -364,6 +360,26 @@ pub struct DrawingContext {
     pixels: Vec<effects::PixelState>,
 }
 impl DrawingContext {
+    /// Saves the state and clips to `rect` with corners of `radii` as a coverage function of the
+    /// renderer's shaders, without a mask (desktop-performance.md section 9.19). Returns `false`,
+    /// with nothing saved, when the renderer cannot (another clip is in effect, the transform
+    /// turns the axes, no Metal renderer): the caller clips with the geometry.
+    fn push_analytic_clip(&mut self, rect: Rect, radii: Vector) -> bool {
+        if !self.prepare() {
+            return false;
+        }
+        let values = [rect.x, rect.y, rect.width, rect.height, radii.x, radii.y];
+        let mut applied = false;
+        self.bitmap.context(|c| unsafe {
+            ffi::q_save(c);
+            applied = ffi::q_clip_rounded(c, values.as_ptr()) != 0;
+            if !applied {
+                ffi::q_restore(c);
+            }
+        });
+        applied
+    }
+
     pub fn new(bitmap: Bitmap, scaled: bool, finished: Option<Box<dyn FnOnce()>>) -> Self {
         let dpi = IBitmapImpl::dpi(&bitmap);
         bitmap.context(|c| unsafe { ffi::q_save(c) });
@@ -924,7 +940,7 @@ impl IDrawingContextImpl for DrawingContext {
                         g,
                         b,
                         a,
-                        text.text_hinting_mode as i32,
+                        native_hinting(text.text_hinting_mode),
                         (mode == TextRenderingMode::Alias || options.edge_mode == EdgeMode::Aliased)
                             as i32,
                         options.bitmap_interpolation_mode as i32,
@@ -993,12 +1009,27 @@ impl IDrawingContextImpl for DrawingContext {
         Rc::new(Bitmap::new(size, Vector::new(96., 96.)))
     }
     fn push_clip(&mut self, r: Rect) {
-        self.push_geometry_clip(&*Geometry::rectangle(r))
+        if !self.push_analytic_clip(r, Vector::new(0.0, 0.0)) {
+            self.push_geometry_clip(&*Geometry::rectangle(r))
+        }
     }
     fn push_clip_rounded(&mut self, r: RoundedRect) {
-        self.push_geometry_clip(&*Geometry::new(rounded(r), FillRule::NonZero))
+        let uniform = r.radii_top_left == r.radii_top_right
+            && r.radii_top_left == r.radii_bottom_left
+            && r.radii_top_left == r.radii_bottom_right;
+        if !(uniform && self.push_analytic_clip(r.rect, r.radii_top_left)) {
+            self.push_geometry_clip(&*Geometry::new(rounded(r), FillRule::NonZero))
+        }
     }
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
+        // A region of one rectangle (the dirty area of a frame that changed everywhere) is an
+        // analytic clip: the clips inside it stay analytic too (section 9.19).
+        if let [r] = region.rects()[..] {
+            let rect = Rect::new(r.left as f64, r.top as f64, (r.right - r.left) as f64, (r.bottom - r.top) as f64);
+            if self.push_analytic_clip(rect, Vector::new(0.0, 0.0)) {
+                return;
+            }
+        }
         let mut path = BezPath::new();
         for r in region.rects() {
             path.extend(
@@ -1165,5 +1196,17 @@ impl IDrawingContextImpl for DrawingContext {
 impl Drop for DrawingContext {
     fn drop(&mut self) {
         self.dispose()
+    }
+}
+
+/// The hinting the renderer is given for `mode`: an unspecified mode is strong hinting, as the Skia
+/// backend resolves it (`text_rendering_settings.rs`). The renderer draws hinted text from Core
+/// Text glyph images in its atlas and unhinted text (`None`) as outlines; passing the unspecified
+/// mode through drew every text that asked for nothing as outlines flattened on the processor.
+#[cfg(feature = "metal")]
+fn native_hinting(mode: ferroui_base::media::TextHintingMode) -> i32 {
+    match mode {
+        ferroui_base::media::TextHintingMode::Unspecified => ferroui_base::media::TextHintingMode::Strong as i32,
+        mode => mode as i32,
     }
 }
