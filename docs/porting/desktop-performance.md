@@ -727,3 +727,18 @@ inherit are kept this way: an inherited value changes with an ancestor's store. 
 `layout/hot_value_tests.rs` (local, style, current and animation values, a cleared local value,
 margin and visibility). Local gate, three rounds: gauntlet UI thread 37.28 to 36.11 ms a frame
 (-3.1 %), still wall with the pointer -6.2 %, no metric regressed.
+
+### 9.10 Targets track the dirty area as several rectangles by default
+
+Upstream keeps one dirty rectangle per target unless region clipping is asked for
+(`UseRegionDirtyRectClipping`). One rectangle is the union of everything that changed, so two
+small changes far apart repaint the whole area between them: on the still wall the clock line at
+the top and the cursor outline, which steps 37 tiles a frame and so moves down the window over
+time, made a rectangle that grew from 1522 x 138 to 986 x 882 pixels in 900 frames, and the
+render time from 28 to 81 ms a frame. Every backend that renders (Skia, Vello, Quartz) supports
+regions, so `CompositionOptions::use_region_dirty_rect_clipping` now means on when it is `None`
+and only `Some(false)` keeps the single rectangle. The tracker is upstream's
+`MultiDirtyRectTracker` with its defaults (at most 8 rectangles, merge eagerness 1000), and a
+target still renders into its retained layer, so the pixels outside the rectangles are the last
+frame's. Test: `composition_options.rs` (the default). Headless still wall, 900 frames: 81.4 to
+10.8 ms a frame, flat over the run (10.6 ms at 120 frames).
