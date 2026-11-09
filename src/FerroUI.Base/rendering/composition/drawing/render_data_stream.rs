@@ -48,6 +48,12 @@ impl RenderDataStream {
         Self::default()
     }
 
+    /// Whether `other` recorded the same operations on the same resources (an addition,
+    /// desktop-performance.md section 9.14): the two draw the same.
+    pub(crate) fn same_recording(&self, other: &RenderDataStream) -> bool {
+        self.opcodes() == other.opcodes() && self.resources.same_resources(&other.resources)
+    }
+
     /// The recorded operations.
     pub fn opcodes(&self) -> &[u8] {
         self.writer.written()

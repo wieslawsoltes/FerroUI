@@ -172,6 +172,9 @@ perf_counters! {
     LayoutPassRounds => "layout pass rounds",
     /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
     VisualsRecorded => "visuals recorded",
+    /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
+    /// was not sent again.
+    VisualsRecordedUnchanged => "visuals recorded unchanged",
 }
 
 /// The number of counters.

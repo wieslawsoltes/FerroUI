@@ -1951,3 +1951,28 @@ mod effect_prewarm_tests {
         }
     }
 }
+
+/// Desktop-performance.md section 9.14: a visual invalidated whose drawing comes out the same
+/// keeps its render data (not sent again), and the server still draws its area again.
+#[test]
+fn an_unchanged_drawing_is_not_sent_again_and_its_area_is_drawn_again() {
+    let s = CompositorCanvas::new();
+    let border = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    s.canvas.add(&border);
+    s.run_jobs();
+    let comp = border.composition_visual().expect("a composition visual");
+    let draw_list = comp.draw_list().expect("a drawing");
+
+    s.events.rects.borrow_mut().clear();
+    border.invalidate_visual();
+    s.run_jobs();
+    let after = comp.draw_list().expect("a drawing");
+    assert!(Rc::ptr_eq(&draw_list, &after), "the same render data");
+    s.assert_rects(&[Rect::new(10.0, 10.0, 20.0, 20.0)]);
+
+    // A different drawing is sent.
+    border.set_background(Some(Brushes::blue()));
+    s.run_jobs();
+    let changed = comp.draw_list().expect("a drawing");
+    assert!(!Rc::ptr_eq(&draw_list, &changed));
+}

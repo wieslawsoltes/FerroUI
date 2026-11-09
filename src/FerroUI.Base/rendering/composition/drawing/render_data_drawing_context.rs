@@ -34,6 +34,15 @@ pub(crate) enum RecordedResource {
 }
 
 impl RecordedResource {
+    /// The identity of the resource.
+    pub(crate) fn identity(&self) -> (u8, usize) {
+        match self {
+            RecordedResource::Brush(brush) => (0, Rc::as_ptr(brush) as *const () as usize),
+            RecordedResource::Pen(pen) => (1, Rc::as_ptr(pen) as *const () as usize),
+            RecordedResource::Geometry(geometry) => (2, &**geometry as *const Geometry as usize),
+        }
+    }
+
     pub(crate) fn with_resource<R>(&self, f: impl FnOnce(&dyn ICompositionRenderResource) -> R) -> Option<R> {
         match self {
             RecordedResource::Brush(brush) => brush_render_resource(&**brush).map(f),
@@ -166,6 +175,24 @@ impl RenderDataDrawingContext {
             }
             None => None,
         }
+    }
+
+    /// Like [`Self::get_render_results`], but `None` when what was recorded is what `previous`
+    /// holds: the same operations on the same resources. The recording is then discarded (its
+    /// references released) and `previous` stays the drawing, so the render thread neither
+    /// receives nor rebuilds it (an addition, desktop-performance.md section 9.14).
+    pub fn get_render_results_unless_same(
+        &mut self,
+        previous: Option<&Rc<CompositionRenderData>>,
+    ) -> Option<Option<Rc<CompositionRenderData>>> {
+        self.flush_stack();
+        if let (Some(previous), Some(stream)) = (previous, self.stream.as_ref()) {
+            if previous.has_recording(stream, &self.resources) {
+                self.reset();
+                return None;
+            }
+        }
+        Some(self.get_render_results())
     }
 
     /// Finishes a compositor-less recording and returns what was recorded

@@ -38,7 +38,13 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         reader: &mut BatchStreamReader<'_>,
         committed_at: Duration,
     ) {
-        if reader.read::<u8>() == 1 {
+        let change = reader.read::<u8>();
+        if change == 2 {
+            // The same drawing, drawn again (section 9.14).
+            *self.fragment.borrow_mut() = None;
+            visual.invalidate_content();
+        }
+        if change == 1 {
             if let Some(old) = self.render_commands.borrow_mut().take() {
                 super::IServerObject::dispose(&*old);
             }
