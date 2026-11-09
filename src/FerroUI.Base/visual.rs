@@ -34,6 +34,8 @@ pub struct Visual {
     // Deviation (DEVIATIONS.md, Visual tree): whether `RenderTransform` has a value, kept by its
     // change handler, so that the transforms of the visual tree skip the property read.
     has_render_transform: Cell<bool>,
+    /// The kept value of `IsVisible`, read many times a layout pass (desktop-performance.md, 9.9).
+    hot_is_visible: crate::property_store::HotValue<bool>,
     // Not upstream: whether the visual has a manipulation transform (the zoom a scroll presenter
     // applies to its content), kept so that the transforms of the visual tree skip the lookup.
     has_manipulation_transform: Cell<bool>,
@@ -822,6 +824,7 @@ impl Visual {
             visual_parent: RefCell::new(None),
             has_mirror_transform: Cell::new(false),
             has_render_transform: Cell::new(false),
+            hot_is_visible: Default::default(),
             has_manipulation_transform: Cell::new(false),
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),
@@ -971,7 +974,7 @@ impl Visual {
 
     /// Whether this control is visible.
     pub fn is_visible(&self) -> bool {
-        self.get_value(Self::is_visible_property())
+        self.hot_is_visible.get(self.values().value_generation(), || self.get_value(Self::is_visible_property()))
     }
 
     pub fn set_is_visible(&self, value: bool) {

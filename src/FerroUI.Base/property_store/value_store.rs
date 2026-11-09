@@ -86,6 +86,9 @@ pub(crate) struct ValueStore {
     /// Effective values sorted by property ID.
     effective_values: RefCell<Vec<(u32, EffectiveValueRef)>>,
     inherited_value_count: Cell<u32>,
+    /// Changes with every change of an effective value of the store: the kept copies of property
+    /// values (`HotValue`) are valid while it stays the same.
+    value_generation: Cell<u32>,
     is_evaluating: Cell<u32>,
     frame_generation: Cell<u32>,
     styling: Cell<u32>,
@@ -109,6 +112,7 @@ impl ValueStore {
             local_value_expressions: RefCell::new(Vec::new()),
             effective_values: RefCell::new(Vec::new()),
             inherited_value_count: Cell::new(0),
+            value_generation: Cell::new(1),
             is_evaluating: Cell::new(0),
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
@@ -969,7 +973,20 @@ impl ValueStore {
         value
     }
 
+    /// The generation of the effective values of the store.
+    #[inline]
+    pub(crate) fn value_generation(&self) -> u32 {
+        self.value_generation.get()
+    }
+
+    /// Records a change of an effective value of the store.
+    #[inline]
+    pub(crate) fn advance_value_generation(&self) {
+        self.value_generation.set(self.value_generation.get().wrapping_add(1).max(1));
+    }
+
     fn add_effective_value(&self, owner: &FerroObject, property: &FerroProperty, value: EffectiveValueRef) {
+        self.advance_value_generation();
         {
             let mut values = self.effective_values.borrow_mut();
             if values.capacity() == 0 {
@@ -1004,6 +1021,7 @@ impl ValueStore {
     }
 
     fn remove_effective_value(&self, owner: &FerroObject, property: &FerroProperty) -> bool {
+        self.advance_value_generation();
         let removed = {
             let mut values = self.effective_values.borrow_mut();
             Self::find(&values, property.id()).map(|index| values.remove(index))

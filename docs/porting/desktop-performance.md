@@ -711,3 +711,19 @@ foreground), and now also drops the kept properties. Test:
 wrapping, line height and spacing, letter spacing, text line bounds and the alignment of the
 layout) are kept the same way, by alignment, and dropped by both invalidations of the layout
 (-1.5 %, within noise, eight reads and an allocation fewer a layout).
+
+### 9.9 Layoutables keep a copy of their size, margin and visibility
+
+A layout pass reads a few properties of every element many times: in the gauntlet, `IsVisible`
+about 93,000 times a frame, `Width`, `MaxWidth`, `MaxHeight`, `MinWidth`, `Height`, `MinHeight`
+and `Margin` between 17,000 and 38,000 times each, every read a lookup in the element's value
+store. `Visual::is_visible` and the getters of these `Layoutable` properties now keep a copy of
+the value (`property_store::HotValue`) with the generations it was read at: the value store's,
+which every change of one of its effective values advances (a value set, coerced, added or
+removed, before the new value is written), and the metadata generation, which every override or
+removal of property metadata advances. A read with both generations unchanged returns the copy;
+any other read looks the property up and keeps the new value. Only properties that do not
+inherit are kept this way: an inherited value changes with an ancestor's store. Tests:
+`layout/hot_value_tests.rs` (local, style, current and animation values, a cleared local value,
+margin and visibility). Local gate, three rounds: gauntlet UI thread 37.28 to 36.11 ms a frame
+(-3.1 %), still wall with the pointer -6.2 %, no metric regressed.
