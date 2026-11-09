@@ -116,7 +116,7 @@ mod allocations {
     mod counted {
         use std::alloc::{GlobalAlloc, Layout, System};
         use std::cell::Cell;
-        thread_local! { static COUNTS: Cell<(u64,u64)> = const { Cell::new((0,0)) }; }
+        ferroui_base::ferro_thread_local! { static COUNTS: Cell<(u64,u64)> = const { Cell::new((0,0)) }; }
         pub fn snapshot() -> (u64,u64) { COUNTS.try_with(Cell::get).unwrap_or((0,0)) }
         fn add(bytes: usize) { let _ = COUNTS.try_with(|counts| { let (n,b)=counts.get(); counts.set((n+1,b+bytes as u64)); }); }
         struct Allocator;
