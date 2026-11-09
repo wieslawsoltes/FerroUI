@@ -273,8 +273,40 @@ pub fn register(registry: &mut Registry) {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn smoke() {
         crate::harness::smoke_class(super::register, "TextPipelineBenchmark");
+    }
+
+    /// `TextLayout::width_hold` with the real shaper and font (kerning, fractional advances): at
+    /// every width a layout holds, in quarter-pixel steps, a new layout makes the same lines.
+    #[test]
+    fn width_holds_match_new_layouts_with_harfbuzz() {
+        let benchmark = TextPipelineBenchmark::new(Corpus::Card);
+        let lines = |layout: &TextLayout| -> Vec<(i32, i32)> {
+            layout.text_lines().iter().map(|line| (line.first_text_source_index(), line.length())).collect()
+        };
+        let mut held = 0;
+        for index in (0..benchmark.texts.len()).step_by(10) {
+            for start in [150.0, 197.5, 240.0, 333.3] {
+                let first = benchmark.layout(index, start, true);
+                let expected = lines(&first);
+                let Some((low, high)) = first.width_hold() else { continue };
+                let mut width = (low - 1.0).max(1.0);
+                while width < high.min(start + 200.0) + 1.0 {
+                    if low <= width && width < high {
+                        held += 1;
+                        let fresh = benchmark.layout(index, width, true);
+                        assert_eq!(expected, lines(&fresh), "text {index} created at {start}, held over {low}..{high}, other lines at {width}");
+                        fresh.dispose();
+                    }
+                    width += 0.25;
+                }
+                first.dispose();
+            }
+        }
+        assert!(held > 1_000, "only {held} widths were held");
     }
 }
