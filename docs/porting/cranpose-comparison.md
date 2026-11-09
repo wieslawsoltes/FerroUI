@@ -45,9 +45,32 @@ Own frame counter, median of the last 8 seconds of a 12-second run, `release` pr
 | Quartz Metal (`ferroui-quartz`) | 1.4 | 0.3 |
 
 FerroUI on Skia does twice the gauntlet frame rate of the .NET original and about Flutter's, a
-third of Cranpose's and egui's. The external-counter run of all four frameworks on this machine is
-recorded in [desktop-performance.md](desktop-performance.md), section 8, once the display can be
-set to the 60 Hz the benchmark is calibrated for.
+third of Cranpose's and egui's (that was before the changes of desktop-performance.md section 9);
+section 2.1 has the benchmark's own harness after them.
+
+### 2.1 The benchmark's own harness (external counter, 60 Hz)
+
+`benchmarks/compose-vs-cranpose/desktop.py` of the Cranpose repository, on the same machine with
+the display at 60 Hz and a still wallpaper (the harness refuses to measure while anything else
+moves on the display), two rounds, each app launched twice a round (the first launch after its
+saved state was removed). FerroUI at main `18a21d966` (sections 9.12 to 9.15 of
+desktop-performance.md; before 9.16 and 9.17). Frames a second as `FrameCount.app` counts the
+frames the window presents, first launch / second launch, both rounds; CPU time a frame of the app
+and what it started; the 99th percentile frame time:
+
+| Scenario | App | fps | CPU a frame | p99 |
+|---|---|---|---:|---:|
+| Gauntlet, tier 16 | Cranpose | 55.6 / 58.4, 55.5 / 58.5 | 18–20 ms | 19–22 ms |
+| | egui | 54.0 / 57.1, 53.7 / 57.2 | 20–23 ms | 33–37 ms |
+| | FerroUI (Skia, Graphite) | 23.3 / 29.4, 23.1 / 29.7 | 63–66 ms | 50–68 ms |
+| Still wall, tier 20 | Cranpose | 21.2 / 25.4, 23.4 / 24.9 | 47–53 ms | 170–188 ms |
+| | egui | 22.6 / 25.0, 23.9 / 25.3 | 50–52 ms | 50–51 ms |
+| | FerroUI (Skia, Graphite) | 26.6 / 36.7, 27.3 / 37.4 | 27–33 ms | 21–25 ms |
+
+FerroUI leads the still wall in frame rate and in smoothness, and runs the gauntlet at about half
+the frame rate of Cranpose and egui with about three times their CPU time a frame. Its first
+launch is slower than its second (first frame 2.3 s against 0.6 s on the gauntlet, 5.5 s against
+3.8 s on the wall), which points at work done once a process (pipelines compiled, fonts loaded).
 
 ## 3. Where FerroUI loses time
 
