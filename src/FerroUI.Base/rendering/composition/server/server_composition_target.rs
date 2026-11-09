@@ -130,7 +130,7 @@ impl ServerCompositionTarget {
         // Not the service locator: a target is created by the thread that
         // applies the batch. The render interface is lent for the call.
         compositor.render_interface().with_platform_render_interface(|platform_render| {
-            if platform_render.supports_regions() && compositor.options().use_region_dirty_rect_clipping == Some(true) {
+            if platform_render.supports_regions() && compositor.options().region_dirty_rect_clipping() {
                 let max_rects = compositor.options().max_dirty_rects.unwrap_or(8);
                 dirty_rects = Some(if max_rects <= 0 {
                     Rc::new(RegionDirtyRectTracker::new(platform_render))

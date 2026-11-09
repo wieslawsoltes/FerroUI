@@ -184,6 +184,15 @@ impl CompositorCanvas {
     /// A canvas whose render interface `setup` configures before the first
     /// frame (a backend context factory).
     fn with_size_and_setup(size: Size, setup: impl FnOnce(&MockPlatformRenderInterface)) -> CompositorCanvas {
+        Self::with_options(size, None, setup)
+    }
+
+    /// A canvas whose compositor has `options`.
+    fn with_options(
+        size: Size,
+        options: Option<crate::rendering::composition::CompositionOptions>,
+        setup: impl FnOnce(&MockPlatformRenderInterface),
+    ) -> CompositorCanvas {
         let dispatcher_scope = Dispatcher::unit_test_scope();
         let (locator_scope, render_interface) = MockPlatformRenderInterface::install();
         setup(render_interface.as_ref());
@@ -194,7 +203,7 @@ impl CompositorCanvas {
             true,
             &MediaContext::instance().scheduler(),
             Dispatcher::ui_thread(),
-            None,
+            options,
             None,
         );
 
@@ -859,7 +868,21 @@ fn detached_visuals_release_their_server_objects() {
 
 #[test]
 fn target_renders_only_the_dirty_area() {
-    let s = CompositorCanvas::new();
+    // Region clipping is on by default: the dirty area is clipped with a region.
+    target_renders_only_the_dirty_area_clipped_with(CompositorCanvas::new(), "PushClipRegion");
+}
+
+#[test]
+fn target_turned_off_region_clipping_renders_only_the_dirty_rectangle() {
+    let options = crate::rendering::composition::CompositionOptions {
+        use_region_dirty_rect_clipping: Some(false),
+        ..Default::default()
+    };
+    let s = CompositorCanvas::with_options(Size::new(1000.0, 1000.0), Some(options), |_| {});
+    target_renders_only_the_dirty_area_clipped_with(s, "PushClip 499, 499, 22, 22");
+}
+
+fn target_renders_only_the_dirty_area_clipped_with(s: CompositorCanvas, clip: &str) {
     let log = s.render_interface.log().clone();
     let first = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
     let second = TestBorder::filled(500.0, 500.0, 20.0, 20.0);
@@ -881,7 +904,7 @@ fn target_renders_only_the_dirty_area() {
     s.run_jobs();
     assert_eq!(0, log.count("DrawRectangle Red"), "{:?}", log.entries());
     assert_eq!(1, log.count("DrawRectangle Green"));
-    assert!(log.entries().iter().any(|e| e.starts_with("PushClip 499, 499, 22, 22")), "{:?}", log.entries());
+    assert!(log.entries().iter().any(|e| e.starts_with(clip)), "{:?}", log.entries());
     s.assert_rects(&[Rect::new(500.0, 500.0, 20.0, 20.0)]);
 }
 
