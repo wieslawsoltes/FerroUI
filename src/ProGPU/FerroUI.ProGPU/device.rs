@@ -35,6 +35,39 @@ impl fmt::Display for ProGpuDeviceError {
 
 impl std::error::Error for ProGpuDeviceError {}
 
+/// The mark of a thread that called the WebGPU implementation: a thread-local that is destroyed
+/// with the thread-locals of the thread and holds nothing.
+struct ThreadMark;
+
+impl Drop for ThreadMark {
+    fn drop(&mut self) {}
+}
+
+thread_local! {
+    /// Whether the calling thread has its mark. It has no destructor, so it can be read at any
+    /// time, also while the thread-locals of the thread are destroyed.
+    static ENTERED: Cell<bool> = const { Cell::new(false) };
+    static MARK: ThreadMark = const { ThreadMark };
+}
+
+/// Whether the thread-locals of the calling thread are being destroyed, or are gone, after the
+/// thread called the WebGPU implementation.
+///
+/// The WebGPU implementation is not called then, and what the backend holds of it is not
+/// released: with debug assertions it keeps the state of its locks in a thread-local of its own
+/// (to report a lock taken twice by one thread), which a release of a device reads and which is
+/// destroyed with the thread, so a release made by a destructor of another thread-local, where
+/// the framework keeps its compositor and so the context of the backend, would panic inside a
+/// function of the C ABI. A thread that ends with a device ends the use of the device: its
+/// objects are left to the end of the process, which is where a window application gets here.
+///
+/// Thread-locals are destroyed in the reverse order of their first use. The mark of a thread is
+/// first used after a call that takes the lock of a device ([`ProGpuDevice::enter`]), so it is
+/// destroyed before the lock state of the implementation: while the mark is alive, that state is.
+pub(crate) fn thread_is_ending() -> bool {
+    ENTERED.get() && MARK.try_with(|_| ()).is_err()
+}
+
 /// A WebGPU device of the statically linked wgpu-native: the device the engines of the backend
 /// render with ([`ProGpuEngine`]), which call WebGPU through the procedures of that
 /// implementation (`resolve_webgpu_proc`).
@@ -175,7 +208,9 @@ impl ProGpuDevice {
                 return Err(ProGpuDeviceError::NoDevice);
             }
             let queue = wgpuDeviceGetQueue(device);
-            Ok(Self { instance, adapter, device, queue })
+            let device = Self { instance, adapter, device, queue };
+            device.enter();
+            Ok(device)
         }
     }
 
@@ -205,7 +240,23 @@ impl ProGpuDevice {
                 return Err(ProGpuDeviceError::NoDevice);
             }
             let queue = wgpuDeviceGetQueue(device);
-            Ok(Self { instance, adapter: ptr::null_mut(), device, queue })
+            let device = Self { instance, adapter: ptr::null_mut(), device, queue };
+            device.enter();
+            Ok(device)
+        }
+    }
+
+    /// Marks the calling thread as one that calls the WebGPU implementation, at its first entry
+    /// (see [`thread_is_ending`]). The device is polled without waiting first, which takes the
+    /// lock of the device once, so the lock state the implementation keeps for the thread exists
+    /// before the mark does.
+    pub(crate) fn enter(&self) {
+        if !ENTERED.get() {
+            // SAFETY: the device is alive; a poll that does not wait only completes what the
+            // device has finished.
+            unsafe { wgpuDevicePoll(self.device, 0, ptr::null()) };
+            MARK.with(|_| ());
+            ENTERED.set(true);
         }
     }
 
@@ -226,6 +277,7 @@ impl ProGpuDevice {
         format: WGPUTextureFormat,
         usage: WGPUTextureUsage,
     ) -> Option<(WGPUTexture, WGPUTextureView)> {
+        self.enter();
         // SAFETY: the texture is valid (the contract of this function); the descriptor is borrowed.
         unsafe {
             let texture = wgpuDeviceCreateTextureFromMetal(
@@ -252,7 +304,11 @@ impl ProGpuDevice {
     }
 
     /// Releases a texture of the device and its view (`create_target`, `wrap_metal_texture`).
+    /// They are left alone on a thread that is ending ([`thread_is_ending`]).
     pub fn release_texture(&self, texture: WGPUTexture, view: WGPUTextureView) {
+        if thread_is_ending() {
+            return;
+        }
         // SAFETY: the handles are owned by the caller, which gives them up here.
         unsafe {
             wgpuTextureViewRelease(view);
@@ -262,17 +318,20 @@ impl ProGpuDevice {
 
     /// The WebGPU device.
     pub fn device(&self) -> WGPUDevice {
+        self.enter();
         self.device
     }
 
     /// The queue of the device.
     pub fn queue(&self) -> WGPUQueue {
+        self.enter();
         self.queue
     }
 
     /// Creates a texture of `RGBA8Unorm` that can be rendered to, sampled and read back, with its
     /// view.
     pub fn create_target(&self, width: u32, height: u32) -> (WGPUTexture, WGPUTextureView) {
+        self.enter();
         // SAFETY: the calls of the WebGPU C ABI with the device; the descriptor is borrowed.
         unsafe {
             let texture = wgpuDeviceCreateTexture(
@@ -297,6 +356,7 @@ impl ProGpuDevice {
 
     /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
     pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+        self.enter();
         // Rows of a copy are aligned to 256 bytes.
         let bytes_per_row = (width * 4).div_ceil(256) * 256;
         let size = u64::from(bytes_per_row) * u64::from(height);
@@ -361,6 +421,10 @@ impl ProGpuDevice {
 
 impl Drop for ProGpuDevice {
     fn drop(&mut self) {
+        // The device of a thread that is ending is not released (`thread_is_ending`).
+        if thread_is_ending() {
+            return;
+        }
         // SAFETY: the handles are owned here.
         unsafe {
             wgpuQueueRelease(self.queue);
@@ -413,6 +477,7 @@ impl ProGpuEngine {
 
     /// The engine, entered by the calling thread.
     fn enter(&self) -> *mut progpu_native_engine {
+        self.device.enter();
         let thread = std::thread::current().id();
         if self.thread.get() != thread {
             // SAFETY: the engine is alive; the owner of the engine serializes its entries (the
@@ -528,6 +593,11 @@ impl ProGpuEngine {
 
 impl Drop for ProGpuEngine {
     fn drop(&mut self) {
+        // The engine of a thread that is ending is not destroyed: destroying it releases its
+        // objects of the device (`thread_is_ending`).
+        if thread_is_ending() {
+            return;
+        }
         // SAFETY: the engine is owned here and goes before the device it retains.
         unsafe { progpu_native_engine_destroy(self.enter()) };
     }

@@ -377,6 +377,28 @@ fn render_target_bitmaps_keep_what_was_drawn() {
     assert!(bitmap.version() >= 2);
 }
 
+/// A thread that ends while a thread-local of it holds the device of its bitmaps (the device is
+/// made after that thread-local is first used, so the thread-local outlives what the WebGPU
+/// implementation keeps for the thread) leaves the device alone instead of releasing it from a
+/// destructor of the thread.
+#[test]
+fn a_thread_ends_with_the_device_of_its_bitmaps() {
+    if context().is_none() {
+        return;
+    }
+    let version = std::thread::spawn(|| {
+        let interface = ProGpuPlatformRenderInterface::new();
+        let bitmap = interface.create_render_target_bitmap(PixelSize::new(8, 8), Vector::new(96.0, 96.0));
+        let mut drawing = bitmap.create_drawing_context();
+        drawing.clear(Color::from_rgb(255, 0, 0));
+        drawing.dispose();
+        bitmap.version()
+    })
+    .join()
+    .expect("the thread ended");
+    assert!(version >= 1, "the bitmap was drawn");
+}
+
 struct ForeignBitmap;
 
 impl IBitmapImpl for ForeignBitmap {
