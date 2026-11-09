@@ -172,9 +172,11 @@ fn reattaching_should_rebuild_text_layout() {
 fn calling_arrange_with_different_size_should_update_constraint_and_text_layout() {
     let _scope = test_scope();
     let text_block = text_block("Hello World");
-    // Wrapped: a layout that neither wraps nor trims is kept for a new width
-    // (`a_layout_that_does_not_depend_on_the_width_is_kept`).
+    // Wrapped and centered: a left-aligned layout is kept for a new width at which it has the
+    // same lines (`a_layout_that_does_not_depend_on_the_width_is_kept`,
+    // `a_wrapped_layout_is_kept_at_a_wider_width_it_holds`); a centered one is not.
     text_block.set_text_wrapping(TextWrapping::Wrap);
+    text_block.set_text_alignment(TextAlignment::Center);
 
     text_block.measure(infinity());
 
@@ -204,6 +206,66 @@ fn calling_arrange_with_different_size_should_update_constraint_and_text_layout(
 
     // The text layout is recreated after arrange.
     assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+}
+
+/// Not in the reference tests (desktop-performance.md section 9.12): a wrapped, left-aligned
+/// layout is kept at a width inside its width hold, wider or narrower, and has the lines a new
+/// layout at that width has.
+#[test]
+fn a_wrapped_layout_is_kept_at_a_wider_width_it_holds() {
+    let _scope = test_scope();
+    let block = text_block("Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod");
+    block.set_text_wrapping(TextWrapping::Wrap);
+
+    block.measure(Size::new(150.0, f64::INFINITY));
+    let text_layout = block.text_layout();
+    let (low, high) = text_layout.width_hold().expect("a wrapped left-to-right layout has a hold");
+    assert!(text_layout.text_lines().len() > 1);
+    let lines = |layout: &ferroui_base::media::text_formatting::TextLayout| -> Vec<(i32, i32)> {
+        layout.text_lines().iter().map(|line| (line.first_text_source_index(), line.length())).collect()
+    };
+
+    for width in [low, (low + high) / 2.0, high.min(1000.0) - 0.05] {
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at {width}");
+        let fresh = text_block("Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod");
+        fresh.set_text_wrapping(TextWrapping::Wrap);
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(lines(&fresh.text_layout()), lines(&text_layout), "same lines at {width}");
+    }
+
+    // Beyond the hold the lines change: a new layout.
+    block.measure(Size::new(high + 1.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+}
+
+/// Not in the reference tests (desktop-performance.md section 9.12): a grid measures a cell of
+/// an auto row at an infinite height and then at the row's height; a layout that left no line out
+/// is kept for both, while one that left lines out for height is made again for a taller one.
+#[test]
+fn a_layout_that_left_no_line_out_is_kept_for_a_taller_height() {
+    let _scope = test_scope();
+    let block = text_block("Lorem ipsum dolor sit amet consectetur adipiscing elit");
+    block.set_text_wrapping(TextWrapping::Wrap);
+
+    block.measure(Size::new(120.0, f64::INFINITY));
+    let text_layout = block.text_layout();
+    let height = text_layout.height();
+    assert!(text_layout.text_lines().len() > 1);
+
+    block.measure(Size::new(120.0, height));
+    assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at its own height");
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept for an infinite height again");
+
+    // A layout that left lines out for height is made again for a taller height.
+    block.measure(Size::new(120.0, height / 2.0));
+    let truncated = block.text_layout();
+    assert!(truncated.is_truncated_by_height());
+    assert!(truncated.text_lines().len() < text_layout.text_lines().len());
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&truncated, &block.text_layout()));
+    assert_eq!(text_layout.text_lines().len(), block.text_layout().text_lines().len());
 }
 
 /// Not in the reference tests: arranging at the measured constraint keeps

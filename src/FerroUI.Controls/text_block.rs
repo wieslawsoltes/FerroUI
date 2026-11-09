@@ -1189,11 +1189,14 @@ impl TextBlock {
         let width_independent = left
             && self.text_wrapping() == TextWrapping::NoWrap
             && Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none());
+        // - a left-aligned layout has the same lines at any width inside its width hold (section
+        //   9.12): every line still fits, and no line can take the next line's first word.
         let same_lines = width_independent
             || constraint.width == created_for.width
             || (left
                 && text_layout.width_including_trailing_whitespace() <= constraint.width
-                && (constraint.width <= created_for.width || created_for.width == f64::INFINITY));
+                && (constraint.width <= created_for.width || created_for.width == f64::INFINITY))
+            || (left && text_layout.holds_width(constraint.width));
         if self.has_complex_content()
             || !same_lines
             || created_for.width.is_nan()
@@ -1214,7 +1217,13 @@ impl TextBlock {
             return false;
         }
 
-        created_for.height == f64::INFINITY || constraint.height <= created_for.height
+        // A layout that left no line out for height has the lines of a layout made for any height
+        // its lines fit (section 9.12): a grid measures a cell of an auto row at an infinite
+        // height and then at the row's height, and the layout of the first is kept for the second
+        // and the next frame's first. One that left lines out keeps them out for a smaller height.
+        created_for.height == f64::INFINITY
+            || constraint.height <= created_for.height
+            || !text_layout.is_truncated_by_height()
     }
 
     fn dispose_text_layout(&self) {

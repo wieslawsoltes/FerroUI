@@ -762,3 +762,38 @@ path. Test: `media/box_shadow_tests.rs` `box_shadows_of_every_kind` (outer and i
 square, offsets, spreads, blurs from 2 to 40, two shadows on one box), whose expected image is the
 image filter's: the two differ by at most 3 of 255 in a channel, in 6 of 120,000 pixels. Local gate,
 three rounds: gauntlet render 88.9 to 50.9 ms a frame (-42.8 %), wall time -42.3 %.
+
+### 9.12 A text block keeps a layout over its width hold and for a taller height
+
+Upstream makes a new text layout whenever the constraint of a text block changes; section 9.7
+keeps a left-aligned layout whose lines fit a narrower width. In the gauntlet that kept nothing:
+every text block is measured twice a frame, by its grid, at an infinite height and then at the
+height of its auto row, and the rule kept a layout only for a height not larger than the one it
+was made for, so the two measures replaced each other's layout: 4,890 layouts a frame.
+
+- `TextLayout::is_truncated_by_height` tells whether a layout left lines out because they did
+  not fit its maximum height. A layout that left nothing out has the lines of a layout made for
+  any height its lines fit, so a text block keeps it for a taller height too.
+- `TextLayout::width_hold` is the range of maximum widths over which a new layout makes the same
+  lines (docs/porting/text-layout-performance.md, step 1): wrapping is greedy, so the lines stay
+  while every line fits (from the widest line without its trailing white space, with it for a
+  line that ends the paragraph or at a required break) and while no line can take the next
+  line's first word (up to a line's width with its trailing white space and that word, read from
+  the advances of the shaped run). It is known for left-to-right text that wraps without
+  trimming, a line limit, letter spacing, tabs or paragraph styles, whose lines are one shaped
+  run each and end at break opportunities, kept 0.01 inside its exact bounds for the tolerance of
+  the formatter's comparisons. `TextLayout::holds_width` answers for one width and stops at the
+  first line that rules it out. A left-aligned text block keeps its layout for any width the
+  layout holds.
+
+Tests: `text_layout_width_hold_tests.rs` (every width a layout holds, in quarter-pixel steps,
+gives a new layout with the same lines, over texts with hyphens, dashes, slashes, runs of spaces,
+required breaks and words wider than the width), the same check with HarfBuzz and Skia over the
+gauntlet's card bodies (`TextPipelineBenchmark` tests), and `text_block_tests.rs`
+(`a_wrapped_layout_is_kept_at_a_wider_width_it_holds`,
+`a_layout_that_left_no_line_out_is_kept_for_a_taller_height`); the reference test that arranges
+a text block wider and expects a new layout centers its text, which the hold does not cover.
+Gauntlet, per frame: text layouts 4,890 to 1,765, text lines formatted 5,533 to 2,263.
+`TextPipelineBenchmark.text_block_measure_sweep` (a width step of 7 a measure): labels 1.97 to
+0.14 ms, card bodies 7.85 to about 5.5 ms, articles unchanged within the noise. Local gate, three
+rounds: gauntlet UI thread 39.0 to 33.6 ms a frame (-13.9 %), no metric regressed.
