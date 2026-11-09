@@ -905,3 +905,17 @@ marks, runs of spaces, required breaks and right-to-left words, at widths every 
 again for every line). `TextPipelineBenchmark`, a layout with shaping cached: card bodies 7.15 to
 4.30 ms, articles 2.65 to 1.60 ms, labels 1.44 to 1.17 ms. Local gate, three rounds: gauntlet UI
 thread 27.4 to 25.0 ms a frame (-9.1 %), no metric regressed.
+
+### 9.18 Removing a control from the queue of Loaded events takes constant time
+
+A control attached to a tree waits in a queue for its `Loaded` event; one detached before the
+dispatcher raised it is removed from the queue. Upstream keeps the queue in a set; FerroUI kept it
+in a vector (for the order of the events) beside a set, and removing a control searched the
+vector, so detaching a tree of n controls that had not been loaded yet took time in n squared:
+detaching 10,000 tiles of the still wall (70,000 elements) took more than a second. The queue now
+keeps each control's slot: removing empties it, which releases the control at once and keeps the
+order of the others, and the vector drops its empty slots when they outnumber the queued controls.
+Tests: `control.rs` (`loaded_queue_tests`), the leak tests of the controls (a removed control is
+not held by the queue). `ElementConstructionBenchmark` (the still wall's tiles, created, attached
+to a styled root and laid out): attaching and detaching 10,000 tiles 1,375 to 195 ms, with layout
+1,517 to 338 ms; 1,000 tiles 26.6 to 12.9 ms. The local gate is unchanged.
