@@ -25,6 +25,27 @@ impl LayoutHelper {
 
     /// Measures a child with padding and a border, returning the desired
     /// size including them.
+    /// The measure hold of an element that measures `control` as [`Self::measure_child_with_border`]
+    /// does: the child's hold moved by the padding and the border (desktop-performance.md section
+    /// 9.15); without a child, every size.
+    pub fn measure_hold_with_border(
+        control: Option<&Layoutable>,
+        mut padding: Thickness,
+        mut border_thickness: Thickness,
+    ) -> Option<crate::layout::MeasureHold> {
+        if let Some(scale) = Self::is_parent_layout_rounded(control) {
+            padding = Self::round_layout_thickness(padding, scale);
+            border_thickness = Self::round_layout_thickness(border_thickness, scale);
+        }
+        let around = padding + border_thickness;
+        match control {
+            Some(control) => control
+                .measure_hold()
+                .map(|hold| hold.inflate(around.left + around.right, around.top + around.bottom)),
+            None => Some(crate::layout::MeasureHold::ANY),
+        }
+    }
+
     pub fn measure_child_with_border(
         control: Option<&Layoutable>,
         available_size: Size,

@@ -61,6 +61,61 @@ ferro_impl_classes!(
 ferroui_base::ferro_impl_classes!(WrapPanel: FerroObjectImpl);
 
 impl LayoutableImpl for WrapPanel {
+    /// A horizontal panel with items at the start of their lines (desktop-performance.md section
+    /// 9.15): its lines are the same while every line fits (from the widest line) and no line can
+    /// take the first item of the next one (up to the narrowest such width), and its children,
+    /// which get its constraint where no item size is set, hold. The other orientations and
+    /// alignments hold nothing.
+    fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        use ferroui_base::layout::MeasureHold;
+        if this.orientation() != Orientation::Horizontal
+            || this.items_alignment() != WrapPanelItemsAlignment::Start
+            || !constraint.width.is_finite()
+        {
+            return None;
+        }
+        const MARGIN: f64 = 0.01;
+        let item_width = this.item_width();
+        let item_height = this.item_height();
+        let (item_width_set, item_height_set) = (!item_width.is_nan(), !item_height.is_nan());
+        let item_spacing = this.item_spacing();
+        let use_layout_rounding = this.use_layout_rounding();
+        let mut hold = MeasureHold::ANY;
+        let (mut line, mut low, mut high) = (0.0f64, 0.0f64, f64::INFINITY);
+        let mut item_exists = false;
+        for child in this.children().snapshot().iter() {
+            let visible = child.is_visible();
+            if visible {
+                let mut child_hold = child.measure_hold()?;
+                if item_width_set {
+                    child_hold = child_hold.any_width();
+                }
+                if item_height_set {
+                    child_hold = child_hold.any_height();
+                }
+                hold = hold.intersect(child_hold)?;
+            }
+            let u = if item_width_set { item_width } else { child.desired_size().width };
+            let next_spacing = if item_exists && visible { item_spacing } else { 0.0 };
+            let joined = line + u + next_spacing;
+            if greater_than(use_layout_rounding, joined, constraint.width) {
+                high = high.min(joined);
+                low = low.max(line);
+                line = u;
+                item_exists = visible;
+            } else {
+                line = joined;
+                item_exists |= visible;
+            }
+        }
+        low = low.max(line);
+        let width = (low + MARGIN, high - MARGIN);
+        if !(width.0 <= constraint.width && constraint.width < width.1) {
+            return None;
+        }
+        hold.intersect(MeasureHold::new(width, MeasureHold::ANY.height))
+    }
+
     fn measure_override(this: &Self, constraint: Size) -> Size {
         let item_width = this.item_width();
         let item_height = this.item_height();

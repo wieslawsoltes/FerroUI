@@ -586,6 +586,8 @@ mod selectable_text_block_tests;
 #[cfg(test)]
 mod text_block_tests;
 #[cfg(test)]
+mod measure_hold_tests;
+#[cfg(test)]
 mod text_layout_rounding_placement_tests;
 #[cfg(test)]
 mod text_line_bounds_tests;

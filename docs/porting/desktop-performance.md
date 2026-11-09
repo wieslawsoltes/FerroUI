@@ -837,3 +837,51 @@ does not, checks the area is drawn again). A counter, `VisualsRecordedUnchanged`
 of 8,177 recordings a frame are unchanged. Local gate against section 9.12, three rounds: render
 thread 51.8 to 45.7 ms a frame (-11.7 %), UI thread -8.1 %, wall time -11.7 %, no metric
 regressed.
+
+### 9.15 Measure holds: an element is not measured again where its measure cannot change
+
+Upstream measures an element again whenever its available size differs from the last one. When
+the width of a window or a column changes, every element below is measured again, although most
+of them return the same desired size: in the gauntlet, whose content width changes every frame,
+10,765 measures a frame.
+
+An element may now report a measure hold (`ferroui_base::layout::MeasureHold`): the range of
+available sizes over which its measure returns the same desired size and leaves its descendants as
+they are. `LayoutableImpl::measure_hold_override` gives it in the space of the constraint
+`measure_override` received; `Layoutable::measure_core` maps it to the space of the available
+size through the margin, the minimum, maximum and explicit sizes, and the clamp of the desired size
+to the available size (an element whose desired size was clamped holds nothing). `Layoutable::measure`
+returns at once when the measure is valid and the new available size is inside the hold. An
+element whose type reports no hold holds at the constraint it got: an axis fixed by an explicit size
+(or equal limits) gives `measure_override` that constraint at every available size, so a fixed-size
+element holds for every available size it fits, and any other element only at its own available
+size, as upstream compares them. The types that report a hold:
+
+- `TextBlock`: the widths of its layout's width hold (section 9.12), any width for left-aligned
+  text that neither wraps nor trims, and every height its lines fit when none was left out, with
+  its padding; nothing for other alignments or inlines;
+- `Border` and `Decorator`: their child's hold moved by the padding and the border; any size
+  without a child;
+- `StackPanel`: the intersection of its visible children's holds across the stack (they get its
+  constraint across it and an infinite size along it), any size along it;
+- `WrapPanel`, horizontal with items at the start: its lines are the same from the widest line up
+  to the narrowest width at which a line would take the next item, intersected with its
+  children's holds where they get its constraint;
+- `Grid` without definitions: the intersection of its children's holds; with one star column
+  (without limits or a shared size), auto or pixel rows (or any rows at an infinite height, where
+  star rows size to their content) and no spans, at a finite width: a cell of the star column gets
+  the grid's width less the fixed width of the other columns and the spacing, so its hold moves by
+  that amount (less a rounding step on each side when the layout is rounded); the other cells get
+  constraints the grid's width does not change. Other grids hold only their own size.
+
+An infinite upper bound includes infinity, so a child measured at an infinite size along a stack
+is inside its own hold. A hold relies on everything a measure reads either being the available
+size or invalidating the measure when it changes; `UseLayoutRounding`, which upstream does not
+mark as affecting the measure (the next measure at another size picks it up), now invalidates it. Tests: `layout/measure_hold.rs` (the mapping through margins, limits and
+the desired size), `measure_hold_tests.rs` in the controls (a tree of borders, a stack, a
+decorator and wrapped, unwrapped and centered text blocks, measured at a width and then at every
+quarter-pixel width 40 around it, has the desired sizes and arranged bounds of a tree laid out at
+that width from nothing; the tree has a wrap panel of chips, an `Auto,*` header grid with a fixed
+avatar, a `*,Auto` row and, in one variant, a grid of two star columns). Gauntlet, per frame: measures 10,765 to 4,605, arranges 7,600 to 5,630,
+drawings recorded 8,177 to 6,099. Local gate against section 9.14, three rounds: UI thread 33.6 to
+29.4 ms a frame (-12.6 %), no metric regressed.

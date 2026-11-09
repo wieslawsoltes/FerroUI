@@ -297,6 +297,78 @@ ferroui_base::ferro_impl_classes!(Grid: FerroObjectImpl);
 
 impl LayoutableImpl for Grid {
     /// Content measurement.
+    /// The measure hold of a grid (desktop-performance.md section 9.15), in two shapes:
+    ///
+    /// - without definitions every child gets the grid's constraint: the intersection of the
+    ///   visible children's holds;
+    /// - with one star column (without minimum, maximum or shared size), rows that are auto or
+    ///   pixel sized (or any rows at an infinite height, where star rows size to their content),
+    ///   no shared sizes and no spans, at a finite width: a cell of an auto or pixel
+    ///   column, or of any row, gets a constraint the grid's does not change, and a cell of the star
+    ///   column gets the grid's width less a fixed amount `F` (the other columns and the spacing),
+    ///   so its hold moves by `F` (less a rounding step on each side when the layout is rounded).
+    ///
+    /// Any other grid holds nothing.
+    fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        use ferroui_base::layout::MeasureHold;
+        let children = this.children().snapshot();
+        if this.ext_data.get().is_none() {
+            let mut hold = MeasureHold::ANY;
+            for child in children.iter().filter(|child| child.is_visible()) {
+                hold = hold.intersect(child.measure_hold()?)?;
+            }
+            return Some(hold);
+        }
+        if !constraint.width.is_finite() {
+            return None;
+        }
+        let (definitions_u, definitions_v) = (this.definitions_u(), this.definitions_v());
+        let mut star = None;
+        for index in 0..definitions_u.count() {
+            let definition = &definitions_u[index];
+            if definition.is_shared() {
+                return None;
+            }
+            if definition.user_size().is_star() {
+                if star.is_some() || definition.user_min_size() != 0.0 || definition.user_max_size() != f64::INFINITY {
+                    return None;
+                }
+                star = Some(index);
+            }
+        }
+        // Star rows share a finite height; at an infinite height they size to their content as
+        // auto rows do.
+        for index in 0..definitions_v.count() {
+            let definition = &definitions_v[index];
+            if definition.is_shared() || (definition.user_size().is_star() && constraint.height.is_finite()) {
+                return None;
+            }
+        }
+        let step = if this.use_layout_rounding() { 1.0 / LayoutHelper::get_layout_scale(this) } else { 0.0 };
+        let last_column = definitions_u.count() as i32 - 1;
+        // A finite width stays finite and an infinite height infinite: the grid sizes to its
+        // content along an infinite axis.
+        let height = if constraint.height.is_finite() { (f64::NEG_INFINITY, f64::MAX) } else { (f64::INFINITY, f64::INFINITY) };
+        let mut hold = MeasureHold::new((f64::NEG_INFINITY, f64::MAX), height);
+        for child in children.iter().filter(|child| child.is_visible()) {
+            if Grid::get_column_span(child) != 1 || Grid::get_row_span(child) != 1 {
+                return None;
+            }
+            let child_hold = child.measure_hold()?.any_height();
+            if star != Some(Grid::get_column(child).clamp(0, last_column.max(0)) as usize) {
+                continue;
+            }
+            let measured = child.previous_measure()?.width;
+            if !(measured > 0.0 && measured.is_finite()) {
+                return None;
+            }
+            let fixed = constraint.width - measured;
+            let width = (child_hold.width.0 + fixed + step, child_hold.width.1 + fixed - step);
+            hold = hold.intersect(MeasureHold::new(width, MeasureHold::ANY.height))?;
+        }
+        hold.contains(constraint).then_some(hold)
+    }
+
     fn measure_override(this: &Self, constraint: Size) -> Size {
         let grid_desired_size;
         let ext_data = this.ext_data.get();

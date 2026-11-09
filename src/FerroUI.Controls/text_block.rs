@@ -179,6 +179,40 @@ impl LayoutableImpl for TextBlock {
         Self::parent_on_measure_invalidated(this);
     }
 
+    /// The constraints over which the layout it has is the one a measure would make (section
+    /// 9.12) and its desired size the same: the widths of the layout's width hold (any width for
+    /// left-aligned text that neither wraps nor trims) and the heights its lines fit when none
+    /// was left out, with the padding (desktop-performance.md section 9.15).
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        if this.has_complex_content() || this.layout_text_alignment.get() != TextAlignment::Left {
+            return None;
+        }
+        let text_layout = this.text_layout.borrow().clone()?;
+        let mut padding = this.padding();
+        if this.use_layout_rounding() {
+            let scale = LayoutHelper::get_layout_scale(this);
+            padding = LayoutHelper::round_layout_thickness(padding, scale);
+        }
+        // A zero constraint is laid out apart (`keeps_text_layout_for`).
+        const LEAST: f64 = 1e-6;
+        let width = if this.text_wrapping() == TextWrapping::NoWrap
+            && Rc::ptr_eq(&this.text_trimming(), &<dyn TextTrimming>::none())
+        {
+            (LEAST, f64::INFINITY)
+        } else {
+            let (low, high) = text_layout.width_hold()?;
+            (low.max(LEAST), high)
+        };
+        if text_layout.is_truncated_by_height() {
+            return None;
+        }
+        let height = (text_layout.height().max(LEAST), f64::INFINITY);
+        Some(
+            ferroui_base::layout::MeasureHold::new(width, height)
+                .inflate(padding.left + padding.right, padding.top + padding.bottom),
+        )
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let mut padding = this.padding();
 
