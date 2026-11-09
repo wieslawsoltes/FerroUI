@@ -34,6 +34,8 @@ pub struct Visual {
     // Deviation (DEVIATIONS.md, Visual tree): whether `RenderTransform` has a value, kept by its
     // change handler, so that the transforms of the visual tree skip the property read.
     has_render_transform: Cell<bool>,
+    /// The kept value of `IsVisible`, read many times a layout pass (desktop-performance.md, 9.9).
+    hot_is_visible: crate::property_store::HotValue<bool>,
     // Not upstream: whether the visual has a manipulation transform (the zoom a scroll presenter
     // applies to its content), kept so that the transforms of the visual tree skip the lookup.
     has_manipulation_transform: Cell<bool>,
@@ -780,12 +782,20 @@ impl Visual {
             Self::clip_property().as_property(),
             Self::clip_to_bounds_property().as_property(),
             Self::is_visible_property().as_property(),
-            Self::opacity_property().as_property(),
             Self::opacity_mask_property().as_property(),
             Self::effect_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
         Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
+        // Opacity is a composition property: its change does not record the drawing again.
+        Self::opacity_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(sender) = e.sender().downcast_ref::<Visual>() {
+                    sender.invalidate_composition_properties();
+                }
+            })
+            .detach();
         Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::z_index_property().changed().subscribe(|e| {
@@ -814,6 +824,7 @@ impl Visual {
             visual_parent: RefCell::new(None),
             has_mirror_transform: Cell::new(false),
             has_render_transform: Cell::new(false),
+            hot_is_visible: Default::default(),
             has_manipulation_transform: Cell::new(false),
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),
@@ -963,7 +974,7 @@ impl Visual {
 
     /// Whether this control is visible.
     pub fn is_visible(&self) -> bool {
-        self.get_value(Self::is_visible_property())
+        self.hot_is_visible.get(self.values().value_generation(), || self.get_value(Self::is_visible_property()))
     }
 
     pub fn set_is_visible(&self, value: bool) {
@@ -1405,6 +1416,16 @@ impl Visual {
         }
     }
 
+    /// Invalidates the composition properties of this visual (its render transform and opacity)
+    /// but not its drawing: the renderer synchronizes the properties without calling `render`
+    /// again. A FerroUI addition (docs/porting/desktop-performance.md, section 9.5): upstream
+    /// invalidates the visual, which records its drawing again.
+    pub fn invalidate_composition_properties(&self) {
+        if let Some(source) = self.presentation_source() {
+            source.renderer().add_dirty_properties(self);
+        }
+    }
+
     /// Indicates that a property change should cause `invalidate_visual` to
     /// be called on objects of class `T`.
     ///
@@ -1482,14 +1503,14 @@ impl Visual {
             });
             sender.set_render_transform_subscription(subscription);
 
-            sender.invalidate_visual();
+            sender.invalidate_composition_properties();
         }
     }
 
     /// Called when the render transform's `changed` notification is raised.
     fn render_transform_value_changed(&self) {
         bump_geometry_version();
-        self.invalidate_visual();
+        self.invalidate_composition_properties();
     }
 
     fn set_render_transform_subscription(&self, value: Option<Subscription>) {

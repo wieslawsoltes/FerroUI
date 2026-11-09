@@ -282,10 +282,46 @@ fn a_layout_that_depends_on_the_width_is_created_again() {
 
         let text_layout = text_block.text_layout();
 
-        text_block.measure(Size::new(150.0, 100.0));
-        text_block.arrange(Rect::new(0.0, 0.0, 150.0, 100.0));
+        // A width the text does not fit: its lines change (desktop-performance.md, section 9.7).
+        text_block.measure(Size::new(20.0, 100.0));
+        text_block.arrange(Rect::new(0.0, 0.0, 20.0, 100.0));
 
         assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+    }
+}
+
+/// Not in the reference tests: a left-aligned layout whose lines all fit a narrower width, or that
+/// was created without a width, is kept, and its lines are the ones a new layout has
+/// (desktop-performance.md, section 9.7).
+#[test]
+fn a_layout_whose_lines_fit_the_new_width_is_kept_and_has_the_lines_of_a_new_one() {
+    let _scope = test_scope();
+
+    for configure in [
+        (|text_block: &TextBlock| text_block.set_text_wrapping(TextWrapping::Wrap)) as fn(&TextBlock),
+        |text_block| text_block.set_text_trimming(<dyn TextTrimming>::character_ellipsis()),
+    ] {
+        for (first, second) in [(200.0, 150.0), (f64::INFINITY, 150.0)] {
+            let block = text_block("Hello World");
+            configure(&block);
+
+            block.measure(Size::new(first, 100.0));
+            block.arrange(Rect::new(0.0, 0.0, first.min(200.0), 100.0));
+            let kept = block.text_layout();
+
+            block.measure(Size::new(second, 100.0));
+            block.arrange(Rect::new(0.0, 0.0, second, 100.0));
+            assert!(Rc::ptr_eq(&kept, &block.text_layout()));
+
+            let fresh = text_block("Hello World");
+            configure(&fresh);
+            fresh.measure(Size::new(second, 100.0));
+            fresh.arrange(Rect::new(0.0, 0.0, second, 100.0));
+            let fresh = fresh.text_layout();
+            assert_eq!(kept.text_lines().len(), fresh.text_lines().len());
+            assert_eq!(kept.width_including_trailing_whitespace(), fresh.width_including_trailing_whitespace());
+            assert_eq!(kept.height(), fresh.height());
+        }
     }
 }
 
@@ -1400,4 +1436,23 @@ fn text_of_a_family_the_font_manager_does_not_have_is_laid_out_with_the_default_
     let system_fonts = FontManager::current().system_fonts();
 
     assert!(system_fonts.font_families().iter().all(|font_family| font_family.name() != "Cascadia Mono"));
+}
+
+/// Not in the reference tests: the run properties a text block keeps between layouts follow the
+/// properties they are made of (desktop-performance.md, section 9.8).
+#[test]
+fn a_kept_layouts_run_properties_follow_the_font_size() {
+    let _scope = test_scope();
+    let block = text_block("Hello World");
+    block.measure(Size::new(200.0, 100.0));
+    let small = block.text_layout().height();
+
+    block.set_font_size(block.font_size() * 2.0);
+    block.measure(Size::new(200.0, 100.0));
+    let large = block.text_layout().height();
+    assert!(large > small, "{large} > {small}");
+
+    // A new constraint alone keeps the properties: the layout has the doubled size still.
+    block.measure(Size::new(180.0, 100.0));
+    assert_eq!(large, block.text_layout().height());
 }

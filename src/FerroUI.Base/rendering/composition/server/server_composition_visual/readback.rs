@@ -113,6 +113,19 @@ impl VisualReadback {
         None
     }
 
+    /// The revision of the readback [`get_readback`](Self::get_readback) would return for
+    /// `reader_revision`, read without taking a slot's lock or copying its data.
+    pub fn readback_revision(&self, reader_revision: u64) -> Option<u64> {
+        let slot0_revision = self.readback0.revision.load(Ordering::SeqCst);
+        let slot1_revision = self.readback1.revision.load(Ordering::SeqCst);
+        match (slot0_revision <= reader_revision, slot1_revision <= reader_revision) {
+            (true, true) => Some(slot0_revision.max(slot1_revision)),
+            (true, false) => Some(slot0_revision),
+            (false, true) => Some(slot1_revision),
+            (false, false) => None,
+        }
+    }
+
     pub fn update_readback(&self, writer_revision: u64, reader_revision: u64, mut data: ReadbackData) {
         let revision0 = self.readback0.revision.load(Ordering::SeqCst);
         let revision1 = self.readback1.revision.load(Ordering::SeqCst);

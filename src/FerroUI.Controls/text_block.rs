@@ -28,6 +28,13 @@ use std::rc::Rc;
 pub struct TextBlock {
     base: Control,
     text_layout: RefCell<Option<Rc<TextLayout>>>,
+    /// The default run properties of the layouts, kept until a property they are made of changes
+    /// (`invalidate_text_layout`): a layout of a new constraint reuses them, and with them the
+    /// glyph typeface they resolved (FerroUI deviation, desktop-performance.md, section 9.8).
+    run_properties: RefCell<Option<Rc<dyn TextRunProperties>>>,
+    /// The paragraph properties of the layouts, with the alignment they were made with, kept until
+    /// a property they are made of changes (desktop-performance.md, section 9.8).
+    paragraph_properties: RefCell<Option<(TextAlignment, Rc<GenericTextParagraphProperties>)>>,
     text_run_cache: RefCell<Option<Rc<TextRunCache>>>,
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
@@ -325,33 +332,12 @@ impl TextBlockImpl for TextBlock {
     }
 
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
+        let default_properties = this.default_run_properties();
 
-        let default_properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface,
-            this.font_size(),
-            this.text_decorations(),
-            this.foreground(),
-            None,
-            Default::default(),
-            None,
-            Typography::effective_font_features(this),
-        ));
-
-        let paragraph_properties = GenericTextParagraphProperties::with_all(
-            this.flow_direction(),
+        let paragraph_properties = this.paragraph_properties_for(
             if this.is_measure_valid() { this.text_alignment() } else { TextAlignment::Left },
-            true,
-            false,
-            default_properties.clone(),
-            this.text_wrapping(),
-            this.line_height(),
-            0.0,
-            this.letter_spacing(),
+            &default_properties,
         );
-        paragraph_properties.set_line_spacing(this.line_spacing());
-        paragraph_properties.set_text_line_bounds(this.text_line_bounds());
 
         let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
             this.ensure_text_runs();
@@ -369,7 +355,7 @@ impl TextBlockImpl for TextBlock {
 
         Rc::new(TextLayout::from_text_source(
             text_source,
-            Rc::new(paragraph_properties),
+            paragraph_properties,
             Some(this.text_trimming()),
             max_size.width,
             max_size.height,
@@ -615,6 +601,8 @@ impl TextBlock {
         Self {
             base: Control::construct(),
             text_layout: RefCell::new(None),
+            run_properties: RefCell::new(None),
+            paragraph_properties: RefCell::new(None),
             text_run_cache: RefCell::new(None),
             constraint: Cell::new(Size::new(f64::NAN, f64::NAN)),
             text_runs: RefCell::new(None),
@@ -1095,8 +1083,62 @@ impl TextBlock {
         self.set_current_value(Self::text_property(), None);
     }
 
+    /// The default run properties of the layouts: the ones kept since a property they are made of
+    /// last changed, else new ones.
+    pub(crate) fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
+        if let Some(properties) = self.run_properties.borrow().as_ref() {
+            return properties.clone();
+        }
+        let typeface =
+            Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
+        let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+            typeface,
+            self.font_size(),
+            self.text_decorations(),
+            self.foreground(),
+            None,
+            Default::default(),
+            None,
+            Typography::effective_font_features(self),
+        ));
+        *self.run_properties.borrow_mut() = Some(properties.clone());
+        properties
+    }
+
+    /// The paragraph properties of a layout with `text_alignment`: the ones kept since a property
+    /// they are made of last changed, else new ones.
+    fn paragraph_properties_for(
+        &self,
+        text_alignment: TextAlignment,
+        default_properties: &Rc<dyn TextRunProperties>,
+    ) -> Rc<GenericTextParagraphProperties> {
+        if let Some((alignment, properties)) = self.paragraph_properties.borrow().as_ref() {
+            if *alignment == text_alignment {
+                return properties.clone();
+            }
+        }
+        let properties = GenericTextParagraphProperties::with_all(
+            self.flow_direction(),
+            text_alignment,
+            true,
+            false,
+            default_properties.clone(),
+            self.text_wrapping(),
+            self.line_height(),
+            0.0,
+            self.letter_spacing(),
+        );
+        properties.set_line_spacing(self.line_spacing());
+        properties.set_text_line_bounds(self.text_line_bounds());
+        let properties = Rc::new(properties);
+        *self.paragraph_properties.borrow_mut() = Some((text_alignment, properties.clone()));
+        properties
+    }
+
     /// Invalidates the text layout and the shaped runs it was built from.
     pub fn invalidate_text_layout(&self) {
+        *self.run_properties.borrow_mut() = None;
+        *self.paragraph_properties.borrow_mut() = None;
         if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
             text_run_cache.invalidate();
         }
@@ -1107,6 +1149,7 @@ impl TextBlock {
     }
 
     fn invalidate_text_layout_keep_cache(&self) {
+        *self.paragraph_properties.borrow_mut() = None;
         self.dispose_text_layout();
         self.invalidate_visual();
         self.invalidate_measure();
@@ -1134,10 +1177,25 @@ impl TextBlock {
 
         let created_for = self.constraint.get();
 
+        // Whether the lines of the layout are the ones a layout created for the width of
+        // `constraint` would have (FerroUI deviation, desktop-performance.md, section 9.7):
+        // - a left-aligned layout that neither wraps nor trims has the same lines at any width;
+        // - every layout has its own lines at the width it was created for;
+        // - a left-aligned layout whose lines all fit the new width has the same lines when the
+        //   new width is not larger (wrapping and trimming are greedy: each line already ends at
+        //   the furthest point that fits the larger width, and that point still fits) or when it
+        //   was created without a width (no line was wrapped or trimmed for width).
+        let left = self.layout_text_alignment.get() == TextAlignment::Left;
+        let width_independent = left
+            && self.text_wrapping() == TextWrapping::NoWrap
+            && Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none());
+        let same_lines = width_independent
+            || constraint.width == created_for.width
+            || (left
+                && text_layout.width_including_trailing_whitespace() <= constraint.width
+                && (constraint.width <= created_for.width || created_for.width == f64::INFINITY));
         if self.has_complex_content()
-            || self.text_wrapping() != TextWrapping::NoWrap
-            || !Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none())
-            || self.layout_text_alignment.get() != TextAlignment::Left
+            || !same_lines
             || created_for.width.is_nan()
             || created_for.height.is_nan()
             || MathUtilities::is_zero(created_for.width)

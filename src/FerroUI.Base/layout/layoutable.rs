@@ -44,6 +44,9 @@ pub enum VerticalAlignment {
 pub struct Layoutable {
     base: Visual,
     desired_size: Cell<Size>,
+    /// The kept values of the size and margin properties, read many times a layout pass
+    /// (desktop-performance.md, section 9.9).
+    hot_sizes: HotSizes,
     is_measure_valid: Cell<bool>,
     is_arrange_valid: Cell<bool>,
     measuring: Cell<bool>,
@@ -493,6 +496,7 @@ impl Layoutable {
         Self {
             base: Visual::construct(),
             desired_size: Cell::new(Size::default()),
+            hot_sizes: HotSizes::default(),
             is_measure_valid: Cell::new(false),
             is_arrange_valid: Cell::new(false),
             measuring: Cell::new(false),
@@ -599,7 +603,7 @@ impl Layoutable {
 
     /// The width of the element.
     pub fn width(&self) -> f64 {
-        self.get_value(Self::width_property())
+        self.hot_sizes.width.get(self.values().value_generation(), || self.get_value(Self::width_property()))
     }
 
     pub fn set_width(&self, value: f64) {
@@ -608,7 +612,7 @@ impl Layoutable {
 
     /// The height of the element.
     pub fn height(&self) -> f64 {
-        self.get_value(Self::height_property())
+        self.hot_sizes.height.get(self.values().value_generation(), || self.get_value(Self::height_property()))
     }
 
     pub fn set_height(&self, value: f64) {
@@ -617,7 +621,7 @@ impl Layoutable {
 
     /// The minimum width of the element.
     pub fn min_width(&self) -> f64 {
-        self.get_value(Self::min_width_property())
+        self.hot_sizes.min_width.get(self.values().value_generation(), || self.get_value(Self::min_width_property()))
     }
 
     pub fn set_min_width(&self, value: f64) {
@@ -626,7 +630,7 @@ impl Layoutable {
 
     /// The maximum width of the element.
     pub fn max_width(&self) -> f64 {
-        self.get_value(Self::max_width_property())
+        self.hot_sizes.max_width.get(self.values().value_generation(), || self.get_value(Self::max_width_property()))
     }
 
     pub fn set_max_width(&self, value: f64) {
@@ -635,7 +639,7 @@ impl Layoutable {
 
     /// The minimum height of the element.
     pub fn min_height(&self) -> f64 {
-        self.get_value(Self::min_height_property())
+        self.hot_sizes.min_height.get(self.values().value_generation(), || self.get_value(Self::min_height_property()))
     }
 
     pub fn set_min_height(&self, value: f64) {
@@ -644,7 +648,7 @@ impl Layoutable {
 
     /// The maximum height of the element.
     pub fn max_height(&self) -> f64 {
-        self.get_value(Self::max_height_property())
+        self.hot_sizes.max_height.get(self.values().value_generation(), || self.get_value(Self::max_height_property()))
     }
 
     pub fn set_max_height(&self, value: f64) {
@@ -653,7 +657,7 @@ impl Layoutable {
 
     /// The margin around the element.
     pub fn margin(&self) -> Thickness {
-        self.get_value(Self::margin_property())
+        self.hot_sizes.margin.get(self.values().value_generation(), || self.get_value(Self::margin_property()))
     }
 
     pub fn set_margin(&self, value: Thickness) {
@@ -744,6 +748,7 @@ impl Layoutable {
 
         if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
             let previous_desired_size = self.desired_size();
+            crate::perf_count!(MeasuresExecuted);
 
             self.is_measure_valid.set(true);
 
@@ -781,6 +786,7 @@ impl Layoutable {
 
         if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
             self.is_arrange_valid.set(true);
+            crate::perf_count!(ArrangesExecuted);
             self.arrange_core(rect);
             self.previous_arrange.set(Some(rect));
         }
@@ -891,4 +897,16 @@ impl Drop for MeasuringGuard<'_> {
     fn drop(&mut self) {
         self.0.set(false);
     }
+}
+
+/// The kept values of the size and margin properties of a layoutable.
+#[derive(Default)]
+struct HotSizes {
+    width: crate::property_store::HotValue<f64>,
+    height: crate::property_store::HotValue<f64>,
+    min_width: crate::property_store::HotValue<f64>,
+    max_width: crate::property_store::HotValue<f64>,
+    min_height: crate::property_store::HotValue<f64>,
+    max_height: crate::property_store::HotValue<f64>,
+    margin: crate::property_store::HotValue<Thickness>,
 }

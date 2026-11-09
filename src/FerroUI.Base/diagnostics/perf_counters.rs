@@ -162,6 +162,16 @@ perf_counters! {
     /// `ContentPresenter::update_child_with`: the child of a content
     /// presenter was replaced by another control or removed.
     ContentPresenterChildrenReplaced => "content presenter children replaced",
+
+    // --- layout and rendering ---
+    /// `Layoutable::measure`: the measure of an element ran (its result was not the cached one).
+    MeasuresExecuted => "measures executed",
+    /// `Layoutable::arrange`: the arrange of an element ran.
+    ArrangesExecuted => "arranges executed",
+    /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
+    LayoutPassRounds => "layout pass rounds",
+    /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
+    VisualsRecorded => "visuals recorded",
 }
 
 /// The number of counters.

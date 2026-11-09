@@ -510,3 +510,220 @@ The sizes of the earlier sections are those of the `dist` profile. The workflow
 `.github/workflows/perf.yml` builds with the release profile of each ref, so a comparison of a ref
 before this change with one after it shows the difference of the profiles, not a regression of the
 code.
+
+## 8. The cross-framework gauntlet (2026-11-08)
+
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
+benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
+beside the other frameworks. `PERF_REPORT=1` prints the frame rate the app's animation-frame
+callback sees, for A/B runs of FerroUI builds:
+
+```sh
+PERF_SCENARIO=gauntlet PERF_TIER=16 PERF_REPORT=1 PERF_FONTS=<folder of Roboto-*.ttf> \
+  cargo run --release -p gauntlet-benchmark
+```
+
+Apple M3 Pro, `release`, Skia, own counter, median of the last 8 of 12 seconds, two alternating
+rounds:
+
+| Build | Gauntlet (tier 16) | Still wall (tier 20, pointer outside the window) |
+|---|---:|---|
+| main (d09b86731) | 15.6, 16.6 | 27.0, 29.4 |
+| disposal index and hit-test buckets (section 9.1, 9.2) | 19.3, 19.0 | 33.5, 28.4 |
+
+The run of the benchmark's own harness (external frame counter, every framework) needs the display
+at 60 Hz, as the benchmark is calibrated; it is added here once made.
+
+### 8.1 The local performance gate
+
+A change to layout, text, the property system, composition, rendering, input or the TreeDataGrid
+is measured on the developer's machine against the commit it is based on before it goes up for
+review, and the table of the gate goes into the description of the pull request. The gate is not
+a CI job: hosted runners are too noisy and too unlike a desktop for a few-percent threshold, so it
+is run locally, on a quiet machine (no other build, no VM or emulator, on mains power).
+
+```sh
+python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
+python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
+python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
+```
+
+The script checks the base out, detached, in a git worktree of its own under the scratch folder
+(`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
+delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
+with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
+(default 3), and compares the medians of the rounds. Cargo runs through `FERROUI_CARGO` when it is
+set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
+build starts during a measurement), else `cargo`. The logs of every build and run are kept under
+`<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something
+did or a benchmark failed on the candidate, 2 when a build or a run failed.
+
+What it measures:
+
+- **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
+  and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
+  the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
+  in the render-thread mode of the desktop (`Compositor::with_render_thread`), with no pointer
+  device. The screens drive their own frames through the top level's animation frame callback,
+  which advances the frame index once a frame, so nothing depends on wall time; 60 frames of
+  warm-up, then 240 measured (`--warmup`, `--frames`). Per scenario: the UI thread's busy time a
+  frame (animation callback, layout, recording, commit), the render thread's time a frame, and
+  the wall time a frame. Alone:
+
+  ```sh
+  cargo test -p gauntlet-benchmark --release --test frame_gate -- --ignored --nocapture --test-threads=1
+  ```
+
+  When the base has no frame gate (a commit before it), the candidate's `samples/GauntletBenchmark`
+  is copied into the base worktree, and added to its workspace members when needed, so both sides
+  run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
+  a gate of its own.
+- **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
+  median time of one operation of each benchmark, read from the tables of the harness. The gate
+  runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
+  after 2 of warm-up; `--tdg-iterations`, `--tdg-min-iteration-ms`, `--tdg-warmup`) so that a
+  full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
+  `FERROUI_BENCH_FILTER` does.
+
+Tolerances. A metric regresses when the candidate is slower than the base by more than
+`--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
+the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
+
+| Metric | Factor | Why |
+|---|---:|---|
+| UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
+| Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
+| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+
+A regression the gate reports is confirmed with more rounds (`--rounds 5`) before it is acted on;
+a change that is meant to cost time says so in the pull request, with the table.
+
+## 9. Deviations from upstream for frame cost
+
+Each deviation keeps the observable behaviour of upstream (the same events, the same order, the
+same results) and changes only how much work a frame does.
+
+### 9.1 The disposal queue of the compositor is indexed by id
+
+Upstream keeps the server objects to dispose with the next batch in a list and searches it for an
+earlier entry of the same object before adding one. A frame in which thousands of visuals record
+new draw lists disposes thousands of render data objects, which made that search quadratic: 14 %
+of the UI thread in the gauntlet. `Compositor` keeps the position of each id's entry in a table
+indexed by the id (ids are dense), so queueing is constant time; the batch writes the same entries
+in the same order.
+
+### 9.2 The hit-test tree reads only a bucket's children
+
+The composition hit-test tree splits a collection's children into buckets of 32 in z order and
+checks a bucket again when the readback revision changed. Checking a bucket took a snapshot of the
+whole collection, so a hit test over a collection of thousands of children was quadratic (97 % of
+the UI thread on the still wall with the pointer in the window). A bucket now reads its own 32
+children by index.
+
+### 9.3 A store keeps the results of its inherited lookups
+
+A read of an inherited property the object does not hold walks its inheritance ancestors to the
+nearest one that holds it, as upstream does. A layout pass reads inherited properties about
+400,000 times a frame in the gauntlet (`UseLayoutRounding`, `FlowDirection` and the text
+properties, nearly all of them held by no ancestor), each walk two to three ancestors long. A store
+now keeps what each lookup found, or that it found nothing, tagged with the thread's inheritance
+generation; the generation changes whenever the holder of an inherited value can change (an
+inheriting property's effective value added to or removed from any store, an inheritance parent or
+ancestor changed). A change of the value itself needs no new lookup: the store keeps the holder's
+effective value, which holds the current value. Tests: `ferro_object_tests_inheritance.rs`, the
+last two. Local gate (section 8.1), three rounds: gauntlet UI thread 44.90 to 43.46 ms a frame
+(-3.2 %), still wall UI thread -5.9 %.
+
+### 9.4 The font manager keeps the glyph typefaces it found
+
+Every text line asks for the glyph typeface of its run's typeface, and a run's properties keep the
+answer only for themselves; a text block creates its run properties with each layout, so in the
+gauntlet every line of every text built a `FontFamily` from its name and looked it up in the
+collections again, every frame. `FontManager::try_get_glyph_typeface` now keeps what it found, by
+typeface, until the thread's glyph typeface generation changes: a font collection deriving from
+`FontCollectionBase` gaining a glyph typeface, or a collection added, replaced or removed. A
+collection that implements `IFontCollection` directly and changes what it returns calls
+`FontManager::invalidate_glyph_typefaces`. Local gate, three rounds: gauntlet UI thread 45.09 to
+43.15 ms a frame (-4.3 %; the render thread, which the change does not touch, -1.8 % in the same
+rounds).
+
+### 9.5 Render transform and opacity changes do not record the drawing again
+
+A visual's render transform and opacity are composition properties: the render thread applies them
+to the visual's retained drawing. Upstream nevertheless invalidates the visual when either changes,
+so its `render` runs again, a new draw list is recorded and serialized, and the old one is
+disposed, for every frame of an animation. FerroUI routes these changes through
+`Visual::invalidate_composition_properties` and `IRenderer::add_dirty_properties`: the compositing
+renderer synchronizes the visual's composition properties without calling `render`. The default
+of `add_dirty_properties` is `add_dirty`, so other renderers behave as before. No `render` of the
+framework reads the visual's own transform or opacity (checked over every `render` override).
+Changes of `Bounds` still record the drawing: `TextPresenter::render` tracks its position for the
+caret of input methods. Tests: `visual_render_tests.rs`. Local gate, three rounds: gauntlet UI
+thread -0.5 %, still wall UI thread -5.2 % (its cursor moves by a transform).
+
+### 9.6 The hit-test tree compares readback revisions before reading readbacks
+
+With the pointer in a window, pointer-over and tooltips hit-test the pointer after every frame, and
+each hit test checks the children of every collection it passes through: the readback revision
+changes with every frame, so every bucket of the collection is checked again. Checking a child read
+its whole readback (a lock and a copy, and clones of its root and of the compositor's readback
+indices) only to find, for nearly every child, the revision the tree already has. A child is now
+checked by the revision of the readback slot it would read, from the slots' atomics, and its
+readback is read only when that revision differs; the tree is unchanged for every child whose
+revision it already has, as before. Local gate, three rounds, with the frame gate's scenario of the
+still wall with the pointer in the window (`wall/20+pointer`): UI thread 3.59 to 1.64 ms a frame
+(-54.4 %); gauntlet UI thread -4.1 %.
+
+A first attempt skipped the whole check while no child's readback had been written since the last
+one (a revision of the children kept by each server visual); the gate refused it (+17.8 % on
+`wall/20+pointer`): the still wall's container holds the changing clock and cursor beside its
+static tiles, so the revision of its children changes with every frame and the bookkeeping only
+added cost.
+
+### 9.7 A text block keeps a left-aligned layout whose lines fit a narrower width
+
+A text block lays its text out again whenever its constraint changes, except in the cases upstream
+and section 9 already keep. In the gauntlet each text block builds two layouts a frame: one for its
+measure and one for its arrange, at another width. A layout is now also kept for a new width when
+it is left-aligned, its lines all fit the new width, and the new width is not larger than the one
+it was created for or it was created without a width. Wrapping and trimming are greedy: each line
+ends at the furthest point that fits the larger width, and that point still fits the smaller one,
+so the lines are the ones a new layout has; the height rule of the kept layouts is unchanged.
+Tests: `a_layout_whose_lines_fit_the_new_width_is_kept_and_has_the_lines_of_a_new_one`, and the
+widths of `a_layout_that_depends_on_the_width_is_created_again` now make the lines change.
+Counters (`--features counters`): text layouts created 5,844 to 5,143 a frame (-12 %); local gate:
+gauntlet UI thread -1.6 % (within noise), no metric regressed.
+
+### 9.8 A text block keeps its run properties between layouts
+
+Each layout of a text block made its default run properties anew: about nine property reads (the
+font family, style, weight, stretch and size, the decorations, the foreground and the font
+features, an inherited lookup), an allocation, and a glyph typeface the new properties resolved
+again for the first line. A text block now keeps them until a property they are made of changes:
+the change handler already lays the text out again for each of them (`invalidate_text_layout`:
+the font properties, flow direction, letter spacing, text, decorations, font features and
+foreground), and now also drops the kept properties. Test:
+`a_kept_layouts_run_properties_follow_the_font_size`. Local gate, three rounds: gauntlet UI thread
+40.93 to 37.24 ms a frame (-9.0 %), no metric regressed. The paragraph properties (flow direction,
+wrapping, line height and spacing, letter spacing, text line bounds and the alignment of the
+layout) are kept the same way, by alignment, and dropped by both invalidations of the layout
+(-1.5 %, within noise, eight reads and an allocation fewer a layout).
+
+### 9.9 Layoutables keep a copy of their size, margin and visibility
+
+A layout pass reads a few properties of every element many times: in the gauntlet, `IsVisible`
+about 93,000 times a frame, `Width`, `MaxWidth`, `MaxHeight`, `MinWidth`, `Height`, `MinHeight`
+and `Margin` between 17,000 and 38,000 times each, every read a lookup in the element's value
+store. `Visual::is_visible` and the getters of these `Layoutable` properties now keep a copy of
+the value (`property_store::HotValue`) with the generations it was read at: the value store's,
+which every change of one of its effective values advances (a value set, coerced, added or
+removed, before the new value is written), and the metadata generation, which every override or
+removal of property metadata advances. A read with both generations unchanged returns the copy;
+any other read looks the property up and keeps the new value. Only properties that do not
+inherit are kept this way: an inherited value changes with an ancestor's store. Tests:
+`layout/hot_value_tests.rs` (local, style, current and animation values, a cleared local value,
+margin and visibility). Local gate, three rounds: gauntlet UI thread 37.28 to 36.11 ms a frame
+(-3.1 %), still wall with the pointer -6.2 %, no metric regressed.

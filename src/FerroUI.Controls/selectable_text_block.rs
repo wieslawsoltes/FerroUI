@@ -319,19 +319,10 @@ impl InputElementImpl for SelectableTextBlock {
 
 impl TextBlockImpl for SelectableTextBlock {
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
-
-        let default_properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface.clone(),
-            this.font_size(),
-            this.text_decorations(),
-            this.foreground(),
-            None,
-            BaselineAlignment::Baseline,
-            None,
-            Typography::effective_font_features(this),
-        ));
+        // The run properties the text block keeps between layouts (desktop-performance.md, section
+        // 9.8): the same as these were (`BaselineAlignment::Baseline` is the default).
+        let default_properties = this.default_run_properties();
+        let typeface = default_properties.typeface().clone();
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
             this.flow_direction(),

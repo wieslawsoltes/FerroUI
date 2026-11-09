@@ -35,6 +35,8 @@ pub mod testing;
 #[cfg(test)]
 mod layout_helper_tests;
 #[cfg(test)]
+mod hot_value_tests;
+#[cfg(test)]
 mod layout_manager_tests_bring_into_view;
 #[cfg(test)]
 mod layout_queue_tests;

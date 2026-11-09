@@ -16,6 +16,8 @@ use std::rc::Rc;
 #[derive(Default)]
 struct TestRenderer {
     dirty: Cell<u32>,
+    /// The invalidations of composition properties alone.
+    properties: Cell<u32>,
 }
 
 impl IRenderer for TestRenderer {
@@ -33,6 +35,9 @@ impl IRenderer for TestRenderer {
     }
     fn add_dirty(&self, _visual: &Visual) {
         self.dirty.set(self.dirty.get() + 1);
+    }
+    fn add_dirty_properties(&self, _visual: &Visual) {
+        self.properties.set(self.properties.get() + 1);
     }
     fn recalculate_children(&self, _visual: &Visual) {}
     fn resized(&self, _size: Size) {}
@@ -211,29 +216,29 @@ fn text_options_invalidate_the_visual() {
 }
 
 #[test]
-fn changing_the_render_transform_of_an_attached_visual_invalidates_it() {
+fn changing_the_render_transform_of_an_attached_visual_invalidates_its_composition_properties() {
     let (visual, renderer) = attached();
     let first = TranslateTransform::new();
     let second = TranslateTransform::new();
     let handle = |transform: &Ref<TranslateTransform>| -> Option<Rc<dyn ITransform>> { Some(transform.into()) };
 
     visual.set_render_transform(handle(&first));
-    assert_eq!(1, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
     first.set_x(5.0);
-    assert_eq!(2, renderer.dirty.get());
+    assert_eq!(2, renderer.properties.get());
 
     // Replacing the transform moves the subscription to the new value.
     visual.set_render_transform(handle(&second));
-    assert_eq!(3, renderer.dirty.get());
+    assert_eq!(3, renderer.properties.get());
     first.set_x(6.0);
-    assert_eq!(3, renderer.dirty.get());
+    assert_eq!(3, renderer.properties.get());
     second.set_x(1.0);
-    assert_eq!(4, renderer.dirty.get());
+    assert_eq!(4, renderer.properties.get());
 
     visual.set_render_transform(None);
-    assert_eq!(5, renderer.dirty.get());
+    assert_eq!(5, renderer.properties.get());
     second.set_x(2.0);
-    assert_eq!(5, renderer.dirty.get());
+    assert_eq!(5, renderer.properties.get());
 }
 
 #[test]
@@ -247,29 +252,32 @@ fn the_render_transform_is_only_observed_while_the_visual_is_attached() {
     let source: Rc<dyn IPresentationSource> = Rc::new(TestSource { root: visual.clone(), renderer: renderer.clone() });
     visual.set_presentation_source_for_root_visual(Some(source));
     renderer.dirty.set(0);
+    renderer.properties.set(0);
     transform.set_x(1.0);
-    assert_eq!(1, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
 
     // Detaching unsubscribes.
     visual.set_presentation_source_for_root_visual(None);
     renderer.dirty.set(0);
+    renderer.properties.set(0);
     transform.set_x(2.0);
-    assert_eq!(0, renderer.dirty.get());
+    assert_eq!(0, renderer.properties.get());
 
     // A transform set while detached is not observed until the visual is
     // attached again.
     let other = TranslateTransform::new();
     visual.set_render_transform(Some((&other).into()));
     other.set_x(1.0);
-    assert_eq!(0, renderer.dirty.get());
+    assert_eq!(0, renderer.properties.get());
 
     let source: Rc<dyn IPresentationSource> = Rc::new(TestSource { root: visual.clone(), renderer: renderer.clone() });
     visual.set_presentation_source_for_root_visual(Some(source));
     renderer.dirty.set(0);
+    renderer.properties.set(0);
     transform.set_x(3.0);
-    assert_eq!(0, renderer.dirty.get());
+    assert_eq!(0, renderer.properties.get());
     other.set_x(2.0);
-    assert_eq!(1, renderer.dirty.get());
+    assert_eq!(1, renderer.properties.get());
     visual.set_presentation_source_for_root_visual(None);
 }
 
@@ -291,4 +299,27 @@ fn rooted_visual_children_count_follows_attachment() {
 
     visual.set_presentation_source_for_root_visual(None);
     assert_eq!(before, Visual::rooted_visual_children_count());
+}
+
+// Not ports: upstream records a visual's drawing again when its render transform or opacity
+// changes; FerroUI synchronizes the composition properties only (desktop-performance.md, 9.5).
+#[test]
+fn opacity_and_render_transform_changes_invalidate_the_composition_properties_only() {
+    let (visual, renderer) = attached();
+
+    visual.set_opacity(0.5);
+    assert_eq!((0, 1), (renderer.dirty.get(), renderer.properties.get()));
+
+    let transform = crate::media::TranslateTransform::new();
+    let handle: Option<Rc<dyn ITransform>> = Some((&transform).into());
+    visual.set_render_transform(handle);
+    assert_eq!((0, 2), (renderer.dirty.get(), renderer.properties.get()));
+
+    transform.set_x(10.0);
+    assert_eq!((0, 3), (renderer.dirty.get(), renderer.properties.get()));
+
+    visual.set_render_transform(None);
+    assert_eq!((0, 4), (renderer.dirty.get(), renderer.properties.get()));
+    transform.set_x(20.0);
+    assert_eq!((0, 4), (renderer.dirty.get(), renderer.properties.get()));
 }

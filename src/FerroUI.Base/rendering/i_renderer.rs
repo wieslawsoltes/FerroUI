@@ -21,6 +21,15 @@ pub trait IRenderer {
     /// Mark a visual as dirty and needing re-rendering.
     fn add_dirty(&self, visual: &Visual);
 
+    /// Mark a visual whose composition properties changed (its render transform or opacity)
+    /// but whose own drawing did not: a renderer that keeps the drawing of a visual apart from
+    /// its properties synchronizes the properties without recording the drawing again. The
+    /// default records it again (FerroUI deviation, docs/porting/desktop-performance.md,
+    /// section 9.5).
+    fn add_dirty_properties(&self, visual: &Visual) {
+        self.add_dirty(visual);
+    }
+
     /// Informs the renderer that the z-ordering of a visual's children has
     /// changed.
     fn recalculate_children(&self, visual: &Visual);

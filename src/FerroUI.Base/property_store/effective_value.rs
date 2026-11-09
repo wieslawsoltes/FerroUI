@@ -319,6 +319,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         }
 
         if !(operations.equals)(&*self.value.borrow(), &v) {
+            owner.values().advance_value_generation();
             self.value.replace(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
@@ -453,6 +454,8 @@ impl<T: PropertyValue> EffectiveValue<T> {
             value_changed = !value_equals(&*self.value.borrow(), &v);
             // `replace` releases the borrow before the previous value is
             // dropped: dropping a value may run code that reads the property.
+            // Before the write: dropping the previous value may read the property.
+            owner.values().advance_value_generation();
             self.value.replace(v.clone());
             self.state.priority.set(priority);
             if let Some((uncommon, value)) = &uncoerced {
