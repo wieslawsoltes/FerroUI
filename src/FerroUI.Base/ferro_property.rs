@@ -394,6 +394,11 @@ pub struct FerroProperty {
     id: u32,
     inherits: bool,
     inherited_value_changed: Cell<Option<InheritedValueChanged>>,
+    /// The value stores that hold an effective value of the property, when it inherits: while
+    /// none does, every element inherits its default, and a lookup need not walk the ancestors.
+    /// An addition (FerroUI deviation, desktop-performance.md section 9.21). Shared with the
+    /// properties added to other owners: they are the same property.
+    holders: Rc<Cell<u32>>,
     is_attached: bool,
     is_direct: bool,
     is_read_only: bool,
@@ -441,6 +446,7 @@ impl FerroProperty {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             inherits: init.inherits,
             inherited_value_changed: Cell::new(None),
+            holders: Rc::new(Cell::new(0)),
             is_attached: init.is_attached,
             is_direct: init.is_direct,
             is_read_only: init.is_read_only,
@@ -463,6 +469,7 @@ impl FerroProperty {
             id: source.id,
             inherits: source.inherits,
             inherited_value_changed: source.inherited_value_changed.clone(),
+            holders: source.holders.clone(),
             is_attached: source.is_attached,
             is_direct: source.is_direct,
             is_read_only,
@@ -558,6 +565,19 @@ impl FerroProperty {
     #[inline]
     pub fn inherits(&self) -> bool {
         self.inherits
+    }
+
+    /// The value stores that hold an effective value of the property (inheriting properties).
+    pub(crate) fn holders(&self) -> u32 {
+        self.holders.get()
+    }
+
+    pub(crate) fn add_holder(&self) {
+        self.holders.set(self.holders.get() + 1);
+    }
+
+    pub(crate) fn remove_holder(&self) {
+        self.holders.set(self.holders.get().saturating_sub(1));
     }
 
     /// Whether this is an attached property.

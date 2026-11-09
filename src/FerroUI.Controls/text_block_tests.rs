@@ -1518,3 +1518,23 @@ fn a_kept_layouts_run_properties_follow_the_font_size() {
     block.measure(Size::new(180.0, 100.0));
     assert_eq!(large, block.text_layout().height());
 }
+
+#[test]
+fn inherited_values_reach_through_every_owner_and_leave_with_their_holder() {
+    // The inheriting font size is held by a panel through `TextElement`'s property and read by a
+    // text block through its own owner of the same property; once the panel is gone, nothing
+    // holds a value and the default is read again.
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    let default_size = TextBlock::new().font_size();
+    let reader = TextBlock::new();
+    {
+        let panel = crate::StackPanel::new();
+        crate::documents::TextElement::set_font_size_on(&panel, default_size + 7.0);
+        panel.children().add(&reader);
+        assert_eq!(default_size + 7.0, reader.font_size());
+        panel.children().clear();
+    }
+    assert_eq!(default_size, reader.font_size());
+    let other = TextBlock::new();
+    assert_eq!(default_size, other.font_size());
+}
