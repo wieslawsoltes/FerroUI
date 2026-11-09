@@ -48,6 +48,10 @@ struct GraphiteState {
     context: graphite::Context,
     frame_completion: GpuCompletion,
     completion_handler: Option<Box<dyn Fn(GpuCompletion)>>,
+    /// A recording failed to insert. With ordered recordings (section 9.17) the context refuses
+    /// every later recording of the recorder, so the context reports itself lost and is made
+    /// again, as after a lost device.
+    recording_failed: bool,
 }
 
 impl Drop for GraphiteState {
@@ -92,6 +96,7 @@ impl GraphiteGrContext {
                 context,
                 frame_completion: GpuCompletion::new(),
                 completion_handler: None,
+                recording_failed: false,
             })),
             frame_context_id: crate::gpu::next_frame_context_id(),
             uploads: Cell::new(0),
@@ -135,6 +140,7 @@ impl GraphiteGrContext {
         if let Some(mut recording) = state.recorder.snap() {
             let info = InsertRecordingInfo::new(&mut recording);
             let inserted = state.context.insert_recording(&info) == graphite::InsertStatus::Success;
+            state.recording_failed |= !inserted;
             let submitted = state.context.submit(None);
             if inserted && submitted {
                 if completion.retained_frames() == 0 {
@@ -341,7 +347,7 @@ impl ISkiaGrContext for GraphiteGrContext {
         self.state
             .borrow()
             .as_ref()
-            .is_some_and(|state| state.context.is_device_lost())
+            .is_some_and(|state| state.context.is_device_lost() || state.recording_failed)
     }
 
     /// A recorder of its own, made by the context, whose pipelines compile
