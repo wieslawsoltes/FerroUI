@@ -72,7 +72,8 @@ impl RenderDataResource {
             RenderDataResource::Pen(v) | RenderDataResource::ClientPen(v) => (Kind::Pen, address(v)),
             RenderDataResource::GeometryImpl(v) => (Kind::GeometryImpl, std::sync::Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Geometry(v) => (Kind::Geometry, address(v)),
-            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(v) as *const () as usize),
+            // The glyph run itself: the recording wraps it in an `Arc` of its own every time.
+            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(&**v) as *const () as usize),
             RenderDataResource::Bitmap(v) => (Kind::Bitmap, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Effect(v) => (Kind::Effect, Arc::as_ptr(v) as *const () as usize),
@@ -94,6 +95,17 @@ pub struct RenderDataResources {
 }
 
 impl RenderDataResources {
+    /// Whether `other` holds the same resources, by identity and in the same order, none of
+    /// them a custom draw operation (which the recording that is dropped disposes) or a resource
+    /// not sent (an addition, desktop-performance.md section 9.14).
+    pub(crate) fn same_resources(&self, other: &RenderDataResources) -> bool {
+        self.resources.len() == other.resources.len()
+            && self.resources.iter().zip(&other.resources).all(|(mine, theirs)| {
+                !matches!(mine, RenderDataResource::CustomDrawOperation(_) | RenderDataResource::NotSent)
+                    && mine.key() == theirs.key()
+            })
+    }
+
     pub fn count(&self) -> usize {
         self.resources.len()
     }

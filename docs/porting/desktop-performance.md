@@ -797,3 +797,29 @@ Gauntlet, per frame: text layouts 4,890 to 1,765, text lines formatted 5,533 to 
 `TextPipelineBenchmark.text_block_measure_sweep` (a width step of 7 a measure): labels 1.97 to
 0.14 ms, card bodies 7.85 to about 5.5 ms, articles unchanged within the noise. Local gate, three
 rounds: gauntlet UI thread 39.0 to 33.6 ms a frame (-13.9 %), no metric regressed.
+
+### 9.14 An unchanged drawing is not sent to the render thread again
+
+A visual recorded again often draws exactly what it drew before: a left-aligned text block
+without a background, resized while its layout was kept (section 9.12), draws the same lines at
+the same places. `RenderDataDrawingContext::get_render_results_unless_same` compares the new
+recording with the render data the visual has: the same operations on the same resources, by
+identity, none of them a custom draw operation (which a dropped recording disposes) or a
+resource not sent. When they are the same, the new recording is dropped, its references
+released, and the render data stays: the render thread neither receives nor deserializes a new
+stream, computes its bounds or disposes the old one, and the UI thread creates no server object
+for it. Because an invalidation can come from something the drawing does not contain (an opacity
+mask, an effect), the visual still has the server draw its area again
+(`CompositionDrawListVisual::invalidate_draw_list_content`, a third state of the draw list in the
+batch).
+
+The identity of a glyph run in a recording was the `Arc` the recording wraps it in, new for every
+recording, so no two recordings of the same text were equal (and a glyph run drawn twice in one
+recording took two slots); it is now the glyph run itself.
+
+Tests: `compositor_tests.rs` (`an_unchanged_drawing_is_not_sent_again_and_its_area_is_drawn_again`;
+`visual_brush_as_opacity_mask_is_a_server_side_scene_brush`, whose mask changes while the drawing
+does not, checks the area is drawn again). A counter, `VisualsRecordedUnchanged`. Gauntlet: 3,820
+of 8,177 recordings a frame are unchanged. Local gate against section 9.12, three rounds: render
+thread 51.8 to 45.7 ms a frame (-11.7 %), UI thread -8.1 %, wall time -11.7 %, no metric
+regressed.
