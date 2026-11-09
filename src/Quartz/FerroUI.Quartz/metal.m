@@ -34,7 +34,8 @@ typedef struct {
   vector_uint4 flags;
 } QImageParams;
 typedef struct {
-  vector_float4 bounds, color;
+  // `radii`: the corner radii of a rounded box (`x`, `y`), zero for a box.
+  vector_float4 bounds, color, radii;
 } QSolidParams;
 typedef struct {
   QImageParams image;
@@ -1503,10 +1504,13 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
           high = (vector_float2){ceilf(high.x - 0.5f), ceilf(high.y - 0.5f)};
         }
       }
-      QSolidParams compact = {{low.x - p.target.x, low.y - p.target.y,
-                               high.x - low.x, high.y - low.y},
-                              {p.color.x * p.color.w, p.color.y * p.color.w,
-                               p.color.z * p.color.w, p.color.w}};
+      QSolidParams compact = {
+          {low.x - p.target.x, low.y - p.target.y, high.x - low.x,
+           high.y - low.y},
+          {p.color.x * p.color.w, p.color.y * p.color.w, p.color.z * p.color.w,
+           p.color.w},
+          (p.reserved & 16) ? (vector_float4){p.src.x, p.src.y, 0, 0}
+                            : (vector_float4){0, 0, 0, 0}};
       [drawImages appendBytes:&compact length:sizeof(compact)];
     } else if (kind == 3) {
       QRectImageParams compact = rect_image_params(p, image);

@@ -1115,6 +1115,36 @@ fn plain_rectangles_match_native_geometry_at_fractional_edges() {
     }
 }
 
+#[cfg(feature = "metal")]
+#[test]
+fn boxes_keep_fractional_coverage_inside_analytic_clips() {
+    let brush =
+        ImmutableSolidColorBrush::new(ferroui_base::media::Color::from_argb(160, 90, 130, 200));
+    let rect = Rect::new(7.25, 9.125, 31.5, 25.75);
+    let geometry = Geometry::rectangle(rect);
+    let mut outputs = Vec::new();
+    for rectangle in [false, true] {
+        let target = Bitmap::new(PixelSize::new(100, 100), Vector::new(96., 96.));
+        let mut draw = target.drawing(false, None);
+        draw.clear(Colors::WHITE);
+        draw.push_clip(Rect::new(0.5, 0.5, 90., 30.25));
+        if rectangle {
+            draw.draw_rectangle(
+                Some(&brush),
+                None,
+                RoundedRect::from_rect(rect),
+                &Default::default(),
+            );
+        } else {
+            draw.draw_geometry(Some(&brush), None, &*geometry);
+        }
+        draw.pop_clip();
+        draw.dispose();
+        outputs.push(target.pixels());
+    }
+    assert_eq!(outputs[0], outputs[1], "a clipped box lost its fractional edges");
+}
+
 #[test]
 fn immutable_shaping_attributes_preserve_complex_script_glyphs_and_context() {
     use ferroui_base::media::{text_formatting::TextShaperOptions, FontFeature, FontSimulations};

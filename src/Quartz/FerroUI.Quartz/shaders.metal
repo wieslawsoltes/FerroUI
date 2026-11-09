@@ -34,6 +34,35 @@ static float clip_rounded(float2 c, float4 rect, float2 rad) {
   }
   return coverage;
 }
+// Whether the sample `q` is inside the box `box` (low and high corners, the
+// low edge included, the high one excluded) with elliptical corners of radii
+// `rad` (none when either is zero).
+static bool inside_box(float2 q, float4 box, float2 rad) {
+  if (any(q < box.xy) || any(q >= box.zw))
+    return false;
+  if (rad.x > 0 && rad.y > 0) {
+    float2 k = abs(q - (box.xy + box.zw) * 0.5f) -
+               ((box.zw - box.xy) * 0.5f - rad);
+    if (k.x > 0 && k.y > 0)
+      return dot(k / rad, k / rad) <= 1;
+  }
+  return true;
+}
+
+// The coverage of a solid box (`reserved & 8`, rounded with `reserved & 16`)
+// at a pixel: the four samples the path coverage takes, tested against the box
+// itself instead of its edges, or the pixel center when aliased.
+static float box_coverage(float2 center, float4 box, float2 rad, bool aliased) {
+  if (aliased)
+    return inside_box(center, box, rad);
+  float value = 0;
+  for (uint y = 0; y < 2; y++)
+    for (uint x = 0; x < 2; x++)
+      value += inside_box(
+          center + float2(float(x) * 0.5f - 0.25f, float(y) * 0.5f - 0.25f),
+          box, rad);
+  return value * 0.25f;
+}
 struct Stop {
   float4 color;
   float4 location;
@@ -250,6 +279,10 @@ kernel void paint(texture2d<float, access::read_write> target [[texture(0)]],
                                                 p.evenodd != 0)
                                   : 1)
                          : coverage(pixel, pathEdges, count, p.evenodd != 0));
+  if (p.mode == 0 && (p.reserved & 8))
+    cov = box_coverage(center, p.gradient,
+                       (p.reserved & 16) ? p.src.xy : float2(0),
+                       p.flipped & 1);
   cov *= mask;
   if (p.mode == 1) {
     target.write(float4(cov), tid);
@@ -750,6 +783,10 @@ fragment float4 draw_fragment(DrawVertex v [[stage_in]],
       : (p.flipped & 1)
           ? (count ? coverage_at(center, pathEdges, count, p.evenodd != 0) : 1)
           : coverage(float2(position), pathEdges, count, p.evenodd != 0);
+  if (p.mode == 0 && (p.reserved & 8))
+    cov = box_coverage(center, p.gradient,
+                       (p.reserved & 16) ? p.src.xy : float2(0),
+                       p.flipped & 1);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -834,6 +871,10 @@ fragment float4 path_fragment(DrawVertex v [[stage_in]],
       : (p.flipped & 1)
           ? (count ? coverage_at(center, pathEdges, count, p.evenodd != 0) : 1)
           : coverage(float2(position), pathEdges, count, p.evenodd != 0);
+  if (p.mode == 0 && (p.reserved & 8))
+    cov = box_coverage(center, p.gradient,
+                       (p.reserved & 16) ? p.src.xy : float2(0),
+                       p.flipped & 1);
   cov *= mask;
   if (cov <= 0)
     return float4(0);
@@ -881,12 +922,13 @@ fragment float4 image_fragment(ImageVertex v [[stage_in]],
 // Integral solid rectangles need neither sampled textures nor per-fragment
 // path parameters. Fractional/transformed paths keep their exact coverage.
 struct SolidParams {
-  float4 bounds, color;
+  float4 bounds, color, radii;
 };
 struct SolidVertex {
   float4 position [[position]];
   float4 color [[flat]];
   float4 bounds [[flat]];
+  float2 radii [[flat]];
 };
 vertex SolidVertex solid_vertex(uint id [[vertex_id]],
                                 device const SolidParams *draws [[buffer(0)]],
@@ -898,10 +940,12 @@ vertex SolidVertex solid_vertex(uint id [[vertex_id]],
   float2 low = p.bounds.xy, high = low + p.bounds.zw;
   float2 pixel = mix(floor(low), ceil(high), corner);
   return {float4(pixel.x / size.x * 2 - 1, 1 - pixel.y / size.y * 2, 0, 1),
-          p.color, float4(low, high)};
+          p.color, float4(low, high), p.radii.xy};
 }
 fragment float4 solid_fragment(SolidVertex v [[stage_in]]) {
   float2 center = floor(v.position.xy) + 0.5f;
+  if (v.radii.x > 0 && v.radii.y > 0)
+    return v.color * box_coverage(center, v.bounds, v.radii, false);
   float2 a = center - 0.25f, b = center + 0.25f;
   float2 covered = float2((a >= v.bounds.xy) & (a < v.bounds.zw)) +
                    float2((b >= v.bounds.xy) & (b < v.bounds.zw));
