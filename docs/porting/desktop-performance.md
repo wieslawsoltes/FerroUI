@@ -696,3 +696,15 @@ Tests: `a_layout_whose_lines_fit_the_new_width_is_kept_and_has_the_lines_of_a_ne
 widths of `a_layout_that_depends_on_the_width_is_created_again` now make the lines change.
 Counters (`--features counters`): text layouts created 5,844 to 5,143 a frame (-12 %); local gate:
 gauntlet UI thread -1.6 % (within noise), no metric regressed.
+
+### 9.8 A text block keeps its run properties between layouts
+
+Each layout of a text block made its default run properties anew: about nine property reads (the
+font family, style, weight, stretch and size, the decorations, the foreground and the font
+features, an inherited lookup), an allocation, and a glyph typeface the new properties resolved
+again for the first line. A text block now keeps them until a property they are made of changes:
+the change handler already lays the text out again for each of them (`invalidate_text_layout`:
+the font properties, flow direction, letter spacing, text, decorations, font features and
+foreground), and now also drops the kept properties. Test:
+`a_kept_layouts_run_properties_follow_the_font_size`. Local gate, three rounds: gauntlet UI thread
+40.93 to 37.24 ms a frame (-9.0 %), no metric regressed.

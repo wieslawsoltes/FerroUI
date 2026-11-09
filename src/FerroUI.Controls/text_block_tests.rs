@@ -1437,3 +1437,22 @@ fn text_of_a_family_the_font_manager_does_not_have_is_laid_out_with_the_default_
 
     assert!(system_fonts.font_families().iter().all(|font_family| font_family.name() != "Cascadia Mono"));
 }
+
+/// Not in the reference tests: the run properties a text block keeps between layouts follow the
+/// properties they are made of (desktop-performance.md, section 9.8).
+#[test]
+fn a_kept_layouts_run_properties_follow_the_font_size() {
+    let _scope = test_scope();
+    let block = text_block("Hello World");
+    block.measure(Size::new(200.0, 100.0));
+    let small = block.text_layout().height();
+
+    block.set_font_size(block.font_size() * 2.0);
+    block.measure(Size::new(200.0, 100.0));
+    let large = block.text_layout().height();
+    assert!(large > small, "{large} > {small}");
+
+    // A new constraint alone keeps the properties: the layout has the doubled size still.
+    block.measure(Size::new(180.0, 100.0));
+    assert_eq!(large, block.text_layout().height());
+}

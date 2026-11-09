@@ -28,6 +28,10 @@ use std::rc::Rc;
 pub struct TextBlock {
     base: Control,
     text_layout: RefCell<Option<Rc<TextLayout>>>,
+    /// The default run properties of the layouts, kept until a property they are made of changes
+    /// (`invalidate_text_layout`): a layout of a new constraint reuses them, and with them the
+    /// glyph typeface they resolved (FerroUI deviation, desktop-performance.md, section 9.8).
+    run_properties: RefCell<Option<Rc<dyn TextRunProperties>>>,
     text_run_cache: RefCell<Option<Rc<TextRunCache>>>,
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
@@ -325,19 +329,7 @@ impl TextBlockImpl for TextBlock {
     }
 
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
-
-        let default_properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface,
-            this.font_size(),
-            this.text_decorations(),
-            this.foreground(),
-            None,
-            Default::default(),
-            None,
-            Typography::effective_font_features(this),
-        ));
+        let default_properties = this.default_run_properties();
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
             this.flow_direction(),
@@ -615,6 +607,7 @@ impl TextBlock {
         Self {
             base: Control::construct(),
             text_layout: RefCell::new(None),
+            run_properties: RefCell::new(None),
             text_run_cache: RefCell::new(None),
             constraint: Cell::new(Size::new(f64::NAN, f64::NAN)),
             text_runs: RefCell::new(None),
@@ -1095,8 +1088,31 @@ impl TextBlock {
         self.set_current_value(Self::text_property(), None);
     }
 
+    /// The default run properties of the layouts: the ones kept since a property they are made of
+    /// last changed, else new ones.
+    fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
+        if let Some(properties) = self.run_properties.borrow().as_ref() {
+            return properties.clone();
+        }
+        let typeface =
+            Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
+        let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+            typeface,
+            self.font_size(),
+            self.text_decorations(),
+            self.foreground(),
+            None,
+            Default::default(),
+            None,
+            Typography::effective_font_features(self),
+        ));
+        *self.run_properties.borrow_mut() = Some(properties.clone());
+        properties
+    }
+
     /// Invalidates the text layout and the shaped runs it was built from.
     pub fn invalidate_text_layout(&self) {
+        *self.run_properties.borrow_mut() = None;
         if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
             text_run_cache.invalidate();
         }
