@@ -25,6 +25,9 @@ typedef struct {
   // bottom) with corner radii (x, y) (`clipped & 2`), and a rectangle
   // (`clipped & 4`), the intersection of the rectangle clips in effect.
   vector_float4 rclip, rradius, sclip;
+  // The inverse transform of a turned analytic clip (`rclip` then in its own
+  // space, its translation in `rradius.zw`); zero when the clip is in pixels.
+  vector_float4 rmap;
 } QParams;
 typedef struct {
   vector_float4 color, location;
@@ -34,8 +37,10 @@ typedef struct {
   vector_uint4 flags;
 } QImageParams;
 typedef struct {
-  // `radii`: the corner radii of a rounded box (`x`, `y`), zero for a box.
-  vector_float4 bounds, color, radii;
+  // `radii`: the corner radii of a rounded box (`x`, `y`), zero for a box;
+  // `shape`: the whole rounded box (low and high corners), which `bounds` may
+  // crop to the pixels of the canvas.
+  vector_float4 bounds, color, radii, shape;
 } QSolidParams;
 typedef struct {
   QImageParams image;
@@ -212,7 +217,7 @@ void qm_record_fault(uint64_t generation) {
 @property(nonatomic) id<MTLTexture> clip;
 @property(nonatomic) CGRect clipRect;
 // The analytic clip: a rounded rectangle in canvas pixels (`rclipped`).
-@property(nonatomic) vector_float4 rclip, rradius, sclip;
+@property(nonatomic) vector_float4 rclip, rradius, sclip, rmap;
 @property(nonatomic) int rclipped, sclipped;
 @property(nonatomic) vector_float4 shadow, shadowColor, gradientOptions;
 @property(nonatomic) int blendMode, aliased, interpolation, hinting;
@@ -361,6 +366,11 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 @property(nonatomic) NSUInteger edgeCacheBytes;
 @property(nonatomic) CFMutableDictionaryRef glyphCache, glyphImages,
     preparedRuns, pathCache;
+// Glyph strikes: the copies of a font at a run's size and at its device size,
+// by font, size and scale (`QStrikeKey`), each an array of the font, its sized
+// copy and its device-sized copy. The glyph caches use those copies as keys
+// by identity: one copy a strike, and they retain their keys.
+@property(nonatomic) CFMutableDictionaryRef strikes;
 @property(nonatomic) QPreparedDraw *capture;
 @property(nonatomic) NSUInteger preparedBytes, pathBytes, pathEntries,
     coverageBytes, coveragePathBytes;
@@ -372,6 +382,10 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 @property(nonatomic) NSMutableArray<QUploadBuffer *> *buffers;
 @property(nonatomic) CFMutableDictionaryRef rectanglePaths;
 @property(nonatomic) NSUInteger bufferBytes;
+// The upload arena of the current command buffer (`upload_slice`).
+@property(nonatomic) id<MTLBuffer> arena;
+@property(nonatomic) id<MTLCommandBuffer> arenaCommands;
+@property(nonatomic) NSUInteger arenaOffset, arenaGeneration;
 @property(nonatomic) id<MTLRenderCommandEncoder> encoder;
 @property(nonatomic) id<MTLTexture> encoderTarget;
 @property(nonatomic) NSMutableSet<id<MTLTexture>> *encoderInputs;
@@ -524,15 +538,19 @@ static QMetalRenderer *renderer(void) {
       r.texturePool = [NSMutableDictionary new];
       r.edgeCache = [NSMutableDictionary new];
       r.coverageImages = [NSMutableDictionary new];
-      r.glyphCache =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
-      r.glyphImages =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
-      r.preparedRuns =
-          CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
+      // Fonts are keys by identity: hashing a font is costly, and the strikes
+      // give one copy of a font at a size; the dictionaries retain their keys,
+      // so an address is never reused while it is one.
+      CFDictionaryKeyCallBacks fontKeys = kCFTypeDictionaryKeyCallBacks;
+      fontKeys.equal = NULL;
+      fontKeys.hash = NULL;
+      r.glyphCache = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.glyphImages = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.preparedRuns = CFDictionaryCreateMutable(
+          NULL, 0, &fontKeys, &kCFTypeDictionaryValueCallBacks);
+      r.strikes = small_dictionary();
       // CGPath hashes collide for distinct paths on current OS releases. The
       // Rust path cache retains immutable paths, so retained pointer identity
       // gives constant-time lookup without geometric equality scans.
@@ -550,6 +568,7 @@ static QMetalRenderer *renderer(void) {
                                               &kCFTypeDictionaryValueCallBacks);
       r.event = [r.device newSharedEvent];
       if (!r.queue || !r.event || !r.glyphCache || !r.glyphImages ||
+          !r.strikes ||
           !r.preparedRuns || !r.pathCache || !r.coveragePaths ||
           !r.rectanglePaths) {
         r = nil;
@@ -627,14 +646,10 @@ static id<MTLCommandBuffer> raw_batch_buffer(void) {
 // Poll completion at reuse instead of scheduling a callback per upload. The
 // completed command buffers are released on the next pool access. All access
 // is serialized by the renderer lock.
-static id<MTLBuffer> upload_buffer(const void *bytes, NSUInteger length,
+// A shared buffer of `capacity` bytes the GPU no longer reads, for `cb`.
+static id<MTLBuffer> pooled_buffer(NSUInteger capacity,
                                    id<MTLCommandBuffer> cb) {
-  if (!cb)
-    return nil;
   QMetalRenderer *r = renderer();
-  NSUInteger capacity = 4096;
-  while (capacity < length)
-    capacity *= 2;
   id<MTLBuffer> buffer = nil;
   for (QUploadBuffer *entry in r.buffers) {
     id<MTLCommandBuffer> previous = entry.lastUse;
@@ -668,8 +683,37 @@ static id<MTLBuffer> upload_buffer(const void *bytes, NSUInteger length,
       r.bufferBytes += capacity;
     }
   }
-  memcpy(buffer.contents, bytes, length);
   return buffer;
+}
+// Uploads `bytes` for the commands of `cb` and returns the buffer holding
+// them at `*offset`. The uploads of a command buffer are slices of one arena,
+// a pooled buffer of at least 1 MiB taken for that command buffer: the draws
+// and passes of a frame bind slices of a few buffers, where each took a buffer
+// of its own, and past the pool's 32 a new one every time.
+static id<MTLBuffer> upload_slice(const void *bytes, NSUInteger length,
+                                  id<MTLCommandBuffer> cb,
+                                  NSUInteger *offset) {
+  if (!cb)
+    return nil;
+  QMetalRenderer *r = renderer();
+  NSUInteger aligned = (MAX(length, 16) + 255) & ~(NSUInteger)255;
+  if (!r.arena || r.arenaCommands != cb ||
+      r.arenaGeneration != qm_generation() ||
+      r.arenaOffset + aligned > r.arena.length) {
+    NSUInteger capacity = 1024 * 1024;
+    while (capacity < aligned)
+      capacity *= 2;
+    r.arena = pooled_buffer(capacity, cb);
+    r.arenaCommands = cb;
+    r.arenaGeneration = qm_generation();
+    r.arenaOffset = 0;
+    if (!r.arena)
+      return nil;
+  }
+  *offset = r.arenaOffset;
+  memcpy((uint8_t *)r.arena.contents + r.arenaOffset, bytes, length);
+  r.arenaOffset += aligned;
+  return r.arena;
 }
 static void end_render_encoder(void) {
   QMetalRenderer *r = renderer();
@@ -743,12 +787,15 @@ static void flush_draws(void) {
   id<MTLCommandBuffer> cb = raw_batch_buffer();
   NSMutableData *vertexData = r.drawKind >= 2 ? r.drawImages : r.drawParams;
   BOOL inlineDraws = vertexData.length <= 4096;
+  NSUInteger drawsOffset = 0, edgesOffset = 0;
   id<MTLBuffer> draws =
       inlineDraws ? nil
-                  : upload_buffer(vertexData.bytes, vertexData.length, cb);
+                  : upload_slice(vertexData.bytes, vertexData.length, cb,
+                                 &drawsOffset);
   id<MTLBuffer> edges =
       (r.drawKind < 2 && r.drawEdges.length > 4096)
-          ? upload_buffer(r.drawEdges.bytes, r.drawEdges.length, cb)
+          ? upload_slice(r.drawEdges.bytes, r.drawEdges.length, cb,
+                         &edgesOffset)
           : nil;
   id<MTLRenderCommandEncoder> enc = r.encoder;
   if (!enc) {
@@ -773,6 +820,8 @@ static void flush_draws(void) {
       CGRect rect = r.drawStorage.region;
       QSolidParams clear = {
           {rect.origin.x, rect.origin.y, rect.size.width, rect.size.height},
+          {0, 0, 0, 0},
+          {0, 0, 0, 0},
           {0, 0, 0, 0}};
       [enc setRenderPipelineState:r.clearPipeline];
       [enc setVertexBytes:&clear length:sizeof(clear) atIndex:0];
@@ -797,7 +846,7 @@ static void flush_draws(void) {
                      length:vertexData.length
                     atIndex:0];
       else
-        [enc setVertexBuffer:draws offset:0 atIndex:0];
+        [enc setVertexBuffer:draws offset:drawsOffset atIndex:0];
     }
     [enc setVertexBytes:&size length:sizeof(size) atIndex:1];
     if (r.drawKind < 2 && r.drawParams.length) {
@@ -806,9 +855,9 @@ static void flush_draws(void) {
                        length:r.drawParams.length
                       atIndex:0];
       else
-        [enc setFragmentBuffer:draws offset:0 atIndex:0];
+        [enc setFragmentBuffer:draws offset:drawsOffset atIndex:0];
       if (edges)
-        [enc setFragmentBuffer:edges offset:0 atIndex:1];
+        [enc setFragmentBuffer:edges offset:edgesOffset atIndex:1];
       else {
         vector_float4 zero = {0};
         [enc setFragmentBytes:r.drawEdges.length ? r.drawEdges.bytes : &zero
@@ -1119,6 +1168,7 @@ static QState *copy_state(QState *s) {
   n.hinting = s.hinting;
   n.rclip = s.rclip;
   n.rradius = s.rradius;
+  n.rmap = s.rmap;
   n.rclipped = s.rclipped;
   n.sclip = s.sclip;
   n.sclipped = s.sclipped;
@@ -1149,6 +1199,7 @@ static QParams params(QMetalSurface *s) {
     p.clipped |= 2;
     p.rclip = state.rclip;
     p.rradius = state.rradius;
+    p.rmap = state.rmap;
   }
   if (state.sclipped) {
     p.clipped |= 4;
@@ -1479,16 +1530,32 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
       }
     }
     NSUInteger kind =
-        p.mode == 0 ? ((!p.clipped && (!p.edges || (p.reserved & 8))) ? 4 : 0)
+        p.mode == 0 ? ((!p.clipped && !(p.reserved & 32) &&
+                        (!p.edges || (p.reserved & 8)))
+                           ? 4
+                           : 0)
         : ((!p.edges || (p.reserved & 8)) && !p.clipped && (p.flipped >> 2) < 3)
             ? ((p.reserved & 8) ? 3 : 2)
             : 1;
     NSMutableData *drawParams = r.drawParams;
+    // Paths (kind 0) and general draws (kind 1) share one format, and the
+    // general pipeline draws paths too: a batch of either takes the other
+    // (then drawn by the general pipeline), and a draw that samples no image
+    // takes the image of the batch, so text and the shapes around it make one
+    // batch instead of one a draw.
+    BOOL general = kind < 2 && r.drawKind < 2;
+    BOOL sameImage = general ? (!image || !r.drawImage || image == r.drawImage)
+                             : r.drawImage == image;
     if (r.drawTarget != target ||
-        (r.drawCount && (r.drawKind != kind || r.drawClip != state.clip ||
-                         r.drawImage != image || r.drawCount >= 4096))) {
+        (r.drawCount && ((!general && r.drawKind != kind) ||
+                         r.drawClip != state.clip || !sameImage ||
+                         r.drawCount >= 4096))) {
       flush_draws();
       drawParams = r.drawParams;
+    }
+    if (r.drawCount && general) {
+      kind = MAX(kind, r.drawKind);
+      image = image ?: r.drawImage;
     }
     NSMutableData *drawImages = r.drawImages, *drawEdges = r.drawEdges;
     if (kind == 4) {
@@ -1510,7 +1577,9 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
           {p.color.x * p.color.w, p.color.y * p.color.w, p.color.z * p.color.w,
            p.color.w},
           (p.reserved & 16) ? (vector_float4){p.src.x, p.src.y, 0, 0}
-                            : (vector_float4){0, 0, 0, 0}};
+                            : (vector_float4){0, 0, 0, 0},
+          p.gradient - (vector_float4){p.target.x, p.target.y, p.target.x,
+                                       p.target.y}};
       [drawImages appendBytes:&compact length:sizeof(compact)];
     } else if (kind == 3) {
       QRectImageParams compact = rect_image_params(p, image);
@@ -1586,22 +1655,21 @@ static void dispatch(QMetalSurface *s, id<MTLTexture> target, QParams p,
   if (r.separateDestination)
     [enc setTexture:previous ?: r.white atIndex:3];
   vector_float4 zero = {0};
-  id<MTLBuffer> e =
-      [r.device newBufferWithBytes:edges.length ? edges.bytes : &zero
-                            length:MAX(edges.length, sizeof(zero))
-                           options:MTLResourceStorageModeShared];
-  id<MTLBuffer> g =
-      [r.device newBufferWithBytes:stops.length ? stops.bytes : &zero
-                            length:MAX(stops.length, sizeof(zero))
-                           options:MTLResourceStorageModeShared];
+  NSUInteger edgesOffset = 0, stopsOffset = 0;
+  id<MTLBuffer> e = upload_slice(edges.length ? edges.bytes : &zero,
+                                 MAX(edges.length, sizeof(zero)), cb,
+                                 &edgesOffset);
+  id<MTLBuffer> g = upload_slice(stops.length ? stops.bytes : &zero,
+                                 MAX(stops.length, sizeof(zero)), cb,
+                                 &stopsOffset);
   if (!e || !g) {
     [enc endEncoding];
     qm_record_fault(qm_generation());
     return;
   }
-  [enc setBuffer:e offset:0 atIndex:0];
+  [enc setBuffer:e offset:edgesOffset atIndex:0];
   [enc setBytes:&p length:sizeof(p) atIndex:1];
-  [enc setBuffer:g offset:0 atIndex:2];
+  [enc setBuffer:g offset:stopsOffset atIndex:2];
   [enc dispatchThreads:MTLSizeMake(p.extent.x, p.extent.y, 1)
       threadsPerThreadgroup:MTLSizeMake(8, 8, 1)];
   [enc endEncoding];
@@ -1699,6 +1767,15 @@ static NSData *path_edges(QMetalSurface *s, CGPathRef path, CGRect *box) {
     }
   }
   return data;
+}
+// The device bounds of `rect` under a transform that keeps the axes.
+static CGRect axis_box(QMetalSurface *s, CGRect rect) {
+  CGAffineTransform transform = s.state.transform;
+  CGPoint a = CGPointApplyAffineTransform(rect.origin, transform);
+  CGPoint c = CGPointApplyAffineTransform(
+      CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect)), transform);
+  return CGRectMake(MIN(a.x, c.x), MIN(a.y, c.y), fabs(c.x - a.x),
+                    fabs(c.y - a.y));
 }
 static NSData *rect_edges(QMetalSurface *s, CGRect rect, CGRect *box) {
   CGAffineTransform transform = s.state.transform;
@@ -1826,6 +1903,8 @@ uint64_t qm_configure(void *device) {
     clear_coverage_paths(r);
     [r.buffers removeAllObjects];
     r.bufferBytes = 0;
+    r.arena = nil;
+    r.arenaCommands = nil;
     r.preparedBytes = r.pathBytes = r.pathEntries = 0;
     r.capture = nil;
     [r.coverageImages removeAllObjects];
@@ -1956,10 +2035,35 @@ int qm_clip_rounded(void *surface, const double *rect) {
          ry = rect[5];
   BOOL axes = t.b == 0 && t.c == 0 && t.a != 0 && t.d != 0;
   BOOL rounded = rx > 0 && ry > 0 && isfinite(rx) && isfinite(ry);
+  BOOL finite = w >= 0 && h >= 0 && isfinite(x) && isfinite(y) &&
+                isfinite(w) && isfinite(h);
+  double determinant = t.a * t.d - t.b * t.c;
+  // A clip under a transform that turns it is the analytic clip in its own
+  // space, mapped through the inverse transform, when no other is in effect.
+  BOOL turned = !axes && finite && !s.state.clip && !s.state.rclipped &&
+                fabs(determinant) > 1e-12 && isfinite(determinant);
   // A mask holds every clip before it; a rounded clip in a rounded clip is
   // not one rounded rectangle. Those clip with the path.
-  if (axes && !s.state.clip && !(rounded && s.state.rclipped) && w >= 0 &&
-      h >= 0 && isfinite(x) && isfinite(y) && isfinite(w) && isfinite(h)) {
+  if (turned) {
+    BOOL clipped = s.state.sclipped;
+    CGRect device = CGRectApplyAffineTransform(CGRectMake(x, y, w, h), t);
+    CGAffineTransform inverse = CGAffineTransformInvert(t);
+    double radiusX = rounded ? MIN(rx, w / 2) : 0;
+    double radiusY = rounded ? MIN(ry, h / 2) : 0;
+    s.state.rclip = (vector_float4){x, y, x + w, y + h};
+    s.state.rradius =
+        (vector_float4){radiusX, radiusY, inverse.tx, inverse.ty};
+    s.state.rmap = (vector_float4){inverse.a, inverse.b, inverse.c, inverse.d};
+    s.state.rclipped = 1;
+    CGRect box = CGRectIntersection(
+        CGRectIntegral(device),
+        CGRectMake(0, 0, s.storage.canvas.width, s.storage.canvas.height));
+    if (clipped)
+      box = CGRectIntersection(box, s.state.clipRect);
+    s.state.clipRect = CGRectIsNull(box) ? CGRectZero : box;
+    applied = 1;
+  } else if (axes && !s.state.clip && !(rounded && s.state.rclipped) &&
+             finite) {
     BOOL clipped = s.state.rclipped || s.state.sclipped;
     CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), t);
     CGPoint b = CGPointApplyAffineTransform(CGPointMake(x + w, y + h), t);
@@ -1970,6 +2074,7 @@ int qm_clip_rounded(void *surface, const double *rect) {
       double radiusY = MIN(ry * fabs(t.d), (bottom - top) / 2);
       s.state.rclip = (vector_float4){left, top, right, bottom};
       s.state.rradius = (vector_float4){radiusX, radiusY, 0, 0};
+      s.state.rmap = (vector_float4){0, 0, 0, 0};
       s.state.rclipped = 1;
     } else if (s.state.sclipped) {
       vector_float4 old = s.state.sclip;
@@ -2028,30 +2133,39 @@ void qm_rectangle(void *surface, const double *rect, double red, double green,
   if (!(rx > 0) || !(ry > 0) || !isfinite(rx) || !isfinite(ry))
     rx = ry = 0;
   QMetalSurface *s = (__bridge QMetalSurface *)surface;
-  if (rx == 0 && ry == 0 && s.state.shadowColor.w <= 0 &&
-      s.state.transform.b == 0 && s.state.transform.c == 0 && !s.state.clip) {
-    // Axis-aligned solid rectangles use exact compact coverage bounds.
-    // Preparing four generic path edges (including a fractional NSData
-    // allocation) cannot affect that pipeline and only adds recording work.
-    CGAffineTransform transform = s.state.transform;
-    CGPoint a = CGPointApplyAffineTransform(CGPointMake(x, y), transform);
-    CGPoint b =
-        CGPointApplyAffineTransform(CGPointMake(x + w, y + h), transform);
-    CGRect box = CGRectMake(MIN(a.x, b.x), MIN(a.y, b.y), fabs(b.x - a.x),
-                            fabs(b.y - a.y));
+  double scale =
+      MIN(1, MIN(rx > 0 ? w / (2 * rx) : 1, ry > 0 ? h / (2 * ry) : 1));
+  rx *= scale;
+  ry *= scale;
+  CGAffineTransform transform = s.state.transform;
+  if (s.state.shadowColor.w <= 0 && (rx == 0 || !s.state.aliased)) {
+    // Solid boxes, rounded or not, use exact coverage: the shaders test the
+    // four samples a pixel takes against the box and its elliptical corners
+    // (inside a mask clip the general pipelines test the same samples), where
+    // a path would test them against the edges of its curves flattened to a
+    // quarter of a pixel. Preparing those edges and their coverage image costs
+    // a path, its edges and a coverage cache entry at every position.
     QParams p = params(s);
-    p.reserved = 8;
-    p.gradient = (vector_float4){box.origin.x, box.origin.y, CGRectGetMaxX(box),
-                                 CGRectGetMaxY(box)};
+    CGRect local = CGRectMake(x, y, w, h);
+    CGRect box = CGRectApplyAffineTransform(local, transform);
+    if (transform.b == 0 && transform.c == 0) {
+      // Axis-aligned: the box in device space, a compact draw unclipped.
+      p.reserved = rx > 0 ? 8 | 16 : 8;
+      p.gradient = (vector_float4){box.origin.x, box.origin.y,
+                                   CGRectGetMaxX(box), CGRectGetMaxY(box)};
+      p.src = (vector_float4){rx * fabs(transform.a), ry * fabs(transform.d),
+                              0, 0};
+    } else {
+      // Turned: the box in its own space, the samples mapped into it.
+      p.reserved = (rx > 0 ? 8 | 16 : 8) | 32;
+      p.gradient = (vector_float4){x, y, x + w, y + h};
+      p.src = (vector_float4){rx, ry, 0, 0};
+    }
     p.color = (vector_float4){red, green, blue, alpha};
     bounds(&p, crop(s, box));
     dispatch(s, s.texture, p, nil, nil, nil);
     return;
   }
-  double scale =
-      MIN(1, MIN(rx > 0 ? w / (2 * rx) : 1, ry > 0 ? h / (2 * ry) : 1));
-  rx *= scale;
-  ry *= scale;
   double keyBytes[] = {x, y, w, h, rx, ry};
   QSmallKey key = small_key(keyBytes, sizeof(keyBytes));
   CGPathRef path = (CGPathRef)small_get(r.rectanglePaths, &key);
@@ -2619,13 +2733,15 @@ static void draw_glyph_image(QMetalSurface *s, QGlyphImage *image, double scale,
   p.dst = (vector_float4){dx, dy, w, h};
   p.translation.w = colored ? tint.a : 1;
   CGRect box;
-  NSData *edges = rect_edges(s, CGRectMake(dx, dy, w, h), &box);
+  NSData *edges = nil;
   // Native raster inputs carry two transparent padding pixels. For an
   // axis-aligned, linearly/nearest sampled mask the outer quad cannot affect
   // coverage; keep every interior Core Text sample and omit redundant edges.
   if (s.state.transform.b == 0 && s.state.transform.c == 0 &&
       s.state.interpolation < 3)
-    edges = nil;
+    box = axis_box(s, CGRectMake(dx, dy, w, h));
+  else
+    edges = rect_edges(s, CGRectMake(dx, dy, w, h), &box);
   p.edges = edges.length / 16;
   bounds(&p, crop(s, box));
   dispatch(s, s.texture, p, edges, nil, image.atlas ?: image.surface.texture);
@@ -2673,6 +2789,17 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     runs = (__bridge NSMutableDictionary *)CFDictionaryGetValue(r.preparedRuns,
                                                                 font);
     QPreparedDraw *ready = runs[runKey];
+    if (!ready) {
+      // Prepare a run when it repeats: one seen once is remembered by its
+      // hash and drawn directly. Text that changes or moves every frame never
+      // repeats, and preparing it would only copy every draw it makes.
+      static uint64_t seen[4096];
+      uint64_t *slot = &seen[discriminator & 4095];
+      BOOL repeated = *slot == discriminator;
+      *slot = discriminator;
+      if (!repeated)
+        runKey = nil;
+    }
     if (ready) {
       const QParams *first = ready.params.bytes;
       NSUInteger kind =
@@ -2709,10 +2836,37 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
       return;
     }
   }
-  CTFontRef f =
-      font ? CTFontCreateCopyWithAttributes(font, size, NULL, NULL) : NULL;
-  if (!f)
+  if (!font)
     return;
+  struct {
+    const void *font;
+    double size, scale;
+  } strikeKey = {font, size, scale};
+  QSmallKey strikeLookup = small_key(&strikeKey, sizeof(strikeKey));
+  CFArrayRef strike = small_get(r.strikes, &strikeLookup);
+  if (!strike) {
+    if (CFDictionaryGetCount(r.strikes) >= 64)
+      CFDictionaryRemoveAllValues(r.strikes);
+    CTFontRef sized = CTFontCreateCopyWithAttributes(font, size, NULL, NULL);
+    CTFontRef scaled =
+        sized ? CTFontCreateCopyWithAttributes(sized, size * scale, NULL, NULL)
+              : NULL;
+    if (scaled) {
+      // The array owns the font too: its address is never reused while it is
+      // part of a key.
+      const void *values[] = {font, sized, scaled};
+      strike = CFArrayCreate(NULL, values, 3, &kCFTypeArrayCallBacks);
+    }
+    if (sized)
+      CFRelease(sized);
+    if (scaled)
+      CFRelease(scaled);
+    if (!strike)
+      return;
+    small_set(r.strikes, &strikeLookup, strike);
+    CFAutorelease(strike);
+  }
+  CTFontRef f = CFArrayGetValueAtIndex(strike, 1);
   CFMutableDictionaryRef glyphsOfFont =
       (CFMutableDictionaryRef)CFDictionaryGetValue(r.glyphCache, f);
   if (!glyphsOfFont) {
@@ -2721,19 +2875,12 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     glyphsOfFont =
         CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
                                   &kCFTypeDictionaryValueCallBacks);
-    if (!glyphsOfFont) {
-      CFRelease(f);
+    if (!glyphsOfFont)
       return;
-    }
     CFDictionarySetValue(r.glyphCache, f, glyphsOfFont);
     CFRelease(glyphsOfFont);
   }
-  CTFontRef scaledFont =
-      CTFontCreateCopyWithAttributes(f, size * scale, NULL, NULL);
-  if (!scaledFont) {
-    CFRelease(f);
-    return;
-  }
+  CTFontRef scaledFont = CFArrayGetValueAtIndex(strike, 2);
   if (CFDictionaryGetCount(r.glyphImages) >= 32 ||
       r.glyphImageBytes >= 16 * 1024 * 1024) {
     flush_draws();
@@ -2797,10 +2944,9 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     r.preparedBytes += runKey.length + captured.params.length +
                        captured.edges.length + captured.images.length;
   }
-  qm_fill(surface, combined, 0, red, green, blue, alpha);
+  if (!CGPathIsEmpty(combined))
+    qm_fill(surface, combined, 0, red, green, blue, alpha);
   CGPathRelease(combined);
-  CFRelease(scaledFont);
-  CFRelease(f);
   UNLOCK
 }
 void qm_glyphs_options(void *surface, void *font, double size,
@@ -3407,6 +3553,8 @@ void qm_finish_context(uint64_t generation) {
     flush_batch();
   [r.buffers removeAllObjects];
   r.bufferBytes = 0;
+  r.arena = nil;
+  r.arenaCommands = nil;
   UNLOCK
 }
 
