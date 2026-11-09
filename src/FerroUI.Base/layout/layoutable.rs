@@ -215,7 +215,14 @@ impl LayoutableImpl for Layoutable {
         }
 
         let measured = this.measure_override(constrained_size);
-        let hold = if container_sizing == ContainerSizing::Normal { this.measure_hold_override(constrained_size) } else { None };
+        // Without a hold of its own an element holds at the constraint it got: an axis fixed by an
+        // explicit size (or equal limits) gives `measure_override` that constraint at every
+        // available size, so it holds there for all of them (section 9.15).
+        let hold = if container_sizing == ContainerSizing::Normal {
+            Some(this.measure_hold_override(constrained_size).unwrap_or_else(|| crate::layout::MeasureHold::exactly(constrained_size)))
+        } else {
+            None
+        };
 
         let mut width = MathUtilities::clamp(measured.width, min_max.min_width, min_max.max_width);
         let mut height = MathUtilities::clamp(measured.height, min_max.min_height, min_max.max_height);

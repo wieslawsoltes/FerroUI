@@ -3,7 +3,7 @@
 //! of a tree measured and arranged at the second width from nothing.
 
 use crate::test_support::test_scope;
-use crate::{Border, Decorator, StackPanel, TextBlock};
+use crate::{Border, ColumnDefinitions, Decorator, Grid, StackPanel, TextBlock, WrapPanel};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::media::{TextAlignment, TextWrapping};
 use ferroui_base::{Rect, Ref, Size, Thickness, Visual};
@@ -24,7 +24,7 @@ fn text(text: &str, wrapping: TextWrapping) -> Ref<TextBlock> {
 
 /// A card: a border with padding around a stack of wrapped text, a decorated label, an
 /// unwrapped label and a centered text (which holds nothing).
-fn tree(centered: bool) -> Ref<Border> {
+fn tree(centered: bool, with_halves: bool) -> Ref<Border> {
     let stack = StackPanel::new();
     stack.set_spacing(2.0);
     stack.children().add(&text(TEXTS[0], TextWrapping::Wrap));
@@ -36,6 +36,50 @@ fn tree(centered: bool) -> Ref<Border> {
     inner.set_border_thickness(Thickness::uniform(1.0));
     inner.set_child(&text(TEXTS[2], TextWrapping::Wrap));
     stack.children().add(&inner);
+    // A wrap panel of chips: bordered labels that do not wrap.
+    let chips = WrapPanel::new();
+    chips.set_item_spacing(3.0);
+    for label in ["#rust", "#layout", "#text", "#performance", "#ui", "#gpu-rendering"] {
+        let chip = Border::new();
+        chip.set_padding(Thickness::new(4.0, 1.0, 4.0, 1.0));
+        chip.set_child(&text(label, TextWrapping::NoWrap));
+        chips.children().add(&chip);
+    }
+    stack.children().add(&chips);
+    // A header grid "Auto,*": a fixed avatar and a stack of texts.
+    let header = Grid::new();
+    header.set_column_definitions(ColumnDefinitions::parse("Auto,*").expect("columns"));
+    header.set_column_spacing(6.0);
+    let avatar = Border::new();
+    avatar.set_width(20.0);
+    avatar.set_height(20.0);
+    header.children().add(&avatar);
+    let names = StackPanel::new();
+    names.children().add(&text("Ada Lovelace wrote the first program", TextWrapping::Wrap));
+    names.children().add(&text("@ada", TextWrapping::NoWrap));
+    Grid::set_column(&names, 1);
+    header.children().add(&names);
+    stack.children().add(&header);
+    // A progress row "*,Auto": a wrapped text and a label.
+    let progress = Grid::new();
+    progress.set_column_definitions(ColumnDefinitions::parse("*,Auto").expect("columns"));
+    progress.children().add(&text("Progress of the reprehenderit task", TextWrapping::Wrap));
+    let percent = text("42%", TextWrapping::NoWrap);
+    Grid::set_column(&percent, 1);
+    progress.children().add(&percent);
+    stack.children().add(&progress);
+    // Two star columns: no hold.
+    let halves = Grid::new();
+    halves.set_column_definitions(ColumnDefinitions::parse("*,*").expect("columns"));
+    halves.children().add(&text("Left half text", TextWrapping::Wrap));
+    let right = text("Right half text", TextWrapping::Wrap);
+    Grid::set_column(&right, 1);
+    halves.children().add(&right);
+    let halves_box = Border::new();
+    halves_box.set_child(&halves);
+    if with_halves {
+        stack.children().add(&halves_box);
+    }
     let last = text(TEXTS[3], TextWrapping::Wrap);
     if centered {
         last.set_text_alignment(TextAlignment::Center);
@@ -73,10 +117,10 @@ fn layout(root: &Border, width: f64) {
 fn a_tree_measured_inside_its_holds_lays_out_as_a_new_one() {
     let _scope = test_scope();
     let mut held = 0;
-    for centered in [false, true] {
+    for (centered, halves) in [(false, false), (true, false), (false, true)] {
         for start in (60..=420).step_by(30) {
             let start = f64::from(start);
-            let root = tree(centered);
+            let root = tree(centered, halves);
             layout(&root, start);
             let mut width = start - 40.0;
             while width < start + 40.0 {
@@ -85,9 +129,9 @@ fn a_tree_measured_inside_its_holds_lays_out_as_a_new_one() {
                         held += 1;
                     }
                     layout(&root, width);
-                    let fresh = tree(centered);
+                    let fresh = tree(centered, halves);
                     layout(&fresh, width);
-                    assert_eq!(sizes(&fresh), sizes(&root), "created at {start}, laid out again at {width}, centered {centered}");
+                    assert_eq!(sizes(&fresh), sizes(&root), "created at {start}, laid out again at {width}, centered {centered}, halves {halves}");
                 }
                 width += 0.25;
             }
@@ -97,12 +141,27 @@ fn a_tree_measured_inside_its_holds_lays_out_as_a_new_one() {
 }
 
 #[test]
-fn a_centered_text_holds_nothing_and_breaks_its_parents_hold() {
+fn a_centered_text_holds_only_its_width_and_so_do_its_parents() {
     let _scope = test_scope();
-    let root = tree(true);
+    let root = tree(true, false);
     layout(&root, 200.0);
-    assert!(root.measure_hold().is_none());
-    let root = tree(false);
+    let holds_other_width = |root: &Ref<Border>| root.measure_hold().is_some_and(|hold| hold.contains(Size::new(201.0, f64::INFINITY)));
+    assert!(!holds_other_width(&root));
+    // A card of holding parts holds (at most widths: with the whole-pixel advances of the test
+    // font a line can be exactly as wide as the width, where the hold keeps a margin).
+    let held = (60..400).step_by(7).filter(|width| {
+        let root = tree(false, false);
+        layout(&root, f64::from(*width));
+        root.measure_hold().is_some_and(|hold| hold.width.1 - hold.width.0 > 1.0)
+    });
+    assert!(held.count() > 20, "a card of holding parts holds");
+    let root = tree(false, true);
     layout(&root, 200.0);
-    assert!(root.measure_hold().is_some());
+    // The grid of two star columns holds only its width: so does the card.
+    assert!(!holds_other_width(&root));
+    let stack = root.child().expect("a child");
+    let header = stack.visual_children_snapshot().expect("children")[4].clone();
+    let header_hold = header.downcast_ref::<ferroui_base::layout::Layoutable>().expect("a layoutable").measure_hold();
+    assert!(header_hold.is_some_and(|hold| hold.width.1 - hold.width.0 > 1.0), "the header grid holds a range");
 }
+

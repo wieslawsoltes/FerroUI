@@ -30,6 +30,11 @@ impl MeasureHold {
         Self { width, height }
     }
 
+    /// `size` alone.
+    pub fn exactly(size: Size) -> Self {
+        Self { width: (size.width, size.width.next_up()), height: (size.height, size.height.next_up()) }
+    }
+
     /// Whether `size` is inside the hold. An infinite upper bound includes infinity: an element
     /// measured at an infinite size (a child of a stack along the stack) is inside its hold.
     pub fn contains(&self, size: Size) -> bool {
@@ -43,7 +48,11 @@ impl MeasureHold {
     pub fn intersect(self, other: MeasureHold) -> Option<MeasureHold> {
         let width = (self.width.0.max(other.width.0), self.width.1.min(other.width.1));
         let height = (self.height.0.max(other.height.0), self.height.1.min(other.height.1));
-        (width.0 < width.1 && height.0 < height.1).then_some(MeasureHold { width, height })
+        // An infinite upper bound includes infinity: `[inf, inf]` is the infinite size alone.
+        fn non_empty((low, high): (f64, f64)) -> bool {
+            low < high || (low == f64::INFINITY && high == f64::INFINITY)
+        }
+        (non_empty(width) && non_empty(height)).then_some(MeasureHold { width, height })
     }
 
     /// The hold moved by `width` and `height`: the hold of an element that gives its child its own
@@ -115,6 +124,12 @@ mod tests {
         assert_eq!(Some((40.0, 500.0)), map_axis((0.0, 500.0), 0.0, 100.0, f64::INFINITY, 40.0, 200.0));
         // A range the limits never reach.
         assert_eq!(None, map_axis((0.0, 50.0), 0.0, 100.0, f64::INFINITY, 40.0, 200.0));
+        // The exact constraint of an explicit size: every available size the size fits.
+        let exactly = MeasureHold::exactly(Size::new(80.0, 30.0));
+        assert_eq!(Some((80.0, f64::INFINITY)), map_axis(exactly.width, 0.0, 80.0, 80.0, 80.0, 500.0));
+        // Of a size that is not fixed: that size alone.
+        let mapped = map_axis(exactly.width, 0.0, 0.0, f64::INFINITY, 50.0, 80.0).expect("a range");
+        assert!(mapped.0 == 80.0 && mapped.1 == 80.0f64.next_up());
     }
 
     #[test]
@@ -125,5 +140,9 @@ mod tests {
         assert_eq!(None, a.intersect(MeasureHold::new((100.0, 200.0), MeasureHold::ANY.height)));
         assert_eq!(MeasureHold::new((5.0, 105.0), (12.0, 22.0)), a.inflate(5.0, 2.0));
         assert!(a.contains(Size::new(0.0, 10.0)) && !a.contains(Size::new(100.0, 10.0)));
+        // The infinite size alone is a hold of its own.
+        let infinite = MeasureHold::new(MeasureHold::ANY.width, (f64::INFINITY, f64::INFINITY));
+        assert_eq!(Some(infinite), infinite.intersect(MeasureHold::ANY));
+        assert!(infinite.contains(Size::new(5.0, f64::INFINITY)) && !infinite.contains(Size::new(5.0, 100.0)));
     }
 }
