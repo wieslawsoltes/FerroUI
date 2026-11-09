@@ -555,7 +555,12 @@ The script checks the base out, detached, in a git worktree of its own under the
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
 delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
 with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
-(default 3), and compares the medians of the rounds. Cargo runs through `FERROUI_CARGO` when it is
+(default 3), and compares the medians of the rounds. A metric over its tolerance by less than the
+spread of its own rounds on either side is not decided yet: one disturbed round can move a median
+of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
+only). The gate then measures another round of that suite, alternately again, until the change is
+larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
+the rounds. Cargo runs through `FERROUI_CARGO` when it is
 set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
 build starts during a measurement), else `cargo`. The logs of every build and run are kept under
 `<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something
@@ -598,8 +603,8 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
 | TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
 
-A regression the gate reports is confirmed with more rounds (`--rounds 5`) before it is acted on;
-a change that is meant to cost time says so in the pull request, with the table.
+A regression the gate reports after its extra rounds is a real one; a change that is meant to
+cost time says so in the pull request, with the table.
 
 ## 9. Deviations from upstream for frame cost
 

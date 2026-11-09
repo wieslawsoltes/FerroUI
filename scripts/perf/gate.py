@@ -12,7 +12,10 @@ worktree of its own under the scratch folder (default: `ferroui-gate-scratch` be
 checkout; reused between runs), and built there with a target folder of its own; the candidate is
 this checkout as it is, uncommitted changes included, built with another target folder. Both are
 built first, then measured alternately (base, candidate, base, candidate, ...) for `--rounds`
-rounds, so that both sides see the same machine. A metric is the median of its rounds.
+rounds, so that both sides see the same machine. A metric is the median of its rounds. When a
+metric is over its tolerance by less than the spread of its own rounds on either side (one
+disturbed round can move a median of three that far), the gate measures more rounds, alternately
+again, up to `--max-rounds`, before it decides.
 
 What is measured (see docs/porting/desktop-performance.md, section 8.1):
 
@@ -370,6 +373,16 @@ def compare(base: Side, candidate: Side, tolerance: float) -> list[Row]:
 HEADER = ("Metric", "Base", "Candidate", "Change", "Tolerance", "Verdict")
 
 
+def is_within_spread(base: Side, candidate: Side, key: str) -> bool:
+    """Whether the change of a metric's median is smaller than the spread of its rounds on either
+    side: then one disturbed round can account for it, and more rounds are needed to tell."""
+    b, c = base.values.get(key), candidate.values.get(key)
+    if not b or not c or len(b) < 2 or len(c) < 2:
+        return False
+    change = statistics.median(c) - statistics.median(b)
+    return change < max(max(b) - min(b), max(c) - min(c))
+
+
 def cells(row: Row) -> tuple[str, ...]:
     return (row.key, row.base, row.candidate, row.change, row.tolerance, row.verdict)
 
@@ -405,6 +418,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--base", help="the base commit (default: the merge-base of HEAD with origin/main)")
     parser.add_argument("--rounds", type=int, default=3, help="measured rounds per side (default 3)")
+    parser.add_argument(
+        "--max-rounds",
+        type=int,
+        default=9,
+        help="the rounds per side up to which a metric over its tolerance by less than the spread of its rounds is measured again (default 9)",
+    )
     parser.add_argument("--only", choices=["gauntlet", "tdg", "all"], default="all", help="what to measure (default all)")
     parser.add_argument("--tolerance", type=float, default=0.05, help="the allowed slowdown, as a fraction (default 0.05)")
     parser.add_argument("--tdg-filter", help="FERROUI_BENCH_FILTER of the TreeDataGrid run: parts of names, comma separated")
@@ -423,6 +442,8 @@ def main() -> int:
     options = parser.parse_args()
     if options.rounds < 1:
         parser.error("--rounds must be at least 1")
+    if options.max_rounds < options.rounds:
+        parser.error("--max-rounds must be at least --rounds")
 
     try:
         return gate(options)
@@ -486,10 +507,12 @@ def gate(options: argparse.Namespace) -> int:
         for side in (base, candidate):
             run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
 
-    for round_index in range(options.rounds):
-        for suite in suites:
+    suite_of: dict[str, str] = {}
+
+    def measure(round_index: int, measured: list[str], of: int) -> None:
+        for suite in measured:
             for side in (base, candidate):
-                print(f"round {round_index + 1} of {options.rounds}: {suite}, {side.name}", flush=True)
+                print(f"round {round_index + 1} of {of}: {suite}, {side.name}", flush=True)
                 log = logs / f"{suite}-{side.name}-{round_index + 1}.log"
                 output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
                 if suite == "gauntlet":
@@ -497,12 +520,27 @@ def gate(options: argparse.Namespace) -> int:
                     if not found:
                         raise GateError(f"[{side.name}] the frame gate printed no GATE line; the log is {log}")
                     record(side, found)
+                    suite_of.update((metric.key, suite) for metric, _ in found)
                 else:
                     found, failed = parse_tdg(output)
                     if not found and not failed:
                         raise GateError(f"[{side.name}] the TreeDataGrid run printed no result; the log is {log}")
                     record(side, found)
+                    suite_of.update((metric.key, suite) for metric, _ in found)
                     side.failed |= failed
+
+    for round_index in range(options.rounds):
+        measure(round_index, suites, options.rounds)
+
+    rounds = options.rounds
+    while rounds < options.max_rounds:
+        doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.regressed and is_within_spread(base, candidate, row.key)]
+        if not doubtful:
+            break
+        measured = [suite for suite in suites if any(suite_of.get(key) == suite for key in doubtful)]
+        print(f"over the tolerance by less than the spread of their rounds: {', '.join(doubtful)}; measuring another round", flush=True)
+        measure(rounds, measured, rounds + 1)
+        rounds += 1
 
     rows = compare(base, candidate, options.tolerance)
     regressions = [row for row in rows if row.regressed]
@@ -525,7 +563,9 @@ def gate(options: argparse.Namespace) -> int:
         lines = [
             "### Local performance gate",
             "",
-            f"Base `{base_sha[:10]}` ({base_ref}), candidate `{candidate_label}`; {options.rounds} rounds, ABAB, "
+            f"Base `{base_sha[:10]}` ({base_ref}), candidate `{candidate_label}`; {options.rounds} rounds"
+            + (f" (up to {rounds} where a metric was over its tolerance within the spread of its rounds)" if rounds > options.rounds else "")
+            + ", ABAB, "
             f"median of the rounds; tolerance {options.tolerance * 100:.0f} % times the factor of the metric "
             "(`scripts/perf/gate.py`). Frame gate: 1280 x 820 at a scaling of 2, raster Skia, render-thread mode. "
             f"TreeDataGrid: median time of an operation, {options.tdg_iterations} iterations of at least "
