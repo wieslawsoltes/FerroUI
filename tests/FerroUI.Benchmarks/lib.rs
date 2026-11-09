@@ -34,6 +34,7 @@ pub mod styling;
 pub mod text;
 pub mod themes;
 pub mod traversal;
+pub mod trees;
 pub mod utilities;
 pub mod visuals;
 
@@ -58,6 +59,7 @@ pub fn register(registry: &mut Registry) {
     text::register(registry);
     themes::register(registry);
     traversal::register(registry);
+    trees::register(registry);
     utilities::register(registry);
     visuals::register(registry);
 }

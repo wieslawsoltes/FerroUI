@@ -177,6 +177,7 @@ members = [
     "tests/FerroUI.RenderBackends.Comparison",
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
+    "tests/FerroUI.FrameBenchmarks",
     "tests/FerroUI.TreeDataGrid.Benchmarks",
     "tests/FerroUI.LeakTests",
     "tests/FerroUI.IntegrationTests.Appium",

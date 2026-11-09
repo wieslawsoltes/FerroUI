@@ -58,6 +58,18 @@ GATE_PACKAGE = "gauntlet-benchmark"
 GATE_SAMPLE = Path("samples/GauntletBenchmark")
 GATE_TEST = GATE_SAMPLE / "tests" / "frame_gate.rs"
 TDG_PACKAGE = "ferroui-treedatagrid-benchmarks"
+# FerroUI's own regression benchmarks, apart from the ports of other frameworks' benchmarks (the
+# gauntlet follows the Cranpose benchmark and is synced with it): the scenes of the frame
+# benchmarks, timed headless and in a desktop window, and the micro-benchmarks of the framework's
+# tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`).
+FRAMES_PACKAGE = "ferroui-frame-benchmarks"
+FRAMES_CRATE = Path("tests/FerroUI.FrameBenchmarks")
+FRAMES_BINARY = "frame-benchmarks"
+FRAMEWORK_PACKAGE = "ferroui-benchmarks"
+FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
+FRAMEWORK_FILTER = "trees::,layout::ElementConstructionBenchmark"
+# The scenes the window suite opens, and how long each runs.
+WINDOW_SCENES = ["text", "list", "transforms", "wall"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
@@ -70,7 +82,21 @@ SUITES = {
         "build": ["test", "-p", TDG_PACKAGE, "--release", "--lib", "--no-run"],
         "run": ["test", "-p", TDG_PACKAGE, "--release", "--lib", "run_benchmarks", "--", *TEST_ARGS],
     },
+    "frames": {
+        "build": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--no-run"],
+        "run": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--", *TEST_ARGS],
+    },
+    "framework": {
+        "build": ["test", "-p", FRAMEWORK_PACKAGE, "--release", "--lib", "--no-run"],
+        "run": ["test", "-p", FRAMEWORK_PACKAGE, "--release", "--lib", "run_benchmarks", "--", *TEST_ARGS],
+    },
+    # Not run through cargo: the binary is started once per scene (`run_window`).
+    "window": {
+        "build": ["build", "-p", FRAMES_PACKAGE, "--release", "--bin", FRAMES_BINARY],
+        "run": [],
+    },
 }
+ALL_SUITES = ["gauntlet", "frames", "framework", "tdg", "window"]
 
 # --- tolerances -----------------------------------------------------------------------------------
 #
@@ -90,6 +116,17 @@ SUITES = {
 
 FRAME_FACTORS = {"ui_ms_per_frame": 1.0, "render_ms_per_frame": 1.5, "wall_ms_per_frame": 1.0}
 FRAME_FLOOR_MS = 0.05
+# - The start of a scene (the frame benchmarks): its build and its show (first layout, recording
+#   and commit) are measured once a run, so a round has one sample of each: 1.5 for the parts, 1 for
+#   their sum.
+STARTUP_FACTORS = {"build_ms": 1.5, "show_ms": 1.5, "startup_ms": 1.0}
+STARTUP_FLOOR_MS = 0.5
+# - The window suite: a desktop process per scene on the GPU backend. Frame times move with the
+#   display and the compositor of the system (and stop at the display's rate), the first frame
+#   with the state of the disk and the shader caches: 2 for both.
+WINDOW_FACTOR = 2.0
+WINDOW_FRAME_FLOOR_MS = 0.5
+WINDOW_FIRST_FRAME_FLOOR_MS = 20.0
 TDG_FACTOR = 2.0
 TDG_SHORT_FACTOR = 3.0
 TDG_SHORT_NS = 100.0
@@ -138,6 +175,10 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
         for name, factor in FRAME_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, FRAME_FLOOR_MS)
+                found.append((metric, float(record[name])))
+        for name, factor in STARTUP_FACTORS.items():
+            if name in record:
+                metric = Metric(f"{bench} {name}", "ms", factor, STARTUP_FLOOR_MS)
                 found.append((metric, float(record[name])))
     return found
 
@@ -270,11 +311,12 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     return "".join(lines)
 
 
-def prepare_base(root: Path, scratch: Path, base: str, need_gate: bool, copy_gate: bool) -> tuple[Path, bool]:
+def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_gate: bool) -> tuple[Path, list[str]]:
     """Checks out `base`, detached, in the worktree of the scratch folder (created on first use),
-    and, when the frame gate is run (`need_gate`), copies the candidate's frame gate into it when
-    it has none or `copy_gate` asks for it. Returns the worktree and whether the gate was
-    copied."""
+    and copies into it the candidate's benchmark code the measured suites need when the base has
+    none of it or `copy_gate` asks for it: the frame gate of the gauntlet, the frame benchmarks,
+    the framework benchmarks (when the base has no `trees` category). Returns the worktree and the
+    folders copied."""
     worktree = scratch / "base"
     common = Path(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")).resolve()
     if worktree.exists():
@@ -290,23 +332,79 @@ def prepare_base(root: Path, scratch: Path, base: str, need_gate: bool, copy_gat
         # --force: the path may be registered from an earlier scratch folder that was deleted.
         git(root, "worktree", "add", "--force", "--detach", str(worktree), base)
 
-    has_gate = (worktree / GATE_TEST).is_file()
-    if not need_gate or (has_gate and not copy_gate):
-        return worktree, False
+    wanted: list[tuple[Path, bool]] = []
+    if "gauntlet" in suites:
+        wanted.append((GATE_SAMPLE, (worktree / GATE_TEST).is_file()))
+    if "frames" in suites or "window" in suites:
+        wanted.append((FRAMES_CRATE, (worktree / FRAMES_CRATE / "Cargo.toml").is_file()))
+    if "framework" in suites:
+        wanted.append((FRAMEWORK_CRATE, (worktree / FRAMEWORK_CRATE / "trees").is_dir()))
 
-    target = worktree / GATE_SAMPLE
-    if target.exists():
-        shutil.rmtree(target)
-    shutil.copytree(root / GATE_SAMPLE, target)
-    manifest = worktree / "Cargo.toml"
-    text = manifest.read_text(encoding="utf-8")
-    member = f'"{GATE_SAMPLE.as_posix()}"'
-    if member not in text:
-        text, count = re.subn(r"(?m)^members = \[\n", f"members = [\n    {member},\n", text, count=1)
-        if count != 1:
-            raise GateError(f"cannot add {GATE_SAMPLE} to the members of {manifest}")
-        manifest.write_text(text, encoding="utf-8")
-    return worktree, True
+    copied = []
+    for folder, present in wanted:
+        if present and not copy_gate:
+            continue
+        target = worktree / folder
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(root / folder, target)
+        manifest = worktree / "Cargo.toml"
+        text = manifest.read_text(encoding="utf-8")
+        member = f'"{folder.as_posix()}"'
+        if member not in text:
+            text, count = re.subn(r"(?m)^members = \[\n", f"members = [\n    {member},\n", text, count=1)
+            if count != 1:
+                raise GateError(f"cannot add {folder} to the members of {manifest}")
+            manifest.write_text(text, encoding="utf-8")
+        copied.append(folder.as_posix())
+    return worktree, copied
+
+
+def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) -> list[tuple[Metric, float]]:
+    """Opens `scene` in the desktop program of the frame benchmarks for `seconds` and returns its
+    first frame (the time from the start of the process to its first animation frame) and its time
+    a frame (from the median of its `PERF fps` lines after the first three)."""
+    import time
+
+    binary = side.target / "release" / FRAMES_BINARY
+    env = {**os.environ, "FRAMES_SCENE": scene, "PERF_REPORT": "1"}
+    env.setdefault("PERF_FONTS", str(side.root / "src/FerroUI.Themes.Material/Assets"))
+    print(f"[{side.name}] {binary.name} {scene} for {seconds:g} s", flush=True)
+    log.parent.mkdir(parents=True, exist_ok=True)
+    start = time.monotonic()
+    first_frame = None
+    rates = []
+    with open(log, "w", encoding="utf-8") as out:
+        process = subprocess.Popen([str(binary)], cwd=side.root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        assert process.stdout is not None
+        try:
+            os.set_blocking(process.stdout.fileno(), False)
+            buffer = ""
+            while time.monotonic() - start < seconds and process.poll() is None:
+                chunk = process.stdout.read()
+                if chunk:
+                    buffer += chunk
+                    *lines, buffer = buffer.split("\n")
+                    for line in lines:
+                        out.write(line + "\n")
+                        if echo:
+                            sys.stdout.write(f"  {line}\n")
+                        if line.startswith("PERF first_frame") and first_frame is None:
+                            first_frame = (time.monotonic() - start) * 1000.0
+                        elif line.startswith("PERF fps "):
+                            rates.append(float(line.split()[2]))
+                else:
+                    time.sleep(0.01)
+        finally:
+            process.kill()
+            process.wait()
+    if first_frame is None or len(rates) < 5:
+        raise GateError(f"[{side.name}] {scene} drew no frames in {seconds:g} s; the log is {log}")
+    rate = statistics.median(rates[3:])
+    return [
+        (Metric(f"window/{scene} ms_per_frame", "ms", WINDOW_FACTOR, WINDOW_FRAME_FLOOR_MS), 1000.0 / rate),
+        (Metric(f"window/{scene} first_frame_ms", "ms", WINDOW_FACTOR, WINDOW_FIRST_FRAME_FLOOR_MS), first_frame),
+    ]
 
 
 def record(side: Side, found: list[tuple[Metric, float]]) -> None:
@@ -424,7 +522,14 @@ def main() -> int:
         default=9,
         help="the rounds per side up to which a metric over its tolerance by less than the spread of its rounds is measured again (default 9)",
     )
-    parser.add_argument("--only", choices=["gauntlet", "tdg", "all"], default="all", help="what to measure (default all)")
+    parser.add_argument(
+        "--only",
+        default="all",
+        help="what to measure, comma separated: gauntlet, frames, framework, tdg, window, or all (default all)",
+    )
+    parser.add_argument("--framework-filter", default=FRAMEWORK_FILTER, help=f"FERROUI_BENCH_FILTER of the framework run (default {FRAMEWORK_FILTER})")
+    parser.add_argument("--window-seconds", type=float, default=12.0, help="how long the window suite runs each scene (default 12)")
+    parser.add_argument("--window-scenes", default=",".join(WINDOW_SCENES), help=f"the scenes of the window suite (default {','.join(WINDOW_SCENES)})")
     parser.add_argument("--tolerance", type=float, default=0.05, help="the allowed slowdown, as a fraction (default 0.05)")
     parser.add_argument("--tdg-filter", help="FERROUI_BENCH_FILTER of the TreeDataGrid run: parts of names, comma separated")
     parser.add_argument("--tdg-iterations", type=int, default=7, help="FERROUI_BENCH_ITERATIONS of the TreeDataGrid run (default 7)")
@@ -464,10 +569,22 @@ def gate(options: argparse.Namespace) -> int:
     head_sha = git(root, "rev-parse", "HEAD")
     dirty = bool(git(root, "status", "--porcelain", "--untracked-files=no"))
     candidate_label = head_sha[:10] + (" with uncommitted changes" if dirty else "")
-    suites = ["gauntlet", "tdg"] if options.only == "all" else [options.only]
+    suites = ALL_SUITES if options.only == "all" else [suite.strip() for suite in options.only.split(",") if suite.strip()]
+    unknown = [suite for suite in suites if suite not in SUITES]
+    if unknown:
+        raise GateError(f"unknown suites: {', '.join(unknown)} (known: {', '.join(ALL_SUITES)})")
+    window_scenes = [scene.strip() for scene in options.window_scenes.split(",") if scene.strip()]
 
+    bench_env = {
+        "FERROUI_BENCH_ITERATIONS": str(options.tdg_iterations),
+        "FERROUI_BENCH_WARMUP": str(options.tdg_warmup),
+        "FERROUI_BENCH_MIN_ITERATION_MS": str(options.tdg_min_iteration_ms),
+    }
     env = {
         "gauntlet": {},
+        "frames": {},
+        "framework": {**bench_env, "FERROUI_BENCH_FILTER": options.framework_filter},
+        "window": {},
         "tdg": {
             "FERROUI_BENCH_ITERATIONS": str(options.tdg_iterations),
             "FERROUI_BENCH_WARMUP": str(options.tdg_warmup),
@@ -476,10 +593,11 @@ def gate(options: argparse.Namespace) -> int:
     }
     if options.tdg_filter:
         env["tdg"]["FERROUI_BENCH_FILTER"] = options.tdg_filter
-    if options.frames is not None:
-        env["gauntlet"]["GATE_FRAMES"] = str(options.frames)
-    if options.warmup is not None:
-        env["gauntlet"]["GATE_WARMUP"] = str(options.warmup)
+    for suite in ("gauntlet", "frames"):
+        if options.frames is not None:
+            env[suite]["GATE_FRAMES"] = str(options.frames)
+        if options.warmup is not None:
+            env[suite]["GATE_WARMUP"] = str(options.warmup)
 
     print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {options.rounds} rounds of {', '.join(suites)}")
     print(f"scratch: {scratch}; cargo: {' '.join(cargo_command())}")
@@ -490,13 +608,16 @@ def gate(options: argparse.Namespace) -> int:
         for suite in suites:
             variables = " ".join(f"{name}={value}" for name, value in env[suite].items())
             print(f"build: {' '.join(cargo_command() + SUITES[suite]['build'])}")
-            print(f"run:   {variables + ' ' if variables else ''}{' '.join(cargo_command() + SUITES[suite]['run'])}")
+            if suite == "window":
+                print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
+            else:
+                print(f"run:   {variables + ' ' if variables else ''}{' '.join(cargo_command() + SUITES[suite]['run'])}")
         return 0
 
-    base_root, copied = prepare_base(root, scratch, base_sha, "gauntlet" in suites, options.copy_gate)
+    base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate)
     if copied:
-        reason = "--copy-gate" if options.copy_gate else "the base has no frame gate of its own"
-        print(f"note: {reason}: the candidate's {GATE_SAMPLE.as_posix()} was copied into the base worktree, so both sides run the same benchmark code")
+        reason = "--copy-gate" if options.copy_gate else "the base has no benchmark code of its own for them"
+        print(f"note: {reason}: the candidate's {', '.join(copied)} were copied into the base worktree, so both sides run the same benchmark code")
 
     base = Side("base", base_root, scratch / "target-base", f"{base_ref} ({base_sha[:10]})")
     candidate = Side("candidate", root, scratch / "target-candidate", candidate_label)
@@ -514,17 +635,24 @@ def gate(options: argparse.Namespace) -> int:
             for side in (base, candidate):
                 print(f"round {round_index + 1} of {of}: {suite}, {side.name}", flush=True)
                 log = logs / f"{suite}-{side.name}-{round_index + 1}.log"
+                if suite == "window":
+                    for scene in window_scenes:
+                        scene_log = logs / f"window-{scene.replace('+', '-')}-{side.name}-{round_index + 1}.log"
+                        found = run_window(side, scene, options.window_seconds, scene_log, options.verbose)
+                        record(side, found)
+                        suite_of.update((metric.key, suite) for metric, _ in found)
+                    continue
                 output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
-                if suite == "gauntlet":
+                if suite in ("gauntlet", "frames"):
                     found = parse_gate(output)
                     if not found:
-                        raise GateError(f"[{side.name}] the frame gate printed no GATE line; the log is {log}")
+                        raise GateError(f"[{side.name}] the {suite} run printed no GATE line; the log is {log}")
                     record(side, found)
                     suite_of.update((metric.key, suite) for metric, _ in found)
                 else:
                     found, failed = parse_tdg(output)
                     if not found and not failed:
-                        raise GateError(f"[{side.name}] the TreeDataGrid run printed no result; the log is {log}")
+                        raise GateError(f"[{side.name}] the {suite} run printed no result; the log is {log}")
                     record(side, found)
                     suite_of.update((metric.key, suite) for metric, _ in found)
                     side.failed |= failed
@@ -559,7 +687,7 @@ def gate(options: argparse.Namespace) -> int:
         machine = f"{platform.system()} {platform.machine()}, Python {platform.python_version()}"
         notes = []
         if copied:
-            notes.append(f"The candidate's `{GATE_SAMPLE.as_posix()}` was copied into the base, so both sides run the same frame gate.")
+            notes.append(f"The candidate's {', '.join(f'`{folder}`' for folder in copied)} were copied into the base, so both sides run the same benchmark code.")
         lines = [
             "### Local performance gate",
             "",

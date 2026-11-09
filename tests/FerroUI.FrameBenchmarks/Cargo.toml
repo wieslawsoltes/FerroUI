@@ -1,0 +1,53 @@
+[package]
+name = "ferroui-frame-benchmarks"
+description = "FerroUI's frame benchmarks of the local performance gate: scenes that each do one kind of per-frame work, timed headless and in a desktop window"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+test = false
+doctest = false
+
+[[bin]]
+name = "frame-benchmarks"
+path = "program.rs"
+test = false
+
+# The scenes in a headless window, timed frame by frame (ignored by default; see `lib.rs`).
+[[test]]
+name = "frames"
+path = "tests/frames.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
+url = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-skia = { workspace = true }
+ferroui-harfbuzz = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, optional = true }
+
+[features]
+default = ["skia"]
+skia = ["ferroui-desktop/skia"]
+quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
+quartz-metal = ["quartz", "ferroui-desktop/quartz-metal"]
+# The framework's work counters: `--features counters` prints them per frame.
+counters = ["ferroui-base/perf-counters"]
