@@ -51,6 +51,8 @@ pub struct Layoutable {
     is_arrange_valid: Cell<bool>,
     measuring: Cell<bool>,
     previous_measure: Cell<Option<Size>>,
+    /// The available sizes over which the last measure holds (section 9.15).
+    measure_hold: Cell<Option<crate::layout::MeasureHold>>,
     previous_arrange: Cell<Option<Rect>>,
     is_attaching_to_visual_tree: Cell<bool>,
     effective_viewport_changed: HandlerList<dyn Fn(&EffectiveViewportChangedEventArgs)>,
@@ -72,6 +74,11 @@ ferro_class! {
         /// Measures the control and its child elements as part of a layout
         /// pass. Returns the size the control would like to be.
         fn measure_override(this, available_size: Size) -> Size;
+        /// The range of constraints, around the one `measure_override` was just given, over which
+        /// it returns the same size and leaves the descendants as they are, or `None` (the
+        /// default) when only that constraint is known to. An addition (desktop-performance.md
+        /// section 9.15): an element is not measured again at an available size inside the hold.
+        fn measure_hold_override(this, constraint: Size) -> Option<crate::layout::MeasureHold>;
         /// The default implementation of the control's arrange pass.
         ///
         /// This calculates the final bounds taking into account the control's
@@ -208,6 +215,7 @@ impl LayoutableImpl for Layoutable {
         }
 
         let measured = this.measure_override(constrained_size);
+        let hold = if container_sizing == ContainerSizing::Normal { this.measure_hold_override(constrained_size) } else { None };
 
         let mut width = MathUtilities::clamp(measured.width, min_max.min_width, min_max.max_width);
         let mut height = MathUtilities::clamp(measured.height, min_max.min_height, min_max.max_height);
@@ -236,6 +244,18 @@ impl LayoutableImpl for Layoutable {
         width += margin.left + margin.right;
         height += margin.top + margin.bottom;
 
+        // The hold of the constraint, in the space of the available size (section 9.15).
+        if let Some(hold) = hold {
+            let valid = min_max.min_width <= min_max.max_width && min_max.min_height <= min_max.max_height;
+            let width_range = crate::layout::measure_hold::map_axis(
+                hold.width, margin.left + margin.right, min_max.min_width, min_max.max_width, width, available_size.width);
+            let height_range = crate::layout::measure_hold::map_axis(
+                hold.height, margin.top + margin.bottom, min_max.min_height, min_max.max_height, height, available_size.height);
+            if let (true, Some(width_range), Some(height_range)) = (valid, width_range, height_range) {
+                this.measure_hold.set(Some(crate::layout::MeasureHold::new(width_range, height_range)));
+            }
+        }
+
         if width > available_size.width {
             width = available_size.width;
         }
@@ -250,6 +270,10 @@ impl LayoutableImpl for Layoutable {
         }
 
         Size::new(width, height)
+    }
+
+    fn measure_hold_override(_this: &Self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
+        None
     }
 
     fn measure_override(this: &Self, available_size: Size) -> Size {
@@ -501,6 +525,7 @@ impl Layoutable {
             is_arrange_valid: Cell::new(false),
             measuring: Cell::new(false),
             previous_measure: Cell::new(None),
+            measure_hold: Cell::new(None),
             previous_arrange: Cell::new(None),
             is_attaching_to_visual_tree: Cell::new(false),
             effective_viewport_changed: HandlerList::new(),
@@ -746,8 +771,18 @@ impl Layoutable {
             panic!("Cannot call Measure using a size with NaN values.");
         }
 
+        if self.is_measure_valid.get()
+            && self.previous_measure.get().is_some()
+            && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size))
+        {
+            // The measure holds at this size (section 9.15): nothing to do.
+            self.previous_measure.set(Some(available_size));
+            return;
+        }
+
         if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
             let previous_desired_size = self.desired_size();
+            self.measure_hold.set(None);
             crate::perf_count!(MeasuresExecuted);
 
             self.is_measure_valid.set(true);
@@ -772,6 +807,13 @@ impl Layoutable {
                 }
             }
         }
+    }
+
+    /// The available sizes over which the last measure of the element holds, if any (section
+    /// 9.15 of desktop-performance.md): a panel whose children's constraints follow its own reads
+    /// its children's holds to compute its own.
+    pub fn measure_hold(&self) -> Option<crate::layout::MeasureHold> {
+        if self.is_measure_valid.get() { self.measure_hold.get() } else { None }
     }
 
     /// Arranges the control and its children.

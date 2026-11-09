@@ -21,6 +21,11 @@ ferro_impl_classes!(Decorator: StyledElementImpl, VisualImpl, InteractiveImpl, I
 ferroui_base::ferro_impl_classes!(Decorator: FerroObjectImpl);
 
 impl LayoutableImpl for Decorator {
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        let child = this.child();
+        LayoutHelper::measure_hold_with_border(child.as_deref().map(|c| -> &Layoutable { c }), this.padding(), Thickness::default())
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let child = this.child();
         LayoutHelper::measure_child(child.as_deref().map(|c| -> &Layoutable { c }), available_size, this.padding())
