@@ -542,3 +542,18 @@ fn virtual_members_can_be_overridden() {
 
     assert_eq!(application.initialized.get(), 1);
 }
+
+#[test]
+fn type_key_lookups_follow_changes_of_the_application_resources() {
+    // The application keeps the results of its type-key lookups (control themes): a lookup that
+    // found nothing must find what is added later, and stop finding what is removed.
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let application = Application::current().expect("the application");
+    let key = ResourceKey::Type(crate::StackPanel::TYPE);
+    assert!(application.try_get_resource(&key, None).is_none());
+    let value: ferroui_base::BoxedValue = std::rc::Rc::new(42_i32);
+    application.resources().add_value(key.clone(), value);
+    assert!(application.try_get_resource(&key, None).flatten().is_some(), "the added resource");
+    application.resources().remove(&key);
+    assert!(application.try_get_resource(&key, None).is_none());
+}

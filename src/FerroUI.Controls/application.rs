@@ -27,6 +27,7 @@ use ferroui_base::{
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
 /// Encapsulates a FerroUI application.
@@ -493,6 +494,14 @@ struct ApplicationHost {
     styles_removed: HandlerList<GlobalStylesHandler>,
     resources_changed: HandlerList<dyn Fn(&ResourcesChangedEventArgs)>,
     actual_theme_variant_changed: HandlerList<dyn Fn()>,
+    /// The results of the lookups of type keys (control themes) in the application's resources
+    /// and styles, by type and theme variant: the last resources every element of a tree looks
+    /// a control theme up in, and most types have none (an element's lookup walked the whole of
+    /// the theme's styles to find nothing). Cleared whenever the resources or the styles change:
+    /// every change of a dictionary or a style the application owns reaches it through
+    /// `notify_hosted_resources_changed`. An addition (FerroUI deviation, desktop-performance.md
+    /// section 9.21).
+    type_lookups: RefCell<HashMap<usize, Vec<(Option<ThemeVariant>, Option<ResourceValue>)>>>,
 }
 
 impl ApplicationHost {
@@ -507,6 +516,7 @@ impl ApplicationHost {
             styles_removed: HandlerList::new(),
             resources_changed: HandlerList::new(),
             actual_theme_variant_changed: HandlerList::new(),
+            type_lookups: RefCell::new(HashMap::new()),
         })
     }
 
@@ -539,7 +549,9 @@ impl ApplicationHost {
             old.remove_owner(&this);
         }
         *self.resources.borrow_mut() = Some(value.clone());
+        self.type_lookups.borrow_mut().clear();
         value.add_owner(&this);
+        self.type_lookups.borrow_mut().clear();
     }
 
     fn has_resources(&self) -> bool {
@@ -548,6 +560,26 @@ impl ApplicationHost {
     }
 
     fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+        let ResourceKey::Type(info) = key else {
+            return self.find_resource(key, theme);
+        };
+        let id = *info as *const ferroui_base::TypeInfo as usize;
+        let known = self
+            .type_lookups
+            .borrow()
+            .get(&id)
+            .and_then(|results| results.iter().find(|(variant, _)| variant.as_ref() == theme).map(|(_, found)| found.clone()));
+        if let Some(found) = known {
+            return found;
+        }
+        // Not borrowed while looking: a lookup may load a style include, which notifies.
+        let found = self.find_resource(key, theme);
+        self.type_lookups.borrow_mut().entry(id).or_default().push((theme.cloned(), found.clone()));
+        found
+    }
+
+    /// Looks `key` up in the resources, then in the styles.
+    fn find_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         let resources = self.resources.borrow().clone();
         if let Some(resources) = resources {
             if let Some(value) = resources.try_get_resource(key, theme) {
@@ -601,6 +633,7 @@ impl IResourceHost for ApplicationHost {
     }
 
     fn notify_hosted_resources_changed(&self, e: ResourcesChangedEventArgs) {
+        self.type_lookups.borrow_mut().clear();
         for (_, handler) in self.resources_changed.snapshot().iter() {
             handler(&e);
         }
