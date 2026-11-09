@@ -92,8 +92,10 @@ pub(crate) struct ValueStore {
     is_evaluating: Cell<u32>,
     frame_generation: Cell<u32>,
     styling: Cell<u32>,
-    /// A reevaluation was deferred, or a frame inserted, during styling.
-    /// Only dirty outermost batches flush. Adapted from PR #668, accb89c55.
+    /// Set while a styling batch is open (`styling > 0`) when a reevaluation was
+    /// put off or a frame was inserted. The end of the outermost batch
+    /// reevaluates the store only when this is set, and clears it: a batch that
+    /// changed nothing leaves the effective values as they are.
     reevaluation_pending: Cell<bool>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.

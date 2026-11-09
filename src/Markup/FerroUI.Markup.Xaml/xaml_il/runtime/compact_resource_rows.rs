@@ -63,6 +63,13 @@ mod indexed {
                 },
             }
         }
+
+        fn release(&self, index: usize) {
+            // The dictionary holds the value of the row: its capture is not needed again. The
+            // slot stays, so the other rows keep their indices. Dropped after the borrow ends.
+            let released = self.contexts.borrow_mut()[index].take();
+            drop(released);
+        }
     }
 
     pub(in super::super) fn add_rows<R: Row>(

@@ -244,6 +244,13 @@ jobs:
             --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
             --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
 
+      # The workspace run above builds ferroui-markup-xaml with `hot-reload` and `source-overlays`
+      # on (ferroui-hot-reload and ferroui-designer ask for them, and features unify), and both
+      # switch the indexed resource groups of compiled dictionaries off. The crate on its own is
+      # built as an application builds it, so these are the tests of that path.
+      - name: Test the compiled resource groups (ferroui-markup-xaml on its own)
+        run: xvfb-run -a cargo test --locked -p ferroui-markup-xaml --lib
+
       - name: Test the detachable FerroBoard component
         env:
           CARGO_BUILD_JOBS: 1

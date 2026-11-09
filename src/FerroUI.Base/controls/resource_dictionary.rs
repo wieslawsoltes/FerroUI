@@ -74,6 +74,61 @@ fn deferred_source_destruction_can_reenter_dictionary_after_realization() {
     }
 }
 
+#[cfg(test)]
+#[test]
+fn indexed_group_is_told_of_a_realized_row_and_not_of_a_failed_build() {
+    use super::{DeferredContentFailed, IDeferredResourceGroup};
+    use std::cell::Cell;
+    #[derive(Default)]
+    struct Source {
+        fail: Cell<bool>,
+        builds: Cell<usize>,
+        released: RefCell<Vec<usize>>,
+    }
+    impl IDeferredResourceGroup for Source {
+        fn try_build(&self, index: usize, _: Option<&Rc<dyn IServiceProvider>>) -> Result<Option<BoxedValue>, DeferredContentFailed> {
+            self.builds.set(self.builds.get() + 1);
+            if self.fail.get() {
+                return Err(DeferredContentFailed);
+            }
+            Ok(Some(Rc::new(index as i32)))
+        }
+        fn release(&self, index: usize) {
+            self.released.borrow_mut().push(index);
+        }
+    }
+    // A development build with hot reload keeps every row buildable: a reload can restore a
+    // saved deferred entry.
+    let told = |rows: &[usize]| if cfg!(all(debug_assertions, feature = "hot-reload")) { Vec::new() } else { rows.to_vec() };
+    let dictionary = ResourceDictionary::new();
+    let source = Rc::new(Source::default());
+    let group = DeferredResourceGroup::new(source.clone());
+    for (index, key) in ["First", "Second", "Third"].into_iter().enumerate() {
+        dictionary.add_indexed_deferred(ResourceKey::from(key), group.clone(), index);
+    }
+    drop(group);
+
+    source.fail.set(true);
+    assert!(dictionary.try_get_value(&ResourceKey::from("Second")).is_none());
+    assert!(dictionary.contains_deferred_key(&ResourceKey::from("Second")));
+    assert!(source.released.borrow().is_empty());
+
+    source.fail.set(false);
+    let value = dictionary.try_get_value(&ResourceKey::from("Second")).unwrap().unwrap();
+    assert_eq!(*value.downcast_ref::<i32>().unwrap(), 1);
+    assert_eq!(*source.released.borrow(), told(&[1]));
+    // The value is cached: the row is neither built nor released again.
+    assert!(Rc::ptr_eq(&value, &dictionary.try_get_value(&ResourceKey::from("Second")).unwrap().unwrap()));
+    assert_eq!(source.builds.get(), 2);
+    assert_eq!(*source.released.borrow(), told(&[1]));
+
+    // The other rows keep their indices.
+    assert!(dictionary.contains_deferred_key(&ResourceKey::from("First")));
+    let third = dictionary.try_get_value(&ResourceKey::from("Third")).unwrap().unwrap();
+    assert_eq!(*third.downcast_ref::<i32>().unwrap(), 2);
+    assert_eq!(*source.released.borrow(), told(&[1, 2]));
+}
+
 struct DeferredItem<F: Fn(Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue>>(F);
 
 impl<F: Fn(Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue>> IDeferredContent for DeferredItem<F> {
@@ -555,6 +610,13 @@ impl ResourceDictionary {
         };
         if shared {
             self.inner.borrow_mut().insert(key.clone(), ResourceItem::Value(value.clone()));
+            // The entry holds the value now: the group can let go of what it kept for this row.
+            // A development reload can restore a saved deferred entry, so the row stays
+            // buildable there.
+            #[cfg(not(all(debug_assertions, feature = "hot-reload")))]
+            if let ResourceItem::IndexedDeferred(group, index) = &item {
+                group.0.release(*index);
+            }
         }
         Some(value)
     }

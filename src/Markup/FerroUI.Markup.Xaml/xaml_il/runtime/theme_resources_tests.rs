@@ -122,6 +122,41 @@ fn compiled_rows_release_owned_plain_roots_per_resource_in_mixed_groups() {
     assert_eq!(brush_color(&resource(&dictionary, "Middle")), Color::from_uint32(0xFF00_0000));
 }
 
+#[cfg(not(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions))))]
+#[test]
+fn compiled_rows_release_the_capture_of_a_realized_row_and_keep_the_other_indices() {
+    #[derive(PartialEq)]
+    struct Model;
+    static ROWS: &[LiteralBrushRow] = &[
+        LiteralBrushRow { key: "First", color: ACCENT, namespaces: None, line: 1, position: 2 },
+        LiteralBrushRow { key: "Second", color: 0xFF00_0000, namespaces: None, line: 2, position: 2 },
+        LiteralBrushRow { key: "Third", color: 0xFFFF_FFFF, namespaces: None, line: 3, position: 2 },
+    ];
+    crate::register_types();
+    ValueTypes::register_reference::<Model>();
+    let dictionary = ResourceDictionary::new();
+    // A model root is captured weakly by each row: its weak count shows the captures.
+    let root: BoxedValue = Rc::new(Model);
+    let context = populate_context(None, &DOCUMENT, Some(root.clone()));
+    context.set_intermediate_root_object(None);
+    context.push_parent(to_value(dictionary.clone()));
+    let before = Rc::weak_count(&root);
+    add_literal_brushes(&dictionary, &context, &DOCUMENT, ROWS).unwrap();
+    assert_eq!(Rc::weak_count(&root), before + 3);
+
+    assert_eq!(brush_color(&resource(&dictionary, "Second")), Color::from_uint32(0xFF00_0000));
+    assert_eq!(Rc::weak_count(&root), before + 2);
+    // A second lookup returns the cached value and releases nothing more.
+    assert_eq!(brush_color(&resource(&dictionary, "Second")), Color::from_uint32(0xFF00_0000));
+    assert_eq!(Rc::weak_count(&root), before + 2);
+
+    // The rows on both sides of the released one are still deferred and build their own row.
+    assert!(deferred(&dictionary, "First") && deferred(&dictionary, "Third"));
+    assert_eq!(brush_color(&resource(&dictionary, "Third")), Color::from_uint32(0xFFFF_FFFF));
+    assert_eq!(brush_color(&resource(&dictionary, "First")), Color::from_uint32(ACCENT));
+    assert_eq!(Rc::weak_count(&root), before);
+}
+
 #[test]
 fn compiled_rows_are_lazy_shared_per_dictionary_and_do_not_keep_owners_alive() {
     static ROWS: &[LiteralBrushRow] = &[

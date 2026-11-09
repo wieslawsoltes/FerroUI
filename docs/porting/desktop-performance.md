@@ -548,6 +548,7 @@ python3 scripts/perf/gate.py                                   # base: merge-bas
 python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
 
@@ -568,6 +569,24 @@ did or a benchmark failed on the candidate, 2 when a build or a run failed.
 
 What it measures:
 
+- **The counter checks** (suite `counters`): unit tests that assert exact numbers of units of
+  work, read from the performance counters of `ferroui-base`
+  (`diagnostics::perf_counters`). The counters compile to nothing without the feature
+  `perf-counters`, so the workspace test run of CI builds these tests with their counts switched
+  off (`assert_count` asserts only when the counters are compiled in) and checks the behaviour
+  alone; the gate builds and runs them with the feature on. The list is `COUNTER_CHECKS` in
+  `gate.py` (package, features, test filter); today the style work tests of the property store
+  (`src/FerroUI.Base/tests/property_store/style_work_tests.rs`, section 9.25). Alone:
+
+  ```sh
+  cargo test -p ferroui-base --features perf-counters --lib style_work
+  ```
+
+  The checks are deterministic: they run once, on the candidate only, before the measured
+  suites, need no base and no quiet machine, and have no tolerance. A test that fails, a run that
+  fails or a filter that selects no test is a row `FAILED` in the table and exit status 1; a
+  build that fails is exit status 2. A change that adds a counter-asserting test adds its filter
+  to `COUNTER_CHECKS`.
 - **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
   and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
   the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
@@ -952,3 +971,67 @@ clip, a clip under a rotation or a skew, a region of several rectangles and any 
 clip with a mask as before; the mask is drawn through the analytic clips in effect and takes them
 in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
 still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.
+
+### 9.25 A styling batch that changed nothing does not reevaluate; compiled resource rows share one deferred group
+
+Two changes to what applying styles and loading a compiled dictionary cost.
+
+**Styling batches.** Upstream's `ValueStore.EndStyling` reevaluates every effective value of the
+store when the outermost batch ends, whatever the batch did. An element opens a batch when its
+styles are applied, when its styles or its control theme are invalidated and when styles are
+detached from it, and many of these batches change nothing: no style or theme matches the
+element, or it holds no frame of the kind that is removed (an invalidation that recurses over a
+tree). The reevaluation of such a batch visits every effective value and every entry of every
+frame of the element to arrive at the values it started from.
+`ValueStore` now keeps a flag (`reevaluation_pending`, `property_store/value_store.rs`), set
+while a batch is open by the three things that can change an effective value during it: a frame
+inserted (`insert_frame`), and a reevaluation of one property or of the store put off because the
+batch is open (a frame removed, a binding of a frame that produced a value, a style whose
+activator changed). `end_styling` of the outermost batch reevaluates when the flag is set, and
+clears it. The values and the notifications of a batch that changed something are
+upstream's; a batch that changed nothing raises nothing, as before, and now does no work.
+
+Tests: `style_work_tests.rs` (a clean batch completes one pass with no reevaluation and leaves
+the generation of the values as it was; a frame added in a nested batch, a frame removed, a
+binding update and a style activation during a batch are applied at the end of the outermost
+one). The counts are asserted with `perf-counters` on, by the counter checks of the local gate
+(section 8.1): `StylingPassesCompleted`, `FullValueReevaluations`, `SingleValueReevaluations`,
+`ReevaluatedEffectiveValues`, `ReevaluatedFrameEntries`. `scripts/perf/style-work.py` runs the
+probe of the same file (`style_work_probe`) from two builds in alternation.
+
+**Compiled resource rows.** Upstream's generated code gives every deferred resource of a
+dictionary a deferred content of its own (`XamlIlRuntimeHelpers.DeferredTransformationFactoryV3`):
+an object holding the builder, the resource nodes above the declaration, the root object and the
+name scope, added with `ResourceDictionary.AddDeferred`. The rows of a compiled dictionary that
+are built on first use (the brushes with a literal, static or dynamic colour and the
+`{StaticResource}` aliases of a row table, [xaml-themes.md](../xaml-themes.md), section 2.2) did
+the same, one allocation a row at load, for rows of which an application reads a fraction. A
+table is now one group (`IDeferredResourceGroup`, `controls/i_deferred_content.rs`) that holds
+the static rows and one capture a row in a vector, and each row's dictionary entry is the group
+and the index of the row (`ResourceDictionary::add_indexed_deferred`, the item
+`IndexedDeferred`), the size of an entry with deferred content. A lookup builds the row through
+the group with the capture of that row, keeps the value in the entry as for any deferred
+resource, and tells the group to drop the capture (`IDeferredResourceGroup::release`); a build
+that fails keeps the entry and the capture, and the next lookup builds again.
+
+What is kept of the per-row form, because the difference would be observable:
+
+- The capture of each row is taken immediately before the row is added, as upstream's is: a
+  handler of the dictionary's change notification can change the parents between two rows.
+- A row whose capture owns a value (a root object or a parent that is a plain value, which
+  `WeakValue` holds by value) is added as ordinary deferred content, so that value is released
+  when that resource is built, not when the last row of the group is.
+- A development build with hot reload, and a build with source overlays (the designer), keep
+  deferred content for every row, with its reload hooks. A reload can also put a saved deferred
+  entry back in place of a built value, so the dictionary does not call `release` in a
+  development build with hot reload.
+
+Tests: `theme_resources_tests.rs` (the rows are lazy, shared per dictionary and do not keep
+their owners alive; each declaration is captured after reentrant notifications; a mixed group
+releases an owned root per resource; a realized row releases its capture and the rows around it
+keep their indices) and `resource_dictionary.rs` (the group is told of a realized row and not of
+a failed build; the destruction of a source can reenter the dictionary). The workspace test run
+builds `ferroui-markup-xaml` with hot reload and source overlays on, so CI runs the library
+tests of the crate on its own as well. `tests/FerroUI.ResourceBenchmarks` with
+`scripts/perf/resource-descriptors.py` measures the load and the allocations of the two forms
+from two builds.
