@@ -938,3 +938,23 @@ clip, a clip under a rotation or a skew, a region of several rectangles and any 
 clip with a mask as before; the mask is drawn through the analytic clips in effect and takes them
 in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
 still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.
+
+### 9.20 The native renderer keeps glyph shapes and draws rounded boxes as boxes
+
+A glyph run of the native renderer asked Core Text for the ink bounds and the outline of every
+glyph it held, each through a copy of the font at the run's size (`CTFontCreateCopyWithAttributes`),
+and built the outline of the whole run when it was created. Text that changes every frame creates
+its runs every frame (the line metrics of a text layout come from its runs): on the gauntlet that
+was 80% of the user interface thread. The font now keeps the bounds and the outline of each glyph
+at each size and simulation (`GlyphShapes`, at most 16,384 a font), and a run builds its outline
+only when it is asked for one (its geometry, its intersections with an underline, drawing it as
+outlines); drawing it through native glyphs never asks.
+
+An axis-aligned rounded rectangle without a shadow or a mask clip was a path: its curves flattened
+to a quarter of a pixel, its edges prepared and a coverage image looked up or rasterized at every
+position. It is now a box, as a rectangle is: the shaders test the same four samples a pixel
+against the box and its elliptical corners (`box_coverage` in `shaders.metal`). A sample within the
+flattening tolerance of a corner may land on the other side of it than with the path; the box is
+the exact one. Aliased rounded rectangles stay paths. Tests: the renderer's tests, a parity test of
+rounded boxes against their paths, clipped and transformed. Window, frames a second, gauntlet
+(tier 16): 3.7 to 5.1 (rounded boxes 3.7 to 4.0, glyph shapes 3.85 to 5.1).
