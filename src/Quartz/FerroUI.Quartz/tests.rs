@@ -470,7 +470,7 @@ fn variable_fonts_simulations_family_faces_and_underline_ink_are_available() {
     };
     let light = glyph(light);
     let heavy = glyph(heavy);
-    let area = |g: &GlyphRun| g.outlines.area().abs();
+    let area = |g: &GlyphRun| g.outlines().area().abs();
     assert!(area(&heavy) > area(&light) * 1.3);
     let regular = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/Inter-Regular.ttf");
     let normal = glyph(
@@ -620,7 +620,7 @@ fn system_font_descriptors_preserve_all_standard_weights_in_the_ui_family() {
             &[GlyphInfo::with_offset(id, 0, 40., Vector::new(0., 0.))],
             Point::new(0., 40.),
         );
-        let area = run.outlines.area().abs();
+        let area = run.outlines().area().abs();
         assert!(
             area > previous + 1.,
             "Weight {weight} did not increase ink: {previous} -> {area}"
