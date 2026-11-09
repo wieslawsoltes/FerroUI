@@ -443,17 +443,24 @@ impl DrawingContextImpl {
 
     /// Configures the paint that draws a box shadow and returns it with the
     /// clip operation that keeps the shadow outside (or inside) the box.
+    ///
+    /// The blur is a mask filter on the shadow's shape, not an image filter
+    /// (a deviation, docs/porting/desktop-performance.md section 9.11): the
+    /// same Gaussian of the shape's coverage, without a layer per shadow, and
+    /// Skia draws a blurred rounded rectangle from a cached nine-patch on the
+    /// CPU and with an analytic shader on the GPU.
     fn create_box_shadow_filter(mut paint: sk::Paint, shadow: &BoxShadow, opacity: f64) -> (sk::Paint, sk::ClipOp) {
         let ac = shadow.color;
 
         let sigma = Self::sk_blur_radius_to_sigma(shadow.blur);
-        let filter = sk::image_filters::blur((sigma, sigma), None, None, None);
         let color = sk::Color::from_argb((ac.a as f64 * opacity) as u8, ac.r, ac.g, ac.b);
 
         paint.reset();
         paint.set_anti_alias(true);
         paint.set_color(color);
-        paint.set_image_filter(filter);
+        if sigma > 0.0 {
+            paint.set_mask_filter(sk::MaskFilter::blur(sk::BlurStyle::Normal, sigma, true));
+        }
 
         let clip_operation = if shadow.is_inset { sk::ClipOp::Intersect } else { sk::ClipOp::Difference };
 
