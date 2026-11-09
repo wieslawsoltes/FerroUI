@@ -417,6 +417,7 @@ dependencies = [
  "ferroui-metal",
  "ferroui-opengl",
  "ferroui-vulkan",
+ "skia-bindings",
  "skia-safe",
 ]
 
