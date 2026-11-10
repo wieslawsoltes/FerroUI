@@ -2,6 +2,7 @@
 
 use crate::harness::Registry;
 
+pub mod bidi_scaling_benchmark;
 pub mod codepoint_benchmark;
 pub mod glyph_bounds_benchmark;
 pub mod huge_text_layout;
@@ -21,6 +22,7 @@ mod random;
 pub fn register(registry: &mut Registry) {
     text_run_cache_benchmark::register(registry);
     unicode_segmentation_scaling_benchmark::register(registry);
+    bidi_scaling_benchmark::register(registry);
     unicode_break_enumerator_benchmark::register(registry);
     huge_text_layout::register(registry);
     shaped_buffer_ops::register(registry);
