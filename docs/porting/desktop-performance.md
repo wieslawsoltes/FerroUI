@@ -1559,3 +1559,22 @@ The thread times are from samples (about a tenth above the real ones). The rende
 more than the UI thread: text blocks that show the same text hold one layout, so they draw the
 same glyph runs, and the renderer finds what it keeps for a glyph run more often (a reading of
 the numbers, not measured apart).
+
+What the layouts that are not found are (every lookup of 20 seconds of the gauntlet written out,
+the second half counted: 139,577 lookups, 54,874 different keys):
+
+| Text | Lookups | Different keys | Found with 4,096 kept | Found with every layout kept |
+|---|---|---|---|---|
+| A price (`611.26`) | 67,901 | 45,538 | 5.0% | 32.9% |
+| A change (`+0.94%`) | 49,008 | 2,712 | 94.5% | 94.5% |
+| A share (`96%`) | 13,552 | 100 | 99.3% | 99.3% |
+| The rest (titles, wrapped paragraphs) | 8,599 | 6,007 | 29.4% | 30.1% |
+| All | 139,577 | 54,874 | 41.3% | 60.7% |
+
+Four in five of the layouts that are not found are prices, numbers that were not shown before:
+no number of kept layouts finds them (16,384 kept layouts find 51% of all lookups, every layout
+kept 61%), so the number stays at 4,096. The wrapped paragraphs are not found because their
+width changes with every frame of an animation; they are shaped once all the same, by the text
+run cache of their text block (upstream), and only wrapped again. What is left of the cost of a
+changing text is the cost of making a layout of a short text, of which shaping is a seventh and
+allocation a quarter.
