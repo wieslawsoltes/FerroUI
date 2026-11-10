@@ -12,7 +12,7 @@ fn the_kept_values_of_a_border_follow_local_style_and_cleared_values() {
     let border = Border::new();
     assert_eq!(Thickness::default(), border.border_thickness());
     assert_eq!(CornerRadius::default(), border.corner_radius());
-    assert_eq!(BackgroundSizing::default(), border.background_sizing());
+    assert_eq!(BackgroundSizing::CenterBorder, border.background_sizing());
     assert_eq!(Thickness::default(), border.padding());
 
     border.set_border_thickness(Thickness::uniform(2.0));
@@ -42,7 +42,7 @@ fn the_kept_values_of_a_border_follow_local_style_and_cleared_values() {
     border.clear_value(Border::background_sizing_property());
     border.clear_value(Decorator::padding_property());
     assert_eq!(CornerRadius::default(), border.corner_radius());
-    assert_eq!(BackgroundSizing::default(), border.background_sizing());
+    assert_eq!(BackgroundSizing::CenterBorder, border.background_sizing());
     assert_eq!(Thickness::default(), border.padding());
 }
 
