@@ -347,6 +347,263 @@ fn bitmaps_of_pixels_are_drawn() {
     target.dispose();
 }
 
+fn crc32(bytes: &[u8]) -> u32 {
+    let mut crc = 0xFFFF_FFFFu32;
+    for &byte in bytes {
+        crc ^= byte as u32;
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 { (crc >> 1) ^ 0xEDB8_8320 } else { crc >> 1 };
+        }
+    }
+    !crc
+}
+
+fn adler32(bytes: &[u8]) -> u32 {
+    let (mut a, mut b) = (1u32, 0u32);
+    for &byte in bytes {
+        a = (a + byte as u32) % 65521;
+        b = (b + a) % 65521;
+    }
+    (b << 16) | a
+}
+
+/// A PNG of `width` x `height` RGBA pixels of eight bits, its rows unfiltered and its stream
+/// stored, not compressed.
+pub(crate) fn png(width: u32, height: u32, pixels: &[u8]) -> Vec<u8> {
+    fn chunk(png: &mut Vec<u8>, kind: &[u8; 4], data: &[u8]) {
+        png.extend_from_slice(&(data.len() as u32).to_be_bytes());
+        let start = png.len();
+        png.extend_from_slice(kind);
+        png.extend_from_slice(data);
+        let crc = crc32(&png[start..]);
+        png.extend_from_slice(&crc.to_be_bytes());
+    }
+    assert_eq!(pixels.len(), width as usize * height as usize * 4);
+    let mut png = vec![0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+    let mut header = Vec::new();
+    header.extend_from_slice(&width.to_be_bytes());
+    header.extend_from_slice(&height.to_be_bytes());
+    header.extend_from_slice(&[8, 6, 0, 0, 0]);
+    chunk(&mut png, b"IHDR", &header);
+    let mut rows = Vec::new();
+    for row in pixels.chunks(width as usize * 4) {
+        rows.push(0);
+        rows.extend_from_slice(row);
+    }
+    let mut stream = vec![0x78, 0x01, 0x01];
+    stream.extend_from_slice(&(rows.len() as u16).to_le_bytes());
+    stream.extend_from_slice(&(!(rows.len() as u16)).to_le_bytes());
+    stream.extend_from_slice(&rows);
+    stream.extend_from_slice(&adler32(&rows).to_be_bytes());
+    chunk(&mut png, b"IDAT", &stream);
+    chunk(&mut png, b"IEND", &[]);
+    png
+}
+
+fn first_pixel(bitmap: &dyn IBitmapImpl) -> [u8; 4] {
+    let locked = bitmap.as_readable_bitmap().expect("readable").lock();
+    let mut pixel = [0u8; 4];
+    locked.with_data(&mut |data| pixel.copy_from_slice(&data[..4]));
+    locked.dispose();
+    pixel
+}
+
+#[test]
+fn image_files_are_decoded_and_drawn() {
+    let Some(context) = context() else { return };
+    let interface = ProGpuPlatformRenderInterface::new();
+    // Four by two: a red and a blue half above, green and half transparent white below.
+    let mut pixels = Vec::new();
+    for color in [[255u8, 0, 0, 255], [255, 0, 0, 255], [0, 0, 255, 255], [0, 0, 255, 255], [0, 255, 0, 255], [0, 255, 0, 255], [255, 255, 255, 128], [255, 255, 255, 128]] {
+        pixels.extend_from_slice(&color);
+    }
+    let file = png(4, 2, &pixels);
+
+    // From a stream: the pixels of the file, not premultiplied, at 96 dpi.
+    let bitmap = interface.load_bitmap(&mut std::io::Cursor::new(file.clone())).expect("a PNG is decoded");
+    assert_eq!(PixelSize::new(4, 2), bitmap.pixel_size());
+    assert_eq!(Vector::new(96.0, 96.0), bitmap.dpi());
+    let readable = bitmap.as_readable_bitmap().expect("readable");
+    assert_eq!(Some(PixelFormat::RGBA8888), readable.format());
+    assert_eq!(Some(AlphaFormat::Unpremul), readable.alpha_format());
+    let locked = readable.lock();
+    locked.with_data(&mut |data| assert_eq!(&pixels[..], &data[..32]));
+    locked.dispose();
+
+    let surface = MemorySurface::new(64, 32);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(0, 0, 0));
+    frame.push_render_options(RenderOptions { bitmap_interpolation_mode: BitmapInterpolationMode::None, ..RenderOptions::default() });
+    frame.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 4.0, 2.0), Rect::new(0.0, 0.0, 64.0, 32.0));
+    frame.pop_render_options();
+    frame.dispose();
+    assert_eq!(RED, surface.rgba(8, 8));
+    assert_eq!(BLUE, surface.rgba(56, 8));
+    assert_eq!([0, 255, 0, 255], surface.rgba(8, 24));
+    assert!(near([128, 128, 128, 255], surface.rgba(56, 24)), "half transparent white over black: {:?}", surface.rgba(56, 24));
+    target.dispose();
+
+    // From a file, and as a bitmap that can be written to.
+    let path = std::env::temp_dir().join(format!("ferroui-progpu-image-{}.png", std::process::id()));
+    std::fs::write(&path, &file).expect("the file is written");
+    let name = path.to_str().expect("a path of text");
+    assert_eq!(PixelSize::new(4, 2), interface.load_bitmap_from_file(name).expect("decoded").pixel_size());
+    assert_eq!(PixelSize::new(4, 2), interface.load_writeable_bitmap_from_file(name).expect("decoded").pixel_size());
+    let _ = std::fs::remove_file(&path);
+    assert_eq!(PixelSize::new(4, 2), interface.load_writeable_bitmap(&mut std::io::Cursor::new(file.clone())).expect("decoded").pixel_size());
+
+    // To a width or a height: the other side keeps the proportion.
+    let wide = interface.load_bitmap_to_width(&mut std::io::Cursor::new(file.clone()), 16, BitmapInterpolationMode::None).expect("decoded");
+    assert_eq!(PixelSize::new(16, 8), wide.pixel_size());
+    assert_eq!(RED, first_pixel(&*wide));
+    let tall = interface.load_bitmap_to_height(&mut std::io::Cursor::new(file.clone()), 6, BitmapInterpolationMode::None).expect("decoded");
+    assert_eq!(PixelSize::new(12, 6), tall.pixel_size());
+    let same = interface.load_writeable_bitmap_to_width(&mut std::io::Cursor::new(file.clone()), 4, BitmapInterpolationMode::None).expect("decoded");
+    assert_eq!(PixelSize::new(4, 2), same.pixel_size());
+    assert_eq!(PixelSize::new(2, 1), interface.load_writeable_bitmap_to_height(&mut std::io::Cursor::new(file.clone()), 1, BitmapInterpolationMode::None).expect("decoded").pixel_size());
+    assert!(interface.load_bitmap_to_width(&mut std::io::Cursor::new(file.clone()), 0, BitmapInterpolationMode::None).is_err());
+
+    // A damaged file is invalid data; a file of another format is not supported.
+    let mut damaged = file.clone();
+    let cut = damaged.len() - 20;
+    damaged.truncate(cut);
+    assert_eq!(std::io::ErrorKind::InvalidData, interface.load_bitmap(&mut std::io::Cursor::new(damaged)).err().expect("refused").kind());
+    let jpeg = vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 16, b'J', b'F', b'I', b'F', 0];
+    assert_eq!(std::io::ErrorKind::Unsupported, interface.load_bitmap(&mut std::io::Cursor::new(jpeg)).err().expect("refused").kind());
+}
+
+/// A frame on a white surface of 96 pixels, drawn by `draw`.
+fn clipped_frame(context: &Rc<dyn IPlatformRenderInterfaceContext>, draw: impl FnOnce(&mut dyn IDrawingContextImpl)) -> Arc<MemorySurface> {
+    let surface = MemorySurface::new(96, 96);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    draw(&mut *frame);
+    frame.dispose();
+    target.dispose();
+    surface
+}
+
+#[test]
+fn rotated_and_nested_clips_restrict_shapes_images_and_paths() {
+    let Some(context) = context() else { return };
+    let interface = ProGpuPlatformRenderInterface::new();
+    const GREEN: [u8; 4] = [0, 160, 0, 255];
+    let green = solid(0, 160, 0);
+    let whole = Rect::new(0.0, 0.0, 96.0, 96.0);
+    let bitmap = interface.load_bitmap_from_pixels(PixelFormat::RGBA8888, AlphaFormat::Unpremul, &GREEN.repeat(4), PixelSize::new(2, 2), Vector::new(96.0, 96.0), 8);
+    let ellipse = interface.create_ellipse_geometry(Rect::new(-40.0, -40.0, 176.0, 176.0));
+    let quarter_turn_half = Matrix::create_rotation_at(std::f64::consts::FRAC_PI_4, Point::new(48.0, 48.0));
+
+    // A square turned by 45 degrees about the middle of the target clips to a diamond that
+    // reaches 28 pixels from the middle; what is drawn is drawn without the rotation.
+    let draws: [(&str, Box<dyn Fn(&mut dyn IDrawingContextImpl)>); 3] = [
+        ("a rectangle", Box::new(|frame| fill(frame, &green, whole))),
+        ("a bitmap", Box::new(|frame| frame.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 2.0, 2.0), whole))),
+        ("a path", Box::new(|frame| frame.draw_geometry(Some(&green as &dyn IBrush), None, &*ellipse))),
+    ];
+    for (what, draw) in &draws {
+        let surface = clipped_frame(&context, |frame| {
+            frame.set_transform(quarter_turn_half);
+            frame.push_clip(Rect::new(28.0, 28.0, 40.0, 40.0));
+            frame.set_transform(Matrix::IDENTITY);
+            draw(frame);
+            frame.pop_clip();
+        });
+        assert_eq!(GREEN, surface.rgba(48, 48), "{what}: the middle of the diamond");
+        assert_eq!(GREEN, surface.rgba(48, 24), "{what}: under the top corner of the diamond");
+        assert_eq!(GREEN, surface.rgba(70, 48), "{what}: before the right corner of the diamond");
+        assert_eq!(WHITE, surface.rgba(30, 30), "{what}: in the square that was not turned, outside the diamond");
+        assert_eq!(WHITE, surface.rgba(66, 66), "{what}: in the square that was not turned, outside the diamond");
+        assert_eq!(WHITE, surface.rgba(48, 16), "{what}: above the diamond");
+        assert_eq!(WHITE, surface.rgba(4, 4), "{what}: far outside");
+    }
+
+    // Five clips in each other: rounded, turned, rounded, turned, rounded. The first four are
+    // one chain of masks, the fifth a masked layer.
+    let surface = clipped_frame(&context, |frame| {
+        frame.push_clip_rounded(RoundedRect::from_uniform_radii(Rect::new(8.0, 8.0, 80.0, 80.0), Vector::new(20.0, 20.0)));
+        frame.set_transform(quarter_turn_half);
+        frame.push_clip(Rect::new(18.0, 18.0, 60.0, 60.0));
+        frame.set_transform(Matrix::IDENTITY);
+        frame.push_clip_rounded(RoundedRect::from_uniform_radii(Rect::new(8.0, 30.0, 80.0, 36.0), Vector::new(10.0, 10.0)));
+        frame.set_transform(quarter_turn_half);
+        frame.push_clip(Rect::new(28.0, 28.0, 40.0, 40.0));
+        frame.set_transform(Matrix::IDENTITY);
+        frame.push_clip_rounded(RoundedRect::from_uniform_radii(Rect::new(40.0, 40.0, 30.0, 30.0), Vector::new(4.0, 4.0)));
+        fill(frame, &green, whole);
+        frame.pop_clip();
+        frame.pop_clip();
+        frame.pop_clip();
+        frame.pop_clip();
+        // Under the first clip alone again.
+        fill(frame, &solid(0, 0, 255), Rect::new(0.0, 44.0, 20.0, 8.0));
+        frame.pop_clip();
+        fill(frame, &solid(255, 0, 0), Rect::new(0.0, 0.0, 6.0, 6.0));
+    });
+    assert_eq!(GREEN, surface.rgba(48, 48), "inside the five clips");
+    assert_eq!(GREEN, surface.rgba(44, 60), "inside the five clips");
+    assert_eq!(GREEN, surface.rgba(68, 48), "inside the five clips");
+    assert_eq!(WHITE, surface.rgba(36, 48), "left of the fifth clip");
+    assert_eq!(WHITE, surface.rgba(68, 63), "outside the fourth clip, the small diamond");
+    assert_eq!(WHITE, surface.rgba(48, 68), "below the third clip, the band");
+    assert_eq!(BLUE, surface.rgba(12, 48), "the first clip alone, after the others are popped");
+    assert_eq!(WHITE, surface.rgba(4, 48), "left of the first clip");
+    assert_eq!(RED, surface.rgba(3, 3), "no clip is left");
+}
+
+#[test]
+fn a_frame_of_many_rotated_clips_needs_no_mask_textures() {
+    let Some(context) = context() else { return };
+    // A mask with a texture has the size of the target: at this size the engine refuses the
+    // frame after a few of them. Rectangle clips under a rotation have none.
+    let surface = MemorySurface::new(2048, 2048);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    let green = solid(0, 160, 0);
+    for index in 0..256 {
+        let (column, row) = (f64::from(index % 16), f64::from(index / 16));
+        let cell = Rect::new(column * 128.0 + 24.0, row * 128.0 + 24.0, 80.0, 80.0);
+        frame.set_transform(Matrix::create_rotation_at(0.1 + 0.01 * f64::from(index), cell.center()));
+        frame.push_clip(cell);
+        frame.push_clip(cell.deflate(8.0));
+        fill(&mut *frame, &green, cell);
+        frame.pop_clip();
+        frame.pop_clip();
+    }
+    frame.dispose();
+    target.dispose();
+    assert_eq!([0, 160, 0, 255], surface.rgba(64, 64), "the first cell");
+    assert_eq!([0, 160, 0, 255], surface.rgba(15 * 128 + 64, 15 * 128 + 64), "the last cell");
+    assert_eq!(WHITE, surface.rgba(4, 4), "between the cells");
+}
+
+#[test]
+fn shapes_without_an_area_draw_and_clip_to_nothing() {
+    let Some(context) = context() else { return };
+    let interface = ProGpuPlatformRenderInterface::new();
+    let green = solid(0, 160, 0);
+    let flat = interface.create_rectangle_geometry(Rect::new(10.0, 10.0, 40.0, 0.0));
+    let surface = clipped_frame(&context, |frame| {
+        // Neither fails the frame: the fill covers nothing, the clips leave nothing.
+        frame.draw_geometry(Some(&green as &dyn IBrush), None, &*flat);
+        frame.push_geometry_clip(&*flat);
+        fill(frame, &green, Rect::new(0.0, 0.0, 96.0, 96.0));
+        frame.pop_geometry_clip();
+        frame.set_transform(Matrix::create_rotation(0.3));
+        frame.push_clip(Rect::new(10.0, 10.0, 0.0, 40.0));
+        fill(frame, &green, Rect::new(0.0, 0.0, 96.0, 96.0));
+        frame.pop_clip();
+        frame.set_transform(Matrix::IDENTITY);
+        fill(frame, &green, Rect::new(60.0, 60.0, 20.0, 20.0));
+    });
+    assert_eq!(WHITE, surface.rgba(30, 10), "the flat rectangle");
+    assert_eq!(WHITE, surface.rgba(30, 40), "under the clips without an area");
+    assert_eq!([0, 160, 0, 255], surface.rgba(70, 70), "what is drawn after them");
+}
+
 #[test]
 fn render_target_bitmaps_keep_what_was_drawn() {
     if context().is_none() {
@@ -469,7 +726,7 @@ fn what_the_backend_lacks_is_drawn_as_nothing() {
     assert_eq!(RED, surface.rgba(24, 24), "what follows is drawn");
     assert!(notes::said("text-run") && notes::said("bitmap-kind") && notes::said("bitmap-mask"));
 
-    // The image codecs are not there: an error, not a panic.
+    // An image the image module does not read: an error, not a panic.
     let error = interface.load_bitmap(&mut std::io::Cursor::new(vec![0u8; 16])).err().expect("no codec");
     assert_eq!(std::io::ErrorKind::Unsupported, error.kind());
     assert!(interface.load_bitmap_from_file("missing.png").is_err());
@@ -689,6 +946,45 @@ mod metal {
         target.dispose();
         assert!(!target.platform_render_target_state().is_ready);
         assert!(target.try_create_drawing_context(&scene_info(PixelSize::new(96, 32))).is_err());
+        context.dispose();
+    }
+
+    /// A frame of many translucent groups is many render passes (the content of each group, then
+    /// the target again), and the engine keeps a command buffer for each of them until it
+    /// submits the frame: on the queue of the platform, which has to allow as many at once. A
+    /// queue with the default capacity of 64 blocks the frame for ever.
+    #[test]
+    fn a_frame_of_many_translucent_groups_is_drawn_on_the_queue_of_the_platform() {
+        let Some(graphics) = OffscreenMetalGraphics::try_new() else {
+            eprintln!("skipped: no Metal device");
+            return;
+        };
+        let interface = ProGpuPlatformRenderInterface::new();
+        let context = interface.create_backend_context(Some(graphics.create_context()));
+        let size = PixelSize::new(320, 320);
+        let surface = OffscreenMetalSurface::new(size, 1.0, OffscreenFramePresentation::Kept, None);
+        let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+        let (mut frame, _) = target.try_create_drawing_context(&scene_info(size)).expect("a frame");
+        frame.clear(Color::from_rgb(255, 255, 255));
+        // 256 groups at half opacity, each a blue square under a red one that covers its
+        // right half: inside a group the red replaces the blue, so no blue shows through it.
+        for index in 0..256 {
+            let (x, y) = (f64::from(index % 16) * 20.0, f64::from(index / 16) * 20.0);
+            frame.push_opacity(0.5, Some(Rect::new(x, y, 16.0, 16.0)));
+            fill(&mut *frame, &solid(0, 0, 255), Rect::new(x, y, 16.0, 16.0));
+            fill(&mut *frame, &solid(255, 0, 0), Rect::new(x + 8.0, y, 8.0, 16.0));
+            frame.pop_opacity();
+        }
+        frame.dispose();
+
+        let drawn = surface.last_frame().expect("the frame that was presented");
+        for index in [0, 17, 128, 255] {
+            let (x, y) = ((index % 16) * 20, (index / 16) * 20);
+            assert!(near([128, 128, 255, 255], rgba(&drawn, x + 4, y + 8)), "group {index}, blue: {:?}", rgba(&drawn, x + 4, y + 8));
+            assert!(near([255, 128, 128, 255], rgba(&drawn, x + 12, y + 8)), "group {index}, red: {:?}", rgba(&drawn, x + 12, y + 8));
+            assert_eq!(WHITE, rgba(&drawn, x + 18, y + 18), "between the groups");
+        }
+        target.dispose();
         context.dispose();
     }
 }

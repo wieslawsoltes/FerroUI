@@ -3557,6 +3557,7 @@ dependencies = [
  "ferroui-desktop",
  "ferroui-harfbuzz",
  "ferroui-native",
+ "ferroui-progpu",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",

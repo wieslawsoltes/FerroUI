@@ -46,7 +46,8 @@ animation frame and, with `PERF_FREEZE`, `PERF frozen frame=<k>` when it stops.
 
 The renderer is chosen with the features of the crate, as in the other desktop samples: Skia by
 default; `--features vello` adds the Vello backend, which `FERROUI_RENDERER=vello` (or
-`vello-hybrid`, `vello-gpu`, `vello-cpu`) selects at start; on macOS `--features quartz` and
+`vello-hybrid`, `vello-gpu`, `vello-cpu`) selects at start; `--features progpu` adds the ProGPU
+backend, which `FERROUI_RENDERER=progpu` selects at start; on macOS `--features quartz` and
 `--features quartz-metal` use the Quartz backend.
 
 ## The frame gate

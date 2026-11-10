@@ -219,6 +219,12 @@ impl ProGpuDevice {
     /// inside its window's Core Animation transaction), so a frame an engine renders is committed
     /// to the queue before the host commits its presentation.
     ///
+    /// The queue has to allow the command buffers of a whole frame at once: the WebGPU
+    /// implementation keeps them (two for each render pass with wgpu) until the frame is
+    /// submitted, and a queue with the default capacity of 64 blocks the thread that asks for one
+    /// more. A host makes its queue with the capacity the implementation gives its own queues
+    /// (4096).
+    ///
     /// # Safety
     /// `mtl_device` is a live `id<MTLDevice>` and `mtl_queue` a live `id<MTLCommandQueue>` of it;
     /// both are retained by the device.

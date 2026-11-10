@@ -1,7 +1,7 @@
 //! The render interface of the backend: what the base library makes its geometries, bitmaps,
 //! glyph runs and backend contexts with.
 
-use crate::bitmap::{self, unsupported_codec, ProGpuBitmap};
+use crate::bitmap::{self, ProGpuBitmap};
 use crate::context::ProGpuContext;
 use crate::geometry::{path_data_of, PathBuilder, PathData, ProGpuGeometry, ProGpuStreamGeometryBuilder};
 use crate::glyph_run::{self, ProGpuGlyphRun};
@@ -23,9 +23,9 @@ use std::sync::Arc;
 /// The render interface of the ProGPU backend.
 ///
 /// Geometries are the neutral geometry module of ProGPU; frames are scenes of its engine on a
-/// WebGPU device. Text (step P4 of docs/porting/progpu-backend.md) and the image codecs (step
-/// P5) are not there yet: glyph runs are measured and drawn as nothing, and loading or saving
-/// an image file reports `Unsupported`; each is noted in the log once.
+/// WebGPU device; text is the text stack of the engine and image files are read by its image
+/// module (PNG). What the engine does not have (other image formats, saving a bitmap) reports
+/// `Unsupported` and is noted in the log once.
 #[derive(Default)]
 pub struct ProGpuPlatformRenderInterface;
 
@@ -33,6 +33,49 @@ impl ProGpuPlatformRenderInterface {
     pub fn new() -> Self {
         ProGpuPlatformRenderInterface
     }
+}
+
+/// The bitmap of the image file a stream holds.
+fn decode_stream(stream: &mut dyn Read) -> io::Result<ProGpuBitmap> {
+    let mut file = Vec::new();
+    stream.read_to_end(&mut file)?;
+    ProGpuBitmap::decode(&file)
+}
+
+/// The bitmap of the image file a stream holds, scaled so that its width (`horizontal`) or its
+/// height is `decode_size` and the other side keeps the proportion.
+fn decode_to_size(stream: &mut dyn Read, decode_size: i32, horizontal: bool, interpolation_mode: BitmapInterpolationMode) -> io::Result<ProGpuBitmap> {
+    let bitmap = decode_stream(stream)?;
+    let size = bitmap.pixel_size();
+    if decode_size <= 0 || size.width <= 0 || size.height <= 0 {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "an image cannot be decoded to an empty size"));
+    }
+    let (along, across) = if horizontal { (size.width, size.height) } else { (size.height, size.width) };
+    if along == decode_size {
+        return Ok(bitmap);
+    }
+    let other = ((across as f64 * decode_size as f64 / along as f64).round() as i32).max(1);
+    let destination = if horizontal { PixelSize::new(decode_size, other) } else { PixelSize::new(other, decode_size) };
+    Ok(resized(&bitmap, destination, interpolation_mode))
+}
+
+/// `bitmap` drawn to `destination_size` on the device and read back: premultiplied `RGBA8888`.
+fn resized(bitmap: &dyn IBitmapImpl, destination_size: PixelSize, interpolation_mode: BitmapInterpolationMode) -> ProGpuBitmap {
+    let resized = ProGpuBitmap::new(destination_size, bitmap.dpi(), PixelFormat::RGBA8888, AlphaFormat::Premul);
+    let source_size = bitmap.pixel_size();
+    if source_size.width > 0 && source_size.height > 0 && destination_size.width > 0 && destination_size.height > 0 {
+        let mut context = resized.create_drawing_context();
+        context.push_render_options(RenderOptions { bitmap_interpolation_mode: interpolation_mode, ..RenderOptions::default() });
+        context.draw_bitmap(
+            bitmap,
+            1.0,
+            Rect::new(0.0, 0.0, source_size.width as f64, source_size.height as f64),
+            Rect::new(0.0, 0.0, destination_size.width as f64, destination_size.height as f64),
+        );
+        context.pop_render_options();
+        context.dispose();
+    }
+    resized
 }
 
 /// An empty geometry: what stands for a geometry the backend cannot make.
@@ -109,55 +152,41 @@ impl IPlatformRenderInterface for ProGpuPlatformRenderInterface {
         Arc::new(ProGpuBitmap::new(size, dpi, format, alpha_format))
     }
 
-    fn load_bitmap_from_file(&self, _file_name: &str) -> io::Result<Arc<SharedBitmapImpl>> {
-        Err(unsupported_codec("decoding an image file"))
+    fn load_bitmap_from_file(&self, file_name: &str) -> io::Result<Arc<SharedBitmapImpl>> {
+        Ok(Arc::new(ProGpuBitmap::decode(&std::fs::read(file_name)?)?))
     }
 
-    fn load_bitmap(&self, _stream: &mut dyn Read) -> io::Result<Arc<SharedBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_bitmap(&self, stream: &mut dyn Read) -> io::Result<Arc<SharedBitmapImpl>> {
+        Ok(Arc::new(decode_stream(stream)?))
     }
 
-    fn load_writeable_bitmap_to_width(&self, _stream: &mut dyn Read, _width: i32, _interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_writeable_bitmap_to_width(&self, stream: &mut dyn Read, width: i32, interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
+        Ok(Arc::new(decode_to_size(stream, width, true, interpolation_mode)?))
     }
 
-    fn load_writeable_bitmap_to_height(&self, _stream: &mut dyn Read, _height: i32, _interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_writeable_bitmap_to_height(&self, stream: &mut dyn Read, height: i32, interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
+        Ok(Arc::new(decode_to_size(stream, height, false, interpolation_mode)?))
     }
 
-    fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
-        Err(unsupported_codec("decoding an image file"))
+    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
+        Ok(Arc::new(ProGpuBitmap::decode(&std::fs::read(file_name)?)?))
     }
 
-    fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> io::Result<Arc<dyn IWriteableBitmapImpl>> {
+        Ok(Arc::new(decode_stream(stream)?))
     }
 
-    fn load_bitmap_to_width(&self, _stream: &mut dyn Read, _width: i32, _interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<SharedBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_bitmap_to_width(&self, stream: &mut dyn Read, width: i32, interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<SharedBitmapImpl>> {
+        Ok(Arc::new(decode_to_size(stream, width, true, interpolation_mode)?))
     }
 
-    fn load_bitmap_to_height(&self, _stream: &mut dyn Read, _height: i32, _interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<SharedBitmapImpl>> {
-        Err(unsupported_codec("decoding an image"))
+    fn load_bitmap_to_height(&self, stream: &mut dyn Read, height: i32, interpolation_mode: BitmapInterpolationMode) -> io::Result<Arc<SharedBitmapImpl>> {
+        Ok(Arc::new(decode_to_size(stream, height, false, interpolation_mode)?))
     }
 
     /// The bitmap drawn to the destination size on the device and read back.
     fn resize_bitmap(&self, bitmap_impl: &dyn IBitmapImpl, destination_size: PixelSize, interpolation_mode: BitmapInterpolationMode) -> Arc<SharedBitmapImpl> {
-        let resized = ProGpuBitmap::new(destination_size, bitmap_impl.dpi(), PixelFormat::RGBA8888, AlphaFormat::Premul);
-        let source_size = bitmap_impl.pixel_size();
-        if source_size.width > 0 && source_size.height > 0 && destination_size.width > 0 && destination_size.height > 0 {
-            let mut context = resized.create_drawing_context();
-            context.push_render_options(RenderOptions { bitmap_interpolation_mode: interpolation_mode, ..RenderOptions::default() });
-            context.draw_bitmap(
-                bitmap_impl,
-                1.0,
-                Rect::new(0.0, 0.0, source_size.width as f64, source_size.height as f64),
-                Rect::new(0.0, 0.0, destination_size.width as f64, destination_size.height as f64),
-            );
-            context.pop_render_options();
-            context.dispose();
-        }
-        Arc::new(resized)
+        Arc::new(resized(bitmap_impl, destination_size, interpolation_mode))
     }
 
     fn load_bitmap_from_pixels(&self, format: PixelFormat, alpha_format: AlphaFormat, data: &[u8], size: PixelSize, dpi: Vector, stride: i32) -> Arc<SharedBitmapImpl> {

@@ -83,8 +83,18 @@ Vello backend does (`src/Vello/FerroUI.Vello/gpu/metal.rs`). On macOS:
 The queue is the one difference from Vello: with the platform's queue created with room for 4096
 command buffers instead of Metal's default 64, the device is created on the platform's own queue.
 The presentation is then committed after the frame on the same queue, with no shared event (Vello
-needs one because it renders on a second queue). Windows (D3D12) and Linux (Vulkan) get
-interop functions of the same shape in the fork (step P8).
+needs one because it renders on a second queue). The capacity is needed, not a margin: wgpu keeps
+two Metal command buffers for each render pass of a command encoder (the pass and the resource
+transitions before it) until the frame is submitted, and a queue that has given out all of its
+buffers blocks the thread that asks for one more. A translucent group is two passes today (its
+content, then the composite on its parent), so a frame of the gauntlet with 20 groups (43 passes,
+86 command buffers) stopped for ever on a queue of the default capacity, while one with 8 groups
+(19 passes) did not. The macOS platform (`native/FerroUI.Native/src/OSX/metal.mm`) and the
+offscreen Metal device (`ferroui_metal::offscreen`) create their queues with 4096, which is also
+the number of open command buffers wgpu allows a device: about 1000 groups in one frame. The
+retained path (section 2.3) is to render the contents of the groups before one pass over the
+target, which removes the composite passes. Windows (D3D12) and Linux (Vulkan) get interop
+functions of the same shape in the fork (step P8).
 
 **Dawn instead of wgpu.** The same engine archive runs on Dawn: the two `webgpu.h` revisions differ
 only by three enum values the engine does not use, and the engine resolves its procedures at run
@@ -273,7 +283,12 @@ the engine (decided by the owner, 2026-11-05):
 
 Bitmaps decode with ProGPU's native image module: PNG today, and **JPEG (baseline and
 progressive), GIF and BMP decoders** added beside it, bounded and allocation-checked like the PNG
-decoder, with a C ABI (decided by the owner, 2026-11-05). The backend links no other decoder. The
+decoder, with a C ABI (decided by the owner, 2026-11-05). The backend links no other decoder.
+Done: PNG files and streams, through the image C ABI of the bindings
+(`progpu_native_sys::image`: the size of an image, then its pixels as straight RGBA8 into a
+buffer of the caller), decoded at their size, to a width or to a height, and resized. Open: the
+other three decoders (a file of another format is refused as unsupported) and encoding (the image
+module has no encoder, so `save` of a bitmap is unsupported). The
 scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its resource in
 place (`update_rgba8_image`, same id, a new generation), so a changed bitmap uploads its pixels and
 nothing else.
@@ -324,6 +339,20 @@ space of the brush, so the backend passes the inverse of the transforms of the b
 relative transform (on the box of the fill as a unit square) and then the absolute transform about
 the transform origin.
 
+**Clips.** A clip costs a texture only when its shape needs one:
+
+| Clip | How it is recorded |
+|---|---|
+| Rectangle, under a transform that keeps it axis aligned | the clip rectangle of the state (a scissor) |
+| Rectangle or rounded rectangle under any other transform (a rotation, a skew) | an analytic mask of the state: a rounded rectangle with its own transform, evaluated in the shader, no texture |
+| Two to four such clips inside each other | one chain of analytic masks (`ANALYTIC_CHAIN`), still no texture |
+| A fifth analytic clip, or an analytic clip inside a geometry clip | a layer with the new mask; the content inside it is drawn into the layer |
+| Geometry clip | a mask texture of the size of the target, generated from the path, within the budget of the engine (256 MB a frame); a frame over the budget fails and is logged |
+
+A clip without an area (an empty rectangle, a geometry with empty bounds, a transform that is not
+invertible) clips everything; a path without an area is not drawn. Both would be refused by the
+scene builder as invalid records.
+
 **The end of a thread.** In a build with debug assertions the WebGPU implementation keeps the
 state of one of its locks in a thread-local, and releasing a device needs that lock. The objects of
 a render context are released when the thread-locals of its thread are destroyed, in an order the
@@ -334,9 +363,12 @@ being destroyed: the device, its engines and its textures are then left to the e
 call into the implementation on the thread, which the reverse order of destruction puts before the
 lock state. Objects released while the thread runs are released as usual.
 
-**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): bitmaps
-decoded from files or streams, bitmaps drawn under an opacity mask, inset shadows and the shadows of rectangles with different corner radii, and
-a clear under a rounded or geometry clip. Content under an opacity mask is drawn without the mask.
+**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): bitmaps drawn under an
+opacity mask, inset shadows and the shadows of rectangles with different corner radii, and a clear
+under a rotated, rounded or geometry clip. Content under an opacity mask is drawn without the
+mask. The shadow of a translucent element under such a clip is drawn whole, also under the
+element (the state has one mask, and the clip keeps it). Image files other than PNG are refused
+when they are loaded, and bitmaps are not encoded (section 2.5).
 The backend refuses compositing layers with a blend mode (`try_push_compositing_layer` answers
 no); blend modes are step P5. A frame that fails is logged every time and leaves the target as it
 was. None of these crashes.
@@ -352,7 +384,9 @@ was. None of these crashes.
 Tests: `cargo test -p ferroui-progpu` renders through the public contracts and reads pixels back
 (clears, rectangles, rounded rectangles, ellipses, paths, strokes, gradients, clips, opacity,
 transforms, layers, the framebuffer target, the Metal texture target on a device made on a Metal
-device, a compositor frame, the safe failures, the end of a thread). The example
+device, a compositor frame, the safe failures, the end of a thread, PNG files, rotated and nested
+clips, a frame of 256 doubly clipped cells, a frame of 256 translucent groups on the queue of the
+platform). The example
 `progpu_window` opens a window through the application builder with `use_progpu()`.
 
 ## 3. Bindings in the ProGPU repository
@@ -385,7 +419,8 @@ calls a frame:
      `CAMetalLayer`, an `HWND`, an X11 window, a Wayland surface);
    - the C ABI of the native Geometry module (section 2.5).
 4. **Image decoders** in the native image module beside PNG: JPEG (baseline and progressive), GIF and
-   BMP, bounded and allocation-checked as the PNG decoder.
+   BMP, bounded and allocation-checked as the PNG decoder. The C ABI of the PNG decoder is in the
+   bindings (`progpu_native_image_png_read_size`, `progpu_native_image_png_decode_rgba`).
 
 What the work on P1 to P3 and the reading of the engine for P4 found, beyond the list above:
 
@@ -537,7 +572,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
-| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | open (render target bitmaps, layers and writeable pixel bitmaps are in P3) |
+| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG files and streams decode through the image module (section 2.5); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: JPEG, GIF and BMP, encoding, effects |
 | P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements | open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
@@ -573,6 +608,36 @@ numbers, so the difference is rasterization, not shaping. The centroids of the l
 At the size of the screen the two renderings are not told apart by eye in the enlarged crops of the
 9 to 14 px lines; the difference image shows thin outlines at glyph edges, strongest at the
 Japanese 12 px line and the simulated bold lines.
+
+### 6.2 The gauntlet against the Skia backend (macOS)
+
+The gauntlet sample runs on this backend when it is built with `--features progpu` and started
+with `FERROUI_RENDERER=progpu`; the switch is in the harness part of the sample
+(`samples/GauntletBenchmark/program.rs`), the scene is untouched:
+
+```
+cargo build --release -p gauntlet-benchmark --features progpu
+FERROUI_RENDERER=progpu PERF_TIER=16 PERF_FONTS=<folder of Roboto-Regular.ttf and Roboto-Bold.ttf> \
+    target/release/perf-compare-ferroui
+```
+
+The same binary without `FERROUI_RENDERER` runs on Skia. The window was captured on both backends
+at the frozen frame 90 (`PERF_FREEZE=90`), 2560 x 1704 device pixels, title bar included.
+Differences are per channel of 255 over the whole capture:
+
+| Tier | Max (R, G, B) | Mean (R, G, B) | Above 8 | Above 32 | Translucent groups in the frame |
+|---|---|---|---|---|---|
+| 5 | 122, 118, 110 | 0.42, 0.42, 0.40 | 1.79% | 0.15% | 3 to 4 |
+| 16 | 121, 107, 109 | 0.59, 0.61, 0.60 | 2.87% | 0.26% | 56 |
+
+No frame failed and the backend reported nothing that it left out, at either tier. Every element
+of the scene is there on both: cards with shadows, avatars under rounded clips, the tilting
+badges, sparklines with gradient fills, progress bars, the rotating panels with their clipped
+cells. The difference image shows thin outlines: glyph edges, the edges of the sparklines and of
+rounded shapes, the edges of the rotated cells. What is worse on this backend, seen in enlarged
+crops: text under a rotation (the titles and numbers of the rotating panels) has rougher edges
+than on Skia, because a glyph is rasterized upright and resampled (section 2.4.1); upright text
+and the shapes are not told apart by eye.
 
 ## 7. Licensing
 

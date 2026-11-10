@@ -93,6 +93,17 @@ fn axis_aligned(matrix: &Matrix) -> bool {
     matrix.m12 == 0.0 && matrix.m21 == 0.0 && matrix.m13 == 0.0 && matrix.m23 == 0.0
 }
 
+/// Whether a rectangle covers anything: a width and a height above zero, all finite.
+fn has_area(rect: Rect) -> bool {
+    rect.x.is_finite() && rect.y.is_finite() && rect.width.is_finite() && rect.height.is_finite() && rect.width > 0.0 && rect.height > 0.0
+}
+
+/// Whether a transform maps areas to areas: what the engine takes as the transform of a mask.
+fn invertible(matrix: &Matrix) -> bool {
+    let determinant = matrix.m11 * matrix.m22 - matrix.m12 * matrix.m21;
+    determinant.is_finite() && determinant.abs() > 0.000001
+}
+
 /// The axis-aligned bounds of a rectangle under a transform.
 fn transform_bounds(rect: Rect, matrix: &Matrix) -> Rect {
     let corners = [
@@ -122,8 +133,9 @@ fn intersect(a: Rect, b: Rect) -> Rect {
 /// One clip of the stack: what it set, to restore it.
 #[derive(Clone, Copy)]
 enum ClipEntry {
-    /// The state's clip rectangle and mask before the clip.
-    State { clip_rect: Option<Rect>, mask: u32 },
+    /// The state's clip rectangle and mask before the clip, and how many analytic masks the
+    /// mask was made of.
+    State { clip_rect: Option<Rect>, mask: u32, analytic: usize },
     /// A clip that needed a layer.
     Layer,
 }
@@ -172,6 +184,9 @@ pub struct ProGpuDrawingContext {
     /// The glyphs of the run being drawn (kept for its allocation).
     positioned: Vec<progpu_native_positioned_glyph>,
     clips: Vec<ClipEntry>,
+    /// The analytic masks the mask of the state is made of: the rounded and the rotated
+    /// rectangle clips in force. Empty under no mask and under a mask with a texture.
+    analytic: Vec<progpu_native_scene_layer_mask>,
     layers: Vec<LayerEntry>,
     render_options: Vec<RenderOptions>,
     text_options: Vec<TextOptions>,
@@ -205,6 +220,7 @@ impl ProGpuDrawingContext {
             text_styles: HashMap::new(),
             positioned: Vec::new(),
             clips: Vec::new(),
+            analytic: Vec::new(),
             layers: Vec::new(),
             render_options: Vec::new(),
             text_options: Vec::new(),
@@ -471,6 +487,11 @@ impl ProGpuDrawingContext {
             return;
         }
         let bounds = data.bounds();
+        if !has_area(bounds) {
+            // Figures without an area (a line, a point) cover nothing, and the engine refuses
+            // a path without bounds.
+            return;
+        }
         let Some(brush_index) = self.brush(brush, bounds) else { return };
         let Some(state) = self.state() else { return };
         let path = progpu_native_scene_path_fill {
@@ -544,6 +565,8 @@ impl ProGpuDrawingContext {
     }
 
     /// A clip of the shapes in `data` (vector mask), with an operation (intersect or difference).
+    /// The mask is a texture of the size of the target: the clips of rectangles and rounded
+    /// rectangles do not come here (see `push_analytic_clip`).
     fn vector_mask(&mut self, data: &PathData, operation: u32) -> Option<u32> {
         let segments = data.filled_segments();
         let bounds = data.bounds();
@@ -598,9 +621,11 @@ impl ProGpuDrawingContext {
             // difference mask of the element keeps it out.
             let saved = self.current;
             if !opaque {
-                let element = Self::rounded_rect_path(rect);
-                if let Some(mask) = self.vector_mask(&element, PROGPU_NATIVE_CLIP_DIFFERENCE as u32) {
-                    if self.current.mask == NO_INDEX {
+                // Under a clip mask the shadow is drawn whole: the engine takes one mask per
+                // state.
+                if self.current.mask == NO_INDEX && has_area(rect.rect) {
+                    let element = Self::rounded_rect_path(rect);
+                    if let Some(mask) = self.vector_mask(&element, PROGPU_NATIVE_CLIP_DIFFERENCE as u32) {
                         self.current.mask = mask;
                         self.changed();
                     }
@@ -674,34 +699,104 @@ impl ProGpuDrawingContext {
         None
     }
 
+    fn state_entry(&self) -> ClipEntry {
+        ClipEntry::State { clip_rect: self.current.clip_rect, mask: self.current.mask, analytic: self.analytic.len() }
+    }
+
+    /// A clip that leaves nothing: the clip of a shape without an area.
+    fn push_empty_clip(&mut self) {
+        self.clips.push(self.state_entry());
+        self.current.clip_rect = Some(Rect::new(0.0, 0.0, 0.0, 0.0));
+        self.changed();
+    }
+
+    /// A clip of a mask with a texture (a geometry): the mask of the state, or under another
+    /// mask a layer masked by it.
     fn push_mask_clip(&mut self, mask: Option<u32>) {
         let Some(mask) = mask else {
-            self.clips.push(ClipEntry::Layer);
+            // The scene has failed: the frame is not drawn, and the clip is kept for its pop.
+            self.clips.push(self.state_entry());
             return;
         };
         if self.current.mask == NO_INDEX {
-            self.clips.push(ClipEntry::State { clip_rect: self.current.clip_rect, mask: self.current.mask });
+            self.clips.push(self.state_entry());
             self.current.mask = mask;
             self.changed();
         } else {
-            // A second mask nests as a layer masked by it.
-            let layer = progpu_native_scene_layer {
-                struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
-                flags: 0,
-                bounds: progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
-                opacity: 1.0,
-                blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
-                mask_resource_index: mask,
-                effect_resource_index: NO_INDEX,
-                content_revision: 0,
-                composite_revision: 0,
-                reserved0: 0,
-                reserved1: 0,
-            };
-            let result = self.scene().push_layer(&layer);
-            self.record(result);
-            self.clips.push(ClipEntry::Layer);
+            self.push_masked_layer(mask);
         }
+    }
+
+    /// A clip as a layer masked by `mask`: how a mask nests in a mask it cannot join.
+    fn push_masked_layer(&mut self, mask: u32) {
+        let layer = progpu_native_scene_layer {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
+            flags: 0,
+            bounds: progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
+            opacity: 1.0,
+            blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
+            mask_resource_index: mask,
+            effect_resource_index: NO_INDEX,
+            content_revision: 0,
+            composite_revision: 0,
+            reserved0: 0,
+            reserved1: 0,
+        };
+        let result = self.scene().push_layer(&layer);
+        self.record(result);
+        self.clips.push(ClipEntry::Layer);
+    }
+
+    /// A clip of a rectangle or a rounded rectangle under the current transform, evaluated by
+    /// the engine per pixel of each draw: no mask texture, whatever the rotation. Clips nested
+    /// in each other join in one chain of masks; past the length of a chain, and under a mask
+    /// with a texture, the clip is a masked layer.
+    fn push_analytic_clip(&mut self, rect: Rect, corner_radii_x: [f32; 4], corner_radii_y: [f32; 4]) {
+        if !has_area(rect) || !invertible(&self.current.transform) {
+            self.push_empty_clip();
+            return;
+        }
+        let mask = progpu_native_scene_layer_mask {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer_mask>() as u32,
+            kind: PROGPU_NATIVE_SCENE_LAYER_MASK_ROUNDED_RECTANGLE as u32,
+            flags: 0,
+            reserved: 0,
+            bounds: image_rect(rect),
+            transform: affine(&self.current.transform),
+            corner_radii_x,
+            corner_radii_y,
+            opacity: 1.0,
+            reserved0: 0,
+            reserved1: 0,
+            reserved2: 0,
+        };
+        let textured = self.current.mask != NO_INDEX && self.analytic.is_empty();
+        if textured || self.analytic.len() >= PROGPU_NATIVE_SCENE_MAX_ANALYTIC_MASKS as usize {
+            let result = self.scene().add_rounded_rectangle_mask(&mask);
+            match self.record(result) {
+                Some(mask) => self.push_masked_layer(mask),
+                None => self.clips.push(self.state_entry()),
+            }
+            return;
+        }
+        let entry = self.state_entry();
+        let mut masks = std::mem::take(&mut self.analytic);
+        masks.push(mask);
+        let result = match masks.len() {
+            1 => self.scene().add_rounded_rectangle_mask(&mask),
+            _ => self.scene().add_analytic_mask_chain(&masks),
+        };
+        match self.record(result) {
+            Some(index) => {
+                self.current.mask = index;
+                self.changed();
+            }
+            None => {
+                masks.pop();
+            }
+        }
+        self.analytic = masks;
+        self.clips.push(entry);
     }
 
     fn push_scene_layer(&mut self, bounds: Option<Rect>, opacity: f64, blend_mode: u32) {
@@ -927,15 +1022,14 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     fn push_clip(&mut self, clip: Rect) {
         if axis_aligned(&self.current.transform) {
             let target = transform_bounds(clip, &self.current.transform);
-            self.clips.push(ClipEntry::State { clip_rect: self.current.clip_rect, mask: self.current.mask });
+            self.clips.push(self.state_entry());
             self.current.clip_rect = Some(match self.current.clip_rect {
                 Some(current) => intersect(current, target),
                 None => target,
             });
             self.changed();
         } else {
-            let mask = self.vector_mask(&PathData::rectangle(clip), PROGPU_NATIVE_CLIP_INTERSECT as u32);
-            self.push_mask_clip(mask);
+            self.push_analytic_clip(clip, [0.0; 4], [0.0; 4]);
         }
     }
 
@@ -944,33 +1038,21 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
             self.push_clip(clip.rect);
             return;
         }
-        let mask = progpu_native_scene_layer_mask {
-            struct_size: std::mem::size_of::<progpu_native_scene_layer_mask>() as u32,
-            kind: PROGPU_NATIVE_SCENE_LAYER_MASK_ROUNDED_RECTANGLE as u32,
-            flags: 0,
-            reserved: 0,
-            bounds: image_rect(clip.rect),
-            transform: affine(&self.current.transform),
-            corner_radii_x: [
+        self.push_analytic_clip(
+            clip.rect,
+            [
                 clip.radii_top_left.x as f32,
                 clip.radii_top_right.x as f32,
                 clip.radii_bottom_right.x as f32,
                 clip.radii_bottom_left.x as f32,
             ],
-            corner_radii_y: [
+            [
                 clip.radii_top_left.y as f32,
                 clip.radii_top_right.y as f32,
                 clip.radii_bottom_right.y as f32,
                 clip.radii_bottom_left.y as f32,
             ],
-            opacity: 1.0,
-            reserved0: 0,
-            reserved1: 0,
-            reserved2: 0,
-        };
-        let result = self.scene().add_rounded_rectangle_mask(&mask);
-        let mask = self.record(result);
-        self.push_mask_clip(mask);
+        );
     }
 
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
@@ -980,9 +1062,10 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
 
     fn pop_clip(&mut self) {
         match self.clips.pop() {
-            Some(ClipEntry::State { clip_rect, mask }) => {
+            Some(ClipEntry::State { clip_rect, mask, analytic }) => {
                 self.current.clip_rect = clip_rect;
                 self.current.mask = mask;
+                self.analytic.truncate(analytic);
                 self.changed();
             }
             Some(ClipEntry::Layer) => {
@@ -1020,7 +1103,15 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn push_geometry_clip(&mut self, clip: &dyn IGeometryImpl) {
-        let mask = path_data_of(clip).and_then(|data| self.vector_mask(&data, PROGPU_NATIVE_CLIP_INTERSECT as u32));
+        let Some(data) = path_data_of(clip) else {
+            self.clips.push(self.state_entry());
+            return;
+        };
+        if !has_area(data.bounds()) || !invertible(&self.current.transform) {
+            self.push_empty_clip();
+            return;
+        }
+        let mask = self.vector_mask(&data, PROGPU_NATIVE_CLIP_INTERSECT as u32);
         self.push_mask_clip(mask);
     }
 

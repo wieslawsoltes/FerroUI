@@ -218,6 +218,42 @@ fn aliased_text_has_no_grey() {
 }
 
 #[test]
+fn text_is_clipped_by_a_rotated_clip() {
+    let Some(engine) = engine() else { return };
+    let text = run("HHHHHHHH", 32.0, Point::new(4.0, 44.0));
+    let black = black();
+    let whole = render(&engine, |context| context.draw_glyph_run(Some(&black), &text));
+    // A square turned by 45 degrees about (80, 32): a diamond that reaches 28 pixels from there.
+    let clipped = render(&engine, |context| {
+        context.set_transform(Matrix::create_rotation_at(std::f64::consts::FRAC_PI_4, Point::new(80.0, 32.0)));
+        context.push_clip(Rect::new(60.0, 12.0, 40.0, 40.0));
+        context.set_transform(Matrix::IDENTITY);
+        context.draw_glyph_run(Some(&black), &text);
+        context.pop_clip();
+    });
+    // By the distance of a pixel from the middle of the diamond, along both axes together.
+    let (mut outside, mut inside, mut cut) = (0u64, 0u64, 0u64);
+    for y in 0..HEIGHT {
+        for x in 0..WIDTH {
+            let distance = (f64::from(x) + 0.5 - 80.0).abs() + (f64::from(y) + 0.5 - 32.0).abs();
+            if distance > 30.0 {
+                outside += u64::from(clipped.ink(x, y));
+                cut += u64::from(whole.ink(x, y));
+            } else if distance < 26.0 {
+                assert_eq!(whole.ink(x, y), clipped.ink(x, y), "the text in the diamond is as without it, at ({x}, {y})");
+                inside += u64::from(clipped.ink(x, y));
+            }
+        }
+    }
+    assert_eq!(0, outside, "nothing outside the diamond");
+    assert!(inside > 20_000, "the text in the diamond: {inside}");
+    assert!(cut > 20_000, "the text the diamond cuts off: {cut}");
+    // In the box of the diamond, past its edge: the clip is the diamond, not its bounds.
+    assert!(whole.ink_in(52..58, 40..44) + whole.ink_in(102..108, 40..44) > 500, "text in the corners of the box");
+    assert_eq!(0, clipped.ink_in(52..58, 40..44) + clipped.ink_in(102..108, 40..44));
+}
+
+#[test]
 fn text_takes_the_clip_the_colour_and_the_opacity_of_its_brush() {
     let Some(engine) = engine() else { return };
     let text = run("HHHH", 32.0, Point::new(8.0, 44.0));

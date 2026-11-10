@@ -154,6 +154,15 @@ impl SceneBuilder {
         self.check("add_rounded_rectangle_mask", ok).map(|()| index)
     }
 
+    /// Adds the mask of two to four rounded-rectangle masks that all apply (clips nested in each
+    /// other); returns its resource index. Like its masks, the chain has no texture.
+    pub fn add_analytic_mask_chain(&mut self, masks: &[progpu_native_scene_layer_mask]) -> Result<u32, SceneBuildError> {
+        let mut index = 0;
+        // SAFETY: the builder is alive; the span is borrowed for the call; `index` is written by it.
+        let ok = unsafe { progpu_native_scene_builder_add_analytic_mask_chain(self.raw, masks.as_ptr(), masks.len(), &mut index) };
+        self.check("add_analytic_mask_chain", ok).map(|()| index)
+    }
+
     /// Adds a vector clip mask of paths; returns its resource index.
     pub fn add_vector_clip_mask(
         &mut self,

@@ -1,8 +1,8 @@
 //! The bitmaps of the backend: pixels in memory (writeable bitmaps, bitmaps made from pixels,
 //! snapshots of layers, render-target bitmaps). A scene draws one as an image of its stream.
 //!
-//! Decoding and encoding image files is the image module of ProGPU (step P5 of
-//! docs/porting/progpu-backend.md): until then loading and saving report `Unsupported`.
+//! Image files are decoded by the image module of ProGPU, which reads PNG: a file of another
+//! format, and saving a bitmap (the module has no encoder), report `Unsupported`.
 
 use crate::drawing_context::ProGpuDrawingContext;
 use crate::gpu::{default_gpu, GpuTexture};
@@ -140,11 +140,49 @@ impl IBitmapImpl for ProGpuBitmap {
     }
 }
 
-/// The error of the image codecs the backend does not have yet, noted once.
+/// The error of what the image module of ProGPU does not do, noted once.
 pub(crate) fn unsupported_codec(what: &str) -> io::Error {
-    let message = format!("{what} needs the image module of ProGPU, which the ProGPU backend does not use yet");
+    let message = format!("{what} is not in the image module of ProGPU, which reads PNG only");
     notes::note_once("image-codec", &message);
     io::Error::new(io::ErrorKind::Unsupported, message)
+}
+
+/// The signature every PNG starts with.
+const PNG_SIGNATURE: [u8; 8] = [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+
+/// The most bytes the pixels of a decoded image may take: a file that asks for more is refused
+/// before anything is allocated.
+const DECODED_BYTES_LIMIT: usize = 1 << 30;
+
+impl ProGpuBitmap {
+    /// The bitmap of an image file: `RGBA8888` pixels that are not premultiplied, at 96 dpi.
+    /// The image module of ProGPU decodes it; it reads PNG. Another format is `Unsupported`, a
+    /// damaged file is `InvalidData`.
+    pub fn decode(file: &[u8]) -> io::Result<Self> {
+        use progpu_native_sys::image::*;
+        if !file.starts_with(&PNG_SIGNATURE) {
+            return Err(unsupported_codec("decoding an image that is not a PNG"));
+        }
+        let invalid = |error: u32| io::Error::new(io::ErrorKind::InvalidData, format!("the PNG could not be decoded (image error {error})"));
+        let (mut width, mut height, mut size, mut error) = (0u32, 0u32, 0usize, 0u32);
+        // SAFETY: `file` is a live slice and every out pointer is a live local.
+        if unsafe { progpu_native_image_png_read_size(file.as_ptr(), file.len(), &mut width, &mut height, &mut size, &mut error) } == 0 {
+            return Err(invalid(error));
+        }
+        if width > i32::MAX as u32 || height > i32::MAX as u32 || size > DECODED_BYTES_LIMIT || size != width as usize * height as usize * 4 {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, format!("a PNG of {width} x {height} pixels is too large")));
+        }
+        let bitmap = Self::new(PixelSize::new(width as i32, height as i32), Vector::new(96.0, 96.0), PixelFormat::RGBA8888, AlphaFormat::Unpremul);
+        {
+            let mut pixels = bitmap.pixels.data();
+            // SAFETY: `file` is a live slice, and the pixels of the bitmap are `size` bytes, which
+            // the decoder is told.
+            if unsafe { progpu_native_image_png_decode_rgba(file.as_ptr(), file.len(), pixels.as_mut_ptr(), pixels.len(), &mut error) } == 0 {
+                return Err(invalid(error));
+            }
+        }
+        Ok(bitmap)
+    }
 }
 
 /// A lock of the pixels of a bitmap. Disposing it advances the version of the bitmap.
