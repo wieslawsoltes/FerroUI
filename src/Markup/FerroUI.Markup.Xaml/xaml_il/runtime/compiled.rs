@@ -1103,7 +1103,7 @@ pub struct DocumentInfo {
     pub namespaces: XmlNamespaceTable,
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     /// The base URI of each document a deferred build was made for, parsed:
     /// a template is built once for every control it is applied to, and
     /// each build has a context of its own with the URI of the document.
