@@ -1,4 +1,4 @@
-use super::composition::{Compositor, LocalFuture, RenderInterfaceFeature};
+use super::composition::{CompositionDrawListVisual, Compositor, LocalFuture, RenderInterfaceFeature};
 use super::{RendererDiagnostics, SceneInvalidatedEventArgs};
 use crate::reactive::IDisposable;
 use crate::{Rect, Size, Visual};
@@ -55,6 +55,22 @@ pub trait IRenderer {
     /// thread). The feature is an object of the server side: what is handed
     /// out lends it inside the compositor lock.
     fn try_get_render_interface_feature(&self, feature_type: TypeId) -> LocalFuture<Option<RenderInterfaceFeature>>;
+
+    /// A visual is leaving the visual tree of the renderer and asks whether the renderer keeps
+    /// its composition visual until its next update pass: `true` when the renderer took it, and
+    /// will have the visual release it in that pass unless the visual is in a tree again by then
+    /// (`Visual::release_departed_composition_visual`). `false`, the default, has the visual
+    /// release it at once, as upstream (FerroUI deviation, docs/porting/desktop-performance.md,
+    /// section 9.32).
+    fn keep_departed_composition_visual(&self, _visual: &Visual, _composition_visual: &CompositionDrawListVisual) -> bool {
+        false
+    }
+
+    /// A visual whose composition visual was kept is attached to the visual tree of this
+    /// renderer: whether the composition visual may be used there (section 9.32).
+    fn rejoins_departed_composition_visual(&self, _composition_visual: &CompositionDrawListVisual) -> bool {
+        false
+    }
 
     /// The compositor of the renderer, if it renders through one
     /// (upstream: the `IRendererWithCompositor` interface).

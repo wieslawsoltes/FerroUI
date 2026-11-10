@@ -229,6 +229,12 @@ impl CompositionVisual {
     // --- generated reference properties, typed --------------------------------
 
     /// The composition target the visual is attached to.
+    /// Whether the visual is the composition visual kept for a visual that left its visual tree
+    /// (docs/porting/desktop-performance.md, section 9.32).
+    pub(crate) fn is_departed(&self) -> bool {
+        matches!(&self.kind, CompositionVisualKind::DrawList(data) if data.is_departed())
+    }
+
     pub fn root(&self) -> Option<Rc<CompositionTarget>> {
         self.visual_props().root().and_then(|o| o.into_any_rc().downcast::<CompositionTarget>().ok())
     }

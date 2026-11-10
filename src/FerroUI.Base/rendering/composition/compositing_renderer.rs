@@ -12,7 +12,7 @@ use crate::rendering::{
 use crate::threading::DispatcherPriority;
 use crate::utilities::HandlerList;
 use rustc_hash::FxHashSet;
-use crate::{Point, Rect, Ref, Size, Visual};
+use crate::{Point, Rect, Ref, Size, Visual, WeakRef};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -108,6 +108,11 @@ pub struct CompositingRenderer {
     /// Visuals whose composition properties changed but whose drawing did not.
     properties_dirty: RefCell<VisualSet>,
     recalculate_children: RefCell<VisualSet>,
+    /// The composition visuals kept for visuals that left the tree since the last update pass,
+    /// each with its visual: released in the next pass unless the visual is in a tree again
+    /// (docs/porting/desktop-performance.md, section 9.32). The visuals are referred to weakly:
+    /// the list keeps no visual alive.
+    departed: RefCell<Vec<(WeakRef<Visual>, CompositionDrawListVisual)>>,
     queued_update: Cell<bool>,
     queued_scene_invalidation: Cell<bool>,
     updating: Cell<bool>,
@@ -149,6 +154,7 @@ impl CompositingRenderer {
             dirty: RefCell::new(VisualSet::default()),
             properties_dirty: RefCell::new(VisualSet::default()),
             recalculate_children: RefCell::new(VisualSet::default()),
+            departed: RefCell::new(Vec::new()),
             queued_update: Cell::new(false),
             queued_scene_invalidation: Cell::new(false),
             updating: Cell::new(false),
@@ -247,7 +253,7 @@ impl CompositingRenderer {
         root: &Visual,
         filter: Option<&dyn Fn(&Visual) -> bool>,
     ) -> Vec<(Ref<Visual>, IntersectionResult)> {
-        let Some(root_visual) = root.composition_visual() else { return Vec::new() };
+        let Some(root_visual) = root.own_composition_visual() else { return Vec::new() };
         let root_visual: Rc<CompositionVisual> = (*root_visual).clone();
 
         let f = Self::composition_filter(filter);
@@ -274,7 +280,7 @@ impl CompositingRenderer {
         root: &Visual,
         filter: Option<&dyn Fn(&Visual) -> bool>,
     ) -> Option<(Ref<Visual>, IntersectionResult)> {
-        let root_visual = root.composition_visual()?;
+        let root_visual = root.own_composition_visual()?;
         let root_visual: Rc<CompositionVisual> = (*root_visual).clone();
 
         let f = Self::composition_filter(filter);
@@ -287,11 +293,40 @@ impl CompositingRenderer {
         Some((visual, intersection))
     }
 
+    /// Releases the composition visuals kept for visuals that left the tree and are not back
+    /// (section 9.32): what the visuals would have done when they left.
+    fn release_departed(&self) {
+        if self.departed.borrow().is_empty() {
+            return;
+        }
+        // The list is taken first: a release changes composition visuals and nothing else, but
+        // nothing here relies on that.
+        let mut departed = std::mem::take(&mut *self.departed.borrow_mut());
+        for (visual, composition_visual) in departed.drain(..) {
+            match visual.upgrade() {
+                Some(visual) => visual.release_departed_composition_visual(&composition_visual),
+                // The visual is gone and its composition visual is still as it left it.
+                None if composition_visual.is_departed() => {
+                    Visual::release_orphaned_composition_visual(&composition_visual);
+                }
+                None => {}
+            }
+        }
+        // The storage is kept for the next pass, unless something was queued meanwhile.
+        let mut list = self.departed.borrow_mut();
+        if list.is_empty() {
+            *list = departed;
+        }
+    }
+
     fn update_core(&self) {
         self.queued_update.set(false);
+        // Before anything is synchronized: a visual that is still out of the tree lets go of
+        // its composition visual here, and its former parent is synchronized below.
+        self.release_departed();
         let dirty: Vec<Ref<Visual>> = self.dirty.borrow_mut().snapshot();
         for visual in &dirty {
-            let Some(comp) = visual.composition_visual() else { continue };
+            let Some(comp) = visual.own_composition_visual() else { continue };
 
             visual.synchronize_composition_properties();
             crate::perf_count!(VisualsRecorded);
@@ -335,7 +370,7 @@ impl CompositingRenderer {
         // The visuals whose properties alone changed: their drawing is kept.
         let properties_dirty: Vec<Ref<Visual>> = self.properties_dirty.borrow_mut().snapshot();
         for visual in &properties_dirty {
-            if visual.composition_visual().is_some() && !self.dirty.borrow().contains(visual) {
+            if visual.own_composition_visual().is_some() && !self.dirty.borrow().contains(visual) {
                 visual.synchronize_composition_properties();
             }
         }
@@ -443,7 +478,7 @@ impl IRenderer for CompositingRenderer {
             panic!("Visual was invalidated during the render pass");
         }
 
-        if visual.composition_visual().is_none() {
+        if visual.own_composition_visual().is_none() {
             // Queuing a detached visual would keep it alive for as long as rendering is stopped.
             self.dirty.borrow_mut().remove(visual);
             self.recalculate_children.borrow_mut().remove(visual);
@@ -462,7 +497,7 @@ impl IRenderer for CompositingRenderer {
         if self.updating.get() {
             panic!("Visual was invalidated during the render pass");
         }
-        if visual.composition_visual().is_none() {
+        if visual.own_composition_visual().is_none() {
             self.properties_dirty.borrow_mut().remove(visual);
             return;
         }
@@ -506,6 +541,8 @@ impl IRenderer for CompositingRenderer {
 
     fn stop(&self) {
         self.composition_target.set_is_enabled(false);
+        // No update pass runs while the renderer is stopped: nothing is kept for one.
+        self.release_departed();
     }
 
     fn try_get_render_interface_feature(
@@ -513,6 +550,22 @@ impl IRenderer for CompositingRenderer {
         feature_type: TypeId,
     ) -> super::LocalFuture<Option<super::RenderInterfaceFeature>> {
         self.compositor.try_get_render_interface_feature(feature_type)
+    }
+
+    fn keep_departed_composition_visual(&self, visual: &Visual, composition_visual: &CompositionDrawListVisual) -> bool {
+        // Kept only when an update pass will run to release it.
+        if self.is_disposed.get() || self.updating.get() || !self.composition_target.is_enabled() {
+            return false;
+        }
+        self.departed.borrow_mut().push((visual.to_ref().downgrade(), composition_visual.clone()));
+        self.queue_update();
+        true
+    }
+
+    fn rejoins_departed_composition_visual(&self, composition_visual: &CompositionDrawListVisual) -> bool {
+        // One that is in the tree of another target of the compositor is not moved to this one.
+        !self.is_disposed.get()
+            && composition_visual.root().is_none_or(|root| Rc::ptr_eq(&root, &self.composition_target))
     }
 
     fn compositor(&self) -> Option<Rc<Compositor>> {
@@ -526,6 +579,7 @@ impl IRenderer for CompositingRenderer {
         self.dirty.borrow_mut().clear();
         self.recalculate_children.borrow_mut().clear();
         self.properties_dirty.borrow_mut().clear();
+        self.release_departed();
         for (token, _) in self.scene_invalidated.snapshot().iter() {
             self.scene_invalidated.remove(*token);
         }

@@ -22,6 +22,15 @@ pub trait ICompositionDrawListVisualExtension: 'static {
     /// by the server content of the visual, after the changes of the draw
     /// list visual.
     fn serialize_changes_core(&self, writer: &mut BatchStreamWriter<'_>);
+
+    /// Whether the control writes what this adds whether or not the control is in a visual tree,
+    /// so that the composition visual of a control that left its tree and is back before the next
+    /// update pass of the renderer is the same as one created then, and is kept (an addition,
+    /// docs/porting/desktop-performance.md, section 9.32). `false` by default: the composition
+    /// visual is released when its control leaves the tree, as upstream.
+    fn follows_control_out_of_tree(&self) -> bool {
+        false
+    }
 }
 
 /// What a draw list visual adds to a visual: the visual of the tree it
@@ -36,6 +45,10 @@ pub(crate) struct DrawListData {
     /// The drawing is the same but what it shows changed (section 9.14): the server redraws it.
     content_invalidated: Cell<bool>,
     draw_list: RefCell<Option<Rc<CompositionRenderData>>>,
+    /// The visual left its visual tree and this composition visual is kept until the next update
+    /// pass of the renderer (section 9.32). Until then it is hit tested as a released one is: it
+    /// has no drawing and no children.
+    departed: Cell<bool>,
     /// The properties of the acrylic visual, when the visual is one.
     pub(super) acrylic: Option<CompositionExperimentalAcrylicVisualProps>,
     /// The part of a derived class defined outside of this module.
@@ -83,9 +96,21 @@ impl DrawListData {
         }
     }
 
+    /// The drawing the visual is hit tested with: none while its visual is out of the tree.
+    fn hit_test_draw_list(&self) -> Option<Rc<CompositionRenderData>> {
+        if self.departed.get() {
+            return None;
+        }
+        self.draw_list.borrow().clone()
+    }
+
+    pub(super) fn is_departed(&self) -> bool {
+        self.departed.get()
+    }
+
     pub(super) fn hit_test(&self, pt: Point) -> bool {
         let custom = self.visual.as_ref().and_then(WeakRef::upgrade).and_then(|visual| visual.custom_hit_test(pt));
-        let draw_list = self.draw_list.borrow().clone();
+        let draw_list = self.hit_test_draw_list();
         if draw_list.is_none() && custom.is_none() {
             return false;
         }
@@ -98,7 +123,7 @@ impl DrawListData {
     pub(super) fn hit_test_geometry(&self, geometry: &Ref<Geometry>) -> IntersectionResult {
         let custom =
             self.visual.as_ref().and_then(WeakRef::upgrade).and_then(|visual| visual.custom_hit_test_geometry(geometry));
-        let draw_list = self.draw_list.borrow().clone();
+        let draw_list = self.hit_test_draw_list();
         if draw_list.is_none() && custom.is_none() {
             return IntersectionResult::Empty;
         }
@@ -182,6 +207,7 @@ impl CompositionDrawListVisual {
             draw_list_changed: Cell::new(false),
             content_invalidated: Cell::new(false),
             draw_list: RefCell::new(None),
+            departed: Cell::new(false),
             acrylic: acrylic.then(CompositionExperimentalAcrylicVisualProps::new),
             extension,
         };
@@ -209,6 +235,20 @@ impl CompositionDrawListVisual {
     /// it is alive.
     pub fn visual(&self) -> Option<Ref<Visual>> {
         self.data().visual.as_ref().and_then(WeakRef::upgrade)
+    }
+
+    /// Whether the visual can be kept while its visual is out of the tree for a moment (section
+    /// 9.32): nothing but the synchronisation of the visual tree writes to a plain draw list
+    /// visual, and a derived one says so itself.
+    pub(crate) fn can_be_kept_out_of_tree(&self) -> bool {
+        let data = self.data();
+        data.acrylic.is_none()
+            && data.extension.as_ref().is_none_or(|extension| extension.follows_control_out_of_tree())
+    }
+
+    /// Marks the visual as kept for a visual that left its tree, or as in use again.
+    pub(crate) fn set_departed(&self, departed: bool) {
+        self.data().departed.set(departed);
     }
 
     pub fn draw_list(&self) -> Option<Rc<CompositionRenderData>> {

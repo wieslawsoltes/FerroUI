@@ -398,7 +398,7 @@ impl Visual {
     /// composition visual if they are still there); the next synchronization installs the new
     /// ones before it writes the properties, so a change made with the transition animates.
     fn composition_transitions_changed(&self) {
-        let old = self.with_composition_extras(|extras| extras.facades.transition_animations.take());
+        let old = self.change_composition_extras(|extras| extras.facades.transition_animations.take()).flatten();
         if let (Some(old), Some(comp)) = (old, self.composition_visual()) {
             if comp.implicit_animations().is_some_and(|current| Rc::ptr_eq(&current, &old)) {
                 comp.set_implicit_animations(None);
