@@ -32,13 +32,13 @@ pub type CompositorClock = Rc<dyn Fn() -> Duration>;
 /// returns them: both under a lock.
 #[derive(Default)]
 pub struct BatchQueue {
-    queue: Mutex<Queue>,
+    queue: Mutex<QueuedBatches>,
     /// Emptied stream buffers, returned by the server for reuse.
     data_pool: Mutex<Vec<BatchStreamData>>,
 }
 
 #[derive(Default)]
-struct Queue {
+struct QueuedBatches {
     batches: VecDeque<CommittedBatch>,
     /// The last tick of the render thread found no batch and drew nothing,
     /// and no batch has been enqueued since: see
