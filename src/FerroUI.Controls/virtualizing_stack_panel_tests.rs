@@ -3400,10 +3400,14 @@ impl ItemsControlImpl for ItemsControlWithRows {
         _index: i32,
         _recycle_key: Option<RecycleKey>,
     ) -> Ref<Control> {
+        // Both draw, so both have a composition visual: one that draws nothing and sets
+        // nothing has none to keep.
         let canvas = Canvas::new();
         canvas.set_width(100.0);
         canvas.set_height(10.0);
+        canvas.set_background(Some(Brushes::white()));
         let row = Border::new();
+        row.set_background(Some(Brushes::red()));
         row.set_child(Some(canvas.upcast()));
         row.upcast()
     }
