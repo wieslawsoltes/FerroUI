@@ -85,12 +85,16 @@ pub struct CameraSelection {
 pub struct CameraStartOptions {
     pub selection: CameraSelection,
     pub presentation: PresentationPolicy,
+    /// Retain an immutable sampling view for explicitly requested analysis.
+    /// Preview-only capture does not allocate analysis storage or read pixels.
+    pub enable_analysis: bool,
 }
 impl Default for CameraStartOptions {
     fn default() -> Self {
         Self {
             selection: CameraSelection::default(),
             presentation: PresentationPolicy::GpuPreferred,
+            enable_analysis: false,
         }
     }
 }

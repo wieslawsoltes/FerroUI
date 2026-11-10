@@ -6,6 +6,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint --ext .ts modules",
     "test:pixels": "node tests/software-blit.test.mjs",
+    "test:media": "node --test tests/media-transfer.test.mjs tests/qr-worker.test.mjs",
     "test:input": "node tests/text-input.test.mjs && node tests/text-input-connection.test.mjs && node tests/input-options.test.mjs"
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "typescript": "5.8.3"
   },
   "dependencies": {
+    "jsqr": "1.4.0",
     "native-file-system-adapter": "github:jimmywarting/native-file-system-adapter#d43ad841581c2cc3ce47bbd1e8f11950ebdff027"
   }
 }

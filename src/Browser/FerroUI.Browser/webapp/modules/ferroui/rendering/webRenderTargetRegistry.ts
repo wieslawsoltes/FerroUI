@@ -144,9 +144,9 @@ export class WebRenderTargetRegistry {
                 FerroExports.CanvasHelper?.OnRenderTargetRegistered(msg.data.id, target.renderTargetType === "webgl" ? 2 : 1);
             } else if (msg.data.ferrouiCmd === "mediaFrame") {
                 // #601: a media frame of the page, for the compositor of this worker to import.
-                SharedGlFrames.receive(msg.data.id, msg.data.frame);
+                SharedGlFrames.receive(msg.data.id, msg.data.frame, msg.data.receipt);
             } else if (msg.data.ferrouiCmd === "discardMediaFrame") {
-                SharedGlFrames.discard(msg.data.id);
+                void SharedGlFrames.discard(msg.data.id);
             } else if (msg.data.ferrouiCmd === "unregisterCanvas") {
                 // The original deletes the entry and nothing sends the message. Here the thread
                 // that created the canvas sends it (`unregister`), and the context of the canvas

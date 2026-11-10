@@ -214,6 +214,7 @@ impl State {
                     }
                 } else {
                     let mut options = ferroui_media_camera::CameraStartOptions::default();
+                    options.enable_analysis = s.mode == Mode::Qr;
                     options.selection.format = Some(CameraFormat {
                         width: 640,
                         height: 480,
