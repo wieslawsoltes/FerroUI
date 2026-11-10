@@ -164,6 +164,9 @@ perf_counters! {
     TextLayoutCacheMisses => "text layout cache misses",
     /// `TextLayoutCache`: a kept layout nothing held was let go for room.
     TextLayoutCacheEvictions => "text layout cache evictions",
+    /// `TextLayoutCache::get_or_create`: the cache was full and was asked for the text for
+    /// the first time; the layout was made for its caller alone.
+    TextLayoutCacheFirstRequests => "text layout cache: first requests of a text, not kept",
     /// `TextFormatterImpl::format_line_with_cache`: a line was asked for.
     TextLinesFormatted => "text lines formatted",
     /// `TextFormatterImpl::format_line_with_cache`: the shaped runs of the
