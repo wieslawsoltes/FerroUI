@@ -41,6 +41,7 @@ mod main_view;
 mod main_window;
 pub mod markup;
 mod page_assets;
+mod navigation_timing;
 mod register_types;
 mod smoke;
 mod transparent_styles;

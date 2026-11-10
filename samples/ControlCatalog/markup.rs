@@ -246,6 +246,7 @@ mod run_time {
 /// # Panics
 /// Panics if the document fails to load.
 pub fn load_component<T: ObjectType>(this: &Ref<T>, path: &str) {
+    let _timing = crate::navigation_timing::MarkupTiming::start(path);
     ferroui_markup_xaml::FerroXamlLoader::track_instance(T::TYPE, this);
     let root: BoxedValue = Rc::new(this.clone());
     let loaded = match ferroui_markup_xaml::FerroXamlLoader::populate_override(T::TYPE) {
