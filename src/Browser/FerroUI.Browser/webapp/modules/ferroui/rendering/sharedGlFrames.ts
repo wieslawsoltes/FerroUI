@@ -149,6 +149,9 @@ export class SharedGlFrames {
         const fail = (error: Error) => {
             failed = error; cleanup(); rejectReady(error); rejectRetired(error);
             if (disposing) { SharedGlFrames.sent.delete(id); }
+            // The receipt port is closed now, so a worker that is slow rather than gone would keep
+            // the frame for good. Its messages arrive in order: the frame first, then this.
+            try { worker.postMessage({ ferrouiCmd: "discardMediaFrame", id }); } catch { /* The worker is gone. */ }
         };
         const onError = () => fail(new Error("The media render worker failed"));
         worker.addEventListener("error", onError);

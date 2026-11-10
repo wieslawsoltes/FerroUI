@@ -53,6 +53,17 @@ test("worker failure rejects readiness and retirement instead of claiming storag
     await assert.rejects(SharedGlFrames.discard(transfer.id),/worker failed/);assert.equal(frames[1].closed,1);
     frames[0].close(); // The fixture owns what an unresponsive worker may still retain.
 });
+test("a failed transfer tells the worker to release a frame that arrives late",async()=>{
+    frames=[];const posted=[];globalThis.__worker=new WorkerFixture();__worker.postMessage=message=>{posted.push(message);};
+    const transfer=SharedGlFrames.beginTransfer(new Video(),16,16,false);const ready=assert.rejects(transfer.ready,/worker failed/);
+    __worker.dispatchEvent(new Event("error"));await ready;
+    assert.deepEqual(posted.map(message=>message.ferrouiCmd),["mediaFrame","discardMediaFrame"]);
+    assert.equal(posted[1].id,transfer.id);
+    await assert.rejects(SharedGlFrames.discard(transfer.id),/worker failed/);assert.equal(frames[0].closed,0);
+    // The worker handles its messages in order: the late frame, then the discard.
+    SharedGlFrames.receive(posted[0].id,posted[0].frame,posted[0].receipt);
+    await SharedGlFrames.discard(posted[1].id);assert.equal(frames[0].closed,1);
+});
 test("failed posting closes provisional images without an orphaned receipt",()=>{
     frames=[];globalThis.__worker=new WorkerFixture();__worker.postMessage=()=>{throw new Error("post failed");};
     assert.throws(()=>SharedGlFrames.beginTransfer(new Video(),16,16,true),/post failed/);
