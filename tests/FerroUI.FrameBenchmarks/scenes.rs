@@ -11,14 +11,14 @@ use ferroui_base::media::{
     TransformGroup, Transforms, TranslateTransform,
 };
 use ferroui_base::media::Points;
-use ferroui_base::{CornerRadius, ObjectType, Point, Ref, Thickness, Upcast, Vector};
+use ferroui_base::{BoxedValue, CornerRadius, ObjectType, Point, Ref, Thickness, Upcast, Vector};
 use ferroui_controls::documents::TextElement;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::shapes::Polyline;
 use ferroui_controls::templates::{FuncDataTemplate, FuncTemplate};
 use ferroui_controls::{
-    Border, Canvas, Control, Grid, ItemsControl, ItemsSource, Panel, ScrollViewer, StackPanel, TextBlock,
-    VirtualizingStackPanel, WrapPanel,
+    Border, Button, Canvas, CheckBox, Control, Grid, ItemsControl, ItemsSource, Panel, ScrollViewer, Slider, StackPanel,
+    TextBlock, TextBox, VirtualizingStackPanel, WrapPanel,
 };
 use std::rc::Rc;
 
@@ -94,9 +94,34 @@ pub const SCENES: &[Scene] = &[
     },
 ];
 
-/// The scene named `name`.
+/// The scenes whose start is measured phase by phase (`tests/frames.rs`, `startup/<name>`): the
+/// build of the scene, its first layout, the recording and the commit of its first frame and the
+/// drawing of that frame. They do no per-frame work.
+pub const STARTUP_SCENES: &[Scene] = &[
+    Scene {
+        name: "tiles",
+        build: start_of_tiles,
+        pointer: false,
+        guards: "the start of a wall of 58,696 small tiles, six elements each: construction, the \
+                 attachment to the tree, the first measure and arrange, the first recording and \
+                 commit of every visual and the first frame (section 9.38)",
+    },
+    Scene {
+        name: "controls",
+        build: start_of_controls,
+        pointer: false,
+        guards: "the start of a form of 1,600 templated controls of the Fluent theme (text boxes, \
+                 check boxes, buttons, sliders): control themes, templates, the styles of their \
+                 parts and their first layout and frame (section 9.38)",
+    },
+];
+
+/// The scene named `name`: a scene of the frames, or `startup/<name>` for a scene of the start.
 pub fn scene(name: &str) -> Option<&'static Scene> {
-    SCENES.iter().find(|scene| scene.name == name)
+    match name.strip_prefix("startup/") {
+        Some(name) => STARTUP_SCENES.iter().find(|scene| scene.name == name),
+        None => SCENES.iter().find(|scene| scene.name == name),
+    }
 }
 
 fn brush(argb: u32) -> Rc<dyn IBrush> {
@@ -346,7 +371,21 @@ const WALL_COLUMNS: usize = 200;
 
 /// A tile of a wall: a bordered box around a label and a line of a dot and a value, seven elements.
 fn tile(index: usize, label_brush: &Rc<dyn IBrush>, tile_brush: &Rc<dyn IBrush>, dot_brush: &Rc<dyn IBrush>) -> Ref<Border> {
-    let (width, height) = (5.0, 4.0);
+    tile_of(index, WALL_COLUMNS, (5.0, 4.0), 24.0, label_brush, tile_brush, dot_brush)
+}
+
+/// A tile `size` points wide and high, at its place on a wall `columns` tiles across that begins
+/// `top` points down.
+fn tile_of(
+    index: usize,
+    columns: usize,
+    size: (f64, f64),
+    top: f64,
+    label_brush: &Rc<dyn IBrush>,
+    tile_brush: &Rc<dyn IBrush>,
+    dot_brush: &Rc<dyn IBrush>,
+) -> Ref<Border> {
+    let (width, height) = size;
     let dot = height * 0.22;
     let name = label(height * 0.30, label_brush, false);
     name.set_text(Some(&format!("{index:05}")));
@@ -374,8 +413,8 @@ fn tile(index: usize, label_brush: &Rc<dyn IBrush>, tile_brush: &Rc<dyn IBrush>,
     tile.set_background(Some(tile_brush.clone()));
     tile.set_clip_to_bounds(true);
     tile.set_child(&content);
-    Canvas::set_left(&tile, (index % WALL_COLUMNS) as f64 * (width + 1.0));
-    Canvas::set_top(&tile, (index / WALL_COLUMNS) as f64 * (height + 1.0) + 24.0);
+    Canvas::set_left(&tile, (index % columns) as f64 * (width + 1.0));
+    Canvas::set_top(&tile, (index / columns) as f64 * (height + 1.0) + top);
     tile
 }
 
@@ -469,4 +508,65 @@ fn lines() -> Ref<Control> {
     draw(0);
     Clock::follow(draw);
     root(&panel)
+}
+
+// --- the start of a scene -------------------------------------------------------------------------
+
+/// The tiles of the densest wall a window of 1280 by 820 points holds: 319 across and 184 down,
+/// 3 points wide and high, a point apart.
+const START_COLUMNS: usize = 319;
+const START_ROWS: usize = 184;
+
+fn start_of_tiles() -> Ref<Control> {
+    let white = brush(0xFFFFFFFF);
+    let blue = brush(0xFF1E40AF);
+    let red = brush(0xFFDC2626);
+    let canvas = Canvas::new();
+    canvas.set_clip_to_bounds(true);
+    for index in 0..START_COLUMNS * START_ROWS {
+        canvas.children().add(tile_of(index, START_COLUMNS, (3.0, 3.0), 80.0, &white, &blue, &red));
+    }
+    root(&canvas)
+}
+
+/// The rows of the form: each a label, a text box, a check box, a button and a slider.
+const START_ROWS_OF_CONTROLS: usize = 400;
+
+fn start_of_controls() -> Ref<Control> {
+    let ink = brush(0xFF111827);
+    let rows = StackPanel::new();
+    rows.set_spacing(4.0);
+    for index in 0..START_ROWS_OF_CONTROLS {
+        let name = label(13.0, &ink, false);
+        name.set_text(Some(&format!("Record {index:04}")));
+        name.set_width(110.0);
+        name.set_vertical_alignment(VerticalAlignment::Center);
+        let text = TextBox::new();
+        text.set_text(Some(&format!("value {}", index * 37 % 1000)));
+        text.set_width(220.0);
+        let check = CheckBox::new();
+        check.set_content(Some(Rc::new(String::from("Enabled")) as BoxedValue));
+        check.set_is_checked(Some(index % 3 == 0));
+        let button = Button::new();
+        button.set_content(Some(Rc::new(String::from("Apply")) as BoxedValue));
+        let slider = Slider::new();
+        slider.set_minimum(0.0);
+        slider.set_maximum(100.0);
+        slider.set_range_value((index % 100) as f64);
+        slider.set_width(200.0);
+        let row = StackPanel::new();
+        row.set_orientation(Orientation::Horizontal);
+        row.set_spacing(12.0);
+        row.children().add(&name);
+        row.children().add(&text);
+        row.children().add(&check);
+        row.children().add(&button);
+        row.children().add(&slider);
+        rows.children().add(&row);
+    }
+    let scroller = ScrollViewer::new();
+    scroller.set_content(Some(Control::boxed(&rows)));
+    scroller.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Hidden);
+    scroller.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled);
+    root(&scroller)
 }

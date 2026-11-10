@@ -1,7 +1,9 @@
 //! The frame benchmarks of the local performance gate (`scripts/perf/gate.py`): scenes that each do
 //! one kind of per-frame work of a heavy desktop screen (text that changes every frame, a scrolling
 //! list of shadowed cards, panels moved by their render transforms, a layout under a changing width,
-//! a still wall of tiles, tiles that move) and the start of each (building the scene, showing it).
+//! a still wall of tiles, tiles that move) and the start of each (building the scene, showing it);
+//! and two scenes whose start alone is measured, phase by phase to the first frame: a wall of small
+//! tiles at its densest, and a form of templated controls ([`STARTUP_SCENES`]).
 //!
 //! They are FerroUI's own regression benchmarks, kept apart from the ports of other frameworks'
 //! benchmarks (`samples/GauntletBenchmark` follows the Cranpose benchmark and is synced with it):
@@ -24,4 +26,4 @@ pub mod scenes;
 pub use clock::Clock;
 pub use fonts::Roboto;
 pub use host::FrameHost;
-pub use scenes::{Scene, SCENES};
+pub use scenes::{Scene, SCENES, STARTUP_SCENES};

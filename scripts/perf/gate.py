@@ -143,11 +143,19 @@ ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
 
 FRAME_FACTORS = {"ui_ms_per_frame": 1.0, "render_ms_per_frame": 1.5, "wall_ms_per_frame": 1.0}
 FRAME_FLOOR_MS = 0.05
-# - The start of a scene (the frame benchmarks): its build and its show (first layout, recording
-#   and commit) are measured once a run, so a round has one sample of each: 1.5 for the parts, 1 for
-#   their sum.
-STARTUP_FACTORS = {"build_ms": 1.5, "show_ms": 1.5, "startup_ms": 1.0}
+# - The start of a scene (the frame benchmarks): its build, its show (first layout, recording
+#   and commit) and, for the scenes of the start, the time from the show to the first frame are
+#   measured once a run, so a round has one sample of each: 1.5 for the parts, 1 for their sum.
+STARTUP_FACTORS = {"build_ms": 1.5, "show_ms": 1.5, "first_frame_ms": 1.5, "startup_ms": 1.0}
 STARTUP_FLOOR_MS = 0.5
+# - The memory a scene of the start adds to the process (resident megabytes): what the allocator
+#   returns to the system moves the parts, their sum less: 2 for the parts, 1 for their sum, and a
+#   megabyte is not a change.
+MEMORY_FACTORS = {"build_mb": 2.0, "show_mb": 2.0, "first_frame_mb": 2.0, "startup_mb": 1.0}
+MEMORY_FLOOR_MB = 1.0
+# - The sizes of the objects an element is made of (`SIZES {...}`): exact, so any growth is one.
+SIZE_FACTOR = 0.0
+SIZE_FLOOR_BYTES = 0.0
 # - The window suite: a desktop process per scene on the GPU backend. Frame times move with the
 #   display and the compositor of the system (and stop at the display's rate), the first frame
 #   with the state of the disk and the shader caches: 2 for both.
@@ -165,7 +173,7 @@ class Metric:
     """One number of a run, lower is better."""
 
     key: str
-    unit: str  # "ms" or "ns"
+    unit: str  # "ms", "ns", "MB" or "bytes"
     factor: float
     floor: float
 
@@ -188,12 +196,18 @@ class GateError(Exception):
 # --- parsing --------------------------------------------------------------------------------------
 
 GATE_LINE = re.compile(r"^GATE (\{.*\})\s*$")
+SIZES_LINE = re.compile(r"^SIZES (\{.*\})\s*$")
 
 
 def parse_gate(output: str) -> list[tuple[Metric, float]]:
-    """The metrics of the `GATE {...}` lines of the frame gate."""
+    """The metrics of the `GATE {...}` and `SIZES {...}` lines of the frame gate."""
     found = []
     for line in output.splitlines():
+        sizes = SIZES_LINE.match(line.strip())
+        if sizes:
+            for name, size in json.loads(sizes.group(1)).items():
+                found.append((Metric(f"sizes/{name}", "bytes", SIZE_FACTOR, SIZE_FLOOR_BYTES), float(size)))
+            continue
         match = GATE_LINE.match(line.strip())
         if not match:
             continue
@@ -206,6 +220,10 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
         for name, factor in STARTUP_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, STARTUP_FLOOR_MS)
+                found.append((metric, float(record[name])))
+        for name, factor in MEMORY_FACTORS.items():
+            if name in record:
+                metric = Metric(f"{bench} {name}", "MB", factor, MEMORY_FLOOR_MB)
                 found.append((metric, float(record[name])))
     return found
 
@@ -500,6 +518,10 @@ def record(side: Side, found: list[tuple[Metric, float]]) -> None:
 def format_value(value: float, unit: str) -> str:
     if unit == "ms":
         return f"{value:.3f} ms"
+    if unit == "MB":
+        return f"{value:.1f} MB"
+    if unit == "bytes":
+        return f"{value:.0f} bytes"
     if value < 1e3:
         return f"{value:.2f} ns"
     if value < 1e6:
