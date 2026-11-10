@@ -272,7 +272,7 @@ pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;
 pub use glyph_run_drawing::GlyphRunDrawing;
 pub use geometry_hit_test_result::GeometryHitTestResult;
-pub use i_affects_render::{can_value_affect_render, subscribe_invalidated, IAffectsRender};
+pub use i_affects_render::{affects_render_source, can_value_affect_render, subscribe_invalidated, IAffectsRender};
 pub use i_experimental_acrylic_material::IExperimentalAcrylicMaterial;
 pub use i_image::IImage;
 pub use i_image_brush::{IImageBrush, IImageBrushSource};

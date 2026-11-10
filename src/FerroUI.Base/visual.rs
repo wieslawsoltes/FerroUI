@@ -1,6 +1,6 @@
 use crate::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior};
 use crate::media::{
-    can_value_affect_render, subscribe_invalidated, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
+    affects_render_source, can_value_affect_render, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
     ITransform, RenderOptions, TextOptions, Transform,
 };
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor, KeptCompositionVisuals};
@@ -1740,18 +1740,17 @@ impl Visual {
             subscription.dispose();
         }
 
+        // The handler is made for a value that can change only: an immutable
+        // brush, the common value of a brush property, has nothing to
+        // subscribe to.
+        let Some(source) = affects_render_source(e.new_value()) else { return };
         let weak = self.to_ref().downgrade();
-        let subscription = subscribe_invalidated(
-            e.new_value(),
-            Rc::new(move || {
-                if let Some(target) = weak.upgrade() {
-                    target.invalidate_visual();
-                }
-            }),
-        );
-        if let Some(subscription) = subscription {
-            self.affects_render_subscriptions.borrow_mut().push((property, subscription));
-        }
+        let subscription = source.invalidated(Rc::new(move || {
+            if let Some(target) = weak.upgrade() {
+                target.invalidate_visual();
+            }
+        }));
+        self.affects_render_subscriptions.borrow_mut().push((property, subscription));
     }
 
     /// Called when a visual's render transform property changes: while the

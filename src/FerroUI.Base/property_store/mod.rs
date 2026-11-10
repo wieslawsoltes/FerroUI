@@ -20,7 +20,7 @@ pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn, UncommonFiel
 pub(crate) use frame_priority::{FramePriority, FrameType};
 pub(crate) use hot_value::advance_metadata_generation;
 #[doc(hidden)]
-pub use hot_value::HotValue;
+pub use hot_value::{HotStamp, HotValue};
 pub use immediate_value_frame::ImmediateValueFrame;
 pub(crate) use local_value_binding_observer::{DirectBindingObserver, DirectBoxedBindingObserver, LocalValueBindingObserver};
 pub(crate) use value_entry::entry_ptr_eq;

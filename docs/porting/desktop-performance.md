@@ -2257,3 +2257,73 @@ What the numbers say:
   entry and, for the first of an object, a frame are allocated, and the effective value is
   made and destroyed with it.
 
+
+### 9.36 The kept copies of a layoutable share one stamp, and two more values are kept
+
+Two of the findings of section 9.35 were acted on first, with the pattern of section 9.9 and
+nothing new beside it: a value a pass reads is kept in the object as a copy, and the copy is
+the value for as long as the generation of the store and of the metadata it was read at.
+
+**The handler of a brush is made for a brush that can change.** A change of a property that
+affects rendering subscribed the visual to the invalidation of the new value, and built the
+handler of that subscription, a reference-counted closure over a weak handle of the visual,
+before it asked whether the value can be subscribed to. An immutable brush, the common
+value, cannot. The visual asks first.
+
+| One write of | Before | After |
+|---|---|---|
+| `Background`, changed, on a `Border` | 85.5 ns | 64.8 ns |
+
+**One stamp for the copies of a layoutable.** Each of the nine kept values of a
+`Layoutable` (the six sizes, the margin and the two alignments) had a stamp of its own,
+eight bytes each, and a measure that read all nine compared nine stamps that are equal by
+construction: they are all the generation of the same store. They share one stamp now
+(`property_store::HotStamp`) with a mask that says which of the copies were read at it. A
+changed generation empties the mask. The stamp, the mask and the six sizes are the first
+sixty-four bytes of the group, one cache line for what a measure reads first.
+
+**`UseLayoutRounding` and `Container.Sizing` are kept.** A measure and an arrange read both
+for every element, and neither was a kept copy: the first because it inherits, the second
+because it is attached. An inherited value depends on the stores of the ancestors, which
+the stamp of the element does not cover, so the copy is used in one case only: while no
+store of the thread holds a value of the property (`FerroProperty::holders`, the count the
+inherited lookup already keeps). Then the value is the default of the class, which only its
+metadata changes, and the metadata is in the stamp. As soon as any element sets the
+property every read goes through the store again, as before. `Container.Sizing` does not
+inherit and is kept as the sizes are.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine:
+
+| One read of | Before | After |
+|---|---|---|
+| `UseLayoutRounding`, held by no control, 16 controls | 5.42 ns | 0.98 ns |
+| `UseLayoutRounding`, held by no control, 10,000 controls | 9.10 ns | 4.79 ns |
+| `Width`, a kept copy, 16 controls | 0.66 ns | 0.71 ns |
+| `Width`, a kept copy, 10,000 controls | 3.56 ns | 4.26 ns |
+
+| Measure and arrange of a panel with 1,000 children | Before | After | |
+|---|---|---|---|
+| `StackPanel`, vertical | 108.50 us | 101.17 us | -6.8 % |
+| `StackPanel`, horizontal | 109.17 us | 99.62 us | -8.7 % |
+| `Grid` | 126.92 us | 118.71 us | -6.5 % |
+| `Grid` with spans | 140.80 us | 127.07 us | -9.7 % |
+| `DockPanel` | 124.03 us | 113.30 us | -8.7 % |
+| `WrapPanel` | 109.77 us | 103.80 us | -5.4 % |
+| `Canvas` | 107.92 us | 102.11 us | -5.4 % |
+| `UniformGrid` | 98.72 us | 92.77 us | -6.0 % |
+
+The passes over a nested tree (`NestedDepth`) and the layout listeners did not move beyond
+the noise of the measurement.
+
+What it costs, and what it does not:
+
+- **A kept read alone is slower by the test of one bit**: 0.05 ns in the cache, 0.7 ns in a
+  walk over 10,000 controls that reads nothing else of each. A pass reads several values of
+  an element, and there the one comparison in place of nine is the larger effect, which is
+  what the panels measure.
+- **Memory goes down.** The group was 168 bytes with nine stamps; it is 104 bytes with one
+  stamp and two more values: 64 bytes less for every layoutable.
+- **Nothing else is kept.** A copy of every property would add about a kilobyte to a
+  control (section 9.35); the two values added here are the two a pass reads for every
+  element that had no copy.
