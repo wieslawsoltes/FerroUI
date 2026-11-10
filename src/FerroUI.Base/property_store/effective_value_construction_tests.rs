@@ -18,10 +18,12 @@ impl<T: PropertyValue> EffectiveValue<T> {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
         };
-        let uncommon = metadata.coerce_value().map(|coerce| UncommonFields {
-            coerce: coerce.clone(),
-            uncoerced_value: RefCell::new(value.clone()),
-            uncoerced_base_value: RefCell::new(value.clone()),
+        let uncommon = metadata.coerce_value().map(|coerce| {
+            Box::new(UncommonFields {
+                coerce: coerce.clone(),
+                uncoerced_value: RefCell::new(value.clone()),
+                uncoerced_base_value: RefCell::new(value.clone()),
+            })
         });
         Self {
             metadata,
