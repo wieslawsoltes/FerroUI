@@ -773,7 +773,7 @@ impl SubtypePickerView {
             engine,
             scheduler,
             theme: RefCell::new(KeyboardThemes::floris_day()),
-            manage_requested: HandlerList::with_ordered_ids(),
+            manage_requested: HandlerList::new(),
         })
     }
     pub fn set_theme(&self, theme: Arc<KeyboardTheme>) {

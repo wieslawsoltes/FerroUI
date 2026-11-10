@@ -135,8 +135,8 @@ impl<T: Clone> FerroList<T> {
     pub fn new() -> Self {
         Self(Rc::new(FerroListData {
             items: RefCell::new(Rc::new(Vec::new())),
-            collection_changed: HandlerList::with_ordered_ids(),
-            untyped_collection_changed: Event::with_ordered_ids(),
+            collection_changed: HandlerList::new(),
+            untyped_collection_changed: Event::new(),
             property_changed: Event::new(),
             validator: RefCell::new(None),
             reset_behavior: Cell::new(ResetBehavior::Reset),

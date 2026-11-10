@@ -1,4 +1,4 @@
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use smallvec::SmallVec;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -6,11 +6,23 @@ use std::sync::atomic::{AtomicU64, Ordering};
 /// A list of event handlers that tolerates being modified while it is being
 /// invoked: invocation works on a snapshot, and the snapshot is only copied
 /// when the list actually changes.
+///
+/// A list is one pointer wide. An object with a dozen events, almost all of
+/// which nobody subscribes to, pays that for each of them and nothing else
+/// (desktop-performance.md, section 9.39).
+///
+/// The tokens of every list come from one counter of the process: within a
+/// list, and across lists, a later subscription has a greater token, and a
+/// token is never given out twice. The typed and the untyped form of one
+/// event, which run their handlers in subscription order as the single
+/// event of the original, need nothing more than that.
 pub struct HandlerList<F: ?Sized> {
     /// `None` until the first handler is added: most lists of an object never get one, and an
     /// empty list then costs no allocation.
-    handlers: RefCell<Option<Rc<Handlers<F>>>>,
-    next_id: HandlerIds,
+    ///
+    /// A `Cell`: the handlers are taken out for the length of one operation of the list and
+    /// put back, and no code of a handler runs in between (see [`HandlerList::with`]).
+    handlers: Cell<Option<Rc<Handlers<F>>>>,
 }
 
 /// The handlers of a list: most lists hold one or two, which are stored with the list's shared
@@ -39,33 +51,8 @@ impl<F: ?Sized> std::ops::Deref for HandlerSnapshot<F> {
     }
 }
 
-/// Where the tokens of a handler list come from.
-enum HandlerIds {
-    Own(Cell<u64>),
-    /// A counter shared with other lists, so that tokens across them are in
-    /// subscription order (the typed and untyped forms of one event).
-    Shared(Rc<Cell<u64>>),
-    /// The counter of the process, which every list made with
-    /// [`HandlerList::with_ordered_ids`] shares: tokens across all of them are
-    /// in subscription order, and a list needs no counter of its own.
-    Ordered,
-}
-
-/// The counter of [`HandlerIds::Ordered`].
-static ORDERED_IDS: AtomicU64 = AtomicU64::new(1);
-
-impl HandlerIds {
-    fn next(&self) -> u64 {
-        let cell = match self {
-            Self::Own(cell) => cell,
-            Self::Shared(cell) => cell,
-            Self::Ordered => return ORDERED_IDS.fetch_add(1, Ordering::Relaxed),
-        };
-        let id = cell.get();
-        cell.set(id + 1);
-        id
-    }
-}
+/// The counter the tokens of every list come from.
+static NEXT_TOKEN: AtomicU64 = AtomicU64::new(1);
 
 impl<F: ?Sized> Default for HandlerList<F> {
     fn default() -> Self {
@@ -74,61 +61,56 @@ impl<F: ?Sized> Default for HandlerList<F> {
 }
 
 impl<F: ?Sized> HandlerList<F> {
-    pub fn new() -> Self {
-        Self { handlers: RefCell::new(None), next_id: HandlerIds::Own(Cell::new(1)) }
+    pub const fn new() -> Self {
+        Self { handlers: Cell::new(None) }
     }
 
-    /// A list whose tokens come from `ids`, a counter shared with other
-    /// lists: tokens across all of them increase in subscription order.
-    pub fn with_shared_ids(ids: Rc<Cell<u64>>) -> Self {
-        Self { handlers: RefCell::new(None), next_id: HandlerIds::Shared(ids) }
-    }
-
-    /// A list whose tokens come from the counter of the process, which every
-    /// list made this way shares: tokens across all of them increase in
-    /// subscription order, as with [`with_shared_ids`](Self::with_shared_ids),
-    /// without a counter to allocate.
-    pub fn with_ordered_ids() -> Self {
-        Self { handlers: RefCell::new(None), next_id: HandlerIds::Ordered }
+    /// Runs `operation` with the handlers, which are out of the list
+    /// meanwhile. `operation` runs no code of a handler and drops no
+    /// handler: either could come back to this list and find it empty.
+    #[inline]
+    fn with<R>(&self, operation: impl FnOnce(&mut Option<Rc<Handlers<F>>>) -> R) -> R {
+        let mut handlers = self.handlers.take();
+        let result = operation(&mut handlers);
+        self.handlers.set(handlers);
+        result
     }
 
     #[inline]
     pub fn is_empty(&self) -> bool {
-        self.handlers.borrow().as_ref().is_none_or(|handlers| handlers.is_empty())
+        self.with(|handlers| handlers.as_ref().is_none_or(|handlers| handlers.is_empty()))
     }
 
     pub fn len(&self) -> usize {
-        self.handlers.borrow().as_ref().map_or(0, |handlers| handlers.len())
+        self.with(|handlers| handlers.as_ref().map_or(0, |handlers| handlers.len()))
     }
 
     /// Adds a handler and returns a token that removes it again.
     pub fn add(&self, handler: Rc<F>) -> u64 {
-        let id = self.next_id.next();
-        let mut handlers = self.handlers.borrow_mut();
-        let handlers = handlers.get_or_insert_with(|| Rc::new(SmallVec::new()));
-        Rc::make_mut_or_clone(handlers).push((id, handler));
+        let id = NEXT_TOKEN.fetch_add(1, Ordering::Relaxed);
+        self.with(|handlers| {
+            let handlers = handlers.get_or_insert_with(|| Rc::new(SmallVec::new()));
+            Rc::make_mut_or_clone(handlers).push((id, handler));
+        });
         id
     }
 
     /// Removes the handler registered under `token`.
     pub fn remove(&self, token: u64) -> bool {
-        let mut handlers = self.handlers.borrow_mut();
-        let Some(handlers) = handlers.as_mut() else {
-            return false;
-        };
-        match handlers.iter().position(|(id, _)| *id == token) {
-            Some(index) => {
-                Rc::make_mut_or_clone(handlers).remove(index);
-                true
-            }
-            None => false,
-        }
+        let removed = self.with(|handlers| {
+            let handlers = handlers.as_mut()?;
+            let index = handlers.iter().position(|(id, _)| *id == token)?;
+            Some(Rc::make_mut_or_clone(handlers).remove(index))
+        });
+        // The handler is released with the list whole again: what it owns
+        // may unsubscribe from this list as it goes.
+        removed.is_some()
     }
 
     /// Returns the current handlers; later modifications do not affect it.
     #[inline]
     pub fn snapshot(&self) -> HandlerSnapshot<F> {
-        HandlerSnapshot(self.handlers.borrow().clone())
+        HandlerSnapshot(self.with(|handlers| handlers.clone()))
     }
 }
 
