@@ -6,7 +6,7 @@
 //! though, and the first frame of a large tree fills each of them once with
 //! what no later frame comes near: three hundred megabytes of a tree of
 //! 350 000 elements stayed allocated for as long as the window lived
-//! (desktop-performance.md, section 9.39).
+//! (desktop-performance.md, section 9.40).
 //!
 //! So an emptied buffer keeps at most [`RETAINED_BUFFER_BYTES`] and gives the
 //! rest back. Content of that size is far above what a frame of an

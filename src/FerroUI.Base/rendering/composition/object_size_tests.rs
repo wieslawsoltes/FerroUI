@@ -5,7 +5,7 @@
 //! allocator hands out blocks of fixed sizes: above a kilobyte the next sizes
 //! are a quarter apart, so one field too many costs every visual a quarter of
 //! its size. The sizes below are the ones the visuals fit in now
-//! (desktop-performance.md, section 9.39); a field that is added to one of
+//! (desktop-performance.md, section 9.40); a field that is added to one of
 //! them belongs in a box, behind an `Option`, if most visuals do not use it,
 //! and a generated property that few visuals set belongs in `RARE_FIELDS` of
 //! the generator, which keeps it in a second block.

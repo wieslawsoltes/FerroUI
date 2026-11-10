@@ -47,7 +47,7 @@ enum VisualSet {
 /// A visual says itself which sets it is in (`Visual::renderer_sets`): the epoch of the sets it
 /// was added to and a bit for each of them. Adding, removing and asking are a comparison of that
 /// word, where the reference hashes the visual into a `HashSet<Visual>` (DEVIATIONS.md,
-/// Rendering; docs/porting/desktop-performance.md, section 9.39). Clearing the sets takes a new
+/// Rendering; docs/porting/desktop-performance.md, section 9.40). Clearing the sets takes a new
 /// epoch, so no visual is visited to forget it. A visual is in the sets of one renderer at a
 /// time: the renderer of the root it is under.
 ///

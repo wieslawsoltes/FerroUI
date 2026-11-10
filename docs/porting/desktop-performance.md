@@ -630,7 +630,7 @@ What it measures:
   sizes of the objects an element is made of (the element class by class, its composition visual
   and the visual of the render thread); the gate compares each. With the `counters` feature
   (`--features counters`) a start also prints the allocations of each phase and the blocks it
-  left alive by size class, and the counters of the framework (section 9.39).
+  left alive by size class, and the counters of the framework (section 9.40).
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -2601,3 +2601,99 @@ What it costs, and what it does not:
 - **Not changed:** an isolate whose end is after a paragraph separator, in classes given
   to `process_classes` directly, stops with "Internal error" as it did. The text formatter
   gives the algorithm one paragraph at a time, where it cannot happen.
+
+
+### 9.40 The start of a large tree: what an element costs before its first frame
+
+The frames of a scene were measured from the first; what a window costs until it shows its
+first frame was not. Two scenes of the start are measured now, phase by phase and with the
+memory each phase adds (section 7): `startup/tiles`, 58,696 tiles of six elements on a
+canvas (352,187 elements), and `startup/controls`, 1,600 templated controls of the Fluent
+theme (24,017 visuals). The tiles start is the one that shows what an element costs: it
+took 2.6 seconds and 3.7 GB, about 10.5 KB for an element, of which the element itself was
+under 2.2 KB. The rest was its composition visual on the two threads, the batch that
+carried it and the queues the first pass filled.
+
+Seven changes, each measured before the next:
+
+- **The dirty sets of the renderer are stamps on the visuals.** `CompositingRenderer` kept
+  the visuals to update, those whose properties changed and those whose children are
+  recalculated in three hash sets of handles: every invalidation of every element hashed a
+  handle and probed a table. A visual now carries the epoch of the sets of its renderer and
+  one bit for each (`Visual::renderer_sets`); the sets are lists in the order of adding
+  (`VisualSets`), and emptying them takes a new epoch and visits no visual.
+- **A new composition visual does not send its defaults.** The constructor set eight
+  defaults through the setters, so the first batch of every visual carried them: about 130
+  bytes a visual, 48 MB for the tiles. The generator writes the defaults into the fields of
+  both sides (one table, `DIRECT_DEFAULTS`), and the first changes a server visual reads
+  report the eight fields as changed, so the same inputs are dirty in the same pass.
+- **A list of handlers is one pointer wide.** `HandlerList` (`ferroui-system`) held a cell
+  with a borrow flag and the source of its tokens, thirty-two bytes for an event nobody
+  listens to, and an element has twelve of them in its base classes. The list is the
+  pointer alone, taken out of its cell for the length of an operation; the tokens come
+  from one counter of the process, so they are unique and increasing across lists.
+- **The coercion fields of an effective value are boxed, and so is the hit test index of a
+  visual.** An effective value kept the two uncoerced values of a property with a coercion
+  callback inline in every value (a `Thickness` value is 176 bytes instead of 264, a
+  reference 144 instead of 200); a visual kept the index of its children for hit testing
+  inline, 120 bytes that only a visual with thirty-two children or more uses.
+- **The handles of a generated property block are in a cell without a borrow flag.**
+  `OptionCell` is what `RefCell<Option<Rc<_>>>` was used for (a read clones, a write
+  replaces), eight bytes smaller for each of the eight handles of a visual on each side.
+- **An emptied transport buffer keeps at most four megabytes.** The streams of a batch,
+  the readback queue, the serialization queue and its set, the own-properties queue and
+  the loaded queue grew to the size of the first batch and kept it for the life of the
+  window, about 390 MB for the tiles. Each gives back what is beyond
+  `RETAINED_BUFFER_BYTES` when it is emptied (`utilities::ReleaseExcess`). The largest
+  batch of the steady-state scenes is under three percent of the limit.
+- **The rarely set properties of a visual are in a second block.** The transform other
+  than the offset, the geometry clip, the opacity mask, the effect, the cache mode, the
+  adorner link and the WinUI additions (twenty-one properties, `RARE_FIELDS` of
+  `scripts/generate_composition.py`) are about four hundred bytes on each side, and few
+  visuals set any of them. The block is made, on both threads, when one of them is first
+  given another value than the one it is made with (`has_rare_properties`).
+
+The sizes, in bytes (`sizes_of_an_element`, kept exact by the gate):
+
+| Object | Before | After |
+|---|---:|---:|
+| `Border` | 2168 | 1880 |
+| `TextBlock` | 2136 | 1848 |
+| `StackPanel` | 1864 | 1576 |
+| `CompositionVisual` (UI thread) | 1032 | 480 |
+| `ServerCompositionVisual` | 1080 | 624 |
+
+The tiles start, median of five runs alternating the two builds on a quiet machine:
+
+| Figure | Before | After | Change |
+|---|---:|---:|---:|
+| Build of the tree (`build_ms`) | 470.1 | 409.6 | -12.9 % |
+| Show: attach, styles, layout (`show_ms`) | 899.5 | 732.0 | -18.6 % |
+| First frame, UI thread (`first_ui_ms`) | 374.3 | 337.1 | -9.9 % |
+| First frame, render thread (`first_render_ms`) | 731.9 | 632.5 | -13.6 % |
+| Show to first frame (`first_frame_ms`) | 1035.3 | 898.1 | -13.3 % |
+| Start (`startup_ms`) | 2596.1 | 2201.7 | -15.2 % |
+| Memory of the build (`build_mb`) | 1422.2 | 1129.8 | -20.6 % |
+| Memory of the show (`show_mb`) | 1005.7 | 713.1 | -29.1 % |
+| Memory of the first frame (`first_frame_mb`) | 1277.4 | 1009.0 | -21.0 % |
+| Memory of the start (`startup_mb`) | 3705.3 | 2851.9 | -23.0 % |
+
+The controls start, where an element is a small part of what a control costs, was measured
+for the last change alone: 302.6 to 297.9 ms and 367.2 to 350.5 MB.
+
+What it costs, and what it does not:
+
+- **Resident memory does not show the transport buffers.** The buffers that are given
+  back are about 230 MB of heap for the tiles, and the macOS allocator keeps freed large
+  blocks resident until the system asks for memory: `first_frame_mb` is the same with and
+  without that change. What lowers the footprint is not making them, which is later work.
+- **A visual that sets a rare property pays one allocation for the block,** once, and a
+  read of such a property of a visual without the block returns the value it would be
+  made with. A visual that sets none of them never has it.
+- **A removed visual stays in a set of the renderer until the set is compacted** (when
+  the stale entries are half of the list, or the set is read), not until the removal.
+- **`HandlerList::with_shared_ids` and `with_ordered_ids` are gone:** every list has what
+  they asked for.
+- **Tests:** `object_size_tests` keeps the two visuals in the allocator blocks they fit in
+  now; `compositor_tests` covers the rare block on both threads and the defaults of a new
+  visual; `release_excess` and `option_cell` have their own.

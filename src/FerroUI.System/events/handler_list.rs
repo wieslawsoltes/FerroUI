@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 ///
 /// A list is one pointer wide. An object with a dozen events, almost all of
 /// which nobody subscribes to, pays that for each of them and nothing else
-/// (desktop-performance.md, section 9.39).
+/// (desktop-performance.md, section 9.40).
 ///
 /// The tokens of every list come from one counter of the process: within a
 /// list, and across lists, a later subscription has a greater token, and a

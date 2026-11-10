@@ -690,7 +690,7 @@ class Generator:
     # transform other than the offset (translation, anchor and center points, rotation, scale,
     # orientation, matrix), its geometry clip, opacity mask, effect, cache mode, adorner link and
     # the WinUI additions are about four hundred bytes on each side, and few visuals of a tree set
-    # any of them (desktop-performance.md section 9.39).
+    # any of them (desktop-performance.md section 9.40).
     RARE_FIELDS = {
         "CompositionVisual": (
             "Clip",

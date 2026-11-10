@@ -104,7 +104,7 @@ pub const STARTUP_SCENES: &[Scene] = &[
         pointer: false,
         guards: "the start of a wall of 58,696 small tiles, six elements each: construction, the \
                  attachment to the tree, the first measure and arrange, the first recording and \
-                 commit of every visual and the first frame (section 9.38)",
+                 commit of every visual and the first frame (section 9.40)",
     },
     Scene {
         name: "controls",
@@ -112,7 +112,7 @@ pub const STARTUP_SCENES: &[Scene] = &[
         pointer: false,
         guards: "the start of a form of 1,600 templated controls of the Fluent theme (text boxes, \
                  check boxes, buttons, sliders): control themes, templates, the styles of their \
-                 parts and their first layout and frame (section 9.38)",
+                 parts and their first layout and frame (section 9.40)",
     },
 ];
 

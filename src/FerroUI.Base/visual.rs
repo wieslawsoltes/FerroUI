@@ -70,7 +70,7 @@ pub struct Visual {
     /// transform, held while the visual is attached to a visual tree.
     render_transform_subscription: RefCell<Option<Subscription>>,
     affects_render_subscriptions: RefCell<Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>>,
-    // Not upstream (docs/porting/desktop-performance.md, section 9.39): the sets of its
+    // Not upstream (docs/porting/desktop-performance.md, section 9.40): the sets of its
     // renderer the visual is in, for the next update pass: the epoch of the sets and a bit for
     // each (`rendering::composition::compositing_renderer::VisualSets`).
     pub(crate) renderer_sets: Cell<u64>,
