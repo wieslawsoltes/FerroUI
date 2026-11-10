@@ -159,7 +159,7 @@ struct Session : std::enable_shared_from_this<Session> {
     ComPtr<IMFDXGIDeviceManager> manager;ComPtr<IMFSourceReader> reader;ComPtr<IMFMediaSource> camera_source;
     ComPtr<ReaderCallback> callback;
     ComPtr<IAudioClient> audio;ComPtr<IAudioRenderClient> render;ComPtr<IAudioClock> audio_clock;ComPtr<ISimpleAudioVolume> audio_volume;
-    UINT audio_capacity=0;UINT64 audio_frequency=0;bool has_audio=false,playing=false,audio_started=false;
+    UINT audio_capacity=0;UINT64 audio_frequency=0;bool has_video=true,has_audio=false,playing=false,audio_started=false;
     bool video_eos=false,audio_eos=false,prepared_frame=false,ever_played=false;LONGLONG clock_base=0,position=0;bool clock_based=false;
     Clock::time_point started;
     std::deque<AudioChunk> pcm;size_t pcm_bytes=0;
@@ -290,37 +290,44 @@ static void prepare(const std::shared_ptr<Session> &owner){
         }
         s.operation="camera Source Reader creation";check(MFCreateSourceReaderFromMediaSource(s.camera_source.Get(),attributes.Get(),&s.reader));
     }else check(MFCreateSourceReaderFromURL(s.source.c_str(),attributes.Get(),&s.reader));
-    check(s.reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,FALSE));check(s.reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,TRUE));
-    // ANGLE's D3D11 image import accepts BGRA, but not B8G8R8X8 storage.
-    // Request ARGB32 so the native processor allocates an importable format.
-    ComPtr<IMFMediaType> type;check(MFCreateMediaType(&type));check(type->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video));check(type->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_ARGB32));
-    if(s.geometry.known){
-        check(type->SetUINT32(MF_MT_VIDEO_ROTATION,0));
-        check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.geometry.width,s.geometry.height));
-        MFVideoArea full{};full.Area.cx=s.geometry.width;full.Area.cy=s.geometry.height;
-        check(type->SetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,(UINT8*)&full,sizeof(full)));
-        check(type->SetBlob(MF_MT_GEOMETRIC_APERTURE,(UINT8*)&full,sizeof(full)));
-    }
-    // Explicit GPU video-processor output request. Validate the negotiated tags
-    // and IMFDXGIBuffer on every frame; no system-memory output is admitted.
-    check(type->SetUINT32(MF_MT_VIDEO_PRIMARIES,MFVideoPrimaries_BT709));check(type->SetUINT32(MF_MT_TRANSFER_FUNCTION,MFVideoTransFunc_sRGB));check(type->SetUINT32(MF_MT_VIDEO_NOMINAL_RANGE,MFNominalRange_0_255));
-    if(s.requested_w&&s.requested_h)check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.requested_w,s.requested_h));
-    if(s.requested_n&&s.requested_d)check(MFSetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,s.requested_n,s.requested_d));
-    s.operation="video output negotiation";check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));
-    if(s.geometry.known){
-        s.operation="native untransformed video configuration";
-        ComPtr<IMFSourceReaderEx> reader;check(s.reader.As(&reader));bool configured=false;
-        for(DWORD index=0;index<16;index++){
-            GUID category;ComPtr<IMFTransform> transform;HRESULT hr=reader->GetTransformForStream(MF_SOURCE_READER_FIRST_VIDEO_STREAM,index,&category,&transform);
-            if(hr==MF_E_INVALIDINDEX)break;check(hr);
-            ComPtr<IMFVideoProcessorControl> control;if(FAILED(transform.As(&control)))continue;
-            RECT full{0,0,(LONG)s.geometry.width,(LONG)s.geometry.height};
-            check(control->SetRotation(ROTATION_NONE));check(control->SetMirror(MIRROR_NONE));
-            check(control->SetSourceRectangle(&full));check(control->SetDestinationRectangle(&full));configured=true;
+    check(s.reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,FALSE));
+    HRESULT video=s.reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,TRUE);
+    // A PCM cue has no video stream. Keep its existing WASAPI path without
+    // allocating a video processor or weakening camera/video admission.
+    s.has_video=s.camera||video!=MF_E_INVALIDSTREAMNUMBER;
+    if(s.has_video){
+        check(video);
+        // ANGLE's D3D11 image import accepts BGRA, but not B8G8R8X8 storage.
+        // Request ARGB32 so the native processor allocates an importable format.
+        ComPtr<IMFMediaType> type;check(MFCreateMediaType(&type));check(type->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video));check(type->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_ARGB32));
+        if(s.geometry.known){
+            check(type->SetUINT32(MF_MT_VIDEO_ROTATION,0));
+            check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.geometry.width,s.geometry.height));
+            MFVideoArea full{};full.Area.cx=s.geometry.width;full.Area.cy=s.geometry.height;
+            check(type->SetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,(UINT8*)&full,sizeof(full)));
+            check(type->SetBlob(MF_MT_GEOMETRIC_APERTURE,(UINT8*)&full,sizeof(full)));
         }
-        if(!configured)throw Failure{E_NOTIMPL};
+        // Explicit GPU video-processor output request. Validate the negotiated tags
+        // and IMFDXGIBuffer on every frame; no system-memory output is admitted.
+        check(type->SetUINT32(MF_MT_VIDEO_PRIMARIES,MFVideoPrimaries_BT709));check(type->SetUINT32(MF_MT_TRANSFER_FUNCTION,MFVideoTransFunc_sRGB));check(type->SetUINT32(MF_MT_VIDEO_NOMINAL_RANGE,MFNominalRange_0_255));
+        if(s.requested_w&&s.requested_h)check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.requested_w,s.requested_h));
+        if(s.requested_n&&s.requested_d)check(MFSetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,s.requested_n,s.requested_d));
+        s.operation="video output negotiation";check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));
+        if(s.geometry.known){
+            s.operation="native untransformed video configuration";
+            ComPtr<IMFSourceReaderEx> reader;check(s.reader.As(&reader));bool configured=false;
+            for(DWORD index=0;index<16;index++){
+                GUID category;ComPtr<IMFTransform> transform;HRESULT hr=reader->GetTransformForStream(MF_SOURCE_READER_FIRST_VIDEO_STREAM,index,&category,&transform);
+                if(hr==MF_E_INVALIDINDEX)break;check(hr);
+                ComPtr<IMFVideoProcessorControl> control;if(FAILED(transform.As(&control)))continue;
+                RECT full{0,0,(LONG)s.geometry.width,(LONG)s.geometry.height};
+                check(control->SetRotation(ROTATION_NONE));check(control->SetMirror(MIRROR_NONE));
+                check(control->SetSourceRectangle(&full));check(control->SetDestinationRectangle(&full));configured=true;
+            }
+            if(!configured)throw Failure{E_NOTIMPL};
+        }
+        s.operation="video metadata validation";video_type(s);
     }
-    s.operation="video metadata validation";video_type(s);
     if(!s.camera){
         ComPtr<IMFMediaType> native_audio;HRESULT audio=s.reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,0,&native_audio);
         if(SUCCEEDED(audio)){
@@ -331,6 +338,13 @@ static void prepare(const std::shared_ptr<Session> &owner){
         }else if(audio!=MF_E_INVALIDSTREAMNUMBER)check(audio);
         PROPVARIANT duration;PropVariantInit(&duration);if(SUCCEEDED(s.reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,MF_PD_DURATION,&duration))&&duration.vt==VT_UI8){std::lock_guard<std::mutex> guard(s.lock);s.state.duration_ns=duration.uhVal.QuadPart*100;}PropVariantClear(&duration);
         PROPVARIANT characteristics;PropVariantInit(&characteristics);if(SUCCEEDED(s.reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,MF_SOURCE_READER_MEDIASOURCE_CHARACTERISTICS,&characteristics))&&characteristics.vt==VT_UI4){std::lock_guard<std::mutex> guard(s.lock);s.state.seekable=(characteristics.ulVal&MFMEDIASOURCE_CAN_SEEK)!=0;}PropVariantClear(&characteristics);
+    }
+    if(!s.has_video){
+        if(!s.has_audio)throw Failure{MF_E_INVALIDMEDIATYPE};
+        s.video_eos=true;
+        s.prepared_frame=true;
+        std::lock_guard<std::mutex> guard(s.lock);
+        s.state.state=1;
     }
 }
 static std::unique_ptr<FerroWindowsFrame> video_frame(Session &s,const Packet &packet){
@@ -352,7 +366,7 @@ static void reset(Session &s,uint64_t epoch,LONGLONG target){
     {std::unique_lock<std::mutex> guard(s.lock);if(!s.changed.wait_for(guard,std::chrono::seconds(5),[&]{return s.flushed||s.closed.load();}))throw Failure{HRESULT_FROM_WIN32(WAIT_TIMEOUT)};s.packet_ready=false;s.packet={};}
     if(s.closed)return;
     PROPVARIANT value;PropVariantInit(&value);value.vt=VT_I8;value.hVal.QuadPart=target;check(s.reader->SetCurrentPosition(GUID_NULL,value));
-    s.video.clear();s.pcm.clear();s.pcm_bytes=0;s.video_eos=s.audio_eos=false;s.prepared_frame=false;s.position=s.clock_base=target;s.clock_based=false;
+    s.video.clear();s.pcm.clear();s.pcm_bytes=0;s.video_eos=!s.has_video;s.audio_eos=false;s.prepared_frame=false;s.position=s.clock_base=target;s.clock_based=false;
     if(s.audio){check(s.audio->Stop());check(s.audio->Reset());}s.audio_started=false;
     std::lock_guard<std::mutex> guard(s.lock);s.request_epoch=epoch;s.latest.reset();s.state.position_ns=target*100;s.state.state=0;
 }
@@ -407,6 +421,17 @@ static void run(const std::shared_ptr<Session> &owner){
                 if(packet.epoch==epoch){
                     ComPtr<IMFMediaType> type;check(s.reader->GetCurrentMediaType(packet.stream,&type));GUID major;check(type->GetGUID(MF_MT_MAJOR_TYPE,&major));bool video=major==MFMediaType_Video;
                     if(packet.flags&MF_SOURCE_READERF_ENDOFSTREAM){if(video)s.video_eos=true;else s.audio_eos=true;}
+                    if(!s.has_video&&!s.prepared_frame&&(packet.sample||s.audio_eos)){
+                        std::lock_guard<std::mutex> guard(s.lock);
+                        if(packet.epoch==s.epoch){
+                            // Audio can return a packet starting before the requested position.
+                            // audio_packet trims the preceding PCM, so keep the requested floor.
+                            s.position=std::max(s.position,packet.pts);
+                            s.state.seek_done=packet.epoch;
+                            s.prepared_frame=true;
+                            s.state.state=s.playing?2:1;
+                        }
+                    }
                     if(packet.sample){if(video){auto f=video_frame(s,packet);if(s.camera||packet.pts>=s.position)s.video.push_back(std::move(f));}else if(s.playing&&s.has_audio)audio_packet(s,packet);}
                 }
             }

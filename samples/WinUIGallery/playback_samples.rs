@@ -368,19 +368,20 @@ pub(crate) fn wire(root: &Ref<Control>) {
 /// Small, application-owned PCM cues. No Windows system-sound assets or claims
 /// of system sound/spatial parity. Native playback still uses the media stack.
 fn sound_source(index: usize, name: &str) -> MediaSource {
-    let rate = 24_000u32;
+    // Match the Media Foundation/WASAPI provider’s native PCM format.
+    let rate = 48_000u32;
     let samples = rate / 5;
-    let length = samples * 2;
+    let length = samples * 4;
     let mut bytes = Vec::with_capacity(44 + length as usize);
     bytes.extend_from_slice(b"RIFF");
     bytes.extend_from_slice(&(36 + length).to_le_bytes());
     bytes.extend_from_slice(b"WAVEfmt ");
     bytes.extend_from_slice(&16u32.to_le_bytes());
     bytes.extend_from_slice(&1u16.to_le_bytes());
-    bytes.extend_from_slice(&1u16.to_le_bytes());
-    bytes.extend_from_slice(&rate.to_le_bytes());
-    bytes.extend_from_slice(&(rate * 2).to_le_bytes());
     bytes.extend_from_slice(&2u16.to_le_bytes());
+    bytes.extend_from_slice(&rate.to_le_bytes());
+    bytes.extend_from_slice(&(rate * 4).to_le_bytes());
+    bytes.extend_from_slice(&4u16.to_le_bytes());
     bytes.extend_from_slice(&16u16.to_le_bytes());
     bytes.extend_from_slice(b"data");
     bytes.extend_from_slice(&length.to_le_bytes());
@@ -391,7 +392,9 @@ fn sound_source(index: usize, name: &str) -> MediaSource {
             .sin()
             .powi(2);
         let value = (std::f64::consts::TAU * frequency * phase).sin() * envelope * 6000.;
-        bytes.extend_from_slice(&(value as i16).to_le_bytes());
+        let pcm = (value as i16).to_le_bytes();
+        bytes.extend_from_slice(&pcm);
+        bytes.extend_from_slice(&pcm);
     }
     MediaSource::Resource {
         name: format!("{name}.wav"),
@@ -460,10 +463,15 @@ mod tests {
             assert_eq!(content_type, "audio/wav");
             assert_eq!(&encoded[..4], b"RIFF");
             assert_eq!(&encoded[8..16], b"WAVEfmt ");
-            assert_eq!(encoded.len(), 9644);
+            assert_eq!(encoded.len(), 38444);
+            assert_eq!(u16::from_le_bytes(encoded[22..24].try_into().unwrap()), 2);
+            assert_eq!(
+                u32::from_le_bytes(encoded[24..28].try_into().unwrap()),
+                48000
+            );
             assert_eq!(
                 u32::from_le_bytes(encoded[40..44].try_into().unwrap()),
-                9600
+                38400
             );
             if let Some(previous) = previous {
                 assert_ne!(encoded, previous);

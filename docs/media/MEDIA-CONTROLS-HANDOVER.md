@@ -12,7 +12,7 @@ $env:FERROUI_SMOKE_MEDIA = '1'
 cargo run -p control-catalog-desktop
 ```
 
-Look for `CATALOG_MEDIA_SMOKE_PASS`. With a supported camera available, repeat with `FERROUI_SMOKE_MEDIA_CAMERA=1`, then exercise photo capture through `CameraCaptureUI`. Record whether the camera is physical or synthetic. Check permission denial and navigation away while capture is preparing.
+Look for `CATALOG_MEDIA_SMOKE_PASS`. With a supported camera available, repeat with `FERROUI_SMOKE_MEDIA_CAMERA=1`, then exercise photo capture through `CameraCaptureUI`. Record whether the camera is physical or synthetic. Check permission denial and navigation away while capture is preparing. The Sound cues use the existing WASAPI path with a PCM-only source. Verify playback, end-of-stream and replay without a video track or texture import.
 
 ## Linux
 

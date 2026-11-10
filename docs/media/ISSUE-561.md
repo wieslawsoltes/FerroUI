@@ -4,7 +4,7 @@ The controls for [#561](https://github.com/wieslawsoltes/FerroUI/issues/561) use
 
 `MediaTransportControls` binds the named buttons and sliders of the WinUI template. The standard layout adds position text, status and volume as space permits. Compact layout retains the main actions and seek bar. The individual action and slider visibility properties apply to both. The existing Button and Slider peers expose the actions, with current Play/Pause, Mute/Unmute and Enter/Exit full window names. Replacing the template disconnects the old parts from transport commands.
 
-`CameraCaptureUI` uses `CameraPreview` and starts only on an explicit action. Photo and recording completions return independently owned encoded results. Stopping, detaching or replacing the template invalidates pending capture results. A provider must advertise video recording separately from preview and photo support. AVFoundation takes silent H.264 samples from the same camera session, encodes an MP4 and bounds the output to 60 seconds and 256 MiB. It does not open a microphone or read back the preview texture. The other providers currently expose preview and still capture; their Record action is disabled.
+`CameraCaptureUI` uses `CameraPreview` and starts only on an explicit action. Photo and recording completions return independently owned encoded results. Stopping, detaching or replacing the template invalidates pending capture results. A provider must advertise video recording separately from preview and photo support. AVFoundation takes silent H.264 samples from the same camera session, encodes an MP4 and bounds the output to 60 seconds and 256 MiB. It does not open a microphone or read back the preview texture. Encoder buffering is separate from the preview counters. The other providers currently expose preview and still capture; their Record action is disabled.
 
 The WinUI, macOS and Material themes supply the transport and capture templates. The optional control packages publish their own `WINUI_ONLY_CONTROLS` lists to avoid a dependency cycle with `ferroui-controls`. Fluent and Simple supply no templates for them. The existing independent media samples select WinUI so their transport remains available.
 
@@ -28,5 +28,12 @@ cargo test -p ferroui-media-camera-apple --lib --features native-lifetime-tests
 cargo test -p ferroui-themes-winui --lib media_transport_template
 cargo test -p winui-gallery --lib
 ```
+
+Local verification on the issue branch:
+
+- The portable media control and camera ownership suites, the AVFoundation encoder fixture, the WinUI transport layout test and all 134 Gallery tests passed. WinUI and macOS generated theme references were regenerated and checked.
+- The macOS catalog media smoke passed with both Skia and Vello GPU on Metal. Both imported real video frames with zero CPU preview transfers and retired the presentation on navigation. The camera check on that host was discovery only.
+- The iOS and Android simulator playback smokes passed pause, seek, resume, stop and retirement. The Android emulator also started its synthetic camera, decoded a 1280 × 960 native JPEG, and stopped with zero retained frames, GPU reads or quarantined reads. This is simulator evidence, not physical camera acceptance.
+- The Windows Sound example uses 48 kHz stereo PCM and the same WASAPI path as the video player. The Media Foundation reader now handles a source with no video stream. Native audio-only playback and replay are part of the Windows handover.
 
 Use the [Windows and Linux handover](MEDIA-CONTROLS-HANDOVER.md) for native acceptance and remaining recorder integration. Physical capture on iOS and Android recording provider support also remain open. The previously recorded #550 verification is evidence for the shared stack on its recorded revisions.
