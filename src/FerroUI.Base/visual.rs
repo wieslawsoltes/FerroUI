@@ -36,6 +36,9 @@ pub struct Visual {
     has_render_transform: Cell<bool>,
     /// The kept value of `IsVisible`, read many times a layout pass (desktop-performance.md, 9.9).
     hot_is_visible: crate::property_store::HotValue<bool>,
+    // Not upstream: what the synchronisation of the composition visual reads from the value store
+    // (docs/porting/desktop-performance.md, section 9.27).
+    hot_composition_inputs: crate::property_store::HotValue<CompositionStyledInputs>,
     // Not upstream: whether the visual has a manipulation transform (the zoom a scroll presenter
     // applies to its content), kept so that the transforms of the visual tree skip the lookup.
     has_manipulation_transform: Cell<bool>,
@@ -61,6 +64,20 @@ pub struct Visual {
 
 /// The state of the WinUI composition API on a visual (see
 /// `docs/porting/winui-composition.md`).
+/// What the synchronisation of a composition visual reads from the value store of its visual:
+/// the values that are plain data, and whether each of the objects is set (an object is read
+/// again at every synchronisation, since it can change without the store changing).
+#[derive(Clone, Copy, Default)]
+struct CompositionStyledInputs {
+    opacity: f32,
+    clip_to_bounds: bool,
+    has_clip: bool,
+    has_opacity_mask: bool,
+    has_cache_mode: bool,
+    has_effect: bool,
+    has_render_transform: bool,
+}
+
 #[derive(Default)]
 struct CompositionExtras {
     /// `UIElement.Translation`: `None` while the facade was never set, so that the translation
@@ -547,12 +564,16 @@ impl VisualImpl for Visual {
         let visible = (this.is_visible() || this.is_shown_by_composition())
             && !this.is_hidden_by_composition() && !this.is_render_suppressed();
         if comp.visible() != visible { comp.set_visible(visible); }
-        let opacity = this.opacity() as f32;
+        // The styled values the composition visual follows, read from the value store once per
+        // change of the store: an object that is absent then is not looked up again, and one
+        // that is present is read as before, since it can change without the store changing.
+        let inputs = this.composition_styled_inputs();
+        let opacity = inputs.opacity;
         if comp.opacity() != opacity { comp.set_opacity(opacity); }
-        if comp.clip_to_bounds() != this.clip_to_bounds() { comp.set_clip_to_bounds(this.clip_to_bounds()); }
-        comp.set_clip(this.clip().and_then(|clip| clip.platform_impl()));
+        if comp.clip_to_bounds() != inputs.clip_to_bounds { comp.set_clip_to_bounds(inputs.clip_to_bounds); }
+        comp.set_clip(if inputs.has_clip { this.clip().and_then(|clip| clip.platform_impl()) } else { None });
 
-        let opacity_mask = this.opacity_mask();
+        let opacity_mask = if inputs.has_opacity_mask { this.opacity_mask() } else { None };
         let same_mask = match (comp.opacity_mask(), &opacity_mask) {
             (Some(a), Some(b)) => *a == **b,
             (None, None) => true,
@@ -562,7 +583,11 @@ impl VisualImpl for Visual {
             comp.set_opacity_mask(opacity_mask);
         }
 
-        let cache_mode = this.cache_mode().map(|cache_mode| cache_mode.get_for_compositor(comp.compositor()));
+        let cache_mode = if inputs.has_cache_mode {
+            this.cache_mode().map(|cache_mode| cache_mode.get_for_compositor(comp.compositor()))
+        } else {
+            None
+        };
         let same_cache_mode = match (comp.cache_mode(), &cache_mode) {
             (Some(a), Some(b)) => Rc::ptr_eq(&a, b),
             (None, None) => true,
@@ -572,7 +597,7 @@ impl VisualImpl for Visual {
             comp.set_cache_mode(cache_mode);
         }
 
-        let effect = this.effect();
+        let effect = if inputs.has_effect { this.effect() } else { None };
         if !crate::media::EffectExtensions::effect_equals(comp.effect().as_deref(), effect.as_deref()) {
             comp.set_effect(effect.as_ref().map(crate::media::EffectExtensions::to_immutable));
         }
@@ -586,7 +611,7 @@ impl VisualImpl for Visual {
             render_transform = crate::Matrix::new(-1.0, 0.0, 0.0, 1.0, bounds.width, 0.0);
         }
 
-        if let Some(transform) = this.render_transform() {
+        if let Some(transform) = if inputs.has_render_transform { this.render_transform() } else { None } {
             let origin = this.render_transform_origin().to_pixels(crate::Size::new(bounds.width, bounds.height));
             let offset = crate::Matrix::create_translation(origin.x, origin.y);
             render_transform = render_transform * ((-offset) * transform.value() * offset);
@@ -776,6 +801,20 @@ crate::ferro_properties! { impl Visual {
 } }
 
 impl Visual {
+    /// The styled values [`Self::synchronize_composition_properties`] reads, kept while the value
+    /// store of the visual is unchanged (none of the properties inherits).
+    fn composition_styled_inputs(&self) -> CompositionStyledInputs {
+        self.hot_composition_inputs.get(self.values().value_generation(), || CompositionStyledInputs {
+            opacity: self.opacity() as f32,
+            clip_to_bounds: self.clip_to_bounds(),
+            has_clip: self.clip().is_some(),
+            has_opacity_mask: self.opacity_mask().is_some(),
+            has_cache_mode: self.cache_mode().is_some(),
+            has_effect: self.effect().is_some(),
+            has_render_transform: self.render_transform().is_some(),
+        })
+    }
+
     fn static_constructor() {
         Self::affects_render::<Visual>(&[
             Self::clip_property().as_property(),
@@ -842,6 +881,7 @@ impl Visual {
             has_mirror_transform: Cell::new(false),
             has_render_transform: Cell::new(false),
             hot_is_visible: Default::default(),
+            hot_composition_inputs: Default::default(),
             has_manipulation_transform: Cell::new(false),
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),

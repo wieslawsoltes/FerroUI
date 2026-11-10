@@ -13,7 +13,7 @@ use crate::rendering::composition::Compositor;
 use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{FerroLocator, LocatorExtensions, Matrix, Point, Rect, Ref, RoundedRect};
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -62,14 +62,14 @@ pub struct RenderDataDrawingContext {
     compositor: Option<Rc<Compositor>>,
     stream: Option<RenderDataStream>,
     resources: Vec<RecordedResource>,
-    resources_hash_set: HashSet<usize>,
+    resources_hash_set: FxHashSet<usize>,
     push_stack: Vec<PushEntry>,
     compositing_layers: Option<bool>,
 }
 
 impl RenderDataDrawingContext {
     pub fn new(compositor: Option<Rc<Compositor>>) -> Self {
-        Self { compositor, stream: None, resources: Vec::new(), resources_hash_set: HashSet::new(), push_stack: Vec::new(), compositing_layers: None }
+        Self { compositor, stream: None, resources: Vec::new(), resources_hash_set: FxHashSet::default(), push_stack: Vec::new(), compositing_layers: None }
     }
 
     fn stream(&mut self) -> &mut RenderDataStream {
