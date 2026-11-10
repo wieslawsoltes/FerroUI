@@ -299,6 +299,18 @@ perf_counters! {
     RenderLayersPushed => "render: opacities, layers, masks and effects pushed by drawings",
     /// The replay of a drawing: a transform was pushed.
     RenderTransformsPushed => "render: transforms pushed by drawings",
+
+    // --- the pipelined frame layers of the Skia backend (desktop-performance.md, section 9.33) ---
+    /// `PipelinedLayer::begin_frame`: a layer that drew its frames directly began to pipeline
+    /// them.
+    SkiaLayersBeganToPipeline => "skia: layers that began to pipeline their frames",
+    /// `PipelinedLayer::finish_frame`: a frame was handed to the threads of the layer.
+    SkiaFramesPipelined => "skia: frames pipelined",
+    /// `PipelinedLayer::finish_frame`: a recorded frame was played on the recorder of the
+    /// context (it had a draw only that recorder draws, or the threads were not there).
+    SkiaPipelinedFramesPlayedDirectly => "skia: recorded frames played on the recorder of the context",
+    /// `PipelinedLayerSurface::surface`: the layer was read while one of its frames was drawn.
+    SkiaPipelinedLayerReadsInFrames => "skia: reads of a pipelined layer while a frame is drawn",
 }
 
 /// The number of counters.

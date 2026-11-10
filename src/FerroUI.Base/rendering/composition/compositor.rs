@@ -531,7 +531,18 @@ impl Compositor {
             !self.is_confined_to_render_thread(),
             "a compositor that is confined to its render thread is not rendered by the thread of the compositor"
         );
-        self.server.with(|server| server.render())
+        self.server.with(|server| {
+            let another_tick = server.render();
+            // A frame a layer holds back is presented here: the caller is
+            // at a synchronous point, and expects what it committed on
+            // screen when this returns (section 9.33 of
+            // desktop-performance.md).
+            if server.has_pending_frames() {
+                server.render()
+            } else {
+                another_tick
+            }
+        })
     }
 
     /// Whether the thread that ticks the render loop renders the frames,
@@ -803,8 +814,15 @@ impl Compositor {
     }
 
     fn enqueue_batch(&self, batch: CommittedBatch) {
-        self.batches.enqueue(batch);
+        let late = self.batches.enqueue(batch);
         self.render_loop.wakeup();
+        // The tick of this display frame has come and gone with nothing to
+        // draw: a render thread draws the batch now, not a display frame
+        // later (desktop-performance.md, section 9.33). One tick out of turn
+        // at most per such tick, so no display frame gets a second frame.
+        if late && self.render_thread && self.render_loop.runs_in_background() {
+            self.render_loop.request_frame_out_of_turn();
+        }
     }
 
     /// Disposes a server object in a batch of its own, outside of the

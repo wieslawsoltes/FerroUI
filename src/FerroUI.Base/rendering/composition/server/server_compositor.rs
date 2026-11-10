@@ -32,18 +32,54 @@ pub type CompositorClock = Rc<dyn Fn() -> Duration>;
 /// returns them: both under a lock.
 #[derive(Default)]
 pub struct BatchQueue {
-    batches: Mutex<VecDeque<CommittedBatch>>,
+    queue: Mutex<Queue>,
     /// Emptied stream buffers, returned by the server for reuse.
     data_pool: Mutex<Vec<BatchStreamData>>,
 }
 
+#[derive(Default)]
+struct Queue {
+    batches: VecDeque<CommittedBatch>,
+    /// The last tick of the render thread found no batch and drew nothing,
+    /// and no batch has been enqueued since: see
+    /// [`BatchQueue::note_idle_tick`].
+    idle_tick: bool,
+}
+
 impl BatchQueue {
-    pub(crate) fn enqueue(&self, batch: CommittedBatch) {
-        self.batches.lock().unwrap().push_back(batch);
+    /// Adds a batch. Returns whether the batch is late for the display
+    /// frame: the last tick of the render thread came before it, found
+    /// nothing to apply and drew nothing. One batch at most is answered
+    /// `true` for one such tick.
+    pub(crate) fn enqueue(&self, batch: CommittedBatch) -> bool {
+        let mut queue = self.queue.lock().unwrap();
+        queue.batches.push_back(batch);
+        std::mem::take(&mut queue.idle_tick)
     }
 
     fn dequeue(&self) -> Option<CommittedBatch> {
-        self.batches.lock().unwrap().pop_front()
+        let mut queue = self.queue.lock().unwrap();
+        let batch = queue.batches.pop_front();
+        if batch.is_some() {
+            queue.idle_tick = false;
+        }
+        batch
+    }
+
+    /// The render thread ends a tick in which it applied no batch and drew
+    /// no frame. A batch that is enqueued before the next tick has missed
+    /// the tick of its display frame for no reason but its timing; the
+    /// compositor asks the render loop for a tick out of turn for it
+    /// (desktop-performance.md, section 9.33), which draws the one frame
+    /// this display frame is still without.
+    ///
+    /// Nothing is noted while a batch waits in the queue: it came during the
+    /// tick, and is applied by the next one.
+    fn note_idle_tick(&self) {
+        let mut queue = self.queue.lock().unwrap();
+        if queue.batches.is_empty() {
+            queue.idle_tick = true;
+        }
     }
 
     /// Takes a stream buffer for a new batch.
@@ -123,8 +159,14 @@ pub struct ServerCompositor {
     options: CompositionOptions,
     readback: Arc<ReadbackIndices>,
     ticks_since_last_commit: Cell<i32>,
+    /// Whether the batch pass of the current tick applied a batch.
+    applied_batches_in_tick: Cell<bool>,
     to_notify_processed: RefCell<Vec<Arc<CompositionBatch>>>,
     to_notify_rendered: RefCell<Vec<Arc<CompositionBatch>>>,
+    /// The batches of the tick before, whose frame a layer held back at the
+    /// end of that tick: see
+    /// [`notify_batches_rendered`](Self::notify_batches_rendered).
+    held_rendered: RefCell<Vec<Arc<CompositionBatch>>>,
     render_resources_invalidation_queue: RefCell<VecDeque<Rc<dyn IServerRenderResource>>>,
     render_resources_invalidation_set: RefCell<HashSet<*const ()>>,
     // TODO: parallel processing maybe
@@ -197,8 +239,10 @@ impl ServerCompositor {
             options,
             readback,
             ticks_since_last_commit: Cell::new(0),
+            applied_batches_in_tick: Cell::new(false),
             to_notify_processed: RefCell::new(Vec::new()),
             to_notify_rendered: RefCell::new(Vec::new()),
+            held_rendered: RefCell::new(Vec::new()),
             render_resources_invalidation_queue: RefCell::new(VecDeque::new()),
             render_resources_invalidation_set: RefCell::new(HashSet::new()),
             visual_own_properties_recompute_pass: RefCell::new(VecDeque::new()),
@@ -345,6 +389,9 @@ impl ServerCompositor {
     fn apply_pending_batches(&self) {
         let mut had_batches = false;
         while let Some(mut batch) = self.batches.dequeue() {
+            // The batch belongs to this frame from here on: the thread of
+            // the compositor may start on the next one.
+            batch.batch.notify_accepted();
             {
                 let mut stream = BatchStreamReader::new(&mut batch.changes);
                 while !stream.is_object_eof() {
@@ -397,6 +444,7 @@ impl ServerCompositor {
             had_batches = true;
         }
 
+        self.applied_batches_in_tick.set(had_batches);
         if had_batches {
             self.ticks_since_last_commit.set(0);
         } else if self.ticks_since_last_commit.get() < i32::MAX {
@@ -473,11 +521,44 @@ impl ServerCompositor {
         self.to_notify_rendered.borrow_mut().extend(processed);
     }
 
+    /// Ends a tick: the batches whose frame is on its way to the screen are
+    /// reported as rendered.
+    ///
+    /// These are the batches the tick applied, unless a layer holds the
+    /// frame of the tick back
+    /// ([`IDrawingContextLayerImpl::has_pending_frame`](crate::platform::IDrawingContextLayerImpl::has_pending_frame)):
+    /// what the tick presented is then the frame before, and the batches
+    /// wait for the next tick, which presents theirs (the compositor asks
+    /// for that tick itself). They wait for one tick, never longer: a target
+    /// that cannot present in that tick could not have presented upstream
+    /// either, where the batches are reported regardless.
+    ///
+    /// Not from upstream, where every tick presents what it drew
+    /// (desktop-performance.md, section 9.33).
     fn notify_batches_rendered(&self) {
+        let held = std::mem::take(&mut *self.held_rendered.borrow_mut());
+        for batch in &held {
+            batch.notify_rendered();
+        }
         let rendered = std::mem::take(&mut *self.to_notify_rendered.borrow_mut());
+        if !rendered.is_empty() && self.has_pending_frames() {
+            *self.held_rendered.borrow_mut() = rendered;
+            return;
+        }
         for batch in &rendered {
             batch.notify_rendered();
         }
+    }
+
+    /// Whether a layer of an active target holds a frame back. Never while
+    /// rendering is stopped: no tick would present the frame.
+    pub(crate) fn has_pending_frames(&self) -> bool {
+        if self.rendering_stopped.get() {
+            return false;
+        }
+        // At the end of a tick that unwinds the list may still be borrowed.
+        let Ok(targets) = self.active_targets.try_borrow() else { return false };
+        targets.iter().any(|target| target.has_pending_frame())
     }
 
     // --- passes -------------------------------------------------------------
@@ -897,9 +978,14 @@ impl ServerCompositor {
         self.execute_server_jobs(&self.received_job_queue);
 
         let targets = self.active_targets.borrow().clone();
+        let mut drew_frame = false;
         for target in &targets {
             target.update(compositor_global_passes_elapsed);
             target.render();
+            drew_frame |= target.drew_frame();
+        }
+        if !drew_frame && !self.applied_batches_in_tick.get() {
+            self.batches.note_idle_tick();
         }
 
         self.visual_readback_update_pass();
@@ -912,6 +998,11 @@ impl ServerCompositor {
 
         // Request a tick if we have active animations or if there are recent batches
         if pending_gpu_work || self.animations.need_next_tick() || self.ticks_since_last_commit.get() < COMMIT_GRACE_TICKS {
+            return true;
+        }
+
+        // A frame a layer holds back is presented by the next tick.
+        if self.has_pending_frames() {
             return true;
         }
 
@@ -938,6 +1029,15 @@ struct ResetFlag<'a>(&'a Cell<bool>);
 impl Drop for ResetFlag<'_> {
     fn drop(&mut self) {
         self.0.set(false);
+    }
+}
+
+impl Drop for ServerCompositor {
+    /// No tick follows: the batches that waited for one are answered.
+    fn drop(&mut self) {
+        for batch in std::mem::take(self.held_rendered.get_mut()) {
+            batch.notify_rendered();
+        }
     }
 }
 

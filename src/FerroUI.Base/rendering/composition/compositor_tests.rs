@@ -2675,3 +2675,111 @@ fn composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer() {
     assert!(child.own_composition_visual().is_none());
     assert!(draw_list_of(&child_visual).is_none());
 }
+
+// --- layers that hold a frame back (desktop-performance.md, section 9.33) ---
+
+/// The canvas with mock layers that hold a frame back, its log and its
+/// server target.
+fn canvas_with_held_frames() -> (CompositorCanvas, crate::rendering::testing::DrawingLog, Rc<ServerCompositionTarget>) {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let target = s
+        .compositor
+        .server()
+        .get::<ServerCompositionTarget>(s.renderer.composition_target().server())
+        .expect("the target of the renderer exists");
+    log.hold_layer_frames_back(true);
+    (s, log, target)
+}
+
+#[test]
+fn a_frame_a_layer_holds_back_is_presented_by_the_tick_after() {
+    let (s, log, target) = canvas_with_held_frames();
+    assert!(!target.has_pending_frame());
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let batch = s.compositor.commit();
+    log.clear();
+    s.render_loop.tick();
+    // The tick drew its frame into the layer and presented the one before.
+    assert_eq!(1, log.count("Blit frame 0 of 1"), "{:?}", log.entries());
+    assert_eq!(0, log.count("CompletePendingFrame"));
+    assert!(target.has_pending_frame());
+    assert!(batch.processed().is_completed());
+    assert!(!batch.rendered().is_completed());
+
+    // Nothing changes: the next tick presents the frame, and only then is
+    // the batch rendered.
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(vec!["CompletePendingFrame"], log.entries().into_iter().filter(|e| e.starts_with("Complete")).collect::<Vec<_>>());
+    assert_eq!(1, log.count("Blit frame 1 of 1"), "{:?}", log.entries());
+    assert_eq!(0, log.count("FillRectangle"), "the tick presents, it draws nothing: {:?}", log.entries());
+    assert!(!target.has_pending_frame());
+    assert!(batch.rendered().is_completed());
+
+    // The stream has ended: the ticks that follow present nothing.
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(0, log.count("Blit"), "{:?}", log.entries());
+}
+
+#[test]
+fn the_batches_of_a_stream_of_held_frames_are_rendered_a_tick_later() {
+    let (s, log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let first = s.compositor.commit();
+    s.render_loop.tick();
+    assert!(!first.rendered().is_completed());
+
+    // The next frame of the stream presents the first one.
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let second = s.compositor.commit();
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(1, log.count("Blit frame 1 of 2"), "{:?}", log.entries());
+    assert_eq!(0, log.count("CompletePendingFrame"), "a tick that draws completes the frame before it by itself");
+    assert!(first.rendered().is_completed());
+    assert!(!second.rendered().is_completed());
+    assert!(target.has_pending_frame());
+
+    s.render_loop.tick();
+    assert!(second.rendered().is_completed());
+    assert!(!target.has_pending_frame());
+}
+
+#[test]
+fn a_synchronous_render_presents_the_frame_a_layer_holds_back() {
+    let (s, log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let batch = s.compositor.commit();
+    log.clear();
+    s.compositor.render_on_this_thread();
+    let presented: Vec<String> =
+        log.entries().into_iter().filter(|e| e.starts_with("Blit") || e.starts_with("Complete")).collect();
+    assert_eq!(vec!["Blit frame 0 of 1", "CompletePendingFrame", "Blit frame 1 of 1"], presented);
+    assert!(!target.has_pending_frame());
+    assert!(batch.rendered().is_completed());
+}
+
+#[test]
+fn no_batch_waits_for_a_held_frame_once_rendering_is_stopped() {
+    let (s, _log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    s.render_loop.tick();
+    assert!(target.has_pending_frame());
+
+    // No tick presents the frame any more: a batch is answered at once.
+    s.compositor.server().stop_rendering();
+    let batch = s.compositor.commit();
+    s.render_loop.tick();
+    assert!(batch.rendered().is_completed());
+}
