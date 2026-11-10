@@ -267,13 +267,28 @@ fn play(visual: &Rc<CompositionVisual>, from: f64, to: f64, begin: Size, end: Si
     let forward = from < to;
     let single_step = compositor.create_step_easing_function();
     single_step.set_is_final_step_single_frame(true);
-    let stretch = compositor.create_cubic_bezier_easing_function(Vector2::new(0.9, 0.1), Vector2::new(1.0, 0.2));
-    let contract = compositor.create_cubic_bezier_easing_function(Vector2::new(0.1, 0.9), Vector2::new(0.2, 1.0));
+    // The WinUI stretch has unbounded endpoint velocity: distant selections can cover
+    // most of their travel in one frame. Preserve adjacent-item motion, blending to
+    // easing with zero endpoint velocity over longer distances without extending the duration.
+    let smoothing = (((to - from).abs() - 80.0) / 160.0).clamp(0.0, 1.0) as f32;
+    let blend = |near: f32, far: f32| near + (far - near) * smoothing;
+    let stretch = compositor.create_cubic_bezier_easing_function(
+        Vector2::new(blend(0.9, 0.4), blend(0.1, 0.0)),
+        Vector2::new(blend(1.0, 0.6), blend(0.2, 1.0)),
+    );
+    let contract = compositor.create_cubic_bezier_easing_function(
+        Vector2::new(blend(0.1, 0.4), blend(0.9, 0.0)),
+        Vector2::new(blend(0.2, 0.6), 1.0),
+    );
     let duration = Duration::from_millis(600);
+    // Use the same key and duration for the pivot and the offset. Separate 200 ms
+    // and 0.333 * 600 ms timelines briefly translate the fully stretched indicator
+    // without its compensating pivot, producing a jump of the entire travel distance.
+    let pivot = 1.0 / 3.0;
     if outgoing {
         let opacity = compositor.create_scalar_key_frame_animation();
         opacity.insert_key_frame(0.0, 1.0);
-        opacity.insert_key_frame_with_easing(0.333, 1.0, single_step.clone());
+        opacity.insert_key_frame_with_easing(pivot, 1.0, single_step.clone());
         opacity.insert_key_frame_with_easing(1.0, 0.0, contract.clone());
         opacity.set_duration(duration);
         visual.start_animation("Opacity", &*opacity);
@@ -294,7 +309,7 @@ fn play(visual: &Rc<CompositionVisual>, from: f64, to: f64, begin: Size, end: Si
             }) as f32,
     );
     offset.insert_key_frame_with_easing(
-        0.333,
+        pivot,
         (base
             + if forward {
                 to + dimension * (end_scale - 1.0)
@@ -307,7 +322,7 @@ fn play(visual: &Rc<CompositionVisual>, from: f64, to: f64, begin: Size, end: Si
     let scale = compositor.create_scalar_key_frame_animation();
     scale.insert_key_frame(0.0, begin_scale as f32);
     scale.insert_key_frame_with_easing(
-        0.333,
+        pivot,
         ((to - from).abs() / dimension + if forward { end_scale } else { begin_scale }) as f32,
         stretch,
     );
@@ -315,8 +330,8 @@ fn play(visual: &Rc<CompositionVisual>, from: f64, to: f64, begin: Size, end: Si
     scale.set_duration(duration);
     let center = compositor.create_scalar_key_frame_animation();
     center.insert_key_frame(0.0, if forward { 0.0 } else { dimension as f32 });
-    center.insert_key_frame_with_easing(1.0, if forward { dimension as f32 } else { 0.0 }, single_step);
-    center.set_duration(Duration::from_millis(200));
+    center.insert_key_frame_with_easing(pivot, if forward { dimension as f32 } else { 0.0 }, single_step);
+    center.set_duration(duration);
     visual.start_animation(if horizontal { "Offset.X" } else { "Offset.Y" }, &*offset);
     visual.start_animation(if horizontal { "Scale.X" } else { "Scale.Y" }, &*scale);
     visual.start_animation(if horizontal { "CenterPoint.X" } else { "CenterPoint.Y" }, &*center);

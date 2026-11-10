@@ -129,7 +129,16 @@ use ferroui_headless_vnc::HeadlessVncPlatformExtensions;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+#[cfg(feature = "animation-probe")]
+#[path = "../../scripts/perf/startup_probe.rs"]
+mod startup_probe;
+#[cfg(feature = "animation-probe")]
+#[path = "../../scripts/perf/connected_animation_probe.rs"]
+mod connected_animation_probe;
+
 fn main() -> std::process::ExitCode {
+    #[cfg(feature = "animation-probe")]
+    startup_probe::start();
     let args: Vec<String> = std::env::args().skip(1).collect();
 
     // Reserve the protocol writer before builder configuration can print platform diagnostics.
@@ -158,6 +167,12 @@ fn main() -> std::process::ExitCode {
         return std::process::ExitCode::from(exit_code as u8);
     }
 
+    #[cfg(feature = "animation-probe")]
+    let exit_code = builder.start_with_classic_desktop_lifetime_with(&args, |lifetime| {
+        startup_probe::watch_lifetime(lifetime);
+        connected_animation_probe::install();
+    });
+    #[cfg(not(feature = "animation-probe"))]
     let exit_code = builder.start_with_classic_desktop_lifetime(&args);
     // With `FERROUI_VELLO_PERF` the Vello backend says where the time of its
     // frames went.
