@@ -132,6 +132,14 @@ impl SurfaceRenderTarget {
 
         let surface = surface.unwrap_or_else(|| panic!("Failed to create Skia render target surface"));
 
+        Self::with_surface(create_info, surface)
+    }
+
+    /// A render target that writes to `surface`, which has the size and the text rendering
+    /// `create_info` states.
+    pub(crate) fn with_surface(create_info: SurfaceRenderTargetCreateInfo, surface: Rc<dyn ISkiaSurface>) -> Self {
+        let pixel_size = PixelSize::new(create_info.width, create_info.height);
+
         Self {
             use_scaled_drawing: create_info.use_scaled_drawing,
             surface,
@@ -311,15 +319,30 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     }
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
-        let mut surface = self.surface.surface();
-        {
-            let canvas = surface.canvas();
-            canvas.restore_to_count(1);
-            canvas.reset_matrix();
-        }
+        // A surface that records its frames gives the canvas of the frame by
+        // itself, and draws the frame when the drawing context is disposed.
+        let version = self.version.clone();
+        let mut disposables: Vec<Box<dyn FnOnce()>> = vec![Box::new(move || version.set(version.get() + 1))];
+
+        let (canvas, surface) = match self.surface.begin_recorded_frame() {
+            Some(canvas) => (Some(canvas), None),
+            None => {
+                let mut surface = self.surface.surface();
+                {
+                    let canvas = surface.canvas();
+                    canvas.restore_to_count(1);
+                    canvas.reset_matrix();
+                }
+                // The surface is told when the frame drawn on its canvas ends.
+                let drawn = self.surface.clone();
+                disposables.push(Box::new(move || drawn.end_drawn_frame()));
+                (None, Some(surface))
+            }
+        };
 
         let create_info = CreateInfo {
-            surface: Some(surface),
+            canvas,
+            surface,
             dpi: self.dpi,
             scale_drawing_to_dpi: self.use_scaled_drawing,
             disable_subpixel_text_rendering: self.disable_lcd_rendering,
@@ -330,8 +353,15 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
             ..CreateInfo::default()
         };
 
-        let version = self.version.clone();
-        Box::new(DrawingContextImpl::new(create_info, vec![Box::new(move || version.set(version.get() + 1))]))
+        Box::new(DrawingContextImpl::new(create_info, disposables))
+    }
+
+    fn has_pending_frame(&self) -> bool {
+        self.surface.has_pending_frame()
+    }
+
+    fn complete_pending_frame(&self) {
+        self.surface.complete_pending_frame();
     }
 }
 

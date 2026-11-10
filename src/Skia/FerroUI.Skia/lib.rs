@@ -78,7 +78,10 @@ pub use sk_round_rect_cache::SkRoundRectCache;
 pub use sk_text_blob_builder_cache::SkTextBlobBuilderCache;
 pub use skia_backend_context::SkiaContext;
 pub use skia_application_extensions::SkiaApplicationExtensions;
-pub use skia_options::{DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES, SkiaOptions};
+pub use skia_options::{
+    DEFAULT_FRAME_PIPELINING_BANDS, DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES, MAX_FRAME_PIPELINING_BANDS, SkiaFramePipelining,
+    SkiaOptions,
+};
 pub use text_rendering_override::{
     set_text_rendering_override, startup_text_rendering_override, text_rendering_override, TextRenderingOverride,
     TEXT_OVERRIDE_ENV_PREFIX, TEXT_OVERRIDE_KEYS,

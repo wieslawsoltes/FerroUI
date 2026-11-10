@@ -39,6 +39,7 @@ fn record(draw: impl FnOnce(&mut DrawingContextImpl)) -> Picture {
             canvas: Some(CanvasSource::Recorder {
                 recorder,
                 on_finished: Box::new(move |picture| *recorded.borrow_mut() = picture),
+                leases: None,
             }),
             dpi: Vector::new(96.0, 96.0),
             disable_subpixel_text_rendering: true,

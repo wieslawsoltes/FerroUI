@@ -35,7 +35,7 @@ use ferroui_base::{FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Re
 use skia_safe as sk;
 use skia_safe::canvas::SaveLayerRec;
 use std::any::{Any, TypeId};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// What a drawing context draws to.
@@ -44,7 +44,14 @@ pub enum CanvasSource {
     Surface(sk::Surface),
     /// The canvas of a picture recorder. `on_finished` receives the recorded
     /// picture when the drawing context is disposed.
-    Recorder { recorder: sk::PictureRecorder, on_finished: Box<dyn FnOnce(Option<sk::Picture>)> },
+    ///
+    /// With `leases` the drawing context leases the Skia API although it draws to no surface
+    /// ([`RecordedLeases`]); `None` gives no lease, as a picture has none.
+    Recorder {
+        recorder: sk::PictureRecorder,
+        on_finished: Box<dyn FnOnce(Option<sk::Picture>)>,
+        leases: Option<Rc<RecordedLeases>>,
+    },
     /// The drawing context has been disposed.
     Finished,
 }
@@ -58,8 +65,13 @@ impl CanvasSource {
     fn get(&mut self) -> &sk::Canvas {
         match self {
             CanvasSource::Surface(surface) => surface.canvas(),
-            CanvasSource::Recorder { recorder, .. } => {
-                recorder.recording_canvas().unwrap_or_else(|| panic!("The picture recording has ended"))
+            CanvasSource::Recorder { recorder, leases, .. } => {
+                let canvas =
+                    recorder.recording_canvas().unwrap_or_else(|| panic!("The picture recording has ended"));
+                if let Some(leases) = leases {
+                    leases.draw_pending(canvas);
+                }
+                canvas
             }
             CanvasSource::Finished => panic!("The drawing context has been disposed"),
         }
@@ -160,6 +172,70 @@ impl ContextCanvas {
     }
 }
 
+/// The leases of the Skia API of a drawing context that records the frame of a surface as a
+/// picture (a frame layer that pipelines its frames, `gpu/graphite/pipelined_layer.rs`).
+///
+/// A lease hands out the canvas of the context, and the canvas of a picture recorder lives
+/// only as long as the borrow of the recorder, which a lease cannot hold. A lease of such a
+/// context therefore records what its client draws into a picture of its own, with the
+/// transform the canvas had when the feature was asked for, and the context draws that
+/// picture into the recording before its next use of the canvas: the clip and the layers of
+/// the canvas are still the ones of the lease then, because the context cannot be used
+/// while it is leased. The differences a client can see: the lease has no surface, the canvas
+/// it gets does not carry the clip of the context (the drawing is clipped all the same), and
+/// the state it leaves on the canvas does not last to its next
+/// [`with_sk_canvas`](ISkiaApiLease::with_sk_canvas).
+///
+/// A frame that had a lease is reported ([`used`](Self::used)), so that the surface can draw
+/// the whole picture with the recorder the client's own GPU objects belong to.
+pub struct RecordedLeases {
+    /// The bounds of the recording, which the pictures of the leases are recorded with.
+    bounds: sk::Rect,
+    /// The pictures of the leases since the canvas was last used.
+    pending: RefCell<Vec<sk::Picture>>,
+    /// Whether `pending` holds a picture: what every use of the canvas tests.
+    has_pending: Cell<bool>,
+    /// Whether the Skia API was leased in the frame.
+    used: Cell<bool>,
+}
+
+impl RecordedLeases {
+    /// The leases of a recording with the given bounds.
+    // Only the surface of a pipelined frame layer makes these (Graphite on Metal).
+    #[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
+    pub(crate) fn new(bounds: sk::Rect) -> Self {
+        Self { bounds, pending: RefCell::new(Vec::new()), has_pending: Cell::new(false), used: Cell::new(false) }
+    }
+
+    /// Whether the Skia API was leased since the recording began.
+    // Only the surface of a pipelined frame layer makes these (Graphite on Metal).
+    #[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
+    pub(crate) fn used(&self) -> bool {
+        self.used.get()
+    }
+
+    fn push(&self, picture: sk::Picture) {
+        self.pending.borrow_mut().push(picture);
+        self.has_pending.set(true);
+    }
+
+    /// Draws the pictures of the leases that ended into the recording. A picture holds the
+    /// transform its drawing was recorded with, so it is drawn without the one of the canvas.
+    #[inline]
+    fn draw_pending(&self, canvas: &sk::Canvas) {
+        if !self.has_pending.get() {
+            return;
+        }
+        self.has_pending.set(false);
+        for picture in self.pending.take() {
+            canvas.save();
+            canvas.reset_matrix();
+            canvas.draw_picture(&picture, None, None);
+            canvas.restore();
+        }
+    }
+}
+
 /// Context create info.
 #[derive(Default)]
 pub struct CreateInfo {
@@ -218,6 +294,10 @@ impl ISkiaApiLeaseFeature for SkiaLeaseFeature {
 
         let revert_transform = self.surface.clone().canvas().local_to_device();
         self.context_leased.set(true);
+        // What the client draws belongs to the recorder of the context.
+        if let Some(gr_context) = &self.gr_context {
+            gr_context.note_direct_only_draw();
+        }
 
         Rc::new(ApiLease {
             context_leased: self.context_leased.clone(),
@@ -288,6 +368,114 @@ impl ISkiaApiLease for ApiLease {
     fn dispose(&self) {
         if !self.is_disposed.get() {
             self.surface.clone().canvas().set_matrix(&self.revert_transform);
+            self.context_leased.set(false);
+            self.is_disposed.set(true);
+        }
+    }
+}
+
+/// The lease feature of a drawing context that records a picture ([`RecordedLeases`]).
+struct RecordedLeaseFeature {
+    context_leased: Rc<Cell<bool>>,
+    leases: Rc<RecordedLeases>,
+    /// The transform of the canvas when the feature was asked for.
+    transform: sk::M44,
+    gr_context: Option<Rc<dyn ISkiaGrContext>>,
+    gpu: Option<Rc<dyn ISkiaGpu>>,
+    current_opacity: f64,
+}
+
+impl ISkiaApiLeaseFeature for RecordedLeaseFeature {
+    fn lease(&self) -> Rc<dyn ISkiaApiLease> {
+        if self.context_leased.get() {
+            leased_panic();
+        }
+
+        self.context_leased.set(true);
+        self.leases.used.set(true);
+        // The surface of the frame draws it with the recorder of the context, and its next
+        // frames too.
+        if let Some(gr_context) = &self.gr_context {
+            gr_context.note_direct_only_draw();
+        }
+
+        Rc::new(RecordedApiLease {
+            context_leased: self.context_leased.clone(),
+            leases: self.leases.clone(),
+            transform: self.transform.clone(),
+            gr_context: self.gr_context.clone(),
+            gpu: self.gpu.clone(),
+            current_opacity: self.current_opacity,
+            is_disposed: Cell::new(false),
+            leased: Rc::new(Cell::new(false)),
+        })
+    }
+}
+
+/// A lease of a drawing context that records a picture ([`RecordedLeases`]).
+struct RecordedApiLease {
+    context_leased: Rc<Cell<bool>>,
+    leases: Rc<RecordedLeases>,
+    transform: sk::M44,
+    gr_context: Option<Rc<dyn ISkiaGrContext>>,
+    gpu: Option<Rc<dyn ISkiaGpu>>,
+    current_opacity: f64,
+    is_disposed: Cell<bool>,
+    /// Whether the platform graphics API is leased.
+    leased: Rc<Cell<bool>>,
+}
+
+impl RecordedApiLease {
+    fn check_lease(&self) {
+        if self.leased.get() {
+            leased_panic();
+        }
+    }
+}
+
+impl ISkiaApiLease for RecordedApiLease {
+    fn with_sk_canvas(&self, action: &mut dyn FnMut(&sk::Canvas)) {
+        self.check_lease();
+        let mut recorder = sk::PictureRecorder::new();
+        {
+            let canvas = recorder.begin_recording(self.leases.bounds, false);
+            canvas.set_matrix(&self.transform);
+            action(canvas);
+        }
+        if let Some(picture) = recorder.finish_recording_as_picture(None) {
+            self.leases.push(picture);
+        }
+    }
+
+    fn gr_context(&self) -> Option<Rc<dyn ISkiaGrContext>> {
+        self.gr_context.clone()
+    }
+
+    fn sk_surface(&self) -> Option<sk::Surface> {
+        self.check_lease();
+        None
+    }
+
+    fn current_opacity(&self) -> f64 {
+        self.check_lease();
+        self.current_opacity
+    }
+
+    fn try_lease_platform_graphics_api(&self) -> Option<Rc<dyn ISkiaPlatformGraphicsApiLease>> {
+        self.check_lease();
+
+        let context = self.gpu.as_ref()?.platform_graphics_context()?;
+
+        if let Some(gr_context) = &self.gr_context {
+            gr_context.flush();
+        }
+        self.leased.set(true);
+
+        Some(Rc::new(PlatformApiLease { leased: self.leased.clone(), gr_context: self.gr_context.clone(), context }))
+    }
+
+    fn dispose(&self) {
+        if !self.is_disposed.get() {
             self.context_leased.set(false);
             self.is_disposed.set(true);
         }
@@ -490,6 +678,15 @@ impl DrawingContextImpl {
     /// The GPU context the drawing context draws with, if any.
     pub fn gr_context(&self) -> Option<&Rc<dyn ISkiaGrContext>> {
         self.gr_context.as_ref()
+    }
+
+    /// A layer with an image filter is about to be drawn: a filter reads around the pixels it
+    /// writes, so the frame is one the recorder of the context draws
+    /// ([`ISkiaGrContext::note_direct_only_draw`]).
+    fn note_image_filter(&self) {
+        if let Some(gr_context) = &self.gr_context {
+            gr_context.note_direct_only_draw();
+        }
     }
 
     /// The surface the drawing context draws to, if it draws to one.
@@ -1228,6 +1425,10 @@ impl DrawingContextImpl {
                 return None;
             };
             paint.set_image_filter(filter);
+            // The fields apart: the canvas is still borrowed from the drawing context.
+            if let Some(gr_context) = &self.gr_context {
+                gr_context.note_direct_only_draw();
+            }
             PushedEffect::Shader { inherited_opacity }
         } else {
             let Some(shader) = overlay_shader(&program, effect, &layer, self.gr_context.as_deref()) else {
@@ -1957,6 +2158,20 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
+            if let CanvasSource::Recorder { leases: Some(leases), .. } = &self.canvas.source {
+                let leases = leases.clone();
+                let transform = self.canvas.get().local_to_device();
+                let feature: Rc<dyn ISkiaApiLeaseFeature> = Rc::new(RecordedLeaseFeature {
+                    context_leased: self.leased.clone(),
+                    leases,
+                    transform,
+                    gr_context: self.gr_context.clone(),
+                    gpu: self.gpu.clone(),
+                    current_opacity: self.current_opacity,
+                });
+                return Some(Rc::new(feature));
+            }
+
             let surface = self.surface.clone()?;
             // A lease draws to the canvas of the surface directly, whenever
             // it is taken: the canvas follows the transform of the context
@@ -2003,9 +2218,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
             disposable();
         }
 
-        if let CanvasSource::Recorder { mut recorder, on_finished } =
+        if let CanvasSource::Recorder { mut recorder, on_finished, leases } =
             std::mem::replace(&mut self.canvas.source, CanvasSource::Finished)
         {
+            // What the last lease drew is still to be drawn into the recording.
+            if let (Some(leases), Some(canvas)) = (&leases, recorder.recording_canvas()) {
+                leases.draw_pending(canvas);
+            }
             on_finished(recorder.finish_recording_as_picture(None));
         }
     }
@@ -2041,6 +2260,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
         let filter = self.create_effect(effect);
         let mut paint = SkPaintCache::get();
         paint.set_image_filter(filter);
+        self.note_image_filter();
 
         match clip_rect {
             Some(clip_rect) => {
@@ -2245,6 +2465,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         };
         let mut paint = SkPaintCache::get();
         paint.set_image_filter(filter);
+        self.note_image_filter();
         let canvas = self.canvas.get();
         canvas.save();
         // Nothing outside the bounds is kept.

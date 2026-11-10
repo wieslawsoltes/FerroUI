@@ -1,3 +1,4 @@
+use super::pipelined_layer::{BandParts, BandPool};
 use super::GraphitePrewarmContext;
 use crate::gpu::{ISkiaGrContext, SkiaGpuBackend, SkiaPrewarm};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -12,6 +13,8 @@ use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::time::Instant;
 
 /// An image that was uploaded for drawing: the image it was made from and
 /// its textures on the recorder.
@@ -37,15 +40,48 @@ impl UploadedImage {
     }
 }
 
+/// The context behind a lock: the render thread and the threads of the
+/// pipelined frame layers, which insert their own recordings
+/// (`pipelined_layer.rs`), use it one at a time.
+pub(super) struct SharedContext(Mutex<graphite::Context>);
+
+// SAFETY: a Graphite context is not bound to the thread that made it; Skia
+// asks only that one thread uses it at a time, which the lock gives. It is
+// dropped on the render thread: the threads of the bands, the only other
+// holders, are joined before the state lets go of its reference.
+unsafe impl Send for SharedContext {}
+// SAFETY: as above; every use goes through the lock.
+unsafe impl Sync for SharedContext {}
+
+impl SharedContext {
+    pub(super) fn lock(&self) -> MutexGuard<'_, graphite::Context> {
+        self.0.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    fn try_lock(&self) -> Option<MutexGuard<'_, graphite::Context>> {
+        match self.0.try_lock() {
+            Ok(guard) => Some(guard),
+            Err(std::sync::TryLockError::Poisoned(poisoned)) => Some(poisoned.into_inner()),
+            Err(std::sync::TryLockError::WouldBlock) => None,
+        }
+    }
+}
+
 /// The mutable halves of a Graphite GPU context. The uploaded images are
 /// declared first so that they are released before the recorder they live
-/// on, and the recorder before the context that created it.
+/// on, and the recorder before the context that created it. The threads
+/// that play the frames of the pipelined layers come before all of them:
+/// each owns a recorder of the context, and they are joined before the
+/// context goes.
 struct GraphiteState {
+    /// The threads of the pipelined frame layers (`pipelined_layer.rs`);
+    /// none until a layer pipelines its first frame.
+    bands: BandPool,
     /// The textures of the raster images that were drawn, by the unique id
     /// of the image.
     uploaded_images: HashMap<u32, UploadedImage>,
     recorder: graphite::Recorder,
-    context: graphite::Context,
+    context: Arc<SharedContext>,
     frame_completion: GpuCompletion,
     completion_handler: Option<Box<dyn Fn(GpuCompletion)>>,
     /// A recording failed to insert. With ordered recordings (section 9.17) the context refuses
@@ -82,6 +118,19 @@ pub struct GraphiteGrContext {
     frame_context_id: u64,
     /// How many raster images were uploaded (or tried).
     uploads: Cell<u64>,
+    /// How many draws only this recorder draws as an ordinary layer would
+    /// were made with the context
+    /// ([`note_direct_only_draw`](ISkiaGrContext::note_direct_only_draw)):
+    /// what a pipelined frame layer compares between and over its frames
+    /// (`pipelined_layer.rs`).
+    direct_only_draws: Cell<u64>,
+    /// A pipelined layer was drawn onto a canvas of the recorder since the
+    /// last flush: that flush is the one the frame in the threads of the
+    /// layer waits for.
+    layer_blit: Cell<bool>,
+    /// When the last flush ended: where the cost of a frame that a layer
+    /// drew directly ends.
+    last_flush_end: Cell<Option<Instant>>,
 }
 
 impl GraphiteGrContext {
@@ -91,16 +140,53 @@ impl GraphiteGrContext {
         let recorder = context.make_recorder(None)?;
         Some(Self {
             state: RefCell::new(Some(GraphiteState {
+                bands: BandPool::default(),
                 uploaded_images: HashMap::new(),
                 recorder,
-                context,
+                context: Arc::new(SharedContext(Mutex::new(context))),
                 frame_completion: GpuCompletion::new(),
                 completion_handler: None,
                 recording_failed: false,
             })),
             frame_context_id: crate::gpu::next_frame_context_id(),
             uploads: Cell::new(0),
+            direct_only_draws: Cell::new(0),
+            layer_blit: Cell::new(false),
+            last_flush_end: Cell::new(None),
         })
+    }
+
+    /// The count of the draws only this recorder draws as an ordinary layer
+    /// would (see the field).
+    pub(super) fn direct_only_draws(&self) -> u64 {
+        self.direct_only_draws.get()
+    }
+
+    /// A pipelined layer was drawn onto a canvas of the recorder.
+    pub(super) fn note_layer_blit(&self) {
+        self.layer_blit.set(true);
+    }
+
+    /// When the last flush of the context ended; `None` before the first.
+    pub(super) fn last_flush_end(&self) -> Option<Instant> {
+        self.last_flush_end.get()
+    }
+
+    /// Runs `f` with what pipelining a frame of a layer needs: the threads,
+    /// the recorder and the context. `None` when the context has been
+    /// disposed or is in use (a frame that ends inside another use of the
+    /// context), which the layer answers by not using the threads.
+    pub(super) fn with_band_parts<R>(&self, f: impl FnOnce(BandParts<'_>) -> R) -> Option<R> {
+        let Ok(mut state) = self.state.try_borrow_mut() else {
+            return None;
+        };
+        let state = state.as_mut()?;
+        Some(f(BandParts {
+            pool: &mut state.bands,
+            recorder: &mut state.recorder,
+            context: &state.context,
+            recording_failed: &mut state.recording_failed,
+        }))
     }
 
     fn with_state<R>(&self, f: impl FnOnce(&mut GraphiteState) -> R) -> R {
@@ -125,7 +211,7 @@ impl GraphiteGrContext {
     pub fn dispose(&self) {
         let mut state = self.state.borrow_mut();
         if let Some(state) = state.as_mut() {
-            Self::flush_state(state);
+            self.flush_now(state);
         }
         *state = None;
     }
@@ -135,13 +221,30 @@ impl GraphiteGrContext {
         self.state.borrow().is_none()
     }
 
-    fn flush_state(state: &mut GraphiteState) {
+    /// Flushes the recorder and notes when the flush ended.
+    fn flush_now(&self, state: &mut GraphiteState) {
+        Self::flush_state(state, self.layer_blit.take());
+        self.last_flush_end.set(Some(Instant::now()));
+    }
+
+    /// `blitted`: a pipelined layer was drawn onto a canvas of the recorder
+    /// since the last flush.
+    fn flush_state(state: &mut GraphiteState, blitted: bool) {
+        // The recordings the threads of the pipelined layers were told to
+        // insert come before the recording of this recorder, all of them:
+        // what it draws may be the texture they are drawing on, or what a
+        // frame they are playing sampled, drawn anew. Nothing is waited for
+        // when no frame is in the threads.
+        state.bands.wait_for_released();
         let completion = std::mem::take(&mut state.frame_completion);
         if let Some(mut recording) = state.recorder.snap() {
             let info = InsertRecordingInfo::new(&mut recording);
-            let inserted = state.context.insert_recording(&info) == graphite::InsertStatus::Success;
+            let (inserted, submitted) = {
+                let mut context = state.context.lock();
+                let inserted = context.insert_recording(&info) == graphite::InsertStatus::Success;
+                (inserted, context.submit(None))
+            };
             state.recording_failed |= !inserted;
-            let submitted = state.context.submit(None);
             if inserted && submitted {
                 if completion.retained_frames() == 0 {
                     completion.complete();
@@ -156,11 +259,17 @@ impl GraphiteGrContext {
             }
         } else {
             // Preserve the context's ordinary empty-flush processing too.
-            let _ = state.context.submit(None);
+            let _ = state.context.lock().submit(None);
             // A fully clipped draw can retain a lease without recording a GPU
             // read. No recording means no read was submitted, so no fence is
             // required and an empty-submit result must not quarantine storage.
             completion.complete();
+        }
+
+        if blitted {
+            // The draw of the layer is in the context: the threads may
+            // insert the frame they played after it.
+            state.bands.release();
         }
 
         // The texture of an image nothing else holds cannot be asked for
@@ -227,6 +336,9 @@ impl ISkiaGrContext for GraphiteGrContext {
         if state.completion_handler.is_none() {
             return Err(FrameError::MissingSynchronization);
         }
+        // The storage is held until the commands of the next flush of this
+        // recorder have run: the draw that reads it belongs to that flush.
+        self.direct_only_draws.set(self.direct_only_draws.get().wrapping_add(1));
         state.frame_completion.retain(frame)
     }
 
@@ -258,8 +370,12 @@ impl ISkiaGrContext for GraphiteGrContext {
     fn flush(&self) {
         let mut state = self.state.borrow_mut();
         if let Some(state) = state.as_mut() {
-            Self::flush_state(state);
+            self.flush_now(state);
         }
+    }
+
+    fn note_direct_only_draw(&self) {
+        self.direct_only_draws.set(self.direct_only_draws.get().wrapping_add(1));
     }
 
     fn reset_context(&self) {
@@ -273,7 +389,7 @@ impl ISkiaGrContext for GraphiteGrContext {
     fn snapshot_to_raster(&self, surface: &mut Surface) -> Option<Image> {
         self.with_state(|state| {
             // The readback does not see work that is still on the recorder.
-            Self::flush_state(state);
+            self.flush_now(state);
 
             let info = surface.image_info().with_alpha_type(AlphaType::Premul);
             let row_bytes = info.min_row_bytes();
@@ -281,6 +397,7 @@ impl ISkiaGrContext for GraphiteGrContext {
 
             if !state
                 .context
+                .lock()
                 .read_pixels(surface, &info, &mut pixels, row_bytes, (0, 0))
             {
                 return None;
@@ -347,7 +464,12 @@ impl ISkiaGrContext for GraphiteGrContext {
         self.state
             .borrow()
             .as_ref()
-            .is_some_and(|state| state.context.is_device_lost() || state.recording_failed)
+            .is_some_and(|state| {
+                // A thread of a pipelined layer that inserts holds the
+                // context for a moment; the answer then waits for the next
+                // ask.
+                state.context.try_lock().is_some_and(|context| context.is_device_lost()) || state.recording_failed
+            })
     }
 
     /// A recorder of its own, made by the context, whose pipelines compile
@@ -356,10 +478,11 @@ impl ISkiaGrContext for GraphiteGrContext {
         let recorder = {
             let mut state = self.state.borrow_mut();
             let state = state.as_mut()?;
-            if state.context.is_device_lost() {
+            let mut context = state.context.lock();
+            if context.is_device_lost() {
                 return None;
             }
-            state.context.make_recorder(None)?
+            context.make_recorder(None)?
         };
         let prewarm = Rc::new(GraphitePrewarmContext::new(recorder));
         let finishing = prewarm.clone();
