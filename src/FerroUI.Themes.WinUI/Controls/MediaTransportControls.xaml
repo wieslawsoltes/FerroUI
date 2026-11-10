@@ -1,0 +1,42 @@
+<!-- Adapted from WinUI MediaTransportControls' control panel: a position slider,
+     time labels, volume controls and full-window action. Unsupported casting,
+     captions, playback-rate and track selection actions are omitted. The native
+     Button and Slider templates retain keyboard, focus and automation behavior.
+     Copyright (c) Microsoft Corporation. MIT License; see ../NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:media="using:FerroUI.Media.Video.Controls">
+  <ControlTheme x:Key="{x:Type media:MediaTransportControls}" TargetType="media:MediaTransportControls">
+    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    <Setter Property="Padding" Value="12" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+          <StackPanel>
+            <TextBlock x:Name="MediaError" IsVisible="False" TextWrapping="Wrap" MaxHeight="80"
+                       Foreground="{TemplateBinding Foreground}" />
+            <Slider x:Name="MediaSeek" Minimum="0" Maximum="1" Height="24"
+                    AutomationProperties.Name="Playback position" />
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto,Auto">
+              <Button x:Name="MediaPlayPause" Width="40" Height="40" Padding="0" MinWidth="0"
+                      AutomationProperties.Name="Play" ToolTip.Tip="Play" />
+              <Button x:Name="MediaStop" Grid.Column="1" Width="40" Height="40" Padding="0" MinWidth="0"
+                      AutomationProperties.Name="Stop" ToolTip.Tip="Stop" />
+              <TextBlock x:Name="MediaTime" Grid.Column="2" Margin="8,0" VerticalAlignment="Center"
+                         Foreground="{TemplateBinding Foreground}" FontFeatures="tnum" />
+              <TextBlock x:Name="MediaStatus" Grid.Column="4" MaxWidth="120" Margin="8,0"
+                         VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+              <Button x:Name="MediaMute" Grid.Column="5" Width="40" Height="40" Padding="0" MinWidth="0"
+                      AutomationProperties.Name="Mute" ToolTip.Tip="Mute" />
+              <Slider x:Name="MediaVolume" Grid.Column="6" Minimum="0" Maximum="1" Value="1"
+                      Width="88" VerticalAlignment="Center" AutomationProperties.Name="Volume" />
+              <Button x:Name="MediaFullWindow" Grid.Column="7" Width="40" Height="40" Padding="0" MinWidth="0"
+                      AutomationProperties.Name="Enter full window" ToolTip.Tip="Enter full window" />
+            </Grid>
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

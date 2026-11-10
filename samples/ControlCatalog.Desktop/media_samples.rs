@@ -1,8 +1,9 @@
 //! Desktop catalog bindings to admitted native media providers.
 use control_catalog::media_samples::MediaSampleProviders;
 use ferroui_base::rendering::composition::{frames::*, ICompositionGpuInterop};
-use ferroui_media::{MediaError, MediaErrorKind};
-use ferroui_media_camera::{CameraError, CameraErrorKind};
+use ferroui_media_camera::CameraError;
+#[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
+use ferroui_media_camera::CameraErrorKind;
 use std::rc::Rc;
 
 #[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
@@ -19,62 +20,9 @@ pub fn install() {
         qr: None,
     });
 }
-fn unavailable(message: impl Into<String>) -> MediaError {
-    MediaError::new(MediaErrorKind::Unsupported, message)
-}
-fn camera_error(error: MediaError) -> CameraError {
-    CameraError::new(CameraErrorKind::Unsupported, error.to_string())
-}
-fn video(
-    interop: &dyn ICompositionGpuInterop,
-    budget: FrameBudget,
-) -> Result<
-    (
-        Rc<dyn ferroui_media_video::MediaPlayerProvider>,
-        Rc<dyn ferroui_media_controls::TextureFrameImporter>,
-    ),
-    MediaError,
-> {
-    #[cfg(target_vendor = "apple")]
-    {
-        if interop.shared_context_id().is_some() {
-            return Err(unavailable(
-                "The catalog uses the Metal media profile on Apple platforms.",
-            ));
-        }
-        let device = DeviceIdentity::Luid(
-            interop
-                .device_luid()
-                .ok_or_else(|| unavailable("No admitted Metal device"))?,
-        );
-        Ok((
-            Rc::new(ferroui_media_video_apple::AppleVideoProvider {
-                device,
-                device_generation: interop.shared_context_generation(),
-                budget,
-            }),
-            Rc::new(ferroui_media_apple::AppleTextureImporter),
-        ))
-    }
-    #[cfg(windows)]
-    {
-        Ok((
-            Rc::new(ferroui_media_video_windows::WindowsVideoProvider {
-                frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
-            }),
-            Rc::new(ferroui_media_windows::NativeGlTextureImporter),
-        ))
-    }
-    #[cfg(target_os = "linux")]
-    {
-        Ok((
-            Rc::new(ferroui_media_video_linux::LinuxVideoProvider {
-                frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
-            }),
-            Rc::new(ferroui_media_linux::NativeGlTextureImporter),
-        ))
-    }
-}
+#[path = "../media_desktop.rs"]
+mod desktop_providers;
+use desktop_providers::video;
 fn camera(
     interop: &dyn ICompositionGpuInterop,
     budget: FrameBudget,
@@ -85,58 +33,20 @@ fn camera(
     ),
     CameraError,
 > {
-    #[cfg(target_vendor = "apple")]
-    {
-        let _ = budget;
-        if interop.shared_context_id().is_some() {
-            return Err(camera_error(unavailable(
-                "The catalog uses the Metal camera profile on Apple platforms.",
-            )));
-        }
-        let device = DeviceIdentity::Luid(
-            interop
-                .device_luid()
-                .ok_or_else(|| camera_error(unavailable("No admitted Metal device")))?,
-        );
-        #[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
-        if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
-            return Ok((
-                Rc::new(camera_fixture::Provider {
-                    device,
-                    generation: interop.shared_context_generation(),
-                }),
-                Rc::new(ferroui_media_apple::AppleTextureImporter),
-            ));
-        }
-        Ok((
-            Rc::new(ferroui_media_camera_apple::AppleCameraProvider {
+    #[cfg(all(target_os = "macos", feature = "quartz-media-test-fixtures"))]
+    if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
+        let device = DeviceIdentity::Luid(interop.device_luid().ok_or_else(|| {
+            CameraError::new(CameraErrorKind::Unsupported, "No admitted Metal device")
+        })?);
+        return Ok((
+            Rc::new(camera_fixture::Provider {
                 device,
-                device_generation: interop.shared_context_generation(),
+                generation: interop.shared_context_generation(),
             }),
             Rc::new(ferroui_media_apple::AppleTextureImporter),
-        ))
+        ));
     }
-    #[cfg(windows)]
-    {
-        Ok((
-            Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::new(
-                ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)
-                    .map_err(camera_error)?,
-            )),
-            Rc::new(ferroui_media_windows::NativeGlTextureImporter),
-        ))
-    }
-    #[cfg(target_os = "linux")]
-    {
-        Ok((
-            Rc::new(ferroui_media_camera_linux::LinuxCameraProvider::new(
-                ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)
-                    .map_err(camera_error)?,
-                ferroui_media_camera_linux::LinuxCameraProfile::Portal,
-            )),
-            Rc::new(ferroui_media_linux::NativeGlTextureImporter),
-        ))
-    }
+    desktop_providers::camera(interop, budget)
 }
 
 fn gpu_checkpoint(label: &str) {

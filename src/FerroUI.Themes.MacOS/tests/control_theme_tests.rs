@@ -83,7 +83,7 @@ fn templated_controls() -> Vec<&'static TypeInfo> {
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
     for type_ in TypeInfo::registered_types() {
-        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs") || type_.module_path().starts_with("ferroui_media_video_controls") || type_.module_path().starts_with("ferroui_media_camera_controls"))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()

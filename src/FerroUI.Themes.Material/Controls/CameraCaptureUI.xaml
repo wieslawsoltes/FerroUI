@@ -1,0 +1,23 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:camera="using:FerroUI.Media.Camera.Controls">
+  <ControlTheme x:Key="{x:Type camera:CameraCaptureUI}" TargetType="camera:CameraCaptureUI">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="8">
+          <Border Background="Black" Height="300">
+            <camera:CameraPreview x:Name="CapturePreview" />
+          </Border>
+          <WrapPanel>
+            <Button x:Name="CaptureStart" Content="Start camera" AutomationProperties.Name="Start camera" />
+            <Button x:Name="CapturePhoto" Content="Take photo" AutomationProperties.Name="Take photo" />
+            <Button x:Name="CaptureRecord" Content="Record video" AutomationProperties.Name="Record silent video" />
+            <Button x:Name="CaptureFinish" Content="Finish video" AutomationProperties.Name="Finish video" />
+            <Button x:Name="CaptureCancel" Content="Stop / Cancel" AutomationProperties.Name="Stop camera and cancel capture" />
+          </WrapPanel>
+          <TextBlock x:Name="CaptureStatus" TextWrapping="Wrap" AutomationProperties.Name="Capture status" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -83,7 +83,7 @@ fn templated_controls() -> Vec<&'static TypeInfo> {
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
     for type_ in TypeInfo::registered_types() {
-        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs") || type_.module_path().starts_with("ferroui_media_video_controls") || type_.module_path().starts_with("ferroui_media_camera_controls"))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()
@@ -326,4 +326,44 @@ fn should_not_define_setters_with_hardcoded_brushes_or_colors() {
             }
         }
     }
+}
+
+#[test]
+fn media_transport_template_keeps_native_actions_accessible_at_narrow_widths() {
+    use ferroui_base::{Point, Rect, Size};
+    use ferroui_controls::{automation::AutomationProperties, Button, Slider};
+    use ferroui_media_video_controls::MediaPlayerElement;
+    let _app = super::support::start_themed_application();
+    let view = MediaPlayerElement::new();
+    view.set_are_transport_controls_enabled(true);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.clone())));
+    window.show();
+    let transport = view.transport_controls();
+    transport.apply_template();
+    let button = |name| transport.get_visual_descendants().find_map(|v| v.cast::<Button>().filter(|b| b.name().as_deref() == Some(name))).unwrap();
+    let slider = |name| transport.get_visual_descendants().find_map(|v| v.cast::<Slider>().filter(|s| s.name().as_deref() == Some(name))).unwrap();
+    for width in [160., 240., 320., 640., 960.] {
+        transport.measure(Size::new(width, 180.));
+        transport.arrange(Rect::new(0., 0., width, transport.desired_size().height));
+        let mut centers = Vec::new();
+        for name in ["MediaPlayPause", "MediaStop", "MediaMute", "MediaFullWindow"] {
+            let part = button(name);
+            if !part.is_visible() { continue; }
+            let origin = part.translate_point(Point::new(0., 0.), &transport).unwrap();
+            assert!(origin.x >= 0. && origin.x + part.bounds().width <= width, "{name}, width {width}");
+            assert!(AutomationProperties::get_name(&part).is_some());
+            centers.push(origin.y + part.bounds().height / 2.);
+        }
+        assert!(centers.len() >= 3 && centers.iter().all(|y| (*y-centers[0]).abs()<0.01));
+        let seek = slider("MediaSeek");
+        assert!(seek.is_visible() && seek.bounds().width <= width);
+    }
+    transport.set_is_compact(true);
+    assert!(!button("MediaStop").is_visible());
+    assert!(!slider("MediaVolume").is_visible());
+    transport.set_is_seek_bar_visible(false);
+    transport.set_is_full_window_button_visible(false);
+    assert!(!slider("MediaSeek").is_visible());
+    assert!(!button("MediaFullWindow").is_visible());
 }

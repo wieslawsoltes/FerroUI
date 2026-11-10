@@ -34,7 +34,7 @@
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "re:MTC.*|\\{MediaPlayerElement\\}",
-      "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback)."
+      "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported."
     },
     {
       "document": "controls/dev/CommonStyles/Pivot_themeresources.xaml",

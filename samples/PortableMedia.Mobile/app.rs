@@ -38,7 +38,7 @@ impl ApplicationImpl for App {
         ferroui_media_video_controls::register_types();
         ferroui_media_camera_controls::register_types();
         this.styles()
-            .add(ferroui_themes_simple::SimpleTheme::new().as_style());
+            .add(ferroui_themes_winui::WinUITheme::new().as_style());
     }
     fn on_framework_initialization_completed(this: &Self) {
         let lifetime = this.application_lifetime();

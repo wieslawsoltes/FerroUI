@@ -48,6 +48,8 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_markup_xaml::register_types();
         ferroui_dialogs::register_types();
+        ferroui_media_video_controls::register_types();
+        ferroui_media_camera_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();

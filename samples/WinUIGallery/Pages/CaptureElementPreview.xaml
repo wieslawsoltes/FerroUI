@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:camera="using:FerroUI.Media.Camera.Controls" Spacing="12">
+  <TextBlock Text="Camera preview and explicit photo/video capture" FontSize="18" />
+  <TextBlock Text="Starting requests camera permission. When available, recording is silent and lasts up to 60 seconds. Stop / Cancel releases capture."
+             TextWrapping="Wrap" />
+  <camera:CameraCaptureUI x:Name="GalleryCapture" />
+  <Image x:Name="GalleryCapturedPhoto" Height="180" Stretch="Uniform" AutomationProperties.Name="Captured photo" />
+  <TextBlock x:Name="GalleryCaptureResult" TextWrapping="Wrap" />
+</StackPanel>

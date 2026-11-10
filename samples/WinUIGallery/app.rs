@@ -28,6 +28,8 @@ impl NewApplication for App {
 
 impl ApplicationImpl for App {
     fn initialize(this: &Self) {
+        #[cfg(feature = "desktop")]
+        crate::playback_samples::install_desktop();
         ferroui_markup_xaml::register_types();
         ferroui_themes_winui::register_types();
         this.styles()

@@ -530,7 +530,8 @@ pub fn camera_page() -> Ref<Page> {
 pub fn qr_page() -> Ref<Page> {
     page(Mode::Qr)
 }
-fn page(mode: Mode) -> Ref<Page> {
+fn page(mode: Mode) -> Ref<Page> { page_named(mode, None) }
+fn page_named(mode: Mode, control_name: Option<&str>) -> Ref<Page> {
     let providers = PROVIDERS.with(|p| p.borrow().clone());
     let state = Rc::new(State {
         mode,
@@ -560,7 +561,7 @@ fn page(mode: Mode) -> Ref<Page> {
         Mode::Camera => "Camera",
         Mode::Qr => "QR codes",
     };
-    page.set_header(Some(Rc::new(header.to_owned())));
+    page.set_header(Some(Rc::new(control_name.unwrap_or(header).to_owned())));
     let content = StackPanel::new();
     content.set_spacing(12.);
     content.set_margin(Thickness::uniform(20.));
@@ -646,6 +647,10 @@ fn page(mode: Mode) -> Ref<Page> {
                 }
             }));
         content.children().add(&state.video);
+        if let Some(name) = control_name {
+            if name == "MediaTransportControls" { state.video.transport_controls().set_is_compact(true); }
+            content.children().add(transport_options(state.video.transport_controls()));
+        }
         state.status("Choose media, then press Play.");
     } else {
         content.children().add(&actions);
@@ -800,4 +805,58 @@ pub fn smoke_snapshot() -> Option<MediaSampleSnapshot> {
             }
         })
     })
+}
+
+/// Dedicated control pages reuse the existing video demonstration and its one
+/// player/presenter/transport graph. No additional decoder or polling is created.
+pub fn media_player_element_page() -> Ref<Page> { video_control_page("MediaPlayerElement") }
+pub fn media_player_presenter_page() -> Ref<Page> { video_control_page("MediaPlayerPresenter") }
+pub fn media_transport_controls_page() -> Ref<Page> { video_control_page("MediaTransportControls") }
+fn video_control_page(name: &str) -> Ref<Page> { page_named(Mode::Video, Some(name)) }
+fn transport_options(controls: Ref<ferroui_media_video_controls::MediaTransportControls>) -> Ref<WrapPanel> {
+    let options = WrapPanel::new();
+    for (label, initial, option) in [("Compact transport", controls.is_compact(), 0), ("Show seek bar", true, 1), ("Show volume", true, 2), ("Show full window", true, 3)] {
+        let check = ferroui_controls::CheckBox::new(); check.set_content(Some(Rc::new(label.to_owned()))); check.set_is_checked(Some(initial));
+        let weak = controls.downgrade(); let weak_check = check.downgrade();
+        check.is_checked_changed(move |_, _| {
+            if let (Some(controls), Some(check)) = (weak.upgrade(), weak_check.upgrade()) {
+                let visible = check.is_checked() == Some(true);
+                match option { 0 => controls.set_is_compact(visible), 1 => controls.set_is_seek_bar_visible(visible), 2 => { controls.set_is_volume_button_visible(visible); controls.set_is_volume_slider_visible(visible); }, _ => controls.set_is_full_window_button_visible(visible) }
+            }
+        });
+        options.children().add(check);
+    }
+    options
+}
+pub fn camera_capture_ui_page() -> Ref<Page> {
+    use ferroui_media_camera_controls::{CameraCaptureUI, CameraCaptureResult};
+    let page = ContentPage::new(); page.set_header(Some(Rc::new("CameraCaptureUI".to_owned())));
+    let capture = CameraCaptureUI::new();
+    let budget = FrameBudget::new(Default::default());
+    if let Some(providers) = PROVIDERS.with(|slot| slot.borrow().clone()) {
+        let factory_budget = budget.clone();
+        capture.set_provider_factory(Some(Rc::new(move |interop| (providers.camera)(interop, factory_budget.clone()))), budget);
+    }
+    let content = StackPanel::new(); content.set_spacing(12.); content.set_margin(Thickness::uniform(20.));
+    let description = TextBlock::new(); description.set_text_wrapping(TextWrapping::Wrap);
+    description.set_text(Some("Start explicitly to request camera permission. Photos and silent video are owned encoded results. Recording is enabled only on providers with native recording support (Apple: 60 seconds / 256 MiB). Stop or navigation cancels acquisition and rejects late results."));
+    content.children().add(description); content.children().add(&capture);
+    let photo = Image::new(); photo.set_height(200.); photo.set_stretch(Stretch::Uniform);
+    let result = TextBlock::new(); result.set_text_wrapping(TextWrapping::Wrap);
+    let weak_photo = photo.downgrade(); let weak_result = result.downgrade();
+    let subscription = capture.completed().subscribe(move |value| {
+        if let Some(result) = weak_result.upgrade() {
+            match value {
+                CameraCaptureResult::Photo(value) => match Bitmap::from_stream(&mut Cursor::new(value.encoded.as_ref())) {
+                    Ok(bitmap) => { if let Some(photo) = weak_photo.upgrade() { photo.set_source(Some(Rc::new(bitmap))); } result.set_text(Some(&format!("{} × {} photo ({:?})", value.width, value.height, value.origin))); }
+                    Err(error) => result.set_text(Some(&error.to_string())),
+                },
+                CameraCaptureResult::Video(value) => result.set_text(Some(&format!("{} × {} video, {:.2} seconds, {} bytes", value.width, value.height, value.duration.as_secs_f64(), value.encoded.len()))),
+            }
+        }
+    });
+    page.detached_from_visual_tree(move |_| { let _ = &subscription; }).detach();
+    content.children().add(photo); content.children().add(result);
+    page.set_content(Some(Control::boxed(content)));
+    page.upcast()
 }

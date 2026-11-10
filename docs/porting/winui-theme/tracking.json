@@ -78255,7 +78255,7 @@
    "kind": "Style",
    "target_type": "MediaPlayerElement",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79845,7 +79845,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79855,7 +79855,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79865,7 +79865,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79875,7 +79875,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79885,7 +79885,7 @@
    "kind": "FontFamily",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79895,7 +79895,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79905,7 +79905,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79915,7 +79915,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79925,7 +79925,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79935,7 +79935,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79945,7 +79945,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79955,7 +79955,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79965,7 +79965,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79975,7 +79975,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79985,7 +79985,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -79995,7 +79995,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83645,7 +83645,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83655,7 +83655,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83665,7 +83665,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83675,7 +83675,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83685,7 +83685,7 @@
    "kind": "FontFamily",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83695,7 +83695,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83705,7 +83705,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83715,7 +83715,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83725,7 +83725,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83735,7 +83735,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83745,7 +83745,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83755,7 +83755,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83765,7 +83765,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83775,7 +83775,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83785,7 +83785,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -83795,7 +83795,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87625,7 +87625,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87635,7 +87635,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87645,7 +87645,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87655,7 +87655,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87665,7 +87665,7 @@
    "kind": "FontFamily",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87675,7 +87675,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87685,7 +87685,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87695,7 +87695,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87705,7 +87705,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87715,7 +87715,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87725,7 +87725,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87735,7 +87735,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87745,7 +87745,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87755,7 +87755,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87765,7 +87765,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -87775,7 +87775,7 @@
    "kind": "x:Double",
    "target_type": "",
    "status": "waived",
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "batch": null
   },
   {
@@ -91374,7 +91374,7 @@
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
    "key": "re:MTC.*|\\{MediaPlayerElement\\}",
    "variant": null,
-   "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback).",
+   "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported.",
    "items": 49
   },
   {
