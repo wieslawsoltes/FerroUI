@@ -45,7 +45,7 @@ impl Drop for ThreadMark {
     fn drop(&mut self) {}
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     /// Whether the calling thread has its mark. It has no destructor, so it can be read at any
     /// time, also while the thread-locals of the thread are destroyed.
     static ENTERED: Cell<bool> = const { Cell::new(false) };

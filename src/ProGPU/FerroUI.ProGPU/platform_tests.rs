@@ -23,10 +23,10 @@ use std::sync::{Arc, Mutex};
 
 /// A framebuffer surface in memory: `BGRA8888` premultiplied, rows longer than their pixels.
 pub(crate) struct MemorySurface {
-    state: Arc<Mutex<Memory>>,
+    state: Arc<Mutex<SurfaceMemory>>,
 }
 
-struct Memory {
+struct SurfaceMemory {
     size: PixelSize,
     row_bytes: i32,
     pixels: Vec<u8>,
@@ -35,7 +35,7 @@ struct Memory {
 
 impl MemorySurface {
     pub(crate) fn new(width: i32, height: i32) -> Arc<Self> {
-        let surface = Arc::new(Self { state: Arc::new(Mutex::new(Memory { size: PixelSize::new(0, 0), row_bytes: 0, pixels: Vec::new(), frames: 0 })) });
+        let surface = Arc::new(Self { state: Arc::new(Mutex::new(SurfaceMemory { size: PixelSize::new(0, 0), row_bytes: 0, pixels: Vec::new(), frames: 0 })) });
         surface.resize(width, height);
         surface
     }
@@ -66,7 +66,7 @@ impl MemorySurface {
 }
 
 struct MemoryLock {
-    state: Arc<Mutex<Memory>>,
+    state: Arc<Mutex<SurfaceMemory>>,
     size: PixelSize,
     row_bytes: i32,
 }

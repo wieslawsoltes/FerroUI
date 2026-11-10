@@ -35,7 +35,7 @@ struct Buffers {
     scratch: Vec<u64>,
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static BUFFERS: RefCell<Buffers> = RefCell::new(Buffers::default());
 }
 

@@ -168,7 +168,7 @@ mod example {
     }
 
     /// A renderer of the scene: a render interface, a font manager and a shaper.
-    struct Stack {
+    struct RenderStack {
         name: &'static str,
         render: Rc<dyn IPlatformRenderInterface>,
         fonts: Rc<dyn IFontManagerImpl>,
@@ -180,7 +180,7 @@ mod example {
     }
 
     /// The scene drawn by a stack, and the count of glyphs the fonts do not have.
-    fn draw(stack: &Stack, scene: &Scene) -> (Image, usize) {
+    fn draw(stack: &RenderStack, scene: &Scene) -> (Image, usize) {
         let scope = FerroLocator::enter_scope();
         FerroLocator::current_mutable()
             .bind::<dyn IPlatformRenderInterface>()
@@ -428,9 +428,9 @@ mod example {
         let progpu_fonts: Rc<dyn IFontManagerImpl> = Rc::new(ferroui_progpu::ProGpuFontManager::new());
         let harfbuzz: Rc<dyn ITextShaperImpl> = Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new());
         let stacks = [
-            Stack { name: "skia", render: skia_render.clone(), fonts: Rc::new(ferroui_skia::FontManagerImpl::new()), shaper: harfbuzz.clone() },
-            Stack { name: "progpu", render: progpu_render.clone(), fonts: progpu_fonts.clone(), shaper: Rc::new(ferroui_progpu::ProGpuTextShaper::new()) },
-            Stack { name: "progpu-harfbuzz", render: progpu_render, fonts: progpu_fonts, shaper: harfbuzz },
+            RenderStack { name: "skia", render: skia_render.clone(), fonts: Rc::new(ferroui_skia::FontManagerImpl::new()), shaper: harfbuzz.clone() },
+            RenderStack { name: "progpu", render: progpu_render.clone(), fonts: progpu_fonts.clone(), shaper: Rc::new(ferroui_progpu::ProGpuTextShaper::new()) },
+            RenderStack { name: "progpu-harfbuzz", render: progpu_render, fonts: progpu_fonts, shaper: harfbuzz },
         ];
 
         let scene = scene();

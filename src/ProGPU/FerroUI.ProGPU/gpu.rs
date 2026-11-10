@@ -150,7 +150,7 @@ impl Gpu {
     }
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static DEFAULT: RefCell<Option<Option<Rc<Gpu>>>> = const { RefCell::new(None) };
 }
 
