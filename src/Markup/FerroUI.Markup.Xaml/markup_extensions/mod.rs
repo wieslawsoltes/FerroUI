@@ -14,6 +14,8 @@ mod static_resource_extension;
 mod x_bind;
 
 pub use compiled_binding_extension::CompiledBindingExtension;
+#[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+pub(crate) use dynamic_resource_extension::bind_dynamic_resource_at;
 pub use dynamic_resource_extension::DynamicResourceExtension;
 pub use on::{AddChildOfOn, On};
 pub use on_form_factor_extension::{OnFormFactorExtension, OnFormFactorExtensionBase, OnFormFactorExtensionOf};

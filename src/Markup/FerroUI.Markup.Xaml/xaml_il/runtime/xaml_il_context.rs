@@ -158,6 +158,11 @@ pub struct XamlIlContext {
     root_object: RefCell<MarkupValue>,
     intermediate_root: RefCell<MarkupValue>,
     parents: RefCell<Vec<MarkupValue>>,
+    /// The objects of `parents` (its entries that are not null), in the same
+    /// order: the list the eager parent stack provider hands out. It is
+    /// kept with `parents`, so handing it out shares it; a push or a pop
+    /// copies it only while an enumeration still holds it.
+    direct_parents: RefCell<Rc<Vec<BoxedValue>>>,
     parent_service_provider: Option<Rc<dyn IServiceProvider>>,
     inner_service_provider: RefCell<Option<Rc<dyn IServiceProvider>>>,
     static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
@@ -185,6 +190,7 @@ impl XamlIlContext {
             root_object: RefCell::new(None),
             intermediate_root: RefCell::new(None),
             parents: RefCell::new(Vec::new()),
+            direct_parents: RefCell::new(Rc::new(Vec::new())),
             parent_service_provider,
             inner_service_provider: RefCell::new(None),
             static_providers,
@@ -258,6 +264,9 @@ impl XamlIlContext {
     /// `PushParent`: adds an object to the parent stack and makes it the
     /// provide-value target object.
     pub fn push_parent(&self, value: MarkupValue) {
+        if let Some(object) = &value {
+            Rc::make_mut(&mut *self.direct_parents.borrow_mut()).push(object.clone());
+        }
         self.parents.borrow_mut().push(value.clone());
         if self.definition.provide_value_target {
             *self.target_object.borrow_mut() = value;
@@ -269,7 +278,9 @@ impl XamlIlContext {
     pub fn pop_parent(&self) {
         let last = {
             let mut parents = self.parents.borrow_mut();
-            parents.pop();
+            if let Some(Some(_)) = parents.pop() {
+                Rc::make_mut(&mut *self.direct_parents.borrow_mut()).pop();
+            }
             parents.last().cloned().flatten()
         };
         if self.definition.provide_value_target {
@@ -486,7 +497,7 @@ impl IFerroXamlIlParentStackProvider for XamlIlContext {
 impl IFerroXamlIlEagerParentStackProvider for XamlIlContext {
     /// `DirectParentsStack => (IReadOnlyList<object>) ParentsStack`.
     fn direct_parents_stack(&self) -> Rc<Vec<BoxedValue>> {
-        Rc::new(self.parents_stack().into_iter().flatten().collect())
+        self.direct_parents.borrow().clone()
     }
 
     /// `ParentProvider => XamlIlRuntimeHelpers.AsEagerParentStackProvider(

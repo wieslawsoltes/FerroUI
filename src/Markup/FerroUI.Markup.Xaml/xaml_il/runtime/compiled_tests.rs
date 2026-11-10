@@ -126,6 +126,34 @@ fn emitted_deferred_context_uses_declaration_namespaces_after_parent_scope_ends(
 }
 
 #[test]
+fn the_base_uri_of_a_deferred_build_is_the_one_a_context_of_the_document_has() {
+    use super::compiled::deferred_context;
+    let parent: Rc<dyn IServiceProvider> = create_context(None, None, NAMESPACES);
+    // An upper-case scheme and authority (read in lower case), two documents whose texts differ
+    // only in their last segment, a text that is not an absolute URI, and no URI at all.
+    let documents = [
+        Some("FERRES://App/Views/Template.xaml"),
+        Some("ferres://App/Views/Other.xaml"),
+        Some("Views/Template.xaml"),
+        None,
+    ];
+    // Every document is asked twice: the second build has the URI kept for the document.
+    for _ in 0..2 {
+        for base_uri in documents {
+            let expected = create_context(None, base_uri, NAMESPACES).base_uri();
+            let deferred = deferred_context(&parent, &DocumentInfo { base_uri, namespaces: NAMESPACES });
+            assert_eq!(deferred.base_uri(), expected, "{base_uri:?}");
+        }
+    }
+    let first = deferred_context(&parent, &DocumentInfo { base_uri: documents[0], namespaces: NAMESPACES });
+    assert_eq!(first.base_uri().map(String::from).as_deref(), Some("ferres://app/Views/Template.xaml"));
+    // The context has a URI of its own: replacing it does not reach the next build.
+    first.set_base_uri(None);
+    let next = deferred_context(&parent, &DocumentInfo { base_uri: documents[0], namespaces: NAMESPACES });
+    assert!(next.base_uri().is_some());
+}
+
+#[test]
 fn the_name_scope_field_is_the_scope_of_the_parent() {
     let scope = NameScopeRef::new(NameScope::new());
     let parent = TestServiceProvider::new().with_name_scope(scope.clone()).sp();
@@ -243,4 +271,196 @@ fn the_error_of_an_assignment_without_a_setter_names_the_type_of_the_value() {
     );
     let error = no_setter("Background", &None, 1, 2);
     assert_eq!(error.message(), "No setter of property Background accepts null Line 1, position 2. (line 1 position 2)");
+}
+
+// --- the binds of a template build -----------------------------------------------------------
+//
+// `bind_dynamic_resource` and `bind_template_binding` make the expression of the binding
+// without the extension the statements of generated code created. Each is compared here with
+// those statements, written out as the emitter wrote them.
+
+mod template_binds {
+    use std::rc::Rc;
+
+    use ferroui_base::controls::ResourceDictionary;
+    use ferroui_base::data::TemplateBinding;
+    use ferroui_base::media::{Color, Colors, SolidColorBrush};
+    use ferroui_base::metadata::IServiceProvider;
+    use ferroui_base::styling::ThemeVariant;
+    use ferroui_base::{FerroObject, FerroProperty, Ref};
+    use ferroui_controls::primitives::TemplatedControl;
+    use ferroui_controls::{Border, Button};
+
+    use super::super::compiled::{
+        bind, bind_dynamic_resource, bind_template_binding, create_context, property_value, provide_value, string_object,
+        to_value,
+    };
+    use super::super::IFerroXamlIlEagerParentStackProvider;
+    use super::{values, NAMESPACES};
+    use crate::markup_extensions::DynamicResourceExtension;
+    use crate::test_support::{boxed, TestServiceProvider};
+    use crate::xaml_il::runtime::XamlIlContext;
+
+    type Bind = fn(&Rc<XamlIlContext>, &Ref<FerroObject>, &'static FerroProperty, &str);
+
+    /// The bind of the runtime.
+    fn direct(context: &Rc<XamlIlContext>, target: &Ref<FerroObject>, property: &'static FerroProperty, key: &str) {
+        bind_dynamic_resource(context, target, property, key, 3, 9).expect("the resource is bound");
+    }
+
+    /// The statements of generated code the bind of the runtime stands for.
+    fn statements(context: &Rc<XamlIlContext>, target: &Ref<FerroObject>, property: &'static FerroProperty, key: &str) {
+        let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
+        let provided =
+            provide_value(context, property_value(property), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
+        bind(target, property, provided, 3, 9).expect("the resource is bound");
+    }
+
+    const BINDS: [(&str, Bind); 2] = [("direct", direct), ("statements", statements)];
+
+    fn brush(color: Color) -> Option<ferroui_base::BoxedValue> {
+        Some(boxed(SolidColorBrush::with_color(color)))
+    }
+
+    fn background_color(border: &Border) -> Option<Color> {
+        border.background().map(|brush| brush.as_solid_color_brush().expect("a solid color brush").color())
+    }
+
+    /// A border with the resource `brush`, and a context whose parent service provider is
+    /// `parent`, with the border pushed as the element being built.
+    fn element(parent: Rc<dyn IServiceProvider>) -> (Ref<Border>, Rc<XamlIlContext>) {
+        let border = Border::new();
+        border.resources().add("brush", brush(Colors::BLUE));
+        let context = create_context(Some(parent), None, NAMESPACES);
+        context.push_parent(to_value(border.clone()));
+        (border, context)
+    }
+
+    #[test]
+    fn a_dynamic_resource_of_a_template_is_bound_at_the_template_priority() {
+        for (name, bind) in BINDS {
+            let (border, context) = element(TestServiceProvider::new().in_control_template().sp());
+            bind(&context, border.upcast_ref::<FerroObject>(), Border::background_property(), "brush");
+            assert_eq!(background_color(&border), Some(Colors::BLUE), "{name}");
+            // A local value is above the binding, and does not replace it.
+            border.set_value(Border::background_property(), Some(SolidColorBrush::with_color(Colors::RED).into()));
+            assert_eq!(background_color(&border), Some(Colors::RED), "{name}");
+            border.clear_value(Border::background_property());
+            assert_eq!(background_color(&border), Some(Colors::BLUE), "{name}");
+            // The target property was cleared after the bind, as after `ProvideValue`.
+            assert!(context.target_property().is_none(), "{name}");
+        }
+    }
+
+    #[test]
+    fn a_dynamic_resource_outside_a_template_is_bound_as_a_local_value() {
+        for (name, bind) in BINDS {
+            let (border, context) = element(TestServiceProvider::new().sp());
+            bind(&context, border.upcast_ref::<FerroObject>(), Border::background_property(), "brush");
+            assert_eq!(background_color(&border), Some(Colors::BLUE), "{name}");
+            // A local value replaces the binding.
+            border.set_value(Border::background_property(), Some(SolidColorBrush::with_color(Colors::RED).into()));
+            border.clear_value(Border::background_property());
+            assert_eq!(background_color(&border), None, "{name}");
+        }
+    }
+
+    #[test]
+    fn a_dynamic_resource_of_an_object_that_is_no_element_finds_resources_from_its_nearest_parent() {
+        for (name, bind) in BINDS {
+            let host = Border::new();
+            host.resources().add("accent", Some(boxed(Colors::BLUE)));
+            let context = create_context(Some(TestServiceProvider::new().sp()), None, NAMESPACES);
+            context.push_parent(to_value(host.clone()));
+            let brush = SolidColorBrush::new();
+            context.push_parent(to_value(brush.clone()));
+            bind(&context, brush.upcast_ref::<FerroObject>(), SolidColorBrush::color_property(), "accent");
+            context.pop_parent();
+            assert_eq!(brush.color(), Colors::BLUE, "{name}");
+            host.resources().set("accent", Some(boxed(Colors::RED)));
+            assert_eq!(brush.color(), Colors::RED, "{name}");
+        }
+    }
+
+    #[test]
+    fn a_dynamic_resource_in_a_theme_dictionary_is_of_the_variant_of_the_dictionary() {
+        for (name, bind) in BINDS {
+            let themed = ResourceDictionary::new();
+            let dark = ResourceDictionary::new();
+            dark.add("accent", Some(boxed(Colors::BLUE)));
+            // The key of a theme dictionary, as the markup that declares it sets it.
+            dark.set_key(Some(ThemeVariant::dark()));
+            let light = ResourceDictionary::new();
+            light.add("accent", Some(boxed(Colors::RED)));
+            themed.add_theme_dictionary(ThemeVariant::dark(), dark.clone());
+            themed.add_theme_dictionary(ThemeVariant::light(), light);
+
+            let host = Border::new();
+            host.resources().add_merged_dictionary(themed);
+            host.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::light()));
+
+            // The brush is declared in the dark dictionary: the dictionary is its nearest parent,
+            // and its variant is the one the resource is looked up in, whatever the host has.
+            let context = create_context(Some(TestServiceProvider::new().sp()), None, NAMESPACES);
+            context.push_parent(to_value(dark.clone()));
+            let brush = SolidColorBrush::new();
+            context.push_parent(to_value(brush.clone()));
+            bind(&context, brush.upcast_ref::<FerroObject>(), SolidColorBrush::color_property(), "accent");
+            context.pop_parent();
+            assert_eq!(brush.color(), Colors::BLUE, "{name}");
+        }
+    }
+
+    #[test]
+    fn a_template_binding_is_bound_as_the_statements_of_generated_code_bind_it() {
+        fn direct(target: &Ref<FerroObject>, property: &'static FerroProperty, source: &'static FerroProperty) {
+            bind_template_binding(target, property, source, 5, 11).expect("the binding is bound");
+        }
+        fn statements(target: &Ref<FerroObject>, property: &'static FerroProperty, source: &'static FerroProperty) {
+            let binding = TemplateBinding::__markup_new_1(source);
+            let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
+            bind(target, property, provided, 5, 11).expect("the binding is bound");
+        }
+        let binds: [(&str, fn(&Ref<FerroObject>, &'static FerroProperty, &'static FerroProperty)); 2] =
+            [("direct", direct), ("statements", statements)];
+        for (name, bind) in binds {
+            let button = Button::new();
+            button.set_value(TemplatedControl::background_property(), Some(SolidColorBrush::with_color(Colors::BLUE).into()));
+            let border = Border::new();
+            bind(border.upcast_ref::<FerroObject>(), Border::background_property(), TemplatedControl::background_property());
+            assert_eq!(background_color(&border), None, "{name}");
+            border.set_templated_parent(Some(button.upcast_ref::<FerroObject>().clone()));
+            assert_eq!(background_color(&border), Some(Colors::BLUE), "{name}");
+            button.set_value(TemplatedControl::background_property(), Some(SolidColorBrush::with_color(Colors::RED).into()));
+            assert_eq!(background_color(&border), Some(Colors::RED), "{name}");
+        }
+    }
+
+    #[test]
+    fn the_direct_parents_are_the_objects_of_the_stack_and_a_list_handed_out_does_not_change() {
+        let context = create_context(None, None, NAMESPACES);
+        let eager: Rc<dyn IFerroXamlIlEagerParentStackProvider> = context.clone();
+        assert!(eager.direct_parents_stack().is_empty());
+        context.push_parent(to_value(1i32));
+        // A null parent is on the stack and not among the objects.
+        context.push_parent(None);
+        context.push_parent(to_value(2i32));
+        let held = eager.direct_parents_stack();
+        assert_eq!(values(&held), [1, 2]);
+        // The list is the one the context keeps, not a copy, until the stack changes.
+        assert!(Rc::ptr_eq(&held, &eager.direct_parents_stack()));
+        context.push_parent(to_value(3i32));
+        assert_eq!(values(&held), [1, 2]);
+        assert_eq!(values(&eager.direct_parents_stack()), [1, 2, 3]);
+        context.pop_parent();
+        context.pop_parent();
+        assert_eq!(values(&eager.direct_parents_stack()), [1]);
+        // Popping the null parent takes no object away.
+        context.pop_parent();
+        assert_eq!(values(&eager.direct_parents_stack()), [1]);
+        assert_eq!(context.parents_stack().len(), 1);
+        context.pop_parent();
+        assert!(eager.direct_parents_stack().is_empty());
+        assert_eq!(values(&held), [1, 2]);
+    }
 }
