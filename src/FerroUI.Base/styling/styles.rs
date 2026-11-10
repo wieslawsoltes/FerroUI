@@ -22,6 +22,7 @@ use std::rc::Rc;
 pub struct Styles {
     base: FerroObject,
     styles: FerroList<Rc<dyn IStyle>>,
+    candidates: super::selector_candidates::CandidateCache,
     owner: RefCell<Option<WeakResourceHost>>,
     resources: RefCell<Option<Ref<ResourceDictionary>>>,
     collection_changed: HandlerList<CollectionChangedHandler<Rc<dyn IStyle>>>,
@@ -64,6 +65,7 @@ impl Styles {
         Self {
             base: FerroObject::construct(),
             styles: FerroList::new(),
+            candidates: Default::default(),
             owner: RefCell::new(None),
             resources: RefCell::new(None),
             collection_changed: HandlerList::new(),
@@ -197,6 +199,15 @@ impl Styles {
     #[inline]
     pub fn snapshot(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         self.styles.snapshot()
+    }
+
+    pub(crate) fn candidates<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        self.candidates.select(self.snapshot(), target)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn candidate_stats(&self) -> Option<(u32, usize, usize)> {
+        self.candidates.stats()
     }
 
     /// Tries to find a resource in the collection's resources and then in
@@ -372,6 +383,17 @@ impl Styles {
             panic!("Reset should not be called on Styles.");
         }
 
+        // The candidate index first: the handlers below can apply styles.
+        match e.action {
+            NotifyCollectionChangedAction::Add => e.new_items.iter().for_each(|item| self.candidates.added(item)),
+            NotifyCollectionChangedAction::Remove => e.old_items.iter().for_each(|item| self.candidates.removed(item)),
+            NotifyCollectionChangedAction::Replace => {
+                e.old_items.iter().for_each(|item| self.candidates.removed(item));
+                e.new_items.iter().for_each(|item| self.candidates.added(item));
+            }
+            _ => self.candidates.changed(),
+        }
+
         let current_owner = self.owner();
 
         match e.action {
@@ -437,6 +459,10 @@ impl IResourceProvider for StylesHandle {
 }
 
 impl IStyle for StylesHandle {
+    fn children_for_target<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        self.0.candidates(target)
+    }
+
     fn children(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         self.0.styles.snapshot()
     }

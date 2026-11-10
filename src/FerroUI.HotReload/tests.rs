@@ -1904,7 +1904,7 @@ fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transac
 #[test]
 fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     use ferroui_base::{
-        styling::{style_ptr_eq, IStyle},
+        styling::{style_ptr_eq, IStyle, Style, Styles},
         threading::Dispatcher,
     };
     use ferroui_controls::Border;
@@ -1915,8 +1915,9 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
     let source = |width| {
+        let unrelated = r#"<Style Selector="Button"/>"#.repeat(8);
         format!(
-            r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
+            r#"<Styles xmlns="https://github.com/ferroui">{unrelated}<Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
         )
     };
     let load = |text: &str| {
@@ -1929,6 +1930,20 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
         )
         .unwrap()
     };
+    // The styles of a document as a generated theme table builds them: each style is
+    // index-enabled before it joins its collection, so the collection leaves out the styles
+    // whose selector cannot match the type of an element. The documents a reload loads at run
+    // time are not index-enabled: each replacement is traversed whole.
+    let generated = |loaded: Rc<dyn IStyle>| {
+        let styles = Styles::new();
+        for style in loaded.children().iter() {
+            if let Some(style) = style.as_object().and_then(|o| o.downcast_ref::<Style>()) {
+                style.enable_selector_index();
+            }
+            styles.add(style.clone());
+        }
+        styles
+    };
     let root = Border::new();
     let child = Border::new();
     root.set_child(child.clone());
@@ -1936,8 +1951,10 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     let application = load(
         r#"<Style xmlns="https://github.com/ferroui" Selector="Border"><Setter Property="Height" Value="33"/></Style>"#,
     );
-    root.styles().add(load(&source(10)));
+    root.styles().add(generated(load(&source(10))));
     root.styles().add(application.clone());
+    // Of the nine styles of the document, a Border is offered the one that names it.
+    assert_eq!(root.styles().get(0).children_for_target(&child).count(), 1);
     root.apply_styling();
     child.apply_styling();
     assert_eq!(child.width(), 10.0);
@@ -1960,6 +1977,8 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
         session.submit(uri.into(), source(width));
         let outcome = session.apply_pending().unwrap();
         assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        // The replacement goes through the ordinary matcher, style by style.
+        assert_eq!(root.styles().get(0).children_for_target(&child).count(), 9);
         root.apply_styling();
         child.apply_styling();
         assert_eq!(child.width(), width as f64);

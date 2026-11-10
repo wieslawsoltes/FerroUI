@@ -951,10 +951,7 @@ impl StyledElement {
         theme.try_attach_checked(self, type_)?;
 
         if theme.has_children() {
-            let children = theme.children().snapshot();
-            for child in children.iter() {
-                self.apply_style(&**child, None, type_)?;
-            }
+            self.apply_style_candidates(theme.children().candidates(self), None, type_)?;
         }
         Ok(())
     }
@@ -966,10 +963,7 @@ impl StyledElement {
         crate::perf_count!(StyleHostsWalked);
 
         if host.is_styles_initialized() {
-            let styles = host.styles().snapshot();
-            for style in styles.iter() {
-                self.apply_style(&**style, Some(host), FrameType::Style)?;
-            }
+            self.apply_style_candidates(host.styles().candidates(self), Some(host), FrameType::Style)?;
         }
         Ok(())
     }
@@ -988,14 +982,29 @@ impl StyledElement {
             }
 
             // The common case of a style without nested styles.
-            if !base.has_children() {
-                return Ok(());
+            if base.has_children() {
+                self.apply_style_candidates(style.children_for_target(self), host, type_)?;
             }
+            return Ok(());
         }
+        self.apply_style_candidates(style.children_for_target(self), host, type_)
+    }
 
-        let children = style.children();
-        for child in children.iter() {
-            self.apply_style(&**child, host, type_)?;
+    #[inline]
+    fn apply_style_candidates(
+        &self,
+        mut styles: crate::styling::StyleCandidates<'_>,
+        host: Option<&StyleHostRef>,
+        type_: FrameType,
+    ) -> Result<(), DuplicateSetterError> {
+        if let Some(all) = styles.unfiltered() {
+            for style in all {
+                self.apply_style(&**style, host, type_)?;
+            }
+        } else {
+            while let Some(style) = styles.next_style() {
+                self.apply_style(style, host, type_)?;
+            }
         }
         Ok(())
     }

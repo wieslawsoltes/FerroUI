@@ -59,7 +59,7 @@ units of the build's own output.
 
 | Part | Form | When it runs |
 |---|---|---|
-| Plain resources: brushes with a literal colour or a resource colour, `x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`, `{StaticResource}` aliases | Static row tables, one shared builder per shape (`rt::add_literal_brushes`, `rt::add_double_resources`, ...) | Added at load; each row is built on its first lookup |
+| Plain resources: brushes with a literal colour or a resource colour, `x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`, `{StaticResource}` aliases | Static row tables, one shared builder per shape (`rt::add_literal_brushes`, `rt::add_double_resources`, ...) | Added at load. A value row (`x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`) is added as its value; a brush or alias row is built on its first lookup (section 2.2) |
 | Other resources | One deferred build function per resource (`rt::add_deferred_resource`) | On first lookup |
 | Control themes | One static table per theme, interpreted by `rt::build_control_theme`; selector chains are static slices, shared when identical | Once per theme, on first use of the control type |
 | Control templates | Native code | Every time a control applies its template |
@@ -69,6 +69,141 @@ units of the build's own output.
 A control theme whose content the table cannot express keeps native code for that theme only.
 Today that means one with animations, a resource dictionary of its own, or a use of the name
 scope.
+
+### 2.2 Lazy resource rows: indexed deferred groups
+
+A brush row (literal, `{StaticResource}` or `{DynamicResource}` colour) and a `{StaticResource}`
+alias row are built when the resource is first looked up. The generated code is a static table
+of rows for each shape and one call of the shared builder (`rt::add_literal_brushes`,
+`rt::add_static_brushes`, `rt::add_dynamic_brushes`, `rt::add_resource_aliases`) with the
+dictionary, the context of the declaration and the table. What the builder puts into the
+dictionary:
+
+- **One group for the table.** The builder creates one object for the whole table (an
+  `IDeferredResourceGroup` behind a `DeferredResourceGroup` handle, `ferroui-base`,
+  `controls/i_deferred_content.rs`) that holds the static rows and, for each row, the capture of
+  its declaration: the name scope, the root object and the resource nodes above it, all held
+  weakly. The capture is taken immediately before the row is added, so a handler of the
+  dictionary's change notification that moves the parents between two rows is seen by the next
+  row.
+- **One entry for each row.** `ResourceDictionary::add_indexed_deferred(key, group, index)` adds
+  an entry that is the group and the index of the row. It is the size of an entry with deferred
+  content, and adding it allocates nothing for the row: the capture is a slot of the group's
+  vector, and rows declared under the same parents share the list of resource nodes.
+- **First lookup.** The dictionary asks the group to build the row
+  (`IDeferredResourceGroup::try_build(index, ..)`), keeps the value in place of the entry, as
+  for any shared deferred resource, and tells the group that the row is built
+  (`IDeferredResourceGroup::release(index)`): the group drops the capture of that row and the
+  other rows keep their indices. A build that fails reports its error to the error scope of the
+  load and keeps the entry: the next lookup builds again. The group lives while an entry of it
+  is not built.
+
+A row falls back to deferred content of its own (`ResourceDictionary::add_deferred`, as the
+other resources of the document) in three cases:
+
+| Case | Why |
+|---|---|
+| The capture of the row owns a value: the root object or a parent is a plain value, not an object or a registered model | The value must be released when that resource is built, not when the last row of the table is |
+| A development build with hot reload (`debug_assertions` and the `hot-reload` feature of `ferroui-markup-xaml`) | A reload replaces the entries of a dictionary one by one and uses the reload hooks of deferred content |
+| A build with `source-overlays` (the designer) | The same hooks |
+
+The fallback is decided for each row: the rows of one table can be of both kinds, and the
+indices of the group stay those of the table. An application built for release has the indexed
+entries; a workspace build that includes hot reload or the designer has the fallback in every
+crate, because features unify. The tests of the indexed form are the library tests of
+`ferroui-markup-xaml` built on its own (`cargo test -p ferroui-markup-xaml --lib`), which CI
+runs as a step of its own.
+
+A group is an implementation detail of the markup runtime. Application code adds lazy resources
+with `ResourceDictionary::add_deferred` or `add_deferred_fn`.
+
+### 2.3 Applying styles: a batch reevaluates only when it changed something
+
+An element changes its styles in a batch (`ValueStore::begin_styling`, `end_styling`): applying
+its styles and control themes attaches the frames of those that match, invalidating its styles
+or its control theme removes their frames, and the effective values are computed once, when the
+outermost batch ends. The end of a batch reevaluates the values only when the batch changed
+something: a frame was inserted, or a reevaluation was put off while the batch was open (a frame
+removed, a binding of a style that produced a value, a style that became active or inactive). A
+batch that changed nothing leaves the effective values untouched.
+
+For a theme this means that an element no style or control theme matches, and an invalidation
+that reaches an element holding no frame of the kind it removes (an invalidation of styles
+recurses over the tree), cost the matching of the selectors and nothing in the property system.
+The deviation from upstream, which reevaluates at the end of every batch, is recorded in
+[docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.25.
+
+### 2.4 Applying styles: the selector candidate index
+
+A control theme of a control with a large template has many nested styles, and most of them name
+a part of another type than the element being styled: of the nested styles of a button's theme, a
+`Border` in the template can match only those whose selector ends in `Border`. Matching every
+nested style against every element of the template is the cost the index removes.
+
+**What is indexed.** A compiled control theme table index-enables each nested style it builds,
+right after it sets the selector and before the style joins the children of its parent
+(`theme_styles.rs`, `Style::enable_selector_index`, a hidden method). An index-enabled style
+records the type its selector requires of the element it matches, when the selector has one: the
+last compound of the selector must start with a type, exact (`Border`) or with derived types
+(`:is(Border)`); a name, classes, property conditions and nth-child conditions may follow in the
+same compound, and anything may come before the compound's combinator
+(`^ /template/ Border#PART_Border:pointerover`). The collection that holds such styles (the
+children of a control theme or of a style, a `Styles` collection) keeps, for each style key it is
+asked for, the list of its entries that can match an element of that key, in source order, and
+applying styles visits the entries of the list.
+
+**What falls back.** An entry is left out of a list only when it is an index-enabled style without
+child styles and the type of its selector rules the style key out. Everything else stays in every
+list and goes through the ordinary matcher:
+
+- a style that was never index-enabled (every style the run-time loader, hot reload or code
+  creates), and a style whose selector was replaced after it was enabled;
+- a selector that gives no type to index by: an OR of selectors (`,`), `:not()`, a last compound
+  that starts with `^` (`^:pointerover`), with a name or a class alone (`/template/ #PART_Border`)
+  or with a custom selector node;
+- a style with child styles, because the type of a parent says nothing about its children;
+- a style whose parent is a container query, which is evaluated before the selector;
+- an entry that is not a style: a nested `Styles` collection, a style include, a custom `IStyle`;
+- every entry of a collection with fewer than eight entries.
+
+The index reads the type of the selector and nothing else: classes, names, pseudo-classes and
+property conditions are evaluated by the matcher, with their activators, for every style in the
+list. The styles of the list apply in source order with the priorities they always had, so the
+values of an element are the same with and without the index.
+
+A selector in a nested style of a theme that names the type of the part
+(`^ /template/ Border#PART_Border`) is indexed; one that names only the part
+(`^ /template/ #PART_Border`) is matched against every element of the template.
+
+**Invalidation.** The lists belong to the collection. They are dropped when
+
+- the collection changes (an entry is added, removed, replaced or moved, or it is cleared);
+- a style the collection counts as index-enabled gets another selector, is index-enabled again,
+  or gets another parent;
+- the child styles of such a style change.
+
+A change of any other collection, or of a style in another collection, leaves the lists in place:
+there is no state shared between collections. A traversal that is under way when one of these
+happens (a setter applied by an earlier style can run code that edits a later one), or during
+which the style key of the element changes, goes on from its position through every remaining
+entry of the collection.
+
+A collection counts a style as index-enabled when the style is added to it while it is enabled.
+A style that is enabled for the first time after it was added is matched for every element until
+it is added again, and a style that two collections hold is narrowed by the first of them only.
+Generated code enables before it adds; nothing else calls the method.
+
+**Cost.** A collection that never held an index-enabled style allocates nothing for the index:
+asking it for the candidates of an element is one check, and the collection is traversed as it
+always was. This is the case of the styles of an application, of a document loaded at run time
+and of a theme replaced by a hot reload. A collection with index-enabled styles shares one small
+state with them (each `Style` holds one pointer to it), scans its entries once for each style key
+it meets and remembers the result: up to 1024 keys for each collection, and keys with the same
+candidates share one list of entry indices. A key beyond the bound gets its list computed at each
+use, and nothing that is remembered is dropped for it.
+
+The deviation from upstream, which matches every child style against every element, is recorded
+in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
 
 ## 3. Units and theme trimming
 
@@ -319,3 +454,5 @@ Documents loaded at run time bind the way the built application does (#604):
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
+| Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
+| Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |

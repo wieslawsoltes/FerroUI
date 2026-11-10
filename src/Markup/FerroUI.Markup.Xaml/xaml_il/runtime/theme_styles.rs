@@ -295,6 +295,7 @@ fn add_member(context: &Rc<XamlIlContext>, style: &Ref<StyleBase>, member: &Styl
             }
             if let Some(steps) = selector {
                 Style::__markup_set_Selector(&nested, build_selector(steps));
+                nested.enable_selector_index();
             }
             for member in members.iter() {
                 add_member(context, nested.upcast_ref::<StyleBase>(), member)?;

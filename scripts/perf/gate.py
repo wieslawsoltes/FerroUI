@@ -6,6 +6,7 @@ TreeDataGrid benchmarks, of a base commit against the working tree, measured on 
     python3 scripts/perf/gate.py --base origin/main --rounds 3 --markdown target/perf-gate.md
     python3 scripts/perf/gate.py --only gauntlet
     python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+    python3 scripts/perf/gate.py --only counters
 
 The base (default: the merge-base of HEAD with origin/main) is checked out, detached, in a git
 worktree of its own under the scratch folder (default: `ferroui-gate-scratch` beside the
@@ -25,6 +26,12 @@ What is measured (see docs/porting/desktop-performance.md, section 8.1):
 - the TreeDataGrid benchmarks, `tests/FerroUI.TreeDataGrid.Benchmarks`: the median time of one
   operation of every benchmark, from the tables of the harness (`ferroui-benchmarks`,
   `harness.rs`).
+
+What is checked without a measurement, on the candidate alone and once (`counters`): the tests
+that assert how much work an operation does, read from the framework's performance counters
+(`COUNTER_CHECKS`). The counters exist only with the feature `perf-counters`, which no other
+automated check turns on, so the assertions of these tests run here. A test that fails fails the
+gate.
 
 When the base has no frame gate (commits before it), the candidate's `samples/GauntletBenchmark`
 is copied into the base worktree (and made a member of its workspace when it is not one), so that
@@ -74,7 +81,17 @@ WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
+# The tests that assert counts of work (`ferroui_base::diagnostics::perf_counters`), each a
+# package, the features that compile the counters in, and the filter of its tests. Their
+# assertions are skipped without the feature, so the gate runs them with it: deterministic, on
+# the candidate only, once.
+COUNTER_CHECKS = [
+    ("ferroui-base", "perf-counters", "style_work"),
+]
+
 SUITES = {
+    # Not measured: `run_counter_checks`.
+    "counters": {"build": [], "run": []},
     "gauntlet": {
         "build": ["test", "-p", GATE_PACKAGE, "--release", "--test", "frame_gate", "--no-run"],
         "run": ["test", "-p", GATE_PACKAGE, "--release", "--test", "frame_gate", "--", *TEST_ARGS],
@@ -97,7 +114,7 @@ SUITES = {
         "run": [],
     },
 }
-ALL_SUITES = ["gauntlet", "frames", "framework", "tdg", "window"]
+ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
 
 # --- tolerances -----------------------------------------------------------------------------------
 #
@@ -423,6 +440,44 @@ def run_window(side: Side, scene: str, seconds: float, log: Path, echo: bool) ->
     return found
 
 
+def counter_check_args(package: str, features: str, test_filter: str, build: bool) -> list[str]:
+    args = ["test", "-p", package, "--features", features, "--lib"]
+    return [*args, "--no-run"] if build else [*args, test_filter]
+
+
+TEST_RESULT = re.compile(r"^test result: \w+\. (\d+) passed; (\d+) failed;")
+
+
+def run_counter_checks(candidate: Side, logs: Path, echo: bool) -> list[Row]:
+    """Runs the counter-asserting tests of `COUNTER_CHECKS` on the candidate and returns a row of
+    the table for each: the number of tests that passed, or FAILED (a test failed, or the filter
+    selected none). A build that fails is an error of the gate, like the build of a suite."""
+    rows = []
+    for package, features, test_filter in COUNTER_CHECKS:
+        name = f"{package}-{test_filter}"
+        key = f"counters/{package} {test_filter}"
+        run_cargo(candidate, counter_check_args(package, features, test_filter, True), {}, logs / f"build-counters-{name}.log", echo)
+        log = logs / f"counters-{name}.log"
+        try:
+            run_cargo(candidate, counter_check_args(package, features, test_filter, False), {}, log, echo)
+            succeeded = True
+        except GateError:
+            succeeded = False
+        passed = failed = 0
+        for line in log.read_text(encoding="utf-8").splitlines():
+            match = TEST_RESULT.match(line.strip())
+            if match:
+                passed += int(match.group(1))
+                failed += int(match.group(2))
+        if succeeded and failed == 0 and passed > 0:
+            rows.append(Row(key, "-", f"{passed} passed", "", "", "ok", False))
+        else:
+            reason = f"{failed} of {passed + failed} tests failed" if failed else "no test ran" if succeeded else "the run failed"
+            print(f"[{candidate.name}] counters: {key}: {reason}; the log is {log}", flush=True)
+            rows.append(Row(key, "-", "FAILED", "", "", "FAILED", True))
+    return rows
+
+
 def record(side: Side, found: list[tuple[Metric, float]]) -> None:
     for metric, value in found:
         side.metrics[metric.key] = metric
@@ -541,7 +596,7 @@ def main() -> int:
     parser.add_argument(
         "--only",
         default="all",
-        help="what to measure, comma separated: gauntlet, frames, framework, tdg, window, or all (default all)",
+        help="what to measure, comma separated: counters, gauntlet, frames, framework, tdg, window, or all (default all)",
     )
     parser.add_argument("--framework-filter", default=FRAMEWORK_FILTER, help=f"FERROUI_BENCH_FILTER of the framework run (default {FRAMEWORK_FILTER})")
     parser.add_argument("--window-seconds", type=float, default=12.0, help="how long the window suite runs each scene (default 12)")
@@ -615,10 +670,36 @@ def gate(options: argparse.Namespace) -> int:
         if options.warmup is not None:
             env[suite]["GATE_WARMUP"] = str(options.warmup)
 
-    print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {options.rounds} rounds of {', '.join(suites)}")
+    timed = [suite for suite in suites if suite != "counters"]
+    what = [f"{options.rounds} rounds of {', '.join(timed)}"] if timed else []
+    if "counters" in suites:
+        what.insert(0, "the counter checks")
+    print(f"base: {base_ref} ({base_sha[:10]}), candidate: {candidate_label}, {' and '.join(what)}")
     print(f"scratch: {scratch}; cargo: {' '.join(cargo_command())}")
     if base_sha == head_sha:
         print("note: the base is HEAD; the comparison shows the uncommitted changes, or the noise of the machine")
+
+    # The counter checks come first and are taken out of the measured suites: they need no base
+    # and no rounds.
+    counters = "counters" in suites
+    suites = [suite for suite in suites if suite != "counters"]
+    logs = scratch / "logs" / datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    candidate = Side("candidate", root, scratch / "target-candidate", candidate_label)
+    check_rows: list[Row] = []
+    if counters and options.dry_run:
+        for check in COUNTER_CHECKS:
+            print(f"build: {' '.join(cargo_command() + counter_check_args(*check, True))}")
+            print(f"run:   {' '.join(cargo_command() + counter_check_args(*check, False))}")
+    elif counters:
+        check_rows = run_counter_checks(candidate, logs, options.verbose)
+        if not suites:
+            failures = [row for row in check_rows if row.regressed]
+            print()
+            print(text_table(check_rows))
+            print()
+            print(f"{len(check_rows)} counter checks, {len(failures)} failed" if failures else f"{len(check_rows)} counter checks, none failed")
+            print(f"logs: {logs}")
+            return 1 if failures else 0
 
     if options.dry_run:
         for suite in suites:
@@ -636,8 +717,6 @@ def gate(options: argparse.Namespace) -> int:
         print(f"note: {reason}: the candidate's {', '.join(copied)} were copied into the base worktree, so both sides run the same benchmark code")
 
     base = Side("base", base_root, scratch / "target-base", f"{base_ref} ({base_sha[:10]})")
-    candidate = Side("candidate", root, scratch / "target-candidate", candidate_label)
-    logs = scratch / "logs" / datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
     # Both sides are built before anything is measured: a build does not run beside a measurement.
     for suite in suites:
@@ -686,7 +765,7 @@ def gate(options: argparse.Namespace) -> int:
         measure(rounds, measured, rounds + 1)
         rounds += 1
 
-    rows = compare(base, candidate, options.tolerance)
+    rows = [*check_rows, *compare(base, candidate, options.tolerance)]
     regressions = [row for row in rows if row.regressed]
     summary = (
         f"{len(rows)} metrics, {len(regressions)} regressed beyond their tolerance"

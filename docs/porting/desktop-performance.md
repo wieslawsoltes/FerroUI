@@ -550,6 +550,7 @@ python3 scripts/perf/gate.py --only gauntlet                   # the frame gate 
 python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
 
@@ -570,6 +571,24 @@ did or a benchmark failed on the candidate, 2 when a build or a run failed.
 
 What it measures:
 
+- **The counter checks** (suite `counters`): unit tests that assert exact numbers of units of
+  work, read from the performance counters of `ferroui-base`
+  (`diagnostics::perf_counters`). The counters compile to nothing without the feature
+  `perf-counters`, so the workspace test run of CI builds these tests with their counts switched
+  off (`assert_count` asserts only when the counters are compiled in) and checks the behaviour
+  alone; the gate builds and runs them with the feature on. The list is `COUNTER_CHECKS` in
+  `gate.py` (package, features, test filter); today the style work tests of the property store
+  (`src/FerroUI.Base/tests/property_store/style_work_tests.rs`, section 9.25). Alone:
+
+  ```sh
+  cargo test -p ferroui-base --features perf-counters --lib style_work
+  ```
+
+  The checks are deterministic: they run once, on the candidate only, before the measured
+  suites, need no base and no quiet machine, and have no tolerance. A test that fails, a run that
+  fails or a filter that selects no test is a row `FAILED` in the table and exit status 1; a
+  build that fails is exit status 2. A change that adds a counter-asserting test adds its filter
+  to `COUNTER_CHECKS`.
 - **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
   and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
   the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
@@ -1058,7 +1077,8 @@ for every element; what differs is the work done where nothing could change.
   raised, on first use of `inlines()`.
 - **Styling passes.** Every styling pass ended with a re-evaluation of every value of the element
   (`ValueStore::end_styling`), even when no style applied. The store remembers whether a
-  re-evaluation was put off, or a frame inserted, during the pass, and re-evaluates only then.
+  re-evaluation was put off, or a frame inserted, during the pass, and re-evaluates only then
+  (section 9.25 describes the flag and has its tests).
 - **Classes.** Every input element removed its focus, pointer-over and disabled pseudoclasses when
   constructed, which made its collection of classes. Removing a pseudoclass from an element without
   classes makes nothing (`StyledElement::set_pseudo_class`).
@@ -1149,6 +1169,128 @@ batches are applied, never during a walk, so the answer holds for the whole walk
 registered nothing changes. Tests: the lighting tests of the composition
 (`composition_light_tests.rs`, `composition_winui_lighting_tests.rs`). Gauntlet (tier 16), Skia
 window, render thread: the light lookups go from about 70 to 0 of about 3,070 samples.
+
+### 9.25 A styling batch that changed nothing does not reevaluate; compiled resource rows share one deferred group
+
+Two changes to what applying styles and loading a compiled dictionary cost.
+
+**Styling batches.** Upstream's `ValueStore.EndStyling` reevaluates every effective value of the
+store when the outermost batch ends, whatever the batch did. An element opens a batch when its
+styles are applied, when its styles or its control theme are invalidated and when styles are
+detached from it, and many of these batches change nothing: no style or theme matches the
+element, or it holds no frame of the kind that is removed (an invalidation that recurses over a
+tree). The reevaluation of such a batch visits every effective value and every entry of every
+frame of the element to arrive at the values it started from.
+`ValueStore` now keeps a flag (`reevaluation_pending`, `property_store/value_store.rs`), set
+while a batch is open by the three things that can change an effective value during it: a frame
+inserted (`insert_frame`), and a reevaluation of one property or of the store put off because the
+batch is open (a frame removed, a binding of a frame that produced a value, a style whose
+activator changed). `end_styling` of the outermost batch reevaluates when the flag is set, and
+clears it. The values and the notifications of a batch that changed something are
+upstream's; a batch that changed nothing raises nothing, as before, and now does no work.
+
+Tests: `style_work_tests.rs` (a clean batch completes one pass with no reevaluation and leaves
+the generation of the values as it was; a frame added in a nested batch, a frame removed, a
+binding update and a style activation during a batch are applied at the end of the outermost
+one). The counts are asserted with `perf-counters` on, by the counter checks of the local gate
+(section 8.1): `StylingPassesCompleted`, `FullValueReevaluations`, `SingleValueReevaluations`,
+`ReevaluatedEffectiveValues`, `ReevaluatedFrameEntries`. `scripts/perf/style-work.py` runs the
+probe of the same file (`style_work_probe`) from two builds in alternation.
+
+**Compiled resource rows.** Upstream's generated code gives every deferred resource of a
+dictionary a deferred content of its own (`XamlIlRuntimeHelpers.DeferredTransformationFactoryV3`):
+an object holding the builder, the resource nodes above the declaration, the root object and the
+name scope, added with `ResourceDictionary.AddDeferred`. The rows of a compiled dictionary that
+are built on first use (the brushes with a literal, static or dynamic colour and the
+`{StaticResource}` aliases of a row table, [xaml-themes.md](../xaml-themes.md), section 2.2) did
+the same, one allocation a row at load, for rows of which an application reads a fraction. A
+table is now one group (`IDeferredResourceGroup`, `controls/i_deferred_content.rs`) that holds
+the static rows and one capture a row in a vector, and each row's dictionary entry is the group
+and the index of the row (`ResourceDictionary::add_indexed_deferred`, the item
+`IndexedDeferred`), the size of an entry with deferred content. A lookup builds the row through
+the group with the capture of that row, keeps the value in the entry as for any deferred
+resource, and tells the group to drop the capture (`IDeferredResourceGroup::release`); a build
+that fails keeps the entry and the capture, and the next lookup builds again.
+
+What is kept of the per-row form, because the difference would be observable:
+
+- The capture of each row is taken immediately before the row is added, as upstream's is: a
+  handler of the dictionary's change notification can change the parents between two rows.
+- A row whose capture owns a value (a root object or a parent that is a plain value, which
+  `WeakValue` holds by value) is added as ordinary deferred content, so that value is released
+  when that resource is built, not when the last row of the group is.
+- A development build with hot reload, and a build with source overlays (the designer), keep
+  deferred content for every row, with its reload hooks. A reload can also put a saved deferred
+  entry back in place of a built value, so the dictionary does not call `release` in a
+  development build with hot reload.
+
+Tests: `theme_resources_tests.rs` (the rows are lazy, shared per dictionary and do not keep
+their owners alive; each declaration is captured after reentrant notifications; a mixed group
+releases an owned root per resource; a realized row releases its capture and the rows around it
+keep their indices) and `resource_dictionary.rs` (the group is told of a realized row and not of
+a failed build; the destruction of a source can reenter the dictionary). The workspace test run
+builds `ferroui-markup-xaml` with hot reload and source overlays on, so CI runs the library
+tests of the crate on its own as well. `tests/FerroUI.ResourceBenchmarks` with
+`scripts/perf/resource-descriptors.py` measures the load and the allocations of the two forms
+from two builds.
+
+### 9.26 A collection of styles offers an element the styles whose selector can match its type
+
+Upstream applies a style to an element by matching the selector of every child style against
+it (`StyledElement.ApplyStyle` walks `IStyle.Children`, and `Style.TryAttach` evaluates the
+selector). A control theme of a control with a large template has many nested styles, most of
+which name a part of another type than the element at hand, so most of these matches fail at
+the type test of the selector's last compound, once for each style and each element of the
+template.
+
+A collection of styles (`StyleChildren`, `Styles`) can now keep, for a style key, the list of
+its entries that can match an element of that key (`styling/selector_candidates.rs`), and
+`StyledElement::apply_style` visits the entries of the list in source order.
+
+- **What is left out.** Only a style that is index-enabled (`Style::enable_selector_index`,
+  hidden; the compiled control theme tables call it for each nested style they build), has no
+  child styles, and whose selector requires a type that rules the key out. The type is read from
+  the last compound of the selector, which must start with it (`Selector::type_candidate`):
+  exact for a type selector, with the derived types for `:is()`. A selector with an OR, a
+  `:not()`, a nesting or a custom node at the start of that compound gives none, and so does a
+  style whose parent is a container query. Every other entry is in every list: styles that are
+  not index-enabled, styles with children, nested collections, custom `IStyle` implementations
+  (which the index does not call). The matcher evaluates the whole selector of every listed
+  style, activators included; the index does not replace any part of it.
+- **Where the lists live.** A collection and the index-enabled styles added to it share one
+  state (`IndexState`: the number of such styles, a generation, the lists); the collection
+  allocates it when the first such style is added, and each `Style` holds a weak pointer to the
+  state of the collection that counts it. A collection without index-enabled styles has no state:
+  `CandidateCache::select` returns the whole snapshot after one check, with no scan and no
+  allocation. A collection with fewer than eight entries is traversed whole as well.
+- **Invalidation.** The generation of a state advances, and its lists are dropped, when the
+  collection changes, when a style it counts gets a selector, is enabled again or gets a parent,
+  and when the children of such a style change. No state is shared between collections, so a
+  change of one collection or of its styles does not invalidate the lists of another. A list is
+  used only for the snapshot of the collection and the generation it was computed for; a
+  traversal re-reads the element's style key and the generation before each step and, when
+  either changed, goes on from its position through every remaining entry of its snapshot.
+- **Memory.** The lists of a collection are kept by style key, up to 1024 keys; a list is a
+  shared slice of entry indices (`u32`), and keys with the same candidates share one slice. A
+  key beyond the bound is computed at each use and nothing is dropped for it, so a rotation of
+  more keys than the bound does not empty the lists of the others.
+- **A restriction.** A collection counts a style when the style is added to it while it is
+  index-enabled. A style enabled for the first time afterwards is a candidate for every key
+  until it is added again; a style in two collections is narrowed by the first one. Generated
+  code enables a nested style before it adds it.
+
+The values and the order in which styles apply are upstream's: an entry that is left out is one
+the matcher rejects by type. Tests: `styling/selector_candidate_tests.rs` (the lists for exact,
+derived and overridden style keys; selectors that give no type; edits of the collection, of a
+selector, of the children and of the parent, during a traversal too; a collection without
+index-enabled styles is never scanned and allocates nothing; 200 style keys in rotation are
+scanned once each; keys beyond the bound; a change of another collection invalidates nothing;
+a style the index cannot leave out and one it can apply in source order, with the same values
+as without the index), `theme_styles_tests.rs` of `ferroui-markup-xaml` (a generated theme) and
+the style reload test of `ferroui-hot-reload` (an indexed collection replaced by one loaded at
+run time). `tests/FerroUI.ResourceBenchmarks/selectors.rs` with
+`scripts/perf/selector-candidates.py` measures the application of a generated theme from two
+builds, for selectors with a type, with a type and a pseudo-class, and without a type.
 
 ### 9.27 A text block keeps a layout that trimming and the line limit left whole
 
