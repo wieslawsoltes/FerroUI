@@ -7,6 +7,7 @@ use crate::scene::{SceneBuildError, SceneBuilder};
 use progpu_native_sys::webgpu::*;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
+use std::time::Instant;
 
 /// A texture of `RGBA8Unorm` of the device (premultiplied content) with its view: the content of
 /// a layer or of an offscreen frame. Scenes of the same device sample it as an external image.
@@ -88,7 +89,10 @@ impl Recording {
         }
         let (scene_id, generation) = (self.scene.scene_id(), self.scene.generation());
         let stream = self.scene.build().map_err(|error| error.to_string())?;
-        engine.update_scene(stream)?;
+        let stream_bytes = stream.len();
+        let started = crate::perf::enabled().then(Instant::now);
+        let scene_metrics = engine.update_scene(stream)?;
+        let updated = started.map(|_| Instant::now());
         // The table of the engine is ordered by the identifiers of the resources.
         let mut images: Vec<ExternalImage> = self
             .images
@@ -103,7 +107,11 @@ impl Recording {
             .collect();
         images.sort_by_key(|image| image.resource_id);
         engine.bind_external_images(&images)?;
-        engine.render_scene(scene_id, generation, view, width, height, preserve)?;
+        let rendering = started.map(|_| Instant::now());
+        let frame_metrics = engine.render_scene(scene_id, generation, view, width, height, preserve)?;
+        if let (Some(started), Some(updated), Some(rendering)) = (started, updated, rendering) {
+            crate::perf::scene(stream_bytes, updated - started, &scene_metrics, rendering.elapsed(), &frame_metrics);
+        }
         Ok(())
     }
 }

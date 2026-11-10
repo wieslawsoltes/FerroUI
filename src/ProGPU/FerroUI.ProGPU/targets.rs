@@ -246,6 +246,7 @@ mod metal {
                     }
                     // Ending the session presents the frame.
                     session.dispose();
+                    crate::perf::window_frame();
                     *slot.borrow_mut() = Some(recording.scene);
                 })),
             );

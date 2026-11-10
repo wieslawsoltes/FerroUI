@@ -14,6 +14,7 @@ mod gpu;
 mod layer;
 mod notes;
 mod outline_log;
+mod perf;
 mod platform;
 mod region;
 mod scene;

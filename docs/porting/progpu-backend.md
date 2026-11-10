@@ -336,7 +336,7 @@ second before any of this; section 6.2 has the numbers after each part):
 | Step | Part | Where | Checked by |
 |---|---|---|---|
 | 1 | Glyph outlines by identifier (section 2.3.8) and the word-wise hash of the content identities (section 2.3.9): built | engine, builder, bindings, backend | the engine tests of the registry and of keyed runs (the same pixels as the same run with its outlines in the stream); the text tests of the backend; the gauntlet frames of section 6.2 unchanged to the byte; frames a second and render thread time at tier 16 (section 6.2) |
-| 2 | A new profile (the one after step 1 is in section 6.2), and from it one of: R1, the stream writer of the backend, R4, the bundles and draws of section 2.3.10 | | |
+| 2 | The bundles and draws of section 2.3.10, in three parts: spans as command lists with bundles kept by content (built), fewer draws, `update_scene` with changed content only (R4) | engine | the engine tests of the lists, the replay and the kept bundles; a scene drawn again, sent again with other colours and sent again with other draws reads back the bytes of a new engine; the gauntlet frames of section 6.2 unchanged to the byte; draws a frame, frames a second and render thread time at tier 16 (section 6.2) |
 | R1 | Groups before the root pass | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
 | R3 | Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
 | R4 | Spans compiled once, chunked buffers, the placement table | engine (family page compilers, shaders, bundle recording) | read-back equality of moved spans against whole streams for every family, with clips and masks; upload bytes of a frame with one changed span (the metrics of the engine report them) |
@@ -493,22 +493,50 @@ must be made by one piece of code; the callers are read for that when they are m
 
 #### 2.3.10 Bundles and draws
 
-What is left of the profile after the hash is the cost of recording: about a sixth of the
-render thread goes into recording the render bundle, dropping it, finishing the encoder and
-submitting. Two things follow, both after step 1 and in the order the next profile gives:
+What is left of the profile after the hash is the cost of recording. The trace of the engine
+(`PROGPU_NATIVE_TRACE_SCENE_ENCODE=1`) for a gauntlet frame at tier 16 after step 1:
 
-- **A bundle is kept while its payload is the same.** Today every bundle is released by
-  `update_scene` and recorded again by the next frame, whatever changed. A bundle is recorded
-  from the draw list of a family page and the buffers it binds; it is kept when the page was a
-  hit and its buffers are the same objects. With spans (R4) the draw list of a page changes only
-  where a span changed, and a bundle for a chunk of spans is kept the same way.
-- **Fewer draws.** The draws of a frame are counted per family first (the metrics of the engine
-  report them), with what splits them (a state, a clip, a paint, the order). The aim for
-  glyphs is one instanced draw for an atlas page and blend state, with the clip and the paint
-  of a glyph read from its instance record, where the order of drawing allows it (text over
-  text without other content between); the same for the analytic shapes. What a draw costs in
-  bundle recording, in the trackers and in the submit is measured per draw before the batching
-  is designed further.
+| A frame at tier 16 | After step 1 |
+|---|---|
+| Commands / draws / changes of family | 11,600 to 13,000 / 8,750 to 9,760 / 6,620 to 7,310 |
+| Spans / render bundles created and finished | 9,230 to 9,350 / 9,130 to 9,240 |
+| Finishing the bundle encoders | 16.7 to 17.1 ms |
+| Creating the encoders, recording the draws, releasing the encoders | 1.0, 0.8, 0.24 ms |
+| Mask bindings (all for rounded clips) | 717 to 822, 5.7 to 6.4 ms |
+| The phases: resources, prepare, bundles, replay, flush | 6.9, 4.3, 26.8, 0.45, 29.7 ms |
+
+A span ends whenever the scissor, the target layer, the mask or the use of depth changes, and
+nearly every visual of the scene has a clip of its own: a bundle holds one draw. That decides
+the three parts:
+
+**Part 1, built: spans as command lists, bundles kept by content.** Keeping one bundle per span
+across frames would not pay with one draw in a bundle: a bundle that is found again still costs
+its lookup, one `ExecuteBundles` call and the state of the pass set again after it, more than
+the draw it holds. So:
+
+- A 2D span records its draws as a list of 64-bit command words (set pipeline, set bind group,
+  set vertex buffer, set index buffer, draw, draw indexed) instead of a bundle. Nothing of wgpu
+  is called for a span until the pass replays its list, and the replay sets only the state that
+  differs from what the pass holds. A list holds one reference on every object it names.
+- A span with at least eight draws gets a bundle made from its list, when the compile before
+  met the same list or when the scene is drawn again unchanged. The bundle is kept by the
+  content of the list (the hash of its words and the target format, compared word for word)
+  across `update_scene`; what a completed compile did not ask for is released at its end. Eight
+  follows from the cost above and is not tuned by measurement; no span of the gauntlet reaches
+  it, so kept bundles are covered by the tests of the engine only.
+- A list names objects and ranges, not what the objects hold. An update that changes only the
+  content of buffers (a colour, a position within the same ranges) leaves a list equal, and its
+  span goes on by the kept bundle. A list binds whole buffers and leaves the ranges to its
+  draws, so content added or removed elsewhere leaves the lists of the other spans alone.
+- 3D spans keep their immediate bundles.
+
+**Part 2: fewer draws.** What splits the draws of the gauntlet, in this order: the scissor of
+every visual, the alternation of families (a rectangle, then its text, then the next
+rectangle), and the mask binding of a rounded clip. The engine already merges neighbouring
+draws of one family in a span when their ranges follow each other, so the work is to let more
+draws be neighbours.
+
+**Part 3: `update_scene` with changed content only** is R4 of section 2.3.7.
 
 #### 2.3.11 Text under a rotation or a skew, and simulated bold
 
@@ -998,7 +1026,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG files and streams decode through the image module (section 2.5); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: JPEG, GIF and BMP, encoding, effects |
-| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8, numbers in section 6.2); the next part is chosen from the profile after it |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2 |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
@@ -1072,14 +1100,42 @@ The target is the cap of 60.
 |---|---|---|---|---|
 | Before the retained work (outlines in every frame, byte-wise hash) | 2.6 to 2.9 | 99% | about 340 ms | the reference of the table above |
 | Step 1: glyph outlines by identifier, word-wise hash | 8.0 to 10.7 (mean 9.0 over two runs) | 96% | about 107 ms | the same bytes as before at tier 5 and at tier 16 |
+| Step 2, part 1: spans as command lists (section 2.3.10) | 11.5 to 15.9 (mean 13.1) | 94% | about 72 ms | the same bytes as before at tier 5 and at tier 16 |
 
-Where the render thread is after step 1, in percent of its samples (inclusive): rendering the
+What a frame of the engine holds and costs (the counts of the backend, `FERROUI_PROGPU_PERF`,
+means over 30 frames; the animation changes the amount of content, so every number is a range):
+
+| A frame at tier 16 | After step 1 | After step 2, part 1 |
+|---|---|---|
+| Draws | 8,750 to 9,760 | 8,670 to 9,750 |
+| Render bundles created | 9,130 to 9,240 | 0 |
+| `update_scene` | 6.6 to 8.4 ms | 6.3 to 7.5 ms |
+| `render_scene` | 63 to 78 ms | 32 to 38 ms |
+| of it: preflight / resources / encode / flush | 3.4 to 4.3 / 5.5 to 7.5 / 27.9 to 33.2 / 26.4 to 33.3 ms | 3.3 to 4.0 / 5.8 to 7.1 / 10.6 to 12.3 / 12.4 to 14.9 ms |
+| Stream / geometry upload / texture upload | 13.4 to 16.0 / 8.0 to 9.5 / 3.4 to 4.3 MB | 12.9 to 15.8 / 7.8 to 9.4 / 3.3 to 4.2 MB |
+
+Where the render thread was after step 1, in percent of its samples (inclusive): rendering the
 scene in the engine 63, of which recording the render bundle 15, submitting the queue 15,
 finishing the command encoder 11, dropping the trackers of the bundle 10; the walk of the
 compositor with the backend's recording 19 (glyph runs 6, geometries 8); `update_scene` 7; the
-content hash 6 (it was 61); the glyph page of the engine 3. The UI thread is busy for 23 percent
-of the time. What a frame waits for now is the wgpu side of section 2.3.10 (one bundle and one
-command buffer recorded again every frame, the draw count), then the cost of changed content.
+content hash 6 (it was 61); the glyph page of the engine 3. The UI thread was busy for 23 percent
+of the time.
+
+Where the render thread is after part 1 of step 2, in percent of its samples (inclusive):
+rendering the scene in the engine 46 (finishing the command encoder 11, the mask bindings of
+rounded clips 7.5, submitting 5, texture upload 3, the glyph page 2); the walk of the compositor
+with the backend's recording 28 (geometries 12, of which widening strokes 5 and path bounds 3;
+glyph runs 6); `update_scene` 9 (the content hash 4); the bounds of the visuals before the walk
+6. The UI thread is busy for 34 percent of the time. The draws are as many as before; they are
+part 2. A frame of 60 a second has 16.7 ms, and the walk of the compositor with `update_scene`
+alone is about 26 ms: the cap is not reached by the engine side alone, the scene has to stop
+being recorded and sent whole (R2, R4, R5 of section 2.3.7).
+
+**The counts of a frame.** `FERROUI_PROGPU_PERF=<frames>` makes the backend print, every so many
+frames of a window, the means of what its scenes held and cost: scenes, commands, draws, changes
+of family, submissions, the bytes of the stream and of the uploads, and the times of
+`update_scene` and `render_scene` with the stages of the engine. It is off by default and then
+costs one load of a flag a frame.
 
 ## 7. Licensing
 

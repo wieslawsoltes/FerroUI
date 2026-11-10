@@ -675,6 +675,9 @@ impl ProGpuEngine {
             if preserve {
                 frame.flags = PROGPU_NATIVE_SCENE_FRAME_PRESERVE_TARGET as u32;
             }
+            if crate::perf::enabled() {
+                frame.flags |= PROGPU_NATIVE_SCENE_FRAME_CAPTURE_CPU_STAGES as u32;
+            }
             let mut metrics: progpu_native_scene_frame_metrics = std::mem::zeroed();
             metrics.struct_size = std::mem::size_of::<progpu_native_scene_frame_metrics>() as u32;
             let status = progpu_native_engine_render_scene(self.enter(), &frame, &mut metrics);
