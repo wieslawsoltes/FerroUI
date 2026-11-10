@@ -10,8 +10,9 @@ a retained GPU mode as fast as the engine allows, measured against the Skia and 
 
 Status: P1 to P3 are in the branch. The backend draws shapes, paths, brushes, clips, opacity,
 layers and analytic shadows into offscreen targets and into the Metal drawables of macOS windows,
-behind `use_progpu()`; text, images from files and effects are drawn as nothing and said once in the
-log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
+behind `use_progpu()`, which also binds the text services of the backend (section 2.4: font
+manager, typefaces and the shaper of the engine); glyph runs, images from files and effects are
+drawn as nothing and said once in the log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
 performance and published size are measured locally against Skia (no new workflows), with
 screenshots of the ControlCatalog.
 
@@ -135,12 +136,49 @@ bundle, and a family page with several resources is uploaded again as a whole).
 
 ### 2.4 Text
 
-`IFontManagerImpl` on ProGPU's system font catalog (families, styles, matching, character fallback)
-and font loading from bytes (embedded fonts, `ferres://` assets); `ITextShaperImpl` on the text
-context of each typeface with its fallback faces, the shaping request of ProGPU (scripts, language,
-direction, features, variations), and its bidi and line breaking where the text layout of FerroUI
-asks the platform. Glyph metrics and outlines come from the same faces, so layout and rendering use
-one font stack.
+`use_progpu()` binds the text services of the backend with the render interface, so an application
+names no text subsystem: the font manager and the glyph typefaces come with the rendering
+subsystem, the shaper as the text shaping subsystem named last. All of them stand on the text stack
+of the engine; no other font or shaping library is linked.
+
+| Service | File | On what |
+|---|---|---|
+| Faces and the catalog | `font.rs` | The font C ABI of the bindings (`progpu_native_sys::font`): the system font catalog of the engine (families, styles, matching a family at a style, the fallback face of a character for a language) and faces made of font bytes; face metrics, names, tables, the variation instance of a style, and unhinted glyph outlines in design units from the parsers of the engine (TrueType, CFF, variations). No hinting provider is linked. |
+| `IFontManagerImpl` | `font_manager.rs` | The catalog: installed families, the default family (the first the catalog has of a short list), a typeface of a family at a style with the simulations of what the face cannot give (bold from weight 600 for a face under it, oblique for an upright face; a variable face is set to the weight and the slant instead), the fallback of a character (`try_match_character`), and a typeface of the bytes of a stream (embedded fonts, `ferres://` assets). |
+| `IPlatformTypeface` | `typeface.rs` | A face at one style: its tables (copied to their reader), its stream, the normalized variation coordinates of its instance. |
+| `ITextShaperImpl` | `text_shaper.rs` | The OpenType shaper of the engine. A typeface holds one text context of the engine; a text is shaped as scalars with up to five scalars of the text before and after it as context, so a slice of a word joins to its surroundings; the script is found by the engine, the direction comes from the bidi level, the language from the culture, the features and the letter spacing from the options. A trailing line break is shaped as a zero width space (a pair `\r\n` as one), a tab as a space of the tab width. A typeface of another font manager is shaped from the bytes of its stream. |
+| `IGlyphRunImpl` | `glyph_run.rs` | The glyphs of a run with their positions, the face and its instance, and the bounds of the ink (the design box of the face at each glyph, widened for the simulations). The geometry of a run (`build_glyph_run_geometry`) is the outlines of its glyphs. |
+
+**The catalog or font bytes.** Both: the engine exposes its own system font catalog, and a face can
+be made of bytes FerroUI brings. The catalog is the one the engine already has (it reads the font
+folders of the system, the names and the coverage of each face, and matches families, styles and
+characters), so exposing it costs a thin C layer and gives the backend system fonts and character
+fallback without a platform font API in FerroUI. Bytes are needed anyway for embedded fonts. The
+fallback itemization of a text stays in FerroUI: its text layout asks the font manager for the
+face of each character the current face lacks, which the catalog answers.
+
+**Checked against the reference shaper.** The tests shape the same texts with the shaper of the
+engine and with HarfBuzz (a development dependency of the tests only) and compare glyph ids,
+clusters, advances and offsets within 0.011 px at 20 px: Latin with kerning, ligatures and
+contextual alternates, combining marks, characters outside the basic plane, Arabic with marks
+(right to left, in visual order), Hebrew with points, Japanese, a variable face at an instance, and
+a slice of an Arabic word with its surroundings. One difference was found and fixed in the engine:
+a contextual rule that matched without a nested lookup (an exception rule) did not end its lookup,
+so a later rule still applied (the colon between a lower case letter and a capital in Inter).
+
+**Known differences.**
+- Clusters are whole graphemes: a joiner (U+200C, U+200D) in a text belongs to the cluster before
+  it, where HarfBuzz keeps it a cluster of its own. This is why a trailing line break is shaped as
+  a zero width space and not as a joiner.
+- The advances the text layout reads from a `GlyphTypeface` come from the `hmtx` table; a variable
+  face at an instance is shaped with its varied advances, and the two differ where the layout uses
+  the metrics of the typeface instead of the shaped run.
+- A text context copies the bytes of its font: a face of a large system collection that is used
+  for shaping costs its file size in memory once.
+- The catalog is read once for the process: fonts installed later are not seen.
+- `get_intersections` of a glyph run answers nothing, so an underline does not skip the ink.
+- A typeface of another font manager is shaped, but its glyph run draws nothing and has no outline
+  geometry.
 
 ### 2.5 Geometries and bitmaps
 
@@ -224,10 +262,9 @@ being destroyed: the device, its engines and its textures are then left to the e
 call into the implementation on the thread, which the reverse order of destruction puts before the
 lock state. Objects released while the thread runs are released as usual.
 
-**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): text (glyph runs and the
-outlines of text; the backend binds no font manager and no text shaper yet, and an application names
-a text shaping subsystem itself until P4), bitmaps decoded from files or streams, bitmaps drawn
-under an opacity mask, inset shadows and the shadows of rectangles with different corner radii, and
+**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): the glyphs of text (text is
+shaped and laid out by the services of section 2.4; the glyph runs are not drawn yet), bitmaps
+decoded from files or streams, bitmaps drawn under an opacity mask, inset shadows and the shadows of rectangles with different corner radii, and
 a clear under a rounded or geometry clip. Content under an opacity mask is drawn without the mask.
 The backend refuses compositing layers with a blend mode (`try_push_compositing_layer` answers
 no); blend modes are step P5. A frame that fails is logged every time and leaves the target as it
@@ -289,16 +326,12 @@ What the work on P1 to P3 and the reading of the engine for P4 found, beyond the
 - **No update smaller than a stream.** `progpu_native_engine_update_scene` replaces the retained
   snapshot and releases the render bundle of the scene; there is no call that changes one state
   record (a transform, an opacity, a clip) or the records of one visual.
-- **Glyph outlines without the hinting provider.** The scene takes glyph outlines as segments in
-  design units with a raster scale and a horizontal quarter-pixel phase, and the text module parses
-  TrueType, CFF and variable outlines, but the C ABI hands outlines out only through the hinted
-  entry points (`progpu_native_text_context_capture_outline_batch` and the hinted runs and
-  paragraphs), which answer that the dependency is unavailable unless the engine is built with a
-  prepared FreeType. The bindings build the engine without it. P4 needs an entry point for the
-  outlines and metrics of the text module itself, or the build of the hinting provider in the
-  bindings.
-- **Fonts are bytes.** A text context is created from the bytes of a font and of its fallback
-  fonts; the system font catalog and fallback itemization are C++ only, as listed above.
+- **Glyph outlines without the hinting provider** (done). The exported C ABI hands outlines out
+  only through the hinted entry points, which need a prepared FreeType. The bindings now carry a
+  font C ABI over the parsers of the text module (`progpu_native_sys::font`): unhinted outlines in
+  design units, face and glyph metrics, names, tables and variation instances.
+- **Fonts are bytes** (done). The same font C ABI exposes the system font catalog (families,
+  matching, the fallback face of a character) beside faces made of bytes.
 - **The glyph cache is per frame payload.** The glyph atlas is kept while the outline array and
   the segment arena of a frame are byte-equal to those of the frame before; a frame with another
   set of glyphs rasterizes all its outlines again. Retained text needs an atlas keyed by outline,
@@ -430,7 +463,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P1 | `ferroui-progpu`: the SDK package fetched and verified at build time (version and hashes pinned), linked; the engine created headless; a test renders a cleared target and reads it back | the headless test passes on macOS | done (the engine is built from the submodule instead of fetched packages) |
 | P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
-| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | open |
+| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | in progress: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4); drawing the glyphs is next |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | open (render target bitmaps, layers and writeable pixel bitmaps are in P3) |
 | P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements | open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |

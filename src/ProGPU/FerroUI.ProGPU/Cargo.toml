@@ -28,6 +28,8 @@ ferroui-metal.workspace = true
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+# The reference shaper the shaper of the engine is checked against.
+ferroui-harfbuzz.workspace = true
 
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 # The offscreen Metal surface of the tests of the window target.

@@ -4,7 +4,7 @@
 use crate::bitmap::{self, unsupported_codec, ProGpuBitmap};
 use crate::context::ProGpuContext;
 use crate::geometry::{path_data_of, PathBuilder, PathData, ProGpuGeometry, ProGpuStreamGeometryBuilder};
-use crate::glyph_run::ProGpuGlyphRun;
+use crate::glyph_run::{self, ProGpuGlyphRun};
 use crate::notes;
 use crate::region::ProGpuRegion;
 use ferroui_base::media::imaging::BitmapInterpolationMode;
@@ -79,10 +79,16 @@ impl IPlatformRenderInterface for ProGpuPlatformRenderInterface {
         }
     }
 
-    fn build_glyph_run_geometry(&self, _glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
-        // Step P4 of the plan: the outlines of the text stack of ProGPU.
-        notes::note_once("text-geometry", "the outlines of text are not made by the ProGPU backend yet");
-        empty_geometry()
+    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
+        let glyph_infos = glyph_run.glyph_infos();
+        let glyph_infos = glyph_infos.borrow();
+        match glyph_run::outline_geometry(glyph_run.glyph_typeface(), glyph_run.font_rendering_em_size(), &glyph_infos, glyph_run.baseline_origin()) {
+            Some(data) => ProGpuGeometry::new(data),
+            None => {
+                notes::note_once("text-geometry", "the outlines of text of a typeface of another font manager are not made by the ProGPU backend");
+                empty_geometry()
+            }
+        }
     }
 
     fn create_glyph_run(

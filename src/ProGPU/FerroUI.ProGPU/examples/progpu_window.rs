@@ -9,9 +9,8 @@
 //! With `FERROUI_SMOKE_EXIT_MS=<n>` the window is made larger half way and closed after `n`
 //! milliseconds, which ends the main loop.
 //!
-//! The backend has no text services yet (step P4 of docs/porting/progpu-backend.md), so the
-//! example registers a text shaping subsystem that provides nothing, gives the window a
-//! template of its own instead of a theme, and draws no text.
+//! `use_progpu()` brings the text services of the backend (the font manager and the shaper of
+//! the engine); the window has a template of its own instead of a theme and holds no text.
 
 #[cfg(target_os = "macos")]
 mod example {
@@ -223,8 +222,6 @@ mod example {
         let args: Vec<String> = std::env::args().skip(1).collect();
         AppBuilder::configure::<App>()
             .use_ferro_native()
-            // Text is step P4 of the backend: no shaper and no font manager until then.
-            .use_text_shaping_subsystem(|| {}, "None")
             .use_progpu()
             .log_to_text_writer(std::io::stderr(), LogEventLevel::Warning, &[])
             .start(
