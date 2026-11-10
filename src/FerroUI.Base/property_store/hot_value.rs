@@ -135,55 +135,77 @@ mod tests {
     // Not from upstream.
     use super::*;
 
+    /// Runs `test` until the metadata changed during it only as often as the test changes it:
+    /// the generation of the metadata is one for the process, and the tests of the crate, some
+    /// of which override metadata, run on several threads.
+    fn undisturbed(changes: u32, test: impl Fn()) {
+        loop {
+            let generation = metadata_generation();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(&test));
+            if metadata_generation() == generation.wrapping_add(changes) {
+                if let Err(panic) = result {
+                    std::panic::resume_unwind(panic);
+                }
+                return;
+            }
+        }
+    }
+
     #[test]
     fn a_group_keeps_each_value_until_the_generation_changes() {
-        let stamp = HotStamp::new();
-        let (first, second) = (Cell::new(0), Cell::new(0));
-        let reads = Cell::new(0);
-        let read = |value: i32| {
-            reads.set(reads.get() + 1);
-            value
-        };
+        undisturbed(0, || {
+            let stamp = HotStamp::new();
+            let (first, second) = (Cell::new(0), Cell::new(0));
+            let reads = Cell::new(0);
+            let read = |value: i32| {
+                reads.set(reads.get() + 1);
+                value
+            };
 
-        assert_eq!(1, stamp.get(7, 1, &first, || read(1)));
-        assert_eq!(1, stamp.get(7, 1, &first, || read(10)));
-        assert_eq!(1, reads.get());
+            assert_eq!(1, stamp.get(7, 1, &first, || read(1)));
+            assert_eq!(1, stamp.get(7, 1, &first, || read(10)));
+            assert_eq!(1, reads.get());
 
-        // The other value of the group is read on its own first request.
-        assert_eq!(2, stamp.get(7, 2, &second, || read(2)));
-        assert_eq!(2, stamp.get(7, 2, &second, || read(20)));
-        assert_eq!(2, reads.get());
+            // The other value of the group is read on its own first request.
+            assert_eq!(2, stamp.get(7, 2, &second, || read(2)));
+            assert_eq!(2, stamp.get(7, 2, &second, || read(20)));
+            assert_eq!(2, reads.get());
 
-        // A change of the store makes both read again.
-        assert_eq!(3, stamp.get(8, 1, &first, || read(3)));
-        assert_eq!(4, stamp.get(8, 2, &second, || read(4)));
-        assert_eq!(4, reads.get());
-        assert_eq!(3, stamp.get(8, 1, &first, || read(30)));
-        assert_eq!(4, reads.get());
+            // A change of the store makes both read again.
+            assert_eq!(3, stamp.get(8, 1, &first, || read(3)));
+            assert_eq!(4, stamp.get(8, 2, &second, || read(4)));
+            assert_eq!(4, reads.get());
+            assert_eq!(3, stamp.get(8, 1, &first, || read(30)));
+            assert_eq!(4, reads.get());
+        });
     }
 
     #[test]
     fn a_change_of_metadata_makes_a_group_read_again() {
-        let stamp = HotStamp::new();
-        let value = Cell::new(0);
-        assert_eq!(1, stamp.get(7, 1, &value, || 1));
-        advance_metadata_generation();
-        assert_eq!(2, stamp.get(7, 1, &value, || 2));
-        assert_eq!(2, stamp.get(7, 1, &value, || 3));
+        undisturbed(1, || {
+            let stamp = HotStamp::new();
+            let value = Cell::new(0);
+            assert_eq!(1, stamp.get(7, 1, &value, || 1));
+            advance_metadata_generation();
+            assert_eq!(2, stamp.get(7, 1, &value, || 2));
+            assert_eq!(2, stamp.get(7, 1, &value, || 3));
+        });
     }
 
     #[test]
     fn a_value_read_while_another_generation_was_stamped_is_not_kept() {
-        let stamp = HotStamp::new();
-        let (first, second) = (Cell::new(0), Cell::new(0));
-        // The read of the first value reads the second at a later generation.
-        let read = stamp.get(7, 1, &first, || {
-            assert_eq!(5, stamp.get(8, 2, &second, || 5));
-            1
+        undisturbed(0, || {
+            let stamp = HotStamp::new();
+            let (first, second) = (Cell::new(0), Cell::new(0));
+            // The read of the first value reads the second at a later generation.
+            let read = stamp.get(7, 1, &first, || {
+                assert_eq!(5, stamp.get(8, 2, &second, || 5));
+                1
+            });
+            assert_eq!(1, read);
+            // The first value was read at generation 7 and the group is at 8: it is read again.
+            assert_eq!(9, stamp.get(8, 1, &first, || 9));
+            assert_eq!(5, stamp.get(8, 2, &second, || 50));
         });
-        assert_eq!(1, read);
-        // The first value was read at generation 7 and the group is at 8: it is read again.
-        assert_eq!(9, stamp.get(8, 1, &first, || 9));
-        assert_eq!(5, stamp.get(8, 2, &second, || 50));
     }
 }
