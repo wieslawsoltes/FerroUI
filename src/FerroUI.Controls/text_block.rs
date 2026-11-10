@@ -7,7 +7,8 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::media::text_formatting::{
     FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, TextCharacters,
-    TextEndOfParagraph, TextLayout, TextLineImpl, TextRun, TextRunCache, TextRunProperties,
+    TextEndOfParagraph, TextLayout, TextLineImpl, TextParagraphProperties, TextRun, TextRunCache,
+    TextRunProperties,
 };
 use ferroui_base::media::{
     DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
@@ -122,8 +123,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "Text" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
                 this.invalidate_text_layout();
+            }
+            // The text: the shaped runs go, the run and paragraph properties are not made of it.
+            "Text" => {
+                this.invalidate_text_layout_for_text();
             }
             // Properties that do not affect shaping: preserve the run cache.
             "TextWrapping" | "TextTrimming" | "TextAlignment" | "Padding" | "LineHeight" | "LineSpacing"
@@ -400,19 +405,34 @@ impl TextBlockImpl for TextBlock {
             &default_properties,
         );
 
-        let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
-            this.ensure_text_runs();
-
-            let text_runs = this.text_runs.borrow().clone().unwrap_or_default();
-
-            Rc::new(InlinesTextSource::new(text_runs, None))
-        } else {
-            Rc::new(SimpleTextSource::new(this.utf16_text(text.unwrap_or("")), default_properties))
-        };
-
         let max_size = this.get_max_size_from_constraint();
 
         let text_run_cache = this.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
+
+        if !this.has_complex_content() {
+            // A plain text: the layout the font manager keeps for this text with these
+            // properties and this constraint, made now when there is none (a FerroUI addition,
+            // docs/porting/desktop-performance.md, section 9.29).
+            let text = text.unwrap_or("");
+            let paragraph_properties: Rc<dyn TextParagraphProperties> = paragraph_properties;
+
+            return TextLayout::shared_plain(
+                text,
+                || Rc::new(SimpleTextSource::new(this.utf16_text(text), default_properties)),
+                &paragraph_properties,
+                &this.text_trimming(),
+                max_size.width,
+                max_size.height,
+                this.max_lines(),
+                Some(text_run_cache),
+            );
+        }
+
+        this.ensure_text_runs();
+
+        let text_runs = this.text_runs.borrow().clone().unwrap_or_default();
+
+        let text_source: Rc<dyn ITextSource> = Rc::new(InlinesTextSource::new(text_runs, None));
 
         Rc::new(TextLayout::from_text_source(
             text_source,
@@ -1212,6 +1232,23 @@ impl TextBlock {
     pub fn invalidate_text_layout(&self) {
         *self.run_properties.borrow_mut() = None;
         *self.paragraph_properties.borrow_mut() = None;
+        if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
+            text_run_cache.invalidate();
+        }
+        *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
+        self.dispose_text_layout();
+        self.invalidate_visual();
+        self.invalidate_measure();
+    }
+
+    /// Invalidates the text layout and the shaped runs it was built from, for a new text: the
+    /// run properties and the paragraph properties, which are not made of the text, are kept
+    /// (a FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
+    fn invalidate_text_layout_for_text(&self) {
         if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
             text_run_cache.invalidate();
         }

@@ -68,14 +68,17 @@ TDG_PACKAGE = "ferroui-treedatagrid-benchmarks"
 # FerroUI's own regression benchmarks, apart from the ports of other frameworks' benchmarks (the
 # gauntlet follows the Cranpose benchmark and is synced with it): the scenes of the frame
 # benchmarks, timed headless and in a desktop window, and the micro-benchmarks of the framework's
-# tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`), of element construction and of
-# text blocks measured and arranged at two widths.
+# tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`), of element construction, of
+# text blocks measured and arranged at two widths and of text blocks whose text changes.
 FRAMES_PACKAGE = "ferroui-frame-benchmarks"
 FRAMES_CRATE = Path("tests/FerroUI.FrameBenchmarks")
 FRAMES_BINARY = "frame-benchmarks"
 FRAMEWORK_PACKAGE = "ferroui-benchmarks"
 FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
-FRAMEWORK_FILTER = "trees::,layout::ElementConstructionBenchmark,text::TextBlockConstraintBenchmark"
+FRAMEWORK_FILTER = (
+    "trees::,layout::ElementConstructionBenchmark,text::TextBlockConstraintBenchmark,"
+    "text::TextBlockChangingTextBenchmark"
+)
 # The scenes the window suite opens, and how long each runs.
 WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 

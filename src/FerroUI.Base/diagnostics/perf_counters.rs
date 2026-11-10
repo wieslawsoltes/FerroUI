@@ -158,6 +158,12 @@ perf_counters! {
     // --- text (design 06) ---
     /// `TextLayout::from_text_source`.
     TextLayoutsCreated => "text layouts created",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
+    TextLayoutCacheHits => "text layout cache hits",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.
+    TextLayoutCacheMisses => "text layout cache misses",
+    /// `TextLayoutCache`: a kept layout nothing held was let go for room.
+    TextLayoutCacheEvictions => "text layout cache evictions",
     /// `TextFormatterImpl::format_line_with_cache`: a line was asked for.
     TextLinesFormatted => "text lines formatted",
     /// `TextFormatterImpl::format_line_with_cache`: the shaped runs of the

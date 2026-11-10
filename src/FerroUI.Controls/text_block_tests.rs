@@ -1706,3 +1706,120 @@ fn inherited_values_reach_through_every_owner_and_leave_with_their_holder() {
     let other = TextBlock::new();
     assert_eq!(default_size, other.font_size());
 }
+
+/// Not in the reference tests: text blocks that show the same plain text the same way have one
+/// layout (desktop-performance.md, section 9.29).
+#[test]
+fn text_blocks_that_show_the_same_text_the_same_way_share_a_layout() {
+    let _scope = test_scope();
+    let first = text_block("12.34");
+    let second = text_block("12.34");
+
+    first.measure(Size::new(200.0, 100.0));
+    second.measure(Size::new(200.0, 100.0));
+
+    let layout = first.text_layout();
+    assert!(layout.is_shared());
+    assert!(Rc::ptr_eq(&layout, &second.text_layout()));
+
+    // Another text, size, brush object or constraint is another layout.
+    let other_text = text_block("12.35");
+    other_text.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_text.text_layout()));
+
+    let other_size = text_block("12.34");
+    other_size.set_font_size(other_size.font_size() + 1.0);
+    other_size.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_size.text_layout()));
+
+    let other_brush = text_block("12.34");
+    other_brush.set_foreground(Some(Brushes::red()));
+    other_brush.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_brush.text_layout()));
+
+    let other_constraint = text_block("12.34");
+    other_constraint.measure(Size::new(201.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_constraint.text_layout()));
+
+    // And the brush a block gets later is the one its text is drawn with.
+    second.set_foreground(Some(Brushes::red()));
+    second.measure(Size::new(200.0, 100.0));
+    assert!(Rc::ptr_eq(&other_brush.text_layout(), &second.text_layout()));
+    assert!(Rc::ptr_eq(&layout, &first.text_layout()));
+}
+
+/// Not in the reference tests: a text that comes back finds the layout it had
+/// (desktop-performance.md, section 9.29).
+#[test]
+fn a_text_that_comes_back_has_the_layout_it_had() {
+    let _scope = test_scope();
+    let block = text_block("12.34");
+    block.measure(Size::new(200.0, 100.0));
+    let layout = block.text_layout();
+    let width = layout.width();
+
+    block.set_text(Some("9.5"));
+    block.measure(Size::new(200.0, 100.0));
+    let other = block.text_layout();
+    assert!(!Rc::ptr_eq(&layout, &other));
+    assert_eq!(3.0 * 6.0, other.width());
+    assert_eq!("9.5", other.text_lines()[0].text_runs()[0].text().to_string_lossy());
+
+    block.set_text(Some("12.34"));
+    block.measure(Size::new(200.0, 100.0));
+    assert!(Rc::ptr_eq(&layout, &block.text_layout()));
+    assert_eq!(width, block.text_layout().width());
+    assert_eq!(5.0 * 6.0, block.desired_size().width);
+}
+
+/// Not in the reference tests: a block that lets a shared layout go leaves it whole for the
+/// blocks that still show it (desktop-performance.md, section 9.29).
+#[test]
+fn a_shared_layout_outlives_a_block_that_lets_it_go() {
+    let _scope = test_scope();
+    let panel = StackPanel::new();
+    let first = text_block("Hello World");
+    let second = text_block("Hello World");
+    panel.children().add(&first);
+    panel.children().add(&second);
+    let root = TestRoot::with_child(panel.clone());
+
+    root.measure(infinity());
+    root.arrange(Rect::from_size(root.desired_size()));
+
+    let layout = second.text_layout();
+    assert!(Rc::ptr_eq(&first.text_layout(), &layout));
+
+    panel.children().remove(&first);
+    assert!(!first.has_text_layout());
+    assert!(second.has_text_layout());
+
+    first.set_text(Some("Other"));
+
+    assert!(Rc::ptr_eq(&layout, &second.text_layout()));
+    assert_eq!("Hello World", layout.text_lines()[0].text_runs()[0].text().to_string_lossy());
+    // The position of a character is read from the shaped runs.
+    assert_eq!(5.0 * 6.0, layout.hit_test_text_position(5).x);
+}
+
+/// Not in the reference tests: a text with inlines, a decorated text and the text blocks that
+/// make their own layout keep a layout of their own (desktop-performance.md, section 9.29).
+#[test]
+fn a_layout_made_of_more_than_a_plain_text_is_not_shared() {
+    let _scope = test_scope();
+
+    let decorated = text_block("Hello World");
+    decorated.set_text_decorations(Some(TextDecorations::underline()));
+    decorated.measure(Size::new(200.0, 100.0));
+    assert!(!decorated.text_layout().is_shared());
+
+    let with_inlines = TextBlock::new();
+    with_inlines.set_inlines(Some(inlines_of([Run::with_text(Some("Hello World")).upcast()])));
+    with_inlines.measure(Size::new(200.0, 100.0));
+    assert!(!with_inlines.text_layout().is_shared());
+
+    let selectable = crate::SelectableTextBlock::new();
+    selectable.set_text(Some("Hello World"));
+    selectable.measure(Size::new(200.0, 100.0));
+    assert!(!selectable.text_layout().is_shared());
+}

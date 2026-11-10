@@ -1462,3 +1462,100 @@ section:
 
 The frame rate hardly moves because the render thread sets it while it draws directly; the UI
 thread's share is what a pipelined frame gets back.
+
+### 9.29 A plain text is laid out once for the texts that are the same
+
+After section 9.28 text is a third of the UI thread of a gauntlet frame (about 5.6 of 16.7 ms).
+A frame makes 796 layouts, 744 of them because the text of a block changed, and each is made
+from nothing: the characters are split into runs, shaped, broken into lines and given their
+metrics, and the layout the block had is released. Most of that is work that was done before.
+The texts are short (95 % have six bytes or fewer) and they repeat: only 4 % of the layouts a
+frame makes are of a text that was never laid out with the same font, size, brush, wrapping and
+constraint. The repeats are spread over time, so a layout has to be kept for a while to be
+found again:
+
+| Layouts kept while nothing shows them | Layouts found instead of made |
+|---|---|
+| 1,024 | 31 % |
+| 2,048 | 38 % |
+| 4,096 | 42 % |
+| 8,192 | 47 % |
+| 16,384 | 53 % |
+
+Upstream makes a layout for every text block and every change. egui keeps its laid-out texts
+(galleys) by their content for the frames that use them, and Cranpose keeps its measured texts
+the same way. FerroUI keeps the layout itself, the object the formatter makes, so nothing about
+shaping, line breaking or drawing is done another way: a layout that is found is the layout
+that would have been made.
+
+What is kept and where:
+
+- The font manager of a thread keeps the layouts (`TextLayoutCache`, a field of `FontManager`,
+  `media/text_formatting/text_layout_cache.rs`). `TextLayout::shared_plain` asks it for the
+  layout of a plain text and makes the layout with `TextLayout::from_text_source` when there is
+  none. The default `TextBlock::create_text_layout` calls it for a text without inlines.
+- A layout is found by everything it is made of: the text, the run properties (typeface,
+  requested family, size, font scale, baseline alignment, culture), the paragraph properties
+  (flow direction, alignment, wrapping, line height, line spacing, indents, letter spacing,
+  line bounds and metrics mode), the trimming, and the exact maximum width, maximum height and
+  line limit. The foreground and background brush are compared as objects, never by their
+  colour: a layout draws with the brush object it was made with, and a brush of the same colour
+  that is another object can change later. Shared brushes (a theme's, `Brushes::black()`) are
+  what makes layouts of different blocks the same.
+- A layout that can change after it was made is not kept and belongs to its block as before: a
+  text with text decorations or font features (collections that are observed), a paragraph
+  with tab stops, a text longer than 256 bytes, and every text with inlines. A text block that
+  makes its own layout (`SelectableTextBlock`, `AccessText`, an override of
+  `create_text_layout`) does not ask the cache.
+- A kept layout is shared (`TextLayout::is_shared`): `TextLayout::dispose` leaves it as it is,
+  because another block may show it, and the cache releases its lines when it lets the layout
+  go. A layout something holds is never let go. Of the layouts nothing holds the cache keeps
+  the 4,096 used last, as far as their text is within 64 KiB (what a layout keeps grows with
+  its text, so long texts go sooner); it looks for the ones to release once in 1,024 new
+  layouts or 16 KiB of new text, so keeping them costs a constant amount for a layout made. A
+  shared layout does not keep the run cache of the block that made it.
+- Every change of the fonts of a thread (a font collection added or removed, glyph typefaces
+  invalidated: the generation the glyph typeface lookups already follow) lets all kept layouts
+  go, so no layout shaped with a font that is gone is found. A layout that is still shown stays
+  whole for the block that shows it and is made again when that block asks for a layout.
+
+A new text keeps what is not made of it: `TextBlock` no longer drops its run properties and
+paragraph properties when its `Text` changes (they are made of the font, the brushes and the
+paragraph values), only its layout and runs.
+
+What a program can see: two text blocks that show the same text the same way return the same
+object from `TextBlock::text_layout`, and `TextLayout::dispose` does nothing to a shared layout.
+Measured sizes, lines, hit tests and drawing are the ones of a layout made for the block.
+
+Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_one_layout`,
+`what_a_layout_is_made_of_tells_layouts_apart`: each part of the key on its own,
+`a_layout_is_shared_for_the_same_brush_object_only`,
+`a_layout_made_of_what_can_change_is_not_shared`,
+`disposing_a_shared_layout_leaves_it_to_its_other_holders`,
+`the_layouts_nothing_holds_are_let_go_from_the_oldest`,
+`long_texts_nothing_holds_are_let_go_by_their_length`,
+`a_change_of_the_fonts_lets_every_layout_go`) and `text_block_tests.rs`
+(`text_blocks_that_show_the_same_text_the_same_way_share_a_layout`,
+`a_text_that_comes_back_has_the_layout_it_had`,
+`a_shared_layout_outlives_a_block_that_lets_it_go`,
+`a_layout_made_of_more_than_a_plain_text_is_not_shared`). The gate measures it with
+`text::TextBlockChangingTextBenchmark` (`change_and_measure`: a text block whose text changes
+and is measured, with texts that repeat and with texts that are new every time; the second is
+the cost the cache adds to a layout it cannot find).
+
+Counters (`--features counters`): `text layout cache hits`, `text layout cache misses` and
+`text layout cache evictions`, beside `text layouts created`.
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 796 to 450 (346 found,
+446 made and kept, 418 let go: the cache is full and turns over, as the table of this section
+says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507.
+
+| Gauntlet, tier 16, direct drawing | Frames a second | UI thread, ms a frame | Render thread, ms a frame |
+|---|---|---|---|
+| Section 9.28 | 33.9 | 16.7 | 33.4 |
+| With the kept layouts | 36.6 | 14.5 | 27.3 |
+
+The thread times are from samples (about a tenth above the real ones). The render thread gains
+more than the UI thread: text blocks that show the same text hold one layout, so they draw the
+same glyph runs, and the renderer finds what it keeps for a glyph run more often (a reading of
+the numbers, not measured apart).
