@@ -1625,3 +1625,22 @@ fn source_references_are_the_names_and_strings_of_the_code() {
         assert!(!references.strings.iter().any(|string| string.contains(text)), "{text}: {:?}", references.strings);
     }
 }
+
+/// Media controls must resolve under the same public namespaces in compiled
+/// markup as they do after runtime register_types().
+#[test]
+fn media_controls_publish_their_public_xaml_namespaces() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+    for (folder, crate_name, namespace, names) in [
+        ("FerroUI.Media.Controls", "ferroui_media_controls", "FerroUI.Media.Controls", &["TexturePresenter", "RendererHost"][..]),
+        ("FerroUI.Media.Camera.Controls", "ferroui_media_camera_controls", "FerroUI.Media.Camera.Controls", &["CameraPreview"][..]),
+        ("FerroUI.Media.Video.Controls", "ferroui_media_video_controls", "FerroUI.Media.Video.Controls", &["MediaPlayerElement", "MediaTransportControls"][..]),
+    ] {
+        let scan = scan_crate(&ScanOptions::new(crate_name, source.join(folder).join("lib.rs")));
+        for name in names {
+            let expected = format!("{namespace}.{name}");
+            assert!(scan.model.types.iter().any(|ty| ty.full_name() == expected), "{expected} is absent from compiled XAML metadata");
+        }
+        assert!(scan.model.namespaces.iter().any(|(module, name)| module == crate_name && name == namespace));
+    }
+}
