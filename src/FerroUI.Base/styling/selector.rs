@@ -135,6 +135,29 @@ impl Selector {
         }
     }
 
+    /// Whether the target compound begins with the nesting selector, with nothing but known
+    /// conjunctive nodes after it: the matcher evaluates the nesting selector, which is the
+    /// selector of the parent style, before any other node, and a mismatch ends the match.
+    pub(super) fn begins_with_nesting(&self) -> bool {
+        let mut current = self;
+        loop {
+            if current.node::<super::NestingSelector>().is_some() {
+                return true;
+            }
+            if current.node::<super::TypeNameAndClassSelector>().is_none()
+                && current.node::<super::PropertyEqualsSelector>().is_none()
+                && current.node::<super::NthChildSelector>().is_none()
+                && current.node::<super::NthLastChildSelector>().is_none()
+            {
+                return false;
+            }
+            match current.0.move_previous() {
+                Some(previous) if !previous.is_combinator() => current = previous,
+                _ => return false,
+            }
+        }
+    }
+
     pub(crate) fn node<T: 'static>(&self) -> Option<&T> {
         self.0.as_any().downcast_ref::<T>()
     }

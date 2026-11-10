@@ -1,3 +1,4 @@
+use super::theme_candidates::SelectorBound;
 use super::{
     DuplicateSetterError, ContainerQuery, ControlTheme, OrSelector, Selector, SelectorMatch, SelectorMatchResult, Setter, StyleBase,
     StyleBaseImpl, StyleBaseImplExt, StyleHostRef, TemplateSelector,
@@ -12,7 +13,9 @@ use std::rc::Rc;
 pub struct Style {
     base: StyleBase,
     selector: RefCell<Option<Selector>>,
-    type_candidate: Cell<Option<super::selector_candidates::TypeCandidate>>,
+    /// What the selector says of the type of the elements it matches, once it is
+    /// index-enabled.
+    bound: Cell<SelectorBound>,
     index_link: super::selector_candidates::IndexLink,
 }
 
@@ -40,7 +43,7 @@ impl StyleBaseImpl for Style {
 
         Self::parent_set_parent(this, parent);
         // Below a container query the style has no type candidate.
-        if this.type_candidate.get().is_some() {
+        if this.bound.get().type_candidate().is_some() {
             this.index_link.changed();
         }
     }
@@ -60,7 +63,7 @@ impl Style {
         Self {
             base: StyleBase::construct(),
             selector: RefCell::new(None),
-            type_candidate: Cell::new(None),
+            bound: Cell::new(SelectorBound::Unknown),
             index_link: Default::default(),
         }
     }
@@ -89,10 +92,14 @@ impl Style {
 
     pub fn set_selector(&self, value: Option<Selector>) {
         let value = Self::validate_selector(value);
-        if self.type_candidate.take().is_some() {
+        let previous = self.bound.take();
+        if previous.type_candidate().is_some() {
             self.index_link.candidate_changed(true, false);
         }
         *self.selector.borrow_mut() = value;
+        if previous != SelectorBound::Unknown {
+            self.structure_changed();
+        }
     }
 
     /// Enables conservative type indexing for a generated selector. Replacing
@@ -106,11 +113,27 @@ impl Style {
     /// selector was replaced.
     #[doc(hidden)]
     pub fn enable_selector_index(&self) {
-        let candidate = self.selector.borrow().as_ref().and_then(Selector::type_candidate);
-        let previous = self.type_candidate.replace(candidate);
-        if previous != candidate {
-            self.index_link.candidate_changed(previous.is_some(), candidate.is_some());
+        let bound = match self.selector.borrow().as_ref() {
+            Some(selector) => match selector.type_candidate() {
+                Some(candidate) => SelectorBound::Type(candidate),
+                None if selector.begins_with_nesting() => SelectorBound::Parent,
+                None => SelectorBound::Unknown,
+            },
+            None => SelectorBound::Unknown,
+        };
+        let previous = self.bound.replace(bound);
+        if previous != bound {
+            let (was, is) = (previous.type_candidate(), bound.type_candidate());
+            if was != is {
+                self.index_link.candidate_changed(was.is_some(), is.is_some());
+            }
+            self.structure_changed();
         }
+    }
+
+    /// What the index-enabled selector says of the type of the elements it matches.
+    pub(super) fn selector_bound(&self) -> SelectorBound {
+        self.bound.get()
     }
 
     pub(super) fn index_link(&self) -> &super::selector_candidates::IndexLink {
@@ -119,11 +142,11 @@ impl Style {
 
     /// Whether the selector is index-enabled, whatever the parent is.
     pub(super) fn has_type_candidate(&self) -> bool {
-        self.type_candidate.get().is_some()
+        self.bound.get().type_candidate().is_some()
     }
 
     pub(super) fn type_candidate(&self) -> Option<super::selector_candidates::TypeCandidate> {
-        let candidate = self.type_candidate.get()?;
+        let candidate = self.bound.get().type_candidate()?;
         // Parent container queries run before the selector's type check.
         if self.parent().is_some_and(|p| p.is::<ContainerQuery>()) {
             return None;

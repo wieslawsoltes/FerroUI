@@ -27,7 +27,7 @@ pub(super) struct TypeCandidate {
 }
 
 impl TypeCandidate {
-    fn matches(self, target: &'static TypeInfo) -> bool {
+    pub(super) fn matches(self, target: &'static TypeInfo) -> bool {
         if self.exact {
             self.type_ == target
         } else {

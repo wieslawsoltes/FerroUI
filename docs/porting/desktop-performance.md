@@ -2327,3 +2327,89 @@ What it costs, and what it does not:
 - **Nothing else is kept.** A copy of every property would add about a kilobyte to a
   control (section 9.35); the two values added here are the two a pass reads for every
   element that had no copy.
+
+
+### 9.37 A control theme keeps, for each style key, the nested styles that can match it
+
+A control theme is applied to the control it themes and to every part of the template of
+that control: the theme of a `CheckBox` is asked about the check box, and then about the
+border, the grid, the path and the content presenter its template makes. The index of
+section 9.26 leaves a nested style out of such an application when its selector begins
+with a type that rules the element out and the style has no styles nested in it. The
+styles of a theme are mostly not of that kind. They begin with the nesting selector
+(`^:checked`), which names no type of its own, and they hold the styles for the parts of
+the template (`^ /template/ Border#NormalRectangle`), each in a collection that was looked
+up on its own. A part that no style selects still paid for those, one selector match each,
+which ends at the type the selector requires.
+
+**A plan for a style key.** The theme keeps, for each style key it is applied to, the list
+of its nested styles whose selector does not rule that key out, in the order the traversal
+of all of them visits them in (`styling::theme_candidates`). An application reads the plan
+of the key of its element and visits those entries and no other. An entry says one of three
+things: the style is attached if it matches and what is nested in it follows in the plan;
+the style cannot match and only what is nested in it follows; or the entry is applied by
+the ordinary traversal with everything below it.
+
+**What is left out, and why that is what the traversal would do.** A style is left out
+only when the type its selector requires is known and rules the key out. That type is the
+type of the first node of the target compound of the selector, or, for a selector that
+begins with the nesting selector, the type the selector of the parent style requires, up to
+the target type of the theme. Either is what the matcher evaluates first, and a mismatch
+ends the match there, before it subscribes to anything: a style left out is a style the
+traversal would have rejected with no other effect. Only a `Style` whose selector was
+index-enabled (section 9.26) has such a type. A selector that says nothing of a type, a
+container query, another implementation of `IStyle` and a style whose parent is not the
+style that holds it are never left out; the last three are applied by the ordinary
+traversal, in their place.
+
+**When a plan is not used.** The plans of a theme carry the version of the theme they were
+made at. A changed collection of nested styles, a replaced selector, a changed parent and
+a changed target type advance the version, and the plans of an older version are dropped.
+Attaching a style can run code that makes such a change, or that changes the style key of
+the element, so the version and the key are compared after every entry that was attached.
+After a change the plan is left, and the traversal goes on from that entry as the ordinary
+one does: with the nested styles the entry has now, then with every style that follows it
+in its collection and in the collections of the styles that hold it. A theme nested deeper
+than sixteen levels, and a key beyond the sixty-four a theme remembers, are applied by the
+ordinary traversal.
+
+**The key of a dynamic resource is converted once.** A `DynamicResource` in a template
+makes one expression for every control the template is built for, and each converted the
+key of the extension, a text, into a key of its own. The extension keeps the converted key,
+and the expressions share it.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent theme):
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the theme attached | 1.21 ms | 1.13 ms | -6.8 % |
+| `Button`, the template applied | 2.45 ms | 2.39 ms | -2.5 % |
+| `CheckBox`, the theme attached | 1.56 ms | 1.27 ms | -18.5 % |
+| `CheckBox`, the template applied | 13.10 ms | 11.41 ms | -12.9 % |
+| `TextBox`, the theme attached | 2.41 ms | 2.34 ms | -2.8 % |
+| `TextBox`, the template applied | 13.28 ms | 12.73 ms | -4.1 % |
+
+Re-attaching the controls (`reattach`), a change of the theme variant and the other classes
+of `styling_subsystem` did not move beyond the noise of the measurement (five interleaved
+rounds of `reattach`: `Button` +2.3 %, `CheckBox` -8.5 %, `TextBox` -3.5 %).
+
+What it costs, and what it does not:
+
+- **Memory: sixteen bytes for a theme, and the plans of the themes in use.** A plan is
+  three numbers for an entry, and keys with the same entries share one plan: two to three
+  kilobytes for a theme of the size of the `CheckBox` theme once its control and the parts
+  of its template were styled. A theme no control uses has no plan. Nothing is added to an
+  element; a `Style` is the size it was (the type its selector requires was already kept,
+  and the same field now says "the parent's" as well).
+- **A change of the nested styles of a theme costs a walk to the theme**, at most the depth
+  of the nesting, and the plans are made again by the next application. Themes are built
+  once and not changed afterwards, so the plans of a theme are made once for each key.
+- **A re-attached control does not gain.** Re-attaching does not apply styles again; its
+  time goes to the dynamic resources and the template bindings that publish their values
+  again (a `TextBox`: 38 us), which is the subject of the template work that follows this.
+- **The styles of an application or a control (`Styles`) are not touched.** They are
+  filtered by the index of section 9.26, one collection at a time. The plan is that idea
+  for a theme as a whole: it knows the target type of the theme, which is the type a
+  nesting selector stands for, and it follows the nesting, so a style with nested styles
+  can be left out with them.

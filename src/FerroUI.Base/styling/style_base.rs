@@ -75,6 +75,9 @@ impl FerroObjectImpl for StyleBase {}
 
 impl StyleBaseImpl for StyleBase {
     fn set_parent(this: &Self, parent: Option<&Ref<StyleBase>>) {
+        // The style leaves the theme it was nested in; the collection it is added to reports
+        // the change to the theme it joins.
+        this.structure_changed();
         *this.parent.borrow_mut() = parent.map(Ref::downgrade);
     }
 
@@ -233,6 +236,30 @@ impl StyleBase {
     /// Adds a child style.
     pub fn add_style(&self, style: impl Into<Rc<dyn IStyle>>) {
         self.children().add(style)
+    }
+
+    /// Whether `parent` is the parent style of the style.
+    pub(super) fn is_child_of(&self, parent: &StyleBase) -> bool {
+        self.parent.borrow().as_ref().is_some_and(|weak| weak.points_at(parent))
+    }
+
+    /// The nested styles of the control theme the style is part of changed in what a plan of
+    /// the theme is made from (`theme_candidates`): a collection of nested styles, a selector,
+    /// a parent. A style that is in no theme reports nothing.
+    pub(super) fn structure_changed(&self) {
+        /// More than the depth a plan follows, so every style of a plan reaches its theme.
+        const MAX_ANCESTORS: usize = 64;
+        if let Some(theme) = self.downcast_ref::<super::ControlTheme>() {
+            return theme.plans_changed();
+        }
+        let Some(mut current) = self.parent() else { return };
+        for _ in 0..MAX_ANCESTORS {
+            if let Some(theme) = current.downcast_ref::<super::ControlTheme>() {
+                return theme.plans_changed();
+            }
+            let Some(parent) = current.parent() else { return };
+            current = parent;
+        }
     }
 
     #[inline]

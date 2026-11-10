@@ -5,7 +5,7 @@ use crate::data::{DynamicResourceAnchor, DynamicResourceExpression, HeldAnchor};
 use crate::object_casts::resource_key_of;
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
 use crate::{FromXamlObject, IProvideValueTarget, ServiceProviderExtensions};
-use ferroui_base::controls::{IResourceProvider, ResourceHostRef};
+use ferroui_base::controls::{IResourceProvider, ResourceHostRef, ResourceKey};
 use ferroui_base::data::{BindingBase, BindingExpressionBase, BindingPriority};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::styling::ThemeVariant;
@@ -24,6 +24,10 @@ pub struct DynamicResourceExtension {
     priority: Cell<BindingPriority>,
     theme_variant: RefCell<Option<ThemeVariant>>,
     resource_key: RefCell<Option<BoxedValue>>,
+    /// The key the expressions of the extension look up, made from
+    /// `resource_key` by the first of them: a text key is one shared string
+    /// for all of them, where each made a copy of its own.
+    lookup_key: RefCell<Option<ResourceKey>>,
 }
 
 impl DynamicResourceExtension {
@@ -34,6 +38,7 @@ impl DynamicResourceExtension {
             priority: Cell::new(BindingPriority::LocalValue),
             theme_variant: RefCell::new(None),
             resource_key: RefCell::new(None),
+            lookup_key: RefCell::new(None),
         })
     }
 
@@ -51,6 +56,17 @@ impl DynamicResourceExtension {
 
     pub fn set_resource_key(&self, value: Option<BoxedValue>) {
         *self.resource_key.borrow_mut() = value;
+        *self.lookup_key.borrow_mut() = None;
+    }
+
+    /// The key the expressions look up, `None` without a resource key.
+    fn lookup_key(&self) -> Option<ResourceKey> {
+        if let Some(key) = &*self.lookup_key.borrow() {
+            return Some(key.clone());
+        }
+        let key = resource_key_of(self.resource_key.borrow().as_ref()?);
+        *self.lookup_key.borrow_mut() = Some(key.clone());
+        Some(key)
     }
 
     /// Captures the context of the place the extension is declared in (the
@@ -111,12 +127,12 @@ impl BindingBase for DynamicResourceExtension {
         target_property: Option<&'static FerroProperty>,
         _anchor: Option<&Ref<FerroObject>>,
     ) -> Rc<dyn BindingExpressionBase> {
-        let Some(resource_key) = self.resource_key() else {
+        let Some(resource_key) = self.lookup_key() else {
             panic!("DynamicResource must have a ResourceKey.");
         };
         let _ = (target, target_property);
         DynamicResourceExpression::with_held_anchor(
-            resource_key_of(&resource_key),
+            resource_key,
             self.anchor.borrow().clone(),
             self.theme_variant.borrow().clone(),
             self.priority.get(),

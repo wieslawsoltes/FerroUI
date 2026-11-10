@@ -951,7 +951,64 @@ impl StyledElement {
         theme.try_attach_checked(self, type_)?;
 
         if theme.has_children() {
-            self.apply_style_candidates(theme.children().candidates(self), None, type_)?;
+            match theme.candidates(self) {
+                Some(candidates) => self.apply_theme_candidates(&candidates, type_)?,
+                None => self.apply_style_candidates(theme.children().candidates(self), None, type_)?,
+            }
+        }
+        Ok(())
+    }
+
+    /// Applies the nested styles of a control theme that can apply to the element, in the
+    /// order the traversal of all of them visits them in.
+    ///
+    /// Attaching a style can run code that changes the nested styles of the theme or the style
+    /// key of the element. The list says nothing of the styles then, and the traversal goes on
+    /// from the entry it is at as `apply_style` does: with the nested styles that entry has
+    /// now, and then with every style that follows it in its collection and in the collections
+    /// of the styles that hold it.
+    /// Applies `candidates` within a styling pass of their own.
+    #[cfg(test)]
+    pub(crate) fn apply_theme_candidates_in_pass(&self, candidates: &crate::styling::ThemeCandidates<'_>) {
+        self.values().begin_styling();
+        let _end_styling = EndStyling(self);
+        self.apply_theme_candidates(candidates, FrameType::Theme).expect("the styles apply");
+    }
+
+    fn apply_theme_candidates(
+        &self,
+        candidates: &crate::styling::ThemeCandidates<'_>,
+        type_: FrameType,
+    ) -> Result<(), DuplicateSetterError> {
+        use crate::styling::ThemeStep;
+
+        for position in 0..candidates.len() {
+            let (style, step) = candidates.get(position);
+            match step {
+                ThemeStep::Descend => continue,
+                ThemeStep::Attach => match style.indexed_style() {
+                    Some(nested) => {
+                        nested.try_attach_checked(self, None, type_)?;
+                    }
+                    None => unreachable!("only a style has an entry of its own in a theme plan"),
+                },
+                ThemeStep::Whole => self.apply_style(style, None, type_)?,
+            }
+            if candidates.is_current() {
+                continue;
+            }
+
+            if step == ThemeStep::Attach {
+                self.apply_style_candidates(style.children_for_target(self), None, type_)?;
+            }
+            let mut entry = Some(position);
+            while let Some(position) = entry {
+                for style in candidates.after(position) {
+                    self.apply_style(&**style, None, type_)?;
+                }
+                entry = candidates.parent(position);
+            }
+            break;
         }
         Ok(())
     }
