@@ -335,7 +335,7 @@ impl MediaContext {
 
     // --- compositors --------------------------------------------------------
 
-    /// Whether a committed composition batch has not been processed by its
+    /// Whether a committed composition batch has not been accepted by its
     /// server compositor yet: while one is, the render passes hold the next
     /// commits back. Not in upstream: the session of the headless platform
     /// asks it between two tests of a shared application.
@@ -357,7 +357,12 @@ impl MediaContext {
         }
         let dispatcher = self.dispatcher.clone();
         let sequence_id = commit.sequence_id();
-        commit.processed().on_completed(move || {
+        // Upstream waits until the batch is processed. Here the render
+        // thread accepts a batch when it takes it from the queue: the next
+        // render pass of this thread overlaps with the frame of that batch
+        // instead of following its deserialization (desktop-performance.md,
+        // section 9.33). At most one batch waits in the queue either way.
+        commit.accepted().on_completed(move || {
             dispatcher.post(
                 move || {
                     // Looked up again on the UI thread: the context is
@@ -437,6 +442,10 @@ impl MediaContext {
             // come once this thread is back in its event loop, is asked for
             // one out of turn.
             compositor.render_loop().request_frame_out_of_turn();
+            // A layer that holds the frame of the batch back (section 9.33
+            // of desktop-performance.md) presents it with the tick after:
+            // the server compositor asks for that tick, and reports the
+            // batch as rendered at its end.
             if wait_full_render { batch.rendered() } else { batch.processed() }.wait();
         } else {
             // This thread renders, under the compositor lock: the render

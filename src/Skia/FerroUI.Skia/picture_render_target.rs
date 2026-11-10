@@ -50,6 +50,7 @@ impl PictureRenderTarget {
             canvas: Some(CanvasSource::Recorder {
                 recorder,
                 on_finished: Box::new(move |recorded| *picture.borrow_mut() = recorded),
+                leases: None,
             }),
             scale_drawing_to_dpi: scale_to_dpi,
             dpi: self.dpi,

@@ -164,6 +164,9 @@ perf_counters! {
     TextLayoutCacheMisses => "text layout cache misses",
     /// `TextLayoutCache`: a kept layout nothing held was let go for room.
     TextLayoutCacheEvictions => "text layout cache evictions",
+    /// `TextLayoutCache::get_or_create`: the cache was full and was asked for the text for
+    /// the first time; the layout was made for its caller alone.
+    TextLayoutCacheFirstRequests => "text layout cache: first requests of a text, not kept",
     /// `TextFormatterImpl::format_line_with_cache`: a line was asked for.
     TextLinesFormatted => "text lines formatted",
     /// `TextFormatterImpl::format_line_with_cache`: the shaped runs of the
@@ -233,6 +236,12 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
     /// visual had, whose server-side object was kept.
     VisualsRecordedInPlace => "visuals recorded into their render data",
+    /// `Visual::attach_to_compositor_core`: a composition visual was created for a visual that
+    /// entered a visual tree.
+    CompositionVisualsCreated => "composition visuals created",
+    /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
+    /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
+    CompositionVisualsKept => "composition visuals kept",
     /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
     UiRenderPasses => "ui: render passes",
 
@@ -290,6 +299,18 @@ perf_counters! {
     RenderLayersPushed => "render: opacities, layers, masks and effects pushed by drawings",
     /// The replay of a drawing: a transform was pushed.
     RenderTransformsPushed => "render: transforms pushed by drawings",
+
+    // --- the pipelined frame layers of the Skia backend (desktop-performance.md, section 9.33) ---
+    /// `PipelinedLayer::begin_frame`: a layer that drew its frames directly began to pipeline
+    /// them.
+    SkiaLayersBeganToPipeline => "skia: layers that began to pipeline their frames",
+    /// `PipelinedLayer::finish_frame`: a frame was handed to the threads of the layer.
+    SkiaFramesPipelined => "skia: frames pipelined",
+    /// `PipelinedLayer::finish_frame`: a recorded frame was played on the recorder of the
+    /// context (it had a draw only that recorder draws, or the threads were not there).
+    SkiaPipelinedFramesPlayedDirectly => "skia: recorded frames played on the recorder of the context",
+    /// `PipelinedLayerSurface::surface`: the layer was read while one of its frames was drawn.
+    SkiaPipelinedLayerReadsInFrames => "skia: reads of a pipelined layer while a frame is drawn",
 }
 
 /// The number of counters.

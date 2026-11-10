@@ -3366,3 +3366,113 @@ fn handles_recycling_control_items_inside_containers() {
     scroll.set_offset(Vector::new(0.0, 2000.0));
     layout(&target);
 }
+
+// --- composition visuals of pooled rows (desktop-performance.md, 9.32) --------------------
+
+/// An items control whose rows are built once and keep what they are made of while they wait
+/// in the recycle pool: a border around a canvas.
+#[repr(C)]
+struct ItemsControlWithRows {
+    base: ItemsControl,
+}
+
+ferro_class!(ItemsControlWithRows: ItemsControl);
+ferro_impl_classes!(
+    ItemsControlWithRows: FerroObjectImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    TemplatedControlImpl
+);
+
+impl StyledElementImpl for ItemsControlWithRows {
+    fn style_key_override(_this: &Self) -> &'static TypeInfo {
+        ItemsControl::TYPE
+    }
+}
+
+impl ItemsControlImpl for ItemsControlWithRows {
+    fn create_container_for_item_override(
+        _this: &Self,
+        _item: &Option<BoxedValue>,
+        _index: i32,
+        _recycle_key: Option<RecycleKey>,
+    ) -> Ref<Control> {
+        let canvas = Canvas::new();
+        canvas.set_width(100.0);
+        canvas.set_height(10.0);
+        let row = Border::new();
+        row.set_child(Some(canvas.upcast()));
+        row.upcast()
+    }
+
+    fn needs_container_override(_this: &Self, _item: &Option<BoxedValue>, _index: i32) -> (bool, Option<RecycleKey>) {
+        (true, Some(RecycleKey::Type(std::any::TypeId::of::<Border>())))
+    }
+}
+
+impl ItemsControlWithRows {
+    fn new() -> Ref<Self> {
+        instantiate(Self { base: ItemsControl::construct() })
+    }
+}
+
+/// How many composition visuals the rows of a list cost while they wait in the recycle
+/// pool of the panel (not from upstream; a counter check `composition_work` of
+/// `scripts/perf/gate.py`, the counts are asserted with the feature `perf-counters`): a
+/// row that goes to the pool in one update pass and comes back in a later one has none
+/// made, however many passes it waited.
+#[test]
+fn composition_work_of_rows_that_wait_in_the_recycle_pool() {
+    use crate::compositor_hit_testing_tests::CompositorTestServices;
+    use ferroui_base::diagnostics::perf_counters::{self, PerfCounter};
+
+    let services = CompositorTestServices::new(Size::new(100.0, 100.0));
+    FerroLocator::current_mutable().bind::<dyn IKeyboardDevice>().to_constant(KeyboardDevice::new());
+
+    let items = Rc::new(FerroList::from_items((0..10).map(|x| format!("Item {x}"))));
+    let t = create_unrooted_target(|o| {
+        o.items = Some(items.clone().into());
+        o.items_control = Some(ItemsControlWithRows::new().upcast());
+    });
+    services.set_content(&t.items_control);
+    services.run_jobs();
+    assert_eq!(10, realized_containers(&t.target).len());
+
+    let round = |passes_in_the_pool: usize| {
+        let rows = realized_containers(&t.target);
+        items.remove_range(5, 5);
+        services.run_jobs();
+        assert_eq!(5, realized_containers(&t.target).len());
+        assert!(rows[5..].iter().all(|row| !row.is_attached_to_visual_tree()));
+        for _ in 0..passes_in_the_pool {
+            services.top_level().invalidate_visual();
+            services.run_jobs();
+        }
+        items.add_range((5..10).map(|x| format!("Item {x}")));
+        services.run_jobs();
+        // The rows of the pool are the rows again, in the order the pool gave them out.
+        let rows_now = realized_containers(&t.target);
+        assert_eq!(10, rows_now.len());
+        assert!(rows.iter().all(|row| rows_now.contains(row)));
+    };
+
+    let before = perf_counters::snapshot();
+    for passes_in_the_pool in 0..4 {
+        round(passes_in_the_pool);
+    }
+    let work = perf_counters::snapshot().since(&before);
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        // Five rows of a border and its canvas, four times.
+        assert_eq!(40, work.get(PerfCounter::CompositionVisualsKept));
+    }
+
+    // The pool lets go of what it kept when the panel leaves the tree.
+    items.remove_range(5, 5);
+    services.run_jobs();
+    services.top_level().set_content(None);
+    services.run_jobs();
+}

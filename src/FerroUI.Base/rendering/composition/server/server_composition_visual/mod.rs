@@ -13,6 +13,8 @@ mod composition_clip;
 mod computed_properties;
 mod dirty_inputs;
 mod readback;
+#[cfg(test)]
+mod readback_tests;
 mod render;
 mod server_composition_visual_cache;
 mod update;
@@ -182,7 +184,15 @@ pub struct ServerCompositionVisual {
 
     // Readback
     readback: Arc<VisualReadback>,
-    enqueued_for_readback_update: Cell<bool>,
+    /// The readback pass of the compositor the visual is in the queue of
+    /// (zero: none yet). A stamp in place of a flag, so that the pass does
+    /// not have to touch the visual to clear it.
+    readback_enqueued_pass: Cell<u64>,
+    /// Where in the queue of that pass the visual is.
+    readback_queue_index: Cell<usize>,
+    /// Whether the entry of that pass holds a copy of the values; left as it
+    /// is when the pass ends.
+    readback_snapshot: Cell<bool>,
 }
 
 impl ServerCompositionVisual {
@@ -229,7 +239,9 @@ impl ServerCompositionVisual {
                 combined_transform_matrix: Cell::new(Matrix::IDENTITY),
                 enqueued_for_own_properties_recompute: Cell::new(false),
                 readback,
-                enqueued_for_readback_update: Cell::new(false),
+                readback_enqueued_pass: Cell::new(0),
+                readback_queue_index: Cell::new(0),
+                readback_snapshot: Cell::new(false),
             }
         })
     }

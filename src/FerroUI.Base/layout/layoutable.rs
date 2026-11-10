@@ -211,9 +211,11 @@ impl LayoutableImpl for Layoutable {
         let constrained_size = LayoutHelper::apply_layout_constraints_min_max(min_max, available_size.deflate(margin));
 
         let mut container_sizing = ContainerSizing::Normal;
-        if let Some(query_provider) = Container::get_query_provider(this) {
-            let sizing = Container::get_sizing(this);
-            if sizing != ContainerSizing::Normal {
+        // Only a container that is queried has a provider to tell its size: the sizing is asked
+        // first, which is kept, and the provider only of such a container.
+        let sizing = this.container_sizing();
+        if sizing != ContainerSizing::Normal {
+            if let Some(query_provider) = Container::get_query_provider(this) {
                 container_sizing = sizing;
                 query_provider.set_size(constrained_size.width, constrained_size.height, container_sizing);
             }
@@ -645,7 +647,7 @@ impl Layoutable {
 
     /// The width of the element.
     pub fn width(&self) -> f64 {
-        self.hot_sizes.width.get(self.values().value_generation(), || self.get_value(Self::width_property()))
+        self.hot(HotSizes::WIDTH, &self.hot_sizes.width, || self.get_value(Self::width_property()))
     }
 
     pub fn set_width(&self, value: f64) {
@@ -654,7 +656,7 @@ impl Layoutable {
 
     /// The height of the element.
     pub fn height(&self) -> f64 {
-        self.hot_sizes.height.get(self.values().value_generation(), || self.get_value(Self::height_property()))
+        self.hot(HotSizes::HEIGHT, &self.hot_sizes.height, || self.get_value(Self::height_property()))
     }
 
     pub fn set_height(&self, value: f64) {
@@ -663,7 +665,7 @@ impl Layoutable {
 
     /// The minimum width of the element.
     pub fn min_width(&self) -> f64 {
-        self.hot_sizes.min_width.get(self.values().value_generation(), || self.get_value(Self::min_width_property()))
+        self.hot(HotSizes::MIN_WIDTH, &self.hot_sizes.min_width, || self.get_value(Self::min_width_property()))
     }
 
     pub fn set_min_width(&self, value: f64) {
@@ -672,7 +674,7 @@ impl Layoutable {
 
     /// The maximum width of the element.
     pub fn max_width(&self) -> f64 {
-        self.hot_sizes.max_width.get(self.values().value_generation(), || self.get_value(Self::max_width_property()))
+        self.hot(HotSizes::MAX_WIDTH, &self.hot_sizes.max_width, || self.get_value(Self::max_width_property()))
     }
 
     pub fn set_max_width(&self, value: f64) {
@@ -681,7 +683,7 @@ impl Layoutable {
 
     /// The minimum height of the element.
     pub fn min_height(&self) -> f64 {
-        self.hot_sizes.min_height.get(self.values().value_generation(), || self.get_value(Self::min_height_property()))
+        self.hot(HotSizes::MIN_HEIGHT, &self.hot_sizes.min_height, || self.get_value(Self::min_height_property()))
     }
 
     pub fn set_min_height(&self, value: f64) {
@@ -690,7 +692,7 @@ impl Layoutable {
 
     /// The maximum height of the element.
     pub fn max_height(&self) -> f64 {
-        self.hot_sizes.max_height.get(self.values().value_generation(), || self.get_value(Self::max_height_property()))
+        self.hot(HotSizes::MAX_HEIGHT, &self.hot_sizes.max_height, || self.get_value(Self::max_height_property()))
     }
 
     pub fn set_max_height(&self, value: f64) {
@@ -699,7 +701,7 @@ impl Layoutable {
 
     /// The margin around the element.
     pub fn margin(&self) -> Thickness {
-        self.hot_sizes.margin.get(self.values().value_generation(), || self.get_value(Self::margin_property()))
+        self.hot(HotSizes::MARGIN, &self.hot_sizes.margin, || self.get_value(Self::margin_property()))
     }
 
     pub fn set_margin(&self, value: Thickness) {
@@ -708,9 +710,9 @@ impl Layoutable {
 
     /// The element's preferred horizontal alignment in its parent.
     pub fn horizontal_alignment(&self) -> HorizontalAlignment {
-        self.hot_sizes
-            .horizontal_alignment
-            .get(self.values().value_generation(), || self.get_value(Self::horizontal_alignment_property()))
+        self.hot(HotSizes::HORIZONTAL_ALIGNMENT, &self.hot_sizes.horizontal_alignment, || {
+            self.get_value(Self::horizontal_alignment_property())
+        })
     }
 
     pub fn set_horizontal_alignment(&self, value: HorizontalAlignment) {
@@ -719,9 +721,9 @@ impl Layoutable {
 
     /// The element's preferred vertical alignment in its parent.
     pub fn vertical_alignment(&self) -> VerticalAlignment {
-        self.hot_sizes
-            .vertical_alignment
-            .get(self.values().value_generation(), || self.get_value(Self::vertical_alignment_property()))
+        self.hot(HotSizes::VERTICAL_ALIGNMENT, &self.hot_sizes.vertical_alignment, || {
+            self.get_value(Self::vertical_alignment_property())
+        })
     }
 
     pub fn set_vertical_alignment(&self, value: VerticalAlignment) {
@@ -767,11 +769,32 @@ impl Layoutable {
 
     /// Whether the control's layout should be snapped to pixel boundaries.
     pub fn use_layout_rounding(&self) -> bool {
-        self.get_value(Self::use_layout_rounding_property())
+        let property = Self::use_layout_rounding_property();
+        // The property inherits: its value changes with the store of an ancestor, which the
+        // generation of this store does not tell. While no store holds a value of it the value
+        // is the default of the class, which only its metadata changes, and that is kept
+        // (section 9.36).
+        if property.as_property().holders() != 0 {
+            return self.get_value(property);
+        }
+        self.hot(HotSizes::USE_LAYOUT_ROUNDING, &self.hot_sizes.use_layout_rounding, || self.get_value(property))
     }
 
     pub fn set_use_layout_rounding(&self, value: bool) {
         self.set_value(Self::use_layout_rounding_property(), value)
+    }
+
+    /// How the element is queried as a container (`Container.Sizing`), which the measure of
+    /// every element asks for.
+    pub(crate) fn container_sizing(&self) -> ContainerSizing {
+        self.hot(HotSizes::CONTAINER_SIZING, &self.hot_sizes.container_sizing, || Container::get_sizing(self))
+    }
+
+    /// The kept copy of a property of the element that does not inherit: `value`, the cell of
+    /// the kept values `bit` stands for.
+    #[inline]
+    fn hot<T: Copy>(&self, bit: u16, value: &Cell<T>, read: impl FnOnce() -> T) -> T {
+        self.hot_sizes.stamp.get(self.values().value_generation(), bit, value, read)
     }
 
     /// The available size passed in the previous layout pass, if any.
@@ -980,16 +1003,39 @@ impl Drop for MeasuringGuard<'_> {
     }
 }
 
-/// The kept values of the size, margin and alignment properties of a layoutable.
+/// The kept values of the properties of a layoutable its measure and arrange read: the sizes,
+/// the margin, the alignments, the layout rounding and the container sizing, beside the one
+/// stamp they share.
+///
+/// In the order of the declaration: the stamp and the sizes, which every measure reads, are
+/// the first sixty-four bytes.
 #[derive(Default)]
+#[repr(C)]
 struct HotSizes {
-    width: crate::property_store::HotValue<f64>,
-    height: crate::property_store::HotValue<f64>,
-    min_width: crate::property_store::HotValue<f64>,
-    max_width: crate::property_store::HotValue<f64>,
-    min_height: crate::property_store::HotValue<f64>,
-    max_height: crate::property_store::HotValue<f64>,
-    margin: crate::property_store::HotValue<Thickness>,
-    horizontal_alignment: crate::property_store::HotValue<HorizontalAlignment>,
-    vertical_alignment: crate::property_store::HotValue<VerticalAlignment>,
+    stamp: crate::property_store::HotStamp,
+    width: Cell<f64>,
+    height: Cell<f64>,
+    min_width: Cell<f64>,
+    max_width: Cell<f64>,
+    min_height: Cell<f64>,
+    max_height: Cell<f64>,
+    margin: Cell<Thickness>,
+    horizontal_alignment: Cell<HorizontalAlignment>,
+    vertical_alignment: Cell<VerticalAlignment>,
+    use_layout_rounding: Cell<bool>,
+    container_sizing: Cell<ContainerSizing>,
+}
+
+impl HotSizes {
+    const WIDTH: u16 = 1 << 0;
+    const HEIGHT: u16 = 1 << 1;
+    const MIN_WIDTH: u16 = 1 << 2;
+    const MAX_WIDTH: u16 = 1 << 3;
+    const MIN_HEIGHT: u16 = 1 << 4;
+    const MAX_HEIGHT: u16 = 1 << 5;
+    const MARGIN: u16 = 1 << 6;
+    const HORIZONTAL_ALIGNMENT: u16 = 1 << 7;
+    const VERTICAL_ALIGNMENT: u16 = 1 << 8;
+    const USE_LAYOUT_ROUNDING: u16 = 1 << 9;
+    const CONTAINER_SIZING: u16 = 1 << 10;
 }

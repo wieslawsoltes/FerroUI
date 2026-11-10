@@ -5,12 +5,11 @@ mod media_player_element;
 mod media_transport_controls;
 pub use media_player_element::*;
 pub use media_transport_controls::*;
+// Shared by runtime registration and the build-time XAML metadata scanner.
+const NAMESPACES: &[(&str, &str)] = &[("ferroui_media_video_controls", "FerroUI.Media.Video.Controls")];
 pub fn register_types() {
     ferroui_media_controls::register_types();
-    ferroui_base::TypeInfo::register_namespaces(&[(
-        "ferroui_media_video_controls",
-        "FerroUI.Media.Video.Controls",
-    )]);
+    ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
     ferroui_base::TypeInfo::register(MediaPlayerElement::TYPE);
     ferroui_base::TypeInfo::register(MediaTransportControls::TYPE);
 }

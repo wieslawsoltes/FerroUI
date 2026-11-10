@@ -59,8 +59,8 @@ impl IAffectsRender for DrawingImage {
     }
 }
 
-/// Subscribes `handler` to the invalidation of a property value, when the
-/// value is a media object that can change.
+/// The media object a property value holds whose changes affect rendering,
+/// when it holds one.
 ///
 /// `value` is the untyped value of a property as carried by a property change
 /// notification; the property types that can hold an [`IAffectsRender`] are
@@ -69,38 +69,50 @@ impl IAffectsRender for DrawingImage {
 /// handles). Returns `None` when the value is of another type, is absent or
 /// is immutable.
 ///
-/// This is the counterpart of testing a property value for the interface;
-/// it lets a visual subscribe uniformly to whatever its render-affecting
-/// properties hold.
-pub fn subscribe_invalidated(value: &dyn Any, handler: Rc<dyn Fn()>) -> Option<Rc<dyn IDisposable>> {
+/// This is the counterpart of testing a property value for the interface.
+/// A caller that builds a handler for the object asks here first, so that a
+/// value with nothing to subscribe to (an immutable brush, no brush) costs
+/// it no handler.
+pub fn affects_render_source(value: &dyn Any) -> Option<&dyn IAffectsRender> {
     if let Some(value) = value.downcast_ref::<Option<Rc<dyn IBrush>>>() {
         let brush = value.as_ref()?.as_object()?.downcast_ref::<Brush>()?;
-        return Some(IAffectsRender::invalidated(brush, handler));
+        return Some(brush);
     }
     if let Some(value) = value.downcast_ref::<Option<Rc<dyn IPen>>>() {
         let pen = value.as_ref()?.as_object()?.downcast_ref::<Pen>()?;
-        return Some(IAffectsRender::invalidated(pen, handler));
+        return Some(pen);
     }
     if let Some(value) = value.downcast_ref::<Option<Rc<dyn ITransform>>>() {
         let transform = value.as_ref()?.as_object()?.downcast_ref::<Transform>()?;
-        return Some(IAffectsRender::invalidated(transform, handler));
+        return Some(transform);
     }
     if let Some(value) = value.downcast_ref::<Option<Ref<Transform>>>() {
         let transform: &Transform = value.as_ref()?;
-        return Some(IAffectsRender::invalidated(transform, handler));
+        return Some(transform);
     }
     if let Some(value) = value.downcast_ref::<Option<Ref<Geometry>>>() {
         let geometry: &Geometry = value.as_ref()?;
-        return Some(IAffectsRender::invalidated(geometry, handler));
+        return Some(geometry);
     }
     if let Some(value) = value.downcast_ref::<Option<Rc<dyn IEffect>>>() {
         let effect = value.as_ref()?.as_object()?.downcast_ref::<Effect>()?;
-        return Some(IAffectsRender::invalidated(effect, handler));
+        return Some(effect);
     }
     if let Some(value) = value.downcast_ref::<Option<Rc<dyn IImage>>>() {
-        return Some(value.as_ref()?.as_affects_render()?.invalidated(handler));
+        return value.as_ref()?.as_affects_render();
     }
     None
+}
+
+/// Subscribes `handler` to the invalidation of a property value, when the
+/// value is a media object that can change
+/// ([`affects_render_source`] says which values are). Returns `None` when
+/// the value is of another type, is absent or is immutable.
+///
+/// It lets a visual subscribe uniformly to whatever its render-affecting
+/// properties hold.
+pub fn subscribe_invalidated(value: &dyn Any, handler: Rc<dyn Fn()>) -> Option<Rc<dyn IDisposable>> {
+    affects_render_source(value).map(|source| source.invalidated(handler))
 }
 
 /// Whether a property with values of the given type can hold a media object

@@ -200,6 +200,25 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
     /// Creates a drawing context that draws into the layer.
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl>;
 
+    /// Whether the layer holds a frame back: the frame drawn into it last
+    /// is not what [`blit`](Self::blit) shows yet, because the layer draws
+    /// a frame while the one before it is presented
+    /// (desktop-performance.md, section 9.33). The owner of such a layer
+    /// presents once more when no further frame follows, after
+    /// [`complete_pending_frame`](Self::complete_pending_frame).
+    ///
+    /// Not from upstream, where a layer is always drawn before it is
+    /// blitted.
+    fn has_pending_frame(&self) -> bool {
+        false
+    }
+
+    /// Completes the frame the layer holds back, so that the next
+    /// [`blit`](Self::blit) shows it. For a tick that draws nothing into
+    /// the layer: a tick that draws completes the frame before it by
+    /// itself.
+    fn complete_pending_frame(&self) {}
+
     /// The contents of the layer as a bitmap that can leave the render
     /// thread. A layer itself stays on the thread that created it.
     fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;

@@ -7,7 +7,6 @@ use ferroui_base::platform::{
     IDrawingContextImpl, IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties,
     RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
-use ferroui_base::{FerroLocator, LocatorExtensions};
 use skia_safe::{AlphaType, ImageInfo};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -294,16 +293,10 @@ pub(super) fn prewarm_animation_pipelines(context: &mut dyn IDrawingContextImpl)
     }
 }
 
-/// [`SkiaOptions::prewarm_effect_pipelines`] of the options registered on
-/// this thread, else of the ones the backend was initialized with (the
-/// render thread has no services); on by default.
+/// [`SkiaOptions::prewarm_effect_pipelines`] of the options in force on
+/// this thread ([`SkiaOptions::current`]); on by default.
 fn prewarm_effect_pipelines() -> bool {
-    FerroLocator::current()
-        .get_service::<SkiaOptions>()
-        .map(|options| *options)
-        .or_else(SkiaPlatform::options)
-        .unwrap_or_default()
-        .prewarm_effect_pipelines
+    SkiaOptions::current().prewarm_effect_pipelines
 }
 
 ferroui_base::ferro_thread_local! {

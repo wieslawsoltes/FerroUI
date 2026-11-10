@@ -1,11 +1,11 @@
 use crate::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior};
 use crate::media::{
-    can_value_affect_render, subscribe_invalidated, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
+    affects_render_source, can_value_affect_render, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
     ITransform, RenderOptions, TextOptions, Transform,
 };
-use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
+use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor, KeptCompositionVisuals};
 use crate::reactive::{Disposable, IDisposable, Subscription};
-use crate::rendering::IPresentationSource;
+use crate::rendering::{IPresentationSource, IRenderer};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObjectImpl,
@@ -51,6 +51,16 @@ pub struct Visual {
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     composition_visual: RefCell<Option<CompositionDrawListVisual>>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.32): the visual left its
+    // visual tree and its composition visual is kept, until the next update pass of the renderer
+    // or for as long as what took the visual out of the tree keeps it, in case the visual comes
+    // back. While it is set the visual answers that it has no
+    // composition visual, as upstream does for a visual that is not attached.
+    composition_visual_departed: Cell<bool>,
+    // Not upstream (section 9.32): the composition visual was given to something other than the
+    // synchronisation of the visual tree, which may have changed it or may hold it. Such a
+    // composition visual is released when the visual leaves its tree, as upstream.
+    composition_visual_handed_out: Cell<bool>,
     child_composition_visual: RefCell<Option<Rc<CompositionVisual>>>,
     /// What the composition API of WinUI adds to the visual (the `Translation` facade, the
     /// requests to hide the composition visual, the layer composition visual): boxed and
@@ -287,7 +297,7 @@ impl VisualImpl for Visual {
         this.enable_transitions();
         let renderer = e.presentation_source().renderer();
         if let Some(compositor) = renderer.compositor() {
-            this.attach_to_compositor(&compositor);
+            this.attach_to_compositor_core(&compositor, Some(&*renderer));
         }
 
         this.invalidate_mirror_transform();
@@ -394,26 +404,17 @@ impl VisualImpl for Visual {
     fn detach_from_compositor(this: &Self) {
         // The shadow visual belongs to the composition visual it follows.
         this.release_theme_shadow_visual();
+        if this.composition_visual_departed.get() || this.keep_departed_composition_visual() {
+            return;
+        }
         let composition_visual = this.composition_visual.borrow_mut().take();
         if let Some(composition_visual) = composition_visual {
-            if let Some(child) = this.child_composition_visual() {
-                composition_visual.children().remove(&child);
-            }
-            if let Some(layer) = this.composition_layer_visual() {
-                composition_visual.children().remove(&layer);
-            }
-            composition_visual.set_draw_list(None);
-            composition_visual.set_opacity_mask(None);
-            // The composition visual and its children refer to each other;
-            // nothing collects such a cycle here, so the visual lets go of
-            // its children. They are re-added when their visuals are
-            // synchronized again.
-            composition_visual.children().clear();
+            this.release_composition_visual(&composition_visual);
         }
     }
 
     fn synchronize_composition_child_visuals(this: &Self) {
-        let Some(composition_visual) = this.composition_visual() else { return };
+        let Some(composition_visual) = this.own_composition_visual() else { return };
         let composition_children = composition_visual.children();
         // Not upstream: a visual with nothing under it (no visual children, no child composition
         // visual, no layer and no unloading visuals) is expected to have no composition children;
@@ -505,7 +506,7 @@ impl VisualImpl for Visual {
                     }
                     index += 1;
                 }
-                if !same(&composition_children.get(index), child_at(c).composition_visual()) {
+                if !same(&composition_children.get(index), child_at(c).own_composition_visual()) {
                     mismatch = true;
                     break;
                 }
@@ -542,7 +543,7 @@ impl VisualImpl for Visual {
             if let Some(shadow) = shadow_at(c) {
                 composition_children.add(shadow.clone());
             }
-            if let Some(composition_child) = child_at(c).composition_visual() {
+            if let Some(composition_child) = child_at(c).own_composition_visual() {
                 composition_children.add((*composition_child).clone());
             }
         }
@@ -559,7 +560,7 @@ impl VisualImpl for Visual {
     }
 
     fn synchronize_composition_properties(this: &Self) {
-        let Some(comp) = this.composition_visual() else { return };
+        let Some(comp) = this.own_composition_visual() else { return };
         let bounds = this.bounds();
 
         // The implicit animations of the transitions, installed before the properties are
@@ -905,6 +906,8 @@ impl Visual {
             render_options: Cell::new(RenderOptions::default()),
             text_options: Cell::new(TextOptions::default()),
             composition_visual: RefCell::new(None),
+            composition_visual_departed: Cell::new(false),
+            composition_visual_handed_out: Cell::new(false),
             child_composition_visual: RefCell::new(None),
             composition_extras: RefCell::new(None),
             render_transform_subscription: RefCell::new(None),
@@ -1219,7 +1222,142 @@ impl Visual {
     /// The composition visual of the visual, while it is attached to a
     /// visual tree rendered by a compositor.
     pub fn composition_visual(&self) -> Option<CompositionDrawListVisual> {
+        let composition_visual = self.own_composition_visual()?;
+        // What is given out here may be changed or held by the caller: it is not kept when the
+        // visual leaves its tree (section 9.32).
+        self.composition_visual_handed_out.set(true);
+        Some(composition_visual)
+    }
+
+    /// The composition visual of the visual for the synchronisation of the visual tree with the
+    /// composition tree, which writes to it only what it writes again when the visual is
+    /// synchronized (section 9.32). Anything else asks [`composition_visual`](Self::composition_visual).
+    #[inline]
+    pub(crate) fn own_composition_visual(&self) -> Option<CompositionDrawListVisual> {
+        if self.composition_visual_departed.get() {
+            return None;
+        }
         self.composition_visual.borrow().clone()
+    }
+
+    /// Whether the visual left its visual tree and its composition visual is kept for its return
+    /// (section 9.32).
+    #[inline]
+    pub(crate) fn composition_visual_departed(&self) -> bool {
+        self.composition_visual_departed.get()
+    }
+
+    /// Whether the composition visual of the visual is one that nothing but the synchronisation
+    /// of the visual tree wrote to, so that it is the same as one created now once the visual is
+    /// synchronized again: it was not handed out, it is a plain draw list visual, and the visual
+    /// has no child composition visual and no state of the composition API. What a control adds
+    /// to its composition visual is kept when the control says that it writes it whether or not
+    /// it is in a tree (`ICompositionDrawListVisualExtension::follows_control_out_of_tree`).
+    fn composition_visual_is_untouched(&self, composition_visual: &CompositionDrawListVisual) -> bool {
+        !self.composition_visual_handed_out.get()
+            && self.child_composition_visual.borrow().is_none()
+            && self.composition_extras.borrow().is_none()
+            && composition_visual.can_be_kept_out_of_tree()
+    }
+
+    /// The visual is leaving its visual tree: asks the renderer to keep the composition visual,
+    /// and reports whether it does (section 9.32). The renderer releases it in its next update
+    /// pass unless the visual is back by then; inside
+    /// [`leave_tree_keeping_composition_visuals`](Self::leave_tree_keeping_composition_visuals)
+    /// it is kept for the caller of that instead. Whatever takes an element out of the tree and
+    /// puts it back (a panel that moves a child, a virtualizing panel that recycles a row) then
+    /// keeps the composition visuals of the element and of everything under it, on both sides of
+    /// the compositor.
+    fn keep_departed_composition_visual(&self) -> bool {
+        let kept = {
+            let composition_visual = self.composition_visual.borrow();
+            let Some(composition_visual) = composition_visual.as_ref() else { return false };
+            self.composition_visual_is_untouched(composition_visual)
+                && self
+                    .presentation_source
+                    .borrow()
+                    .as_ref()
+                    .is_some_and(|source| source.renderer().keep_departed_composition_visual(self, composition_visual))
+        };
+        if kept {
+            self.composition_visual_departed.set(true);
+            if let Some(composition_visual) = self.composition_visual.borrow().as_ref() {
+                composition_visual.set_departed(true);
+            }
+        }
+        kept
+    }
+
+    /// What a visual does to its composition visual when it lets go of it.
+    fn release_composition_visual(&self, composition_visual: &CompositionDrawListVisual) {
+        if let Some(child) = self.child_composition_visual() {
+            composition_visual.children().remove(&child);
+        }
+        if let Some(layer) = self.composition_layer_visual() {
+            composition_visual.children().remove(&layer);
+        }
+        Self::release_orphaned_composition_visual(composition_visual);
+    }
+
+    /// Releases a composition visual whose visual is gone.
+    pub(crate) fn release_orphaned_composition_visual(composition_visual: &CompositionDrawListVisual) {
+        composition_visual.set_departed(false);
+        composition_visual.set_draw_list(None);
+        composition_visual.set_opacity_mask(None);
+        // The composition visual and its children refer to each other;
+        // nothing collects such a cycle here, so the visual lets go of
+        // its children. They are re-added when their visuals are
+        // synchronized again.
+        composition_visual.children().clear();
+    }
+
+    /// What kept the composition visual of the visual lets go of it (the update pass of the
+    /// renderer, or the holder of a [`KeptCompositionVisuals`]): if the visual is still out of
+    /// its tree the composition visual is released, as it would have been when the visual left
+    /// (section 9.32). Nothing is done when the visual is back in a tree, or holds another
+    /// composition visual. A visual that left twice is released by whichever of the two lets go
+    /// first: it is then created again when the visual returns, as it always was.
+    pub(crate) fn release_departed_composition_visual(&self, kept: &CompositionDrawListVisual) {
+        if !self.composition_visual_departed.get() {
+            return;
+        }
+        let held = self.composition_visual.borrow().as_ref().is_some_and(|held| Rc::ptr_eq(held, kept));
+        if !held {
+            return;
+        }
+        self.composition_visual_departed.set(false);
+        let composition_visual = self.composition_visual.borrow_mut().take();
+        if let Some(composition_visual) = composition_visual {
+            self.release_composition_visual(&composition_visual);
+        }
+    }
+
+    /// Runs `leave`, which takes this visual (or visuals in the same visual tree) out of the
+    /// tree, and returns the composition visuals that were kept for what left: those of the
+    /// visuals that nothing but the synchronisation of the visual tree wrote to (FerroUI
+    /// addition, docs/porting/desktop-performance.md, section 9.32).
+    ///
+    /// They live until what is returned is released or dropped. A visual attached to a tree of
+    /// the same compositor before that has the composition visual it had, with what the
+    /// compositor holds for it on the render thread; one that is not lets go of it then, as it
+    /// would have when it left. What recycles elements (the pool of a virtualizing panel) holds
+    /// the result for as long as the element is in its pool, and nothing is kept longer than
+    /// the holder decides. `None` when nothing was kept: the visual is in no tree, or its
+    /// renderer keeps nothing.
+    pub fn leave_tree_keeping_composition_visuals(&self, leave: impl FnOnce()) -> Option<KeptCompositionVisuals> {
+        let mut leave = Some(leave);
+        let mut departure = || {
+            if let Some(leave) = leave.take() {
+                leave();
+            }
+        };
+        let kept = match self.presentation_source() {
+            Some(source) => source.renderer().keep_composition_visuals_departing_in(&mut departure),
+            None => None,
+        };
+        // A renderer that did not run it.
+        departure();
+        kept
     }
 
     /// The composition visual shown as the last child of the composition
@@ -1239,6 +1377,20 @@ impl Visual {
 
     fn read_composition_extras<R>(&self, f: impl FnOnce(&CompositionExtras) -> R) -> Option<R> {
         self.composition_extras.borrow().as_deref().map(f)
+    }
+
+    /// Changes the composition extras when the visual has them. Taking something away from a
+    /// visual that never had extras leaves it without them: the visuals without extras, nearly
+    /// all of them, are the ones the synchronisation answers on its short paths (sections 9.28
+    /// and 9.32 of docs/porting/desktop-performance.md).
+    fn change_composition_extras<R>(&self, f: impl FnOnce(&mut CompositionExtras) -> R) -> Option<R> {
+        self.composition_extras.borrow_mut().as_deref_mut().map(f)
+    }
+
+    /// Whether the visual has composition extras.
+    #[cfg(test)]
+    pub(crate) fn has_composition_extras(&self) -> bool {
+        self.composition_extras.borrow().is_some()
     }
 
     /// `UIElement.Lights`: the XAML lights the element holds. A light added
@@ -1339,7 +1491,7 @@ impl Visual {
 
     /// Ends a request of [`add_composition_hide_request`](Self::add_composition_hide_request).
     pub fn remove_composition_hide_request(&self) {
-        self.with_composition_extras(|extras| extras.hide_requests = extras.hide_requests.saturating_sub(1));
+        self.change_composition_extras(|extras| extras.hide_requests = extras.hide_requests.saturating_sub(1));
         self.invalidate_visual();
     }
 
@@ -1401,7 +1553,7 @@ impl Visual {
 
     /// Ends a request of [`add_composition_show_request`](Self::add_composition_show_request).
     pub fn remove_composition_show_request(&self) {
-        self.with_composition_extras(|extras| extras.show_requests = extras.show_requests.saturating_sub(1));
+        self.change_composition_extras(|extras| extras.show_requests = extras.show_requests.saturating_sub(1));
         self.invalidate_visual();
     }
 
@@ -1424,8 +1576,8 @@ impl Visual {
 
     /// Ends [`add_composition_unloading_visual`](Self::add_composition_unloading_visual).
     pub(crate) fn remove_composition_unloading_visual(&self, visual: &Rc<CompositionVisual>) {
-        self.with_composition_extras(|extras| extras.unloading_visuals.retain(|v| !Rc::ptr_eq(v, visual)));
-        if let Some(own) = self.composition_visual() {
+        self.change_composition_extras(|extras| extras.unloading_visuals.retain(|v| !Rc::ptr_eq(v, visual)));
+        if let Some(own) = self.own_composition_visual() {
             own.children().remove(visual);
         }
         if let Some(source) = self.presentation_source() {
@@ -1436,7 +1588,7 @@ impl Visual {
     /// Sets the visual of [`composition_layer_visual`](Self::composition_layer_visual).
     pub fn set_composition_layer_visual(&self, value: Option<Rc<CompositionVisual>>) {
         let old = self.with_composition_extras(|extras| std::mem::replace(&mut extras.layer_visual, value.clone()));
-        if let (Some(old), Some(own)) = (&old, self.composition_visual()) {
+        if let (Some(old), Some(own)) = (&old, self.own_composition_visual()) {
             if !value.as_ref().is_some_and(|new| Rc::ptr_eq(new, old)) {
                 own.children().remove(old);
             }
@@ -1449,15 +1601,60 @@ impl Visual {
     /// Makes sure the visual has a composition visual on `compositor` and
     /// returns it.
     pub fn attach_to_compositor(&self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
-        let current = self.composition_visual();
-        match current {
-            Some(current) if Rc::ptr_eq(current.compositor(), compositor) => current,
-            _ => {
-                let created = self.create_composition_visual(compositor);
-                *self.composition_visual.borrow_mut() = Some(created.clone());
-                self.composition_visual_created(&created);
-                created
+        let composition_visual = self.attach_to_compositor_core(compositor, None);
+        self.composition_visual_handed_out.set(true);
+        composition_visual
+    }
+
+    /// [`attach_to_compositor`](Self::attach_to_compositor) for the visual tree, which hands the
+    /// composition visual to nothing. `renderer` is the renderer of the tree the visual is
+    /// attached to.
+    fn attach_to_compositor_core(
+        &self,
+        compositor: &Rc<Compositor>,
+        renderer: Option<&dyn IRenderer>,
+    ) -> CompositionDrawListVisual {
+        let current = self.composition_visual.borrow().clone();
+        if self.composition_visual_departed.replace(false) {
+            // The visual left a tree and is in one again before the renderer released its
+            // composition visual (section 9.32).
+            if let Some(kept) = current {
+                if Rc::ptr_eq(kept.compositor(), compositor)
+                    && self.composition_visual_is_untouched(&kept)
+                    && renderer.is_some_and(|renderer| renderer.rejoins_departed_composition_visual(&kept))
+                {
+                    crate::perf_count!(CompositionVisualsKept);
+                    kept.set_departed(false);
+                    self.rejoin_composition_tree(&kept);
+                    return kept;
+                }
+                self.composition_visual.borrow_mut().take();
+                self.release_composition_visual(&kept);
             }
+        } else if let Some(current) = current {
+            if Rc::ptr_eq(current.compositor(), compositor) {
+                return current;
+            }
+        }
+        crate::perf_count!(CompositionVisualsCreated);
+        let created = self.create_composition_visual(compositor);
+        *self.composition_visual.borrow_mut() = Some(created.clone());
+        self.composition_visual_handed_out.set(false);
+        self.composition_visual_created(&created);
+        created
+    }
+
+    /// A kept composition visual is still a child of the composition visual its visual was under.
+    /// When the visual is now under another one, it leaves the old one here: the old parent may
+    /// be synchronized after the new one, and a composition visual has one parent.
+    fn rejoin_composition_tree(&self, kept: &CompositionDrawListVisual) {
+        let Some(old_parent) = kept.parent() else { return };
+        let same_parent = self
+            .visual_parent()
+            .and_then(|parent| parent.own_composition_visual())
+            .is_some_and(|new_parent| Rc::ptr_eq(&new_parent, &old_parent));
+        if !same_parent {
+            old_parent.children().remove(kept);
         }
     }
 
@@ -1543,18 +1740,17 @@ impl Visual {
             subscription.dispose();
         }
 
+        // The handler is made for a value that can change only: an immutable
+        // brush, the common value of a brush property, has nothing to
+        // subscribe to.
+        let Some(source) = affects_render_source(e.new_value()) else { return };
         let weak = self.to_ref().downgrade();
-        let subscription = subscribe_invalidated(
-            e.new_value(),
-            Rc::new(move || {
-                if let Some(target) = weak.upgrade() {
-                    target.invalidate_visual();
-                }
-            }),
-        );
-        if let Some(subscription) = subscription {
-            self.affects_render_subscriptions.borrow_mut().push((property, subscription));
-        }
+        let subscription = source.invalidated(Rc::new(move || {
+            if let Some(target) = weak.upgrade() {
+                target.invalidate_visual();
+            }
+        }));
+        self.affects_render_subscriptions.borrow_mut().push((property, subscription));
     }
 
     /// Called when a visual's render transform property changes: while the
