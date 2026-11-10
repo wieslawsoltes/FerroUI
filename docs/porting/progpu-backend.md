@@ -11,8 +11,9 @@ a retained GPU mode as fast as the engine allows, measured against the Skia and 
 Status: P1 to P3 are in the branch. The backend draws shapes, paths, brushes, clips, opacity,
 layers and analytic shadows into offscreen targets and into the Metal drawables of macOS windows,
 behind `use_progpu()`, which also binds the text services of the backend (section 2.4: font
-manager, typefaces and the shaper of the engine); glyph runs, images from files and effects are
-drawn as nothing and said once in the log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
+manager, typefaces and the shaper of the engine) and draws text from a glyph atlas that is kept
+across frames, matched by measurement to the text of the Skia backend on macOS (section 2.4.1);
+images from files and effects are drawn as nothing and said once in the log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
 performance and published size are measured locally against Skia (no new workflows), with
 screenshots of the ControlCatalog.
 
@@ -147,7 +148,7 @@ of the engine; no other font or shaping library is linked.
 | `IFontManagerImpl` | `font_manager.rs` | The catalog: installed families, the default family (the first the catalog has of a short list), a typeface of a family at a style with the simulations of what the face cannot give (bold from weight 600 for a face under it, oblique for an upright face; a variable face is set to the weight and the slant instead), the fallback of a character (`try_match_character`), and a typeface of the bytes of a stream (embedded fonts, `ferres://` assets). |
 | `IPlatformTypeface` | `typeface.rs` | A face at one style: its tables (copied to their reader), its stream, the normalized variation coordinates of its instance. |
 | `ITextShaperImpl` | `text_shaper.rs` | The OpenType shaper of the engine. A typeface holds one text context of the engine; a text is shaped as scalars with up to five scalars of the text before and after it as context, so a slice of a word joins to its surroundings; the script is found by the engine, the direction comes from the bidi level, the language from the culture, the features and the letter spacing from the options. A trailing line break is shaped as a zero width space (a pair `\r\n` as one), a tab as a space of the tab width. A typeface of another font manager is shaped from the bytes of its stream. |
-| `IGlyphRunImpl` | `glyph_run.rs` | The glyphs of a run with their positions, the face and its instance, and the bounds of the ink (the design box of the face at each glyph, widened for the simulations). The geometry of a run (`build_glyph_run_geometry`) is the outlines of its glyphs. |
+| `IGlyphRunImpl` | `glyph_run.rs` | The glyphs of a run with their positions, the face and its instance, and the bounds of the ink (the design box of the face at each glyph, widened for the simulations and the text weight). The geometry of a run (`build_glyph_run_geometry`) is the outlines of its glyphs. A run keeps what the engine draws it from (outlines with scale and phase, places) while its placement stays. |
 
 **The catalog or font bytes.** Both: the engine exposes its own system font catalog, and a face can
 be made of bytes FerroUI brings. The catalog is the one the engine already has (it reads the font
@@ -179,6 +180,77 @@ so a later rule still applied (the colon between a lower case letter and a capit
 - `get_intersections` of a glyph run answers nothing, so an underline does not skip the ink.
 - A typeface of another font manager is shaped, but its glyph run draws nothing and has no outline
   geometry.
+
+### 2.4.1 Drawing glyphs
+
+**The atlas.** The engine rasterizes glyph coverage on the GPU into one R8 atlas and keeps it
+across frames. A tile is found by the exact identity of its raster: the bytes of the outline (which
+stand for the face, its variation instance, the glyph and the text weight), its bounds, the raster
+scale and the horizontal subpixel phase. An outline that is in the atlas is not rasterized again
+and keeps its tile, so a frame with one new glyph rasterizes that glyph only (tested in the engine
+and in `text_draw_tests.rs`: the raster count of a second frame with one more glyph is one). The
+atlas grows by doubling its edge up to the texture limit of the device, copying its content; when
+it is full at its largest size it starts again with the glyphs of the current frame. Nothing is
+evicted one by one yet. The transfer from coverage to alpha is applied when a glyph is drawn, not
+when it is rasterized, so one tile serves every colour.
+
+**Placement.** Upright text at one scale is drawn texel for texel: every glyph lies on a whole
+device pixel, the quarter pixel its origin falls on is the phase its raster is made for, and the
+baseline is on a whole pixel (the Skia backend snaps the baseline the same way). The atlas is
+sampled at texel centres there, where the linear filter of the engine returns the texel unchanged,
+so nothing is blurred. Text under a rotation, a skew or an uneven scale is rasterized at
+the scale of its transform, in steps of an eighth of a doubling so an animated scale does not fill
+the atlas, and drawn through the transform with linear filtering.
+
+**The weight of text.** The text the Skia backend draws on macOS (unhinted, subpixel positioned,
+greyscale antialiasing) is heavier than the outlines of the font. Measured on stems, bars,
+diagonals and rounds from 8 to 96 px an em, the ink is the outline grown by a box: every edge lies
+0.0054 em further out sideways, an edge that faces up lies twice as far up, and an edge that faces
+down stays where the outline has it; from about 54 px an em the growth levels off at 0.29 px. The
+engine grows outlines by such a box exactly (`embolden_outline` of the text module: the Minkowski
+sum of the contour and a box with four free sides, traced as their convolution; curves are cut at
+their turning points and each piece moves to the corner of the box its normal faces, so curves
+stay curves and right angles stay right angles). The backend asks for the grown outline once for a
+glyph and a weight and caches it; aliased text and outline geometry keep the plain outlines. No
+algorithm of another renderer is used: the growth is what the measurement shows, and the measured
+numbers are the constants.
+
+**The coverage transfer.** Greyscale text is drawn with alpha = 1 - (1 - coverage)^e. The exponent
+depends on the lightness of the text colour, in four steps (0.94, 1.16, 1.47, 1.81 from dark to
+light, by a quarter of red and three quarters of green): the reference gets heavier the lighter
+its colour is. The steps were measured on 25 colours.
+
+**The quality check.** The example `progpu_text_quality` draws one text scene with the Skia
+backend (CPU raster surface) and with this backend into offscreen targets, twice with this
+backend (shaped by the engine and shaped by HarfBuzz, to separate shaping from rasterization), and
+writes the images, difference images, enlarged crops of the small sizes and the numbers. The scene:
+Latin regular and bold at 9 to 32 px (Inter), Arabic, Hebrew and Japanese at several sizes, an
+accent colour, simulated bold and oblique, dark on light and light on dark. Results are in
+section 6.
+
+**Where the text of this backend is worse or different.**
+- Edges are placed in eighths of a pixel in both directions: the rasterizer of the engine takes 8
+  sample rows with 8 evenly spaced columns each, so the coverage of an edge that is nearly
+  vertical or horizontal moves in steps of 32 of 255. This is the largest part of the remaining
+  difference (about 8 of 255 on edge pixels, most visible at thin horizontal strokes: Japanese at
+  12 px is the worst line of the scene). Staggering the sample columns from row to row would give
+  64 distinct horizontal positions at the same cost; the vertical direction needs more rows or an
+  analytic coverage. The shader is shared with the managed backend of ProGPU, so the change is a
+  proposal, not part of this step.
+- Small round glyphs (8 to 20 px) come out 3 to 5 percent heavier than the reference; straight
+  and diagonal strokes are within 2 percent.
+- Simulated bold is two strikes of the weighted outline and is much heavier than the reference
+  (ink 1.19 to 1.42 times). The reference image shows no emboldening on those lines although the
+  Skia backend asks for it; which of the two is intended was not decided here.
+- Simulated oblique is 1 to 2 percent lighter than the reference.
+- Only the horizontal phase is kept (quarter pixels); a glyph is up to an eighth of a pixel from
+  its exact place horizontally, and vertically it is on the snapped baseline.
+- The colour rule of the transfer is sure for greys and for the tested accent colours; saturated
+  blue and magenta were measured as dark, which was not examined further.
+- Subpixel (LCD) text is drawn as greyscale. Text filled with a gradient or an image is a path
+  fill of the plain outlines (not weighted). Text under a rotation is filtered linearly and its
+  raster scale is quantized.
+- The reference is the CPU rasterizer of Skia, not its GPU text path.
 
 ### 2.5 Geometries and bitmaps
 
@@ -262,8 +334,7 @@ being destroyed: the device, its engines and its textures are then left to the e
 call into the implementation on the thread, which the reverse order of destruction puts before the
 lock state. Objects released while the thread runs are released as usual.
 
-**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): the glyphs of text (text is
-shaped and laid out by the services of section 2.4; the glyph runs are not drawn yet), bitmaps
+**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): bitmaps
 decoded from files or streams, bitmaps drawn under an opacity mask, inset shadows and the shadows of rectangles with different corner radii, and
 a clear under a rounded or geometry clip. Content under an opacity mask is drawn without the mask.
 The backend refuses compositing layers with a blend mode (`try_push_compositing_layer` answers
@@ -332,17 +403,19 @@ What the work on P1 to P3 and the reading of the engine for P4 found, beyond the
   design units, face and glyph metrics, names, tables and variation instances.
 - **Fonts are bytes** (done). The same font C ABI exposes the system font catalog (families,
   matching, the fallback face of a character) beside faces made of bytes.
-- **The glyph cache is per frame payload.** The glyph atlas is kept while the outline array and
-  the segment arena of a frame are byte-equal to those of the frame before; a frame with another
-  set of glyphs rasterizes all its outlines again. Retained text needs an atlas keyed by outline,
-  scale and phase that keeps entries across frames.
-- **Text quality.** Coverage is 8x8 supersampled on the GPU into an R8 atlas and sampled with a
-  linear filter; the subpixel phase is horizontal only and quarter-pixel; the subpixel text mode
-  samples the grayscale atlas three times and is not a filtered LCD raster (the separate RGB glyph
-  run is one, for opaque targets and whole-pixel positions only); the coverage transfer is a fixed
-  gamma and contrast or the GDI+ grayscale contrast table. Parity with the text of the macOS
-  platform (unhinted outlines, stem darkening, linear blending of coverage) needs a transfer for
-  that, and a comparison against the Skia backend on real text, which has not been made.
+- **The glyph cache was per frame payload** (done). The glyph atlas was kept only while the
+  outline array and the segment arena of a frame were byte-equal to those of the frame before.
+  The scene path now keeps an atlas cache by raster identity (outline bytes, bounds, scale, phase)
+  across frames (section 2.4.1). A frame still hashes the outline bytes of its glyphs to find
+  their tiles; glyph resources named by id (P6) remove that.
+- **Text quality** (matched by measurement; section 2.4.1 and section 6). Coverage is 8x8
+  supersampled on the GPU into an R8 atlas; the subpixel phase is horizontal only and
+  quarter-pixel; the subpixel text mode samples the grayscale atlas three times and is not a
+  filtered LCD raster (the separate RGB glyph run is one, for opaque targets and whole-pixel
+  positions only). Added for the match: text style transfers 14 to 78 (an exponent given
+  directly) and outlines grown by a box (`embolden_outline`, exported through the font C ABI as
+  `progpu_native_font_outline_embolden`); the backend places upright text texel for texel. Open:
+  the regular 8x8 sample grid (edges in eighths of a pixel).
 
 These land in ProGPU as their own pull requests, each with the tests of the engine; the FerroUI
 backend starts on the existing C ABI with a small C++ shim over the builder (step P2) and moves to
@@ -463,7 +536,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P1 | `ferroui-progpu`: the SDK package fetched and verified at build time (version and hashes pinned), linked; the engine created headless; a test renders a cleared target and reads it back | the headless test passes on macOS | done (the engine is built from the submodule instead of fetched packages) |
 | P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
-| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | in progress: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4); drawing the glyphs is next |
+| P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | open (render target bitmaps, layers and writeable pixel bitmaps are in P3) |
 | P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements | open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
@@ -473,7 +546,33 @@ The tables go into section 6 and the pull request as each step lands.
 
 ## 6. Results
 
-None yet.
+### 6.1 Text against the Skia backend (macOS)
+
+`cargo run -p ferroui-progpu --example progpu_text_quality -- <folder>` writes the two images, the
+difference image and `text-quality.txt`. Differences are per channel of 255 over the whole panel
+(text is about 18 percent of its pixels); a text pixel is one that is not background in one of the
+two images; the ink ratio is the summed coverage of this backend over that of Skia.
+
+| Panel (real faces) | Max | Mean (R, G, B) | Above 8 | Above 32 | Text pixels: mean | Text pixels: above 8 | Ink ratio |
+|---|---|---|---|---|---|---|---|
+| Dark on light, plain outlines and the fixed transfer (before the match) | 169 | 3.21, 3.08, 2.99 | 9.82% | | | | 0.899 |
+| Light on dark, before the match | 179 | 5.90, 5.96, 6.06 | 11.39% | | | | 0.784 |
+| Dark on light | 102 | 1.42, 1.38, 1.34 | 6.49% | 0.55% | 7.80, 7.56, 7.37 | 35.7% | 1.002 |
+| Light on dark | 117 | 1.13, 1.16, 1.19 | 5.07% | 0.45% | 6.23, 6.35, 6.53 | 27.9% | 1.005 |
+| Both | 117 | 1.28, 1.27, 1.27 | 5.78% | 0.50% | 7.01, 6.95, 6.95 | 31.8% | 1.004 |
+
+By line the ink ratio is 0.986 to 1.020 for every real face and size (Latin regular and bold 9 to
+32 px, Arabic 11 to 28, Hebrew 11 to 20, Japanese 12 to 24, the accent colour). The mean
+difference on text pixels is 4 to 10 of 255 except Japanese at 12 px (19 to 20, maximum 117: thin
+horizontal strokes between sample rows). The lines of simulated styles are counted apart:
+simulated bold is 1.19 to 1.42 times the ink of the reference (mean on text pixels 35 to 47),
+simulated oblique 0.982 to 0.996. Shaping with HarfBuzz instead of the engine gives the same
+numbers, so the difference is rasterization, not shaping. The centroids of the lines agree within
+0.01 px in both directions at every size.
+
+At the size of the screen the two renderings are not told apart by eye in the enlarged crops of the
+9 to 14 px lines; the difference image shows thin outlines at glyph edges, strongest at the
+Japanese 12 px line and the simulated bold lines.
 
 ## 7. Licensing
 

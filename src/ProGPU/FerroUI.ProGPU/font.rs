@@ -64,7 +64,16 @@ pub(crate) struct FontFace {
     id: u64,
     metrics: progpu_native_font_face_metrics,
     design_box: [f32; 4],
+    /// The outlines read so far, by variation instance, glyph and weight (`None` for a glyph
+    /// the face does not have).
+    outlines: Mutex<OutlineCache>,
 }
+
+type OutlineCache = HashMap<Box<[i16]>, HashMap<(u16, u8), Option<Arc<GlyphOutline>>>>;
+
+/// The steps of the weight of an outline: a weight is so many 4096ths of the em its edges move
+/// sideways by.
+pub(crate) const WEIGHT_STEPS_PER_EM: f32 = 4096.0;
 
 // SAFETY: a face of the engine is immutable and may be used from several threads (the C ABI
 // says so); the outline call keeps its storage per thread.
@@ -85,7 +94,8 @@ impl FontFace {
             unsafe { progpu_native_font_face_destroy(raw) };
             return None;
         }
-        let mut face = FontFace { raw, id: NEXT_FACE_ID.fetch_add(1, Ordering::Relaxed), metrics, design_box: [0.0; 4] };
+        let mut face =
+            FontFace { raw, id: NEXT_FACE_ID.fetch_add(1, Ordering::Relaxed), metrics, design_box: [0.0; 4], outlines: Mutex::new(HashMap::new()) };
         face.design_box = face.read_design_box();
         Some(Arc::new(face))
     }
@@ -221,6 +231,42 @@ impl FontFace {
             let segments = if count == 0 || segments.is_null() { Vec::new() } else { core::slice::from_raw_parts(segments, count).to_vec() };
             Some(GlyphOutline { segments, min_x: bounds.x_min, min_y: bounds.y_min, max_x: bounds.x_max, max_y: bounds.y_max })
         }
+    }
+
+    /// The outline of `glyph` at the variation `coordinates` at a text weight of `weight` steps
+    /// ([`WEIGHT_STEPS_PER_EM`]; none for the outline as the face has it): read from the face
+    /// once and shared after.
+    ///
+    /// The weight is the growth measured on the text of the platform (docs/porting/
+    /// progpu-backend.md, the text quality check): every edge moves sideways by the steps, an
+    /// edge that faces up moves up by twice the steps, and an edge that faces down stays where
+    /// it is, so a baseline stays a baseline.
+    pub fn cached_outline(&self, glyph: u16, coordinates: &[i16], weight: u8) -> Option<Arc<GlyphOutline>> {
+        let mut outlines = self.outlines.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if let Some(found) = outlines.get(coordinates).and_then(|instance| instance.get(&(glyph, weight))) {
+            return found.clone();
+        }
+        let outline = self.outline(glyph, coordinates).map(|mut outline| {
+            if weight != 0 && !outline.segments.is_empty() {
+                let distance = f32::from(weight) * f32::from(self.units_per_em().max(1)) / WEIGHT_STEPS_PER_EM;
+                let growth = progpu_native_font_outline_growth { left: distance, bottom: 0.0, right: distance, top: 2.0 * distance };
+                // SAFETY: plain data, written by the call.
+                let mut bounds: progpu_native_font_glyph_bounds = unsafe { core::mem::zeroed() };
+                let mut segments = ptr::null();
+                let mut count = 0usize;
+                // SAFETY: the source is owned by the outline; the grown segments are borrowed
+                // from the calling thread and copied before its next call.
+                unsafe {
+                    if progpu_native_font_outline_embolden(outline.segments.as_ptr(), outline.segments.len(), &growth, &mut segments, &mut count, &mut bounds) != 0 && count != 0 && !segments.is_null() {
+                        outline.segments = core::slice::from_raw_parts(segments, count).to_vec();
+                        (outline.min_x, outline.min_y, outline.max_x, outline.max_y) = (bounds.x_min, bounds.y_min, bounds.x_max, bounds.y_max);
+                    }
+                }
+            }
+            Arc::new(outline)
+        });
+        outlines.entry(coordinates.into()).or_default().insert((glyph, weight), outline.clone());
+        outline
     }
 }
 

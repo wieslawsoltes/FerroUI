@@ -467,7 +467,7 @@ fn what_the_backend_lacks_is_drawn_as_nothing() {
     frame.dispose();
     assert_eq!(WHITE, surface.rgba(4, 4));
     assert_eq!(RED, surface.rgba(24, 24), "what follows is drawn");
-    assert!(notes::said("text") && notes::said("bitmap-kind") && notes::said("bitmap-mask"));
+    assert!(notes::said("text-run") && notes::said("bitmap-kind") && notes::said("bitmap-mask"));
 
     // The image codecs are not there: an error, not a panic.
     let error = interface.load_bitmap(&mut std::io::Cursor::new(vec![0u8; 16])).err().expect("no codec");

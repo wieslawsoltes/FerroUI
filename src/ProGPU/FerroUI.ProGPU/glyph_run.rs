@@ -1,7 +1,7 @@
 //! The glyph run of the backend: the glyphs of one face at one size, placed from a baseline
 //! origin, as the text stack of the engine draws them.
 
-use crate::font::FontFace;
+use crate::font::{FontFace, WEIGHT_STEPS_PER_EM};
 use crate::geometry::{PathBuilder, PathData};
 use crate::typeface::ProGpuTypeface;
 use ferroui_base::media::text_formatting::GlyphInfo;
@@ -9,15 +9,38 @@ use ferroui_base::media::{FontSimulations, GlyphTypeface};
 use ferroui_base::platform::{IGeometryContext, IGlyphRunImpl};
 use ferroui_base::{Point, Rect};
 use progpu_native_sys::progpu::{
-    progpu_native_path_segment, PROGPU_NATIVE_PATH_SEGMENT_CUBIC, PROGPU_NATIVE_PATH_SEGMENT_LINE, PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC,
+    progpu_native_path_segment, progpu_native_scene_glyph_outline, PROGPU_NATIVE_PATH_SEGMENT_CUBIC, PROGPU_NATIVE_PATH_SEGMENT_LINE,
+    PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC,
 };
 use std::any::Any;
-use std::sync::Arc;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 /// The shear of a simulated oblique, as the other backends shear it.
 pub(crate) const OBLIQUE_SKEW: f32 = 0.3;
 /// The widening of a simulated bold, in ems.
 pub(crate) const BOLD_EM_FRACTION: f32 = 1.0 / 24.0;
+
+/// The weight of antialiased text over the outlines of its font. The text the Skia backend
+/// draws on macOS is heavier than the outlines: measured on stems, bars, diagonals and rounds
+/// from 8 to 96 pixels an em, every edge lies this part of the em further out sideways, an
+/// edge that faces up lies twice as far up, and an edge that faces down is where the outline
+/// has it (docs/porting/progpu-backend.md, the text quality check).
+const TEXT_WEIGHT_EM: f32 = 0.0054;
+/// The most an edge moves sideways, in device pixels: what the measured weight levels off at
+/// from about fifty pixels an em.
+const TEXT_WEIGHT_PIXELS: f32 = 0.29;
+
+/// The weight of antialiased text at `pixels_per_em`, in the steps of the outlines of a face.
+/// One weight for every size below the size the weight levels off at, so a glyph has one
+/// weighted outline there.
+fn text_weight(pixels_per_em: f32) -> u8 {
+    if !(pixels_per_em.is_finite() && pixels_per_em > 0.0) {
+        return 0;
+    }
+    let weight = TEXT_WEIGHT_EM.min(TEXT_WEIGHT_PIXELS / pixels_per_em);
+    (weight * WEIGHT_STEPS_PER_EM).round().clamp(0.0, 255.0) as u8
+}
 
 /// A glyph of a run: its index in the face and its place from the baseline origin of the run,
 /// in the units of the run (Y down).
@@ -39,6 +62,53 @@ pub(crate) struct RunFont {
     pub simulations: FontSimulations,
 }
 
+/// How a run lies on the pixels of a target: what its rasters are made for.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum Placement {
+    /// Upright text at one scale. Every glyph is drawn at a whole device pixel; the quarter
+    /// pixel its origin falls on is the phase of its raster, so the atlas is sampled texel for
+    /// texel. The baseline is on a whole pixel.
+    Snapped {
+        /// Device pixels per unit of the run.
+        scale: f32,
+        /// The part of a pixel the origin of the run is right of a whole pixel.
+        fraction_x: f32,
+        /// The part of a pixel the origin of the run is below a whole pixel.
+        fraction_y: f32,
+        /// Aliased text: whole pixels only, no phases.
+        aliased: bool,
+    },
+    /// Text under any other transform: rasters at the scale of the transform, drawn through it.
+    Free {
+        /// Device pixels per unit of the run, the root of the area the transform gives a unit.
+        scale: f32,
+    },
+}
+
+/// A glyph of a run as it is drawn: its raster and its place.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct PlacedGlyph {
+    /// The index of the raster in the outlines of the run.
+    pub outline: u32,
+    /// Snapped: whole device pixels from the pixel of the origin of the run. Free: units of the
+    /// run from its origin.
+    pub x: f32,
+    /// As `x`, downwards.
+    pub y: f32,
+}
+
+/// What the engine draws a run from at one placement: the outlines of its glyphs with the scale
+/// and the phase each is rasterized at, and the place of every glyph.
+pub(crate) struct RunRaster {
+    placement: Placement,
+    /// One outline for every glyph and phase of the run.
+    pub outlines: Vec<progpu_native_scene_glyph_outline>,
+    /// The segments of the outlines (design units, Y up); the phases of a glyph share theirs.
+    pub segments: Vec<progpu_native_path_segment>,
+    /// The glyphs of the run that have an outline, in the order of the run.
+    pub glyphs: Vec<PlacedGlyph>,
+}
+
 /// A glyph run: its font, its size, its origin, its glyphs and a box that holds them.
 pub struct ProGpuGlyphRun {
     font: Option<RunFont>,
@@ -46,6 +116,9 @@ pub struct ProGpuGlyphRun {
     baseline_origin: Point,
     glyphs: Vec<RunGlyph>,
     bounds: Rect,
+    /// What the run was drawn from last: a run is drawn at the same placement frame after
+    /// frame.
+    raster: Mutex<Option<Arc<RunRaster>>>,
 }
 
 impl ProGpuGlyphRun {
@@ -77,7 +150,104 @@ impl ProGpuGlyphRun {
             }
         };
 
-        ProGpuGlyphRun { font, font_rendering_em_size, baseline_origin, glyphs, bounds }
+        ProGpuGlyphRun { font, font_rendering_em_size, baseline_origin, glyphs, bounds, raster: Mutex::new(None) }
+    }
+
+    /// What the engine draws the run from at `placement`: made once and kept while the
+    /// placement stays. None for a run of a typeface of another font manager.
+    pub(crate) fn raster(&self, placement: Placement) -> Option<Arc<RunRaster>> {
+        let font = self.font.as_ref()?;
+        let mut kept = self.raster.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if let Some(raster) = kept.as_ref().filter(|raster| raster.placement == placement) {
+            return Some(raster.clone());
+        }
+        let raster = Arc::new(self.build_raster(font, placement));
+        *kept = Some(raster.clone());
+        Some(raster)
+    }
+
+    fn build_raster(&self, font: &RunFont, placement: Placement) -> RunRaster {
+        let em_size = self.font_rendering_em_size;
+        let units = f64::from(font.face.units_per_em().max(1));
+        let device_scale = match placement {
+            Placement::Snapped { scale, .. } | Placement::Free { scale } => f64::from(scale),
+        };
+        let raster_scale = (em_size * device_scale / units) as f32;
+        let mut raster = RunRaster { placement, outlines: Vec::new(), segments: Vec::new(), glyphs: Vec::with_capacity(self.glyphs.len()) };
+        if !(raster_scale.is_finite() && raster_scale > 0.0) {
+            return raster;
+        }
+        let skew = if font.simulations.contains(FontSimulations::Oblique) { OBLIQUE_SKEW } else { 0.0 };
+        // Aliased text is the outline of the font; antialiased text has the weight of the text
+        // of the platform.
+        let weight = match placement {
+            Placement::Snapped { aliased: true, .. } => 0,
+            _ => text_weight(raster_scale * units as f32),
+        };
+        // A simulated bold is two strikes of the glyph, half the widening left and right of
+        // its place.
+        let widening = f64::from(BOLD_EM_FRACTION) * em_size;
+        let strikes: &[f64] = if font.simulations.contains(FontSimulations::Bold) { &[-0.5, 0.5] } else { &[0.0] };
+
+        // The range of the segments of a glyph and its box (None for a glyph without an
+        // outline), and the outline of a glyph at a phase.
+        let mut ranges: HashMap<u16, Option<(u64, u64, [f32; 4])>> = HashMap::new();
+        let mut indices: HashMap<(u16, u8), u32> = HashMap::new();
+        for glyph in &self.glyphs {
+            let segments = &mut raster.segments;
+            let range = *ranges.entry(glyph.glyph).or_insert_with(|| {
+                let outline = font.face.cached_outline(glyph.glyph, &font.coordinates, weight)?;
+                if outline.segments.is_empty() {
+                    return None;
+                }
+                let offset = segments.len() as u64;
+                let bounds = if skew == 0.0 {
+                    segments.extend_from_slice(&outline.segments);
+                    [outline.min_x, outline.min_y, outline.max_x, outline.max_y]
+                } else {
+                    shear(segments, &outline.segments, skew)
+                };
+                if !(bounds[2] > bounds[0] && bounds[3] > bounds[1]) {
+                    segments.truncate(offset as usize);
+                    return None;
+                }
+                Some((offset, outline.segments.len() as u64, bounds))
+            });
+            let Some((segment_offset, segment_count, [min_x, min_y, max_x, max_y])) = range else { continue };
+            for strike in strikes {
+                let local_x = f64::from(glyph.x) + strike * widening;
+                let (x, y, phase) = match placement {
+                    Placement::Snapped { scale, fraction_x, fraction_y, aliased } => {
+                        let x = f64::from(fraction_x) + f64::from(scale) * local_x;
+                        let y = (f64::from(fraction_y) + f64::from(scale) * f64::from(glyph.y) + 0.5).floor();
+                        if aliased {
+                            ((x + 0.5).floor(), y, 0u8)
+                        } else {
+                            // The nearest quarter of a pixel: whole pixels and a phase.
+                            let quarters = (x * 4.0 + 0.5).floor() as i64;
+                            (quarters.div_euclid(4) as f64, y, quarters.rem_euclid(4) as u8)
+                        }
+                    }
+                    Placement::Free { .. } => (local_x, f64::from(glyph.y), 0u8),
+                };
+                let outlines = &mut raster.outlines;
+                let outline = *indices.entry((glyph.glyph, phase)).or_insert_with(|| {
+                    outlines.push(progpu_native_scene_glyph_outline {
+                        segment_offset,
+                        segment_count,
+                        min_x,
+                        min_y,
+                        max_x,
+                        max_y,
+                        raster_scale,
+                        subpixel_x: f32::from(phase) / 4.0,
+                    });
+                    (outlines.len() - 1) as u32
+                });
+                raster.glyphs.push(PlacedGlyph { outline, x: x as f32, y: y as f32 });
+            }
+        }
+        raster
     }
 
     /// The union of the box of the face at the place of every glyph: a box no glyph leaves.
@@ -100,6 +270,9 @@ impl ProGpuGlyphRun {
             left -= widening;
             right += widening;
         }
+        // The weight of antialiased text: sideways, and twice that upwards.
+        let weight = f64::from(TEXT_WEIGHT_EM) * em_size;
+        let (left, top, right) = (left - weight, top - 2.0 * weight, right + weight);
         let (mut x0, mut y0, mut x1, mut y1) = (f64::MAX, f64::MAX, f64::MIN, f64::MIN);
         for glyph in glyphs {
             x0 = x0.min(f64::from(glyph.x) + left);
@@ -108,6 +281,21 @@ impl ProGpuGlyphRun {
             y1 = y1.max(f64::from(glyph.y) + bottom);
         }
         Rect::new(origin.x + x0, origin.y + y0, x1 - x0, y1 - y0)
+    }
+
+    /// The outlines of the glyphs of the run as one path, in the units of the run.
+    pub(crate) fn outline_path(&self) -> Option<PathData> {
+        let font = self.font.as_ref()?;
+        let scale = self.font_rendering_em_size / f64::from(font.face.units_per_em().max(1));
+        let skew = if font.simulations.contains(FontSimulations::Oblique) { f64::from(OBLIQUE_SKEW) } else { 0.0 };
+        let mut builder = PathBuilder::default();
+        for glyph in &self.glyphs {
+            if let Some(outline) = font.face.cached_outline(glyph.glyph, &font.coordinates, 0) {
+                let (x, y) = (self.baseline_origin.x + f64::from(glyph.x), self.baseline_origin.y + f64::from(glyph.y));
+                add_outline(&mut builder, &outline.segments, scale, skew, x, y);
+            }
+        }
+        Some(builder.finish())
     }
 
     /// The font of the run, when its typeface is one of this backend.
@@ -119,6 +307,30 @@ impl ProGpuGlyphRun {
     pub fn glyphs(&self) -> &[RunGlyph] {
         &self.glyphs
     }
+}
+
+/// Appends `outline` to `segments` sheared for a simulated oblique (design units, Y up: what is
+/// above the baseline moves right) and returns the box of its control points.
+fn shear(segments: &mut Vec<progpu_native_path_segment>, outline: &[progpu_native_path_segment], skew: f32) -> [f32; 4] {
+    let mut bounds = [f32::MAX, f32::MAX, f32::MIN, f32::MIN];
+    for segment in outline {
+        let mut sheared = *segment;
+        let used = if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_LINE as u32 {
+            2
+        } else if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32 {
+            3
+        } else {
+            4
+        };
+        for (index, point) in [&mut sheared.p0, &mut sheared.p1, &mut sheared.p2, &mut sheared.p3].into_iter().enumerate() {
+            point.x += point.y * skew;
+            if index < used {
+                bounds = [bounds[0].min(point.x), bounds[1].min(point.y), bounds[2].max(point.x), bounds[3].max(point.y)];
+            }
+        }
+        segments.push(sheared);
+    }
+    bounds
 }
 
 /// Adds the outline of a glyph (design units, Y up) to a path: scaled, sheared for a simulated

@@ -301,6 +301,47 @@ impl SceneBuilder {
         self.check("draw_image", ok)
     }
 
+    /// Adds glyph outlines (design units, Y up) with the scale and the horizontal phase each is
+    /// rasterized at; several outlines may share a range of `segments`. Returns the index of
+    /// the resource.
+    pub fn add_glyph_outlines(
+        &mut self,
+        outlines: &[progpu_native_scene_glyph_outline],
+        segments: &[progpu_native_path_segment],
+    ) -> Result<u32, SceneBuildError> {
+        let mut index = NO_INDEX;
+        // SAFETY: the spans are borrowed for the call.
+        let ok = unsafe {
+            progpu_native_scene_builder_add_glyph_outlines(self.raw, outlines.as_ptr(), outlines.len(), segments.as_ptr(), segments.len(), &mut index)
+        };
+        self.check("add_glyph_outlines", ok).map(|()| index)
+    }
+
+    /// Adds a text style (a colour, a rendering mode and a coverage transfer); returns its
+    /// index. The builder gives equal styles one index.
+    pub fn add_text_style(&mut self, style: &progpu_native_scene_text_style) -> Result<u32, SceneBuildError> {
+        let mut index = NO_INDEX;
+        // SAFETY: the record is borrowed for the call.
+        let ok = unsafe { progpu_native_scene_builder_add_text_style(self.raw, style, &mut index) };
+        self.check("add_text_style", ok).map(|()| index)
+    }
+
+    /// Draws glyphs of a glyph outline resource with a text style.
+    pub fn draw_glyph_run(
+        &mut self,
+        glyph_resource_index: u32,
+        glyphs: &[progpu_native_positioned_glyph],
+        bounds: progpu_native_image_rect,
+        state_index: u32,
+        text_style_index: u32,
+    ) -> Result<(), SceneBuildError> {
+        // SAFETY: the span is borrowed for the call.
+        let ok = unsafe {
+            progpu_native_scene_builder_draw_glyph_run(self.raw, glyph_resource_index, glyphs.as_ptr(), glyphs.len(), bounds, state_index, text_style_index)
+        };
+        self.check("draw_glyph_run", ok)
+    }
+
     /// Builds the stream of what was recorded into the builder's buffer (reused across
     /// generations) and returns it.
     pub fn build(&mut self) -> Result<&[u8], SceneBuildError> {

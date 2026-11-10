@@ -13,12 +13,13 @@
 
 use crate::bitmap::ProGpuBitmap;
 use crate::geometry::{path_data_of, PathData};
+use crate::glyph_run::{Placement, ProGpuGlyphRun};
 use crate::gpu::{Gpu, Recording, SampledTexture};
 use crate::layer::ProGpuLayer;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder, NO_INDEX};
 use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
-use ferroui_base::media::{BoxShadows, Color, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions};
+use ferroui_base::media::{BoxShadows, Color, EdgeMode, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions, TextRenderingMode};
 use ferroui_base::platform::{
     AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion, PixelFormat,
@@ -32,6 +33,24 @@ use std::rc::Rc;
 /// The coverage sampling of path fills and clips: a 4x4 grid per pixel (the engine accepts 1, 4
 /// or 8).
 const PATH_SAMPLE_GRID: u32 = 4;
+
+/// The coverage transfers of greyscale text (`progpu_native_scene_text_style::coverage_transfer`)
+/// by the lightness of its colour, darkest first: alpha = 1 - (1 - coverage)^e with e = 0.5 +
+/// (value - 14) / 32. The text the Skia backend draws on macOS gets heavier the lighter its
+/// colour is, in four steps; the exponents are measured against it
+/// (docs/porting/progpu-backend.md, the text quality check).
+const TEXT_COVERAGE_TRANSFERS: [u32; 4] = [28, 35, 45, 56];
+
+/// The coverage transfer of greyscale text of a colour: by a quarter of its red and three
+/// quarters of its green, in four steps of 64 (measured on 25 colours; blue did not count).
+fn text_coverage_transfer(color: progpu_native_color) -> u32 {
+    let lightness = (0.25 * color.r + 0.75 * color.g).clamp(0.0, 1.0) * 255.0;
+    TEXT_COVERAGE_TRANSFERS[((lightness as u32) >> 6).min(3) as usize]
+}
+
+/// The steps of the raster scale of text under a transform that is not upright: eight to a
+/// doubling, so a scale that animates does not fill the atlas with a raster per frame.
+const FREE_SCALE_STEPS: f64 = 8.0;
 
 /// The sigma of a blur radius, as the other backends convert it.
 pub(crate) fn blur_radius_to_sigma(radius: f64) -> f32 {
@@ -145,6 +164,13 @@ pub struct ProGpuDrawingContext {
     bitmaps: HashMap<(usize, i32), SceneImage>,
     current: Current,
     state: Option<u32>,
+    /// The state of the current clips without the transform: what glyphs at whole device
+    /// pixels are drawn with.
+    glyph_state: Option<u32>,
+    /// The text styles of the scene, by colour and mode.
+    text_styles: HashMap<([u32; 4], bool), u32>,
+    /// The glyphs of the run being drawn (kept for its allocation).
+    positioned: Vec<progpu_native_positioned_glyph>,
     clips: Vec<ClipEntry>,
     layers: Vec<LayerEntry>,
     render_options: Vec<RenderOptions>,
@@ -175,6 +201,9 @@ impl ProGpuDrawingContext {
             bitmaps: HashMap::new(),
             current: Current { transform: Matrix::IDENTITY, clip_rect: None, mask: NO_INDEX },
             state: None,
+            glyph_state: None,
+            text_styles: HashMap::new(),
+            positioned: Vec::new(),
             clips: Vec::new(),
             layers: Vec::new(),
             render_options: Vec::new(),
@@ -208,8 +237,28 @@ impl ProGpuDrawingContext {
         if let Some(index) = self.state {
             return Some(index);
         }
+        let index = self.add_state(self.current.transform)?;
+        self.state = Some(index);
+        Some(index)
+    }
+
+    /// The state resource of the current clips under the identity transform, added once per
+    /// change: the clips of a state are in the coordinates of the target.
+    fn glyph_state(&mut self) -> Option<u32> {
+        if self.current.transform.is_identity() {
+            return self.state();
+        }
+        if let Some(index) = self.glyph_state {
+            return Some(index);
+        }
+        let index = self.add_state(Matrix::IDENTITY)?;
+        self.glyph_state = Some(index);
+        Some(index)
+    }
+
+    fn add_state(&mut self, transform: Matrix) -> Option<u32> {
         let mut state = SceneBuilder::identity_state();
-        state.transform = affine(&self.current.transform);
+        state.transform = affine(&transform);
         state.opacity = 1.0;
         if let Some(clip) = self.current.clip_rect {
             state.flags |= PROGPU_NATIVE_SCENE_STATE_CLIP_RECT as u32;
@@ -220,13 +269,98 @@ impl ProGpuDrawingContext {
             state.mask_resource_index = self.current.mask;
         }
         let result = self.scene().add_state(&state);
-        let index = self.record(result)?;
-        self.state = Some(index);
-        Some(index)
+        self.record(result)
     }
 
     fn changed(&mut self) {
         self.state = None;
+        self.glyph_state = None;
+    }
+
+    /// Whether text is drawn aliased: the text options pushed last, then the render options,
+    /// as the other backends resolve them. Everything else is greyscale antialiasing.
+    fn aliased_text(&self) -> bool {
+        let text = self.text_options.last().map(|options| options.text_rendering_mode).unwrap_or_default();
+        let render = self.render_options.last().copied().unwrap_or_default();
+        match (text, render.text_rendering_mode) {
+            (TextRenderingMode::Alias, _) | (TextRenderingMode::Unspecified, TextRenderingMode::Alias) => true,
+            (TextRenderingMode::Unspecified, TextRenderingMode::Unspecified) => render.edge_mode == EdgeMode::Aliased,
+            _ => false,
+        }
+    }
+
+    /// The text style of a colour, added to the scene once.
+    fn text_style(&mut self, color: progpu_native_color, aliased: bool) -> Option<u32> {
+        let key = ([color.r.to_bits(), color.g.to_bits(), color.b.to_bits(), color.a.to_bits()], aliased);
+        if let Some(index) = self.text_styles.get(&key) {
+            return Some(*index);
+        }
+        let style = progpu_native_scene_text_style {
+            color,
+            text_rendering_mode: if aliased { PROGPU_NATIVE_SCENE_TEXT_ALIASED } else { PROGPU_NATIVE_SCENE_TEXT_GRAYSCALE } as u32,
+            coverage_transfer: if aliased { 0 } else { text_coverage_transfer(color) },
+            reserved1: 0,
+            reserved2: 0,
+        };
+        let result = self.scene().add_text_style(&style);
+        let index = self.record(result)?;
+        self.text_styles.insert(key, index);
+        Some(index)
+    }
+
+    /// Draws a run in one colour from the glyph atlas of the engine.
+    fn draw_run(&mut self, run: &ProGpuGlyphRun, color: progpu_native_color) {
+        let transform = self.current.transform;
+        let origin = ferroui_base::platform::IGlyphRunImpl::baseline_origin(run);
+        let aliased = self.aliased_text();
+        let upright = axis_aligned(&transform) && transform.m11 > 0.0 && (transform.m11 - transform.m22).abs() <= 1e-6 * transform.m11;
+        // Upright text: glyphs at whole device pixels under the identity transform. Any other
+        // transform: glyphs in the units of the run, through the transform.
+        let (placement, base, atlas_to_logical_scale) = if upright {
+            let device = transform.transform(origin);
+            let base = Point::new(device.x.floor(), device.y.floor());
+            if !(base.x.is_finite() && base.y.is_finite()) {
+                return;
+            }
+            let placement =
+                Placement::Snapped { scale: transform.m11 as f32, fraction_x: (device.x - base.x) as f32, fraction_y: (device.y - base.y) as f32, aliased };
+            (placement, base, 1.0)
+        } else {
+            let scale = transform.get_determinant().abs().sqrt();
+            if !(scale.is_finite() && scale > 0.0) {
+                return;
+            }
+            let scale = 2f64.powf((scale.log2() * FREE_SCALE_STEPS).round() / FREE_SCALE_STEPS) as f32;
+            (Placement::Free { scale }, origin, 1.0 / scale)
+        };
+        let Some(raster) = run.raster(placement) else { return };
+        if raster.glyphs.is_empty() {
+            return;
+        }
+        let state = if upright { self.glyph_state() } else { self.state() };
+        let Some(state) = state else { return };
+        let Some(style) = self.text_style(color, aliased) else { return };
+        let result = self.scene().add_glyph_outlines(&raster.outlines, &raster.segments);
+        let Some(resource) = self.record(result) else { return };
+
+        let mut positioned = std::mem::take(&mut self.positioned);
+        positioned.clear();
+        positioned.extend(raster.glyphs.iter().map(|glyph| progpu_native_positioned_glyph {
+            outline_index: glyph.outline,
+            reserved: 0,
+            position: progpu_native_point { x: (base.x + f64::from(glyph.x)) as f32, y: (base.y + f64::from(glyph.y)) as f32 },
+            basis_x: progpu_native_point { x: 1.0, y: 0.0 },
+            basis_y: progpu_native_point { x: 0.0, y: 1.0 },
+            color,
+            atlas_to_logical_scale,
+            bold_offset: 0.0,
+            italic_skew: 0.0,
+            reserved2: 0.0,
+        }));
+        let bounds = transform_bounds(ferroui_base::platform::IGlyphRunImpl::bounds(run), &transform).inflate(1.0);
+        let result = self.scene().draw_glyph_run(resource, &positioned, image_rect(bounds), state, style);
+        self.record(result);
+        self.positioned = positioned;
     }
 
     /// The brush of the scene for a brush of the base library, over `bounds` (the local box a
@@ -759,9 +893,31 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         }
     }
 
-    fn draw_glyph_run(&mut self, _foreground: Option<&dyn IBrush>, _glyph_run: &dyn IGlyphRunImpl) {
-        // Step P4 of the plan: the text stack of ProGPU.
-        notes::note_once("text", "text is not drawn by the ProGPU backend yet");
+    fn draw_glyph_run(&mut self, foreground: Option<&dyn IBrush>, glyph_run: &dyn IGlyphRunImpl) {
+        let Some(foreground) = foreground else { return };
+        let Some(run) = glyph_run.as_any().downcast_ref::<ProGpuGlyphRun>() else {
+            notes::note_once("text-run", "a glyph run of another backend is not drawn by the ProGPU backend");
+            return;
+        };
+        if run.font().is_none() {
+            notes::note_once("text-typeface", "text of a typeface of another font manager is not drawn by the ProGPU backend");
+            return;
+        }
+        match foreground.as_solid_color_brush() {
+            Some(solid) => {
+                let color = native_color(solid.color(), foreground.opacity());
+                if color.a > 0.0 {
+                    self.draw_run(run, color);
+                }
+            }
+            // A gradient fills the outlines of the run as a path: its coordinates are those of
+            // the run.
+            None => {
+                if let Some(path) = run.outline_path() {
+                    self.fill_path(&path, foreground);
+                }
+            }
+        }
     }
 
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
