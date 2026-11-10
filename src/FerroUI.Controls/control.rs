@@ -17,6 +17,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::styling::{ISetterValue, Setter};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::utilities::ReleaseExcess;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, BoxedValue,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable, Rect,
@@ -86,6 +87,8 @@ impl LoadedQueues {
     /// The queued controls in their order, the queue left empty.
     fn take(&mut self) -> Vec<Ref<Control>> {
         self.queued.clear();
+        // The first show of a large tree queues every control of it.
+        self.queued.release_excess();
         std::mem::take(&mut self.queue).into_iter().flatten().collect()
     }
 }
