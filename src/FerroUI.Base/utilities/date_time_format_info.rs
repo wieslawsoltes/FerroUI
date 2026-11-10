@@ -68,8 +68,8 @@ pub struct DateTimeFormatInfo {
     shortest_day_names: [String; 7],
     month_names: [String; 13],
     abbreviated_month_names: [String; 13],
-    month_names_in_date: Option<[String; 13]>,
-    abbreviated_month_names_in_date: Option<[String; 13]>,
+    month_genitive_names: Option<[String; 13]>,
+    abbreviated_month_genitive_names: Option<[String; 13]>,
 }
 
 fn day_strings(names: &[&str; 7]) -> [String; 7] {
@@ -104,8 +104,8 @@ impl DateTimeFormatInfo {
             shortest_day_names: day_strings(&SHORTEST_DAY_NAMES),
             month_names: month_strings(&MONTH_NAMES),
             abbreviated_month_names: month_strings(&ABBREVIATED_MONTH_NAMES),
-            month_names_in_date: None,
-            abbreviated_month_names_in_date: None,
+            month_genitive_names: None,
+            abbreviated_month_genitive_names: None,
         }
     }
 
@@ -358,30 +358,46 @@ impl DateTimeFormatInfo {
         &self.month_names[(month - 1) as usize]
     }
 
-    /// Month names used with a numeric day, for locales whose date forms
-    /// differ from the names used alone. Falls back to `month_names`.
-    pub fn month_names_in_date(&self) -> &[String; 13] {
-        self.month_names_in_date
-            .as_ref()
-            .unwrap_or(&self.month_names)
+    /// The full names of the months in the form a date with a day number
+    /// takes (.NET `MonthGenitiveNames`): "7 stycznia" beside "styczeń 2026".
+    /// The plain names for a culture that has no such form.
+    pub fn month_genitive_names(&self) -> &[String; 13] {
+        self.month_genitive_names.as_ref().unwrap_or(&self.month_names)
     }
 
-    /// Sets the locale's full month names when formatting a numeric day.
-    pub fn set_month_names_in_date(&mut self, names: [String; 13]) {
-        self.month_names_in_date = Some(names);
+    /// Sets the full names of the months in the form a date with a day
+    /// number takes.
+    pub fn set_month_genitive_names(&mut self, value: [String; 13]) {
+        self.month_genitive_names = Some(value);
     }
 
-    /// Abbreviated month names used with a numeric day. Falls back to
-    /// `abbreviated_month_names` when no separate date forms are provided.
-    pub fn abbreviated_month_names_in_date(&self) -> &[String; 13] {
-        self.abbreviated_month_names_in_date
-            .as_ref()
-            .unwrap_or(&self.abbreviated_month_names)
+    /// The abbreviated names of the months in the form a date with a day
+    /// number takes (.NET `AbbreviatedMonthGenitiveNames`). The plain
+    /// abbreviated names for a culture that has no such form.
+    pub fn abbreviated_month_genitive_names(&self) -> &[String; 13] {
+        self.abbreviated_month_genitive_names.as_ref().unwrap_or(&self.abbreviated_month_names)
     }
 
-    /// Sets the locale's abbreviated month names used with a numeric day.
-    pub fn set_abbreviated_month_names_in_date(&mut self, names: [String; 13]) {
-        self.abbreviated_month_names_in_date = Some(names);
+    /// Sets the abbreviated names of the months in the form a date with a
+    /// day number takes.
+    pub fn set_abbreviated_month_genitive_names(&mut self, value: [String; 13]) {
+        self.abbreviated_month_genitive_names = Some(value);
+    }
+
+    /// Whether genitive month names were set. A format reads its pattern for
+    /// a day number, and a parse matches the genitive names, only then.
+    pub(crate) fn has_genitive_month_names(&self) -> bool {
+        self.month_genitive_names.is_some() || self.abbreviated_month_genitive_names.is_some()
+    }
+
+    /// The genitive full names, when they were set.
+    pub(crate) fn month_genitive_names_if_set(&self) -> Option<&[String; 13]> {
+        self.month_genitive_names.as_ref()
+    }
+
+    /// The genitive abbreviated names, when they were set.
+    pub(crate) fn abbreviated_month_genitive_names_if_set(&self) -> Option<&[String; 13]> {
+        self.abbreviated_month_genitive_names.as_ref()
     }
 
     /// The abbreviated name of a month, 1..=13. Panics for other values.
