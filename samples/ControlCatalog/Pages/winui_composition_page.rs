@@ -151,7 +151,7 @@ pub fn smoke_open_card(index: usize) -> bool {
 }
 
 /// Chooses the configuration of the page "Connected animations" last created (0 gravity,
-/// 1 direct, 2 basic), as its buttons do.
+/// 1 direct, 2 basic, 3 gravity without its shadow), as its buttons do.
 pub fn smoke_set_configuration(index: usize) -> bool {
     let Some(gallery) = GALLERY.with(|gallery| gallery.borrow().upgrade()) else { return false };
     gallery.configuration.set(index);
@@ -183,6 +183,7 @@ struct Gallery {
 impl Gallery {
     fn configuration(&self) -> Rc<dyn ConnectedAnimationConfiguration> {
         match self.configuration.get() {
+            3 => GravityConnectedAnimationConfiguration::new().with_is_shadow_enabled(false),
             1 => DirectConnectedAnimationConfiguration::new(),
             2 => BasicConnectedAnimationConfiguration::new(),
             _ => GravityConnectedAnimationConfiguration::new(),

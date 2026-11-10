@@ -1451,6 +1451,62 @@ fn graphite_prewarms_pipelines_on_a_recorder_and_a_thread_of_their_own() {
     assert!(gr_context.create_surface(&info, &props).is_some());
 }
 
+/// The animation prewarm never submits its draws to the GPU or changes
+/// the live surface, and finishes on a worker rather than the render thread.
+#[test]
+fn animation_prewarm_compiles_off_thread_without_changing_the_live_surface() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let target = GraphiteTarget::new(&device);
+    target.draw(|context| context.clear(Colors::BLUE));
+    let prewarm = target.gr_context.begin_prewarm().unwrap();
+    let prewarm_context = prewarm
+        .gr_context
+        .as_any()
+        .downcast_ref::<crate::gpu::graphite::GraphitePrewarmContext>()
+        .unwrap();
+    let info = skia_safe::ImageInfo::new(
+        (512, 512),
+        ColorType::N32,
+        skia_safe::AlphaType::Premul,
+        None,
+    );
+    let surface = prewarm
+        .gr_context
+        .create_surface(&info, &skia_safe::SurfaceProps::default())
+        .unwrap();
+    {
+        let mut context = crate::DrawingContextImpl::new(
+            crate::drawing_context_impl::CreateInfo {
+                surface: Some(surface),
+                gr_context: Some(prewarm.gr_context.clone()),
+                ..crate::drawing_context_impl::CreateInfo::default()
+            },
+            Vec::new(),
+        );
+        crate::gpu::skia_gpu_render_target::prewarm_animation_pipelines(&mut context);
+        context.dispose();
+    }
+    let thread = prewarm_context.finish().unwrap();
+    assert_ne!(thread.thread().id(), std::thread::current().id());
+    assert!(
+        thread.join().unwrap(),
+        "the shadow and image draws made a recording"
+    );
+    assert!(prewarm_context.is_finished());
+    // A prewarm recording is dropped rather than submitted to the GPU.
+    let snapshot = target.snapshot();
+    let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+    for y in 0..64 {
+        for x in 0..64 {
+            assert_eq!(BLUE, pixel(bitmap, x, y));
+        }
+    }
+    target.dispose();
+}
+
 /// The render target of a window prewarms with the drawing context of its
 /// frames, offscreen: nothing is presented. With the option off it does not.
 #[test]

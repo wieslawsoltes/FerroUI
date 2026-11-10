@@ -63,6 +63,9 @@ ferroui-wayland = { workspace = true }
 ferroui-linuxframebuffer = { workspace = true }
 
 [features]
+# Native startup/animation measurements; no instrumentation in default builds.
+animation-probe = []
+startup-probe-allocations = ["animation-probe"]
 default = ["skia"]
 skia = ["ferroui-desktop/skia", "ferroui-headless-vnc/harfbuzz"]
 quartz = ["ferroui-desktop/quartz"]
