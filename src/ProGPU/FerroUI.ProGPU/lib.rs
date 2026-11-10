@@ -13,6 +13,7 @@ mod glyph_run;
 mod gpu;
 mod layer;
 mod notes;
+mod outline_log;
 mod platform;
 mod region;
 mod scene;

@@ -1,11 +1,13 @@
 //! The retained scene: the owned builder over the engine's C ABI and the stream it builds
 //! (docs/porting/progpu-backend.md, sections 1 and 2.3).
 
+use crate::font::FontFace;
 use progpu_native_sys::progpu::*;
 use progpu_native_sys::scene_builder::*;
 use std::ffi::c_void;
 use std::fmt;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 
 /// No resource (`PROGPU_NATIVE_SCENE_NO_INDEX`).
 pub(crate) const NO_INDEX: u32 = PROGPU_NATIVE_SCENE_NO_INDEX as u32;
@@ -36,6 +38,9 @@ pub struct SceneBuilder {
     scene_id: u64,
     generation: u64,
     stream: Vec<u8>,
+    /// The faces the glyph keys of the generation name: held so that the outlines of a face
+    /// stay with the engines for as long as a scene that draws them can be rendered.
+    faces: Vec<Arc<FontFace>>,
 }
 
 impl SceneBuilder {
@@ -45,7 +50,7 @@ impl SceneBuilder {
         // SAFETY: creates an owned builder; released in `drop`.
         let raw = unsafe { progpu_native_scene_builder_create(scene_id, 1) };
         assert!(!raw.is_null(), "the scene builder could not be allocated");
-        Self { raw, scene_id, generation: 1, stream: Vec::new() }
+        Self { raw, scene_id, generation: 1, stream: Vec::new(), faces: Vec::new() }
     }
 
     /// The identifier of the scene.
@@ -70,6 +75,7 @@ impl SceneBuilder {
     /// Starts recording the next generation of the scene: everything recorded before is dropped.
     pub fn begin_generation(&mut self) -> Result<(), SceneBuildError> {
         self.generation += 1;
+        self.faces.clear();
         // SAFETY: the builder is alive.
         let ok = unsafe { progpu_native_scene_builder_reset(self.raw, self.scene_id, self.generation) };
         self.check("reset", ok)
@@ -324,6 +330,22 @@ impl SceneBuilder {
             progpu_native_scene_builder_add_glyph_outlines(self.raw, outlines.as_ptr(), outlines.len(), segments.as_ptr(), segments.len(), &mut index)
         };
         self.check("add_glyph_outlines", ok).map(|()| index)
+    }
+
+    /// Adds a glyph resource that names outlines the engine holds (the outline log) instead of
+    /// carrying them: for every glyph and phase of a run the key of its outline, its raster
+    /// scale and its subpixel phase. `face` is the face of the outlines. Returns the index of
+    /// the resource.
+    pub(crate) fn add_glyph_keys(&mut self, face: &Arc<FontFace>, keys: &[progpu_native_scene_glyph_key]) -> Result<u32, SceneBuildError> {
+        let mut index = NO_INDEX;
+        // SAFETY: the span is borrowed for the call.
+        let ok = unsafe { progpu_native_scene_builder_add_glyph_keys(self.raw, keys.as_ptr(), keys.len(), &mut index) };
+        self.check("add_glyph_keys", ok)?;
+        // The runs of a frame are of a few faces, and runs of one face follow each other.
+        if !self.faces.iter().rev().any(|held| Arc::ptr_eq(held, face)) {
+            self.faces.push(face.clone());
+        }
+        Ok(index)
     }
 
     /// Adds a text style (a colour, a rendering mode and a coverage transfer); returns its

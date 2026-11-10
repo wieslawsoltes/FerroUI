@@ -335,8 +335,8 @@ second before any of this; section 6.2 has the numbers after each part):
 
 | Step | Part | Where | Checked by |
 |---|---|---|---|
-| 1 | Glyph outlines by identifier (section 2.3.8) and the word-wise hash of the content identities (section 2.3.9) | engine, builder, bindings, backend | the engine tests of the registry and of keyed runs (the same pixels as the same run with its outlines in the stream); the text tests of section 6.1 unchanged; the gauntlet frames of section 6.2 unchanged; frames a second and render thread time at tier 16 |
-| 2 | A new profile, and from it one of: R1, the stream writer of the backend, R4 | | |
+| 1 | Glyph outlines by identifier (section 2.3.8) and the word-wise hash of the content identities (section 2.3.9): built | engine, builder, bindings, backend | the engine tests of the registry and of keyed runs (the same pixels as the same run with its outlines in the stream); the text tests of the backend; the gauntlet frames of section 6.2 unchanged to the byte; frames a second and render thread time at tier 16 (section 6.2) |
+| 2 | A new profile (the one after step 1 is in section 6.2), and from it one of: R1, the stream writer of the backend, R4, the bundles and draws of section 2.3.10 | | |
 | R1 | Groups before the root pass | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
 | R3 | Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
 | R4 | Spans compiled once, chunked buffers, the placement table | engine (family page compilers, shaders, bundle recording) | read-back equality of moved spans against whole streams for every family, with clips and masks; upload bytes of a frame with one changed span (the metrics of the engine report them) |
@@ -405,9 +405,13 @@ typedef struct progpu_native_scene_glyph_key {
   The positioned glyphs are what they are today; `outline_index` is the index into the table.
   The builder gets `add_glyph_keys` beside `add_glyph_outlines`; a run with its outlines in the
   stream stays valid and is how one-off outlines are drawn (section 2.3.11).
-- The keys are resolved when the scene is rendered. A key that is not registered fails the
-  frame with `INVALID_ARGUMENT` and names the key in the error text; nothing is drawn in its
-  place.
+- The keys are resolved when the scene is rendered, every frame. A key that is not registered
+  (or whose face was released) fails the frame with `INVALID_ARGUMENT`; nothing is drawn in its
+  place. Whether an engine holds an outline is not a property of a stream, so `update_scene`
+  takes a stream with any well-formed key.
+- Only a plain glyph run takes a keyed resource. The colour (RGB) and painted glyph draws keep
+  resources that carry their outlines; the builder and the validation of the stream refuse a
+  keyed resource there.
 
 Why not the two alternatives. A handle given out by the engine would be shorter, but a stream
 with handles means nothing without the engine that gave them, and a stale handle would draw
@@ -417,8 +421,10 @@ table keeps it on the distinct glyph. A registration for every scale and phase w
 the registrations by the sizes in use without saving a lookup.
 
 **What the atlas key is.** For a registered outline the tile of the atlas is found by
-(registry entry, raster scale, subpixel phase): three words, compared as words. The entry stands
-for the outline bytes and the bounds. For an outline that comes in the stream the tile is found
+(registry serial, raster scale, subpixel phase): three words, compared as words. The registry
+gives every outline a serial counted from one that is never given a second time, and a released
+face number is refused afterwards, so a serial stands for the outline bytes and the bounds for
+as long as the engine lives. For an outline that comes in the stream the tile is found
 as today, by the content: bounds, scale, phase and the segment bytes, hashed word-wise and
 compared on a hit. Both kinds of tile live in the one atlas and are dropped together when it
 starts again.
@@ -427,20 +433,34 @@ starts again.
 
 | Piece | What it does |
 |---|---|
-| The registry (`glyph_outline_registry`) | key to entry; an entry owns its segments, its bounds and whether it is a binary (aliased) outline. A released face frees its entries and advances the revision of the registry. |
+| The registry (`glyph_outline_registry`) | key to serial to entry; an entry owns its segments and its bounds. A call registers all of its outlines or none. A released face frees its entries; their serials name nothing afterwards. The registry needs no device and outlives a device loss. |
 | Validation of the stream, preflight | a keyed resource is checked for its size and for finite, positive scales and legal phases; its outline count is the table length and its segment count is zero. |
 | Content hashes of `update_scene` | cover the key table (24 bytes for a distinct glyph of a run) and the positioned glyphs. No outline bytes. |
 | The glyph page of `render_scene` | resolves every key once for a run and maps (entry, scale, phase) to one outline of the frame, so a glyph that 700 runs use is one outline of the frame, not 700. The identity of a keyed resource for sharing is its table. The page keeps, beside its outlines, the entry each one came from. |
-| `render_glyphs` | an outline with an entry is not validated again and not hashed: its tile is looked up by the three words. Only an outline without a tile has its segments read, to be rasterized; the segments uploaded for that are the segments of the outlines to rasterize, not of every outline of the frame. The comparison with the payload of the frame before uses the outline records, the entries and the revision of the registry instead of segment bytes. The payload hash (a diagnostic) covers the instances and the outline records. |
+| `render_glyphs` | an outline with an entry is not validated again and not hashed: its tile is looked up by the three words. Only an outline without a tile has its segments read, to be rasterized; the segments uploaded for that are the segments of the outlines to rasterize, not of every outline of the frame. The comparison with the payload of the frame before uses the outline records and the serials instead of segment bytes. The payload hash (a diagnostic) covers the instances and the outline records. |
 
 **In the backend.** The outline cache of a face gives every outline its key when it is made
-(`face` is a number of the face and its variation instance, `variant` the weight step and the
-oblique bit; the sheared outline of a simulated oblique is cached like the others). An outline
-that a run uses for the first time is appended to a log of the process; an engine registers
-what the log gained since its last frame before it takes a stream, so a second engine or an
-offscreen target learns the same outlines without the runs knowing of engines. A face that is
-dropped appends its release. A run keeps its key table with its placement and sends 24 bytes
-for a distinct glyph instead of its outline.
+(`face` is a number of the face at one variation instance, counted for the process and never
+given a second time; `variant` is the weight step and the oblique bit; the sheared outline of a
+simulated oblique is cached like the others). An outline that a run names for the first time is
+appended to a log of the process (`outline_log.rs`); an engine registers what the log gained
+since it read it last before it takes a stream (4,096 outlines a call at most), so a second
+engine or an offscreen target learns the same outlines without the runs knowing of engines, and
+an engine made later reads the log from its start. A face that is dropped takes its outlines
+out of the log and appends its release. A run keeps its key table with its placement and sends
+24 bytes for a distinct glyph instead of its outline.
+
+- A scene holds the faces its glyph runs name until its next generation begins, so a release
+  never reaches an engine before the scene that draws the face was rendered. A scene the engine
+  keeps is not rendered again after its builder began the next generation.
+- When the engine refuses a registration call, its outlines are registered one at a time and
+  the refusal is noted once; a frame that draws an outline the engine did not take fails, as any
+  frame with an unknown key.
+- What this costs in memory: the log holds every outline that runs named of the faces that
+  are alive (the same allocations the faces cache), every engine holds its own copy of them, and
+  a dropped variation instance leaves one small release entry in the log and one face number in
+  the released set of every engine. The atlas keeps the tiles of a released face until it
+  starts again.
 
 **What stays content-hashed.** The stream and its families (the retained snapshot of
 `update_scene`), outlines that come in the stream (rotated text, section 2.3.11; hosts that do
@@ -597,9 +617,11 @@ so a later rule still applied (the colon between a lower case letter and a capit
 ### 2.4.1 Drawing glyphs
 
 **The atlas.** The engine rasterizes glyph coverage on the GPU into one R8 atlas and keeps it
-across frames. A tile is found by the exact identity of its raster: the bytes of the outline (which
-stand for the face, its variation instance, the glyph and the text weight), its bounds, the raster
-scale and the horizontal subpixel phase. An outline that is in the atlas is not rasterized again
+across frames. A tile is found by the exact identity of its raster: the outline (which stands for
+the face, its variation instance, the glyph, the text weight and a simulated oblique), the raster
+scale and the horizontal subpixel phase. The backend registers every outline with the engine once
+and a frame names it by key (section 2.3.8), so the identity is three words and no outline byte
+travels with a frame or is hashed for a glyph the atlas holds. An outline that is in the atlas is not rasterized again
 and keeps its tile, so a frame with one new glyph rasterizes that glyph only (tested in the engine
 and in `text_draw_tests.rs`: the raster count of a second frame with one more glyph is one). The
 atlas grows by doubling its edge up to the texture limit of the device, copying its content; when
@@ -976,7 +998,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG files and streams decode through the image module (section 2.5); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: JPEG, GIF and BMP, encoding, effects |
-| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | designed (section 2.3, with the counts of a gauntlet frame); every part but the backend fragments needs engine changes beyond the bindings, so the work waits for the review of the design |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8, numbers in section 6.2); the next part is chosen from the profile after it |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
@@ -1041,6 +1063,23 @@ rounded shapes, the edges of the rotated cells. What is worse on this backend, s
 crops: text under a rotation (the titles and numbers of the rotating panels) has rougher edges
 than on Skia, because a glyph is rasterized upright and resampled (section 2.4.1); upright text
 and the shapes are not told apart by eye.
+
+**Frame rate at tier 16** (the animated scene, the same window, a quiet machine; frames a second
+as the sample reports them once a second, the render thread from a 10 s sample of the process).
+The target is the cap of 60.
+
+| State of the backend | Frames a second | Render thread busy | Render thread a frame | Captures at the frozen frame |
+|---|---|---|---|---|
+| Before the retained work (outlines in every frame, byte-wise hash) | 2.6 to 2.9 | 99% | about 340 ms | the reference of the table above |
+| Step 1: glyph outlines by identifier, word-wise hash | 8.0 to 10.7 (mean 9.0 over two runs) | 96% | about 107 ms | the same bytes as before at tier 5 and at tier 16 |
+
+Where the render thread is after step 1, in percent of its samples (inclusive): rendering the
+scene in the engine 63, of which recording the render bundle 15, submitting the queue 15,
+finishing the command encoder 11, dropping the trackers of the bundle 10; the walk of the
+compositor with the backend's recording 19 (glyph runs 6, geometries 8); `update_scene` 7; the
+content hash 6 (it was 61); the glyph page of the engine 3. The UI thread is busy for 23 percent
+of the time. What a frame waits for now is the wgpu side of section 2.3.10 (one bundle and one
+command buffer recorded again every frame, the draw count), then the cost of changed content.
 
 ## 7. Licensing
 

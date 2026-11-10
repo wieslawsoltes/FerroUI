@@ -5,13 +5,22 @@
 //! platform. A catalog and a face are immutable and are shared between threads.
 
 use progpu_native_sys::font::*;
-use progpu_native_sys::progpu::progpu_native_path_segment;
+use progpu_native_sys::progpu::{
+    progpu_native_glyph_outline_key, progpu_native_path_segment, PROGPU_NATIVE_PATH_SEGMENT_LINE, PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC,
+};
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::ptr;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 static NEXT_FACE_ID: AtomicU64 = AtomicU64::new(1);
+/// The numbers of the variation instances of the faces of this process: counted from one and
+/// never given a second time, so an outline key names one outline for the life of the process.
+static NEXT_INSTANCE: AtomicU64 = AtomicU64::new(1);
+
+/// The shear of a simulated oblique, as the other backends shear it.
+pub(crate) const OBLIQUE_SKEW: f32 = 0.3;
 
 /// A requested style: an OpenType weight (1 to 1000), a width class (1 to 9) and a slant.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,18 +67,60 @@ pub(crate) struct GlyphOutline {
     pub max_y: f32,
 }
 
+/// An outline a face keeps: the outline and the key the engines know it by
+/// ([`crate::outline_log`]).
+pub(crate) struct KeptOutline {
+    outline: GlyphOutline,
+    key: progpu_native_glyph_outline_key,
+    /// Whether the outline is in the outline log.
+    logged: AtomicBool,
+}
+
+impl KeptOutline {
+    /// The key of the outline: the variation instance of its face, its glyph and its variant
+    /// (the weight and the simulated oblique).
+    pub fn key(&self) -> progpu_native_glyph_outline_key {
+        self.key
+    }
+
+    /// Whether the outline has anything to draw: segments and a box with an area.
+    pub fn drawable(&self) -> bool {
+        !self.outline.segments.is_empty() && self.outline.max_x > self.outline.min_x && self.outline.max_y > self.outline.min_y
+    }
+
+    /// Whether the outline is in the outline log (written by the log, under its lock).
+    pub(crate) fn logged(&self) -> &AtomicBool {
+        &self.logged
+    }
+}
+
+impl Deref for KeptOutline {
+    type Target = GlyphOutline;
+
+    fn deref(&self) -> &GlyphOutline {
+        &self.outline
+    }
+}
+
+/// The outlines of one variation instance of a face.
+struct Instance {
+    /// The number the outline keys name the instance by.
+    number: u64,
+    /// By glyph and variant (`None` for a glyph the face does not have).
+    glyphs: HashMap<(u16, u16), Option<Arc<KeptOutline>>>,
+}
+
 /// A font face of the engine.
 pub(crate) struct FontFace {
     raw: *mut progpu_native_font_face,
     id: u64,
     metrics: progpu_native_font_face_metrics,
     design_box: [f32; 4],
-    /// The outlines read so far, by variation instance, glyph and weight (`None` for a glyph
-    /// the face does not have).
+    /// The outlines read so far, by variation instance.
     outlines: Mutex<OutlineCache>,
 }
 
-type OutlineCache = HashMap<Box<[i16]>, HashMap<(u16, u8), Option<Arc<GlyphOutline>>>>;
+type OutlineCache = HashMap<Box<[i16]>, Instance>;
 
 /// The steps of the weight of an outline: a weight is so many 4096ths of the em its edges move
 /// sideways by.
@@ -234,16 +285,17 @@ impl FontFace {
     }
 
     /// The outline of `glyph` at the variation `coordinates` at a text weight of `weight` steps
-    /// ([`WEIGHT_STEPS_PER_EM`]; none for the outline as the face has it): read from the face
-    /// once and shared after.
+    /// ([`WEIGHT_STEPS_PER_EM`]; none for the outline as the face has it), sheared for a
+    /// simulated oblique with `oblique`: read from the face once and shared after.
     ///
     /// The weight is the growth measured on the text of the platform (docs/porting/
     /// progpu-backend.md, the text quality check): every edge moves sideways by the steps, an
     /// edge that faces up moves up by twice the steps, and an edge that faces down stays where
     /// it is, so a baseline stays a baseline.
-    pub fn cached_outline(&self, glyph: u16, coordinates: &[i16], weight: u8) -> Option<Arc<GlyphOutline>> {
+    pub fn cached_outline(&self, glyph: u16, coordinates: &[i16], weight: u8, oblique: bool) -> Option<Arc<KeptOutline>> {
+        let variant = u16::from(weight) | (u16::from(oblique) << 8);
         let mut outlines = self.outlines.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(found) = outlines.get(coordinates).and_then(|instance| instance.get(&(glyph, weight))) {
+        if let Some(found) = outlines.get(coordinates).and_then(|instance| instance.glyphs.get(&(glyph, variant))) {
             return found.clone();
         }
         let outline = self.outline(glyph, coordinates).map(|mut outline| {
@@ -263,15 +315,53 @@ impl FontFace {
                     }
                 }
             }
-            Arc::new(outline)
+            if oblique && !outline.segments.is_empty() {
+                shear(&mut outline, OBLIQUE_SKEW);
+            }
+            outline
         });
-        outlines.entry(coordinates.into()).or_default().insert((glyph, weight), outline.clone());
+        let instance = match outlines.get_mut(coordinates) {
+            Some(instance) => instance,
+            None => outlines
+                .entry(coordinates.into())
+                .or_insert_with(|| Instance { number: NEXT_INSTANCE.fetch_add(1, Ordering::Relaxed), glyphs: HashMap::new() }),
+        };
+        let key = progpu_native_glyph_outline_key { face: instance.number, glyph: u32::from(glyph), variant: u32::from(variant) };
+        let outline = outline.map(|outline| Arc::new(KeptOutline { outline, key, logged: AtomicBool::new(false) }));
+        instance.glyphs.insert((glyph, variant), outline.clone());
         outline
     }
 }
 
+/// Shears `outline` for a simulated oblique (design units, Y up: what is above the baseline
+/// moves right); its box becomes the box of its control points.
+fn shear(outline: &mut GlyphOutline, skew: f32) {
+    let mut bounds = [f32::MAX, f32::MAX, f32::MIN, f32::MIN];
+    for segment in &mut outline.segments {
+        let used = if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_LINE as u32 {
+            2
+        } else if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32 {
+            3
+        } else {
+            4
+        };
+        for (index, point) in [&mut segment.p0, &mut segment.p1, &mut segment.p2, &mut segment.p3].into_iter().enumerate() {
+            point.x += point.y * skew;
+            if index < used {
+                bounds = [bounds[0].min(point.x), bounds[1].min(point.y), bounds[2].max(point.x), bounds[3].max(point.y)];
+            }
+        }
+    }
+    [outline.min_x, outline.min_y, outline.max_x, outline.max_y] = bounds;
+}
+
 impl Drop for FontFace {
     fn drop(&mut self) {
+        // The outlines of the face leave the log, and the engines forget them: the numbers of
+        // its instances name nothing afterwards.
+        let outlines = self.outlines.get_mut().unwrap_or_else(|poisoned| poisoned.into_inner());
+        let instances: Vec<u64> = outlines.values().map(|instance| instance.number).collect();
+        crate::outline_log::release(&instances);
         // SAFETY: the face is owned here and released once.
         unsafe { progpu_native_font_face_destroy(self.raw) };
     }

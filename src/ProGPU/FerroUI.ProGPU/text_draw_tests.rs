@@ -2,6 +2,7 @@
 //! read-back pixels and in what the engine says it uploaded.
 
 use crate::geometry::ProGpuGeometry;
+use crate::outline_log;
 use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, ProGpuFontManager, ProGpuGlyphRun, ProGpuTextShaper, SceneBuilder, TargetFormat};
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::{GlyphInfo, TextShaperOptions};
@@ -11,6 +12,7 @@ use ferroui_base::utilities::ReadOnlyMemory;
 use ferroui_base::{FerroLocator, Matrix, Point, Rect, RelativePoint, RelativeUnit};
 use progpu_native_sys::progpu::progpu_native_scene_frame_metrics;
 use std::rc::Rc;
+use std::sync::Arc;
 
 const INTER: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/Inter-Regular.ttf");
 
@@ -71,6 +73,11 @@ fn render_scene(engine: &ProGpuEngine, scene: SceneBuilder, draw: impl FnOnce(&m
     draw(&mut context);
     let (mut scene, error) = context.finish();
     assert!(error.is_none(), "recording: {error:?}");
+    (present(engine, &mut scene), scene)
+}
+
+/// Renders the recorded `scene` with `engine`.
+fn present(engine: &ProGpuEngine, scene: &mut SceneBuilder) -> Frame {
     let stream = scene.build().expect("the stream of the scene").to_vec();
     engine.update_scene(&stream).expect("the scene");
     let device = engine.device();
@@ -78,7 +85,7 @@ fn render_scene(engine: &ProGpuEngine, scene: SceneBuilder, draw: impl FnOnce(&m
     let metrics = engine.render_scene(scene.scene_id(), scene.generation(), view, WIDTH, HEIGHT, false).expect("the frame");
     let pixels = device.read_rgba8(texture, WIDTH, HEIGHT);
     device.release_texture(texture, view);
-    (Frame { pixels, metrics }, scene)
+    Frame { pixels, metrics }
 }
 
 fn render(engine: &ProGpuEngine, draw: impl FnOnce(&mut ProGpuDrawingContext)) -> Frame {
@@ -401,4 +408,67 @@ fn a_new_glyph_does_not_rasterize_the_others_again() {
     let (back, _) = render_scene(&engine, scene, |context| context.draw_glyph_run(Some(&black), &first));
     assert_eq!(0, back.metrics.coverage_staging_bytes, "glyphs stay in the atlas while they are not drawn");
     assert_eq!(one.pixels, back.pixels);
+}
+
+#[test]
+fn an_engine_made_later_draws_the_glyphs_runs_named_before() {
+    let Some(first) = engine() else { return };
+    let black = black();
+    let text = run("later", 24.0, Point::new(8.0, 28.0));
+    let one = render(&first, |context| context.draw_glyph_run(Some(&black), &text));
+    assert!(one.ink_in(0..WIDTH, 0..HEIGHT) > 20_000, "the text is drawn");
+
+    // The outlines of the run were named before this engine was made: it reads them from the
+    // start of the outline log and draws the same run, kept as it is, to the same pixels.
+    let Some(second) = engine() else { return };
+    let other = render(&second, |context| context.draw_glyph_run(Some(&black), &text));
+    assert_eq!(one.pixels, other.pixels);
+    assert_eq!(one.metrics.coverage_staging_bytes, other.metrics.coverage_staging_bytes, "each engine rasterizes the glyphs once");
+
+    // And the first engine still holds what it rasterized.
+    let again = render(&first, |context| context.draw_glyph_run(Some(&black), &text));
+    assert_eq!(0, again.metrics.coverage_staging_bytes);
+    assert_eq!(one.pixels, again.pixels);
+}
+
+#[test]
+fn the_outlines_of_a_face_stay_while_a_scene_draws_them_and_leave_with_the_face() {
+    let Some(engine) = engine() else { return };
+    let black = black();
+    let text = run("face", 24.0, Point::new(8.0, 28.0));
+    let (face, instance) = {
+        let font = text.font().expect("the run has a face of the engine");
+        let outline = font.face.cached_outline(text.glyphs()[0].glyph, &font.coordinates, 0, false).expect("the glyph has an outline");
+        (Arc::downgrade(&font.face), outline.key().face)
+    };
+    let one = render(&engine, |context| context.draw_glyph_run(Some(&black), &text));
+    assert!(one.ink_in(0..WIDTH, 0..HEIGHT) > 15_000, "the text is drawn");
+    assert!(outline_log::holds(instance), "a drawn run puts its outlines in the log");
+
+    // A scene is recorded and its run is dropped before the scene is rendered: the scene holds
+    // the face, so the engine still has the outlines the scene names.
+    let mut context = ProGpuDrawingContext::new(SceneBuilder::new(), None);
+    context.clear(Color::from_rgb(255, 255, 255));
+    context.draw_glyph_run(Some(&black), &text);
+    let (mut scene, error) = context.finish();
+    assert!(error.is_none(), "recording: {error:?}");
+    drop(text);
+    assert!(face.upgrade().is_some(), "the scene holds the face it draws");
+    assert!(outline_log::holds(instance));
+    let held = present(&engine, &mut scene);
+    assert_eq!(one.pixels, held.pixels);
+    assert_eq!(0, held.metrics.coverage_staging_bytes);
+
+    // The next generation of the scene does not draw the face: the face is dropped and its
+    // outlines leave the log.
+    scene.begin_generation().expect("the next generation");
+    assert!(face.upgrade().is_none(), "nothing holds the face after the scene that drew it");
+    assert!(!outline_log::holds(instance), "the outlines of a dropped face leave the log");
+
+    // The same font read again is another face with keys of its own: the engine forgets the
+    // dropped face, takes the new outlines and draws the same pixels.
+    let text = run("face", 24.0, Point::new(8.0, 28.0));
+    let again = render(&engine, |context| context.draw_glyph_run(Some(&black), &text));
+    assert_eq!(one.pixels, again.pixels);
+    assert!(again.metrics.coverage_staging_bytes > 0, "the glyphs of the new face are rasterized");
 }

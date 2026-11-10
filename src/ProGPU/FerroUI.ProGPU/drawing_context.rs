@@ -356,7 +356,8 @@ impl ProGpuDrawingContext {
         let state = if upright { self.glyph_state() } else { self.state() };
         let Some(state) = state else { return };
         let Some(style) = self.text_style(color, aliased) else { return };
-        let result = self.scene().add_glyph_outlines(&raster.outlines, &raster.segments);
+        let Some(font) = run.font() else { return };
+        let result = self.scene().add_glyph_keys(&font.face, &raster.keys);
         let Some(resource) = self.record(result) else { return };
 
         let mut positioned = std::mem::take(&mut self.positioned);

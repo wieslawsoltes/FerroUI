@@ -1,5 +1,7 @@
 //! The WebGPU device and the ProGPU engines on it (docs/porting/progpu-backend.md, section 2.2).
 
+use crate::notes;
+use crate::outline_log::{self, Entry};
 use progpu_native_sys::progpu::*;
 use progpu_native_sys::webgpu::*;
 use std::cell::Cell;
@@ -134,6 +136,20 @@ pub struct ProGpuEngine {
     engine: *mut progpu_native_engine,
     format: TargetFormat,
     thread: Cell<ThreadId>,
+    /// The entry of the outline log the engine holds the glyph outlines up to.
+    outlines_seen: Cell<u64>,
+}
+
+/// The most outlines and segments of one registration call: far below what the engine takes in
+/// one call, so a long log is registered in pieces.
+const REGISTRATION_OUTLINES: usize = 4096;
+const REGISTRATION_SEGMENTS: usize = 1 << 18;
+
+/// Outlines of the outline log gathered for one registration call.
+#[derive(Default)]
+struct Registration {
+    outlines: Vec<progpu_native_registered_glyph_outline>,
+    segments: Vec<progpu_native_path_segment>,
 }
 
 fn no_label() -> WGPUStringView {
@@ -465,7 +481,7 @@ impl ProGpuEngine {
         // SAFETY: the options are borrowed for the call; the handles are those of the device.
         let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
         if status == PROGPU_NATIVE_STATUS_SUCCESS {
-            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()) })
+            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()), outlines_seen: Cell::new(0) })
         } else {
             Err(ProGpuDeviceError::Engine(status))
         }
@@ -510,15 +526,89 @@ impl ProGpuEngine {
         }
     }
 
+    /// Brings the glyph outlines of the engine up to the outline log: the outlines runs named
+    /// since the engine read the log last are registered, the faces dropped since are released.
+    /// A scene names its glyph outlines by key, so this comes before every scene.
+    fn register_outlines(&self, engine: *mut progpu_native_engine) {
+        let seen = self.outlines_seen.get();
+        if outline_log::last() == seen {
+            return;
+        }
+        let (entries, last) = outline_log::after(seen);
+        let mut registration = Registration::default();
+        for entry in &entries {
+            match entry {
+                Entry::Outline(outline) => {
+                    if registration.outlines.len() >= REGISTRATION_OUTLINES
+                        || (!registration.outlines.is_empty() && registration.segments.len() + outline.segments.len() > REGISTRATION_SEGMENTS)
+                    {
+                        self.register(engine, &mut registration);
+                    }
+                    registration.outlines.push(progpu_native_registered_glyph_outline {
+                        key: outline.key(),
+                        segment_offset: registration.segments.len() as u64,
+                        segment_count: outline.segments.len() as u64,
+                        min_x: outline.min_x,
+                        min_y: outline.min_y,
+                        max_x: outline.max_x,
+                        max_y: outline.max_y,
+                    });
+                    registration.segments.extend_from_slice(&outline.segments);
+                }
+                Entry::Release(instance) => {
+                    // In the order of the log: the outlines before the release of their face.
+                    self.register(engine, &mut registration);
+                    // SAFETY: the engine is alive and entered by this thread.
+                    let status = unsafe { progpu_native_engine_release_glyph_face(engine, *instance) };
+                    if status != PROGPU_NATIVE_STATUS_SUCCESS {
+                        notes::note_once("glyph-face-release", &format!("the engine did not release the glyph outlines of a face (status {status}): {}", self.last_error()));
+                    }
+                }
+            }
+        }
+        self.register(engine, &mut registration);
+        self.outlines_seen.set(last);
+    }
+
+    /// Registers the gathered outlines with the engine and empties the gathering. The engine
+    /// takes all outlines of a call or none: when it refuses the call, the outlines are
+    /// registered one at a time, so one outline the engine does not take (it fails the frames
+    /// that draw it, and says so) does not take the others with it.
+    fn register(&self, engine: *mut progpu_native_engine, registration: &mut Registration) {
+        if registration.outlines.is_empty() {
+            return;
+        }
+        let (outlines, segments) = (&registration.outlines, &registration.segments);
+        // SAFETY: the engine is alive and entered by this thread; the spans are borrowed for
+        // the call and the engine copies what it keeps.
+        let status = unsafe { progpu_native_engine_register_glyph_outlines(engine, outlines.as_ptr(), outlines.len(), segments.as_ptr(), segments.len()) };
+        if status != PROGPU_NATIVE_STATUS_SUCCESS {
+            for outline in outlines {
+                // SAFETY: as above, one outline of the gathering.
+                let status = unsafe { progpu_native_engine_register_glyph_outlines(engine, outline, 1, segments.as_ptr(), segments.len()) };
+                if status != PROGPU_NATIVE_STATUS_SUCCESS {
+                    notes::note_once(
+                        "glyph-outline-registration",
+                        &format!("the engine did not take the outline of glyph {} (status {status}): {}", outline.key.glyph, self.last_error()),
+                    );
+                }
+            }
+        }
+        registration.outlines.clear();
+        registration.segments.clear();
+    }
+
     /// Sends a scene stream to the engine (`progpu_native_engine_update_scene`): only when its
     /// generation changed; the engine keeps the scene and renders it until the next stream.
     pub fn update_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
+        let engine = self.enter();
+        self.register_outlines(engine);
         // SAFETY: the engine is alive; the stream is borrowed for the call.
         unsafe {
             let mut metrics: progpu_native_scene_metrics = std::mem::zeroed();
             metrics.struct_size = std::mem::size_of::<progpu_native_scene_metrics>() as u32;
             let status = progpu_native_engine_update_scene(
-                self.enter(),
+                engine,
                 stream.as_ptr() as *const c_void,
                 stream.len(),
                 &mut metrics,
