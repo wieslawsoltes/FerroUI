@@ -22,6 +22,7 @@ import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.Camera2Interop;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.DynamicRange;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCaptureException;
@@ -122,7 +123,8 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                         return selected;
                     });
                     else if(facing==1 || facing==2) selector.requireLensFacing(facing==1 ? CameraSelector.LENS_FACING_FRONT : CameraSelector.LENS_FACING_BACK);
-                    Preview.Builder builder=new Preview.Builder().setTargetRotation(displayRotation());
+                    Preview.Builder builder=new Preview.Builder().setTargetRotation(displayRotation())
+                        .setDynamicRange(DynamicRange.SDR);
                     if(preferredWidth>0 && preferredHeight>0) builder.setResolutionSelector(new ResolutionSelector.Builder()
                         .setResolutionStrategy(new ResolutionStrategy(new Size(preferredWidth,preferredHeight),
                             ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER)).build());
@@ -143,6 +145,10 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                     still=new ImageCapture.Builder().setTargetRotation(displayRotation()).setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();
                     preview.setSurfaceProvider(main,request->{
                         if(closed) {request.willNotProvideSurface();return;}
+                        if(!CameraPreviewProfile.supports(request.getDynamicRange())) {
+                            request.willNotProvideSurface();
+                            fail(7,"Camera GPU preview supports SDR only");return;
+                        }
                         Size size=request.getResolution();synchronized(geometryLock){width=size.getWidth();height=size.getHeight();}
                         if(exact && preferredWidth>0 && (width!=preferredWidth || height!=preferredHeight)) {
                             request.willNotProvideSurface();fail(7,"Exact camera size unavailable");return;
