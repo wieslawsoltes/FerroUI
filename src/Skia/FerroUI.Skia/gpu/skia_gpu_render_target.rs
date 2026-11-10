@@ -136,6 +136,16 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         // frame that first needs them.
         if prewarm_frame(&gr_context) {
             context.prewarm_runtime_effects();
+            // Box shadows use Skia's mask-filter path, not the registered
+            // effect graphs. Compile its pipelines on a separate recorder,
+            // before the first hover or connected animation needs them.
+            if gr_context.backend() == super::SkiaGpuBackend::Graphite && prewarm_effect_pipelines() {
+                let prewarm_scene = RenderTargetSceneInfo {
+                    size: ferroui_base::PixelSize::new(512, 512),
+                    ..scene_info.clone()
+                };
+                self.prewarm_with(&gr_context, &prewarm_scene, &mut prewarm_animation_pipelines);
+            }
         }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
@@ -168,6 +178,118 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
     fn dispose(&self) {
         self.render_target.dispose();
+    }
+}
+
+/// A connected flight scales its shadow nonuniformly when the source and
+/// destination have different aspect ratios. SkCanvas::canAttemptBlurredRRectDraw
+/// rejects that transform: the mask filter uses image-filter blur passes
+/// instead, whose kernel-size buckets select different GPU programs.
+pub(super) fn prewarm_animation_pipelines(context: &mut dyn IDrawingContextImpl) {
+    use ferroui_base::media::imaging::BitmapInterpolationMode;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
+    use ferroui_base::media::RenderOptions;
+    use ferroui_base::media::{BoxShadow, BoxShadows, Color};
+    use ferroui_base::platform::{
+        AlphaFormat, IGeometryContext, IStreamGeometryBuilder, PixelFormat,
+    };
+    use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
+
+    // A window containing paths uses Graphite's internal MSAA. The same
+    // shaders on a single-sample target don't warm its Metal pipeline states.
+    let mut path = crate::StreamGeometryBuilder::new(None);
+    path.begin_figure(Point::new(8.0, 8.0), true);
+    path.line_to(Point::new(500.0, 8.0), true);
+    path.cubic_bezier_to(
+        Point::new(200.0, 100.0),
+        Point::new(200.0, 400.0),
+        Point::new(500.0, 500.0),
+        true,
+    );
+    path.line_to(Point::new(8.0, 500.0), true);
+    path.end_figure(true);
+    let geometry = path.to_geometry();
+    let gradient = ImmutableLinearGradientBrush::from_stops(&[
+        ImmutableGradientStop::new(0.0, Color::from_rgb(46, 134, 222)),
+        ImmutableGradientStop::new(1.0, Color::from_rgb(63, 158, 90)),
+    ]);
+    context.push_opacity(0.5, None);
+    context.draw_geometry(Some(&gradient), None, &*geometry);
+    context.pop_opacity();
+
+    for (x, y) in [(1.0, 1.0), (1.5, 1.25)] {
+        // Fractional bounds keep the AA geometry in the alpha-mask pass;
+        // integer-aligned rectangles can take a different, unantialiased path.
+        context.set_transform(Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(x, y));
+        for blur in [0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0] {
+            let shadows = BoxShadows::new(BoxShadow {
+                blur,
+                color: Color::from_argb(102, 0, 0, 0),
+                offset_y: 4.0,
+                ..BoxShadow::default()
+            });
+            context.draw_rectangle(
+                None,
+                None,
+                // Skia emits an additional unclamped interior blur shader
+                // only when its safe interior exceeds 128 * 128 pixels.
+                RoundedRect::from_rect(Rect::new(48.0, 48.0, 240.0, 160.0)),
+                &shadows,
+            );
+        }
+    }
+    // The frozen source and the live destination cross-fade at fractional
+    // offsets/scales. An opaque, unscaled image doesn't warm these programs.
+    let Ok(bitmap) = crate::ImmutableBitmap::from_pixels(
+        PixelSize::new(4, 4),
+        Vector::new(96.0, 96.0),
+        16,
+        PixelFormat::BGRA8888,
+        AlphaFormat::Premul,
+        &[128; 64],
+    ) else {
+        return;
+    };
+    context.set_transform(Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(1.5, 1.25));
+    let fill = ImmutableSolidColorBrush::new(Color::from_rgb(46, 134, 222));
+    for opacity in [1.0, 0.5] {
+        context.push_opacity(opacity, None);
+        context.draw_rectangle(
+            Some(&fill),
+            None,
+            RoundedRect::from_radius(Rect::new(24.0, 24.0, 64.0, 48.0), 12.0),
+            &BoxShadows::default(),
+        );
+        context.pop_opacity();
+    }
+    for interpolation in [
+        BitmapInterpolationMode::None,
+        BitmapInterpolationMode::LowQuality,
+    ] {
+        context.push_render_options(RenderOptions {
+            bitmap_interpolation_mode: interpolation,
+            ..RenderOptions::default()
+        });
+        // Integer-aligned draws use a non-AA render step, distinct from
+        // the fractional cross-fade draws, including at a flight's endpoint.
+        for transform in [
+            Matrix::IDENTITY,
+            Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(1.5, 1.25),
+        ] {
+            context.set_transform(transform);
+            for opacity in [1.0, 0.5] {
+                for source in [Rect::new(0.0, 0.0, 4.0, 4.0), Rect::new(1.0, 1.0, 2.0, 2.0)] {
+                    context.draw_bitmap(
+                        &bitmap,
+                        opacity,
+                        source,
+                        Rect::new(24.0, 24.0, 64.0, 48.0),
+                    );
+                }
+            }
+        }
+        context.pop_render_options();
     }
 }
 

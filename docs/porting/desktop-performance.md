@@ -2413,3 +2413,111 @@ What it costs, and what it does not:
   for a theme as a whole: it knows the target type of the theme, which is the type a
   nesting selector stands for, and it follows the nesting, so a style with nested styles
   can be left out with them.
+
+### 9.38 A template build binds its resources and template bindings without the extension objects
+
+The content of a control template is built by generated code for every control the template
+is applied to. For a `CheckBox` of the Fluent theme that is five
+`{DynamicResource}` values and nine `{TemplateBinding}` values, and each was bound by the
+statements the loader runs for a markup extension: create the extension, box the key and the
+property, ask the extension to provide a value in the context of the build, convert the
+provided value to its untyped form, cast that back to a binding, and bind it. The extension
+was reachable from nothing afterwards: the expression of a dynamic resource keeps the key,
+the anchor, the theme variant and the priority, and the expression of a template binding
+copies what it reads from the binding.
+
+**The two binds make the expression from what the extension would have read.**
+`compiled::bind_dynamic_resource` reads the place of the declaration from the service
+provider of the build with the lookups `DynamicResourceExtension::provide_value` makes, in
+the same order (one function, `Place::of`, is now the body of both): whether a control
+template is being built, the anchor when the target is not an element, and the theme
+variant of the theme dictionary the declaration is in. It binds a binding that lives on the
+stack for the call and creates the expression from those. `compiled::bind_template_binding`
+binds a `TemplateBinding` that lives on the stack for the call. Neither can fail where the
+statements could not: the value an extension provides is a binding by its type, so the cast
+the binding setter made always succeeded.
+
+A development build with hot reload keeps the statements for a dynamic resource: it records
+the extension, to move its anchor when the document is loaded again.
+
+**The parents of the build are handed out, not copied.** The theme variant of a dynamic
+resource is found by walking the parents of the declaration from the nearest one. The
+context of the build copied its parent stack twice for each walk (the stack, then the
+entries of it that are not null). It now keeps the second list beside the first, changed
+by the same push and pop, and hands it out shared, as the contract of the eager parent
+stack provider describes; a push copies it only while a walk still holds it, which no walk
+does.
+
+**`ValueTypes::as_object` asks one table when the first answers.** A value is viewed as an
+object by the table its type is in, one of three. All three were asked for every value; the
+tables after the one that has the type are no longer asked.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent theme):
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.46 ms | 2.29 ms | -6.9 % |
+| `CheckBox`, the template applied | 11.41 ms | 10.83 ms | -5.1 % |
+| `TextBox`, the template applied | 13.34 ms | 12.41 ms | -7.0 % |
+
+Attaching the theme (five rounds: -0.2 %, -1.0 %, -1.8 %) and re-attaching a control
+(+2.5 %, -1.0 %, +0.5 %) are within the noise of the runs: neither builds a template.
+
+Two smaller costs of the same build were found in the profile of the result and removed
+after it.
+
+**The base URI of a document is parsed once.** Each build of a template makes a context
+for its content, and the context keeps the base URI of the document as a parsed URI. The
+text was parsed for every build. A document is a constant of the generated code, so the
+parsed URI is kept for the document (by the address and the length of its text) and
+copied into the context of each build; a context whose base URI is changed afterwards
+changes its own copy.
+
+**The registry keeps the direct property a class answers with.** A direct property is
+registered for its owner and for every class it was added to, and a read or a write on an
+object of a derived class walked the classes from the class of the object to the one that
+has the property, one table lookup each (a template binding to `IsChecked` on a
+`CheckBox`: three). The registry keeps the answer of that walk for each pair of a class
+and a property identity it was asked about, "none" included, and drops all of them when
+a direct property is registered, as it does with its other lists. A property asked for on
+its owner never reached the walk and does not reach the table.
+
+In the profile of the `CheckBox` build (about 3 250 samples) the lookup of a direct
+property went from 43 samples to 5 and the creation of the context from 47 to 25. Median
+of five interleaved rounds of the build with the binds above and the build with these two
+as well:
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.31 ms | 2.17 ms | -6.1 % |
+| `CheckBox`, the template applied | 10.83 ms | 10.86 ms | +0.3 % |
+| `TextBox`, the template applied | 12.01 ms | 11.98 ms | -0.3 % |
+
+About 0.6 us is saved for a build. The template of a `Button` is built in 11 us, where
+that is one part in twenty and every round was lower; the two large templates are built
+in 54 us and 60 us, where it is below the noise of the runs. `DirectPropertyBenchmark`
+(a read and a write on the owner) is unchanged: -0.2 % and -0.1 %.
+
+What it costs, and what it does not:
+
+- **Memory: one more list for a context, while it builds.** The list of the parents that
+  are not null holds one reference for each parent on the stack, and goes with the context
+  when the build returns. An element, a style, a template and an expression are the size
+  they were, and a built template holds one object less for each dynamic resource and each
+  template binding only while it is built (the extension was dropped after the bind).
+  One parsed URI is kept for each document a deferred build was made from, and one entry
+  of thirty-two bytes for each pair of a class and a direct property that was asked for
+  on a class other than the owner; the entries are dropped by the next registration of a
+  direct property.
+- **The run-time loader is not changed.** It creates the extension and calls
+  `ProvideValue`, as before; so does generated code for an extension with any other
+  argument than a text key, and for a setter whose value is a dynamic resource.
+- **Each bind is compared with the statements it stands for** (`compiled_tests`,
+  `template_binds`): the priority in and outside a control template, the anchor of an
+  object that is not an element, the variant of a theme dictionary, the target property
+  cleared after the bind, and a template binding before and after its templated parent is
+  set. The kept base URI is compared with the one a context of the document parses
+  itself, for two documents, a relative text and no URI; the kept direct property is
+  compared for a derived class, for a class the property is added to after the answer
+  was kept, and for a class outside its owners.

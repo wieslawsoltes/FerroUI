@@ -1210,14 +1210,15 @@ impl ValueTypes {
             return Some(o.clone());
         }
         let id = value_type_id(&*value);
-        let (f, element, interface) = with_registry(|r| {
-            (
-                r.objects.get(&id).map(|o| o.0),
-                r.element_ref_objects.get(&id).map(|e| e.0),
-                r.interface_objects.get(&id).cloned(),
-            )
+        // A type is in one of the three tables: the first that has it answers, and the
+        // tables after it are not asked.
+        let (f, interface) = with_registry(|r| {
+            match r.objects.get(&id).map(|o| o.0).or_else(|| r.element_ref_objects.get(&id).map(|e| e.0)) {
+                Some(f) => (Some(f), None),
+                None => (None, r.interface_objects.get(&id).cloned()),
+            }
         });
-        match f.or(element) {
+        match f {
             Some(f) => f(value),
             None => interface.and_then(|f| f(value)),
         }

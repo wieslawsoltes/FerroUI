@@ -74,27 +74,14 @@ impl DynamicResourceExtension {
     /// dictionary, the priority inside a control template) and returns the
     /// extension itself: it is the binding.
     pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Rc<DynamicResourceExtension> {
-        if service_provider.is_in_control_template() {
+        let place = Place::of(service_provider);
+        if place.in_control_template {
             self.priority.set(BindingPriority::Template);
         }
-
-        let provide_target = service_provider.get_service_of::<Rc<dyn IProvideValueTarget>>();
-        let target_object = provide_target.and_then(|t| t.target_object());
-
-        if !target_object.as_ref().is_some_and(|t| <Ref<StyledElement>>::from_xaml_object(t).is_some()) {
-            let anchor = service_provider
-                .get_first_parent::<Ref<StyledElement>>()
-                .map(DynamicResourceAnchor::Element)
-                .or_else(|| {
-                    service_provider.get_first_parent::<Rc<dyn IResourceProvider>>().map(DynamicResourceAnchor::Provider)
-                })
-                .or_else(|| service_provider.get_first_parent::<ResourceHostRef>().map(DynamicResourceAnchor::Host));
-            *self.anchor.borrow_mut() = anchor.map(HeldAnchor::from);
+        if let Some(anchor) = place.anchor {
+            *self.anchor.borrow_mut() = anchor;
         }
-
-        *self.theme_variant.borrow_mut() = StaticResourceExtension::get_dictionary_variant(
-            service_provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().as_ref(),
-        );
+        *self.theme_variant.borrow_mut() = place.theme_variant;
 
         let this = self.this.upgrade().expect("the extension is alive while it is used");
         #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -106,6 +93,91 @@ impl DynamicResourceExtension {
     pub fn as_binding(&self) -> Rc<dyn BindingBase> {
         self.this.upgrade().expect("the extension is alive while it is used")
     }
+}
+
+/// What a dynamic resource takes from the place it is declared in, read from
+/// the service provider of that place.
+struct Place {
+    /// The content of a control template is being built: the resource is
+    /// bound at the template priority.
+    in_control_template: bool,
+    /// The anchor to find resources from, when the provide-value target is
+    /// not an element (an element finds them itself): the nearest parent
+    /// that is an element, a resource provider or a resource host, if there
+    /// is one. `None` for a target that is an element.
+    anchor: Option<Option<HeldAnchor>>,
+    /// The theme variant of the theme dictionary the place is in.
+    theme_variant: Option<ThemeVariant>,
+}
+
+impl Place {
+    fn of(service_provider: &Rc<dyn IServiceProvider>) -> Self {
+        let in_control_template = service_provider.is_in_control_template();
+
+        let provide_target = service_provider.get_service_of::<Rc<dyn IProvideValueTarget>>();
+        let target_object = provide_target.and_then(|t| t.target_object());
+
+        let anchor = if target_object.as_ref().is_some_and(|t| <Ref<StyledElement>>::from_xaml_object(t).is_some()) {
+            None
+        } else {
+            let anchor = service_provider
+                .get_first_parent::<Ref<StyledElement>>()
+                .map(DynamicResourceAnchor::Element)
+                .or_else(|| {
+                    service_provider.get_first_parent::<Rc<dyn IResourceProvider>>().map(DynamicResourceAnchor::Provider)
+                })
+                .or_else(|| service_provider.get_first_parent::<ResourceHostRef>().map(DynamicResourceAnchor::Host));
+            Some(anchor.map(HeldAnchor::from))
+        };
+
+        let theme_variant = StaticResourceExtension::get_dictionary_variant(
+            service_provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().as_ref(),
+        );
+
+        Self { in_control_template, anchor, theme_variant }
+    }
+}
+
+/// `{DynamicResource key}` with a text key, bound to `property` of `target`
+/// at the place `service_provider` describes: what creating the extension
+/// with the key, [`provide_value`](DynamicResourceExtension::provide_value)
+/// and binding the provided extension do, without the extension. The
+/// extension of that sequence is reachable from nothing once its one
+/// expression is made (the expression keeps the key, the anchor, the theme
+/// variant and the priority, not the extension), so the expression is made
+/// from the place directly.
+///
+/// Not used by a development build with hot reload, which records the
+/// extension to move its anchor when the document is loaded again.
+#[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+pub(crate) fn bind_dynamic_resource_at(
+    service_provider: &Rc<dyn IServiceProvider>,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    key: &str,
+) {
+    struct AtPlace<'a> {
+        key: &'a str,
+        place: Place,
+    }
+
+    impl BindingBase for AtPlace<'_> {
+        fn create_instance(
+            &self,
+            _target: &FerroObject,
+            _target_property: Option<&'static FerroProperty>,
+            _anchor: Option<&Ref<FerroObject>>,
+        ) -> Rc<dyn BindingExpressionBase> {
+            DynamicResourceExpression::with_held_anchor(
+                ResourceKey::from(self.key),
+                self.place.anchor.clone().flatten(),
+                self.place.theme_variant.clone(),
+                if self.place.in_control_template { BindingPriority::Template } else { BindingPriority::LocalValue },
+            )
+        }
+    }
+
+    let _ = target.bind_binding(property, &AtPlace { key, place: Place::of(service_provider) });
 }
 
 #[cfg(all(feature = "hot-reload", debug_assertions))]

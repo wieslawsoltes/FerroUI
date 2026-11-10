@@ -193,3 +193,72 @@ fn unregister_removes_metadata_of_type() {
 
     assert_eq!("foodefault", property.get_default_value(UnregisterDerived2::TYPE));
 }
+
+// The direct property a class answers for a property identity with is kept
+// by the registry for each (class, identity) it was asked about. These are
+// not ported: they hold the kept answer to what the walk of the class chain
+// finds, before and after a registration.
+
+test_class!(DirectBase: FerroObject);
+
+impl DirectBase {
+    ferro_property!(pub fn value_property() -> DirectProperty<DirectBase, i32> {
+        FerroProperty::register_direct::<DirectBase, _>("Value", |_| 1, None, 0)
+    });
+}
+
+test_class!(DirectMiddle: DirectBase);
+test_class!(DirectLeaf: DirectMiddle);
+test_class!(DirectLateMiddle: DirectBase);
+test_class!(DirectLateLeaf: DirectLateMiddle);
+test_class!(DirectStranger: FerroObject);
+
+#[test]
+fn direct_property_of_a_base_class_is_found_for_an_object_of_a_derived_class() {
+    let property = DirectBase::value_property();
+    let registry = FerroPropertyRegistry::instance();
+    let leaf = DirectLeaf::new();
+
+    // Asked twice: the second answer is the kept one.
+    for _ in 0..2 {
+        let found = registry.find_registered_direct(&leaf, property).expect("the property of the base class");
+        assert!(std::ptr::eq(found, &**property));
+        assert_eq!(1, leaf.get_direct_value(property));
+    }
+}
+
+#[test]
+fn direct_property_added_to_a_nearer_class_replaces_the_answer_kept_for_a_derived_class() {
+    let property = DirectBase::value_property();
+    let leaf = DirectLateLeaf::new();
+    let other_leaf = DirectLeaf::new();
+    assert_eq!(1, leaf.get_direct_value(property));
+    assert_eq!(1, other_leaf.get_direct_value(property));
+
+    let added = property.add_owner::<DirectLateMiddle>(|_| 2, None, None);
+
+    assert_eq!(2, leaf.get_direct_value(property));
+    assert_eq!(2, leaf.get_direct_value(added));
+    let found = FerroPropertyRegistry::instance().find_registered_direct(&leaf, property).expect("the added property");
+    assert!(std::ptr::eq(found, &**added));
+    // A class beside the one the property was added to answers as before.
+    assert_eq!(1, other_leaf.get_direct_value(property));
+    assert_eq!(1, DirectBase::new().get_direct_value(property));
+}
+
+#[test]
+fn direct_property_is_not_found_for_a_class_outside_its_owners_until_it_is_added() {
+    let property = DirectBase::value_property();
+    let registry = FerroPropertyRegistry::instance();
+    let stranger = DirectStranger::new();
+
+    for _ in 0..2 {
+        assert!(registry.find_registered_direct(&stranger, property).is_none());
+    }
+
+    let added = property.add_owner::<DirectStranger>(|_| 3, None, None);
+
+    let found = registry.find_registered_direct(&stranger, property).expect("the added property");
+    assert!(std::ptr::eq(found, &**added));
+    assert_eq!(3, stranger.get_direct_value(property));
+}
