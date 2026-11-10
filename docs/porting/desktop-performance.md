@@ -1446,3 +1446,19 @@ after two recordings before one batch; `an_equal_recording_leaves_the_render_dat
 `the_canvas_follows_the_transform_at_once_when_the_api_can_be_leased`). Counters: `routed event
 routes skipped (nothing listens)`, `visuals recorded into their render data`, and the transforms
 applied to the canvas beside the transforms set.
+
+Gauntlet (tier 16, GPU Skia, 60 Hz, this machine, sampled, per frame), before and with the
+section:
+
+| Per frame | Before | With |
+|---|---|---|
+| UI thread | 18.4 ms | 16.7 ms |
+| Layout pass | 9.28 ms | 8.59 ms |
+| `Compositor::commit` | 7.55 ms | 6.53 ms |
+| `ValueStore::get_value` | 1.36 ms | 0.74 ms |
+| Routed events | 0.37 ms | 0.14 ms |
+| Render thread | 35.3 ms | 33.4 ms |
+| Frames per second | 31.8 to 34.2 | 33.6 to 34.3 |
+
+The frame rate hardly moves because the render thread sets it while it draws directly; the UI
+thread's share is what a pipelined frame gets back.
