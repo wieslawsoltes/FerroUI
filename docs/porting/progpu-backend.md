@@ -123,27 +123,234 @@ completed.
 ### 2.3 Retained GPU mode
 
 The compositor of FerroUI already keeps a backend fragment of the content of every draw-list visual
-and draws it again while the content does not change (`IDrawingFragment`). The backend makes the
-fragment the encoded records of the visual (its commands, its resources by stable id) in the stream
-format, so a frame is put together without drawing the content again:
+and draws it again while the content does not change (`IDrawingFragment`,
+`IDrawingContextImplWithFragments`). The retained path makes that fragment a piece of the scene the
+engine keeps compiled on the GPU, so that a frame costs what changed in it. This section is the
+design of that path (step P6). It needs changes in the engine itself, beyond the bindings, and is
+written down for review before any of it is built.
 
-1. **Per-visual fragments.** A visual whose render data did not change contributes its fragment as
-   it is: a copy of its encoded records, no tessellation, no shaping, no allocation.
-2. **Transforms in state records.** The transform, opacity and clip of a visual are its state record
-   (`progpu_native_scene_state`), not baked into its draws, so moving, scrolling or fading a visual
-   changes one record.
-3. **Generations.** The frame stream gets a new generation only when a fragment or a state changed;
-   a frame without changes calls `progpu_native_engine_render_scene` only (render bundles replayed).
-4. **Cached layers.** Visuals with a cache mode, and subtrees that change rarely under changing
-   parents, are pushed as `LAYER_CACHE_CONTENT` layers with the revision of their content, placed in
-   local space; scrolling a list moves cached layers instead of drawing their rows again.
-5. **Damage.** The dirty rects of the compositor become `DAMAGE_RECT` with `PRESERVE_TARGET`.
-6. **Text.** Glyph outlines are resources by typeface and glyph id, rasterized on the GPU into the
-   engine's atlas once; a glyph run is a positioned-glyph record.
+#### 2.3.1 What a frame costs today
 
-What the engine does not do yet, and section 3 adds: replacing one resource or one state of a page
-without sending the whole stream (today every stream change re-records the full-scene render
-bundle, and a family page with several resources is uploaded again as a whole).
+Read from the engine and the backend as they are (nothing here is a timing):
+
+| Where | What happens every frame in which anything changed |
+|---|---|
+| Backend | The commands of every visual are replayed into the drawing context: one call into the builder for every record, the paths prepared again, the glyph runs placed again. The backend keeps no fragments. |
+| `progpu_native_engine_update_scene` | Seven passes over the whole stream: a byte comparison with the retained snapshot, the validation walk, the comparison of the generations with the old stream, a copy, a hash of the bytes, the content hashes of every family, and the release of every render bundle. |
+| `progpu_native_engine_render_scene` | Two preflight walks over every command. A family page (analytic, path, glyph, image, brush, text style) is keyed by the hash of its family: one changed record or one changed state compiles every record of the family again on the CPU and writes its whole buffer from offset 0. The transform, the opacity and the clip of a state are applied on the CPU while the records are compiled, so a moved visual is a changed family. Every render bundle is recorded again. |
+| Translucent groups | A layer ends the current pass, renders its content in a pass of its own and opens the parent again to composite: two passes for each group and one for the root (section 2.2). |
+| Cached layers | At most 16, keyed by revisions the caller names. A hit skips the GPU replay of the content; the commands inside are still walked and compiled on the CPU. |
+| Scenes | One retained scene for each engine: a window and the layers drawn through the same engine replace each other's snapshot, so the comparison at the head of the update never matches. |
+
+A frame in which nothing changed is already cheap (the bundles are replayed). A frame in which one
+visual moved costs the same as a frame in which every visual changed.
+
+#### 2.3.2 What changes in a gauntlet frame
+
+Counted on the window target with the bookkeeping of the compositor (a visual whose kept
+fragment the compositor offers to draw again has the content of the frame before), every tenth
+frame of frames 10 to 120 of the scene, the first two frames left out. The scene sets the width of
+its content in every frame, so a large part of it is laid out and drawn anew by design:
+
+| In one frame | tier 5 | tier 16 |
+|---|---|---|
+| Visuals drawn | 784 to 798 | 8,951 to 10,364 |
+| content changed, or drawn for the first time | 289 to 318 | 3,634 to 3,858 |
+| content unchanged, at the same place | 43 to 73 | 180 to 958 |
+| content unchanged, moved by whole device pixels | 255 to 310 | 3,247 to 5,047 |
+| content unchanged, moved by a fraction of a pixel | 6 | 18 |
+| content unchanged, rotated or scaled | 138 to 140 | 1,052 to 1,084 |
+| Draw commands | 955 to 975 | 11,107 to 13,176 |
+| of visuals whose content changed | 460 to 495 (48 to 51 %) | 5,480 to 6,488 (47 to 51 %) |
+| of unchanged visuals at the same place or moved by whole pixels | 34 to 37 % | 39 to 45 % |
+
+Three things follow for the design:
+
+1. Scrolling lands on whole device pixels: of the visuals that only moved, all but 18 (tier 16)
+   moved by whole pixels. An offset in whole pixels is enough to keep them.
+2. Keeping fragments removes at most about two fifths of the draw commands of a gauntlet frame
+   from the encoding and the compiling. Half of the commands belong to content that is new in the
+   frame, and a tenth to the rotating panels. The retained path is therefore necessary and not
+   sufficient for this scene: what a **changed** visual costs (its encoding in the backend, its
+   compilation in the engine, and the passes over the whole stream that come with any change
+   today) decides the other half.
+3. The second frame of the scene, before the animation starts, draws 10,064 visuals at tier 16
+   with every fragment unchanged at the same place: the case every static window is.
+
+#### 2.3.3 Spans, placements and scenes
+
+Three objects are added to the engine. The stream format of the records does not change: a span is
+made of the same pointer-free commands and resources as a scene stream.
+
+- **Scene.** The engine keeps one retained scene for every scene identifier it was given, instead
+  of one in all, each with its own order, spans and bundles; `progpu_native_scene_frame::scene_id`
+  selects it. A scene is released by a call, and the scenes together stay inside a byte budget the
+  engine reports. The family buffers, the pipelines, the glyph atlas and the path coverage cache
+  stay shared by the scenes of an engine.
+- **Span.** The records of one fragment, under an identifier and a generation the backend chooses.
+  The engine validates a span when it arrives, compiles it once for each family into ranges of the
+  family buffers, and keeps those ranges while the generation stays. The buffers become chunks of
+  a fixed size with ranges handed out from them, so a new or changed span uploads its own ranges
+  and nothing else moves; a removed span returns its ranges.
+- **Placement.** What a frame says about a span without changing it: an offset in whole device
+  pixels, the clip of its ancestors (a rectangle and, for rounded and rotated clips, the analytic
+  mask chain of section 2.7) and the group it is drawn into. Placements live in a table on the GPU
+  (a storage buffer, one record for each span of the order); every vertex and instance of a span
+  carries the slot of its placement, and the shaders add the offset after the brush coordinates
+  are taken and before the mask is evaluated. A span that moved is one record written.
+
+The **order** of a scene is its list of entries: a span with its placement, the push and the pop of
+a group (the existing layer descriptor), a clear. A frame sends what changed:
+
+```c
+/* One call a frame for a target. The delta is pointer-free, like a scene stream. */
+progpu_native_status progpu_native_engine_update_scene_delta(
+    progpu_native_engine* engine,
+    const uint8_t* delta, size_t delta_size,
+    progpu_native_scene_delta_metrics* metrics);
+
+/* delta: header { magic, version, scene_id, base_generation, generation, operation table }
+ * operations:
+ *   PUT_SPAN      { span_id, generation, stream bytes }     validated and compiled once
+ *   REMOVE_SPAN   { span_id }
+ *   PUT_RESOURCE  { resource_id, generation, kind, bytes }  shared by the spans of the scene
+ *   REMOVE_RESOURCE { resource_id }
+ *   SET_ORDER     { entries[] }      sent when visuals were added, removed or reordered
+ *   SET_PLACEMENTS{ first, count, placements[] }            ranges of the placement table
+ */
+progpu_native_status progpu_native_engine_release_scene(progpu_native_engine*, uint64_t scene_id);
+```
+
+`progpu_native_engine_render_scene` then draws the order: consecutive spans of one family whose
+ranges are adjacent in a chunk stay one draw, as consecutive commands do today; a render bundle
+covers a run of draws with one group and one mask, and is recorded again only when a span of the
+run changed its ranges or the order changed. Scissor rectangles are set between bundles from the
+placements, so a clip that moved records nothing. `progpu_native_engine_update_scene` with a whole
+stream stays as it is, for callers that send whole streams and as the reference of the tests.
+
+Resources named by identifier remove what a frame repeats for them today: a glyph outline is a
+resource under (typeface, glyph), sent once, so the engine no longer hashes the outline bytes of
+every glyph of a frame to find its atlas tile; an image is a resource under the identifier and the
+version of its bitmap; brushes stay inside the span that uses them.
+
+What a **changed** span costs is the other half of a gauntlet frame (section 2.3.2), and the same
+objects carry it: a new span is validated and compiled alone (no pass over the rest of the scene,
+no other family record compiled again, no bundle of another run recorded again), its glyphs find
+their tiles by identifier, and its ranges are the only bytes uploaded. The backend's share of a
+changed visual is the builder call for every record; the Rust stream writer of section 3 removes
+that boundary and is independent of the engine work.
+
+#### 2.3.4 What a placement may change
+
+The rule that keeps the pixels: **a span that is drawn again without being compiled again gives
+the bytes it would give compiled at the new place.** That holds for an offset in whole device
+pixels and for a changed clip, and for nothing else the engine has today:
+
+| Change of a visual | What happens |
+|---|---|
+| Moved by whole device pixels (scrolling on the pixel grid, a parent that moved) | one placement record |
+| Clip of an ancestor changed | one placement record |
+| Moved by a fraction of a pixel | the span is compiled again at the new phase: glyph tiles and path coverage are rasters made for a scale and a subpixel phase (section 2.4.1), and sampling a raster made for another phase would blur it |
+| Rotated or scaled | the span is encoded and compiled again; only this span |
+| Content changed | the fragment is dropped by the compositor; a new span |
+
+Analytic shapes, images and gradients could take a whole affine transform in the placement,
+because their shaders are evaluated for each pixel. That is left out of the first version: the rule
+above is one test (the same scene drawn from moved spans and from a whole stream must read back
+the same bytes), and text, which the owner puts first, cannot take part in more than the offset.
+
+#### 2.3.5 Groups before the root pass
+
+Independent of the spans, and the first thing to build because it removes a limit the gauntlet
+already reaches (section 2.2): the content of every group that does not read its backdrop is
+rendered before the root pass begins.
+
+- The groups of a frame are ordered by nesting depth. The groups of one depth share a **group
+  page**: one texture, each group a rectangle of it sized to its bounds in device pixels, packed
+  on shelves; a second page is opened when the first is full. One pass draws the content of all
+  groups of a depth, the deepest depth first, with the viewport and the scissor of each group's
+  rectangle.
+- The pass of the parent (the root, or the page of the depth above) draws each group as one quad
+  sampling its rectangle, with the opacity and the blend of the group, at the group's place in
+  the order.
+- A frame is then 1 + (the greatest nesting depth) passes, whatever the number of groups, instead
+  of 1 + 2 x (the number of groups); the root target is no longer loaded and stored for each
+  group. The command buffers of a frame no longer grow with the groups.
+- Groups that read their backdrop, groups with effects and advanced blends keep today's path.
+- The managed implementation is the reference for the order: it prepares its layer textures in a
+  pass before the geometry of the frame "so a nested offscreen submission never splits the main
+  pass" (`EnsureLayerTexture`, `PreparePictureLayerCaches`).
+
+The stream and the C ABI do not change for this part; the pixels must not change either (the tests
+of the layers and of section 2.7 read back the same bytes before and after).
+
+A cached group (a visual with a cache mode) is then a group whose rectangle is kept from frame to
+frame: its span generations are its content revision, so a hit skips the CPU work for its content
+as well, which the cached layers of today do not.
+
+#### 2.3.6 The backend
+
+- `ProGpuDrawingContext` implements `IDrawingContextImplWithFragments`.
+  `begin_fragment` starts a span in the builder and sets the clips of the ancestors aside: they
+  belong to the placement, not to the span. What is drawn until `end_fragment` is recorded as
+  today, in device pixels at the transform of the visual, and also drawn.
+- The fragment (`ProGpuFragment`) keeps the identifier and the generation of the span, the
+  transform it was recorded at, the options it was recorded under (antialiasing, text mode) and
+  the bitmaps it samples.
+- `draw_fragment` accepts when the options are the same, the linear part of the transform is the
+  same and the translation differs by whole device pixels; it then adds an order entry with a
+  placement and encodes nothing. Otherwise it returns `false` and the compositor draws the visual
+  again into a new fragment, which replaces the span.
+- A fragment that is dropped (the compositor drops it when the commands or a resource of them
+  change, or the visual goes away) queues `REMOVE_SPAN` for the next delta of its scene.
+- Fragments that sample a render target (a layer, a render target bitmap) are not kept in the
+  first version: the texture of such an image is bound for each frame with its generation.
+- Every target (a window, a layer, an offscreen frame) has its own scene identifier and sends
+  deltas to it. A layer that is not drawn into in a frame sends nothing and is sampled as it is.
+- The dirty rectangles of the compositor become `DAMAGE_RECT` with `PRESERVE_TARGET` on the frame;
+  spans whose bounds lie outside the damage are left out of the draws of the frame.
+
+Until the delta call exists the same fragments work against the whole-stream call: the builder
+keeps the bytes of a span and writes them into the stream again without the backend encoding
+them (a call of the builder C ABI in the bindings). That removes the backend's share of an
+unchanged visual and is the differential reference afterwards: a frame built from kept spans and
+the same frame built from commands must be the same stream.
+
+#### 2.3.7 Order of the work, and what each part is checked against
+
+| Part | Where | Checked by |
+|---|---|---|
+| R1 Groups before the root pass | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
+| R2 Fragments in the backend against the whole-stream call | backend; builder span calls in the bindings | stream equality with and without kept spans; the backend suite |
+| R3 Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
+| R4 Spans compiled once, chunked buffers, the placement table | engine (family page compilers, shaders, bundle recording) | read-back equality of moved spans against whole streams for every family, with clips and masks; upload bytes of a frame with one changed span (the metrics of the engine report them) |
+| R5 The delta call | engine C ABI, bindings, backend | the same frames through deltas and through whole streams; validation errors of a bad span leave the scene as it was |
+| R6 Resources by identifier, damage, cached groups | engine, backend | the text tests of section 6.1 unchanged; partial redraw scenarios of section 4 |
+
+R1 and R2 do not depend on each other. R4 is the large one: it touches the compiler of every
+family and their shaders. Each part lands with the tests of the engine, as its own pull request in
+the ProGPU repository; none of them is a change of the bindings alone.
+
+The frame times are measured after each part with the stage capture of the engine
+(`PROGPU_NATIVE_SCENE_FRAME_CAPTURE_CPU_STAGES`: preflight, resources, encode, flush, finalize)
+and the gauntlet, by the procedure of section 4.
+
+#### 2.3.8 What this design does not settle
+
+- **Draw calls.** Spans compiled in order are adjacent and stay merged; after many replacements
+  the ranges of neighbours are apart and a run falls into more draws. Compacting a chunk (moving
+  ranges and their index bases) is the answer if the counts show it; it is not in the first
+  version.
+- **Fractional movement.** A visual that moves by fractions of a pixel in every frame gains
+  nothing from its span. The gauntlet scrolls on whole device pixels (section 2.3.2); a scene
+  that does not would need the layout to land on pixels, which is not a matter of the backend.
+- **Rotating content.** A rotated span is encoded and compiled again in every frame of the
+  rotation (a tenth of the gauntlet's commands). Its glyph tiles are kept (rotated text samples
+  the upright tiles), its instances are not.
+- **Memory.** Compiled spans, the chunks and the group pages are budgets beside the existing
+  ones; the numbers are chosen with the catalog and the gauntlet and reported by the engine.
+- **The browser.** A storage buffer read in the vertex stage is part of WebGPU; the compatibility
+  mode without it is not a target of this backend (section 2.6).
 
 ### 2.4 Text
 
@@ -410,11 +617,11 @@ calls a frame:
      already allocation-free).
 3. **C ABI additions** to the engine:
    - the system font catalog and fallback itemization (C++ only today);
-   - a **delta update**: replace resources and state records by id in a retained scene without
-     sending the stream again, keeping the render bundles of the unchanged spans (the
-     "family-granular retained update" the baseline lists as not implemented);
-   - render bundles per span or per cached layer instead of one for the scene, so a change of one
-     visual records one span again;
+   - a **delta update**: spans, resources and placements replaced by identifier in a retained
+     scene without sending the stream again, a retained scene for each target, and render bundles
+     that are recorded again only for the run a change is in (the "family-granular retained
+     update" the baseline lists as not implemented); the design is section 2.3;
+   - the content of translucent groups rendered before the root pass (section 2.3.5);
    - surface helpers for the native handles (creating and configuring a WebGPU surface for a
      `CAMetalLayer`, an `HWND`, an X11 window, a Wayland surface);
    - the C ABI of the native Geometry module (section 2.5).
@@ -573,7 +780,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG files and streams decode through the image module (section 2.5); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: JPEG, GIF and BMP, encoding, effects |
-| P6 | Retained mode: fragments as encoded records, state records, generations, cached layers, damage | stable frames submit without re-encoding; catalog measurements | open |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | designed (section 2.3, with the counts of a gauntlet frame); every part but the backend fragments needs engine changes beyond the bindings, so the work waits for the review of the design |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
