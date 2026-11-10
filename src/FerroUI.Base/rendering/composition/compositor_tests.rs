@@ -384,6 +384,30 @@ fn decorator_with_child() -> (Ref<TestBorder>, Ref<TestBorder>) {
     (control, child)
 }
 
+/// What is set on a composition visual asked for after a pass stays: the visual was
+/// synchronized when it was created, and the next pass has nothing of it to forward
+/// (section 9.41).
+#[test]
+fn an_offset_set_on_a_composition_visual_asked_for_after_a_pass_survives_the_next_pass() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    assert!(!control.has_composition_visual());
+
+    let control_visual: Rc<super::CompositionVisual> = (*control.composition_visual().expect("in a tree")).clone();
+    assert_eq!(Vector3D::new(30.0, 50.0, 0.0), control_visual.offset());
+    control_visual.set_offset(Vector3D::new(-210.0, 50.0, 0.0));
+    s.run_jobs();
+    assert_eq!(Vector3D::new(-210.0, 50.0, 0.0), control_visual.offset());
+    assert!(Rc::ptr_eq(&composition_parent(&child), &control_visual));
+
+    // A change of the framework side is forwarded as before.
+    control.set_bounds(Rect::new(35.0, 50.0, 40.0, 30.0));
+    s.run_jobs();
+    assert_eq!(Vector3D::new(35.0, 50.0, 0.0), control_visual.offset());
+}
+
 /// The decorator of [`decorator_with_child`], clipping to its bounds: it draws nothing as the
 /// other does, and has a composition visual of its own, which the other has not (section 9.41).
 fn clipping_decorator_with_child() -> (Ref<TestBorder>, Ref<TestBorder>) {

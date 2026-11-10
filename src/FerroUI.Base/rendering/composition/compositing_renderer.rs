@@ -523,21 +523,26 @@ impl CompositingRenderer {
     }
 
     /// Places a composition visual created outside an update pass (section 9.41). The next
-    /// pass synchronizes its properties and the children around it. A visual that a pass has
-    /// already seen is synchronized here as well: what asked for the composition visual finds
-    /// it as it would be had the visual had it all along.
+    /// pass synchronizes the children around it, and the properties of one no pass has seen
+    /// yet. A visual that a pass has already seen is synchronized here instead: what asked for
+    /// the composition visual finds it as it would be had the visual had it all along, and
+    /// what it then sets on it (an `Offset` an animation starts from) is not written over by
+    /// the next pass, which has nothing of the visual to forward.
     fn place_materialized(&self, visual: &Visual) {
         let ancestor = visual.nearest_composition_ancestor();
+        // Read before the offsets are settled, which forgets it.
+        let seen = visual.was_seen_without_composition_visual();
         {
             let mut sets = self.sets.borrow_mut();
             if let Some(ancestor) = &ancestor {
                 sets.add(VisualSet::ChildrenFirst, ancestor);
             }
             sets.add(VisualSet::RecalculateChildren, visual);
-            sets.add(VisualSet::PropertiesDirty, visual);
+            if !seen {
+                sets.add(VisualSet::PropertiesDirty, visual);
+            }
         }
-        // Read before the offsets are settled, which forgets it.
-        if visual.was_seen_without_composition_visual() {
+        if seen {
             visual.synchronize_composition_properties();
             visual.settle_composition_offsets();
             if let Some(ancestor) = &ancestor {
