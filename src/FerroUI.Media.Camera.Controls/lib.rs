@@ -392,12 +392,11 @@ impl Drop for CameraPreview {
         }
     }
 }
+// Shared by runtime registration and the build-time XAML metadata scanner.
+const NAMESPACES: &[(&str, &str)] = &[("ferroui_media_camera_controls", "FerroUI.Media.Camera.Controls")];
 pub fn register_types() {
     ferroui_media_controls::register_types();
-    ferroui_base::TypeInfo::register_namespaces(&[(
-        "ferroui_media_camera_controls",
-        "FerroUI.Media.Camera.Controls",
-    )]);
+    ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
     ferroui_base::TypeInfo::register(CameraPreview::TYPE);
 }
 
