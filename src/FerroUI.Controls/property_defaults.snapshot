@@ -477,6 +477,7 @@ FerroUI.Controls.NavigationView.PaneToggleButtonStyle: Option<Ref<ControlTheme>>
 FerroUI.Controls.NavigationView.SelectedItem: Option<Rc<dyn AnyValue>> = (null); OneWay
 FerroUI.Controls.NavigationView.SelectionFollowsFocus: NavigationViewSelectionFollowsFocus = Disabled; OneWay
 FerroUI.Controls.NavigationViewItem overrides FerroUI.Input.InputElement.Focusable = True; OneWay
+FerroUI.Controls.NavigationViewItem overrides FerroUI.Visual.ClipToBounds = False; OneWay
 FerroUI.Controls.NavigationViewItem.HasUnrealizedChildren: bool = False; OneWay
 FerroUI.Controls.NavigationViewItem.Icon: Option<Ref<IconElement>> = (null); OneWay
 FerroUI.Controls.NavigationViewItem.InfoBadge: Option<Ref<InfoBadge>> = (null); OneWay
@@ -800,6 +801,7 @@ FerroUI.Controls.ScrollViewer.VerticalSnapPointsAlignment: SnapPointsAlignment =
 FerroUI.Controls.ScrollViewer.VerticalSnapPointsType: SnapPointsType = None; OneWay; attached
 FerroUI.Controls.ScrollViewer.ZoomMode: ZoomMode = Disabled; OneWay
 FerroUI.Controls.SelectableTextBlock overrides FerroUI.Input.InputElement.Focusable = True; OneWay
+FerroUI.Controls.SelectionIndicator overrides FerroUI.Input.InputElement.IsHitTestVisible = False; OneWay
 FerroUI.Controls.Shapes.Arc overrides FerroUI.Controls.Shapes.Shape.StrokeThickness = 1; OneWay
 FerroUI.Controls.Shapes.Arc.StartAngle: f64 = 0; OneWay
 FerroUI.Controls.Shapes.Arc.SweepAngle: f64 = 0; OneWay
