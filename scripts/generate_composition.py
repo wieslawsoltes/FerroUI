@@ -662,12 +662,15 @@ class Generator:
         return "Cell::new(Default::default())" if info.is_copy else "RefCell::new(None)"
 
     # The classes whose schema defaults of copy types are written to their fields directly when an
-    # object is made, rather than through the setters: the fields are marked changed and the object
-    # registered for serialization once, so the first batch carries the same values to the server
-    # as before. On a new object a setter's work beyond that (the change hooks, which do nothing for
-    # these properties here, the bookkeeping of animations and the lookup of an implicit animation,
-    # neither of which a new object has) changes nothing; a visual is made for every element of a
-    # tree, and its eight defaults cost a setter each.
+    # object is made, on the UI thread and on the server alike, rather than through the setters and
+    # the first batch. The object is registered for serialization once, and the server reports the
+    # defaults as changed with the first changes it reads (`DEFAULT_FIELDS`), so what follows a
+    # change of these fields on the server runs for a new object as it did when the first batch
+    # carried them. On a new object a setter's work beyond that (the change hooks, which do nothing
+    # for these properties on either side, the bookkeeping of animations and the lookup of an
+    # implicit animation, neither of which a new object has) changes nothing; a visual is made for
+    # every element of a tree, and its eight defaults cost a setter, a hundred and sixty bytes of
+    # the batch and a setter of the server each.
     DIRECT_DEFAULTS = {"CompositionVisual"}
 
     def direct_default(self, cl, prop):
@@ -837,18 +840,18 @@ class Generator:
         unit.emit("    /// `InitializeDefaults` of this class alone.")
         unit.emit("    pub fn initialize_own_defaults(&self, host: &dyn %s) {" % hooks)
         unit.emit("        %s::initialize_defaults_extra(host);" % hooks)
-        direct_flags = []
+        has_direct = False
         for prop in props:
             direct = self.direct_default(cl, prop)
             if direct is not None:
                 unit.emit("        " + self.field_set(self.get_type_info(prop.type), snake(prop.name), direct))
-                direct_flags.append("%s::%s" % (changed_fields_type_name(cl), screaming(prop.name)))
+                has_direct = True
             elif prop.default_value is not None:
                 unit.emit("        self.set_%s(host, %s);" % (snake(prop.client_name or prop.name), self.default_value(prop)))
-        if direct_flags:
-            # The defaults written directly go to the server with the first batch (`DIRECT_DEFAULTS`).
-            field = changed_fields_field_name(cl)
-            unit.emit("        self.%s.set(self.%s.get() | %s);" % (field, field, " | ".join(direct_flags)))
+        if has_direct:
+            # The defaults written directly are the values the server object is made with: they are
+            # not marked changed and no batch carries them (`DIRECT_DEFAULTS`). The object is still
+            # serialized once, so the server reads its first changes, which report the defaults.
             unit.emit("        host.register_for_serialization();")
         unit.emit("    }")
 
@@ -1227,6 +1230,14 @@ class Generator:
             unit.use(*info.server_imports)
             unit.use("std::cell::Cell" if info.is_copy else "std::cell::RefCell")
             unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.server_type)))
+        direct_flags = [
+            "%s::%s" % (changed_type, screaming(prop.name)) for prop in props if self.direct_default(cl, prop) is not None
+        ]
+        if direct_flags:
+            unit.use("std::cell::Cell")
+            unit.emit("    /// Whether the first changes of the object were read: they report")
+            unit.emit("    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) as changed.")
+            unit.emit("    defaults_reported: Cell<bool>,")
         unit.emit("}")
         unit.emit()
         unit.emit("impl Default for %s {" % struct)
@@ -1237,8 +1248,22 @@ class Generator:
         unit.emit()
 
         unit.emit("impl %s {" % struct)
-        unit.emit("    /// Creates the properties with every field at the default of its type; the")
-        unit.emit("    /// values of the UI thread arrive with the first batch.")
+        if direct_flags:
+            unit.emit("    /// The fields an object is made with at the default of the schema, on the")
+            unit.emit("    /// UI thread and here: no batch carries these values. The first changes read")
+            unit.emit("    /// for an object report them as changed, with the fields the batch names.")
+            unit.emit("    pub const DEFAULT_FIELDS: %s = %s" % (changed_type, direct_flags[0]))
+            for flag in direct_flags[1:-1]:
+                unit.emit("        .union(%s)" % flag)
+            unit.emit("        .union(%s);" % direct_flags[-1])
+            unit.emit()
+            unit.emit("    /// Creates the properties with the fields of")
+            unit.emit("    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) at the default of the schema and")
+            unit.emit("    /// every other field at the default of its type; the other values of the UI")
+            unit.emit("    /// thread arrive with the first batch.")
+        else:
+            unit.emit("    /// Creates the properties with every field at the default of its type; the")
+            unit.emit("    /// values of the UI thread arrive with the first batch.")
         unit.emit("    pub fn new() -> Self {")
         unit.emit("        Self {")
         if base_kind == "generated":
@@ -1246,7 +1271,13 @@ class Generator:
         if cl.is_list:
             unit.emit("            list: ServerList::new(),")
         for prop in props:
-            unit.emit("            %s: %s," % (snake(prop.name), self.field_init(self.get_type_info(prop.type))))
+            direct = self.direct_default(cl, prop)
+            if direct is not None:
+                unit.emit("            %s: Cell::new(%s)," % (snake(prop.name), direct))
+            else:
+                unit.emit("            %s: %s," % (snake(prop.name), self.field_init(self.get_type_info(prop.type))))
+        if direct_flags:
+            unit.emit("            defaults_reported: Cell::new(false),")
         unit.emit("        }")
         unit.emit("    }")
         unit.emit()
@@ -1303,6 +1334,9 @@ class Generator:
             unit.emit("        let changed = reader.read::<%s>();" % changed_type)
             for prop in props:
                 self.apply_deserialize_field(unit, cl, prop)
+            if direct_flags:
+                unit.emit("        // The first changes of the object: the defaults it was made with changed too.")
+                unit.emit("        let changed = if self.defaults_reported.replace(true) { changed } else { changed | Self::DEFAULT_FIELDS };")
             unit.emit("        %s::on_fields_deserialized(host, changed);" % hooks)
         unit.emit("    }")
 

@@ -353,7 +353,6 @@ impl CompositionVisualProps {
         self.transform_matrix.set(Matrix::IDENTITY);
         self.rotation_axis.set(Vector3D::new(0.0, 0.0, 1.0));
         self.is_hit_test_visible.set(true);
-        self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::VISIBLE | CompositionVisualChangedFields::OPACITY | CompositionVisualChangedFields::CLIP_TO_BOUNDS | CompositionVisualChangedFields::ORIENTATION | CompositionVisualChangedFields::SCALE | CompositionVisualChangedFields::TRANSFORM_MATRIX | CompositionVisualChangedFields::ROTATION_AXIS | CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE);
         host.register_for_serialization();
     }
 
@@ -1832,6 +1831,9 @@ pub struct ServerCompositionVisualProps {
     backface_visibility: Cell<CompositionBackfaceVisibility>,
     composite_mode: Cell<CompositionCompositeMode>,
     parent_for_transform: RefCell<Option<Rc<dyn IServerObject>>>,
+    /// Whether the first changes of the object were read: they report
+    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) as changed.
+    defaults_reported: Cell<bool>,
 }
 
 impl Default for ServerCompositionVisualProps {
@@ -1841,25 +1843,39 @@ impl Default for ServerCompositionVisualProps {
 }
 
 impl ServerCompositionVisualProps {
-    /// Creates the properties with every field at the default of its type; the
-    /// values of the UI thread arrive with the first batch.
+    /// The fields an object is made with at the default of the schema, on the
+    /// UI thread and here: no batch carries these values. The first changes read
+    /// for an object report them as changed, with the fields the batch names.
+    pub const DEFAULT_FIELDS: CompositionVisualChangedFields = CompositionVisualChangedFields::VISIBLE
+        .union(CompositionVisualChangedFields::OPACITY)
+        .union(CompositionVisualChangedFields::CLIP_TO_BOUNDS)
+        .union(CompositionVisualChangedFields::ORIENTATION)
+        .union(CompositionVisualChangedFields::SCALE)
+        .union(CompositionVisualChangedFields::TRANSFORM_MATRIX)
+        .union(CompositionVisualChangedFields::ROTATION_AXIS)
+        .union(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE);
+
+    /// Creates the properties with the fields of
+    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) at the default of the schema and
+    /// every other field at the default of its type; the other values of the UI
+    /// thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
             root: RefCell::new(None),
             parent: RefCell::new(None),
-            visible: Cell::new(Default::default()),
-            opacity: Cell::new(Default::default()),
+            visible: Cell::new(true),
+            opacity: Cell::new(1.0),
             clip: RefCell::new(None),
-            clip_to_bounds: Cell::new(Default::default()),
+            clip_to_bounds: Cell::new(true),
             offset: Cell::new(Default::default()),
             translation: Cell::new(Default::default()),
             size: Cell::new(Default::default()),
             anchor_point: Cell::new(Default::default()),
             center_point: Cell::new(Default::default()),
             rotation_angle: Cell::new(Default::default()),
-            orientation: Cell::new(Default::default()),
-            scale: Cell::new(Default::default()),
-            transform_matrix: Cell::new(Default::default()),
+            orientation: Cell::new(Quaternion::IDENTITY),
+            scale: Cell::new(Vector3D::new(1.0, 1.0, 1.0)),
+            transform_matrix: Cell::new(Matrix::IDENTITY),
             adorned_visual: RefCell::new(None),
             adorner_is_clipped: Cell::new(Default::default()),
             opacity_mask_brush: RefCell::new(None),
@@ -1868,15 +1884,16 @@ impl ServerCompositionVisualProps {
             text_options: Cell::new(Default::default()),
             cache_mode: RefCell::new(None),
             composition_clip: RefCell::new(None),
-            rotation_axis: Cell::new(Default::default()),
+            rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
             relative_offset_adjustment: Cell::new(Default::default()),
             relative_size_adjustment: Cell::new(Default::default()),
-            is_hit_test_visible: Cell::new(Default::default()),
+            is_hit_test_visible: Cell::new(true),
             is_pixel_snapping_enabled: Cell::new(Default::default()),
             border_mode: Cell::new(Default::default()),
             backface_visibility: Cell::new(Default::default()),
             composite_mode: Cell::new(Default::default()),
             parent_for_transform: RefCell::new(None),
+            defaults_reported: Cell::new(false),
         }
     }
 
@@ -3250,6 +3267,8 @@ impl ServerCompositionVisualProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_parent_for_transform(host, value);
         }
+        // The first changes of the object: the defaults it was made with changed too.
+        let changed = if self.defaults_reported.replace(true) { changed } else { changed | Self::DEFAULT_FIELDS };
         ServerCompositionVisualHooks::on_fields_deserialized(host, changed);
     }
 
