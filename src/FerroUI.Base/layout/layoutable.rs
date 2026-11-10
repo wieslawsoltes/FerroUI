@@ -708,7 +708,9 @@ impl Layoutable {
 
     /// The element's preferred horizontal alignment in its parent.
     pub fn horizontal_alignment(&self) -> HorizontalAlignment {
-        self.get_value(Self::horizontal_alignment_property())
+        self.hot_sizes
+            .horizontal_alignment
+            .get(self.values().value_generation(), || self.get_value(Self::horizontal_alignment_property()))
     }
 
     pub fn set_horizontal_alignment(&self, value: HorizontalAlignment) {
@@ -717,7 +719,9 @@ impl Layoutable {
 
     /// The element's preferred vertical alignment in its parent.
     pub fn vertical_alignment(&self) -> VerticalAlignment {
-        self.get_value(Self::vertical_alignment_property())
+        self.hot_sizes
+            .vertical_alignment
+            .get(self.values().value_generation(), || self.get_value(Self::vertical_alignment_property()))
     }
 
     pub fn set_vertical_alignment(&self, value: VerticalAlignment) {
@@ -976,7 +980,7 @@ impl Drop for MeasuringGuard<'_> {
     }
 }
 
-/// The kept values of the size and margin properties of a layoutable.
+/// The kept values of the size, margin and alignment properties of a layoutable.
 #[derive(Default)]
 struct HotSizes {
     width: crate::property_store::HotValue<f64>,
@@ -986,4 +990,6 @@ struct HotSizes {
     min_height: crate::property_store::HotValue<f64>,
     max_height: crate::property_store::HotValue<f64>,
     margin: crate::property_store::HotValue<Thickness>,
+    horizontal_alignment: crate::property_store::HotValue<HorizontalAlignment>,
+    vertical_alignment: crate::property_store::HotValue<VerticalAlignment>,
 }

@@ -544,4 +544,16 @@ impl RenderDataStream {
         self.writer.dispose();
         self.resources.dispose();
     }
+
+    /// Empties the stream for another recording and keeps its buffers, unless they grew large:
+    /// a recorder that discards a recording (nothing drawn, or the drawing the visual already
+    /// has) records the next visual into the same storage (FerroUI addition,
+    /// desktop-performance.md, section 9.28). The custom draw operations are disposed by
+    /// [`Self::dispose_resources`], as before a [`Self::dispose`].
+    pub(crate) fn recycle(&mut self) {
+        self.writer.recycle();
+        self.resources.recycle();
+        self.depth = 0;
+        self.max_depth = 0;
+    }
 }

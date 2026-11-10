@@ -12,6 +12,9 @@ use ferroui_base::{
 #[repr(C)]
 pub struct Decorator {
     base: Control,
+    /// Not upstream: the padding, kept while the value store of the decorator is unchanged
+    /// (docs/porting/desktop-performance.md, section 9.28).
+    kept_padding: ferroui_base::property_store::HotValue<Thickness>,
 }
 
 ferro_class!(Decorator: Control);
@@ -68,7 +71,7 @@ impl Decorator {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Control::construct() }
+        Self { base: Control::construct(), kept_padding: Default::default() }
     }
 
     pub fn new() -> Ref<Self> {
@@ -86,7 +89,7 @@ impl Decorator {
 
     /// The padding to place around the child control.
     pub fn padding(&self) -> Thickness {
-        self.get_value(Self::padding_property())
+        self.kept_padding.get_for(self, || self.get_value(Self::padding_property()))
     }
 
     pub fn set_padding(&self, value: Thickness) {

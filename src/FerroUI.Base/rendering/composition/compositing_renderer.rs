@@ -1,4 +1,4 @@
-use super::drawing::RenderDataDrawingContext;
+use super::drawing::{RecordedDrawing, RenderDataDrawingContext};
 use super::hit_testing::{GeometryCompositionHitTester, ICompositionHitTester, PointCompositionHitTester};
 use super::server::RenderSurfaces;
 use super::{
@@ -312,12 +312,19 @@ impl CompositingRenderer {
                     let mut context = DrawingContext::new(&mut *recorder);
                     visual.render(&mut context);
                 }
-                // A drawing equal to the one the visual has is not sent again (section 9.14).
-                recorder.get_render_results_unless_same(previous.as_ref())
+                // A drawing equal to the one the visual has is not sent again (section 9.14),
+                // and a different one is given to the render data the visual has, unless
+                // something besides the visual and `previous` holds it (section 9.28).
+                let previous_is_shared = previous.as_ref().is_some_and(|previous| Rc::strong_count(previous) > 2);
+                recorder.get_render_results_for(previous.as_ref(), previous_is_shared)
             };
             match draw_list {
-                Some(draw_list) => comp.set_draw_list(draw_list),
-                None => {
+                RecordedDrawing::New(draw_list) => comp.set_draw_list(draw_list),
+                RecordedDrawing::Updated => {
+                    crate::perf_count!(VisualsRecordedInPlace);
+                    comp.invalidate_draw_list_content();
+                }
+                RecordedDrawing::Same => {
                     crate::perf_count!(VisualsRecordedUnchanged);
                     comp.invalidate_draw_list_content();
                 }

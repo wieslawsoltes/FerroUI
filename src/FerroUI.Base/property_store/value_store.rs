@@ -1416,24 +1416,27 @@ impl Drop for EvaluatingGuard<'_> {
 #[path = "value_store_default_coercion_tests.rs"]
 mod default_coercion_tests;
 
-/// The generation of the inheritance of this thread: it changes whenever the object that holds
+/// The generation of the inheritance, one for the process: it changes whenever the object that holds
 /// the inherited value an object reads can change (an inheriting property's effective value added
 /// to or removed from a store, an inheritance parent or ancestor changed). A store keeps the
 /// results of its inherited lookups while the generation stays the same; a change of an inherited
 /// value itself does not change the generation, because a lookup keeps the effective value, which
 /// holds the current value.
 mod inheritance_generation {
-    use std::cell::Cell;
+    use std::sync::atomic::{AtomicU64, Ordering};
 
-    crate::ferro_thread_local! {
-        static GENERATION: Cell<u64> = const { Cell::new(1) };
-    }
+    // One for the process, not one a thread: every read of an inherited value compares it, and a
+    // load of a static costs less than the address of a thread-local value
+    // (docs/porting/desktop-performance.md, section 9.28). A change on one thread makes the
+    // stores of every thread look their inherited values up once more.
+    static GENERATION: AtomicU64 = AtomicU64::new(1);
 
+    #[inline]
     pub(super) fn current() -> u64 {
-        GENERATION.with(Cell::get)
+        GENERATION.load(Ordering::Relaxed)
     }
 
     pub(super) fn advance() {
-        GENERATION.with(|generation| generation.set(generation.get().wrapping_add(1)));
+        GENERATION.fetch_add(1, Ordering::Relaxed);
     }
 }

@@ -25,6 +25,14 @@ struct EventSubscriptions {
     subscriptions: Vec<EventSubscription>,
 }
 
+impl Drop for EventSubscriptions {
+    /// The handlers that go away with their interactive leave the event's
+    /// count of instance handlers.
+    fn drop(&mut self) {
+        self.routed_event.note_instance_handlers_removed(self.subscriptions.len());
+    }
+}
+
 crate::ferro_thread_local! {
     static TOTAL_HANDLERS_COUNT: Cell<usize> = const { Cell::new(0) };
     static NEXT_TOKEN: Cell<u64> = const { Cell::new(1) };
@@ -204,6 +212,7 @@ impl Interactive {
 
         if removed.is_some() {
             TOTAL_HANDLERS_COUNT.set(TOTAL_HANDLERS_COUNT.get() - 1);
+            routed_event.note_instance_handlers_removed(1);
         }
         removed.is_some()
     }
@@ -226,6 +235,16 @@ impl Interactive {
         let e = e.as_routed_event();
         let mut result = EventRoute::new(&e);
         let has_class_handlers = e.has_raised_subscriptions();
+
+        // Nothing listens to the event anywhere on the thread: the route is
+        // empty whatever the ancestors are, so they are not walked (not
+        // from upstream; desktop-performance.md, section 9.28). A panel that
+        // raises an event from every arrange pays nothing for it then.
+        if !has_class_handlers && !e.has_instance_handlers() {
+            crate::perf_count!(RoutedEventRoutesSkipped);
+            return result;
+        }
+
         let strategies = e.routing_strategies();
         let this = self.to_ref();
 
@@ -259,6 +278,7 @@ impl Interactive {
             None => event_handlers.push(EventSubscriptions { routed_event, subscriptions: vec![subscription] }),
         }
 
+        routed_event.note_instance_handlers_added(1);
         TOTAL_HANDLERS_COUNT.set(TOTAL_HANDLERS_COUNT.get() + 1);
     }
 

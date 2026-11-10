@@ -236,4 +236,14 @@ impl RenderDataResources {
         self.resources.clear();
         self.intern_map = None;
     }
+
+    /// Empties the table for another recording and keeps its storage: the references are let go
+    /// as [`Self::dispose`] lets them go (FerroUI addition, desktop-performance.md, section 9.28).
+    pub(crate) fn recycle(&mut self) {
+        self.resources.clear();
+        if self.resources.capacity() > 2 * Self::LINEAR_INTERN_LIMIT {
+            self.resources = Vec::new();
+        }
+        self.intern_map = None;
+    }
 }

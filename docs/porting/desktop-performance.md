@@ -874,7 +874,7 @@ lists that scroll at a fixed width, where every moved item is no longer recorded
 
 A visual recorded again often draws exactly what it drew before: a left-aligned text block
 without a background, resized while its layout was kept (section 9.12), draws the same lines at
-the same places. `RenderDataDrawingContext::get_render_results_unless_same` compares the new
+the same places. `RenderDataDrawingContext::get_render_results_for` compares the new
 recording with the render data the visual has: the same operations on the same resources, by
 identity, none of them a custom draw operation (which a dropped recording disposes) or a
 resource not sent. When they are the same, the new recording is dropped, its references
@@ -1355,3 +1355,94 @@ texts that changed), layouts dropped for a new measure constraint 541 to 18 and 
 constraint 506 to 15, measures executed 4,671 to 3,506. UI thread, from samples: about 23 to about
 17 ms a frame. The frame rate does not change (31.5 to 32.3 frames a second before and after):
 the render thread is busy for the whole frame and sets it.
+
+### 9.28 The UI thread of a frame: values read in place, events nobody hears, a drawing kept by its render data
+
+After section 9.27 the render thread and the UI thread of the gauntlet cost about the same, and
+with the render thread no longer the only limit the UI thread's share of a frame decides the frame
+rate as well. Its samples show no single cost; they show the same small work done for every one of
+about 13,500 visuals a frame. This section removes that work where it has no effect. None of the
+changes alters a value, an event, a drawing or an order.
+
+Values read where they are kept:
+
+- The generation of inherited values and the generation of property metadata are one for the
+  process (an atomic) and no longer one a thread. Every read of an inherited value and every
+  `HotValue` compares them, and the address of a thread-local value costs more than the load of a
+  static. A change on one thread makes the stores of every thread look their values up once more;
+  no store misses a change.
+- `HotValue` (section 9.9) is public and hidden from the documentation, with `get_for(object,
+  read)`, so that the controls crate keeps values the way the base crate does. A layoutable keeps
+  its two alignments with its sizes and margin. A border keeps its thickness, corner radius and
+  background sizing, a decorator its padding, and a row or column definition its user size,
+  minimum and maximum: a grid reads the three of every definition in every pass of its layout.
+  Each kept value is read again whenever the value store of its object changes.
+- Layout asks for the layout scale of every element it rounds. `IPresentationSource` has
+  `layout_root_scaling()` (default: the scaling of its layout root), and
+  `Visual::layout_scaling_of_presentation_source` reads it in place, where
+  `LayoutHelper::get_layout_scale` handed out the layout root as a counted reference for every
+  element.
+- An assignment of an animated property returns at once when the object has no animation
+  controller, and the transitions of composition facades are asked only of a visual that has
+  facades.
+
+Work that has no receiver:
+
+- A routed event counts its instance handlers (`RoutedEvent::has_instance_handlers`): adding a
+  handler, removing it and dropping an interactive that holds handlers keep the count. Building a
+  route for an event that has neither a class handler nor an instance handler returns the empty
+  route without walking the ancestors. A stack panel raises its snap-points events, which bubble,
+  in every arrange as upstream does; in the gauntlet that walked the ancestors of every stack
+  panel a frame for nobody. Handlers added later are found: the count is read when a route is
+  built.
+- `Visual::synchronize_composition_child_visuals` answers a visual with no visual child, no child
+  composition visual and no facades without building the lists it compares.
+- The compositor asks for a commit only when none is pending (`ensure_commit_requested`), where
+  every change of every object handed the pending batch out and dropped it.
+
+A drawing kept by its render data:
+
+- A recorder keeps the stream of a recording it discards (nothing drawn, or the drawing the
+  visual already has, section 9.14) and records the next visual into the same storage
+  (`RenderDataStream::recycle`). Storage beyond 512 bytes is not kept, so that a recording does
+  not hold much more than it needs.
+- A visual whose drawing changed gives the new recording to the render data it already has
+  (`CompositionRenderData::replace_recording`, through
+  `RenderDataDrawingContext::get_render_results_for`, which returns a `RecordedDrawing`: the same
+  drawing, updated in place, or a new render data). Upstream, and FerroUI until here, creates a
+  render data for every changed drawing and disposes the old one: a server object created and
+  one disposed, an allocation and a registration for each of the visuals a frame draws. The
+  server-side render data already resets itself and reads a new stream whenever it is
+  serialized, which is how it received its first recording; the visual tells its server-side
+  visual that its content changed (the change code of an unchanged drawing list), so bounds and
+  the kept fragment follow as for a new render data. The resources of the old recording are
+  released as `dispose` releases them: by the render data when the recording was not sent yet,
+  by the server-side render data when it reads the next one. A render data that something else
+  than its visual and the renderer holds is not written to: the recording gets its own, as
+  before. A visual that stops drawing has no render data, as before.
+
+The Skia backend sets the transform of its canvas when something is drawn with it:
+
+- `DrawingContextImpl` keeps the transform it is given and applies it to the canvas before the
+  first operation that depends on it (a draw, a clip, a layer, a save, a lease of the canvas).
+  The render walk sets a transform for every visual and sets it back after it, and a visual
+  outside the dirty area or without a drawing recorded two matrix operations for nothing. What is
+  recorded is what is drawn with, in the same order; Skia's API is used as before, only less
+  often. When the canvas can be leased (`ISkiaSharpApiLeaseFeature`) the canvas follows at once.
+
+Tests: `interactive_tests.rs`
+(`the_count_of_instance_handlers_follows_added_removed_and_dropped_handlers`,
+`a_class_handler_is_reached_when_no_instance_handler_is_attached`), `render_data_tests.rs`
+(`a_changed_recording_goes_to_the_render_data_the_visual_has`: the server-side render data keeps
+its id, is not disposed, has the bounds and replays the operations of the new recording, also
+after two recordings before one batch; `an_equal_recording_leaves_the_render_data_as_it_is`;
+`a_shared_render_data_and_an_empty_drawing_are_not_recorded_in_place`;
+`the_custom_operations_of_a_replaced_recording_are_released`), `hot_value_tests.rs`
+(`the_kept_alignments_follow_their_changes`), `kept_value_tests.rs` of the controls
+(`the_kept_values_of_a_border_follow_local_style_and_cleared_values`,
+`the_kept_sizes_of_a_definition_follow_its_properties`) and
+`drawing_context_transform_tests.rs` of the Skia backend
+(`drawing_uses_the_last_transform_set`, `a_transform_that_nothing_is_drawn_with_is_not_recorded`,
+`the_canvas_follows_the_transform_at_once_when_the_api_can_be_leased`). Counters: `routed event
+routes skipped (nothing listens)`, `visuals recorded into their render data`, and the transforms
+applied to the canvas beside the transforms set.

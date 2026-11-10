@@ -18,7 +18,9 @@ pub(crate) use boxed_binding_entry::BoxedBindingEntry;
 pub(crate) use boxed_local_value_binding_observer::BoxedLocalValueBindingObserver;
 pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn, UncommonFields};
 pub(crate) use frame_priority::{FramePriority, FrameType};
-pub(crate) use hot_value::{advance_metadata_generation, HotValue};
+pub(crate) use hot_value::advance_metadata_generation;
+#[doc(hidden)]
+pub use hot_value::HotValue;
 pub use immediate_value_frame::ImmediateValueFrame;
 pub(crate) use local_value_binding_observer::{DirectBindingObserver, DirectBoxedBindingObserver, LocalValueBindingObserver};
 pub(crate) use value_entry::entry_ptr_eq;

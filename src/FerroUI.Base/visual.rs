@@ -415,6 +415,19 @@ impl VisualImpl for Visual {
     fn synchronize_composition_child_visuals(this: &Self) {
         let Some(composition_visual) = this.composition_visual() else { return };
         let composition_children = composition_visual.children();
+        // Not upstream: a visual with nothing under it (no visual children, no child composition
+        // visual, no layer and no unloading visuals) is expected to have no composition children;
+        // that is the case of most visuals a frame draws, and it is answered without the lists
+        // below (docs/porting/desktop-performance.md, section 9.28).
+        if this.visual_children.get().is_none_or(FerroList::is_empty)
+            && this.child_composition_visual.borrow().is_none()
+            && this.composition_extras.borrow().is_none()
+        {
+            if composition_children.count() != 0 {
+                composition_children.clear();
+            }
+            return;
+        }
         let visual_children: Rc<Vec<Ref<Visual>>> =
             this.visual_children_snapshot().unwrap_or_else(|| Rc::new(Vec::new()));
 
@@ -1165,6 +1178,13 @@ impl Visual {
     #[inline]
     pub fn presentation_source(&self) -> Option<Rc<dyn IPresentationSource>> {
         self.presentation_source.borrow().clone()
+    }
+
+    /// The layout scaling of the presentation source the visual is attached
+    /// to, read in place: layout asks for every element it rounds.
+    #[inline]
+    pub(crate) fn layout_scaling_of_presentation_source(&self) -> Option<f64> {
+        self.presentation_source.borrow().as_ref().map(|source| source.layout_root_scaling())
     }
 
     /// The root of the visual tree, if the control is attached to one.

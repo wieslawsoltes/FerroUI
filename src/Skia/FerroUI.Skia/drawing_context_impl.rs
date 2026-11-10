@@ -66,6 +66,100 @@ impl CanvasSource {
     }
 }
 
+/// The canvas of a drawing context and the transform the context has for it
+/// that the canvas does not have yet.
+///
+/// Deviation (desktop-performance.md, 9.28): upstream sets the matrix of the
+/// canvas with every change of the transform of the context. The render walk
+/// changes the transform when it enters a visual and again when it leaves it,
+/// so most of the matrices set are replaced before anything is drawn with
+/// them. Here a transform reaches the canvas with the first use of the
+/// canvas after the change: [`get`](Self::get) is the only way to the canvas,
+/// so nothing is drawn, clipped, saved or read with a matrix other than the
+/// one upstream would have set.
+struct ContextCanvas {
+    source: CanvasSource,
+    /// The transform of the context the canvas does not have yet.
+    pending_transform: Option<Matrix>,
+    /// What a transform is multiplied with before it is set on the canvas
+    /// (the scale of a context that draws at another DPI).
+    post_transform: Option<Matrix>,
+    /// Whether transforms are set on the canvas at once: something outside
+    /// the context has the surface and can draw to its canvas (the API
+    /// lease), at a time the context does not learn about.
+    eager: bool,
+}
+
+impl ContextCanvas {
+    fn new(source: CanvasSource, post_transform: Option<Matrix>) -> Self {
+        Self { source, pending_transform: None, post_transform, eager: false }
+    }
+
+    /// The canvas, with the transform of the context on it.
+    ///
+    /// # Panics
+    /// Panics when the drawing context has been disposed.
+    #[inline]
+    fn get(&mut self) -> &sk::Canvas {
+        if self.pending_transform.is_some() {
+            self.apply_pending_transform();
+        }
+        self.source.get()
+    }
+
+    /// Records the transform the canvas takes with its next use.
+    #[inline]
+    fn set_transform(&mut self, value: Matrix) {
+        self.pending_transform = Some(value);
+        if self.eager {
+            self.apply_pending_transform();
+        }
+    }
+
+    fn apply_pending_transform(&mut self) {
+        let Some(mut transform) = self.pending_transform.take() else { return };
+        if let Some(post_transform) = self.post_transform {
+            transform *= post_transform;
+        }
+        ferroui_base::perf_count!(RenderCanvasTransformsApplied);
+        // The canvas internally uses a 4x4 matrix; convert directly.
+        self.source.get().set_matrix(&to_sk_matrix44(transform));
+    }
+
+    /// Restores the canvas to its last save. The restore replaces the matrix
+    /// of the canvas, so a transform that was not applied yet is dropped
+    /// without being set. (A restore without a save changes nothing: the
+    /// canvas takes the transform then.)
+    fn restore(&mut self) -> &sk::Canvas {
+        if self.pending_transform.is_some() {
+            if self.source.get().save_count() > 1 {
+                self.pending_transform = None;
+            } else {
+                self.apply_pending_transform();
+            }
+        }
+        let canvas = self.source.get();
+        canvas.restore();
+        canvas
+    }
+
+    /// The end of the drawing: a surface is left with the transform of the
+    /// context, as with every transform set at once; a recording ends
+    /// without a transform nothing was drawn with.
+    fn finish_transform(&mut self) {
+        if matches!(self.source, CanvasSource::Surface(_)) {
+            self.apply_pending_transform();
+        }
+        self.pending_transform = None;
+    }
+
+    /// Sets transforms on the canvas at once from now on (see `eager`).
+    fn set_eager(&mut self) {
+        self.eager = true;
+        self.apply_pending_transform();
+    }
+}
+
 /// Context create info.
 #[derive(Default)]
 pub struct CreateInfo {
@@ -315,7 +409,7 @@ pub struct DrawingContextImpl {
     session: Option<Rc<dyn ISkiaGpuRenderSession>>,
     leased: Rc<Cell<bool>>,
     use_opacity_save_layer: bool,
-    canvas: CanvasSource,
+    canvas: ContextCanvas,
     surface: Option<sk::Surface>,
     render_options: RenderOptions,
     text_options: TextOptions,
@@ -382,7 +476,7 @@ impl DrawingContextImpl {
             session: create_info.current_session,
             leased: Rc::new(Cell::new(false)),
             use_opacity_save_layer,
-            canvas,
+            canvas: ContextCanvas::new(canvas, post_transform),
             surface: create_info.surface,
             render_options: RenderOptions::default(),
             text_options: TextOptions::default(),
@@ -495,8 +589,7 @@ impl DrawingContextImpl {
     /// Restores the canvas state. The transform of the context is what the
     /// canvas has afterwards, less the post transform of a scaled context.
     fn restore_canvas(&mut self) {
-        let canvas = self.canvas.get();
-        canvas.restore();
+        let canvas = self.canvas.restore();
         let level = canvas.save_count();
         self.rounded_clip_elements.retain(|saved| *saved <= level);
         // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
@@ -1340,14 +1433,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         self.current_transform = Some(value);
 
-        let mut transform = value;
-
-        if let Some(post_transform) = self.post_transform {
-            transform *= post_transform;
-        }
-
-        // The canvas internally uses a 4x4 matrix; convert directly.
-        self.canvas.get().set_matrix(&to_sk_matrix44(transform));
+        // The canvas takes the transform with its next use (9.28).
+        self.canvas.set_transform(value);
     }
 
     fn clear(&mut self, color: Color) {
@@ -1870,6 +1957,10 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             let surface = self.surface.clone()?;
+            // A lease draws to the canvas of the surface directly, whenever
+            // it is taken: the canvas follows the transform of the context
+            // without delay from here on.
+            self.canvas.set_eager();
             let feature: Rc<dyn ISkiaApiLeaseFeature> = Rc::new(SkiaLeaseFeature {
                 context_leased: self.leased.clone(),
                 surface,
@@ -1894,6 +1985,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.check_lease();
         self.disposed = true;
 
+        // Before the disposables, which may read the surface.
+        self.canvas.finish_transform();
+
         // Return leased paints.
         for paint in [self.stroke_paint.take(), self.fill_paint.take(), self.box_shadow_paint.take()]
             .into_iter()
@@ -1909,7 +2003,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
 
         if let CanvasSource::Recorder { mut recorder, on_finished } =
-            std::mem::replace(&mut self.canvas, CanvasSource::Finished)
+            std::mem::replace(&mut self.canvas.source, CanvasSource::Finished)
         {
             on_finished(recorder.finish_recording_as_picture(None));
         }

@@ -791,3 +791,61 @@ fn a_copy_of_routed_event_args_shares_the_routing_state() {
     assert!(args == copy);
     assert!(args != RoutedEventArgs::new());
 }
+
+// --- the count of instance handlers (desktop-performance.md, section 9.28) ---
+
+#[test]
+fn the_count_of_instance_handlers_follows_added_removed_and_dropped_handlers() {
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    let count = Rc::new(Cell::new(0));
+
+    // Nothing listens: the route is empty and the ancestors are not asked.
+    assert!(!ev.has_instance_handlers());
+    assert!(!child.build_event_route(&ev).has_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+
+    // A handler on an ancestor is reached by a raise on the child.
+    let token = {
+        let count = count.clone();
+        parent.add_handler(&ev, move |_, _| count.set(count.get() + 1))
+    };
+    assert!(ev.has_instance_handlers());
+    assert!(child.build_event_route(&ev).has_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    assert_eq!(count.get(), 1);
+
+    // Removed: nothing listens again.
+    assert!(parent.remove_handler(&ev, token));
+    assert!(!ev.has_instance_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    assert_eq!(count.get(), 1);
+
+    // Handlers that go away with their interactive are not counted either.
+    {
+        let short_lived = TestInteractive::new("short lived");
+        short_lived.add_handler(&ev, |_, _| {});
+        short_lived.add_handler(&ev, |_, _| {});
+        assert!(ev.has_instance_handlers());
+    }
+    assert!(!ev.has_instance_handlers());
+}
+
+#[test]
+fn a_class_handler_is_reached_when_no_instance_handler_is_attached() {
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    let seen = Rc::new(RefCell::new(Vec::new()));
+    let recorded = seen.clone();
+    let subscription = ev.raised().subscribe(move |sender, _| recorded.borrow_mut().push(label_of(sender)));
+
+    assert!(!ev.has_instance_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    subscription.dispose();
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+
+    assert_eq!(*seen.borrow(), ["child", "parent"]);
+    drop(parent);
+}

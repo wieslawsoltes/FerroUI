@@ -462,6 +462,26 @@ impl Fixture {
         }
         recorder.get_render_results()
     }
+
+    /// Records for a visual that already has `previous`, as the renderer does.
+    fn record_for(
+        &self,
+        previous: &Rc<CompositionRenderData>,
+        previous_is_shared: bool,
+        draw: impl FnOnce(&mut DrawingContext<'_>),
+    ) -> RecordedDrawing {
+        let mut recorder = RenderDataDrawingContext::new(Some(self.compositor.clone()));
+        {
+            let mut context = DrawingContext::new(&mut recorder);
+            draw(&mut context);
+        }
+        recorder.get_render_results_for(Some(previous), previous_is_shared)
+    }
+
+    fn commit_and_tick(&self) {
+        self.compositor.commit();
+        self.render_loop.tick();
+    }
 }
 
 impl Drop for Fixture {
@@ -611,6 +631,119 @@ fn server_object_ids_are_reused_only_after_their_disposal_was_committed() {
     assert_eq!(server.object_count(), 2);
     let bounds = server.get::<ServerCompositionRenderData>(third.server()).unwrap().bounds().unwrap();
     assert_eq!(bounds.right, 3.0);
+}
+
+#[test]
+fn a_changed_recording_goes_to_the_render_data_the_visual_has() {
+    let fixture = Fixture::new();
+    let server = fixture.compositor.server().clone();
+    let render_data = fixture.record(|c| c.fill_rectangle(&brush(), Rect::new(0.0, 0.0, 1.0, 1.0), 0.0)).unwrap();
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 1);
+    let server_data = server.get::<ServerCompositionRenderData>(render_data.server()).expect("created by the batch");
+    assert_eq!(server_data.bounds().unwrap().right, 1.0);
+
+    // Another drawing: the render data takes it, and the server-side one receives it with the
+    // next batch.
+    let updated = fixture.record_for(&render_data, false, |c| {
+        c.fill_rectangle(&brush(), Rect::new(0.0, 0.0, 3.0, 5.0), 0.0)
+    });
+    assert!(matches!(updated, RecordedDrawing::Updated));
+    assert!(render_data.hit_test(Point::new(2.5, 4.5)), "hit testing follows the new recording at once");
+    assert_eq!(server_data.bounds().unwrap().right, 1.0);
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 1, "no render data was created or disposed");
+    assert!(!server_data.is_disposed());
+    let bounds = server_data.bounds().expect("has content");
+    assert_eq!((bounds.right, bounds.bottom), (3.0, 5.0));
+
+    let log = fixture.render_interface.log().clone();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    server_data.render(&mut context);
+    assert_eq!(log.entries(), ["DrawRectangle Red none 0, 0, 3, 5 shadows=0"]);
+
+    // Twice before a batch: the server receives the last one.
+    for width in [7.0, 9.0] {
+        let updated = fixture.record_for(&render_data, false, |c| {
+            c.fill_rectangle(&brush(), Rect::new(0.0, 0.0, width, 1.0), 0.0)
+        });
+        assert!(matches!(updated, RecordedDrawing::Updated));
+    }
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 1);
+    assert_eq!(server_data.bounds().unwrap().right, 9.0);
+
+    render_data.dispose();
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 0);
+}
+
+#[test]
+fn an_equal_recording_leaves_the_render_data_as_it_is() {
+    let fixture = Fixture::new();
+    let fill = brush();
+    let render_data = fixture.record(|c| c.fill_rectangle(&fill, Rect::new(0.0, 0.0, 1.0, 1.0), 0.0)).unwrap();
+    fixture.commit_and_tick();
+
+    let same = fixture.record_for(&render_data, false, |c| c.fill_rectangle(&fill, Rect::new(0.0, 0.0, 1.0, 1.0), 0.0));
+    assert!(matches!(same, RecordedDrawing::Same));
+    assert!(render_data.hit_test(Point::new(0.5, 0.5)));
+    let server = fixture.compositor.server().clone();
+    let server_data = server.get::<ServerCompositionRenderData>(render_data.server()).unwrap();
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 1);
+    assert_eq!(server_data.bounds().unwrap().right, 1.0);
+}
+
+#[test]
+fn a_shared_render_data_and_an_empty_drawing_are_not_recorded_in_place() {
+    let fixture = Fixture::new();
+    let server = fixture.compositor.server().clone();
+    let render_data = fixture.record(|c| c.fill_rectangle(&brush(), Rect::new(0.0, 0.0, 1.0, 1.0), 0.0)).unwrap();
+    fixture.commit_and_tick();
+
+    // Something else holds the render data: the recording gets its own.
+    let other = fixture.record_for(&render_data, true, |c| {
+        c.fill_rectangle(&brush(), Rect::new(0.0, 0.0, 2.0, 2.0), 0.0)
+    });
+    let RecordedDrawing::New(Some(other)) = other else { panic!("a new render data is expected") };
+    assert_ne!(other.server(), render_data.server());
+    fixture.commit_and_tick();
+    assert_eq!(server.object_count(), 2);
+    assert_eq!(server.get::<ServerCompositionRenderData>(render_data.server()).unwrap().bounds().unwrap().right, 1.0);
+    assert_eq!(server.get::<ServerCompositionRenderData>(other.server()).unwrap().bounds().unwrap().right, 2.0);
+
+    // Nothing drawn: the visual has no drawing, and the render data it had is left to it.
+    let nothing = fixture.record_for(&render_data, false, |_| {});
+    assert!(matches!(nothing, RecordedDrawing::New(None)));
+    assert!(render_data.hit_test(Point::new(0.5, 0.5)));
+}
+
+#[test]
+fn the_custom_operations_of_a_replaced_recording_are_released() {
+    let fixture = Fixture::new();
+    let first = TestOperation::new(Rect::new(0.0, 0.0, 10.0, 10.0));
+    let second = TestOperation::new(Rect::new(0.0, 0.0, 20.0, 20.0));
+    let third = TestOperation::new(Rect::new(0.0, 0.0, 30.0, 30.0));
+    let custom = |operation: &std::sync::Arc<TestOperation>| -> std::sync::Arc<dyn ICustomDrawOperation> { operation.clone() };
+
+    let render_data = fixture.record(|c| c.custom(&custom(&first))).unwrap();
+    // Not sent yet: the render data releases the operation itself.
+    let updated = fixture.record_for(&render_data, false, |c| c.custom(&custom(&second)));
+    assert!(matches!(updated, RecordedDrawing::Updated));
+    assert_eq!((first.disposed.get(), second.disposed.get()), (1, 0));
+
+    // Sent: the server-side render data releases it when it reads the next recording.
+    fixture.commit_and_tick();
+    let updated = fixture.record_for(&render_data, false, |c| c.custom(&custom(&third)));
+    assert!(matches!(updated, RecordedDrawing::Updated));
+    assert_eq!((second.disposed.get(), third.disposed.get()), (0, 0));
+    fixture.commit_and_tick();
+    assert_eq!((first.disposed.get(), second.disposed.get(), third.disposed.get()), (1, 1, 0));
+
+    render_data.dispose();
+    fixture.commit_and_tick();
+    assert_eq!(third.disposed.get(), 1);
 }
 
 #[test]
