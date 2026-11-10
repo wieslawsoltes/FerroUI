@@ -68,6 +68,8 @@ pub struct DateTimeFormatInfo {
     shortest_day_names: [String; 7],
     month_names: [String; 13],
     abbreviated_month_names: [String; 13],
+    month_names_in_date: Option<[String; 13]>,
+    abbreviated_month_names_in_date: Option<[String; 13]>,
 }
 
 fn day_strings(names: &[&str; 7]) -> [String; 7] {
@@ -102,6 +104,8 @@ impl DateTimeFormatInfo {
             shortest_day_names: day_strings(&SHORTEST_DAY_NAMES),
             month_names: month_strings(&MONTH_NAMES),
             abbreviated_month_names: month_strings(&ABBREVIATED_MONTH_NAMES),
+            month_names_in_date: None,
+            abbreviated_month_names_in_date: None,
         }
     }
 
@@ -352,6 +356,32 @@ impl DateTimeFormatInfo {
     pub fn get_month_name(&self, month: i32) -> &str {
         assert!((1..=13).contains(&month), "Valid values are between 1 and 13, inclusive. (Parameter 'month')");
         &self.month_names[(month - 1) as usize]
+    }
+
+    /// Month names used with a numeric day, for locales whose date forms
+    /// differ from the names used alone. Falls back to `month_names`.
+    pub fn month_names_in_date(&self) -> &[String; 13] {
+        self.month_names_in_date
+            .as_ref()
+            .unwrap_or(&self.month_names)
+    }
+
+    /// Sets the locale's full month names when formatting a numeric day.
+    pub fn set_month_names_in_date(&mut self, names: [String; 13]) {
+        self.month_names_in_date = Some(names);
+    }
+
+    /// Abbreviated month names used with a numeric day. Falls back to
+    /// `abbreviated_month_names` when no separate date forms are provided.
+    pub fn abbreviated_month_names_in_date(&self) -> &[String; 13] {
+        self.abbreviated_month_names_in_date
+            .as_ref()
+            .unwrap_or(&self.abbreviated_month_names)
+    }
+
+    /// Sets the locale's abbreviated month names used with a numeric day.
+    pub fn set_abbreviated_month_names_in_date(&mut self, names: [String; 13]) {
+        self.abbreviated_month_names_in_date = Some(names);
     }
 
     /// The abbreviated name of a month, 1..=13. Panics for other values.

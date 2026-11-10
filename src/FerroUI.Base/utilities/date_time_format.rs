@@ -133,6 +133,7 @@ struct FormatContext<'a> {
     year: i32,
     month: i32,
     day: i32,
+    numeric_day: bool,
 }
 
 impl FormatContext<'_> {
@@ -159,7 +160,9 @@ impl FormatContext<'_> {
             },
             b'M' => match count {
                 1 | 2 => push_number(out, self.month as i64, count),
+                3 if self.numeric_day => out.push_str(&info.abbreviated_month_names_in_date()[(self.month - 1) as usize]),
                 3 => out.push_str(info.get_abbreviated_month_name(self.month)),
+                _ if self.numeric_day => out.push_str(&info.month_names_in_date()[(self.month - 1) as usize]),
                 _ => out.push_str(info.get_month_name(self.month)),
             },
             b'y' => match count {
@@ -228,6 +231,38 @@ fn is_repeatable(byte: u8) -> bool {
     matches!(byte, b'd' | b'M' | b'y' | b'g' | b'h' | b'H' | b'm' | b's' | b'f' | b'F' | b't' | b'z')
 }
 
+// A numeric day selects a locale's month-in-date forms. Quoted/escaped
+// text and weekday names do not change the month context.
+fn has_numeric_day(pattern: &str) -> Result<bool, FormatError> {
+    let bytes = pattern.as_bytes();
+    let mut index = 0;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'\'' | b'"' => index = find_quote_end(pattern, index)? + 1,
+            b'\\' => {
+                let next = pattern[index + 1..].chars().next().ok_or_else(bad_format)?;
+                index += 1 + next.len_utf8();
+            }
+            b'%' => {
+                let next = pattern[index + 1..].chars().next().ok_or_else(bad_format)?;
+                if next == 'd' {
+                    return Ok(true);
+                }
+                index += 1 + next.len_utf8();
+            }
+            b'd' => {
+                let count = run_length(bytes, index);
+                if count <= 2 {
+                    return Ok(true);
+                }
+                index += count;
+            }
+            _ => index += pattern[index..].chars().next().unwrap().len_utf8(),
+        }
+    }
+    Ok(false)
+}
+
 fn format_custom(
     value: DateTime,
     offset: Option<SignedDuration>,
@@ -235,7 +270,7 @@ fn format_custom(
     info: &DateTimeFormatInfo,
 ) -> Result<String, FormatError> {
     let (year, month, day, _) = value.date_parts();
-    let context = FormatContext { value, offset, info, year, month, day };
+    let context = FormatContext { value, offset, info, year, month, day, numeric_day: has_numeric_day(pattern)? };
     let bytes = pattern.as_bytes();
     let mut out = String::with_capacity(pattern.len() + 8);
     let mut index = 0;
@@ -1124,4 +1159,45 @@ fn resolve_date(
         _ => return None,
     }
     Some(())
+}
+
+#[cfg(test)]
+mod month_context_tests {
+    use super::*;
+
+    #[test]
+    fn numeric_days_select_date_month_names_but_literals_and_weekdays_do_not() {
+        let mut info = DateTimeFormatInfo::new();
+        let mut abbreviated = info.abbreviated_month_names().clone();
+        abbreviated[0] = "Jan.".into();
+        info.set_abbreviated_month_names_in_date(abbreviated);
+        let mut full = info.month_names().clone();
+        full[0] = "month-in-date".into();
+        info.set_month_names_in_date(full);
+        let value = DateTime::new(2026, 1, 7);
+        for (pattern, expected) in [
+            ("d MMM yyyy", "7 Jan. 2026"),
+            ("MMM dd", "Jan. 07"),
+            ("MMMM d", "month-in-date 7"),
+            ("%d MMM", "7 Jan."),
+            ("MMM yyyy", "Jan 2026"),
+            ("ddd MMM", "Wed Jan"),
+            ("dddd MMMM", "Wednesday January"),
+            ("'dd' MMM", "dd Jan"),
+            ("\"dd\" MMM", "dd Jan"),
+            (r"\d MMM", "d Jan"),
+            ("MMM 'd'", "Jan d"),
+        ] {
+            assert_eq!(
+                format(value, None, pattern, &info).unwrap(),
+                expected,
+                "{pattern}"
+            );
+        }
+        let mut fallback = DateTimeFormatInfo::new();
+        let mut names = fallback.abbreviated_month_names().clone();
+        names[0] = "custom".into();
+        fallback.set_abbreviated_month_names(names);
+        assert_eq!(format(value, None, "d MMM", &fallback).unwrap(), "7 custom");
+    }
 }
