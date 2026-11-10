@@ -644,22 +644,33 @@ class Generator:
     # ---- field access snippets ------------------------------------------
 
     @staticmethod
+    # A field of a copy type is a `Cell`. Every other type of the schema is an optional handle (an
+    # `Rc`, an `Arc`, or a value made of them) that is read by cloning it and written by replacing
+    # it, which is what an `OptionCell` does without the borrow flag of a `RefCell`: eight bytes
+    # less for each such field, and a visual, which is made for every element of a tree, has eight
+    # of them on the UI thread and eight on the server.
+    @staticmethod
     def field_decl(info, type_name):
-        return ("Cell<%s>" if info.is_copy else "RefCell<%s>") % type_name
+        if info.is_copy:
+            return "Cell<%s>" % type_name
+        assert type_name.startswith("Option<") and type_name.endswith(">"), type_name
+        return "OptionCell<%s>" % type_name[len("Option<"):-1]
+
+    @staticmethod
+    def field_cell(info):
+        return "std::cell::Cell" if info.is_copy else "crate::utilities::OptionCell"
 
     @staticmethod
     def field_get(info, field):
-        return ("self.%s.get()" if info.is_copy else "self.%s.borrow().clone()") % field
+        return "self.%s.get()" % field
 
     @staticmethod
     def field_set(info, field, value):
-        if info.is_copy:
-            return "self.%s.set(%s);" % (field, value)
-        return "*self.%s.borrow_mut() = %s;" % (field, value)
+        return "self.%s.set(%s);" % (field, value)
 
     @staticmethod
     def field_init(info):
-        return "Cell::new(Default::default())" if info.is_copy else "RefCell::new(None)"
+        return "Cell::new(Default::default())" if info.is_copy else "OptionCell::new()"
 
     # The classes whose schema defaults of copy types are written to their fields directly when an
     # object is made, on the UI thread and on the server alike, rather than through the setters and
@@ -795,7 +806,7 @@ class Generator:
             unit.emit("    %s: Cell<%s>," % (changed_field, changed_type))
         for prop in props:
             info = self.get_type_info(prop.type)
-            unit.use("std::cell::Cell" if info.is_copy else "std::cell::RefCell")
+            unit.use(self.field_cell(info))
             unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.client_type)))
         unit.emit("}")
         unit.emit()
@@ -1228,7 +1239,7 @@ class Generator:
         for prop in props:
             info = self.get_type_info(prop.type)
             unit.use(*info.server_imports)
-            unit.use("std::cell::Cell" if info.is_copy else "std::cell::RefCell")
+            unit.use(self.field_cell(info))
             unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.server_type)))
         direct_flags = [
             "%s::%s" % (changed_type, screaming(prop.name)) for prop in props if self.direct_default(cl, prop) is not None
@@ -1463,11 +1474,8 @@ class Generator:
         unit.emit("            CompositionProperty::register::<%s, %s>(" % (struct, info.server_type))
         unit.emit('                "%s",' % prop.name)
         unit.emit('                "%s",' % name)
-        getter = ("props_of::<%s>(obj).%s.get()" if info.is_copy else "props_of::<%s>(obj).%s.borrow().clone()") % (struct, field)
-        if info.is_copy:
-            setter = "props_of::<%s>(obj).%s.set(v)" % (struct, field)
-        else:
-            setter = "*props_of::<%s>(obj).%s.borrow_mut() = v" % (struct, field)
+        getter = "props_of::<%s>(obj).%s.get()" % (struct, field)
+        setter = "props_of::<%s>(obj).%s.set(v)" % (struct, field)
         unit.emit("                |obj| %s," % getter)
         unit.emit("                |obj, v| %s," % setter)
         if is_variant:

@@ -23,10 +23,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -121,7 +121,7 @@ pub struct PointLightProps {
     constant_attenuation: Cell<f32>,
     linear_attenuation: Cell<f32>,
     quadratic_attenuation: Cell<f32>,
-    coordinate_space: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    coordinate_space: OptionCell<Rc<dyn ICompositionObject>>,
     offset: Cell<Vector3D>,
     intensity: Cell<f32>,
     min_attenuation_cutoff: Cell<f32>,
@@ -146,7 +146,7 @@ impl PointLightProps {
             constant_attenuation: Cell::new(Default::default()),
             linear_attenuation: Cell::new(Default::default()),
             quadratic_attenuation: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             offset: Cell::new(Default::default()),
             intensity: Cell::new(Default::default()),
             min_attenuation_cutoff: Cell::new(Default::default()),
@@ -341,24 +341,24 @@ impl PointLightProps {
 
     /// `CoordinateSpace` (FerroUI overlay).
     pub fn coordinate_space(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     /// Sets `CoordinateSpace` (FerroUI overlay).
     pub fn set_coordinate_space(&self, host: &dyn PointLightHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         if old_value.differs(&value) {
             PointLightHooks::validate_coordinate_space_change(host, &old_value, &value);
             PointLightHooks::on_coordinate_space_changing(host);
             changed = true;
             // Update the backing value
-            *self.coordinate_space.borrow_mut() = value.clone();
+            self.coordinate_space.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_point_light.set(self.changed_fields_of_point_light.get() | PointLightChangedFields::COORDINATE_SPACE);
             host.register_for_serialization();
         }
-        *self.coordinate_space.borrow_mut() = value;
+        self.coordinate_space.set(value);
         if changed {
             PointLightHooks::on_coordinate_space_changed(host);
         }
@@ -624,7 +624,7 @@ impl PointLightProps {
             writer.write(self.quadratic_attenuation.get());
         }
         if changed.contains(PointLightChangedFields::COORDINATE_SPACE) {
-            writer.write_server_object(self.coordinate_space.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.coordinate_space.get().map(|o| o.server()));
         }
         if changed.contains(PointLightChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerPointLightProps::id_of_offset_property().base()));
@@ -667,7 +667,7 @@ pub struct ServerPointLightProps {
     constant_attenuation: Cell<f32>,
     linear_attenuation: Cell<f32>,
     quadratic_attenuation: Cell<f32>,
-    coordinate_space: RefCell<Option<Rc<dyn IServerObject>>>,
+    coordinate_space: OptionCell<Rc<dyn IServerObject>>,
     offset: Cell<Vector3D>,
     intensity: Cell<f32>,
     min_attenuation_cutoff: Cell<f32>,
@@ -690,7 +690,7 @@ impl ServerPointLightProps {
             constant_attenuation: Cell::new(Default::default()),
             linear_attenuation: Cell::new(Default::default()),
             quadratic_attenuation: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             offset: Cell::new(Default::default()),
             intensity: Cell::new(Default::default()),
             min_attenuation_cutoff: Cell::new(Default::default()),
@@ -819,8 +819,8 @@ impl ServerPointLightProps {
             CompositionProperty::register::<ServerPointLightProps, Option<Rc<dyn IServerObject>>>(
                 "CoordinateSpace",
                 "ServerPointLight",
-                |obj| props_of::<ServerPointLightProps>(obj).coordinate_space.borrow().clone(),
-                |obj, v| *props_of::<ServerPointLightProps>(obj).coordinate_space.borrow_mut() = v,
+                |obj| props_of::<ServerPointLightProps>(obj).coordinate_space.get(),
+                |obj, v| props_of::<ServerPointLightProps>(obj).coordinate_space.set(v),
                 None,
                 None,
             )
@@ -829,11 +829,11 @@ impl ServerPointLightProps {
 
     /// `CoordinateSpace`.
     pub fn coordinate_space(&self) -> Option<Rc<dyn IServerObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     pub fn set_coordinate_space(&self, host: &dyn ServerPointLightHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerPointLightHooks::on_coordinate_space_changing(host);
@@ -845,7 +845,7 @@ impl ServerPointLightProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.coordinate_space.borrow_mut() = value.clone(),
+                assign: &mut || self.coordinate_space.set(value.clone()),
             },
         );
         if changed {

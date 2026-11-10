@@ -21,10 +21,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -70,8 +70,8 @@ pub trait ShapeVisualHooks: CompositionContainerVisualHooks {
 pub struct ShapeVisualProps {
     base: CompositionContainerVisualProps,
     changed_fields_of_shape_visual: Cell<ShapeVisualChangedFields>,
-    shapes: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    view_box: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    shapes: OptionCell<Rc<dyn ICompositionObject>>,
+    view_box: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for ShapeVisualProps {
@@ -88,8 +88,8 @@ impl ShapeVisualProps {
         Self {
             base: CompositionContainerVisualProps::new(),
             changed_fields_of_shape_visual: Cell::new(ShapeVisualChangedFields::empty()),
-            shapes: RefCell::new(None),
-            view_box: RefCell::new(None),
+            shapes: OptionCell::new(),
+            view_box: OptionCell::new(),
         }
     }
 
@@ -112,24 +112,24 @@ impl ShapeVisualProps {
 
     /// `Shapes` (FerroUI overlay).
     pub fn shapes(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.shapes.borrow().clone()
+        self.shapes.get()
     }
 
     /// Sets `Shapes` (FerroUI overlay).
     pub fn set_shapes(&self, host: &dyn ShapeVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.shapes.borrow().clone();
+        let old_value = self.shapes.get();
         if old_value.differs(&value) {
             ShapeVisualHooks::validate_shapes_change(host, &old_value, &value);
             ShapeVisualHooks::on_shapes_changing(host);
             changed = true;
             // Update the backing value
-            *self.shapes.borrow_mut() = value.clone();
+            self.shapes.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_shape_visual.set(self.changed_fields_of_shape_visual.get() | ShapeVisualChangedFields::SHAPES);
             host.register_for_serialization();
         }
-        *self.shapes.borrow_mut() = value;
+        self.shapes.set(value);
         if changed {
             ShapeVisualHooks::on_shapes_changed(host);
         }
@@ -137,24 +137,24 @@ impl ShapeVisualProps {
 
     /// `ViewBox` (FerroUI overlay).
     pub fn view_box(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.view_box.borrow().clone()
+        self.view_box.get()
     }
 
     /// Sets `ViewBox` (FerroUI overlay).
     pub fn set_view_box(&self, host: &dyn ShapeVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.view_box.borrow().clone();
+        let old_value = self.view_box.get();
         if old_value.differs(&value) {
             ShapeVisualHooks::validate_view_box_change(host, &old_value, &value);
             ShapeVisualHooks::on_view_box_changing(host);
             changed = true;
             // Update the backing value
-            *self.view_box.borrow_mut() = value.clone();
+            self.view_box.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_shape_visual.set(self.changed_fields_of_shape_visual.get() | ShapeVisualChangedFields::VIEW_BOX);
             host.register_for_serialization();
         }
-        *self.view_box.borrow_mut() = value;
+        self.view_box.set(value);
         if changed {
             ShapeVisualHooks::on_view_box_changed(host);
         }
@@ -180,10 +180,10 @@ impl ShapeVisualProps {
         let changed = self.changed_fields_of_shape_visual.get();
         writer.write(changed);
         if changed.contains(ShapeVisualChangedFields::SHAPES) {
-            writer.write_server_object(self.shapes.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.shapes.get().map(|o| o.server()));
         }
         if changed.contains(ShapeVisualChangedFields::VIEW_BOX) {
-            writer.write_server_object(self.view_box.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.view_box.get().map(|o| o.server()));
         }
         self.changed_fields_of_shape_visual.set(ShapeVisualChangedFields::empty());
     }
@@ -208,8 +208,8 @@ pub trait ServerShapeVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerShapeVisual`.
 pub struct ServerShapeVisualProps {
-    shapes: RefCell<Option<Rc<dyn IServerObject>>>,
-    view_box: RefCell<Option<Rc<dyn IServerObject>>>,
+    shapes: OptionCell<Rc<dyn IServerObject>>,
+    view_box: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerShapeVisualProps {
@@ -223,8 +223,8 @@ impl ServerShapeVisualProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            shapes: RefCell::new(None),
-            view_box: RefCell::new(None),
+            shapes: OptionCell::new(),
+            view_box: OptionCell::new(),
         }
     }
 
@@ -244,8 +244,8 @@ impl ServerShapeVisualProps {
             CompositionProperty::register::<ServerShapeVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Shapes",
                 "ServerShapeVisual",
-                |obj| props_of::<ServerShapeVisualProps>(obj).shapes.borrow().clone(),
-                |obj, v| *props_of::<ServerShapeVisualProps>(obj).shapes.borrow_mut() = v,
+                |obj| props_of::<ServerShapeVisualProps>(obj).shapes.get(),
+                |obj, v| props_of::<ServerShapeVisualProps>(obj).shapes.set(v),
                 None,
                 None,
             )
@@ -254,11 +254,11 @@ impl ServerShapeVisualProps {
 
     /// `Shapes`.
     pub fn shapes(&self) -> Option<Rc<dyn IServerObject>> {
-        self.shapes.borrow().clone()
+        self.shapes.get()
     }
 
     pub fn set_shapes(&self, host: &dyn ServerShapeVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.shapes.borrow().clone();
+        let old_value = self.shapes.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerShapeVisualHooks::on_shapes_changing(host);
@@ -270,7 +270,7 @@ impl ServerShapeVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.shapes.borrow_mut() = value.clone(),
+                assign: &mut || self.shapes.set(value.clone()),
             },
         );
         if changed {
@@ -285,8 +285,8 @@ impl ServerShapeVisualProps {
             CompositionProperty::register::<ServerShapeVisualProps, Option<Rc<dyn IServerObject>>>(
                 "ViewBox",
                 "ServerShapeVisual",
-                |obj| props_of::<ServerShapeVisualProps>(obj).view_box.borrow().clone(),
-                |obj, v| *props_of::<ServerShapeVisualProps>(obj).view_box.borrow_mut() = v,
+                |obj| props_of::<ServerShapeVisualProps>(obj).view_box.get(),
+                |obj, v| props_of::<ServerShapeVisualProps>(obj).view_box.set(v),
                 None,
                 None,
             )
@@ -295,11 +295,11 @@ impl ServerShapeVisualProps {
 
     /// `ViewBox`.
     pub fn view_box(&self) -> Option<Rc<dyn IServerObject>> {
-        self.view_box.borrow().clone()
+        self.view_box.get()
     }
 
     pub fn set_view_box(&self, host: &dyn ServerShapeVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.view_box.borrow().clone();
+        let old_value = self.view_box.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerShapeVisualHooks::on_view_box_changing(host);
@@ -311,7 +311,7 @@ impl ServerShapeVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.view_box.borrow_mut() = value.clone(),
+                assign: &mut || self.view_box.set(value.clone()),
             },
         );
         if changed {

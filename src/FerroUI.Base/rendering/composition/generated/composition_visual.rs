@@ -40,10 +40,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -254,11 +254,11 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
 /// The UI-thread properties of `CompositionVisual`.
 pub struct CompositionVisualProps {
     changed_fields_of_composition_visual: Cell<CompositionVisualChangedFields>,
-    root: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    parent: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    root: OptionCell<Rc<dyn ICompositionObject>>,
+    parent: OptionCell<Rc<dyn ICompositionObject>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: RefCell<Option<Arc<dyn IGeometryImpl>>>,
+    clip: OptionCell<Arc<dyn IGeometryImpl>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
     translation: Cell<Vector3D>,
@@ -269,14 +269,14 @@ pub struct CompositionVisualProps {
     orientation: Cell<Quaternion>,
     scale: Cell<Vector3D>,
     transform_matrix: Cell<Matrix>,
-    adorned_visual: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    adorned_visual: OptionCell<Rc<dyn ICompositionObject>>,
     adorner_is_clipped: Cell<bool>,
-    opacity_mask_brush: RefCell<Option<BatchResource<dyn IBrush>>>,
-    effect: RefCell<Option<Arc<dyn IImmutableEffect>>>,
+    opacity_mask_brush: OptionCell<BatchResource<dyn IBrush>>,
+    effect: OptionCell<Arc<dyn IImmutableEffect>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
-    cache_mode: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    composition_clip: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    cache_mode: OptionCell<Rc<dyn ICompositionObject>>,
+    composition_clip: OptionCell<Rc<dyn ICompositionObject>>,
     rotation_axis: Cell<Vector3D>,
     relative_offset_adjustment: Cell<Vector3D>,
     relative_size_adjustment: Cell<Vector>,
@@ -285,7 +285,7 @@ pub struct CompositionVisualProps {
     border_mode: Cell<CompositionBorderMode>,
     backface_visibility: Cell<CompositionBackfaceVisibility>,
     composite_mode: Cell<CompositionCompositeMode>,
-    parent_for_transform: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    parent_for_transform: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for CompositionVisualProps {
@@ -301,11 +301,11 @@ impl CompositionVisualProps {
     pub fn new() -> Self {
         Self {
             changed_fields_of_composition_visual: Cell::new(CompositionVisualChangedFields::empty()),
-            root: RefCell::new(None),
-            parent: RefCell::new(None),
+            root: OptionCell::new(),
+            parent: OptionCell::new(),
             visible: Cell::new(Default::default()),
             opacity: Cell::new(Default::default()),
-            clip: RefCell::new(None),
+            clip: OptionCell::new(),
             clip_to_bounds: Cell::new(Default::default()),
             offset: Cell::new(Default::default()),
             translation: Cell::new(Default::default()),
@@ -316,14 +316,14 @@ impl CompositionVisualProps {
             orientation: Cell::new(Default::default()),
             scale: Cell::new(Default::default()),
             transform_matrix: Cell::new(Default::default()),
-            adorned_visual: RefCell::new(None),
+            adorned_visual: OptionCell::new(),
             adorner_is_clipped: Cell::new(Default::default()),
-            opacity_mask_brush: RefCell::new(None),
-            effect: RefCell::new(None),
+            opacity_mask_brush: OptionCell::new(),
+            effect: OptionCell::new(),
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
-            cache_mode: RefCell::new(None),
-            composition_clip: RefCell::new(None),
+            cache_mode: OptionCell::new(),
+            composition_clip: OptionCell::new(),
             rotation_axis: Cell::new(Default::default()),
             relative_offset_adjustment: Cell::new(Default::default()),
             relative_size_adjustment: Cell::new(Default::default()),
@@ -332,7 +332,7 @@ impl CompositionVisualProps {
             border_mode: Cell::new(Default::default()),
             backface_visibility: Cell::new(Default::default()),
             composite_mode: Cell::new(Default::default()),
-            parent_for_transform: RefCell::new(None),
+            parent_for_transform: OptionCell::new(),
         }
     }
 
@@ -358,24 +358,24 @@ impl CompositionVisualProps {
 
     /// `Root` (internal).
     pub fn root(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.root.borrow().clone()
+        self.root.get()
     }
 
     /// Sets `Root` (internal).
     pub fn set_root(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.root.borrow().clone();
+        let old_value = self.root.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_root_change(host, &old_value, &value);
             CompositionVisualHooks::on_root_changing(host);
             changed = true;
             // Update the backing value
-            *self.root.borrow_mut() = value.clone();
+            self.root.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROOT);
             host.register_for_serialization();
         }
-        *self.root.borrow_mut() = value;
+        self.root.set(value);
         if changed {
             CompositionVisualHooks::on_root_changed(host);
         }
@@ -383,24 +383,24 @@ impl CompositionVisualProps {
 
     /// `Parent` (internal).
     pub fn parent(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.parent.borrow().clone()
+        self.parent.get()
     }
 
     /// Sets `Parent` (internal).
     pub fn set_parent(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.parent.borrow().clone();
+        let old_value = self.parent.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_parent_change(host, &old_value, &value);
             CompositionVisualHooks::on_parent_changing(host);
             changed = true;
             // Update the backing value
-            *self.parent.borrow_mut() = value.clone();
+            self.parent.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::PARENT);
             host.register_for_serialization();
         }
-        *self.parent.borrow_mut() = value;
+        self.parent.set(value);
         if changed {
             CompositionVisualHooks::on_parent_changed(host);
         }
@@ -502,24 +502,24 @@ impl CompositionVisualProps {
 
     /// `Clip` (internal).
     pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
-        self.clip.borrow().clone()
+        self.clip.get()
     }
 
     /// Sets `Clip` (internal).
     pub fn set_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
         let mut changed = false;
-        let old_value = self.clip.borrow().clone();
+        let old_value = self.clip.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_clip_change(host, &old_value, &value);
             CompositionVisualHooks::on_clip_changing(host);
             changed = true;
             // Update the backing value
-            *self.clip.borrow_mut() = value.clone();
+            self.clip.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CLIP);
             host.register_for_serialization();
         }
-        *self.clip.borrow_mut() = value;
+        self.clip.set(value);
         if changed {
             CompositionVisualHooks::on_clip_changed(host);
         }
@@ -997,24 +997,24 @@ impl CompositionVisualProps {
 
     /// `AdornedVisual` (internal).
     pub fn adorned_visual(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.adorned_visual.borrow().clone()
+        self.adorned_visual.get()
     }
 
     /// Sets `AdornedVisual` (internal).
     pub fn set_adorned_visual(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.adorned_visual.borrow().clone();
+        let old_value = self.adorned_visual.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_adorned_visual_change(host, &old_value, &value);
             CompositionVisualHooks::on_adorned_visual_changing(host);
             changed = true;
             // Update the backing value
-            *self.adorned_visual.borrow_mut() = value.clone();
+            self.adorned_visual.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ADORNED_VISUAL);
             host.register_for_serialization();
         }
-        *self.adorned_visual.borrow_mut() = value;
+        self.adorned_visual.set(value);
         if changed {
             CompositionVisualHooks::on_adorned_visual_changed(host);
         }
@@ -1047,24 +1047,24 @@ impl CompositionVisualProps {
 
     /// `OpacityMaskBrush` (private to the class).
     pub fn opacity_mask_brush_transport_field(&self) -> Option<BatchResource<dyn IBrush>> {
-        self.opacity_mask_brush.borrow().clone()
+        self.opacity_mask_brush.get()
     }
 
     /// Sets `OpacityMaskBrush` (private to the class).
     pub fn set_opacity_mask_brush_transport_field(&self, host: &dyn CompositionVisualHooks, value: Option<BatchResource<dyn IBrush>>) {
         let mut changed = false;
-        let old_value = self.opacity_mask_brush.borrow().clone();
+        let old_value = self.opacity_mask_brush.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_opacity_mask_brush_change(host, &old_value, &value);
             CompositionVisualHooks::on_opacity_mask_brush_changing(host);
             changed = true;
             // Update the backing value
-            *self.opacity_mask_brush.borrow_mut() = value.clone();
+            self.opacity_mask_brush.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::OPACITY_MASK_BRUSH);
             host.register_for_serialization();
         }
-        *self.opacity_mask_brush.borrow_mut() = value;
+        self.opacity_mask_brush.set(value);
         if changed {
             CompositionVisualHooks::on_opacity_mask_brush_changed(host);
         }
@@ -1072,24 +1072,24 @@ impl CompositionVisualProps {
 
     /// `Effect` (internal).
     pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
-        self.effect.borrow().clone()
+        self.effect.get()
     }
 
     /// Sets `Effect` (internal).
     pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
         let mut changed = false;
-        let old_value = self.effect.borrow().clone();
+        let old_value = self.effect.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_effect_change(host, &old_value, &value);
             CompositionVisualHooks::on_effect_changing(host);
             changed = true;
             // Update the backing value
-            *self.effect.borrow_mut() = value.clone();
+            self.effect.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::EFFECT);
             host.register_for_serialization();
         }
-        *self.effect.borrow_mut() = value;
+        self.effect.set(value);
         if changed {
             CompositionVisualHooks::on_effect_changed(host);
         }
@@ -1147,24 +1147,24 @@ impl CompositionVisualProps {
 
     /// `CacheMode` (internal).
     pub fn cache_mode(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.cache_mode.borrow().clone()
+        self.cache_mode.get()
     }
 
     /// Sets `CacheMode` (internal).
     pub fn set_cache_mode(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.cache_mode.borrow().clone();
+        let old_value = self.cache_mode.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_cache_mode_change(host, &old_value, &value);
             CompositionVisualHooks::on_cache_mode_changing(host);
             changed = true;
             // Update the backing value
-            *self.cache_mode.borrow_mut() = value.clone();
+            self.cache_mode.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CACHE_MODE);
             host.register_for_serialization();
         }
-        *self.cache_mode.borrow_mut() = value;
+        self.cache_mode.set(value);
         if changed {
             CompositionVisualHooks::on_cache_mode_changed(host);
         }
@@ -1172,24 +1172,24 @@ impl CompositionVisualProps {
 
     /// `CompositionClip` (FerroUI overlay).
     pub fn composition_clip(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.composition_clip.borrow().clone()
+        self.composition_clip.get()
     }
 
     /// Sets `CompositionClip` (FerroUI overlay).
     pub fn set_composition_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.composition_clip.borrow().clone();
+        let old_value = self.composition_clip.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_composition_clip_change(host, &old_value, &value);
             CompositionVisualHooks::on_composition_clip_changing(host);
             changed = true;
             // Update the backing value
-            *self.composition_clip.borrow_mut() = value.clone();
+            self.composition_clip.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITION_CLIP);
             host.register_for_serialization();
         }
-        *self.composition_clip.borrow_mut() = value;
+        self.composition_clip.set(value);
         if changed {
             CompositionVisualHooks::on_composition_clip_changed(host);
         }
@@ -1463,24 +1463,24 @@ impl CompositionVisualProps {
 
     /// `ParentForTransform` (FerroUI overlay).
     pub fn parent_for_transform(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.parent_for_transform.borrow().clone()
+        self.parent_for_transform.get()
     }
 
     /// Sets `ParentForTransform` (FerroUI overlay).
     pub fn set_parent_for_transform(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.parent_for_transform.borrow().clone();
+        let old_value = self.parent_for_transform.get();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_parent_for_transform_change(host, &old_value, &value);
             CompositionVisualHooks::on_parent_for_transform_changing(host);
             changed = true;
             // Update the backing value
-            *self.parent_for_transform.borrow_mut() = value.clone();
+            self.parent_for_transform.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::PARENT_FOR_TRANSFORM);
             host.register_for_serialization();
         }
-        *self.parent_for_transform.borrow_mut() = value;
+        self.parent_for_transform.set(value);
         if changed {
             CompositionVisualHooks::on_parent_for_transform_changed(host);
         }
@@ -1610,10 +1610,10 @@ impl CompositionVisualProps {
         let changed = self.changed_fields_of_composition_visual.get();
         writer.write(changed);
         if changed.contains(CompositionVisualChangedFields::ROOT) {
-            writer.write_server_object(self.root.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.root.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::PARENT) {
-            writer.write_server_object(self.parent.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.parent.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_visible_property().base()));
@@ -1626,7 +1626,7 @@ impl CompositionVisualProps {
             writer.write(self.opacity.get());
         }
         if changed.contains(CompositionVisualChangedFields::CLIP) {
-            writer.write_value(self.clip.borrow().clone());
+            writer.write_value(self.clip.get());
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_clip_to_bounds_property().base()));
@@ -1679,16 +1679,16 @@ impl CompositionVisualProps {
             writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionVisualChangedFields::ADORNED_VISUAL) {
-            writer.write_server_object(self.adorned_visual.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.adorned_visual.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::ADORNER_IS_CLIPPED) {
             writer.write(self.adorner_is_clipped.get());
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_MASK_BRUSH) {
-            writer.write_resource(self.opacity_mask_brush.borrow().clone());
+            writer.write_resource(self.opacity_mask_brush.get());
         }
         if changed.contains(CompositionVisualChangedFields::EFFECT) {
-            writer.write_value(self.effect.borrow().clone());
+            writer.write_value(self.effect.get());
         }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {
             writer.write(self.render_options.get());
@@ -1697,10 +1697,10 @@ impl CompositionVisualProps {
             writer.write(self.text_options.get());
         }
         if changed.contains(CompositionVisualChangedFields::CACHE_MODE) {
-            writer.write_server_object(self.cache_mode.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.cache_mode.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
-            writer.write_server_object(self.composition_clip.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.composition_clip.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base()));
@@ -1733,7 +1733,7 @@ impl CompositionVisualProps {
             writer.write(self.composite_mode.get());
         }
         if changed.contains(CompositionVisualChangedFields::PARENT_FOR_TRANSFORM) {
-            writer.write_server_object(self.parent_for_transform.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.parent_for_transform.get().map(|o| o.server()));
         }
         self.changed_fields_of_composition_visual.set(CompositionVisualChangedFields::empty());
     }
@@ -1799,11 +1799,11 @@ pub trait ServerCompositionVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerCompositionVisual`.
 pub struct ServerCompositionVisualProps {
-    root: RefCell<Option<Rc<dyn IServerObject>>>,
-    parent: RefCell<Option<Rc<dyn IServerObject>>>,
+    root: OptionCell<Rc<dyn IServerObject>>,
+    parent: OptionCell<Rc<dyn IServerObject>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: RefCell<Option<Arc<dyn IGeometryImpl>>>,
+    clip: OptionCell<Arc<dyn IGeometryImpl>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
     translation: Cell<Vector3D>,
@@ -1814,14 +1814,14 @@ pub struct ServerCompositionVisualProps {
     orientation: Cell<Quaternion>,
     scale: Cell<Vector3D>,
     transform_matrix: Cell<Matrix>,
-    adorned_visual: RefCell<Option<Rc<dyn IServerObject>>>,
+    adorned_visual: OptionCell<Rc<dyn IServerObject>>,
     adorner_is_clipped: Cell<bool>,
-    opacity_mask_brush: RefCell<Option<ServerResourceRef<dyn IBrush>>>,
-    effect: RefCell<Option<Arc<dyn IImmutableEffect>>>,
+    opacity_mask_brush: OptionCell<ServerResourceRef<dyn IBrush>>,
+    effect: OptionCell<Arc<dyn IImmutableEffect>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
-    cache_mode: RefCell<Option<Rc<dyn IServerObject>>>,
-    composition_clip: RefCell<Option<Rc<dyn IServerObject>>>,
+    cache_mode: OptionCell<Rc<dyn IServerObject>>,
+    composition_clip: OptionCell<Rc<dyn IServerObject>>,
     rotation_axis: Cell<Vector3D>,
     relative_offset_adjustment: Cell<Vector3D>,
     relative_size_adjustment: Cell<Vector>,
@@ -1830,7 +1830,7 @@ pub struct ServerCompositionVisualProps {
     border_mode: Cell<CompositionBorderMode>,
     backface_visibility: Cell<CompositionBackfaceVisibility>,
     composite_mode: Cell<CompositionCompositeMode>,
-    parent_for_transform: RefCell<Option<Rc<dyn IServerObject>>>,
+    parent_for_transform: OptionCell<Rc<dyn IServerObject>>,
     /// Whether the first changes of the object were read: they report
     /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) as changed.
     defaults_reported: Cell<bool>,
@@ -1861,11 +1861,11 @@ impl ServerCompositionVisualProps {
     /// thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            root: RefCell::new(None),
-            parent: RefCell::new(None),
+            root: OptionCell::new(),
+            parent: OptionCell::new(),
             visible: Cell::new(true),
             opacity: Cell::new(1.0),
-            clip: RefCell::new(None),
+            clip: OptionCell::new(),
             clip_to_bounds: Cell::new(true),
             offset: Cell::new(Default::default()),
             translation: Cell::new(Default::default()),
@@ -1876,14 +1876,14 @@ impl ServerCompositionVisualProps {
             orientation: Cell::new(Quaternion::IDENTITY),
             scale: Cell::new(Vector3D::new(1.0, 1.0, 1.0)),
             transform_matrix: Cell::new(Matrix::IDENTITY),
-            adorned_visual: RefCell::new(None),
+            adorned_visual: OptionCell::new(),
             adorner_is_clipped: Cell::new(Default::default()),
-            opacity_mask_brush: RefCell::new(None),
-            effect: RefCell::new(None),
+            opacity_mask_brush: OptionCell::new(),
+            effect: OptionCell::new(),
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
-            cache_mode: RefCell::new(None),
-            composition_clip: RefCell::new(None),
+            cache_mode: OptionCell::new(),
+            composition_clip: OptionCell::new(),
             rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
             relative_offset_adjustment: Cell::new(Default::default()),
             relative_size_adjustment: Cell::new(Default::default()),
@@ -1892,7 +1892,7 @@ impl ServerCompositionVisualProps {
             border_mode: Cell::new(Default::default()),
             backface_visibility: Cell::new(Default::default()),
             composite_mode: Cell::new(Default::default()),
-            parent_for_transform: RefCell::new(None),
+            parent_for_transform: OptionCell::new(),
             defaults_reported: Cell::new(false),
         }
     }
@@ -1913,8 +1913,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Root",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).root.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).root.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).root.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).root.set(v),
                 None,
                 None,
             )
@@ -1923,11 +1923,11 @@ impl ServerCompositionVisualProps {
 
     /// `Root`.
     pub fn root(&self) -> Option<Rc<dyn IServerObject>> {
-        self.root.borrow().clone()
+        self.root.get()
     }
 
     pub fn set_root(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.root.borrow().clone();
+        let old_value = self.root.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_root_changing(host);
@@ -1939,7 +1939,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.root.borrow_mut() = value.clone(),
+                assign: &mut || self.root.set(value.clone()),
             },
         );
         if changed {
@@ -1954,8 +1954,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Parent",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).parent.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).parent.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).parent.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).parent.set(v),
                 None,
                 None,
             )
@@ -1964,11 +1964,11 @@ impl ServerCompositionVisualProps {
 
     /// `Parent`.
     pub fn parent(&self) -> Option<Rc<dyn IServerObject>> {
-        self.parent.borrow().clone()
+        self.parent.get()
     }
 
     pub fn set_parent(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.parent.borrow().clone();
+        let old_value = self.parent.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_parent_changing(host);
@@ -1980,7 +1980,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.parent.borrow_mut() = value.clone(),
+                assign: &mut || self.parent.set(value.clone()),
             },
         );
         if changed {
@@ -2045,8 +2045,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IGeometryImpl>>>(
                 "Clip",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).clip.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).clip.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).clip.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).clip.set(v),
                 None,
                 None,
             )
@@ -2055,11 +2055,11 @@ impl ServerCompositionVisualProps {
 
     /// `Clip`.
     pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
-        self.clip.borrow().clone()
+        self.clip.get()
     }
 
     pub fn set_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
-        let old_value = self.clip.borrow().clone();
+        let old_value = self.clip.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_clip_changing(host);
@@ -2071,7 +2071,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.clip.borrow_mut() = value.clone(),
+                assign: &mut || self.clip.set(value.clone()),
             },
         );
         if changed {
@@ -2336,8 +2336,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "AdornedVisual",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).adorned_visual.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).adorned_visual.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).adorned_visual.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).adorned_visual.set(v),
                 None,
                 None,
             )
@@ -2346,11 +2346,11 @@ impl ServerCompositionVisualProps {
 
     /// `AdornedVisual`.
     pub fn adorned_visual(&self) -> Option<Rc<dyn IServerObject>> {
-        self.adorned_visual.borrow().clone()
+        self.adorned_visual.get()
     }
 
     pub fn set_adorned_visual(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.adorned_visual.borrow().clone();
+        let old_value = self.adorned_visual.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_adorned_visual_changing(host);
@@ -2362,7 +2362,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.adorned_visual.borrow_mut() = value.clone(),
+                assign: &mut || self.adorned_visual.set(value.clone()),
             },
         );
         if changed {
@@ -2418,8 +2418,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<ServerResourceRef<dyn IBrush>>>(
                 "OpacityMaskBrush",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.set(v),
                 None,
                 None,
             )
@@ -2428,11 +2428,11 @@ impl ServerCompositionVisualProps {
 
     /// `OpacityMaskBrush`.
     pub fn opacity_mask_brush(&self) -> Option<ServerResourceRef<dyn IBrush>> {
-        self.opacity_mask_brush.borrow().clone()
+        self.opacity_mask_brush.get()
     }
 
     pub fn set_opacity_mask_brush(&self, host: &dyn ServerCompositionVisualHooks, value: Option<ServerResourceRef<dyn IBrush>>) {
-        let old_value = self.opacity_mask_brush.borrow().clone();
+        let old_value = self.opacity_mask_brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_opacity_mask_brush_changing(host);
@@ -2444,7 +2444,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.opacity_mask_brush.borrow_mut() = value.clone(),
+                assign: &mut || self.opacity_mask_brush.set(value.clone()),
             },
         );
         if changed {
@@ -2459,8 +2459,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IImmutableEffect>>>(
                 "Effect",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).effect.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).effect.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).effect.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).effect.set(v),
                 None,
                 None,
             )
@@ -2469,11 +2469,11 @@ impl ServerCompositionVisualProps {
 
     /// `Effect`.
     pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
-        self.effect.borrow().clone()
+        self.effect.get()
     }
 
     pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
-        let old_value = self.effect.borrow().clone();
+        let old_value = self.effect.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_effect_changing(host);
@@ -2485,7 +2485,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.effect.borrow_mut() = value.clone(),
+                assign: &mut || self.effect.set(value.clone()),
             },
         );
         if changed {
@@ -2582,8 +2582,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "CacheMode",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).cache_mode.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).cache_mode.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).cache_mode.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).cache_mode.set(v),
                 None,
                 None,
             )
@@ -2592,11 +2592,11 @@ impl ServerCompositionVisualProps {
 
     /// `CacheMode`.
     pub fn cache_mode(&self) -> Option<Rc<dyn IServerObject>> {
-        self.cache_mode.borrow().clone()
+        self.cache_mode.get()
     }
 
     pub fn set_cache_mode(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.cache_mode.borrow().clone();
+        let old_value = self.cache_mode.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_cache_mode_changing(host);
@@ -2608,7 +2608,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.cache_mode.borrow_mut() = value.clone(),
+                assign: &mut || self.cache_mode.set(value.clone()),
             },
         );
         if changed {
@@ -2623,8 +2623,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "CompositionClip",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).composition_clip.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).composition_clip.set(v),
                 None,
                 None,
             )
@@ -2633,11 +2633,11 @@ impl ServerCompositionVisualProps {
 
     /// `CompositionClip`.
     pub fn composition_clip(&self) -> Option<Rc<dyn IServerObject>> {
-        self.composition_clip.borrow().clone()
+        self.composition_clip.get()
     }
 
     pub fn set_composition_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.composition_clip.borrow().clone();
+        let old_value = self.composition_clip.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_composition_clip_changing(host);
@@ -2649,7 +2649,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.composition_clip.borrow_mut() = value.clone(),
+                assign: &mut || self.composition_clip.set(value.clone()),
             },
         );
         if changed {
@@ -2944,8 +2944,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "ParentForTransform",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.set(v),
                 None,
                 None,
             )
@@ -2954,11 +2954,11 @@ impl ServerCompositionVisualProps {
 
     /// `ParentForTransform`.
     pub fn parent_for_transform(&self) -> Option<Rc<dyn IServerObject>> {
-        self.parent_for_transform.borrow().clone()
+        self.parent_for_transform.get()
     }
 
     pub fn set_parent_for_transform(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.parent_for_transform.borrow().clone();
+        let old_value = self.parent_for_transform.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_parent_for_transform_changing(host);
@@ -2970,7 +2970,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.parent_for_transform.borrow_mut() = value.clone(),
+                assign: &mut || self.parent_for_transform.set(value.clone()),
             },
         );
         if changed {

@@ -40,10 +40,12 @@ pub use uri::{Uri, UriFormatError, UriKind, UriToUrlError};
 pub use uri_ref::UriRef;
 
 mod disposable_lock;
+mod option_cell;
 mod ref_countable;
 mod uri_extensions;
 
 pub use disposable_lock::DisposableLock;
+pub(crate) use option_cell::OptionCell;
 pub use ref_countable::{RefCountable, RefCounted};
 mod thread_bound;
 pub use thread_bound::ThreadBound;

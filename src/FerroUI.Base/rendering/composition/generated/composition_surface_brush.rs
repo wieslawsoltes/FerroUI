@@ -25,10 +25,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -134,7 +134,7 @@ pub trait CompositionSurfaceBrushHooks: CompositionBrushHooks {
 pub struct CompositionSurfaceBrushProps {
     base: CompositionBrushProps,
     changed_fields_of_composition_surface_brush: Cell<CompositionSurfaceBrushChangedFields>,
-    surface: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    surface: OptionCell<Rc<dyn ICompositionObject>>,
     stretch: Cell<CompositionStretch>,
     horizontal_alignment_ratio: Cell<f32>,
     vertical_alignment_ratio: Cell<f32>,
@@ -162,7 +162,7 @@ impl CompositionSurfaceBrushProps {
         Self {
             base: CompositionBrushProps::new(),
             changed_fields_of_composition_surface_brush: Cell::new(CompositionSurfaceBrushChangedFields::empty()),
-            surface: RefCell::new(None),
+            surface: OptionCell::new(),
             stretch: Cell::new(Default::default()),
             horizontal_alignment_ratio: Cell::new(Default::default()),
             vertical_alignment_ratio: Cell::new(Default::default()),
@@ -202,24 +202,24 @@ impl CompositionSurfaceBrushProps {
 
     /// `Surface` (FerroUI overlay).
     pub fn surface(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.surface.borrow().clone()
+        self.surface.get()
     }
 
     /// Sets `Surface` (FerroUI overlay).
     pub fn set_surface(&self, host: &dyn CompositionSurfaceBrushHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.surface.borrow().clone();
+        let old_value = self.surface.get();
         if old_value.differs(&value) {
             CompositionSurfaceBrushHooks::validate_surface_change(host, &old_value, &value);
             CompositionSurfaceBrushHooks::on_surface_changing(host);
             changed = true;
             // Update the backing value
-            *self.surface.borrow_mut() = value.clone();
+            self.surface.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_surface_brush.set(self.changed_fields_of_composition_surface_brush.get() | CompositionSurfaceBrushChangedFields::SURFACE);
             host.register_for_serialization();
         }
-        *self.surface.borrow_mut() = value;
+        self.surface.set(value);
         if changed {
             CompositionSurfaceBrushHooks::on_surface_changed(host);
         }
@@ -704,7 +704,7 @@ impl CompositionSurfaceBrushProps {
         let changed = self.changed_fields_of_composition_surface_brush.get();
         writer.write(changed);
         if changed.contains(CompositionSurfaceBrushChangedFields::SURFACE) {
-            writer.write_server_object(self.surface.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.surface.get().map(|o| o.server()));
         }
         if changed.contains(CompositionSurfaceBrushChangedFields::STRETCH) {
             writer.write(self.stretch.get());
@@ -781,7 +781,7 @@ pub trait ServerCompositionSurfaceBrushHooks: ServerCompositionBrushHooks {
 /// The server-side properties of `ServerCompositionSurfaceBrush`.
 pub struct ServerCompositionSurfaceBrushProps {
     base: ServerCompositionBrushProps,
-    surface: RefCell<Option<Rc<dyn IServerObject>>>,
+    surface: OptionCell<Rc<dyn IServerObject>>,
     stretch: Cell<CompositionStretch>,
     horizontal_alignment_ratio: Cell<f32>,
     vertical_alignment_ratio: Cell<f32>,
@@ -807,7 +807,7 @@ impl ServerCompositionSurfaceBrushProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionBrushProps::new(),
-            surface: RefCell::new(None),
+            surface: OptionCell::new(),
             stretch: Cell::new(Default::default()),
             horizontal_alignment_ratio: Cell::new(Default::default()),
             vertical_alignment_ratio: Cell::new(Default::default()),
@@ -843,8 +843,8 @@ impl ServerCompositionSurfaceBrushProps {
             CompositionProperty::register::<ServerCompositionSurfaceBrushProps, Option<Rc<dyn IServerObject>>>(
                 "Surface",
                 "ServerCompositionSurfaceBrush",
-                |obj| props_of::<ServerCompositionSurfaceBrushProps>(obj).surface.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSurfaceBrushProps>(obj).surface.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSurfaceBrushProps>(obj).surface.get(),
+                |obj, v| props_of::<ServerCompositionSurfaceBrushProps>(obj).surface.set(v),
                 None,
                 None,
             )
@@ -853,11 +853,11 @@ impl ServerCompositionSurfaceBrushProps {
 
     /// `Surface`.
     pub fn surface(&self) -> Option<Rc<dyn IServerObject>> {
-        self.surface.borrow().clone()
+        self.surface.get()
     }
 
     pub fn set_surface(&self, host: &dyn ServerCompositionSurfaceBrushHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.surface.borrow().clone();
+        let old_value = self.surface.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSurfaceBrushHooks::on_surface_changing(host);
@@ -869,7 +869,7 @@ impl ServerCompositionSurfaceBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.surface.borrow_mut() = value.clone(),
+                assign: &mut || self.surface.set(value.clone()),
             },
         );
         if changed {
