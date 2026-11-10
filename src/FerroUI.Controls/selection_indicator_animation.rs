@@ -181,11 +181,19 @@ impl SelectionIndicatorAnimation {
         next.reset(1.0);
         let compositor = next.visual.compositor();
         let batch = compositor.create_scoped_batch(CompositionBatchTypes::ANIMATION);
-        let same_depth = if horizontal {
+        // Separate viewports (for example the menu and Settings footer) cannot
+        // share a travelling bar. Use the local shrink/grow animation there.
+        let clip_root = |indicator: &Indicator| {
+            indicator.element.upgrade().and_then(|element| {
+                element.get_visual_ancestors().find(|ancestor| ancestor.clip_to_bounds())
+            })
+        };
+        let same_depth = (if horizontal {
             (previous_position.y - next_position.y).abs() < 0.001
         } else {
             (previous_position.x - next_position.x).abs() < 0.001
-        };
+        }) && (owner.downcast_ref::<crate::NavigationView>().is_none()
+            || clip_root(&previous) == clip_root(&next));
         if same_depth {
             let distance = if horizontal {
                 next_position.x - previous_position.x

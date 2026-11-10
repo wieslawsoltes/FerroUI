@@ -10301,7 +10301,7 @@
   {
     "name": "InteractiveBurningFlameEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveBurningFlameEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveBurningFlameEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10313,7 +10313,7 @@
   {
     "name": "InteractivePointerSpotlightEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractivePointerSpotlightEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractivePointerSpotlightEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10325,7 +10325,7 @@
   {
     "name": "InteractiveReactiveGridEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveReactiveGridEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveReactiveGridEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10337,7 +10337,7 @@
   {
     "name": "InteractiveWaterRippleEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveWaterRippleEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveWaterRippleEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -20374,6 +20374,18 @@
     "documentation": "ferroui_controls::SelectionChangedEventArgs",
     "base": "IRoutedEventArgs",
     "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SelectionIndicator",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SelectionIndicator",
+    "base": "Rectangle",
+    "constructible": true,
     "properties": {},
     "namespace_aliases": [
       "using:FerroUI.Controls",

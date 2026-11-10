@@ -78,6 +78,14 @@ impl ServerCompositionRenderData {
         }
     }
 
+    /// Draws the geometry of a rectangular shape with radii supplied by its visual.
+    /// This preserves cap sizes during composition scaling without UI-thread redraws.
+    pub fn render_as_rounded_rectangle(&self, context: &mut dyn IDrawingContextImpl, radius: crate::Vector) {
+        if let Some(stream) = self.stream.borrow().as_ref() {
+            stream.replay_as_rounded_rectangle(context, &mut self.replay_scopes.borrow_mut(), radius);
+        }
+    }
+
     /// Lets go of what the data drew: the subscriptions to the server-side resources and the
     /// custom draw operations. Returns the emptied stream, with its buffers, for the next
     /// content (FerroUI addition, desktop-performance.md, section 9.31): a visual whose drawing

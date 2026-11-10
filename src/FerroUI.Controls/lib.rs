@@ -645,6 +645,8 @@ mod navigable_containers;
 mod selection_changed_event_args;
 mod selection_mode;
 mod selection_indicator_animation;
+mod selection_indicator;
+pub use selection_indicator::SelectionIndicator;
 mod tab_control;
 mod tab_item;
 mod tree_view;

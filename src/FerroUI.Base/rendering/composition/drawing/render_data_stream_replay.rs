@@ -4,7 +4,7 @@ use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
-use crate::{Matrix, Point, Rect, RoundedRect};
+use crate::{Matrix, Point, Rect, RoundedRect, Vector};
 use std::sync::Arc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -37,11 +37,12 @@ impl ReplayScope {
 /// Replays recorded operations onto a platform drawing context.
 pub struct ReplayVisitor<'a> {
     context: &'a mut dyn IDrawingContextImpl,
+    geometry_corner_radius: Option<Vector>,
 }
 
 impl<'a> ReplayVisitor<'a> {
     pub fn new(context: &'a mut dyn IDrawingContextImpl) -> Self {
-        Self { context }
+        Self { context, geometry_corner_radius: None }
     }
 }
 
@@ -94,8 +95,16 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         _client_pen: Option<&dyn IPen>,
         geometry: Option<&Arc<dyn IGeometryImpl>>,
     ) {
-        crate::perf_count!(RenderGeometriesDrawn);
         if let Some(geometry) = geometry {
+            if let Some(radius) = self.geometry_corner_radius {
+                let bounds = geometry.bounds();
+                let rect = RoundedRect::from_radius_xy(
+                    bounds, radius.x.min(bounds.width / 2.0), radius.y.min(bounds.height / 2.0),
+                );
+                self.on_draw_rectangle(server_brush, server_pen, _client_pen, rect, &BoxShadows::default());
+                return;
+            }
+            crate::perf_count!(RenderGeometriesDrawn);
             if !draw_with_painted_brushes(self.context, server_brush, server_pen, PaintedShape::Geometry(&**geometry), None) {
                 self.context.draw_geometry(server_brush, server_pen, &**geometry);
             }
@@ -236,6 +245,14 @@ impl RenderDataStream {
     /// Like [`replay`](Self::replay), with a reusable scope stack.
     pub fn replay_with_scopes(&self, context: &mut dyn IDrawingContextImpl, scopes: &mut Vec<ReplayScope>) {
         let mut visitor = ReplayVisitor::new(context);
+        self.visit_with_scopes(&mut visitor, scopes);
+    }
+
+    /// Replays rectangular shape geometry with render-side corner radii. Resources and
+    /// scopes still use the normal replay path, including live and composition brushes.
+    pub fn replay_as_rounded_rectangle(&self, context: &mut dyn IDrawingContextImpl, scopes: &mut Vec<ReplayScope>, radius: Vector) {
+        let mut visitor = ReplayVisitor::new(context);
+        visitor.geometry_corner_radius = Some(radius);
         self.visit_with_scopes(&mut visitor, scopes);
     }
 }

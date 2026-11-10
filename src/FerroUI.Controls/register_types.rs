@@ -413,6 +413,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::shapes::Polygon,
     crate::shapes::Polyline,
     crate::shapes::Rectangle,
+    crate::SelectionIndicator,
     crate::shapes::Sector,
     crate::shapes::Shape,
     // FerroUI.Controls.Utils
