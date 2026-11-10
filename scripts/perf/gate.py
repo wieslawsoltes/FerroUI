@@ -90,6 +90,8 @@ TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 # the candidate only, once.
 COUNTER_CHECKS = [
     ("ferroui-base", "perf-counters", "style_work"),
+    ("ferroui-base", "perf-counters", "composition_work"),
+    ("ferroui-controls", "perf-counters", "composition_work"),
 ]
 
 SUITES = {

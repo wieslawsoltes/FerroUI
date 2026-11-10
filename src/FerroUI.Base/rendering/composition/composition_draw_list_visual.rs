@@ -45,8 +45,8 @@ pub(crate) struct DrawListData {
     /// The drawing is the same but what it shows changed (section 9.14): the server redraws it.
     content_invalidated: Cell<bool>,
     draw_list: RefCell<Option<Rc<CompositionRenderData>>>,
-    /// The visual left its visual tree and this composition visual is kept until the next update
-    /// pass of the renderer (section 9.32). Until then it is hit tested as a released one is: it
+    /// The visual left its visual tree and this composition visual is kept for its return
+    /// (section 9.32). Until then it is hit tested as a released one is: it
     /// has no drawing and no children.
     departed: Cell<bool>,
     /// The properties of the acrylic visual, when the visual is one.

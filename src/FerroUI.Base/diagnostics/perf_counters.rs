@@ -236,6 +236,12 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
     /// visual had, whose server-side object was kept.
     VisualsRecordedInPlace => "visuals recorded into their render data",
+    /// `Visual::attach_to_compositor_core`: a composition visual was created for a visual that
+    /// entered a visual tree.
+    CompositionVisualsCreated => "composition visuals created",
+    /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
+    /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
+    CompositionVisualsKept => "composition visuals kept",
     /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
     UiRenderPasses => "ui: render passes",
 

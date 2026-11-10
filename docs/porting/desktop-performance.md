@@ -1728,3 +1728,151 @@ now runs through the kept storage), `server/server_render_resource.rs`
 tests (`a_fill_draws_the_same_after_any_other_fill`, six kinds of fill in all thirty-six
 orders compared pixel by pixel with the fill drawn first in a context, and
 `consecutive_solid_fills_each_have_their_colour_opacity_and_edge_mode`).
+
+### 9.32 A visual that leaves its tree for a moment or for a pool keeps its composition visual
+
+A virtualizing panel that recycles a row takes the row out of the visual tree
+(`VirtualizingStackPanel::recycle_element`, as upstream: the container is cleared, pooled, hidden
+and removed) and puts it back when the next item needs a container, in the same layout pass
+or in a later one. Leaving the tree ran `Visual::detach_from_compositor` for the row and for every element
+under it, which lets go of the composition visual, and entering it again created a new one. A
+gauntlet frame recycles rows all the time, so every frame made and released composition
+visuals and their server-side objects by the hundred: allocations on the UI thread, a
+serialized object each, and on the render thread the same again plus the removal of the old
+ones. The new objects are wherever the allocator had room, so the walks of the UI thread and
+of the render thread lost their locality as the run went on: the recording of a frame took
+5.4 ms at the start of a run and 7.8 ms forty seconds later.
+
+**What is kept for a pass.** A visual that leaves its tree asks its renderer to keep its composition
+visual until the renderer's next update pass (`IRenderer::keep_departed_composition_visual`).
+The renderer holds the composition visual beside a weak reference to the visual, so it keeps
+no visual alive, and it queues an update pass. A visual that is in a tree again before that
+pass, with the same compositor, rejoins with the composition visual it had
+(`Visual::attach_to_compositor_core`): the object, its server-side object, its render data
+and its place under its parent are the ones from before, and the synchronisation that follows
+any attachment writes whatever changed meanwhile. A visual that is not back by then is
+released in that pass exactly as it was released at once before
+(`CompositingRenderer::release_departed`, which also runs when the renderer stops or is
+disposed), and so is the composition visual of a visual that was dropped. The update pass
+always comes before the commit that would send the batch, so the render thread never sees a
+composition visual that waits.
+
+**What is kept for a pool.** One pass is not enough for a list whose rows are of more than
+one kind. A recycled row waits in the pool of its recycle key until an item of its kind needs
+a container, and that is often a later frame: with only the rule above, a gauntlet frame
+still created 35 composition visuals and kept 2.4. So the element that pools says so.
+`Visual::leave_tree_keeping_composition_visuals(leave)` runs `leave`, which takes the visual
+out of its tree, and hands back what the visual and everything under it would have given to
+the renderer for one pass, as a `KeptCompositionVisuals`
+(`IRenderer::keep_composition_visuals_departing_in`; a renderer without composition runs
+`leave` and keeps nothing). Whoever holds that value decides how long the composition
+visuals wait, and releases them by dropping it: what is back in a tree by then is left
+alone, and everything else is released exactly as the update pass releases what it kept.
+`VirtualizingStackPanel` holds one beside each element of its recycle pool
+(`remove_pooled_child`), lets go of it right after the element is a child again
+(`get_recycled_element`), and lets go of all of them when the panel itself leaves the visual
+tree. What waits is bounded by the pool, which already keeps the far larger elements
+themselves: a composition visual and its server-side object for each visual of a pooled
+element, with the render data it last had. The same conditions as for one pass decide what
+may be kept, the calls nest (a removal inside another collects for itself), and a removal
+that unwinds leaves what it collected to the next update pass.
+
+**When it is not kept.** Only a composition visual that nothing but the synchronisation of
+the visual tree wrote to is kept, because only then is the kept one the same as a new one
+would be after its first synchronisation. It is released at once, as before, when
+
+- it was handed out: `Visual::composition_visual` and the public `attach_to_compositor`
+  mark it (`ElementCompositionPreview`, animations, lights, effects and an application ask
+  that way); the synchronisation itself reads it with `own_composition_visual`, which marks
+  nothing;
+- the visual has a child composition visual or composition extras (facades, transitions,
+  lights, a theme shadow, a layer, unloading visuals, show or hide requests);
+- the composition visual draws acrylic, or has an extension that does not say that it follows
+  its control out of the tree
+  (`ICompositionDrawListVisualExtension::follows_control_out_of_tree`, `false` unless
+  overridden). The border's does: `Border` writes its corner radius to it whether or not the
+  border is in a tree;
+- the renderer is stopped, disposed or in its update pass (no pass will follow in which to
+  release it), or the renderer has none of this (the default of the two new `IRenderer`
+  methods is to refuse).
+
+A visual that returns under another renderer rejoins only when the composition visual is not
+in the tree of another target (`IRenderer::rejoins_departed_composition_visual`); under
+another compositor it never does. A visual that returns under another parent in the same pass
+keeps its composition visual and leaves the children of the old composition parent at once,
+since a composition visual has one parent.
+
+**While it waits.** A visual out of the tree has no composition visual: `composition_visual`
+answers `None` as before, the renderer's dirty lists ignore the visual, and hit testing does
+not find it. The last point needs care, because the composition visual is still a child of
+its parent until the update pass: a waiting draw list visual reports no draw list to the hit
+test and its children are not visited (`DrawListData::departed`,
+`CompositionTarget::hit_test_children`, `hit_test_first_core`). What waits for a pool goes
+through update passes: in the first of them its topmost composition visual leaves the
+children of its composition parent, as that of any removed visual does, and from then on the
+kept visuals are a subtree of their own that is in no tree, which the render thread neither
+walks nor draws. Where the visual was shown is redrawn in that pass, as for any visual that
+leaves.
+
+**An empty record for every visual that left a tree.** `detach_from_compositor` first releases
+the theme shadow visual, and that release went through the accessor that creates the
+composition extras of a visual when it has none. So every visual that left a tree once had
+extras from then on, empty ones, and missed every short path that asks whether a visual has
+extras: the child synchronisation of section 9.28 and the transitions check among them. The
+release, the end of a show or hide request, the removal of an unloading visual and the change
+of the transitions now leave a visual without extras as it is
+(`Visual::change_composition_extras`).
+
+**The bounds of a server-side visual that changes its parent.** A server-side visual
+remembers the bounds of its subtree in the space of its parent, and hands them to the parent
+as an extra dirty rectangle when the parent changes
+(`ServerCompositionVisual.OnParentChanging`), so that the place it leaves is redrawn. It
+went on remembering them, and the next update under the new parent added the same bounds to
+the dirty region again, now read in the space of the new parent: a rectangle that belongs to
+no place the visual is or was. Upstream does the same; there it is a redraw of a few pixels
+too many after a rare reparenting, here every row that comes back from a pool is reparented.
+The bounds are now forgotten when they are handed to the old parent
+(`on_parent_changing_core`), and the next update computes them for the place the visual is
+in.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the build of
+section 9.31 against the same with this section, cycle-aligned means):
+
+MEASURE_TABLE
+
+What a program can see: a composition visual that the program asked for is never kept, so
+whatever a program holds or changed is released when its visual leaves the tree, as before.
+The identity of a composition visual that nobody asked for now survives a removal and an
+addition within one update pass, which a program can only observe by walking the composition
+tree down from a composition visual it did ask for; what it changes on a visual reached that
+way stays changed on the kept one, where a new one would have started over. The diagnostic
+tools ask for the composition visuals they show, which only means that what they inspect is
+not kept. A row that comes out of a recycle pool has the composition visuals it went in
+with, under the same rule; a pooled element whose composition visual a program asked for is
+not kept, so nothing changes for it.
+
+Tests: `compositor_tests.rs`
+(`visual_back_before_the_update_pass_keeps_its_composition_visuals`,
+`visual_back_in_the_tree_is_synchronized_with_what_changed_meanwhile`,
+`visual_not_back_by_the_update_pass_releases_its_composition_visuals`,
+`composition_visuals_kept_for_a_dropped_visual_are_released`,
+`composition_visual_handed_out_is_released_when_its_visual_leaves`,
+`composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stopped`,
+`visual_out_of_the_tree_is_not_hit_through_what_is_kept_for_it`,
+`visual_moved_to_another_parent_in_one_pass_keeps_its_composition_visuals`,
+`child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_visual`,
+`composition_visual_kept_for_one_compositor_is_not_used_with_another`,
+`visual_that_leaves_its_tree_gains_no_composition_extras`; for a pool
+`visual_taken_out_for_a_pool_keeps_its_composition_visuals_across_update_passes`,
+`composition_visuals_kept_for_a_pool_are_released_by_what_holds_them`,
+`composition_visuals_kept_for_a_pool_outlive_no_visual`,
+`child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool`,
+`visuals_taken_out_inside_one_another_are_kept_by_the_innermost`,
+`nothing_is_kept_for_a_pool_outside_of_a_tree_or_while_rendering_is_stopped`,
+`composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer`; for the bounds
+`visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is`) and the
+counter checks `composition_work_of_a_row_taken_out_of_the_tree_and_put_back`
+(`compositor_tests.rs`) and `composition_work_of_rows_that_wait_in_the_recycle_pool`
+(`virtualizing_stack_panel_tests.rs`), which the performance gate runs with the counters
+`composition visuals created` and `composition visuals kept` (`scripts/perf/gate.py`,
+`COUNTER_CHECKS`).
