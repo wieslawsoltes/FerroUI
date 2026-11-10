@@ -1838,7 +1838,19 @@ in.
 What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the build of
 section 9.31 against the same with this section, cycle-aligned means):
 
-MEASURE_TABLE
+| Measure | Section 9.31 | With this section |
+|---|---|---|
+| Frames per second, two runs each | 53.7, 54.0 | 58.5, 59.4 |
+| UI thread pass, ms | 17.3 to 17.5 | 15.9 to 16.6 |
+| Render tick, ms | 17.0 to 18.0 | 14.4 to 15.1 |
+| Picture recording, ms, at the start and at the end of a run | 5.4 and 7.9, 5.6 and 8.1 | 4.9 to 5.5 throughout |
+| Composition visuals created per pass, after the first 300 passes | 35.3 | 0.0 |
+| Composition visuals kept per pass | 0 | 37.8 to 47.0 |
+
+The recording time that grew over a run no longer grows: the server visuals
+that the rows left behind and made again are the same ones now, and the dirty rectangle of a
+row that comes back is the rectangle of the place it is in. The display runs at 60 frames per
+second, so 60 is the most this measure can show.
 
 What a program can see: a composition visual that the program asked for is never kept, so
 whatever a program holds or changed is released when its visual leaves the tree, as before.
