@@ -2127,3 +2127,133 @@ Tests: `render_thread_tests.rs` (`a_batch_is_accepted_when_the_render_thread_tak
 `an_adaptive_layer_draws_its_first_frames_directly`,
 `a_layer_is_ordinary_when_pipelining_is_off_or_the_layer_is_too_low`,
 `a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
+
+### 9.34 Layout and text shaping on worker threads: measured, not adopted
+
+Section 9.33 moved render work to threads beside the render thread. The same question was
+asked of the UI thread, which after it is the limit of a gauntlet frame (about 14.4 ms at
+tier 16, half of it in the layout pass): can the layout pass or the text it lays out be
+computed by worker threads while the UI thread goes on? Two prototypes were built and
+measured. Neither is in the tree as a mechanism; what they measured is recorded here so the
+question is not asked twice, and the benchmark of the second stays as its record.
+
+**Plain texts shaped ahead of the layout pass.** A text block whose text changes announced
+the text, its typeface, size, features and culture to the shaper, which handed batches of
+sixteen runs to worker threads; the layout pass then took the shaped glyphs of a run that
+was ready and shaped the others itself. The glyphs were the same byte for byte (the same
+HarfBuzz font data, shared, the same features). In a gauntlet frame 468 texts were
+announced, 401 shaped by workers and 295 of those used; none was shaped twice. Three runs
+each way, interleaved, on a quiet machine:
+
+| Text preparation | fps | UI thread per frame |
+|---|---|---|
+| on | 59.49 / 59.93 / 59.88 | 15.0 / 14.4 / 14.3 ms |
+| off | 59.91 / 59.99 / 61.45 | 14.2 / 14.3 / 13.8 ms |
+
+Shaping on the UI thread fell from 3.1 % to 2.4 % of its frame (about 0.12 ms), and the
+announcement cost about 0.23 ms: the copy of the text, the language of its culture and the
+wake of a worker cost a text about as much as HarfBuzz costs for the short texts a busy
+frame is made of (about 0.7 µs each). A hand-off pays only for work that is much larger than
+the hand-off, and a single short run is not. The larger cost of a plain text layout is
+outside the shaper: about 4 µs of formatting for each of the 430 layouts of a frame, which
+is work of one thread whatever shapes the glyphs.
+
+**The measure and arrange of a panel tree, computed apart from the elements.** The second
+prototype is the benchmark `layout::ComputeApplySpike`: a tree of 10,101 elements (a stack
+panel of borders, each with a stack panel of borders) whose layout it computes three ways.
+`existing` is the layout pass of the framework. `extract` copies the inputs of every element
+(sizes, limits, margin, alignment, visibility, padding, border, orientation, spacing) into
+plain data, `compute` runs the measure and arrange algorithms of the same panels over that
+data on one, two or four threads, and `apply` writes the results back. The setup asserts
+that the computed sizes and bounds are the framework's exactly. In nanoseconds per element:
+
+| Step | ns per element |
+|---|---|
+| `existing`, every element invalid | 487.1 |
+| `existing_incremental`, one width changed | 54.7 |
+| `extract` | 158.4 |
+| `compute`, one thread | 16.2 |
+| `compute`, two threads | 13.0 |
+| `compute`, four threads | 10.1 |
+| `apply` | 20.4 |
+| starting the scoped threads, two / four | 2.7 / 4.9 |
+
+The arithmetic of layout is 3 % of a layout pass, and four threads take 6 ns per element
+off it. What a pass costs is reading the properties of each element and keeping its state:
+`extract` alone, which reads each property once, is a third of the pass. A design that
+computes layout on other threads has to extract first and apply afterwards on the UI
+thread, so it can save at most the 16 ns it parallelizes, and `apply` here is a lower
+bound (it has no setter for the previous constraints and the measure hold of an element).
+The work is therefore in what a pass reads, not in where it computes: a profile of
+`existing` shows the values the pass still reads through the value store for every element
+(the inherited `UseLayoutRounding`, the container query provider, the layout scale of the
+root) at about a quarter of the pass, beside the sizes, margin, alignment and visibility
+that are kept copies since section 9.15.
+
+**The benchmarks of the two subsystems.** The classes of `layout_subsystem::` and
+`styling_subsystem::` in `tests/FerroUI.Benchmarks` measure one mechanism each (the measure
+and arrange of each panel, depth, invalidation, the passes of the layout manager, size
+changes, visibility, scrolled content, attached layout properties and layout listeners;
+selector matching, the styles in scope, activation, setters, control themes, resources,
+attaching and detaching, and changes of the style collections). They are in the framework
+group of the local gate (`scripts/perf/gate.py --only framework`), so a change to what a
+layout or styling pass reads is measured against the commit before it.
+
+### 9.35 What a read and a write of a property cost a control
+
+The layout pass of section 9.34 spends about a fifth of its time reading properties, so the
+property system was measured on its own, on controls and not on objects that have nothing
+but properties. The classes `property_subsystem::ControlRead` and
+`property_subsystem::ControlWrite` of `tests/FerroUI.Benchmarks` measure one read and one
+write, and are in the framework group of the local gate. M3 Pro, quiet machine; a walk over
+16 controls stays in the first cache of the processor, a walk over 10,000 does not:
+
+| One read of | 16 controls | 10,000 controls |
+|---|---|---|
+| `Width`, a kept copy (section 9.9) | 0.7 ns | 4.0 ns |
+| `Opacity`, unset, the store empty | 4.1 ns | 4.1 ns |
+| `Opacity`, unset, six other values in the store | 4.0 ns | 7.5 ns |
+| `Opacity`, a local value | 4.1 ns | 5.4 ns |
+| `Background`, a shared brush | 3.5 ns | 10.4 ns |
+| `UseLayoutRounding`, inherited, held by no control | 5.4 ns | 9.4 ns |
+| the font size, inherited, held by the panel above | 7.2 ns | 16.3 ns |
+| `Canvas.Left`, attached, unset | 4.0 ns | 7.9 ns |
+
+| One write of | Border | Button |
+|---|---|---|
+| `Opacity`, changed | 34.9 ns | 45.0 ns |
+| `Opacity`, unchanged | 9.8 ns | |
+| `Width`, changed | 35.7 ns | 47.6 ns |
+| `Background`, changed | 85.5 ns | |
+| `Canvas.Left`, changed | 38.5 ns | |
+| the font size, changed, on a control without children | 33.4 ns | |
+| `Opacity` with the priority of a style, set and taken back | 206.5 ns | |
+| `Opacity`, set and cleared | 109.5 ns | |
+
+What the numbers say:
+
+- **A read is a few nanoseconds; a pass pays for how many it makes and for the memory they
+  reach.** A read that finds its value walks from the object to the buffer of its values and
+  from there to the allocation of the value: three places. A kept copy is in the object. In
+  a walk over many controls the difference is the memory, not the instructions: the copy
+  costs what reaching the object costs.
+- **A control is large.** A `Border` is 2,224 bytes (a `FerroObject` 344, a `Visual` 1,248,
+  a `Layoutable` 1,648, a `Control` 1,888), thirty-five cache lines, of which a pass touches
+  the few that hold what it reads. A kept copy of every property of every class would add
+  about a kilobyte to each control and move what a pass reads further apart; the copies are
+  for the values the passes read, kept together.
+- **A value that is set costs about 216 bytes** (an allocation of 192 bytes for a number, with
+  its priorities, its base value and its entries, and 24 bytes in the buffer of the store); a
+  property at its default costs nothing.
+- **A write is mostly its notification.** Of the 45 ns of a changed `Opacity` on a button,
+  the store takes about a quarter. The rest is the chain of class handlers
+  (`on_property_changed` of each class of the hierarchy, eight for a button), each of which
+  compares the changed property with the properties of its class, and each comparison reads
+  the property from the storage of the thread (17 % of the write is that lookup alone).
+- **A changed brush allocates twice.** The visual subscribes to the invalidation of the new
+  value, and builds the handler of the subscription before it knows that an immutable brush
+  has nothing to subscribe to.
+- **A value set with a priority other than the local one costs about six local writes:** an
+  entry and, for the first of an object, a frame are allocated, and the effective value is
+  made and destroyed with it.
+

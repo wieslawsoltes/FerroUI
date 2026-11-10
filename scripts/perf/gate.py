@@ -76,9 +76,13 @@ FRAMES_BINARY = "frame-benchmarks"
 FRAMEWORK_PACKAGE = "ferroui-benchmarks"
 FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
 FRAMEWORK_FILTER = (
-    "trees::,layout::ElementConstructionBenchmark,text::TextBlockConstraintBenchmark,"
-    "text::TextBlockChangingTextBenchmark"
+    "trees::,layout_subsystem::,styling_subsystem::,property_subsystem::,"
+    "layout::ElementConstructionBenchmark,"
+    "text::TextBlockConstraintBenchmark,text::TextBlockChangingTextBenchmark"
 )
+# The categories of the framework benchmarks a base has to have to be measured with its own copy
+# of them; a base without one of them is measured with the candidate's.
+FRAMEWORK_CATEGORIES = ("trees", "layout_subsystem", "styling_subsystem", "property_subsystem")
 # The scenes the window suite opens, and how long each runs.
 WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
@@ -338,7 +342,7 @@ def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_g
     """Checks out `base`, detached, in the worktree of the scratch folder (created on first use),
     and copies into it the candidate's benchmark code the measured suites need when the base has
     none of it or `copy_gate` asks for it: the frame gate of the gauntlet, the frame benchmarks,
-    the framework benchmarks (when the base has no `trees` category). Returns the worktree and the
+    the framework benchmarks (when the base lacks one of their categories). Returns the worktree and the
     folders copied."""
     worktree = scratch / "base"
     common = Path(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")).resolve()
@@ -361,7 +365,8 @@ def prepare_base(root: Path, scratch: Path, base: str, suites: list[str], copy_g
     if "frames" in suites or "window" in suites:
         wanted.append((FRAMES_CRATE, (worktree / FRAMES_CRATE / "Cargo.toml").is_file()))
     if "framework" in suites:
-        wanted.append((FRAMEWORK_CRATE, (worktree / FRAMEWORK_CRATE / "trees").is_dir()))
+        present = all((worktree / FRAMEWORK_CRATE / category).is_dir() for category in FRAMEWORK_CATEGORIES)
+        wanted.append((FRAMEWORK_CRATE, present))
 
     copied = []
     for folder, present in wanted:

@@ -17,6 +17,17 @@ The crate root has what the benchmarks share: the harness (`harness.rs`), the en
 library) and the helpers of the upstream project (`control_hierarchy_creator.rs`, `test_styles.rs`,
 `test_binding_observable.rs`, `test_types.rs`).
 
+Four folders have no upstream counterpart. `trees/` measures whole trees of controls.
+`layout_subsystem/` and `styling_subsystem/` measure the layout and the styling of the framework
+one mechanism at a time (a class for each: the measure and arrange of each panel, invalidation,
+the passes of the layout manager, selector matching, activation, setters, resources, ...), on
+trees built from the base controls alone, so that a change to one mechanism moves the numbers of
+its class. `property_subsystem/` measures one read and one write of a property of a control, by
+where the value comes from and by the kind of the write (`docs/porting/desktop-performance.md`,
+section 9.35). The local gate measures the four folders (`scripts/perf/gate.py --only framework`).
+`layout/compute_apply_spike.rs` is the record of an experiment, not of a mechanism of the
+framework: `docs/porting/desktop-performance.md`, section 9.34.
+
 ## The harness
 
 The upstream project measures with the benchmark library of its platform. This crate has a small
