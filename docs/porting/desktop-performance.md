@@ -1888,3 +1888,242 @@ counter checks `composition_work_of_a_row_taken_out_of_the_tree_and_put_back`
 (`virtualizing_stack_panel_tests.rs`), which the performance gate runs with the counters
 `composition visuals created` and `composition visuals kept` (`scripts/perf/gate.py`,
 `COUNTER_CHECKS`).
+
+### 9.33 The UI thread starts on its next frame when its batch is taken, and a late frame layer draws while the frame before it is presented
+
+After sections 9.26 to 9.32 a gauntlet frame at tier 16 cost the UI thread about 15 ms and
+the render thread about 38 ms, and the two ran one after the other more than they had to: the
+UI thread held its next commit back until the render thread had deserialized the batch
+before, and the render thread spent most of its tick inside Graphite, which sorts the draws
+of a frame, prepares their text and builds its passes on the thread that draws and snaps.
+Neither is work that can be made much smaller without repeating what Skia does. What can
+change is when it runs and on which thread. This section has three parts: when a commit may
+follow the one before it, what happens to a batch that just misses its tick, and a frame
+layer of the Skia backend that draws on threads of its own.
+
+**A batch is accepted when the render thread takes it.** `CompositionBatch` has a third
+completion, `accepted`, before `processed` and `rendered`: the render thread raises it when it
+takes the batch from the queue (`ServerCompositor::apply_pending_batches`), before it reads
+the first change. From then on the batch belongs to the frame that thread is starting, and a
+batch committed now is applied by the frame after it. `MediaContext` holds the next commit
+back until the batch before it is accepted, where upstream waits until it is processed
+(`MediaContext::commit_compositor`). The UI thread therefore prepares its next batch while the
+render thread applies and draws this one. One batch at most waits in the queue either way,
+so nothing piles up, and nothing of an accepted batch can be observed: whoever needs its
+effects still waits for `processed` or `rendered`. A batch that is completed without being
+applied raises `accepted` too.
+
+**A batch that follows an idle tick is drawn in the display frame it was made for.** With a
+render thread, a batch that is committed a moment after the tick of its display frame waits
+for the next tick, a whole display frame, although the render thread has nothing to do. The
+queue remembers a tick that applied no batch and drew no frame (`BatchQueue::note_idle_tick`),
+and the first batch enqueued after such a tick asks the render loop for a tick out of turn
+(`Compositor::enqueue_batch`, `IRenderLoop::request_frame_out_of_turn`, which
+`ThreadProxyRenderTimer::request_tick_out_of_turn` serves on the timer thread). One idle tick
+answers one batch, so no display frame gets a second frame, and a compositor that renders on
+the thread that commits asks for nothing.
+
+**A frame layer that holds a frame back.** `IDrawingContextLayerImpl` has two new methods,
+both with defaults that change nothing: `has_pending_frame` (the frame drawn into the layer
+last is not what `blit` shows yet) and `complete_pending_frame`. A layer that says so is
+presented once more by its owner when no further frame follows:
+
+- `ServerCompositionTarget::render_frame` presents in a tick that has nothing to draw when
+  its layer holds a frame back, after `complete_pending_frame`;
+- `ServerCompositor` asks for another tick while a layer of an active target holds a frame
+  back (`has_pending_frames`), never while rendering is stopped;
+- the batches a tick applied are reported as `rendered` at the end of that tick, unless a
+  layer holds the frame of the tick back: then they are reported at the end of the next
+  tick, which presents their frame (`ServerCompositor::notify_batches_rendered`). They wait
+  one tick and never longer, and a compositor that is dropped answers them;
+- a synchronous render (`Compositor::render` on the thread of the compositor, and the wait
+  of `MediaContext::immediate_render_requested` for `rendered`) returns with the committed
+  frame presented, as before.
+
+**The pipelined frame layer of Graphite on Metal.** The frame layer of a window (the layer a
+render target context creates, no other surface) is a `PipelinedLayerSurface`
+(`gpu/graphite/pipelined_layer.rs`) unless `SkiaOptions::frame_pipelining` is `Off`. It draws
+its frames in one of two ways:
+
+- *directly*, as an ordinary layer: the drawing context draws on the surface of the layer
+  with the recorder of the context. Every layer begins like this;
+- *pipelined*: the drawing context records the frame as a picture
+  (`ISkiaSurface::begin_recorded_frame`). When it is disposed, the picture goes to the band
+  threads of the context: the layer is divided into horizontal bands of equal height, two
+  by default, and each band has a thread. Each thread owns a Graphite recorder and a surface
+  that wraps the texture of the layer, plays the picture under the clip of its band, snaps
+  its recorder and keeps the recording. The render thread does not
+  wait: it draws the layer onto the target as the frame before left it, flushes, and then
+  tells the threads to insert their recordings. The frame is on the screen one frame later
+  than it was drawn, and the render thread is free for the next one in the meantime.
+
+Nothing of Skia is repeated: the picture, the clip and the playback are Skia's, and the
+bands differ from one playback only in the clip Skia applies. What changed is the thread that
+asks.
+
+`SkiaOptions::frame_pipelining` is a `SkiaFramePipelining`: `Off`, `Adaptive` (the default)
+or `On` (every frame, for tests and measurements). An adaptive layer pipelines after four
+frames in a row that were late (a frame is late when it cost more than half of the time to
+the frame after it, and 4 ms at least), draws directly again after ninety light frames in a
+row, starts over after a pause of 100 ms, and stays direct for 120 frames after a frame that
+only the recorder of the context draws. An application whose frames are light never
+pipelines one, has no threads for it, and shows every frame in the tick that drew it, as
+upstream does.
+
+`SkiaOptions::frame_pipelining_bands` is the number of bands, and of threads: two by default
+(`DEFAULT_FRAME_PIPELINING_BANDS`), and a value outside 1 to 16
+(`MAX_FRAME_PIPELINING_BANDS`) is brought into that range
+(`SkiaOptions::effective_frame_pipelining_bands`). With one band the whole frame is drawn by
+one thread beside the render thread. A band is 64 pixels high at least, so a layer has the
+bands it is asked for or as many as fit it (`band_count`): a layer of 200 rows that is asked
+for eight has three. A layer that is asked to be divided and has room for one band only, and
+a layer lower than 64 pixels, is an ordinary layer. The threads belong to the GPU context
+and are made once, by its first layer that pipelines a frame, as many as that layer has
+bands; a layer of the same context that asks for more draws in as many bands as there are
+threads. What the number of bands buys and costs is measured below.
+
+**Frames only the recorder of the context draws.** A pipelined layer draws such a frame
+directly (the recorded picture is played on the recorder of the context), and because the
+same draws are counted in direct frames (`ISkiaGrContext::note_direct_only_draw`), a layer
+whose frames keep having them never begins to pipeline:
+
+- a draw with an image filter: a filter reads around the pixels it writes, across the clip
+  of a band;
+- a lease of the Skia API (`ISkiaApiLeaseFeature`): what the client draws belongs to the
+  recorder the lease hands out. In a recorded frame the lease records what its client draws
+  into a picture of its own (`RecordedLeases`), which the context draws into the frame in
+  its place, and the frame is then played on the recorder of the context. What a client of
+  a lease can see in such a frame: the lease has no surface, the canvas does not carry the
+  clip of the context (the drawing is clipped all the same), and the state it leaves on the
+  canvas does not last to its next `with_sk_canvas`;
+- a frame of a retained GPU producer, whose storage is held until the next flush of the
+  context only.
+
+**The order on the GPU** is the order of insertion: what the recorder of the context has
+pending when the frame ends, the draw of the layer onto the target with the flush of the
+tick, then the recordings of the bands, from the top band down (`InsertOrder`). The next frame
+of the layer, the next read of the layer and the next flush of the context wait for the
+bands before they add anything, so a second window that shares the context waits for the
+frame in the threads (at most what is left of it) before its own flush. The fixed order of
+the bands costs nothing, because the insertions are serialized by the lock of the context
+anyway, and it is what makes a frame the same every time it is drawn: Graphite resolves the
+pixel where an antialiased edge crosses the boundary between two clips in favour of the band
+that is inserted second, so with the bands racing for the lock that one pixel differed from
+run to run (by 6 of 255 in the test scene).
+
+**What the pixels are.** A pipelined frame is, byte for byte, the frame the ordinary layer
+draws when it draws the same content band by band, under the same clips, with the recorder
+of the context and each band a recording of its own
+(`a_pipelined_frame_shows_what_the_layer_draws_band_by_band`,
+`a_frame_in_any_number_of_bands_shows_what_the_layer_draws_band_by_band` for one, three and
+four bands, `the_frames_of_a_pipelined_layer_follow_each_other_in_order`). Against a frame drawn in one
+piece it differs as any frame Skia draws under a clip differs: a gradient fill rounds
+differently by 1 of 255 at isolated pixels, and the pixel where an antialiased edge crosses
+the clip boundary differs by about the coverage of one sample. In the test scene (rounded
+rectangles, gradients, antialiased lines and text across the boundary) that is 7 of 81,920
+pixels and 6 of 255 at most (`a_pipelined_frame_differs_from_an_unclipped_frame_as_any_clipped_frame_does`,
+which bounds it). Direct frames have drawn under such clips all along: every partial redraw
+draws under the clip of its dirty rectangle. Text is drawn by the same Skia code from the
+same strikes; each band has a glyph atlas of its own, so a glyph that several bands draw is
+rasterized and uploaded once for each, with the same result.
+
+**A band is a recording of its own, and Graphite decides about multisampling for each
+recording.** Graphite draws the draws of a recording in passes it builds for that recording.
+When one draw of a pass needs multisampling (in the test scene a stroked ellipse that is
+not a circle), the whole pass is multisampled, and the shapes Graphite otherwise draws with
+coverage it computes (lines, rectangles) get the edges multisampling gives them. A frame
+that is drawn directly is one recording, so one such draw anywhere in the frame decides
+for all of it. Of a pipelined frame, the bands that contain such a draw are multisampled
+and the others are not: every band is drawn exactly as a frame that contains the draws of
+that band alone. Both renderings are Skia's own for the same draws, and which one a shape
+gets already depends on what else is in its frame when frames are drawn directly; with
+bands it depends on what else is in its band. In the test scene, in four bands, the two
+bands with the ellipse are byte for byte the frame drawn as one recording, and in the two
+without it the antialiased edge pixels of lines and rectangles differ, by up to 52 of 255
+(`a_band_is_drawn_as_a_frame_with_its_draws_alone_is`, which bounds it at half a percent of
+the pixels). This holds for the default two bands as for any other number, and it is the
+one place where a pipelined frame can be told from a direct one by more than a clip does.
+
+**When the threads are not used.** A band that fails to record or to insert ends the
+threads of the context (a recording that was snapped and never inserted would make every
+later recording of its recorder fail), the frame is replayed on the recorder of the context,
+and the layers of that context draw directly from then on. A frame that ends while the
+context is in use or disposed is played directly. A layer that is disposed with a frame in
+the threads waits for it and leaves the context usable
+(`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
+
+What a program can see: with the default, a window whose frames cost the render thread more
+than half a refresh interval four times in a row shows its frames one refresh later than
+before and at the rate of the display instead of half of it; a `rendered` completion of such a
+frame is raised one tick later, when the frame is presented. A program that needs every frame
+in the tick that drew it sets `SkiaOptions { frame_pipelining: SkiaFramePipelining::Off, .. }`.
+A custom drawing operation that leases the Skia API keeps its frame on the recorder of the
+context, with the differences listed above when the frame was recorded. The counters `skia:
+layers that began to pipeline their frames`, `skia: frames pipelined`, `skia: recorded frames
+played on the recorder of the context` and `skia: reads of a pipelined layer while a frame is
+drawn` tell what a run did.
+
+What it measures (M3 Pro, gauntlet at tier 16, 60 Hz, quiet machine, runs of 51 s, two runs
+each; the frames per second are the mean of a run):
+
+| Configuration | Frames per second |
+|---|---|
+| Section 9.32, every frame drawn directly | 39.60 / 39.52 |
+| This section, the defaults (`Adaptive`, two bands) | 59.99 / 59.95 |
+
+The display refreshes sixty times a second, so the benchmark is at its cap. What the number
+of bands changes is where the time goes (the stage timed by a build made for the
+measurement; the processor time is that of the whole process for a frame):
+
+| Bands | Frames per second | Slowest band | All bands together | Inserting the recordings | Processor time for a frame |
+|---|---|---|---|---|---|
+| 1 | 60.08 / 59.85 | 13.4 ms | 13.4 ms | 2.2 ms | 27.5 ms |
+| 2 (default) | 59.93 / 59.98 | 8.2 ms | 15.6 ms | 2.4 ms | 29.0 ms |
+| 3 | | 9.0 ms | 25.3 ms | 2.4 ms | |
+| 4 | 60.05 / 59.94 | 8.0 ms | 27.1 ms | 2.5 ms | 32.3 ms |
+| 6 | | 9.3 ms | 43.1 ms | 2.7 ms | |
+| 8 | 60.03 / 60.05 | 9.5 ms | 57.4 ms | 2.8 ms | 43.8 ms |
+
+Two bands are the default because nothing is gained after them in this frame: the slowest
+band, which is what a frame waits for, is as slow with four or eight bands as with two, and
+every further band costs about 4.5 ms of a core whatever its share of the frame is (with
+eight bands the threads spill onto the efficiency cores). One band already frees the render
+thread, and is the choice for a machine with few cores; its recording takes 13.4 ms, which
+fits a 60 Hz frame and does not fit a 120 Hz frame, where two bands do.
+
+**The picture of a frame is recorded without a bounding hierarchy.** Skia can keep the
+bounds of the draws of a picture in a tree, so that a playback under a clip skips the draws
+outside it without looking at them (`begin_recording(bounds, true)`). Measured the same way:
+building the tree costs the render thread 3.2 ms a frame, when the picture is finished, and
+saves the slowest band 0.7 ms with two bands, 1.2 ms with four and 1.6 ms with eight (all
+bands together 1.4 ms, 5.4 ms and 14 ms). The render thread is the thread the stage exists
+to free, so the picture is recorded without the tree; the cost of a band is mostly what
+Graphite does for a recording of its own, not the walk over the draws outside it.
+
+Tests: `render_thread_tests.rs` (`a_batch_is_accepted_when_the_render_thread_takes_it`,
+`a_batch_that_follows_an_idle_tick_asks_for_a_frame_out_of_turn`,
+`a_compositor_that_renders_on_its_own_thread_asks_for_no_frame_out_of_turn`),
+`thread_proxy_render_timer.rs` (`ticks_out_of_turn_on_its_own_thread_while_started`),
+`compositor_tests.rs` (`a_frame_a_layer_holds_back_is_presented_by_the_tick_after`,
+`the_batches_of_a_stream_of_held_frames_are_rendered_a_tick_later`,
+`a_synchronous_render_presents_the_frame_a_layer_holds_back`,
+`no_batch_waits_for_a_held_frame_once_rendering_is_stopped`), `pipelined_layer.rs`
+(`a_layer_pipelines_after_four_late_frames_in_a_row`,
+`a_late_frame_costs_half_its_period_and_four_milliseconds_at_least`,
+`a_pipelined_layer_draws_directly_again_after_ninety_light_frames`,
+`a_pause_begins_a_new_stream_that_is_drawn_directly`,
+`a_frame_that_needs_the_recorder_of_the_context_holds_the_layer_off`,
+`the_options_can_ask_for_pipelined_frames_always_or_never`,
+`the_threads_insert_in_the_order_the_bands_were_sent_in`,
+`a_turn_that_is_dropped_passes_to_the_next`) and, on a Metal device,
+`gpu/metal/tests/pipelined_frames.rs` (the pixel tests named above,
+`a_layer_has_the_bands_it_is_asked_for_as_far_as_they_fit_it`,
+`a_layer_has_no_more_bands_than_its_context_has_threads`,
+`the_options_ask_for_two_bands_by_default_and_for_sixteen_at_most`,
+`the_bands_of_a_layer_are_disjoint_and_cover_it`,
+`a_pending_frame_is_completed_on_request`,
+`a_frame_with_an_image_filter_is_drawn_by_the_recorder_of_the_context`,
+`a_frame_that_leases_the_skia_api_is_drawn_by_the_recorder_of_the_context`,
+`an_adaptive_layer_draws_its_first_frames_directly`,
+`a_layer_is_ordinary_when_pipelining_is_off_or_the_layer_is_too_low`,
+`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
