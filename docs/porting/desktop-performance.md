@@ -1578,3 +1578,70 @@ width changes with every frame of an animation; they are shaped once all the sam
 run cache of their text block (upstream), and only wrapped again. What is left of the cost of a
 changing text is the cost of making a layout of a short text, of which shaping is a seventh and
 allocation a quarter.
+
+### 9.30 The pushed states of a drawing context and the readback pass
+
+Two costs of a frame that are not work on the scene but the way two small pieces of state are
+kept. Both were found by sampling the gauntlet with the Graphite stage moved off the render
+thread, where the render thread itself is what limits the rate.
+
+**The pushed states of a drawing context.** A `DrawingContext` remembers what was pushed (a
+transform, a clip, an opacity) to pop it in reverse order. Upstream rents that stack from a
+pool, and FerroUI took it from a pool of the thread: a lookup of the thread's storage, a
+borrow, and a block on the heap of a few bytes for every context that pushes, which is every
+visual that draws. The states are now stored in the context itself
+(`StateStack = SmallVec<[PushedStateType; 16]>`, `media/drawing_context.rs`); a context with
+more than sixteen nested states moves them to the heap as a vector does. Nothing about the
+order of pushes and pops changes, and `states` is `None` before the first push and after the
+disposal as before.
+
+**The readback pass.** The UI thread reads four values of a server visual back (its matrix to
+the root, its target, whether it is visible, and its subtree bounds). Upstream collects the
+visuals whose values changed in a queue and visits each one more time after the targets were
+rendered (`ServerCompositionVisual.UpdateReadback`). In the gauntlet that is several thousand
+visuals a frame, and each visit touches three places that are not in the cache any more: the
+visual, the readback it shares with the UI thread, and the lock of that. FerroUI keeps the
+pass and its place in the frame, and changes what it has to touch:
+
+- The update walk takes the copy of the four values at the moment it has finalized the bounds
+  of a visual (`readback.rs`, `snapshot_for_readback_update`), when the visual is being worked on anyway.
+  The queue of the pass holds the copy beside the readback it is written to
+  (`ReadbackQueueEntry`, `server/server_compositor.rs`), so the pass writes without visiting
+  the visual.
+- A change that is announced after the copy was taken (an adorner, a value set by a later
+  pass) turns the entry of the visual back into a visit, so the pass writes what upstream's
+  pass would have read.
+- A visual is in the queue once for a pass by the number of the pass, where upstream sets a
+  flag in the visual and the pass clears it in every visual again.
+- The two slots of a readback are atomics. The protocol of the slots is upstream's (one
+  writer, one reader, the reader never reads the slot that is written), and the lock of the
+  readback indices, held for the whole write and taken by the reader to move to a newer
+  revision, still orders the write of a revision before every read of it. What went away is a
+  lock for each slot that this protocol never contended.
+
+The copy relies on two things the code states where it takes it: the own transform of a visual
+is written only through `set_own_transform` and before the update walk, and the values the
+copy holds are final once the walk has finalized the bounds of the visual.
+
+What it measures (M3 Pro, gauntlet at tier 16, cycle-aligned means of alternating runs):
+
+| | Before | After |
+|---|---|---|
+| Readback pass, render thread, Graphite stage on its own threads | about 1.5 ms a frame (7.4 % of the thread) | about 0.75 ms a frame (3.9 %) |
+| Frame rate, Graphite stage on the render thread | 34.9 fps | 35.4 fps (inside the noise of the runs) |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and neither
+change moves the rate. They are kept for the configuration in which the render thread's own
+passes are the limit, and because neither adds a code path: the stack is the same stack in
+another place and the pass is the same pass with fewer places to touch.
+
+What a program can see: nothing. The values the UI thread reads back and the revision they
+belong to are the same, and so is the order in which states pop.
+
+Tests: `drawing_context_tests.rs`
+(`more_states_than_the_context_stores_in_itself_pop_in_reverse_order`) and
+`server_composition_visual/readback_tests.rs` (`nothing_is_read_before_the_first_write`,
+`every_value_survives_a_slot`, `a_reader_keeps_its_revision_while_newer_ones_are_written`,
+`two_writes_of_one_revision_leave_the_last`, `the_pass_writes_what_the_update_walk_left`,
+`a_change_announced_after_the_copy_is_read_by_the_pass`,
+`a_visual_is_in_the_queue_once_per_pass`, `the_visuals_of_a_pass_share_its_revision`).
