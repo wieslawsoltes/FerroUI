@@ -91,6 +91,8 @@ pub struct TextLayout {
     width_hold: std::cell::Cell<Option<Option<(f64, f64)>>>,
     /// Whether lines were left out because they did not fit the maximum height.
     truncated_by_height: bool,
+    /// Whether lines with text were left out because of the line limit.
+    truncated_by_max_lines: bool,
 }
 
 /// How far inside its exact bounds a width hold is kept: the formatter compares widths with a
@@ -212,6 +214,7 @@ impl TextLayout {
             max_lines,
             width_hold: std::cell::Cell::new(None),
             truncated_by_height: false,
+            truncated_by_max_lines: false,
         };
 
         text_layout.text_lines = text_layout.create_text_lines();
@@ -321,9 +324,12 @@ impl TextLayout {
     /// line and a line that ends at a required break, which have no break after it), and while no line
     /// can take the first word of the next one, up to the width of a line with its trailing white
     /// space and that word. The range is known for left-to-right text that wraps without
-    /// trimming, a line limit, letter spacing, tabs or paragraph styles, and that left no line
-    /// out for the maximum height (the same lines have the same height), whose lines are one
+    /// letter spacing, tabs or paragraph styles, and that left no line out for the maximum
+    /// height (the same lines have the same height) or the line limit, whose lines are one
     /// shaped run each and end at break opportunities (no line was broken inside a word).
+    /// Trimming and a line limit that changed nothing do not narrow it (section 9.27): a line is
+    /// trimmed only when it does not fit the width or when lines after it are left out, and
+    /// inside the range every line fits and the lines, so their count, are the same.
     pub fn width_hold(&self) -> Option<(f64, f64)> {
         if let Some(hold) = self.width_hold.get() {
             return hold;
@@ -338,6 +344,20 @@ impl TextLayout {
     /// height has (desktop-performance.md section 9.12).
     pub fn is_truncated_by_height(&self) -> bool {
         self.truncated_by_height
+    }
+
+    /// Whether lines with text were left out because of the line limit. An addition: a layout
+    /// that left nothing out is the layout without a line limit (desktop-performance.md section
+    /// 9.27).
+    pub fn is_truncated_by_max_lines(&self) -> bool {
+        self.truncated_by_max_lines
+    }
+
+    /// Whether a line was collapsed: trimmed because it did not fit the width, or because lines
+    /// after it were left out. An addition: a layout without one is the layout without trimming
+    /// (desktop-performance.md section 9.27).
+    pub fn has_collapsed_lines(&self) -> bool {
+        self.text_lines.iter().any(|line| line.has_collapsed())
     }
 
     /// Whether `width` is inside [`TextLayout::width_hold`]. Stops at the first line that shows
@@ -364,9 +384,8 @@ impl TextLayout {
         let properties = &self.paragraph_properties;
         if properties.text_wrapping() != TextWrapping::Wrap
             || properties.flow_direction() != FlowDirection::LeftToRight
-            || !Rc::ptr_eq(&self.text_trimming, &<dyn TextTrimming>::none())
-            || self.max_lines != 0
             || self.truncated_by_height
+            || self.truncated_by_max_lines
             || self.letter_spacing() != 0.0
             || self.paragraph_styles.is_some()
             || self.text_lines.is_empty()
@@ -818,6 +837,7 @@ impl TextLayout {
                 break;
             }
             if self.max_lines > 0 && text_lines.len() as i32 >= self.max_lines {
+                self.truncated_by_max_lines |= has_real_content;
                 if !self.is_trimming_none() && has_real_content {
                     let last = text_lines.len() - 1;
                     text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),

@@ -1085,3 +1085,59 @@ batches are applied, never during a walk, so the answer holds for the whole walk
 registered nothing changes. Tests: the lighting tests of the composition
 (`composition_light_tests.rs`, `composition_winui_lighting_tests.rs`). Gauntlet (tier 16), Skia
 window, render thread: the light lookups go from about 70 to 0 of about 3,070 samples.
+
+### 9.27 A text block keeps a layout that trimming and the line limit left whole
+
+At the gauntlet's tier 16 every card is about 60 px wide. A text block is measured at the width
+its parent has left, which is not rounded (59.763), and arranged at its layout-rounded width
+(60.0), so every text block saw two constraints a pass. The rules that keep a layout over a new
+constraint (sections 9.7, 9.12 and 9.15) refused every text of the gauntlet: the paragraphs wrap
+with a character ellipsis and a line limit, the subtitles are four inlines on one line with an
+ellipsis. Of 1,793 text layouts a pass, 1,048 were of a text that had not changed.
+
+- `TextLayout::width_hold` no longer excludes trimming and a line limit. A line is trimmed in two
+  cases only: it does not fit the width (the hold already excludes a layout with a collapsed or
+  overflowed line), or lines after it were left out for the maximum height
+  (`is_truncated_by_height`, already excluded) or for the line limit. The new
+  `TextLayout::is_truncated_by_max_lines` tells the last case, with or without trimming, and
+  such a layout has no hold. A layout that left nothing out is the layout of the same text
+  without trimming and without a limit, and inside the hold a new layout has the same lines, so
+  the same count: nothing is left out there either.
+- A text block that does not wrap keeps a left-aligned layout without a collapsed line
+  (`TextLayout::has_collapsed_lines`) at any width its lines fit, and reports the measure hold
+  from that width upwards: without wrapping the width decides nothing but whether a line is
+  trimmed, and a line that fits is not. Lines left out by the line limit do not depend on the
+  width without wrapping.
+- Inlines without a control among them (`EmbeddedControlRun`) follow the rules of a text: their
+  layout depends on the constraint the way a text's does. The text block remembers whether its
+  text runs hold a control when it builds them; while the runs are not built, and with a control,
+  a layout is not kept, as before.
+
+The same change set makes three representations cheaper without changing what they do. The sets
+of addresses of the compositor (the objects to serialize, the visuals of the renderer, the
+resources of a recording) hash with `rustc_hash` instead of SipHash; an address needs no defence
+against chosen keys. `RenderDataResources::intern` searches the table of a recording while it has
+at most eight resources and builds its map only beyond that: a recording of a control has a brush,
+a pen and a glyph run, and paid for a map. `Visual::synchronize_composition_properties` reads the
+styled values it follows (opacity, clip to bounds, and whether a clip, an opacity mask, a cache
+mode, an effect and a render transform are set) from a snapshot kept while the value store of the
+visual is unchanged (`HotValue`, section 9.9); an object that is set is read as before, since it
+can change without the store changing.
+
+Tests: `text_layout_width_hold_tests.rs`
+(`a_trimmed_limited_layout_makes_the_same_lines_at_every_width_it_holds`: over the texts of
+section 9.12 and line limits of 1 to 40, a layout with a hold left nothing out and has no
+collapsed line, has the lines of the plain text, and a new layout at every width it holds, in
+half-pixel steps, has the same lines, none collapsed, none left out;
+`layouts_the_hold_does_not_describe_have_none`), and `text_block_tests.rs`
+(`a_trimmed_limited_layout_that_left_nothing_out_is_kept_at_a_width_it_holds`,
+`a_layout_that_left_text_out_for_the_line_limit_is_created_again`,
+`an_unwrapped_layout_that_was_not_trimmed_is_kept_at_any_width_it_fits`,
+`inlines_without_a_control_are_kept_the_way_a_text_is`: the kept layout has the lines and the
+desired size of a new text block at the new constraint).
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 1,793 to 779 (the rest are
+texts that changed), layouts dropped for a new measure constraint 541 to 18 and for a new arrange
+constraint 506 to 15, measures executed 4,671 to 3,506. UI thread, from samples: about 23 to about
+17 ms a frame. The frame rate does not change (31.5 to 32.3 frames a second before and after):
+the render thread is busy for the whole frame and sets it.

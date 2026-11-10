@@ -149,6 +149,29 @@ perf_counters! {
     TextRunCacheMisses => "text run cache misses",
     /// `TextShaper::shape_text`: a run was shaped by the platform shaper.
     TextRunsShaped => "text runs shaped",
+    /// `TextBlock::invalidate_text_layout`: a layout was dropped with its shaped runs (the text
+    /// or a property the shaping depends on changed).
+    TextBlockLayoutDropsShaping => "text block layout drops: shaping",
+    /// `TextBlock::invalidate_text_layout_keep_cache`: a layout was dropped and its shaped runs
+    /// kept (a property of the paragraph changed).
+    TextBlockLayoutDropsParagraph => "text block layout drops: paragraph",
+    /// `TextBlock::on_measure_invalidated`: a layout was dropped because the measure of the
+    /// text block was invalidated by something else than its text.
+    TextBlockLayoutDropsMeasureInvalidated => "text block layout drops: measure invalidated",
+    /// `TextBlock::measure_override`: a layout was dropped for the constraint of the measure.
+    TextBlockLayoutDropsMeasureConstraint => "text block layout drops: measure constraint",
+    /// `TextBlock::measure_override`: a layout was dropped because an embedded control was
+    /// measured again.
+    TextBlockLayoutDropsEmbeddedControls => "text block layout drops: embedded controls",
+    /// `TextBlock::arrange_override`: a layout was dropped because the alignment of the arrange
+    /// is not the one it was created with.
+    TextBlockLayoutDropsArrangeAlignment => "text block layout drops: arrange alignment",
+    /// `TextBlock::arrange_override`: a layout was dropped for the constraint of the arrange.
+    TextBlockLayoutDropsArrangeConstraint => "text block layout drops: arrange constraint",
+    /// `TextBlock::measure_override`: the measure created the layout.
+    TextBlockLayoutsCreatedByMeasure => "text block layouts created by measure",
+    /// `TextBlock::arrange_override`: the arrange created the layout.
+    TextBlockLayoutsCreatedByArrange => "text block layouts created by arrange",
 
     // --- containers (the controls crate) ---
     /// `VirtualizingStackPanel::recycle_element`: a container left the
@@ -170,6 +193,9 @@ perf_counters! {
     ArrangesExecuted => "arranges executed",
     /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
     LayoutPassRounds => "layout pass rounds",
+    /// `LayoutManager::invalidate_measure`: the measure of an element was invalidated while a
+    /// layout pass ran (what makes a pass take another round).
+    LayoutMeasureInvalidatedInPass => "measures invalidated during a layout pass",
     /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
     VisualsRecorded => "visuals recorded",
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
