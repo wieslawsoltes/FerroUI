@@ -1069,11 +1069,24 @@ pub fn create_context(
     base_uri: Option<&str>,
     namespaces: XmlNamespaceTable,
 ) -> Rc<XamlIlContext> {
+    create_context_at(parent, base_uri.and_then(parse_base_uri), namespaces)
+}
+
+/// The base URI of a document as its contexts hold it. The emitter writes
+/// the URI of the document, which is absolute; its scheme and authority are
+/// read in lower case, as the run-time loader reads the URI of a document.
+fn parse_base_uri(uri: &str) -> Option<url::Url> {
+    UriRef::parse_absolute(uri).ok()
+}
+
+/// [`create_context`] with the base URI already parsed.
+fn create_context_at(
+    parent: Option<Rc<dyn IServiceProvider>>,
+    base_uri: Option<url::Url>,
+    namespaces: XmlNamespaceTable,
+) -> Rc<XamlIlContext> {
     let static_providers: Rc<[Rc<dyn IStaticServiceProvider>]> =
         Rc::new([Rc::new(CompiledXmlNamespaceInfo { table: namespaces }) as Rc<dyn IStaticServiceProvider>]);
-    // The emitter writes the URI of the document, which is absolute; its scheme and authority are
-    // read in lower case, as the run-time loader reads the URI of a document.
-    let base_uri = base_uri.and_then(|uri| UriRef::parse_absolute(uri).ok());
     let context =
         XamlIlContext::new(FRAMEWORK_CONTEXT, Rc::new(FrameworkContextServices), parent, static_providers, base_uri);
     context.initialize_name_scope_field();
@@ -1090,13 +1103,30 @@ pub struct DocumentInfo {
     pub namespaces: XmlNamespaceTable,
 }
 
+thread_local! {
+    /// The base URI of each document a deferred build was made for, parsed:
+    /// a template is built once for every control it is applied to, and
+    /// each build has a context of its own with the URI of the document.
+    /// Keyed by the text generated code holds for the document, which lives
+    /// as long as the program: one entry for a document, never removed.
+    static DOCUMENT_BASE_URIS: RefCell<HashMap<(usize, usize), Option<url::Url>>> = RefCell::new(HashMap::new());
+}
+
+/// The parsed base URI of `document`: [`parse_base_uri`] of its text, done
+/// once for the document.
+fn document_base_uri(document: &DocumentInfo) -> Option<url::Url> {
+    let text = document.base_uri?;
+    let key = (text.as_ptr() as usize, text.len());
+    DOCUMENT_BASE_URIS.with(|uris| uris.borrow_mut().entry(key).or_insert_with(|| parse_base_uri(text)).clone())
+}
+
 /// The context of a build of deferred content (a template, a deferred
 /// resource) of `document` called with `service_provider`:
 /// [`create_context`] chained to it, with the root object of
 /// `service_provider` as its root object, as the run-time loader's build of
 /// deferred content creates it.
 pub fn deferred_context(service_provider: &Rc<dyn IServiceProvider>, document: &DocumentInfo) -> Rc<XamlIlContext> {
-    let context = create_context(Some(service_provider.clone()), document.base_uri, document.namespaces);
+    let context = create_context_at(Some(service_provider.clone()), document_base_uri(document), document.namespaces);
     if let Some(root) = FrameworkContextServices.get_parent_root_object(service_provider) {
         context.set_root_object(root);
     }

@@ -2464,6 +2464,41 @@ machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent them
 Attaching the theme (five rounds: -0.2 %, -1.0 %, -1.8 %) and re-attaching a control
 (+2.5 %, -1.0 %, +0.5 %) are within the noise of the runs: neither builds a template.
 
+Two smaller costs of the same build were found in the profile of the result and removed
+after it.
+
+**The base URI of a document is parsed once.** Each build of a template makes a context
+for its content, and the context keeps the base URI of the document as a parsed URI. The
+text was parsed for every build. A document is a constant of the generated code, so the
+parsed URI is kept for the document (by the address and the length of its text) and
+copied into the context of each build; a context whose base URI is changed afterwards
+changes its own copy.
+
+**The registry keeps the direct property a class answers with.** A direct property is
+registered for its owner and for every class it was added to, and a read or a write on an
+object of a derived class walked the classes from the class of the object to the one that
+has the property, one table lookup each (a template binding to `IsChecked` on a
+`CheckBox`: three). The registry keeps the answer of that walk for each pair of a class
+and a property identity it was asked about, "none" included, and drops all of them when
+a direct property is registered, as it does with its other lists. A property asked for on
+its owner never reached the walk and does not reach the table.
+
+In the profile of the `CheckBox` build (about 3 250 samples) the lookup of a direct
+property went from 43 samples to 5 and the creation of the context from 47 to 25. Median
+of five interleaved rounds of the build with the binds above and the build with these two
+as well:
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.31 ms | 2.17 ms | -6.1 % |
+| `CheckBox`, the template applied | 10.83 ms | 10.86 ms | +0.3 % |
+| `TextBox`, the template applied | 12.01 ms | 11.98 ms | -0.3 % |
+
+About 0.6 us is saved for a build. The template of a `Button` is built in 11 us, where
+that is one part in twenty and every round was lower; the two large templates are built
+in 54 us and 60 us, where it is below the noise of the runs. `DirectPropertyBenchmark`
+(a read and a write on the owner) is unchanged: -0.2 % and -0.1 %.
+
 What it costs, and what it does not:
 
 - **Memory: one more list for a context, while it builds.** The list of the parents that
@@ -2471,6 +2506,10 @@ What it costs, and what it does not:
   when the build returns. An element, a style, a template and an expression are the size
   they were, and a built template holds one object less for each dynamic resource and each
   template binding only while it is built (the extension was dropped after the bind).
+  One parsed URI is kept for each document a deferred build was made from, and one entry
+  of thirty-two bytes for each pair of a class and a direct property that was asked for
+  on a class other than the owner; the entries are dropped by the next registration of a
+  direct property.
 - **The run-time loader is not changed.** It creates the extension and calls
   `ProvideValue`, as before; so does generated code for an extension with any other
   argument than a text key, and for a setter whose value is a dynamic resource.
@@ -2478,4 +2517,7 @@ What it costs, and what it does not:
   `template_binds`): the priority in and outside a control template, the anchor of an
   object that is not an element, the variant of a theme dictionary, the target property
   cleared after the bind, and a template binding before and after its templated parent is
-  set.
+  set. The kept base URI is compared with the one a context of the document parses
+  itself, for two documents, a relative text and no URI; the kept direct property is
+  compared for a derived class, for a class the property is added to after the answer
+  was kept, and for a class outside its owners.

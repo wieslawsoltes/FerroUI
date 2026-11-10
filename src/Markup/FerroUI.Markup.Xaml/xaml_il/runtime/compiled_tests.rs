@@ -126,6 +126,34 @@ fn emitted_deferred_context_uses_declaration_namespaces_after_parent_scope_ends(
 }
 
 #[test]
+fn the_base_uri_of_a_deferred_build_is_the_one_a_context_of_the_document_has() {
+    use super::compiled::deferred_context;
+    let parent: Rc<dyn IServiceProvider> = create_context(None, None, NAMESPACES);
+    // An upper-case scheme and authority (read in lower case), two documents whose texts differ
+    // only in their last segment, a text that is not an absolute URI, and no URI at all.
+    let documents = [
+        Some("FERRES://App/Views/Template.xaml"),
+        Some("ferres://App/Views/Other.xaml"),
+        Some("Views/Template.xaml"),
+        None,
+    ];
+    // Every document is asked twice: the second build has the URI kept for the document.
+    for _ in 0..2 {
+        for base_uri in documents {
+            let expected = create_context(None, base_uri, NAMESPACES).base_uri();
+            let deferred = deferred_context(&parent, &DocumentInfo { base_uri, namespaces: NAMESPACES });
+            assert_eq!(deferred.base_uri(), expected, "{base_uri:?}");
+        }
+    }
+    let first = deferred_context(&parent, &DocumentInfo { base_uri: documents[0], namespaces: NAMESPACES });
+    assert_eq!(first.base_uri().map(String::from).as_deref(), Some("ferres://app/Views/Template.xaml"));
+    // The context has a URI of its own: replacing it does not reach the next build.
+    first.set_base_uri(None);
+    let next = deferred_context(&parent, &DocumentInfo { base_uri: documents[0], namespaces: NAMESPACES });
+    assert!(next.base_uri().is_some());
+}
+
+#[test]
 fn the_name_scope_field_is_the_scope_of_the_parent() {
     let scope = NameScopeRef::new(NameScope::new());
     let parent = TestServiceProvider::new().with_name_scope(scope.clone()).sp();
