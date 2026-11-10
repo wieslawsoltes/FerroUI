@@ -165,6 +165,15 @@ impl RenderDataDrawingContext {
         }
     }
 
+    /// Whether nothing was drawn since the context was made ready to record: what
+    /// [`get_render_results`](Self::get_render_results) answers with `None`. The recording is
+    /// left as it is; the renderer asks for a visual that has no composition visual, which
+    /// gets one only when it draws (docs/porting/desktop-performance.md, section 9.41).
+    pub fn recorded_nothing(&mut self) -> bool {
+        self.flush_stack();
+        self.resources.is_empty() && self.stream.as_ref().is_none_or(|stream| stream.opcode_length() == 0)
+    }
+
     /// Finishes the recording and returns the render data, registered for
     /// serialization on the compositor; `None` if nothing was drawn. The
     /// context is ready to record again.

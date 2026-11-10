@@ -347,6 +347,11 @@ impl Gate {
         let pointer = scene.pointer.then_some(Point::new(WIDTH / 2.0, HEIGHT / 2.0));
         Clock::reset();
         let started = Instant::now();
+        // `FERROUI_GATE_VISUALS_ON_DEMAND=0` gives every element a composition visual, as before
+        // section 9.41: the two are compared with it.
+        if std::env::var("FERROUI_GATE_VISUALS_ON_DEMAND").is_ok_and(|value| value.trim() == "0") {
+            ferroui_base::Visual::set_composition_visuals_on_demand(false);
+        }
         if std::env::var_os("PERF_FONTS").is_none() {
             std::env::set_var("PERF_FONTS", concat!(env!("CARGO_MANIFEST_DIR"), "/../../src/FerroUI.Themes.Material/Assets"));
         }
@@ -656,6 +661,8 @@ struct Census {
     bare_under_bare: usize,
     /// The longest chain of bare elements.
     bare_chain: usize,
+    /// Have no composition visual (section 9.41).
+    without_visual: usize,
 }
 
 impl Census {
@@ -669,7 +676,13 @@ impl Census {
         if children.is_empty() {
             self.leaves += 1;
         }
-        let draws = visual.composition_visual().is_some_and(|composition| composition.draw_list().is_some());
+        // Asking an element without a composition visual for it would give it one.
+        let has_visual = visual.has_composition_visual();
+        if !has_visual {
+            self.without_visual += 1;
+        }
+        let draws =
+            has_visual && visual.composition_visual().is_some_and(|composition| composition.draw_list().is_some());
         let other_inputs = visual.opacity() != 1.0
             || visual.clip().is_some()
             || visual.cache_mode().is_some()
@@ -721,6 +734,7 @@ impl Census {
             line("draw nothing, set an input", self.inputs_without_drawing),
             line("draw nothing, set nothing, under one that does neither", self.bare_under_bare),
             format!("  longest chain that draws nothing and sets nothing: {}", self.bare_chain),
+            line("have no composition visual", self.without_visual),
         ]
         .join("\n")
     }

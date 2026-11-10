@@ -197,6 +197,24 @@ impl CompositionTarget {
         Some(res)
     }
 
+    /// [`try_hit_test`](Self::try_hit_test) for a root that has no composition visual
+    /// (docs/porting/desktop-performance.md, section 9.41): `visuals` are the composition
+    /// visuals that show what is under it, in the order they are shown, all children of one
+    /// composition visual, and `parent_input` is the input in the coordinates of that one.
+    pub(crate) fn hit_test_siblings<H: ICompositionHitTester>(
+        &self,
+        visuals: &[Rc<CompositionVisual>],
+        parent_input: &H::Input,
+        filter: VisualFilter<'_>,
+    ) -> Vec<(IntersectionResult, Rc<CompositionVisual>)> {
+        self.compositor().readback().next_read();
+        let mut res = Vec::new();
+        for visual in visuals.iter().rev() {
+            self.hit_test_core::<H>(visual, parent_input, &mut res, filter);
+        }
+        res
+    }
+
     fn hit_test_core<H: ICompositionHitTester>(
         &self,
         visual: &Rc<CompositionVisual>,
@@ -332,6 +350,25 @@ impl CompositionTarget {
         let parent_input = H::transform(input, readback.matrix);
 
         self.hit_test_first_core::<H>(&root, &parent_input, filter, result_filter)
+    }
+
+    /// [`try_hit_test_first`](Self::try_hit_test_first) for a root that has no composition
+    /// visual: see [`hit_test_siblings`](Self::hit_test_siblings).
+    pub(crate) fn hit_test_first_sibling<H: ICompositionHitTester>(
+        &self,
+        visuals: &[Rc<CompositionVisual>],
+        parent_input: &H::Input,
+        filter: VisualFilter<'_>,
+        result_filter: VisualFilter<'_>,
+    ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
+        self.compositor().readback().next_read();
+        for visual in visuals.iter().rev() {
+            let (hit, intersection) = self.hit_test_first_core::<H>(visual, parent_input, filter, result_filter);
+            if hit.is_some() {
+                return (hit, intersection);
+            }
+        }
+        (None, IntersectionResult::NotCalculated)
     }
 
     pub(crate) fn hit_test_first_core<H: ICompositionHitTester>(
