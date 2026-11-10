@@ -1319,6 +1319,14 @@ ellipsis. Of 1,793 text layouts a pass, 1,048 were of a text that had not change
   text runs hold a control when it builds them; while the runs are not built, and with a control,
   a layout is not kept, as before.
 
+A measure that holds over more constraints showed a defect of the grid that upstream shares: the
+definitions of a grid are made when they are first read, a read invalidates nothing, and the
+arrange took a grid with definitions for one measured with them. A cell of a keyboard (a grid
+without definitions around an unwrapped text) whose definitions a test helper had read was
+arranged at a new size without a measure and failed on definition structures that were never
+validated. The grid now arranges, and reports its hold, by the measure that ran
+(`Grid::is_measured_with_definitions`; DEVIATIONS.md, "Grid").
+
 The same change set makes three representations cheaper without changing what they do. The sets
 of addresses of the compositor (the objects to serialize, the visuals of the renderer, the
 resources of a recording) hash with `rustc_hash` instead of SipHash; an address needs no defence

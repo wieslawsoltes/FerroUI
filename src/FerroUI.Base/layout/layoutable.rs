@@ -852,8 +852,6 @@ impl Layoutable {
         }
     }
 
-    /// Invalidates the measurement of the control and queues a new layout
-    /// pass.
     /// Clears `subtree_measure_invalid` of this element and of the ancestors that have it: one
     /// of their descendants is measured. The flagged elements are closed downwards (the
     /// descendants of a flagged element are flagged), so the first ancestor without it ends the
@@ -871,6 +869,8 @@ impl Layoutable {
         }
     }
 
+    /// Invalidates the measurement of the control and queues a new layout
+    /// pass.
     pub fn invalidate_measure(&self) {
         if self.is_measure_valid.get() {
             self.is_measure_valid.set(false);

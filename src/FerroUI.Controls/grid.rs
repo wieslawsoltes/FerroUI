@@ -312,7 +312,7 @@ impl LayoutableImpl for Grid {
     fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
         use ferroui_base::layout::MeasureHold;
         let children = this.children().snapshot();
-        if this.ext_data.get().is_none() {
+        if !this.is_measured_with_definitions() {
             let mut hold = MeasureHold::ANY;
             for child in children.iter().filter(|child| child.is_visible()) {
                 hold = hold.intersect(child.measure_hold()?)?;
@@ -680,7 +680,9 @@ impl LayoutableImpl for Grid {
         this.set_flags(true, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
         let _in_progress = FlagGuard(this, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
 
-        if this.ext_data.get().is_none() {
+        // Arranged as it was measured: a grid whose definitions were first asked for after its
+        // measure was measured as a trivial grid (`is_measured_with_definitions`).
+        if !this.is_measured_with_definitions() {
             let children = this.children().snapshot();
 
             for child in children.iter() {
@@ -2661,6 +2663,18 @@ impl Grid {
                 grid.set_cells_structure_dirty(true);
             }
         }
+    }
+
+    /// Whether the last measure of the grid ran with its definitions. It did not for a trivial
+    /// grid (one without extended data), nor for a grid whose extended data was made after that
+    /// measure: `column_definitions` and `row_definitions` make it when they are first read, and
+    /// a read invalidates nothing, so the measure that holds is the trivial one and the arrange
+    /// and the measure hold follow it. Not upstream, whose `ArrangeOverride` reads definitions
+    /// that are not there in that case (FerroUI deviation, DEVIATIONS.md, "Grid").
+    fn is_measured_with_definitions(&self) -> bool {
+        self.ext_data
+            .get()
+            .is_some_and(|ext_data| ext_data.definitions_u.borrow().is_some() && ext_data.definitions_v.borrow().is_some())
     }
 
     /// The array of column definitions used during the calculations.

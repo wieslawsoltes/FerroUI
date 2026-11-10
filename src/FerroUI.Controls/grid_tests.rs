@@ -6,7 +6,7 @@ use crate::{
 };
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
-use ferroui_base::layout::{LayoutableImpl, Orientation};
+use ferroui_base::layout::{LayoutableImpl, MeasureHold, Orientation};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, IntoRef, Point, Rect, Ref, Size, StyledElementImpl,
     Thickness, VisualImpl,
@@ -34,6 +34,38 @@ impl TestControl {
         instantiate(Self {
             base: Control::construct(),
             measure_size: Cell::new(measure_size),
+        })
+    }
+}
+
+/// A control with a fixed measured size whose measure holds at every size.
+#[repr(C)]
+struct HoldingControl {
+    base: Control,
+    measure_size: Size,
+    measures: Cell<usize>,
+}
+
+ferro_class!(HoldingControl: Control);
+ferro_impl_classes!(HoldingControl: FerroObjectImpl, StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+
+impl LayoutableImpl for HoldingControl {
+    fn measure_override(this: &Self, _available_size: Size) -> Size {
+        this.measures.set(this.measures.get() + 1);
+        this.measure_size
+    }
+
+    fn measure_hold_override(_this: &Self, _constraint: Size) -> Option<MeasureHold> {
+        Some(MeasureHold::ANY)
+    }
+}
+
+impl HoldingControl {
+    fn new(measure_size: Size) -> Ref<Self> {
+        instantiate(Self {
+            base: Control::construct(),
+            measure_size,
+            measures: Cell::new(0),
         })
     }
 }
@@ -338,6 +370,66 @@ fn layout_empty_column_row_layout_like_a_normal_panel() {
     // Assert
     GridAssert::children_width(&grid, &[600.0]);
     GridAssert::children_height(&grid, &[200.0]);
+}
+
+/// Not upstream, whose `ArrangeOverride` reads definitions that are not there: the definitions
+/// of a grid are made when they are first read, and a grid measured without them is arranged as
+/// it was measured (DEVIATIONS.md, "Grid").
+#[test]
+fn definitions_first_read_after_the_measure_keep_the_layout_of_that_measure() {
+    let grid = Grid::new();
+    let child = TestControl::new(Size::new(30.0, 20.0));
+    grid.children().add(child.clone());
+    grid.measure(Size::new(100.0, 100.0));
+    grid.arrange(Rect::new(0.0, 0.0, 100.0, 100.0));
+    assert_eq!(child_bounds(&grid, 0), Rect::new(0.0, 0.0, 100.0, 100.0));
+
+    // A read makes the collections and invalidates nothing.
+    assert_eq!(grid.column_definitions().count(), 0);
+    assert_eq!(grid.row_definitions().count(), 0);
+    assert!(grid.is_measure_valid());
+
+    // The measure holds, so the arrange at another rectangle does not measure again.
+    grid.arrange(Rect::new(0.0, 0.0, 120.0, 80.0));
+    assert_eq!(child_bounds(&grid, 0), Rect::new(0.0, 0.0, 120.0, 80.0));
+
+    // A definition is a change of the structure: the grid is measured again, with it.
+    grid.column_definitions().add(column(pixels(40.0), None));
+    grid.column_definitions().add(column(star(1.0), None));
+    assert!(!grid.is_measure_valid());
+    grid.measure(Size::new(120.0, 80.0));
+    grid.arrange(Rect::new(0.0, 0.0, 120.0, 80.0));
+    assert_eq!(child_bounds(&grid, 0), Rect::new(0.0, 0.0, 40.0, 80.0));
+}
+
+/// As above, for a grid whose measure holds at other sizes (desktop-performance.md section
+/// 9.15): the measure at another size is not run, and the arrange follows the one that was.
+#[test]
+fn definitions_first_read_after_the_measure_keep_a_measure_that_holds() {
+    let grid = Grid::new();
+    let child = HoldingControl::new(Size::new(30.0, 20.0));
+    grid.children().add(child.clone());
+    grid.measure(Size::new(100.0, 100.0));
+    grid.arrange(Rect::new(0.0, 0.0, 100.0, 100.0));
+    assert!(grid.measure_hold().is_some_and(|hold| hold.contains(Size::new(120.0, 80.0))));
+    assert_eq!(child.measures.get(), 1);
+
+    assert_eq!(grid.column_definitions().count(), 0);
+
+    grid.measure(Size::new(120.0, 80.0));
+    assert_eq!(child.measures.get(), 1);
+    grid.arrange(Rect::new(0.0, 0.0, 120.0, 80.0));
+    assert_eq!(child_bounds(&grid, 0), Rect::new(0.0, 0.0, 120.0, 80.0));
+    // The hold is asked of a grid measured as a trivial one.
+    assert!(grid.measure_hold().is_some_and(|hold| hold.contains(Size::new(90.0, 60.0))));
+
+    // Measured with its definitions from the next measure on; the child's own measure holds.
+    grid.invalidate_measure();
+    grid.measure(Size::new(120.0, 80.0));
+    grid.arrange(Rect::new(0.0, 0.0, 120.0, 80.0));
+    assert_eq!(child.measures.get(), 1);
+    assert_eq!(child_bounds(&grid, 0), Rect::new(0.0, 0.0, 120.0, 80.0));
+    assert!(grid.measure_hold().is_some_and(|hold| hold.contains(Size::new(120.0, 80.0))));
 }
 
 #[test]
