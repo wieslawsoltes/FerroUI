@@ -151,7 +151,7 @@ impl LayoutHelper {
     /// Obtains the layout scale of the given control, based on its layout
     /// root.
     pub fn get_layout_scale(control: &Layoutable) -> f64 {
-        control.get_layout_root().map_or(1.0, |root| root.layout_scaling())
+        control.layout_scaling_of_presentation_source().unwrap_or(1.0)
     }
 
     /// Rounds a size to an integer number of device pixels, rounding up.

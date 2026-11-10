@@ -1,6 +1,6 @@
-//! Not ports: the kept copies of the size, margin and visibility properties
-//! (docs/porting/desktop-performance.md, section 9.9) are the values `get_value` reads after every
-//! kind of change.
+//! Not ports: the kept copies of the size, margin, alignment and visibility properties
+//! (docs/porting/desktop-performance.md, sections 9.9 and 9.28) are the values `get_value` reads
+//! after every kind of change.
 
 use crate::data::BindingPriority;
 use crate::layout::Layoutable;
@@ -50,4 +50,31 @@ fn a_kept_margin_and_visibility_follow_their_changes() {
     assert!(!visual.is_visible());
     visual.clear_value(Visual::is_visible_property());
     assert!(visual.is_visible());
+}
+
+#[test]
+fn the_kept_alignments_follow_their_changes() {
+    use crate::layout::{HorizontalAlignment, VerticalAlignment};
+
+    let layoutable = Layoutable::new();
+    assert_eq!(HorizontalAlignment::Stretch, layoutable.horizontal_alignment());
+    assert_eq!(VerticalAlignment::Stretch, layoutable.vertical_alignment());
+
+    layoutable.set_horizontal_alignment(HorizontalAlignment::Center);
+    layoutable.set_vertical_alignment(VerticalAlignment::Bottom);
+    assert_eq!(HorizontalAlignment::Center, layoutable.horizontal_alignment());
+    assert_eq!(VerticalAlignment::Bottom, layoutable.vertical_alignment());
+
+    // A style value under the local one, then the local one cleared.
+    let _style = layoutable.set_value_with_priority(
+        Layoutable::horizontal_alignment_property(),
+        HorizontalAlignment::Right,
+        BindingPriority::Style,
+    );
+    assert_eq!(HorizontalAlignment::Center, layoutable.horizontal_alignment());
+    layoutable.clear_value(Layoutable::horizontal_alignment_property());
+    assert_eq!(HorizontalAlignment::Right, layoutable.horizontal_alignment());
+
+    layoutable.clear_value(Layoutable::vertical_alignment_property());
+    assert_eq!(VerticalAlignment::Stretch, layoutable.vertical_alignment());
 }

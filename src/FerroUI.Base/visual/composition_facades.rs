@@ -346,7 +346,16 @@ impl Visual {
     /// Deviation (winui-composition.md): the collection replaces implicit animations the
     /// application set on the element's composition visual while a transition is set (WinUI does
     /// not allow a facade transition and an animation of the handoff visual's property together).
+    #[inline]
     pub(super) fn apply_composition_transitions(&self, comp: &Rc<CompositionVisual>, after_writes: bool) {
+        // A visual without facades, the usual one, is answered where it is asked.
+        if self.composition_extras.borrow().is_none() {
+            return;
+        }
+        self.apply_composition_transitions_of_facades(comp, after_writes);
+    }
+
+    fn apply_composition_transitions_of_facades(&self, comp: &Rc<CompositionVisual>, after_writes: bool) {
         let Some(fresh) = self.read_composition_extras(|extras| {
             extras.facades.fresh_visual.as_ref().is_some_and(|visual| std::ptr::eq(visual.as_ptr(), Rc::as_ptr(comp)))
         }) else {

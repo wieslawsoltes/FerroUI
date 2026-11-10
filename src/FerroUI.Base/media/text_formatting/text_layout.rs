@@ -2,16 +2,16 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::{
     FormattedTextSource, FormattingObjectPool, GenericTextParagraphProperties, GenericTextRunProperties,
-    ITextDrawingSink, ITextSource, InterWordJustification, TextCollapsingProperties, TextEndOfParagraph,
-    TextFormatter, TextFormatterImpl, TextLine, TextLineImpl, TextParagraphProperties, TextRun, TextRunCache,
-    TextRunProperties, TextParagraphStyle, TextParagraphStyles,
+    ITextDrawingSink, ITextSource, InterWordJustification, PlainTextLayoutRequest, TextCollapsingProperties,
+    TextEndOfParagraph, TextFormatter, TextFormatterImpl, TextLine, TextLineImpl, TextParagraphProperties, TextRun,
+    TextRunCache, TextRunProperties, TextParagraphStyle, TextParagraphStyles,
 };
 use crate::media::{
-    BaselineAlignment, CharacterHit, FlowDirection, FontFeatureCollection, IBrush, TextAlignment,
+    BaselineAlignment, CharacterHit, FlowDirection, FontFeatureCollection, FontManager, IBrush, TextAlignment,
     TextCollapsingCreateInfo, TextDecorationCollection, TextHitTestResult, TextTrimming, TextWrapping, Typeface,
 };
 use crate::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
-use crate::{Point, Rect};
+use crate::{FerroLocator, LocatorExtensions, Point, Rect};
 
 /// The optional parameters of [`TextLayout::new`]. `Default` gives upstream's
 /// parameter defaults.
@@ -93,6 +93,9 @@ pub struct TextLayout {
     truncated_by_height: bool,
     /// Whether lines with text were left out because of the line limit.
     truncated_by_max_lines: bool,
+    /// Whether the layout belongs to the layouts its font manager keeps
+    /// ([`shared_plain`](Self::shared_plain)): its holders do not release it.
+    shared: bool,
 }
 
 /// How far inside its exact bounds a width hold is kept: the formatter compares widths with a
@@ -215,11 +218,86 @@ impl TextLayout {
             width_hold: std::cell::Cell::new(None),
             truncated_by_height: false,
             truncated_by_max_lines: false,
+            shared: false,
         };
 
         text_layout.text_lines = text_layout.create_text_lines();
 
         text_layout
+    }
+
+    /// The layout of the plain text `text`: one run of the default run properties of
+    /// `paragraph_properties`. A text that was laid out before with the same properties,
+    /// trimming and constraint gets the layout that was made then, which every asker holds
+    /// (a FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
+    ///
+    /// `text_source` is asked for the source when the layout has to be made; it gives exactly
+    /// `text` in runs of the default run properties. `text_run_cache` is used while the layout
+    /// is made.
+    ///
+    /// The font manager of the thread keeps the layout, so [`dispose`](Self::dispose) leaves
+    /// it alone ([`is_shared`](Self::is_shared)). A long text, a text with decorations or font
+    /// features and a paragraph with tab stops get a layout of their own, as
+    /// [`from_text_source`](Self::from_text_source) makes it.
+    #[allow(clippy::too_many_arguments)]
+    pub fn shared_plain(
+        text: &str,
+        text_source: impl FnOnce() -> Rc<dyn ITextSource>,
+        paragraph_properties: &Rc<dyn TextParagraphProperties>,
+        text_trimming: &Rc<dyn TextTrimming>,
+        max_width: f64,
+        max_height: f64,
+        max_lines: i32,
+        text_run_cache: Option<Rc<TextRunCache>>,
+    ) -> Rc<Self> {
+        let create = || {
+            Self::from_text_source(
+                text_source(),
+                paragraph_properties.clone(),
+                Some(text_trimming.clone()),
+                max_width,
+                max_height,
+                max_lines,
+                text_run_cache,
+            )
+        };
+
+        // Without a font manager there is nothing the layouts could belong to.
+        let Some(font_manager) = FerroLocator::current().get_service::<FontManager>() else {
+            return Rc::new(create());
+        };
+
+        let request = PlainTextLayoutRequest {
+            text,
+            paragraph_properties: &**paragraph_properties,
+            text_trimming,
+            max_width,
+            max_height,
+            max_lines,
+        };
+
+        font_manager.text_layouts().get_or_create(&request, create)
+    }
+
+    /// Whether the font manager keeps this layout for the next use of its text
+    /// ([`shared_plain`](Self::shared_plain)).
+    pub fn is_shared(&self) -> bool {
+        self.shared
+    }
+
+    /// The layout as one its font manager keeps. The shaped runs it was made with are its
+    /// own from here on: the text run cache it was given belongs to the one that asked first.
+    pub(crate) fn into_shared(mut self) -> Self {
+        self.shared = true;
+        self.text_run_cache = None;
+        self
+    }
+
+    /// Releases the text lines of a layout the font manager kept, when it lets it go.
+    pub(crate) fn release_shared(&self) {
+        for line in &self.text_lines {
+            line.dispose();
+        }
     }
 
     /// Gets the height of each line of text.
@@ -947,8 +1025,14 @@ impl TextLayout {
         line.collapse(&[collapsing_properties])
     }
 
-    /// Releases the text lines.
+    /// Releases the text lines. A layout its font manager keeps
+    /// ([`is_shared`](Self::is_shared)) is released by the font manager, when nothing holds it
+    /// any more.
     pub fn dispose(&self) {
+        if self.shared {
+            return;
+        }
+
         for line in &self.text_lines {
             line.dispose();
         }

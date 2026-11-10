@@ -312,6 +312,10 @@ impl IPresentationSource for PresentationSource {
         self.rc()
     }
 
+    fn layout_root_scaling(&self) -> f64 {
+        PresentationSource::layout_scaling(self)
+    }
+
     fn client_size(&self) -> Size {
         PresentationSource::client_size(self)
     }

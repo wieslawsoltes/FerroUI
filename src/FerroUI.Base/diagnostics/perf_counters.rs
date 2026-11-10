@@ -158,6 +158,12 @@ perf_counters! {
     // --- text (design 06) ---
     /// `TextLayout::from_text_source`.
     TextLayoutsCreated => "text layouts created",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
+    TextLayoutCacheHits => "text layout cache hits",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.
+    TextLayoutCacheMisses => "text layout cache misses",
+    /// `TextLayoutCache`: a kept layout nothing held was let go for room.
+    TextLayoutCacheEvictions => "text layout cache evictions",
     /// `TextFormatterImpl::format_line_with_cache`: a line was asked for.
     TextLinesFormatted => "text lines formatted",
     /// `TextFormatterImpl::format_line_with_cache`: the shaped runs of the
@@ -210,6 +216,10 @@ perf_counters! {
     MeasuresExecuted => "measures executed",
     /// `Layoutable::arrange`: the arrange of an element ran.
     ArrangesExecuted => "arranges executed",
+    /// `Interactive::build_event_route`: a routed event was raised that has no class handler
+    /// and no instance handler on the thread, so its route was left empty without walking the
+    /// ancestors.
+    RoutedEventRoutesSkipped => "routed event routes skipped (nothing listens)",
     /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
     LayoutPassRounds => "layout pass rounds",
     /// `LayoutManager::invalidate_measure`: the measure of an element was invalidated while a
@@ -220,6 +230,9 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
     /// was not sent again.
     VisualsRecordedUnchanged => "visuals recorded unchanged",
+    /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
+    /// visual had, whose server-side object was kept.
+    VisualsRecordedInPlace => "visuals recorded into their render data",
     /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
     UiRenderPasses => "ui: render passes",
 
@@ -243,6 +256,9 @@ perf_counters! {
     RenderVisualsRendered => "render: visuals rendered",
     /// The render walk: a visual with its own transform set the transform of the canvas.
     RenderVisualTransformsSet => "render: visual transforms set",
+    /// The drawing context of the backend: a transform of the context reached the canvas (a
+    /// transform that is replaced before the canvas is used does not).
+    RenderCanvasTransformsApplied => "render: transforms applied to the canvas",
     /// The render walk: a visual pushed its clip to bounds.
     RenderVisualClipsPushed => "render: visual clips to bounds pushed",
     /// The render walk: a visual pushed its opacity.

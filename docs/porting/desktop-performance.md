@@ -874,7 +874,7 @@ lists that scroll at a fixed width, where every moved item is no longer recorded
 
 A visual recorded again often draws exactly what it drew before: a left-aligned text block
 without a background, resized while its layout was kept (section 9.12), draws the same lines at
-the same places. `RenderDataDrawingContext::get_render_results_unless_same` compares the new
+the same places. `RenderDataDrawingContext::get_render_results_for` compares the new
 recording with the render data the visual has: the same operations on the same resources, by
 identity, none of them a custom draw operation (which a dropped recording disposes) or a
 resource not sent. When they are the same, the new recording is dropped, its references
@@ -1355,3 +1355,226 @@ texts that changed), layouts dropped for a new measure constraint 541 to 18 and 
 constraint 506 to 15, measures executed 4,671 to 3,506. UI thread, from samples: about 23 to about
 17 ms a frame. The frame rate does not change (31.5 to 32.3 frames a second before and after):
 the render thread is busy for the whole frame and sets it.
+
+### 9.28 The UI thread of a frame: values read in place, events nobody hears, a drawing kept by its render data
+
+After section 9.27 the render thread and the UI thread of the gauntlet cost about the same, and
+with the render thread no longer the only limit the UI thread's share of a frame decides the frame
+rate as well. Its samples show no single cost; they show the same small work done for every one of
+about 13,500 visuals a frame. This section removes that work where it has no effect. None of the
+changes alters a value, an event, a drawing or an order.
+
+Values read where they are kept:
+
+- The generation of inherited values and the generation of property metadata are one for the
+  process (an atomic) and no longer one a thread. Every read of an inherited value and every
+  `HotValue` compares them, and the address of a thread-local value costs more than the load of a
+  static. A change on one thread makes the stores of every thread look their values up once more;
+  no store misses a change.
+- `HotValue` (section 9.9) is public and hidden from the documentation, with `get_for(object,
+  read)`, so that the controls crate keeps values the way the base crate does. A layoutable keeps
+  its two alignments with its sizes and margin. A border keeps its thickness, corner radius and
+  background sizing, a decorator its padding, and a row or column definition its user size,
+  minimum and maximum: a grid reads the three of every definition in every pass of its layout.
+  Each kept value is read again whenever the value store of its object changes.
+- Layout asks for the layout scale of every element it rounds. `IPresentationSource` has
+  `layout_root_scaling()` (default: the scaling of its layout root), and
+  `Visual::layout_scaling_of_presentation_source` reads it in place, where
+  `LayoutHelper::get_layout_scale` handed out the layout root as a counted reference for every
+  element.
+- An assignment of an animated property returns at once when the object has no animation
+  controller, and the transitions of composition facades are asked only of a visual that has
+  facades.
+
+Work that has no receiver:
+
+- A routed event counts its instance handlers (`RoutedEvent::has_instance_handlers`): adding a
+  handler, removing it and dropping an interactive that holds handlers keep the count. Building a
+  route for an event that has neither a class handler nor an instance handler returns the empty
+  route without walking the ancestors. A stack panel raises its snap-points events, which bubble,
+  in every arrange as upstream does; in the gauntlet that walked the ancestors of every stack
+  panel a frame for nobody. Handlers added later are found: the count is read when a route is
+  built.
+- `Visual::synchronize_composition_child_visuals` answers a visual with no visual child, no child
+  composition visual and no facades without building the lists it compares.
+- The compositor asks for a commit only when none is pending (`ensure_commit_requested`), where
+  every change of every object handed the pending batch out and dropped it.
+
+A drawing kept by its render data:
+
+- A recorder keeps the stream of a recording it discards (nothing drawn, or the drawing the
+  visual already has, section 9.14) and records the next visual into the same storage
+  (`RenderDataStream::recycle`). Storage beyond 512 bytes is not kept, so that a recording does
+  not hold much more than it needs.
+- A visual whose drawing changed gives the new recording to the render data it already has
+  (`CompositionRenderData::replace_recording`, through
+  `RenderDataDrawingContext::get_render_results_for`, which returns a `RecordedDrawing`: the same
+  drawing, updated in place, or a new render data). Upstream, and FerroUI until here, creates a
+  render data for every changed drawing and disposes the old one: a server object created and
+  one disposed, an allocation and a registration for each of the visuals a frame draws. The
+  server-side render data already resets itself and reads a new stream whenever it is
+  serialized, which is how it received its first recording; the visual tells its server-side
+  visual that its content changed (the change code of an unchanged drawing list), so bounds and
+  the kept fragment follow as for a new render data. The resources of the old recording are
+  released as `dispose` releases them: by the render data when the recording was not sent yet,
+  by the server-side render data when it reads the next one. A render data that something else
+  than its visual and the renderer holds is not written to: the recording gets its own, as
+  before. A visual that stops drawing has no render data, as before.
+
+The Skia backend sets the transform of its canvas when something is drawn with it:
+
+- `DrawingContextImpl` keeps the transform it is given and applies it to the canvas before the
+  first operation that depends on it (a draw, a clip, a layer, a save, a lease of the canvas).
+  The render walk sets a transform for every visual and sets it back after it, and a visual
+  outside the dirty area or without a drawing recorded two matrix operations for nothing. What is
+  recorded is what is drawn with, in the same order; Skia's API is used as before, only less
+  often. When the canvas can be leased (`ISkiaSharpApiLeaseFeature`) the canvas follows at once.
+
+Tests: `interactive_tests.rs`
+(`the_count_of_instance_handlers_follows_added_removed_and_dropped_handlers`,
+`a_class_handler_is_reached_when_no_instance_handler_is_attached`), `render_data_tests.rs`
+(`a_changed_recording_goes_to_the_render_data_the_visual_has`: the server-side render data keeps
+its id, is not disposed, has the bounds and replays the operations of the new recording, also
+after two recordings before one batch; `an_equal_recording_leaves_the_render_data_as_it_is`;
+`a_shared_render_data_and_an_empty_drawing_are_not_recorded_in_place`;
+`the_custom_operations_of_a_replaced_recording_are_released`), `hot_value_tests.rs`
+(`the_kept_alignments_follow_their_changes`), `kept_value_tests.rs` of the controls
+(`the_kept_values_of_a_border_follow_local_style_and_cleared_values`,
+`the_kept_sizes_of_a_definition_follow_its_properties`) and
+`drawing_context_transform_tests.rs` of the Skia backend
+(`drawing_uses_the_last_transform_set`, `a_transform_that_nothing_is_drawn_with_is_not_recorded`,
+`the_canvas_follows_the_transform_at_once_when_the_api_can_be_leased`). Counters: `routed event
+routes skipped (nothing listens)`, `visuals recorded into their render data`, and the transforms
+applied to the canvas beside the transforms set.
+
+Gauntlet (tier 16, GPU Skia, 60 Hz, this machine, sampled, per frame), before and with the
+section:
+
+| Per frame | Before | With |
+|---|---|---|
+| UI thread | 18.4 ms | 16.7 ms |
+| Layout pass | 9.28 ms | 8.59 ms |
+| `Compositor::commit` | 7.55 ms | 6.53 ms |
+| `ValueStore::get_value` | 1.36 ms | 0.74 ms |
+| Routed events | 0.37 ms | 0.14 ms |
+| Render thread | 35.3 ms | 33.4 ms |
+| Frames per second | 31.8 to 34.2 | 33.6 to 34.3 |
+
+The frame rate hardly moves because the render thread sets it while it draws directly; the UI
+thread's share is what a pipelined frame gets back.
+
+### 9.29 A plain text is laid out once for the texts that are the same
+
+After section 9.28 text is a third of the UI thread of a gauntlet frame (about 5.6 of 16.7 ms).
+A frame makes 796 layouts, 744 of them because the text of a block changed, and each is made
+from nothing: the characters are split into runs, shaped, broken into lines and given their
+metrics, and the layout the block had is released. Most of that is work that was done before.
+The texts are short (95 % have six bytes or fewer) and they repeat: only 4 % of the layouts a
+frame makes are of a text that was never laid out with the same font, size, brush, wrapping and
+constraint. The repeats are spread over time, so a layout has to be kept for a while to be
+found again:
+
+| Layouts kept while nothing shows them | Layouts found instead of made |
+|---|---|
+| 1,024 | 31 % |
+| 2,048 | 38 % |
+| 4,096 | 42 % |
+| 8,192 | 47 % |
+| 16,384 | 53 % |
+
+Upstream makes a layout for every text block and every change. egui keeps its laid-out texts
+(galleys) by their content for the frames that use them, and Cranpose keeps its measured texts
+the same way. FerroUI keeps the layout itself, the object the formatter makes, so nothing about
+shaping, line breaking or drawing is done another way: a layout that is found is the layout
+that would have been made.
+
+What is kept and where:
+
+- The font manager of a thread keeps the layouts (`TextLayoutCache`, a field of `FontManager`,
+  `media/text_formatting/text_layout_cache.rs`). `TextLayout::shared_plain` asks it for the
+  layout of a plain text and makes the layout with `TextLayout::from_text_source` when there is
+  none. The default `TextBlock::create_text_layout` calls it for a text without inlines.
+- A layout is found by everything it is made of: the text, the run properties (typeface,
+  requested family, size, font scale, baseline alignment, culture), the paragraph properties
+  (flow direction, alignment, wrapping, line height, line spacing, indents, letter spacing,
+  line bounds and metrics mode), the trimming, and the exact maximum width, maximum height and
+  line limit. The foreground and background brush are compared as objects, never by their
+  colour: a layout draws with the brush object it was made with, and a brush of the same colour
+  that is another object can change later. Shared brushes (a theme's, `Brushes::black()`) are
+  what makes layouts of different blocks the same.
+- A layout that can change after it was made is not kept and belongs to its block as before: a
+  text with text decorations or font features (collections that are observed), a paragraph
+  with tab stops, a text longer than 256 bytes, and every text with inlines. A text block that
+  makes its own layout (`SelectableTextBlock`, `AccessText`, an override of
+  `create_text_layout`) does not ask the cache.
+- A kept layout is shared (`TextLayout::is_shared`): `TextLayout::dispose` leaves it as it is,
+  because another block may show it, and the cache releases its lines when it lets the layout
+  go. A layout something holds is never let go. Of the layouts nothing holds the cache keeps
+  the 4,096 used last, as far as their text is within 64 KiB (what a layout keeps grows with
+  its text, so long texts go sooner); it looks for the ones to release once in 1,024 new
+  layouts or 16 KiB of new text, so keeping them costs a constant amount for a layout made. A
+  shared layout does not keep the run cache of the block that made it.
+- Every change of the fonts of a thread (a font collection added or removed, glyph typefaces
+  invalidated: the generation the glyph typeface lookups already follow) lets all kept layouts
+  go, so no layout shaped with a font that is gone is found. A layout that is still shown stays
+  whole for the block that shows it and is made again when that block asks for a layout.
+
+A new text keeps what is not made of it: `TextBlock` no longer drops its run properties and
+paragraph properties when its `Text` changes (they are made of the font, the brushes and the
+paragraph values), only its layout and runs.
+
+What a program can see: two text blocks that show the same text the same way return the same
+object from `TextBlock::text_layout`, and `TextLayout::dispose` does nothing to a shared layout.
+Measured sizes, lines, hit tests and drawing are the ones of a layout made for the block.
+
+Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_one_layout`,
+`what_a_layout_is_made_of_tells_layouts_apart`: each part of the key on its own,
+`a_layout_is_shared_for_the_same_brush_object_only`,
+`a_layout_made_of_what_can_change_is_not_shared`,
+`disposing_a_shared_layout_leaves_it_to_its_other_holders`,
+`the_layouts_nothing_holds_are_let_go_from_the_oldest`,
+`long_texts_nothing_holds_are_let_go_by_their_length`,
+`a_change_of_the_fonts_lets_every_layout_go`) and `text_block_tests.rs`
+(`text_blocks_that_show_the_same_text_the_same_way_share_a_layout`,
+`a_text_that_comes_back_has_the_layout_it_had`,
+`a_shared_layout_outlives_a_block_that_lets_it_go`,
+`a_layout_made_of_more_than_a_plain_text_is_not_shared`). The gate measures it with
+`text::TextBlockChangingTextBenchmark` (`change_and_measure`: a text block whose text changes
+and is measured, with texts that repeat and with texts that are new every time; the second is
+the cost the cache adds to a layout it cannot find).
+
+Counters (`--features counters`): `text layout cache hits`, `text layout cache misses` and
+`text layout cache evictions`, beside `text layouts created`.
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 796 to 450 (346 found,
+446 made and kept, 418 let go: the cache is full and turns over, as the table of this section
+says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507.
+
+| Gauntlet, tier 16, direct drawing | Frames a second | UI thread, ms a frame | Render thread, ms a frame |
+|---|---|---|---|
+| Section 9.28 | 33.9 | 16.7 | 33.4 |
+| With the kept layouts | 36.6 | 14.5 | 27.3 |
+
+The thread times are from samples (about a tenth above the real ones). The render thread gains
+more than the UI thread: text blocks that show the same text hold one layout, so they draw the
+same glyph runs, and the renderer finds what it keeps for a glyph run more often (a reading of
+the numbers, not measured apart).
+
+What the layouts that are not found are (every lookup of 20 seconds of the gauntlet written out,
+the second half counted: 139,577 lookups, 54,874 different keys):
+
+| Text | Lookups | Different keys | Found with 4,096 kept | Found with every layout kept |
+|---|---|---|---|---|
+| A price (`611.26`) | 67,901 | 45,538 | 5.0% | 32.9% |
+| A change (`+0.94%`) | 49,008 | 2,712 | 94.5% | 94.5% |
+| A share (`96%`) | 13,552 | 100 | 99.3% | 99.3% |
+| The rest (titles, wrapped paragraphs) | 8,599 | 6,007 | 29.4% | 30.1% |
+| All | 139,577 | 54,874 | 41.3% | 60.7% |
+
+Four in five of the layouts that are not found are prices, numbers that were not shown before:
+no number of kept layouts finds them (16,384 kept layouts find 51% of all lookups, every layout
+kept 61%), so the number stays at 4,096. The wrapped paragraphs are not found because their
+width changes with every frame of an animation; they are shaped once all the same, by the text
+run cache of their text block (upstream), and only wrapped again. What is left of the cost of a
+changing text is the cost of making a layout of a short text, of which shaping is a seventh and
+allocation a quarter.

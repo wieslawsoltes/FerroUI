@@ -36,7 +36,7 @@ pub use i_composition_render_resource::ICompositionRenderResource;
 pub use i_render_data_geometry::IRenderDataGeometry;
 pub use i_render_data_visitor::IRenderDataVisitor;
 pub use immediate_render_data_scene_brush_content::ImmediateRenderDataSceneBrushContent;
-pub use render_data_drawing_context::RenderDataDrawingContext;
+pub use render_data_drawing_context::{RecordedDrawing, RenderDataDrawingContext};
 pub use render_data_resources::{RenderDataResource, RenderDataResources, NULL_HANDLE};
 pub use render_data_opcode::RenderDataOpcode;
 pub use render_data_payloads::{

@@ -52,6 +52,18 @@ impl RecordedResource {
     }
 }
 
+/// What became of the recording of a visual
+/// ([`RenderDataDrawingContext::get_render_results_for`]).
+pub enum RecordedDrawing {
+    /// What was recorded is the drawing the visual has: the recording was discarded.
+    Same,
+    /// The render data of the visual took the recording in place of the one it held.
+    Updated,
+    /// The recording is a new render data, registered for serialization; `None` if nothing
+    /// was drawn.
+    New(Option<Rc<CompositionRenderData>>),
+}
+
 /// The drawing context core that records what is drawn into render data
 /// instead of drawing it.
 ///
@@ -61,6 +73,9 @@ impl RecordedResource {
 pub struct RenderDataDrawingContext {
     compositor: Option<Rc<Compositor>>,
     stream: Option<RenderDataStream>,
+    /// The emptied stream of a recording that was discarded, for the next recording (FerroUI
+    /// addition, desktop-performance.md, section 9.28).
+    spare_stream: Option<RenderDataStream>,
     resources: Vec<RecordedResource>,
     resources_hash_set: FxHashSet<usize>,
     push_stack: Vec<PushEntry>,
@@ -69,11 +84,12 @@ pub struct RenderDataDrawingContext {
 
 impl RenderDataDrawingContext {
     pub fn new(compositor: Option<Rc<Compositor>>) -> Self {
-        Self { compositor, stream: None, resources: Vec::new(), resources_hash_set: FxHashSet::default(), push_stack: Vec::new(), compositing_layers: None }
+        Self { compositor, stream: None, spare_stream: None, resources: Vec::new(), resources_hash_set: FxHashSet::default(), push_stack: Vec::new(), compositing_layers: None }
     }
 
     fn stream(&mut self) -> &mut RenderDataStream {
-        self.stream.get_or_insert_with(RenderDataStream::new)
+        let spare = &mut self.spare_stream;
+        self.stream.get_or_insert_with(|| spare.take().unwrap_or_default())
     }
 
     fn add_brush_resource(&mut self, brush: Option<&Rc<dyn IBrush>>) {
@@ -170,29 +186,47 @@ impl RenderDataDrawingContext {
                 Some(render_data)
             }
             Some(mut stream) => {
-                stream.dispose();
+                stream.recycle();
+                self.spare_stream = Some(stream);
                 None
             }
             None => None,
         }
     }
 
-    /// Like [`Self::get_render_results`], but `None` when what was recorded is what `previous`
-    /// holds: the same operations on the same resources. The recording is then discarded (its
-    /// references released) and `previous` stays the drawing, so the render thread neither
-    /// receives nor rebuilds it (an addition, desktop-performance.md section 9.14).
-    pub fn get_render_results_unless_same(
+    /// Finishes the recording of a visual whose drawing is `previous`, and says what became of
+    /// it. When what was recorded is what `previous` holds (the same operations on the same
+    /// resources) the recording is discarded, its references released, and `previous` stays
+    /// the drawing, so the render thread neither receives nor rebuilds it (an addition,
+    /// desktop-performance.md section 9.14). A different drawing is given to `previous` itself
+    /// when the visual is the only holder of it (`previous_is_shared` is unset): its
+    /// server-side render data is sent the new recording instead of being disposed for a new
+    /// one (FerroUI addition, desktop-performance.md, section 9.28). Otherwise the result is
+    /// that of [`Self::get_render_results`]. The context is ready to record again.
+    pub fn get_render_results_for(
         &mut self,
         previous: Option<&Rc<CompositionRenderData>>,
-    ) -> Option<Option<Rc<CompositionRenderData>>> {
+        previous_is_shared: bool,
+    ) -> RecordedDrawing {
         self.flush_stack();
         if let (Some(previous), Some(stream)) = (previous, self.stream.as_ref()) {
             if previous.has_recording(stream, &self.resources) {
                 self.reset();
-                return None;
+                return RecordedDrawing::Same;
+            }
+            let drew = !self.resources.is_empty() || stream.opcode_length() > 0;
+            if let (true, false, Some(compositor)) = (drew, previous_is_shared, self.compositor.clone()) {
+                if let Some(stream) = self.stream.take() {
+                    let resources = std::mem::take(&mut self.resources);
+                    self.resources_hash_set.clear();
+                    let emptied = previous.replace_recording(stream, resources);
+                    self.spare_stream.get_or_insert(emptied);
+                    compositor.register_for_serialization(previous.clone());
+                    return RecordedDrawing::Updated;
+                }
             }
         }
-        Some(self.get_render_results())
+        RecordedDrawing::New(self.get_render_results())
     }
 
     /// Finishes a compositor-less recording and returns what was recorded
@@ -228,7 +262,8 @@ impl RenderDataDrawingContext {
         self.compositing_layers = None;
         if let Some(mut stream) = self.stream.take() {
             stream.dispose_resources();
-            stream.dispose();
+            stream.recycle();
+            self.spare_stream = Some(stream);
         }
         if let Some(compositor) = &self.compositor {
             for resource in self.resources.drain(..) {

@@ -53,6 +53,7 @@ mod text_formatter_impl;
 mod text_geometry_sink;
 mod text_index;
 mod text_layout;
+mod text_layout_cache;
 mod text_leading_prefix_character_ellipsis;
 mod text_line;
 mod text_line_break;
@@ -87,6 +88,8 @@ mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
 #[cfg(test)]
 mod text_formatter_wrap_characterization_tests;
+#[cfg(test)]
+mod text_layout_cache_tests;
 #[cfg(test)]
 mod text_layout_tests;
 #[cfg(test)]
@@ -139,6 +142,7 @@ pub use text_formatter::TextFormatter;
 pub use text_formatter_impl::TextFormatterImpl;
 pub use text_index::{utf16_index_to_utf8, utf8_index_to_utf16};
 pub use text_layout::{TextLayout, TextLayoutOptions};
+pub(crate) use text_layout_cache::{PlainTextLayoutRequest, TextLayoutCache};
 pub use text_leading_prefix_character_ellipsis::TextLeadingPrefixCharacterEllipsis;
 pub use text_line::TextLine;
 pub use text_line_impl::TextLineImpl;

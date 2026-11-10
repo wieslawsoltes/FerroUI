@@ -457,6 +457,8 @@ pub(crate) mod test_support;
 #[cfg(test)]
 mod border_tests;
 #[cfg(test)]
+mod kept_value_tests;
+#[cfg(test)]
 mod canvas_tests;
 #[cfg(test)]
 mod classes_tests;

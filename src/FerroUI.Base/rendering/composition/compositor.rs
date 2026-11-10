@@ -634,12 +634,24 @@ impl Compositor {
         self.request_composition_batch_commit_async()
     }
 
+    /// Asks for a commit unless one is requested already: what the callers
+    /// that do not need the batch use, since every change of a composition
+    /// object asks (not from upstream: no handle to the batch is taken and
+    /// released per change; desktop-performance.md, section 9.28).
+    #[inline]
+    pub(crate) fn ensure_commit_requested(&self) {
+        self.dispatcher.verify_access();
+        if self.next_commit.borrow().is_none() {
+            self.request_composition_batch_commit_async();
+        }
+    }
+
     /// Serializes the pending changes into a batch and hands it to the
     /// server compositor.
     pub fn commit(&self) -> Arc<CompositionBatch> {
         let result = self.commit_core();
         if !self.invoke_before_commit_write.borrow().is_empty() {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
         if !self.after_commit.is_empty() {
             for (_, handler) in self.after_commit.snapshot().iter() {
@@ -866,7 +878,7 @@ impl Compositor {
         };
         self.server_object_id_in_use.borrow_mut()[id.index()] = true;
         self.pending_creations.borrow_mut().push((id, Box::new(factory)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
         id
     }
 
@@ -877,14 +889,14 @@ impl Compositor {
         if self.object_serialization_hash_set.borrow_mut().insert(key) {
             self.object_serialization_queue.borrow_mut().push_back(composition_object);
         }
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Disposes a server object with the next batch, and releases it: the
     /// server compositor drops it and its id can be reused.
     pub fn dispose_on_next_batch(&self, obj: ServerObjectId) {
         if self.queue_disposal(obj, true, true) {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
     }
 
@@ -896,7 +908,7 @@ impl Compositor {
     /// server object.
     pub(crate) fn dispose_and_keep_on_next_batch(&self, obj: ServerObjectId) {
         if self.queue_disposal(obj, true, false) {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
     }
 
@@ -956,7 +968,7 @@ impl Compositor {
     pub fn request_composition_update(&self, action: impl FnOnce() + 'static) {
         self.dispatcher.verify_access();
         self.invoke_before_commit_write.borrow_mut().push_back(Box::new(action));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Posts a job that runs on the render thread with the next batch:
@@ -970,7 +982,7 @@ impl Compositor {
             &self.pending_server_compositor_jobs
         };
         list.borrow_mut().push(PendingServerJob::Job(Box::new(job)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Posts a job that runs on the render thread with the next batch and
@@ -991,7 +1003,7 @@ impl Compositor {
             &self.pending_server_compositor_jobs
         };
         list.borrow_mut().push(PendingServerJob::ObjectJob(target, Box::new(job)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// [`invoke_server_job_async`](Self::invoke_server_job_async) with a job

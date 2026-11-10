@@ -43,6 +43,36 @@ impl CompositionRenderData {
             && self.stream.borrow().same_recording(stream)
     }
 
+    /// Takes a new recording in place of the one the render data holds, and returns the stream
+    /// it held, emptied for another recording. The server-side render data stays: it receives
+    /// the recording with the next batch, as it received the first one, where a new render data
+    /// would be created for the recording and this one disposed (FerroUI addition,
+    /// desktop-performance.md, section 9.28). The caller registers the render data for
+    /// serialization and has the visual drawn again.
+    pub(crate) fn replace_recording(
+        &self,
+        stream: RenderDataStream,
+        resources: Vec<RecordedResource>,
+    ) -> RenderDataStream {
+        let mut old_stream = self.stream.replace(stream);
+        // As in `dispose`: a stream that was sent is released by the server-side render data,
+        // which resets itself when it reads the new one.
+        if !self.items_sent.get() {
+            old_stream.dispose_resources();
+        }
+        self.items_sent.set(false);
+        // The new recording took its references while it was recorded, so a resource of both
+        // recordings stays referenced while those of the old one are released.
+        let old_resources = self.resources.replace(resources);
+        if let Some(compositor) = self.compositor.upgrade() {
+            for resource in old_resources {
+                resource.with_resource(|r| r.release_on_compositor(&compositor));
+            }
+        }
+        old_stream.recycle();
+        old_stream
+    }
+
     /// The id of the server-side render data.
     pub fn server(&self) -> ServerObjectId {
         self.server
