@@ -2007,6 +2007,11 @@ impl Visual {
         }
         crate::perf_count!(CompositionVisualsCreated);
         let created = self.create_composition_visual(compositor);
+        if self.was_seen_without_composition_visual() {
+            // What is under the visual was shown without it until now: a hit test goes on to
+            // find it where it was shown, until a frame is rendered with the new one.
+            created.set_shown_through();
+        }
         *self.composition_visual.borrow_mut() = Some(created.clone());
         self.composition_visual_handed_out.set(false);
         self.composition_visual_created(&created);

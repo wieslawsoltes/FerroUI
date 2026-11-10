@@ -2984,6 +2984,12 @@ fn asking_for_the_composition_visual_creates_it_in_its_place() {
     // Before any pass: it is where it would be had the visual had it all along, and so is
     // that of its visual parent, which what is read from it (`Parent`, `Offset`) describes.
     let control_visual: Rc<super::CompositionVisual> = (*control.composition_visual().expect("in a tree")).clone();
+    // What is under it is hit as it was, before a frame is rendered with the new ones.
+    assert_eq!(vec![child.clone().upcast::<Visual>()], s.renderer.hit_test(Point::new(45.0, 65.0), &s.root, None));
+    assert_eq!(Some(child.clone().upcast::<Visual>()), s.renderer.hit_test_first(Point::new(45.0, 65.0), &s.root, None));
+    assert_eq!(vec![child.clone().upcast::<Visual>()], s.renderer.hit_test(Point::new(15.0, 15.0), &control, None));
+    assert_eq!(Some(child.clone().upcast::<Visual>()), s.renderer.hit_test_first(Point::new(15.0, 15.0), &control, None));
+    assert!(s.renderer.hit_test(Point::new(35.0, 55.0), &s.root, None).is_empty());
     assert!(s.canvas.has_composition_visual());
     assert!(Rc::ptr_eq(&composition_parent(&control), &own_visual(&s.canvas)));
     assert!(Rc::ptr_eq(&composition_parent(&s.canvas), &own_visual(&s.root)));
@@ -3008,6 +3014,50 @@ fn asking_for_the_composition_visual_creates_it_in_its_place() {
     assert!(Rc::ptr_eq(&composition_parent(&inner), &early_visual));
     assert_eq!(Vector3D::new(200.0, 200.0, 0.0), early_visual.offset());
     s.assert_hit_test(215.0, 215.0, None, &[&inner]);
+}
+
+#[test]
+fn what_is_under_a_new_composition_visual_is_hit_before_the_first_frame_with_it() {
+    let s = CompositorCanvas::new();
+    let outer = TestBorder::new();
+    outer.set_bounds(Rect::new(100.0, 100.0, 200.0, 200.0));
+    let (control, child) = decorator_with_child();
+    outer.add(&control);
+    s.canvas.add(&outer);
+    // Enough children for the hit test index of the visual that shows them.
+    for index in 0..40 {
+        s.canvas.add(&TestBorder::filled(400.0 + 10.0 * f64::from(index), 0.0, 5.0, 5.0));
+    }
+    s.run_jobs();
+    assert!(!control.has_composition_visual());
+    assert!(!outer.has_composition_visual());
+    s.assert_hit_test(145.0, 165.0, None, &[&child]);
+
+    // In the last frame the child was shown by the visual above the two: a hit test reads that
+    // frame, and finds the child through the two new ones until a frame has them.
+    let hit = vec![child.clone().upcast::<Visual>()];
+    let first = Some(child.clone().upcast::<Visual>());
+    let _control_visual = control.composition_visual().expect("in a tree");
+    assert!(control.has_composition_visual());
+    assert!(outer.has_composition_visual());
+    assert_eq!(hit, s.renderer.hit_test(Point::new(145.0, 165.0), &s.root, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(145.0, 165.0), &s.root, None));
+    assert_eq!(hit, s.renderer.hit_test(Point::new(45.0, 65.0), &outer, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(45.0, 65.0), &outer, None));
+    assert_eq!(hit, s.renderer.hit_test(Point::new(15.0, 15.0), &control, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(15.0, 15.0), &control, None));
+    // The two draw nothing, and the filter is asked for them as before.
+    assert!(s.renderer.hit_test(Point::new(135.0, 155.0), &s.root, None).is_empty());
+    let control_as_visual: Ref<Visual> = control.clone().upcast();
+    let not_the_control = move |visual: &Visual| !std::ptr::eq(visual, &*control_as_visual);
+    assert!(s.renderer.hit_test(Point::new(145.0, 165.0), &s.root, Some(&not_the_control)).is_empty());
+
+    // With the frame, they are hit as every other.
+    s.run_jobs();
+    assert_eq!(hit, s.renderer.hit_test(Point::new(145.0, 165.0), &s.root, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(145.0, 165.0), &s.root, None));
+    assert_eq!(hit, s.renderer.hit_test(Point::new(15.0, 15.0), &control, None));
+    assert_eq!(first, s.renderer.hit_test_first(Point::new(15.0, 15.0), &control, None));
 }
 
 #[test]
