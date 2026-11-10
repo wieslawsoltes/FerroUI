@@ -621,6 +621,16 @@ What it measures:
   ```sh
   cargo test -p ferroui-frame-benchmarks --release --test frames -- --ignored --nocapture --test-threads=1
   ```
+
+  The scenes of the start (`startup/tiles`: 58,696 tiles of six elements on a canvas, 352,187
+  elements; `startup/controls`: 1,600 templated controls of the Fluent theme, 24,017 visuals) are
+  shown once and measured to their first frame: the build, the show, the time from the show to
+  the first frame (`first_frame_ms`) and their sum, and the resident memory each of them added
+  (`build_mb`, `show_mb`, `first_frame_mb`, `startup_mb`). `sizes_of_an_element` prints the
+  sizes of the objects an element is made of (the element class by class, its composition visual
+  and the visual of the render thread); the gate compares each. With the `counters` feature
+  (`--features counters`) a start also prints the allocations of each phase and the blocks it
+  left alive by size class, and the counters of the framework (section 9.39).
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -659,6 +669,9 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
 | Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
+| First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
+| Memory of a start (`build_mb`, `show_mb`, `first_frame_mb`; `startup_mb`) | 2; 1 | resident memory moves with what the allocator returns to the system; the sum less (floor 1 MB) |
+| Size of an object of an element (`sizes/...`) | 0 | exact: any growth is a regression |
 | Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to

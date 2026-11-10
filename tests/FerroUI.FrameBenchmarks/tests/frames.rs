@@ -611,6 +611,102 @@ fn measure_start(scene: &Scene) {
         println!("  the first frame: {}", heap_first.since(&shown).report());
         println!("{bench} sizes:\n{}", sizes_report());
         println!("{bench} counters:\n{}", counters.report());
+        let mut census = Census::default();
+        census.count(&gate.window, true);
+        println!("{bench} census:\n{}", census.report());
+    }
+}
+
+/// What the elements of a shown scene ask of the compositor: how many draw, and how many set
+/// something that only a composition visual of their own can carry.
+#[derive(Default)]
+struct Census {
+    elements: usize,
+    leaves: usize,
+    /// Record a drawing.
+    drawing: usize,
+    /// Set an input of the visual (opacity, a clip, a transform, an effect, a mask, a cache mode,
+    /// hidden, mirrored), whether they draw or not.
+    with_inputs: usize,
+    /// Clip to their bounds and set no other input.
+    only_clip_to_bounds: usize,
+    /// Draw nothing and set no input: nothing of them reaches a frame but their position.
+    bare: usize,
+    /// Draw, set no input.
+    drawing_without_inputs: usize,
+    /// Draw nothing, set an input.
+    inputs_without_drawing: usize,
+    /// Bare elements whose parent is bare too.
+    bare_under_bare: usize,
+    /// The longest chain of bare elements.
+    bare_chain: usize,
+}
+
+impl Census {
+    fn count(&mut self, visual: &ferroui_base::Visual, root: bool) {
+        self.walk(visual, root, 0);
+    }
+
+    fn walk(&mut self, visual: &ferroui_base::Visual, root: bool, bare_above: usize) {
+        let children = visual.visual_children().to_vec();
+        self.elements += 1;
+        if children.is_empty() {
+            self.leaves += 1;
+        }
+        let draws = visual.composition_visual().is_some_and(|composition| composition.draw_list().is_some());
+        let other_inputs = visual.opacity() != 1.0
+            || visual.clip().is_some()
+            || visual.cache_mode().is_some()
+            || visual.effect().is_some()
+            || visual.opacity_mask().is_some()
+            || visual.render_transform().is_some()
+            || !visual.is_visible()
+            || visual.has_mirror_transform();
+        let inputs = other_inputs || visual.clip_to_bounds();
+        if draws {
+            self.drawing += 1;
+        }
+        if inputs {
+            self.with_inputs += 1;
+        }
+        if visual.clip_to_bounds() && !other_inputs {
+            self.only_clip_to_bounds += 1;
+        }
+        let bare = !draws && !inputs && !root;
+        match (draws, inputs) {
+            (true, false) => self.drawing_without_inputs += 1,
+            (false, true) => self.inputs_without_drawing += 1,
+            _ => {}
+        }
+        let chain = if bare { bare_above + 1 } else { 0 };
+        if bare {
+            self.bare += 1;
+            if bare_above > 0 {
+                self.bare_under_bare += 1;
+            }
+            self.bare_chain = self.bare_chain.max(chain);
+        }
+        for child in &children {
+            self.walk(child, false, chain);
+        }
+    }
+
+    fn report(&self) -> String {
+        let share = |count: usize| 100.0 * count as f64 / self.elements.max(1) as f64;
+        let line = |name: &str, count: usize| format!("  {name}: {count} ({:.1} %)", share(count));
+        [
+            format!("  elements: {}", self.elements),
+            line("leaves", self.leaves),
+            line("record a drawing", self.drawing),
+            line("set an input of the visual", self.with_inputs),
+            line("clip to bounds and nothing else", self.only_clip_to_bounds),
+            line("draw nothing, set nothing", self.bare),
+            line("draw, set nothing", self.drawing_without_inputs),
+            line("draw nothing, set an input", self.inputs_without_drawing),
+            line("draw nothing, set nothing, under one that does neither", self.bare_under_bare),
+            format!("  longest chain that draws nothing and sets nothing: {}", self.bare_chain),
+        ]
+        .join("\n")
     }
 }
 
