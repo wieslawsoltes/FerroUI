@@ -37,6 +37,7 @@ mod selectors;
 mod setter;
 mod setter_base;
 mod target_property_path;
+mod theme_candidates;
 mod style;
 mod style_base;
 mod style_children;
@@ -88,6 +89,7 @@ pub use selectors::Selectors;
 pub use setter::{Setter, SetterValue};
 pub use setter_base::{SetterBase, SetterInstance};
 pub use target_property_path::TargetPropertyPath;
+pub(crate) use theme_candidates::{Step as ThemeStep, ThemeCandidates};
 pub(crate) use setter_base::SetterInstanceKind;
 pub use style::Style;
 pub use style_base::{StyleBase, StyleBaseImpl, StyleBaseImplExt, StyleBaseVTable};
@@ -120,3 +122,6 @@ mod container_tests;
 
 #[cfg(test)]
 mod selector_candidate_tests;
+
+#[cfg(test)]
+mod theme_candidate_tests;

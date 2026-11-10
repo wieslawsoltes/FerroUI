@@ -23,12 +23,14 @@ fn as_style_base(item: &Rc<dyn IStyle>) -> Option<&StyleBase> {
 impl StyleChildrenData {
     /// The children of the owner changed. A style with children is a candidate
     /// for every element, so the collection that counts the owner as
-    /// index-enabled drops its candidate lists.
+    /// index-enabled drops its candidate lists; and the control theme the owner
+    /// is, or is nested in, drops its plans.
     fn owner_children_changed(&self) {
         if let Some(owner) = self.owner.upgrade() {
             if let Some(style) = owner.downcast_ref::<super::Style>() {
                 style.index_link().changed();
             }
+            owner.structure_changed();
         }
     }
 }

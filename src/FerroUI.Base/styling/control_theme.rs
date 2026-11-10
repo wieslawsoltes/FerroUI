@@ -1,3 +1,4 @@
+use super::theme_candidates::{ThemeCandidates, ThemePlans};
 use super::{DuplicateSetterError, SelectorMatchResult, Setter, StyleBase, StyleBaseImpl};
 use crate::property_store::FrameType;
 use crate::{ferro_class, instantiate, FerroObjectImpl, ObjectType, Ref, StyledElement, TypeInfo};
@@ -10,6 +11,8 @@ pub struct ControlTheme {
     base: StyleBase,
     target_type: Cell<Option<&'static TypeInfo>>,
     based_on: RefCell<Option<Ref<ControlTheme>>>,
+    /// The nested styles that can apply to an element, by the style key of the element.
+    plans: ThemePlans,
 }
 
 ferro_class!(ControlTheme: StyleBase);
@@ -33,7 +36,7 @@ impl StyleBaseImpl for ControlTheme {
 impl ControlTheme {
     /// Creates the class data; see [`FerroObject::construct`](crate::FerroObject::construct).
     pub fn construct() -> Self {
-        Self { base: StyleBase::construct(), target_type: Cell::new(None), based_on: RefCell::new(None) }
+        Self { base: StyleBase::construct(), target_type: Cell::new(None), based_on: RefCell::new(None), plans: ThemePlans::default() }
     }
 
     /// Creates a control theme without a target type.
@@ -59,7 +62,26 @@ impl ControlTheme {
     }
 
     pub fn set_target_type(&self, value: Option<&'static TypeInfo>) {
-        self.target_type.set(value)
+        // A nested style that begins with the nesting selector matches what the theme targets.
+        if self.target_type.replace(value) != value {
+            self.plans.changed();
+        }
+    }
+
+    /// The nested styles, at any depth, that can apply to `target`, in the order they are
+    /// applied in; `None` when the ordinary traversal of the nested styles applies them.
+    pub(crate) fn candidates<'a>(&'a self, target: &'a StyledElement) -> Option<ThemeCandidates<'a>> {
+        self.plans.select(self, target)
+    }
+
+    /// What a plan of the theme is made from changed.
+    pub(super) fn plans_changed(&self) {
+        self.plans.changed();
+    }
+
+    #[cfg(test)]
+    pub(super) fn plan_stats(&self) -> (usize, usize, usize) {
+        self.plans.stats()
     }
 
     /// A control theme that is the basis of the current theme.
