@@ -910,7 +910,7 @@ impl DrawingContextImpl {
         }
 
         let shader = image.to_shader((tile_x, tile_y), sk::SamplingOptions::default(), &paint_transform);
-        paint_wrapper.paint.set_shader(shader);
+        paint_wrapper.paint_mut().set_shader(shader);
     }
 
     fn configure_scene_brush_content(
@@ -981,7 +981,7 @@ impl DrawingContextImpl {
             || source_rect.width <= 0.0
             || source_rect.height <= 0.0
         {
-            paint_wrapper.paint.set_color(sk::Color::from_argb(0, 0, 0, 0));
+            paint_wrapper.paint_mut().set_color(sk::Color::from_argb(0, 0, 0, 0));
             return;
         }
 
@@ -1059,7 +1059,7 @@ impl DrawingContextImpl {
             &to_sk_matrix(shader_transform),
             &sk::Rect::new(0.0, 0.0, cull_rect.width(), cull_rect.height()),
         );
-        paint_wrapper.paint.set_shader(shader);
+        paint_wrapper.paint_mut().set_shader(shader);
     }
 
     fn create_alpha_color_filter(opacity: f64) -> sk::ColorFilter {
@@ -1255,8 +1255,9 @@ impl DrawingContextImpl {
 
     /// Creates a paint wrapper for the given brush.
     ///
-    /// `paint` is a reset paint; it travels in the wrapper and comes back
-    /// from [`PaintWrapper::dispose`].
+    /// `paint` is a reset paint, or the paint of an earlier solid colour fill
+    /// ([`PaintWrapper::release_fill`]): the anti-aliasing and the colour are set on every
+    /// path. It travels in the wrapper and comes back from [`PaintWrapper::dispose`].
     fn create_paint(&mut self, mut paint: sk::Paint, brush: &dyn IBrush, target_rect: Rect) -> PaintWrapper {
         paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
 
@@ -1266,7 +1267,7 @@ impl DrawingContextImpl {
             let color = solid.color();
             paint.set_color(sk::Color::from_argb((color.a as f64 * opacity) as u8, color.r, color.g, color.b));
 
-            return PaintWrapper::new(paint);
+            return PaintWrapper::solid_fill(paint);
         }
 
         paint.set_color(sk::Color::from_argb((255.0 * opacity) as u8, 255, 255, 255));
@@ -1290,7 +1291,7 @@ impl DrawingContextImpl {
                     return paint_wrapper;
                 }
                 None => {
-                    paint_wrapper.paint.set_color(sk::Color::from_argb(0, 0, 0, 0));
+                    paint_wrapper.paint_mut().set_color(sk::Color::from_argb(0, 0, 0, 0));
                 }
             }
         } else if let Some(image_brush) = brush.as_image_brush() {
@@ -1305,7 +1306,7 @@ impl DrawingContextImpl {
                 self.configure_tile_brush(&mut paint_wrapper, target_rect, tile_brush, &*tile_brush_image);
             }
             _ => {
-                paint_wrapper.paint.set_color(sk::Color::from_argb(0, 255, 255, 255));
+                paint_wrapper.paint_mut().set_color(sk::Color::from_argb(0, 255, 255, 255));
             }
         }
 
@@ -1330,7 +1331,7 @@ impl DrawingContextImpl {
         }
 
         let mut rv = self.create_paint(paint, &*brush, target_rect);
-        let paint = &mut rv.paint;
+        let paint = rv.paint_mut();
 
         paint.set_stroke(true);
         paint.set_stroke_width(pen.thickness() as f32);
@@ -1357,7 +1358,7 @@ impl DrawingContextImpl {
     }
 
     fn release_fill(&mut self, fill: PaintWrapper) {
-        self.fill_paint = Some(fill.dispose());
+        self.fill_paint = Some(fill.release_fill());
     }
 
     fn create_stroke(&mut self, pen: &dyn IPen, target_rect: Rect) -> Option<PaintWrapper> {
@@ -1489,7 +1490,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         };
 
         if let Some(stroke) = self.create_stroke(pen, Rect::from_points(p1, p2).normalize()) {
-            self.canvas.get().draw_line(to_sk_point(p1), to_sk_point(p2), &stroke.paint);
+            self.canvas.get().draw_line(to_sk_point(p1), to_sk_point(p2), stroke.paint());
             self.release_stroke(stroke);
         }
     }
@@ -1501,13 +1502,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         if let (Some(brush), Some(fill_path)) = (brush, geometry_impl.fill_path()) {
             let fill = self.create_fill(brush, rect);
-            self.canvas.get().draw_path(&fill_path, &fill.paint);
+            self.canvas.get().draw_path(&fill_path, fill.paint());
             self.release_fill(fill);
         }
 
         if let (Some(pen), Some(stroke_path)) = (pen, geometry_impl.stroke_path()) {
             if let Some(stroke) = self.create_stroke(pen, rect.inflate(pen.thickness() / 2.0)) {
-                self.canvas.get().draw_path(&stroke_path, &stroke.paint);
+                self.canvas.get().draw_path(&stroke_path, stroke.paint());
                 self.release_stroke(stroke);
             }
         }
@@ -1586,8 +1587,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
         if let Some(brush) = brush {
             let fill = self.create_fill(brush, rect.rect);
             match (is_rounded, &sk_round_rect) {
-                (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, &fill.paint),
-                _ => self.canvas.get().draw_rect(rc, &fill.paint),
+                (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, fill.paint()),
+                _ => self.canvas.get().draw_rect(rc, fill.paint()),
             };
             self.release_fill(fill);
         }
@@ -1632,8 +1633,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
         if let Some(pen) = pen {
             if let Some(stroke) = self.create_stroke(pen, rect.rect.inflate(pen.thickness() / 2.0)) {
                 match (is_rounded, &sk_round_rect) {
-                    (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, &stroke.paint),
-                    _ => self.canvas.get().draw_rect(rc, &stroke.paint),
+                    (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, stroke.paint()),
+                    _ => self.canvas.get().draw_rect(rc, stroke.paint()),
                 };
                 self.release_stroke(stroke);
             }
@@ -1660,13 +1661,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         if let Some(brush) = brush {
             let fill = self.create_fill(brush, bounds);
-            self.canvas.get().draw_region(&r.region(), &fill.paint);
+            self.canvas.get().draw_region(&r.region(), fill.paint());
             self.release_fill(fill);
         }
 
         if let Some(pen) = pen {
             if let Some(stroke) = self.create_stroke(pen, bounds.inflate(pen.thickness() / 2.0)) {
-                self.canvas.get().draw_region(&r.region(), &stroke.paint);
+                self.canvas.get().draw_region(&r.region(), stroke.paint());
                 self.release_stroke(stroke);
             }
         }
@@ -1682,13 +1683,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         if let Some(brush) = brush {
             let fill = self.create_fill(brush, rect);
-            self.canvas.get().draw_oval(rc, &fill.paint);
+            self.canvas.get().draw_oval(rc, fill.paint());
             self.release_fill(fill);
         }
 
         if let Some(pen) = pen {
             if let Some(stroke) = self.create_stroke(pen, rect.inflate(pen.thickness() / 2.0)) {
-                self.canvas.get().draw_oval(rc, &stroke.paint);
+                self.canvas.get().draw_oval(rc, stroke.paint());
                 self.release_stroke(stroke);
             }
         }
@@ -1720,7 +1721,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
             effective_text_options,
             self.render_options,
             glyph_run.baseline_origin(),
-            &paint_wrapper.paint,
+            paint_wrapper.paint(),
         );
 
         self.release_fill(paint_wrapper);
@@ -1880,7 +1881,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         SkPaintCache::return_reset(paint);
 
         canvas.set_matrix(&transform);
-        canvas.draw_paint(&paint_wrapper.paint);
+        canvas.draw_paint(paint_wrapper.paint());
 
         // The wrapper resets the paint when it is disposed.
         SkPaintCache::return_item(paint_wrapper.dispose());
@@ -2609,15 +2610,16 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
 
         let rc = to_sk_rect(rect.rect);
 
-        let paint = self.fill_paint.take().unwrap_or_default();
+        // The kept fill paint may carry the colour of a solid fill.
+        let paint = self.fill_paint.take().map(reset_paint).unwrap_or_default();
         let fill = self.create_acrylic_paint(paint, material);
 
         if rect.is_rounded() {
             let sk_round_rect = SkRoundRectCache::get_and_set_radii(&rc, &rect);
-            self.canvas.get().draw_rrect(sk_round_rect, &fill.paint);
+            self.canvas.get().draw_rrect(sk_round_rect, fill.paint());
             SkRoundRectCache::return_item(sk_round_rect);
         } else {
-            self.canvas.get().draw_rect(rc, &fill.paint);
+            self.canvas.get().draw_rect(rc, fill.paint());
         }
 
         self.release_fill(fill);
@@ -2667,7 +2669,10 @@ fn reset_paint(mut paint: sk::Paint) -> sk::Paint {
 /// Skia paint wrapper: a configured paint and what has to stay alive (and be
 /// released) with it.
 pub(crate) struct PaintWrapper {
-    pub paint: sk::Paint,
+    paint: sk::Paint,
+    /// The paint differs from a reset paint in its anti-aliasing and its colour only: the
+    /// paint of a solid colour fill that nothing changed since ([`Self::release_fill`]).
+    solid_fill: bool,
     // We are saving memory allocations here: up to three disposables without
     // a collection.
     disposable1: Option<Box<dyn FnOnce()>>,
@@ -2677,7 +2682,24 @@ pub(crate) struct PaintWrapper {
 
 impl PaintWrapper {
     pub fn new(paint: sk::Paint) -> Self {
-        Self { paint, disposable1: None, disposable2: None, disposable3: None }
+        Self { paint, solid_fill: false, disposable1: None, disposable2: None, disposable3: None }
+    }
+
+    /// The wrapper of a paint whose anti-aliasing and colour were set, and nothing else, since
+    /// it was reset or came back from [`Self::release_fill`].
+    fn solid_fill(paint: sk::Paint) -> Self {
+        Self { paint, solid_fill: true, disposable1: None, disposable2: None, disposable3: None }
+    }
+
+    /// The configured paint.
+    pub fn paint(&self) -> &sk::Paint {
+        &self.paint
+    }
+
+    /// The paint, to configure further.
+    pub fn paint_mut(&mut self) -> &mut sk::Paint {
+        self.solid_fill = false;
+        &mut self.paint
     }
 
     /// Adds a new disposable to the wrapper.
@@ -2701,12 +2723,29 @@ impl PaintWrapper {
     /// Releases the disposables and hands back the paint, reset.
     pub fn dispose(mut self) -> sk::Paint {
         self.paint.reset();
+        self.release_disposables();
+        self.paint
+    }
+
+    /// Releases the disposables and hands back the paint for the next fill: reset, unless it
+    /// is the paint of a solid colour fill, which differs from a reset paint in the two
+    /// values that every fill sets first (FerroUI addition, desktop-performance.md,
+    /// section 9.31). A paint from here is given to [`DrawingContextImpl::create_paint`] only,
+    /// or reset.
+    pub fn release_fill(mut self) -> sk::Paint {
+        if !self.solid_fill {
+            self.paint.reset();
+        }
+        self.release_disposables();
+        self.paint
+    }
+
+    fn release_disposables(&mut self) {
         for disposable in [self.disposable1.take(), self.disposable2.take(), self.disposable3.take()]
             .into_iter()
             .flatten()
         {
             disposable();
         }
-        self.paint
     }
 }
