@@ -407,11 +407,13 @@ pub fn add_dynamic_resource_setter_with_parent(
 }
 
 /// `{DynamicResource key}` as the value of the registered property `property` of `target`:
-/// the extension created with the key (`DynamicResourceExtension::__markup_new_1`),
-/// `ProvideValue` with the property as the provide-value target property ([`provide_value`],
-/// [`property_value`]), then the binding setter of the property ([`bind`]) with the provided
-/// binding at `line`, `position`: the calls the statements of generated code make, in the same
-/// order.
+/// what the statements of generated code do, which create the extension with the key
+/// (`DynamicResourceExtension::__markup_new_1`), call `ProvideValue` with the property as the
+/// provide-value target property ([`provide_value`], [`property_value`]), and pass the provided
+/// binding to the binding setter of the property ([`bind`]) at `line`, `position`. The
+/// expression those statements end with is made here without the extension (section 9.38 of
+/// `docs/porting/desktop-performance.md`); a development build with hot reload makes the calls
+/// of the statements, in the same order.
 #[inline(never)]
 pub fn bind_dynamic_resource(
     context: &Rc<XamlIlContext>,
@@ -421,17 +423,35 @@ pub fn bind_dynamic_resource(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadError> {
-    use crate::markup_extensions::DynamicResourceExtension;
-    let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
-    let provided = provide_value(context, property_value(property), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
-    bind(target, property, provided, line, position)
+    // The extension the statements create provides itself, a binding by its type: the cast of
+    // the binding setter cannot fail, and nothing keeps the extension after its expression is
+    // made. The expression is made from the place the extension would have read
+    // (`bind_dynamic_resource_at`), with the target property set and cleared around it as
+    // around `ProvideValue`.
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    {
+        let _ = (line, position);
+        let service_provider = target_service_provider(context, property_value(property));
+        crate::markup_extensions::bind_dynamic_resource_at(&service_provider, target, property, key);
+        clear_target_property(context);
+        Ok(())
+    }
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use crate::markup_extensions::DynamicResourceExtension;
+        let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
+        let provided =
+            provide_value(context, property_value(property), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
+        bind(target, property, provided, line, position)
+    }
 }
 
 /// `{TemplateBinding source}` as the value of the registered property `property` of `target`
-/// (in a control template): the binding created for the property `source` of the templated
-/// parent (`TemplateBinding::__markup_new_1`), `ProvideValue`, then the binding setter of the
-/// property ([`bind`]) at `line`, `position`: the calls the statements of generated code make,
-/// in the same order.
+/// (in a control template): what the statements of generated code do, which create the binding
+/// for the property `source` of the templated parent (`TemplateBinding::__markup_new_1`), call
+/// `ProvideValue`, and pass the binding to the binding setter of the property ([`bind`]) at
+/// `line`, `position`. The expression those statements end with is made here from a binding
+/// that is not shared (section 9.38 of `docs/porting/desktop-performance.md`).
 #[inline(never)]
 pub fn bind_template_binding(
     target: &Ref<FerroObject>,
@@ -441,9 +461,15 @@ pub fn bind_template_binding(
     position: i32,
 ) -> Result<(), XamlLoadError> {
     use ferroui_base::data::TemplateBinding;
-    let binding = TemplateBinding::__markup_new_1(source);
-    let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
-    bind(target, property, provided, line, position)
+    // The binding the statements create provides itself, a binding by its type: the cast of the
+    // binding setter cannot fail (so `line`, `position` name no error), and nothing keeps the
+    // binding after its expression is made, which copies what it reads from the binding. It is
+    // made in place, not shared.
+    let _ = (line, position);
+    let binding = TemplateBinding::default();
+    binding.set_property(Some(source));
+    let _ = target.bind_binding(property, &binding);
+    Ok(())
 }
 
 /// The build of deferred content that is `{StaticResource key}` alone (a resource of a

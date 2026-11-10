@@ -2413,3 +2413,69 @@ What it costs, and what it does not:
   for a theme as a whole: it knows the target type of the theme, which is the type a
   nesting selector stands for, and it follows the nesting, so a style with nested styles
   can be left out with them.
+
+### 9.38 A template build binds its resources and template bindings without the extension objects
+
+The content of a control template is built by generated code for every control the template
+is applied to. For a `CheckBox` of the Fluent theme that is five
+`{DynamicResource}` values and nine `{TemplateBinding}` values, and each was bound by the
+statements the loader runs for a markup extension: create the extension, box the key and the
+property, ask the extension to provide a value in the context of the build, convert the
+provided value to its untyped form, cast that back to a binding, and bind it. The extension
+was reachable from nothing afterwards: the expression of a dynamic resource keeps the key,
+the anchor, the theme variant and the priority, and the expression of a template binding
+copies what it reads from the binding.
+
+**The two binds make the expression from what the extension would have read.**
+`compiled::bind_dynamic_resource` reads the place of the declaration from the service
+provider of the build with the lookups `DynamicResourceExtension::provide_value` makes, in
+the same order (one function, `Place::of`, is now the body of both): whether a control
+template is being built, the anchor when the target is not an element, and the theme
+variant of the theme dictionary the declaration is in. It binds a binding that lives on the
+stack for the call and creates the expression from those. `compiled::bind_template_binding`
+binds a `TemplateBinding` that lives on the stack for the call. Neither can fail where the
+statements could not: the value an extension provides is a binding by its type, so the cast
+the binding setter made always succeeded.
+
+A development build with hot reload keeps the statements for a dynamic resource: it records
+the extension, to move its anchor when the document is loaded again.
+
+**The parents of the build are handed out, not copied.** The theme variant of a dynamic
+resource is found by walking the parents of the declaration from the nearest one. The
+context of the build copied its parent stack twice for each walk (the stack, then the
+entries of it that are not null). It now keeps the second list beside the first, changed
+by the same push and pop, and hands it out shared, as the contract of the eager parent
+stack provider describes; a push copies it only while a walk still holds it, which no walk
+does.
+
+**`ValueTypes::as_object` asks one table when the first answers.** A value is viewed as an
+object by the table its type is in, one of three. All three were asked for every value; the
+tables after the one that has the type are no longer asked.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent theme):
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.46 ms | 2.29 ms | -6.9 % |
+| `CheckBox`, the template applied | 11.41 ms | 10.83 ms | -5.1 % |
+| `TextBox`, the template applied | 13.34 ms | 12.41 ms | -7.0 % |
+
+Attaching the theme (five rounds: -0.2 %, -1.0 %, -1.8 %) and re-attaching a control
+(+2.5 %, -1.0 %, +0.5 %) are within the noise of the runs: neither builds a template.
+
+What it costs, and what it does not:
+
+- **Memory: one more list for a context, while it builds.** The list of the parents that
+  are not null holds one reference for each parent on the stack, and goes with the context
+  when the build returns. An element, a style, a template and an expression are the size
+  they were, and a built template holds one object less for each dynamic resource and each
+  template binding only while it is built (the extension was dropped after the bind).
+- **The run-time loader is not changed.** It creates the extension and calls
+  `ProvideValue`, as before; so does generated code for an extension with any other
+  argument than a text key, and for a setter whose value is a dynamic resource.
+- **Each bind is compared with the statements it stands for** (`compiled_tests`,
+  `template_binds`): the priority in and outside a control template, the anchor of an
+  object that is not an element, the variant of a theme dictionary, the target property
+  cleared after the bind, and a template binding before and after its templated parent is
+  set.
