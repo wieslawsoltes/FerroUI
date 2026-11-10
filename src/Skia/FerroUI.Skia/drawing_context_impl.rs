@@ -1628,11 +1628,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
             &self.text_rendering,
         );
 
-        let text_blob = glyph_run_impl.get_text_blob(effective_text_options, self.render_options);
-
-        if let Some(text_blob) = text_blob {
-            self.canvas.get().draw_text_blob(text_blob, to_sk_point(glyph_run.baseline_origin()), &paint_wrapper.paint);
-        }
+        glyph_run_impl.draw(
+            self.canvas.get(),
+            effective_text_options,
+            self.render_options,
+            glyph_run.baseline_origin(),
+            &paint_wrapper.paint,
+        );
 
         self.release_fill(paint_wrapper);
     }

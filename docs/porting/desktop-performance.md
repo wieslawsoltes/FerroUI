@@ -547,6 +547,8 @@ is run locally, on a quiet machine (no other build, no VM or emulator, on mains 
 python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
 python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
+python3 scripts/perf/gate.py --only window --window-scenes text,wall
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
@@ -605,6 +607,40 @@ What it measures:
   is copied into the base worktree, and added to its workspace members when needed, so both sides
   run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
   a gate of its own.
+- **The frame benchmarks** (`tests/FerroUI.FrameBenchmarks`, suite `frames`): FerroUI's own
+  regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
+  follows the Cranpose benchmark and is synced with it). Each scene does one kind of per-frame work
+  of a heavy screen, so that a change of that work shows in its own numbers, and each names the
+  sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
+  of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
+  layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
+  canvas that move), `lines` (charts whose lines change every frame). The harness is the frame gate's; besides the times a frame, every scene
+  reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
+  layout, recording and commit) and their sum (`startup_ms`). Alone:
+
+  ```sh
+  cargo test -p ferroui-frame-benchmarks --release --test frames -- --ignored --nocapture --test-threads=1
+  ```
+- **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
+  framework's tree mechanics on walls of small tiles, in an application with a desktop's services
+  (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
+  root down), laying out, detaching and clearing; inherited properties, the enabled and visible
+  states, the flow direction, the data context, the theme variant and styles passed down an
+  attached wall; class styles and resources on it; and the text of many short labels. The suite
+  runs `trees::` and `layout::ElementConstructionBenchmark` (`--framework-filter`) with the
+  TreeDataGrid suite's iterations. When the base has no `trees` category, the candidate's
+  `tests/FerroUI.Benchmarks` is copied into it.
+- **The window suite** (`window`): the desktop program of the frame benchmarks (`frame-benchmarks`)
+  opened once per scene (`--window-scenes`, default `text,list,transforms,wall`) for
+  `--window-seconds` (12): the time from the start of the process to its first animation frame
+  (`first_frame_ms`) and to its second (`second_frame_ms`), and its time a frame (`ms_per_frame`,
+  from its frame rate after the first three seconds) on the backend of the platform (Skia with
+  Graphite on macOS). It measures what the raster frame benchmarks cannot: the GPU backends and the
+  start of a real process. The first animation frame comes before the scene has been drawn; the
+  first commit of the composition tree, the first drawing and whatever the platform asks to be
+  painted when a window is shown keep the thread until the second, which is the time by which the
+  scene is on the screen and the application answers. A scene that holds the display's rate shows
+  no change of its time a frame; its first frames still do.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
@@ -620,7 +656,10 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
-| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
+| Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
+| Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
 cost time says so in the pull request, with the table.
@@ -1016,6 +1055,121 @@ mask clips), 6.3 (turned boxes), 6.65 (turned clips), 8.5 (repeated runs). The s
 the display's rate. The uploads and the batches change the frame rate by less than the noise; the
 gauntlet's frame is now held about evenly by the render thread and by the GPU.
 
+### 9.21 Walks of the tree stop where nothing changes; per-element work made on use
+
+Building a large tree from its leaves up and attaching it (the still wall: 58,696 tiles of seven
+elements) did work that grows with the number of elements times their depth, or that most elements
+never need. Each change keeps upstream's observable behaviour: the same values, events and order
+for every element; what differs is the work done where nothing could change.
+
+- **Measure invalidation.** Every element whose visual parent changes invalidates its own measure
+  and that of its whole subtree (`LayoutHelper::invalidate_self_and_children_measure`); a tree
+  built from the leaves up was walked once for every level above each element. An element whose
+  subtree that walk invalidated, and which has not been measured since
+  (`Layoutable::subtree_measure_invalid`), ends the walk; the flag is cleared when the element or
+  one below it is measured. The flagged elements are closed downwards, so clearing stops at the
+  first ancestor without it.
+- **Effective enabled state.** `InputElement::update_is_effectively_enabled_from` updated the whole
+  subtree of every element whose parent or enabled state changed. A child's value is derived from
+  its parent's and every change is passed down as it happens: an unchanged value ends the walk.
+- **Inline collections.** Every text block made an inline collection, its logical children and its
+  subscription when constructed; most show their `Text`. The collection is made, and its change
+  raised, on first use of `inlines()`.
+- **Styling passes.** Every styling pass ended with a re-evaluation of every value of the element
+  (`ValueStore::end_styling`), even when no style applied. The store remembers whether a
+  re-evaluation was put off, or a frame inserted, during the pass, and re-evaluates only then
+  (section 9.25 describes the flag and has its tests).
+- **Classes.** Every input element removed its focus, pointer-over and disabled pseudoclasses when
+  constructed, which made its collection of classes. Removing a pseudoclass from an element without
+  classes makes nothing (`StyledElement::set_pseudo_class`).
+- **Removing many children.** `FerroList::remove_all` searched the removed items for every item of
+  the list, and every child unlinked from its inheritance parent was searched for among its
+  siblings: clearing a panel was quadratic. Items that are one run of the list are removed as that
+  run (the one notification the search raised for it); the inheritance children are a deque
+  searched from both ends.
+- **Control themes.** Every styled element looks up the control theme of its type when attached;
+  most types have none, and each lookup walked the whole of the theme's styles at the application
+  to find nothing. The application keeps the result of each type-key lookup by theme variant and
+  forgets them whenever a dictionary or style it owns changes (`notify_hosted_resources_changed`)
+  or its dictionary is replaced.
+  A memory of the lookup at each element, tried as well, is not kept: it made attaching slower
+  (5 to 7 % from the leaves up, 4.7 % from the root down, 5.1 % for a changed resource), since
+  every element then holds and clears state that the application's table already answers.
+- **Inherited properties no element sets.** A property no store holds (the flow direction of most
+  trees) was looked up through every ancestor holding inherited values, and the per-store results
+  are forgotten whenever an inheritance changes anywhere. Each inheriting property counts the
+  stores holding an effective value of it (`FerroProperty::holders`, shared with the properties
+  added to other owners); while none does, a lookup returns the default at once.
+
+Tests: the tests of the base and controls crates, and tests of the inline collection made on use
+(`selectable_text_block_tests`), of type-key lookups following the application's resources
+(`application_tests`) and of inherited values held through another owner and released with their
+holder (`text_block_tests`). Measured with the `trees` benchmarks (2,000 tiles, against the commit
+before): attach -33 %, first layout -44 % (part of it the benchmark itself, which freed the
+previous wall inside the measurement), detach -25 %, clear -38 %, attach with class styles -19 %, a
+style added to the root -20 %. Still wall (tier 20), launch to first frame: 2.26 s to about 1.9 s.
+
+### 9.22 Skia: a glyph run's first draw skips the text blob cache
+
+A text blob is a key of Skia's text blob cache: drawing one hashes it, keeps the GPU blob made of it
+and posts a purge message when it is dropped. Text that changes every frame makes runs that are
+drawn once, and each paid for the cache for nothing. A run's first draw is of its glyphs alone
+(`Canvas::draw_glyphs_at`), which Skia draws without the cache; the blob is made, and cached by
+Skia, when the run is drawn again (`GlyphRunImpl::draw`). The pixels are the same: both draw the
+same glyphs at the same positions with the same font. Tests: the Skia backend's tests. Gauntlet
+(tier 16), Skia window, interleaved A/B: 27.4 to 31.2 frames a second.
+
+### 9.23 macOS: a render target made by a paint is drawn once
+
+The Metal render target of a window is made by its first paint (`TopLevelImpl::CreateMetalRenderTarget`
+needs the main thread, and the paint is the first that needs the target). Giving the view its target
+(`-[FrnView setRenderTarget:]`) asked for the new layer to be displayed, and so did the target's
+`resize:withScale:`; both requests came from inside the paint that was about to draw that layer, so
+every window was painted twice when shown, the second time with the same content at the same size
+in the same transaction. For a small scene that is a frame; for the still wall it is the whole
+first drawing again, about 100 ms on the UI thread.
+
+The view now knows when it is inside the paint of its top level (`updateLayer`). A target set
+during a paint is given its size and no display request; the paint that set it draws it. At the end
+of that paint the view asks for the display itself if the target has begun no frame on the main
+thread since (`mainThreadFrames` of the render target protocol, counted by the Metal target in
+`BeginDrawing`): a paint that made a target and drew nothing still gets the display it had before.
+The request is the view's (`requestDisplay`: the target's layer and the view), no longer a side
+effect of the target's resize. Every other request is unchanged: a change of the frame size or of
+the backing properties, also inside a paint (the second display of a cooperative resize), and
+`Invalidate` of the top level. The IOSurface target counts no frames, so its windows are asked to
+display as before. Upstream's sources are changed by
+`native/FerroUI.Native/patches/0005-one-display-for-a-render-target-set-in-a-paint.patch`. Test:
+`src/FerroUI.Native/tests/first_paint.rs` counts the paints of a real window (one when shown with
+Metal, where it counted two before; another for a changed size; none while nothing changes).
+
+Measured with the window program of the frame benchmarks (the still wall, 60 Hz, six launches each,
+alternately): the second animation frame 1.30 to 1.33 s after the start of the process before, 1.11
+to 1.18 s after; the frame rate of the first second 28 to 30 against 37 to 39. The first animation
+frame is unchanged (0.73 to 0.76 s), which is why the gate's window suite now also measures the
+second (`second_frame_ms`).
+
+The comparison found a fault of the build: `ferroui-native` carries its static libraries
+(`+whole-archive`), and nothing in the command line of the Rust compiler names their content, so a
+compiler cache (sccache) gave the crate compiled before a change of the native sources back after
+it, and the program ran the other side's native code. The build script now writes a fingerprint of
+what the library is compiled from (the script, the generated header, the headers and the sources)
+as a Rust source of the crate (`interop::NATIVE_SOURCES`), which every such cache reads.
+
+### 9.24 A render walk asks once whether a light is registered
+
+The lights of the composition (`CompositionLight` and its targets, the WinUI lighting API) are
+applied where a visual is drawn: `LitContent::begin` looked, for every visual of every walk, through
+the lights registered with the compositor for those that light the visual (`light_map_of`). An
+application that registers no light, which is most, paid for the look at every visual: 2.5 % of the
+render thread of the gauntlet. The walk now asks the compositor once, when its context is made
+(`ServerCompositor::has_registered_lights`, kept in `RenderContext::lights_registered`), and looks
+for the lights of a visual only when one is registered and alive. Lights are registered while
+batches are applied, never during a walk, so the answer holds for the whole walk. With a light
+registered nothing changes. Tests: the lighting tests of the composition
+(`composition_light_tests.rs`, `composition_winui_lighting_tests.rs`). Gauntlet (tier 16), Skia
+window, render thread: the light lookups go from about 70 to 0 of about 3,070 samples.
+
 ### 9.25 A styling batch that changed nothing does not reevaluate; compiled resource rows share one deferred group
 
 Two changes to what applying styles and loading a compiled dictionary cost.
@@ -1137,3 +1291,67 @@ the style reload test of `ferroui-hot-reload` (an indexed collection replaced by
 run time). `tests/FerroUI.ResourceBenchmarks/selectors.rs` with
 `scripts/perf/selector-candidates.py` measures the application of a generated theme from two
 builds, for selectors with a type, with a type and a pseudo-class, and without a type.
+
+### 9.27 A text block keeps a layout that trimming and the line limit left whole
+
+At the gauntlet's tier 16 every card is about 60 px wide. A text block is measured at the width
+its parent has left, which is not rounded (59.763), and arranged at its layout-rounded width
+(60.0), so every text block saw two constraints a pass. The rules that keep a layout over a new
+constraint (sections 9.7, 9.12 and 9.15) refused every text of the gauntlet: the paragraphs wrap
+with a character ellipsis and a line limit, the subtitles are four inlines on one line with an
+ellipsis. Of 1,793 text layouts a pass, 1,048 were of a text that had not changed.
+
+- `TextLayout::width_hold` no longer excludes trimming and a line limit. A line is trimmed in two
+  cases only: it does not fit the width (the hold already excludes a layout with a collapsed or
+  overflowed line), or lines after it were left out for the maximum height
+  (`is_truncated_by_height`, already excluded) or for the line limit. The new
+  `TextLayout::is_truncated_by_max_lines` tells the last case, with or without trimming, and
+  such a layout has no hold. A layout that left nothing out is the layout of the same text
+  without trimming and without a limit, and inside the hold a new layout has the same lines, so
+  the same count: nothing is left out there either.
+- A text block that does not wrap keeps a left-aligned layout without a collapsed line
+  (`TextLayout::has_collapsed_lines`) at any width its lines fit, and reports the measure hold
+  from that width upwards: without wrapping the width decides nothing but whether a line is
+  trimmed, and a line that fits is not. Lines left out by the line limit do not depend on the
+  width without wrapping.
+- Inlines without a control among them (`EmbeddedControlRun`) follow the rules of a text: their
+  layout depends on the constraint the way a text's does. The text block remembers whether its
+  text runs hold a control when it builds them; while the runs are not built, and with a control,
+  a layout is not kept, as before.
+
+A measure that holds over more constraints showed a defect of the grid that upstream shares: the
+definitions of a grid are made when they are first read, a read invalidates nothing, and the
+arrange took a grid with definitions for one measured with them. A cell of a keyboard (a grid
+without definitions around an unwrapped text) whose definitions a test helper had read was
+arranged at a new size without a measure and failed on definition structures that were never
+validated. The grid now arranges, and reports its hold, by the measure that ran
+(`Grid::is_measured_with_definitions`; DEVIATIONS.md, "Grid").
+
+The same change set makes three representations cheaper without changing what they do. The sets
+of addresses of the compositor (the objects to serialize, the visuals of the renderer, the
+resources of a recording) hash with `rustc_hash` instead of SipHash; an address needs no defence
+against chosen keys. `RenderDataResources::intern` searches the table of a recording while it has
+at most eight resources and builds its map only beyond that: a recording of a control has a brush,
+a pen and a glyph run, and paid for a map. `Visual::synchronize_composition_properties` reads the
+styled values it follows (opacity, clip to bounds, and whether a clip, an opacity mask, a cache
+mode, an effect and a render transform are set) from a snapshot kept while the value store of the
+visual is unchanged (`HotValue`, section 9.9); an object that is set is read as before, since it
+can change without the store changing.
+
+Tests: `text_layout_width_hold_tests.rs`
+(`a_trimmed_limited_layout_makes_the_same_lines_at_every_width_it_holds`: over the texts of
+section 9.12 and line limits of 1 to 40, a layout with a hold left nothing out and has no
+collapsed line, has the lines of the plain text, and a new layout at every width it holds, in
+half-pixel steps, has the same lines, none collapsed, none left out;
+`layouts_the_hold_does_not_describe_have_none`), and `text_block_tests.rs`
+(`a_trimmed_limited_layout_that_left_nothing_out_is_kept_at_a_width_it_holds`,
+`a_layout_that_left_text_out_for_the_line_limit_is_created_again`,
+`an_unwrapped_layout_that_was_not_trimmed_is_kept_at_any_width_it_fits`,
+`inlines_without_a_control_are_kept_the_way_a_text_is`: the kept layout has the lines and the
+desired size of a new text block at the new constraint).
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 1,793 to 779 (the rest are
+texts that changed), layouts dropped for a new measure constraint 541 to 18 and for a new arrange
+constraint 506 to 15, measures executed 4,671 to 3,506. UI thread, from samples: about 23 to about
+17 ms a frame. The frame rate does not change (31.5 to 32.3 frames a second before and after):
+the render thread is busy for the whole frame and sets it.

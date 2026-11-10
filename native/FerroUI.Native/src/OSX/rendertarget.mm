@@ -187,6 +187,13 @@ public:
     }
 }
 
+- (void)setNeedsDisplay {
+}
+
+- (uint64_t)mainThreadFrames {
+    return 0;
+}
+
 - (void)setSurfaceInUiThreadContext: (IOSurfaceHolder*) surface
 {
     [CATransaction begin];

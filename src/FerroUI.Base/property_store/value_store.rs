@@ -599,6 +599,10 @@ impl ValueStore {
     /// ancestor that has one.
     pub fn try_get_inherited_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
         debug_assert!(property.inherits());
+        // No store holds a value of the property: every element inherits the default.
+        if property.holders() == 0 {
+            return None;
+        }
         let generation = inheritance_generation::current();
         if self.inherited_lookups_generation.get() == generation {
             if let Some((_, found)) = self.inherited_lookups.borrow().iter().find(|(id, _)| *id == property.id()) {
@@ -1013,6 +1017,7 @@ impl ValueStore {
             values.insert(index, (property.id(), value));
         }
         if property.inherits() {
+            property.add_holder();
             inheritance_generation::advance();
             let count = self.inherited_value_count.get();
             self.inherited_value_count.set(count + 1);
@@ -1044,6 +1049,7 @@ impl ValueStore {
             return false;
         }
         if property.inherits() {
+            property.remove_holder();
             inheritance_generation::advance();
             let count = self.inherited_value_count.get() - 1;
             self.inherited_value_count.set(count);
@@ -1386,6 +1392,19 @@ impl ValueStore {
 }
 
 struct EvaluatingGuard<'a>(&'a Cell<u32>);
+
+/// A store dropped with effective values of inheriting properties no longer holds them
+/// (`FerroProperty::holders`).
+impl Drop for ValueStore {
+    fn drop(&mut self) {
+        for (_, value) in self.effective_values.get_mut().iter() {
+            let property = value.property();
+            if property.inherits() {
+                property.remove_holder();
+            }
+        }
+    }
+}
 
 impl Drop for EvaluatingGuard<'_> {
     fn drop(&mut self) {

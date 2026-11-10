@@ -56,6 +56,13 @@ name = "text_input_options"
 path = "tests/text_input_options.rs"
 harness = false
 
+# The paints of a window that is shown and resized, counted on the real AppKit view
+# (section 9.23 of docs/porting/desktop-performance.md).
+[[test]]
+name = "first_paint"
+path = "tests/first_paint.rs"
+harness = false
+
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "platforms"

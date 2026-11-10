@@ -12,9 +12,10 @@ use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
 use crate::utilities::HandlerList;
+use rustc_hash::FxHashSet;
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -72,7 +73,7 @@ pub struct Compositor {
     clock: CompositorClock,
     next_commit: RefCell<Option<Arc<CompositionBatch>>>,
     object_serialization_queue: RefCell<VecDeque<Rc<dyn ICompositorSerializable>>>,
-    object_serialization_hash_set: RefCell<HashSet<*const ()>>,
+    object_serialization_hash_set: RefCell<FxHashSet<*const ()>>,
     invoke_before_commit_write: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     invoke_before_commit_read: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     dispose_on_next_batch: RefCell<Vec<PendingDisposal>>,
@@ -419,7 +420,7 @@ impl Compositor {
             clock,
             next_commit: RefCell::new(None),
             object_serialization_queue: RefCell::new(VecDeque::new()),
-            object_serialization_hash_set: RefCell::new(HashSet::new()),
+            object_serialization_hash_set: RefCell::new(FxHashSet::default()),
             invoke_before_commit_write: RefCell::new(VecDeque::new()),
             invoke_before_commit_read: RefCell::new(VecDeque::new()),
             dispose_on_next_batch: RefCell::new(Vec::new()),

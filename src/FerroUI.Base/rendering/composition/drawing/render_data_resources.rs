@@ -4,7 +4,7 @@ use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -91,10 +91,13 @@ impl RenderDataResource {
 #[derive(Default)]
 pub struct RenderDataResources {
     resources: Vec<RenderDataResource>,
-    intern_map: Option<HashMap<(Kind, usize), i32>>,
+    intern_map: Option<FxHashMap<(Kind, usize), i32>>,
 }
 
 impl RenderDataResources {
+    /// The length up to which [`Self::intern`] searches the table instead of a map.
+    const LINEAR_INTERN_LIMIT: usize = 8;
+
     /// Whether `other` holds the same resources, by identity and in the same order, none of
     /// them a custom draw operation (which the recording that is dropped disposes) or a resource
     /// not sent (an addition, desktop-performance.md section 9.14).
@@ -112,16 +115,36 @@ impl RenderDataResources {
 
     /// Recording path: dedupes by reference equality so a resource reused
     /// across many draws gets one slot.
+    ///
+    /// A recording of a control has a handful of resources (a brush, a pen, a glyph run), so
+    /// the table itself is searched while it is short and the map is only built for a table
+    /// that outgrows [`Self::LINEAR_INTERN_LIMIT`]: nothing is hashed or allocated for the
+    /// recordings of ordinary controls (desktop-performance.md section 9.27).
     pub fn intern(&mut self, resource: Option<RenderDataResource>) -> i32 {
         let Some(resource) = resource else { return NULL_HANDLE };
         let key = resource.key();
-        let intern_map = self.intern_map.get_or_insert_with(HashMap::new);
-        if let Some(handle) = intern_map.get(&key) {
-            return *handle;
+        if let Some(intern_map) = self.intern_map.as_mut() {
+            if let Some(handle) = intern_map.get(&key) {
+                return *handle;
+            }
+            let handle = self.resources.len() as i32;
+            self.resources.push(resource);
+            intern_map.insert(key, handle);
+            return handle;
+        }
+        if let Some(index) = self.resources.iter().position(|existing| existing.key() == key) {
+            return index as i32;
         }
         let handle = self.resources.len() as i32;
         self.resources.push(resource);
-        intern_map.insert(key, handle);
+        if self.resources.len() > Self::LINEAR_INTERN_LIMIT {
+            let mut intern_map = FxHashMap::with_capacity_and_hasher(self.resources.len() * 2, Default::default());
+            for (index, existing) in self.resources.iter().enumerate() {
+                // The first slot of a key is its handle, as in the search above.
+                intern_map.entry(existing.key()).or_insert(index as i32);
+            }
+            self.intern_map = Some(intern_map);
+        }
         handle
     }
 

@@ -268,6 +268,174 @@ fn a_layout_that_left_no_line_out_is_kept_for_a_taller_height() {
     assert_eq!(text_layout.text_lines().len(), block.text_layout().text_lines().len());
 }
 
+fn line_ranges(layout: &ferroui_base::media::text_formatting::TextLayout) -> Vec<(i32, i32)> {
+    layout.text_lines().iter().map(|line| (line.first_text_source_index(), line.length())).collect()
+}
+
+/// Not in the reference tests (desktop-performance.md section 9.27): trimming and a line limit
+/// that changed nothing do not stop a wrapped layout from being kept inside its width hold. A
+/// text measured at an unrounded width and arranged at the rounded one is laid out once.
+#[test]
+fn a_trimmed_limited_layout_that_left_nothing_out_is_kept_at_a_width_it_holds() {
+    let _scope = test_scope();
+    let make = || {
+        let block = text_block("Lorem ipsum dolor sit amet elit");
+        block.set_text_wrapping(TextWrapping::Wrap);
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(8);
+        block
+    };
+    let block = make();
+
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(text_layout.text_lines().len() > 1);
+    assert!(!text_layout.has_collapsed_lines() && !text_layout.is_truncated_by_max_lines());
+    assert!(text_layout.width_hold().is_some());
+    let hold = <TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(119.763, f64::INFINITY))
+        .expect("a measure hold");
+    assert!(hold.contains(Size::new(120.0, f64::INFINITY)));
+
+    for width in [120.0, 119.5, 121.25] {
+        block.arrange(Rect::from_size(Size::new(width, block.desired_size().height)));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when arranged at {width}");
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when measured at {width}");
+        let fresh = make();
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout), "same lines at {width}");
+        assert_eq!(fresh.desired_size(), block.desired_size(), "same size at {width}");
+    }
+}
+
+/// Not in the reference tests (section 9.27): a layout that left text out for the line limit has
+/// no width hold, with or without trimming, and is made again for another width.
+#[test]
+fn a_layout_that_left_text_out_for_the_line_limit_is_created_again() {
+    let _scope = test_scope();
+    for trimming in [<dyn TextTrimming>::character_ellipsis(), <dyn TextTrimming>::none()] {
+        let block = text_block("Lorem ipsum dolor sit amet elit");
+        block.set_text_wrapping(TextWrapping::Wrap);
+        block.set_text_trimming(trimming);
+        block.set_max_lines(1);
+
+        block.measure(Size::new(119.763, f64::INFINITY));
+        let text_layout = block.text_layout();
+        assert_eq!(1, text_layout.text_lines().len());
+        assert!(text_layout.is_truncated_by_max_lines());
+        assert_eq!(None, text_layout.width_hold());
+
+        block.measure(Size::new(121.25, f64::INFINITY));
+        assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+    }
+
+    // A line limit the text reaches without leaving anything out is no truncation.
+    let block = text_block("Lorem ipsum dolor sit amet elit");
+    block.set_text_wrapping(TextWrapping::Wrap);
+    block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    block.set_max_lines(2);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert_eq!(2, text_layout.text_lines().len());
+    assert!(!text_layout.is_truncated_by_max_lines() && !text_layout.has_collapsed_lines());
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(Rc::ptr_eq(&text_layout, &block.text_layout()));
+}
+
+/// Not in the reference tests (section 9.27): text that does not wrap and that trimming left
+/// whole has the same line at any width it fits; a trimmed one is made again.
+#[test]
+fn an_unwrapped_layout_that_was_not_trimmed_is_kept_at_any_width_it_fits() {
+    let _scope = test_scope();
+    let make = |text: &str| {
+        let block = text_block(text);
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(1);
+        block
+    };
+
+    let block = make("Hello world");
+    block.measure(Size::new(99.613, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(!text_layout.has_collapsed_lines());
+    let text_width = text_layout.width_including_trailing_whitespace();
+    let hold = <TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(99.613, f64::INFINITY))
+        .expect("a measure hold");
+    assert!(hold.contains(Size::new(text_width + 0.5, f64::INFINITY)) && hold.contains(Size::new(5000.0, f64::INFINITY)));
+    assert!(!hold.contains(Size::new(text_width - 1.0, f64::INFINITY)));
+    for width in [99.5, 150.0, text_width + 0.5, f64::INFINITY] {
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at {width}");
+        let fresh = make("Hello world");
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout));
+        assert!(!fresh.text_layout().has_collapsed_lines());
+        assert_eq!(fresh.desired_size(), block.desired_size());
+    }
+    // Narrower than the text: it is trimmed, a new layout.
+    block.measure(Size::new(text_width - 10.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+    assert!(block.text_layout().has_collapsed_lines());
+
+    // A trimmed layout is made again for a wider width: more of the text fits.
+    let block = make("Lorem ipsum dolor sit amet elit");
+    block.measure(Size::new(99.613, f64::INFINITY));
+    let trimmed = block.text_layout();
+    assert!(trimmed.has_collapsed_lines());
+    assert!(<TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(99.613, f64::INFINITY))
+        .is_none_or(|hold| !hold.contains(Size::new(120.0, f64::INFINITY))));
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&trimmed, &block.text_layout()));
+}
+
+/// Not in the reference tests (section 9.27): inlines without a control among them are kept
+/// the way a text is; with a control they are laid out again for every constraint.
+#[test]
+fn inlines_without_a_control_are_kept_the_way_a_text_is() {
+    let _scope = test_scope();
+    let make = |with_control: bool| {
+        let block = TextBlock::new();
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(1);
+        let inlines = block.inlines().unwrap();
+        inlines.add(Run::with_text(Some("by ")));
+        inlines.add(Run::with_text(Some("author")));
+        inlines.add(Run::with_text(Some(" - ")));
+        inlines.add(Run::with_text(Some("tag")));
+        if with_control {
+            inlines.add(InlineUIContainer::with_child(Border::new()));
+        }
+        block
+    };
+
+    let block = make(false);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(!text_layout.has_collapsed_lines());
+    for width in [120.0, 119.5, 200.0] {
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at {width}");
+        block.arrange(Rect::from_size(Size::new(width, block.desired_size().height)));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when arranged at {width}");
+        let fresh = make(false);
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout));
+        assert_eq!(fresh.desired_size(), block.desired_size());
+    }
+
+    // A changed inline makes new runs and a new layout.
+    block.inlines().unwrap().add(Run::with_text(Some("!")));
+    block.measure(Size::new(200.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+
+    let block = make(true);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(<TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(119.763, f64::INFINITY)).is_none());
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+}
+
 /// Not in the reference tests: arranging at the measured constraint keeps
 /// the layout created by the measure pass.
 #[test]
@@ -1517,4 +1685,24 @@ fn a_kept_layouts_run_properties_follow_the_font_size() {
     // A new constraint alone keeps the properties: the layout has the doubled size still.
     block.measure(Size::new(180.0, 100.0));
     assert_eq!(large, block.text_layout().height());
+}
+
+#[test]
+fn inherited_values_reach_through_every_owner_and_leave_with_their_holder() {
+    // The inheriting font size is held by a panel through `TextElement`'s property and read by a
+    // text block through its own owner of the same property; once the panel is gone, nothing
+    // holds a value and the default is read again.
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    let default_size = TextBlock::new().font_size();
+    let reader = TextBlock::new();
+    {
+        let panel = crate::StackPanel::new();
+        crate::documents::TextElement::set_font_size_on(&panel, default_size + 7.0);
+        panel.children().add(&reader);
+        assert_eq!(default_size + 7.0, reader.font_size());
+        panel.children().clear();
+    }
+    assert_eq!(default_size, reader.font_size());
+    let other = TextBlock::new();
+    assert_eq!(default_size, other.font_size());
 }

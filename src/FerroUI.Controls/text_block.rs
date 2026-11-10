@@ -38,7 +38,14 @@ pub struct TextBlock {
     text_run_cache: RefCell<Option<Rc<TextRunCache>>>,
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
+    /// Whether `text_runs` has a control among them (true while they are not built).
+    text_runs_embed_controls: Cell<bool>,
     inlines: RefCell<Option<InlineCollection>>,
+    /// Whether `inlines` holds the collection made on first use or one set. An addition
+    /// (FerroUI deviation, desktop-performance.md section 9.21): upstream makes the collection,
+    /// its logical children and its subscription in the constructor of every text block; most
+    /// text blocks show `Text` and never use it.
+    inlines_made: Cell<bool>,
     inlines_invalidated: RefCell<Option<Subscription>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
@@ -88,11 +95,7 @@ ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
-
-        let inlines = InlineCollection::new();
-        inlines.set_logical_children(Some(this));
-        inlines.set_inline_host(Some(this.as_inline_host()));
-        this.set_inlines(Some(inlines));
+        // The inline collection is made on first use (`inlines`), not here.
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -174,6 +177,9 @@ impl VisualImpl for TextBlock {
 
 impl LayoutableImpl for TextBlock {
     fn on_measure_invalidated(this: &Self) {
+        if this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsMeasureInvalidated);
+        }
         this.dispose_text_layout();
 
         Self::parent_on_measure_invalidated(this);
@@ -184,7 +190,7 @@ impl LayoutableImpl for TextBlock {
     /// left-aligned text that neither wraps nor trims) and the heights its lines fit when none
     /// was left out, with the padding (desktop-performance.md section 9.15).
     fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
-        if this.has_complex_content() || this.layout_text_alignment.get() != TextAlignment::Left {
+        if this.has_embedded_controls() || this.layout_text_alignment.get() != TextAlignment::Left {
             return None;
         }
         let text_layout = this.text_layout.borrow().clone()?;
@@ -199,6 +205,9 @@ impl LayoutableImpl for TextBlock {
             && Rc::ptr_eq(&this.text_trimming(), &<dyn TextTrimming>::none())
         {
             (LEAST, f64::INFINITY)
+        } else if this.is_unwrapped_and_untrimmed(&text_layout) {
+            // Any width its lines fit (section 9.27).
+            (text_layout.width_including_trailing_whitespace().max(LEAST), f64::INFINITY)
         } else {
             let (low, high) = text_layout.width_hold()?;
             (low.max(LEAST), high)
@@ -228,6 +237,9 @@ impl LayoutableImpl for TextBlock {
             // Deviation (DEVIATIONS.md, Text block): unless the layout is the
             // one the new constraint would create (`keeps_text_layout_for`).
             if !this.keeps_text_layout_for(deflated_size) {
+                if this.has_text_layout() {
+                    ferroui_base::perf_count!(TextBlockLayoutDropsMeasureConstraint);
+                }
                 this.dispose_text_layout();
             }
             this.constraint.set(deflated_size);
@@ -242,11 +254,17 @@ impl LayoutableImpl for TextBlock {
             // A line snapshots its metrics when it is formatted, so an
             // existing layout still reports the width and height the child
             // had before it was measured again.
+            if this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutDropsEmbeddedControls);
+            }
             this.dispose_text_layout();
         }
 
         // This implicitly recreates the text layout with a new constraint if
         // we previously reset it.
+        if !this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
+        }
         let text_layout = this.text_layout();
 
         // The text width used here is matching that the text presenter uses
@@ -275,16 +293,25 @@ impl LayoutableImpl for TextBlock {
         // invalidated since) is that layout already, so it is kept: nothing
         // is laid out again when the arranged size is the measured one.
         if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
+            if this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutDropsArrangeAlignment);
+            }
             this.dispose_text_layout();
             this.constraint.set(available_size);
         } else if this.constraint.get() != available_size {
             if !this.keeps_text_layout_for(available_size) {
+                if this.has_text_layout() {
+                    ferroui_base::perf_count!(TextBlockLayoutDropsArrangeConstraint);
+                }
                 this.dispose_text_layout();
             }
             this.constraint.set(available_size);
         }
 
         // This implicitly recreates the text layout with a new constraint.
+        if !this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
+        }
         let text_layout = this.text_layout();
 
         if this.has_complex_content() {
@@ -640,7 +667,9 @@ impl TextBlock {
             text_run_cache: RefCell::new(None),
             constraint: Cell::new(Size::new(f64::NAN, f64::NAN)),
             text_runs: RefCell::new(None),
+            text_runs_embed_controls: Cell::new(true),
             inlines: RefCell::new(None),
+            inlines_made: Cell::new(false),
             inlines_invalidated: RefCell::new(None),
             inline_host: OnceCell::new(),
             clear_text_internal: Cell::new(false),
@@ -922,10 +951,20 @@ impl TextBlock {
 
     /// The inlines.
     pub fn inlines(&self) -> Option<InlineCollection> {
+        if !self.inlines_made.get() {
+            // Made on first use and set as upstream's constructor sets it: the change it raises
+            // connects the collection (here and in derived controls).
+            self.inlines_made.set(true);
+            self.set_and_raise(Self::inlines_property(), &self.inlines, Some(InlineCollection::new()));
+        }
         self.inlines.borrow().clone()
     }
 
     pub fn set_inlines(&self, value: Option<InlineCollection>) {
+        if !self.inlines_made.get() {
+            // The collection a getter would make is replaced: it is the old value.
+            self.inlines();
+        }
         self.set_and_raise(Self::inlines_property(), &self.inlines, value);
     }
 
@@ -1177,6 +1216,10 @@ impl TextBlock {
             text_run_cache.invalidate();
         }
         *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
         self.dispose_text_layout();
         self.invalidate_visual();
         self.invalidate_measure();
@@ -1184,12 +1227,14 @@ impl TextBlock {
 
     fn invalidate_text_layout_keep_cache(&self) {
         *self.paragraph_properties.borrow_mut() = None;
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsParagraph);
+        }
         self.dispose_text_layout();
         self.invalidate_visual();
         self.invalidate_measure();
     }
 
-    #[allow(dead_code)] // read by the tests
     pub(crate) fn has_text_layout(&self) -> bool {
         self.text_layout.borrow().is_some()
     }
@@ -1230,8 +1275,14 @@ impl TextBlock {
             || (left
                 && text_layout.width_including_trailing_whitespace() <= constraint.width
                 && (constraint.width <= created_for.width || created_for.width == f64::INFINITY))
-            || (left && text_layout.holds_width(constraint.width));
-        if self.has_complex_content()
+            || (left && text_layout.holds_width(constraint.width))
+            // - a left-aligned layout that does not wrap and has no trimmed line has the same
+            //   lines at any width they fit (section 9.27).
+            || (left
+                && text_layout.width_including_trailing_whitespace() <= constraint.width
+                && self.is_unwrapped_and_untrimmed(&text_layout));
+        // Inlines without a control among them are laid out as a text is (section 9.27).
+        if self.has_embedded_controls()
             || !same_lines
             || created_for.width.is_nan()
             || created_for.height.is_nan()
@@ -1281,7 +1332,23 @@ impl TextBlock {
             }
         }
 
+        self.text_runs_embed_controls
+            .set(text_runs.iter().any(|run| run.downcast_ref::<EmbeddedControlRun>().is_some()));
         *self.text_runs.borrow_mut() = Some(Rc::new(text_runs));
+    }
+
+    /// Whether the inlines have a control among them, or may have (their text runs are not
+    /// built). The layout of inlines without one depends on the constraint the way the layout
+    /// of a text does (desktop-performance.md section 9.27).
+    fn has_embedded_controls(&self) -> bool {
+        self.has_complex_content() && (self.text_runs_embed_controls.get() || self.text_runs.borrow().is_none())
+    }
+
+    /// Whether the layout is of text that does not wrap and no line of it was trimmed: it has
+    /// the same lines at any width they fit (a line is trimmed only when it does not fit, or
+    /// when lines after it are left out, which the width does not decide without wrapping).
+    fn is_unwrapped_and_untrimmed(&self, text_layout: &TextLayout) -> bool {
+        self.text_wrapping() == TextWrapping::NoWrap && !text_layout.has_collapsed_lines()
     }
 
     fn measure_embedded_controls(&self, constraint: Size) -> bool {
@@ -1458,7 +1525,8 @@ impl TextBlock {
         build_base_debug_display(self, builder);
 
         if include_content {
-            let text = self.text().or_else(|| self.inlines().and_then(|inlines| inlines.text()));
+            let inlines = self.inlines.borrow().clone();
+            let text = self.text().or_else(|| inlines.and_then(|inlines| inlines.text()));
             append_optional_value(builder, "Text", text.as_deref());
         }
     }

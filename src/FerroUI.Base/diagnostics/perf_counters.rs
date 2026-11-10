@@ -168,6 +168,29 @@ perf_counters! {
     TextRunCacheMisses => "text run cache misses",
     /// `TextShaper::shape_text`: a run was shaped by the platform shaper.
     TextRunsShaped => "text runs shaped",
+    /// `TextBlock::invalidate_text_layout`: a layout was dropped with its shaped runs (the text
+    /// or a property the shaping depends on changed).
+    TextBlockLayoutDropsShaping => "text block layout drops: shaping",
+    /// `TextBlock::invalidate_text_layout_keep_cache`: a layout was dropped and its shaped runs
+    /// kept (a property of the paragraph changed).
+    TextBlockLayoutDropsParagraph => "text block layout drops: paragraph",
+    /// `TextBlock::on_measure_invalidated`: a layout was dropped because the measure of the
+    /// text block was invalidated by something else than its text.
+    TextBlockLayoutDropsMeasureInvalidated => "text block layout drops: measure invalidated",
+    /// `TextBlock::measure_override`: a layout was dropped for the constraint of the measure.
+    TextBlockLayoutDropsMeasureConstraint => "text block layout drops: measure constraint",
+    /// `TextBlock::measure_override`: a layout was dropped because an embedded control was
+    /// measured again.
+    TextBlockLayoutDropsEmbeddedControls => "text block layout drops: embedded controls",
+    /// `TextBlock::arrange_override`: a layout was dropped because the alignment of the arrange
+    /// is not the one it was created with.
+    TextBlockLayoutDropsArrangeAlignment => "text block layout drops: arrange alignment",
+    /// `TextBlock::arrange_override`: a layout was dropped for the constraint of the arrange.
+    TextBlockLayoutDropsArrangeConstraint => "text block layout drops: arrange constraint",
+    /// `TextBlock::measure_override`: the measure created the layout.
+    TextBlockLayoutsCreatedByMeasure => "text block layouts created by measure",
+    /// `TextBlock::arrange_override`: the arrange created the layout.
+    TextBlockLayoutsCreatedByArrange => "text block layouts created by arrange",
 
     // --- containers (the controls crate) ---
     /// `VirtualizingStackPanel::recycle_element`: a container left the
@@ -189,11 +212,68 @@ perf_counters! {
     ArrangesExecuted => "arranges executed",
     /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
     LayoutPassRounds => "layout pass rounds",
+    /// `LayoutManager::invalidate_measure`: the measure of an element was invalidated while a
+    /// layout pass ran (what makes a pass take another round).
+    LayoutMeasureInvalidatedInPass => "measures invalidated during a layout pass",
     /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
     VisualsRecorded => "visuals recorded",
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
     /// was not sent again.
     VisualsRecordedUnchanged => "visuals recorded unchanged",
+    /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
+    UiRenderPasses => "ui: render passes",
+
+    // --- the frames of the render thread (counted on the thread that draws) ---
+    /// `ServerCompositionTarget::render_frame`: a frame was drawn.
+    RenderFramesDrawn => "render: frames drawn",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the bounds of the dirty region.
+    RenderDirtyBoundsPixels => "render: pixels of the dirty bounds",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the target.
+    RenderTargetPixels => "render: pixels of the target",
+    /// The update pass (`UpdateContext::pre_subgraph`): a visual was visited.
+    RenderUpdateVisualsVisited => "render: visuals visited by the update pass",
+    /// The update pass (`UpdateContext::post_subgraph`): a visual was dirty for render.
+    RenderVisualsDirty => "render: visuals dirty for render",
+    /// The update pass (`UpdateContext::add_to_dirty_region`): a rectangle was added to the
+    /// dirty region.
+    RenderDirtyRectsAdded => "render: dirty rectangles added",
+    /// The render walk (`ServerCompositionVisual::render`): a visual was visited.
+    RenderVisualsVisited => "render: visuals visited by the render walk",
+    /// The render walk: a visual was drawn (it meets the clip and the dirty region).
+    RenderVisualsRendered => "render: visuals rendered",
+    /// The render walk: a visual with its own transform set the transform of the canvas.
+    RenderVisualTransformsSet => "render: visual transforms set",
+    /// The render walk: a visual pushed its clip to bounds.
+    RenderVisualClipsPushed => "render: visual clips to bounds pushed",
+    /// The render walk: a visual pushed its opacity.
+    RenderVisualOpacitiesPushed => "render: visual opacities pushed",
+    /// The render walk: a visual was drawn from its bitmap cache.
+    RenderCachedVisualsDrawn => "render: visuals drawn from a cache",
+    /// The replay of a drawing (`RenderDataStreamReplay`): a line.
+    RenderLinesDrawn => "render: lines drawn",
+    /// The replay of a drawing: a rectangle.
+    RenderRectanglesDrawn => "render: rectangles drawn",
+    /// The replay of a drawing: an ellipse.
+    RenderEllipsesDrawn => "render: ellipses drawn",
+    /// The replay of a drawing: a geometry.
+    RenderGeometriesDrawn => "render: geometries drawn",
+    /// The replay of a drawing: a glyph run.
+    RenderGlyphRunsDrawn => "render: glyph runs drawn",
+    /// The drawing context of the backend: the glyphs of the glyph runs drawn.
+    RenderGlyphsDrawn => "render: glyphs drawn",
+    /// The drawing context of the backend: a glyph run was drawn for the first time, from its
+    /// glyphs and without a retained blob.
+    RenderGlyphRunsFirstDrawn => "render: glyph runs drawn for the first time",
+    /// The replay of a drawing: a bitmap.
+    RenderBitmapsDrawn => "render: bitmaps drawn",
+    /// The replay of a drawing: a clip was pushed.
+    RenderClipsPushed => "render: clips pushed by drawings",
+    /// The replay of a drawing: a geometry clip was pushed.
+    RenderGeometryClipsPushed => "render: geometry clips pushed by drawings",
+    /// The replay of a drawing: an opacity, a layer, an opacity mask or an effect was pushed.
+    RenderLayersPushed => "render: opacities, layers, masks and effects pushed by drawings",
+    /// The replay of a drawing: a transform was pushed.
+    RenderTransformsPushed => "render: transforms pushed by drawings",
 }
 
 /// The number of counters.
@@ -264,6 +344,14 @@ mod counting {
         });
     }
 
+    #[inline]
+    pub(super) fn add(counter: PerfCounter, amount: u64) {
+        let _ = COUNTS.try_with(|counts| {
+            let cell = &counts[counter as usize];
+            cell.set(cell.get() + amount);
+        });
+    }
+
     pub(super) fn count_virtual_call(member: &'static str) {
         let _ = VIRTUAL_CALLS.try_with(|calls| {
             // The table is never borrowed across a call of the framework;
@@ -314,6 +402,19 @@ pub fn count(counter: PerfCounter) {
 #[cfg(not(feature = "perf-counters"))]
 #[inline(always)]
 pub fn count(_counter: PerfCounter) {}
+
+/// Adds `amount` occurrences of `counter` on this thread.
+#[cfg(feature = "perf-counters")]
+#[inline]
+pub fn add(counter: PerfCounter, amount: u64) {
+    counting::add(counter, amount)
+}
+
+/// Adds `amount` occurrences of `counter` on this thread: nothing, since
+/// the feature `perf-counters` is off.
+#[cfg(not(feature = "perf-counters"))]
+#[inline(always)]
+pub fn add(_counter: PerfCounter, _amount: u64) {}
 
 /// Counts one virtual call of `member` (`"Class::member"`) on this thread.
 /// Call it through [`perf_count_virtual!`](crate::perf_count_virtual).

@@ -11,10 +11,11 @@ use crate::rendering::{
 };
 use crate::threading::DispatcherPriority;
 use crate::utilities::HandlerList;
+use rustc_hash::FxHashSet;
 use crate::{Point, Rect, Ref, Size, Visual};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -36,7 +37,7 @@ crate::ferro_thread_local! {
 #[derive(Default)]
 struct VisualSet {
     items: Vec<Ref<Visual>>,
-    keys: HashSet<*const Visual>,
+    keys: FxHashSet<*const Visual>,
     /// The entries of `items` whose key was removed.
     stale: usize,
 }
@@ -65,7 +66,7 @@ impl VisualSet {
     /// Drops the stale entries (and an entry added again after its removal is kept once, at its
     /// last place).
     fn compact(&mut self) {
-        let mut seen = HashSet::with_capacity(self.keys.len());
+        let mut seen = FxHashSet::with_capacity_and_hasher(self.keys.len(), Default::default());
         let mut items = std::mem::take(&mut self.items);
         items.reverse();
         items.retain(|item| {

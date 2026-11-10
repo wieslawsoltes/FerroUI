@@ -486,6 +486,17 @@ impl StyledElement {
         self.classes_ref()
     }
 
+    /// Adds or removes a pseudoclass. Removing one from an element whose classes were never made
+    /// makes nothing: an element without classes holds none to remove. An addition (FerroUI
+    /// deviation, desktop-performance.md section 9.21): every input element removed its focus,
+    /// pointer-over and disabled pseudoclasses when constructed, which made its collection of
+    /// classes (three allocations) whether it would ever have a class or not.
+    pub fn set_pseudo_class(&self, name: &str, value: bool) {
+        if value || self.classes.get().is_some() {
+            self.pseudo_classes().set(name, value);
+        }
+    }
+
     /// The control's data context.
     ///
     /// The data context is an inherited property that specifies the default

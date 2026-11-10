@@ -170,7 +170,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
         } else if property == Self::is_pointer_over_property().as_property() {
             this.update_pseudo_classes(None, Some(change.get_new_value::<bool>()));
         } else if property == Self::is_keyboard_focus_within_property().as_property() {
-            this.pseudo_classes().set(":focus-within", change.get_new_value::<bool>());
+            this.set_pseudo_class(":focus-within", change.get_new_value::<bool>());
         } else if property == Visual::is_visible_property().as_property()
             && !change.get_new_value::<bool>()
             && this.is_keyboard_focus_within()
@@ -878,7 +878,7 @@ impl InputElement {
 
     fn set_is_effectively_enabled(&self, value: bool) {
         self.set_and_raise_cell(Self::is_effectively_enabled_property(), &self.is_effectively_enabled, value);
-        self.pseudo_classes().set(":disabled", !value);
+        self.set_pseudo_class(":disabled", !value);
 
         if !self.is_effectively_enabled() {
             if let Some(focus_manager) = FocusManager::get_focus_manager(self) {
@@ -1109,9 +1109,16 @@ impl InputElement {
     /// Updates the `is_effectively_enabled` property based on the parent's
     /// `is_effectively_enabled`.
     fn update_is_effectively_enabled_from(&self, parent: Option<&InputElement>) {
-        self.set_is_effectively_enabled(
-            self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled),
-        );
+        let value = self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled);
+        // An addition (FerroUI deviation, desktop-performance.md section 9.21): upstream updates
+        // the entire hierarchy below every element whose parent or enabled state changes. The
+        // value of every child is derived from its parent's, and every change of it is passed
+        // down when it happens: when this element's value is unchanged, so are the values below
+        // it. A tree built from the leaves up visited each element once for every ancestor.
+        if value == self.is_effectively_enabled() {
+            return;
+        }
+        self.set_is_effectively_enabled(value);
 
         // PERF-SENSITIVE: this is called on the entire hierarchy.
         if let Some(children) = self.visual_children_snapshot() {
@@ -1125,12 +1132,12 @@ impl InputElement {
 
     fn update_pseudo_classes(&self, is_focused: Option<bool>, is_pointer_over: Option<bool>) {
         if let Some(is_focused) = is_focused {
-            self.pseudo_classes().set(":focus", is_focused);
-            self.pseudo_classes().set(":focus-visible", self.is_focus_visible.get());
+            self.set_pseudo_class(":focus", is_focused);
+            self.set_pseudo_class(":focus-visible", self.is_focus_visible.get());
         }
 
         if let Some(is_pointer_over) = is_pointer_over {
-            self.pseudo_classes().set(":pointerover", is_pointer_over);
+            self.set_pseudo_class(":pointerover", is_pointer_over);
         }
     }
 }

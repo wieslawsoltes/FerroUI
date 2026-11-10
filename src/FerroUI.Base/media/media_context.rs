@@ -39,6 +39,9 @@ pub struct MediaContext {
     top_levels: RefCell<HashMap<usize, TopLevelInfo>>,
     clock: Rc<MediaContextClock>,
     time_origin: i64,
+    /// The counters of the UI thread at the last report of them (`report_ui_counters`), when
+    /// the environment asks for the reports (`FERROUI_FRAME_TIMES=1`). Not from the reference.
+    ui_counters_reported: Option<RefCell<Option<crate::diagnostics::perf_counters::PerfCountersSnapshot>>>,
 }
 
 fn same_compositor(a: &Compositor, b: &Compositor) -> bool {
@@ -70,6 +73,9 @@ impl MediaContext {
             top_levels: RefCell::new(HashMap::new()),
             clock: MediaContextClock::new(this.clone()),
             time_origin,
+            ui_counters_reported: std::env::var("FERROUI_FRAME_TIMES")
+                .is_ok_and(|value| value == "1")
+                .then(|| RefCell::new(None)),
         });
         let weak = Rc::downgrade(&context);
         // The subscription lives as long as the timer, which the context
@@ -183,6 +189,28 @@ impl MediaContext {
         self.is_rendering.set(true);
         let _finally = Finally(self);
         self.render_core();
+        crate::perf_count!(UiRenderPasses);
+        self.report_ui_counters();
+    }
+
+    /// With the feature `perf-counters` and `FERROUI_FRAME_TIMES=1`: every 300 render passes,
+    /// prints what the UI thread counted since the last report, a pass. The sibling of the
+    /// report of the render thread (`ServerCompositionTarget::report_render_counters`).
+    fn report_ui_counters(&self) {
+        use crate::diagnostics::perf_counters::{self, PerfCounter};
+        let Some(reported) = self.ui_counters_reported.as_ref().filter(|_| perf_counters::ENABLED) else { return };
+        let now = perf_counters::snapshot();
+        let mut last = reported.borrow_mut();
+        let counted = match last.as_ref() {
+            Some(last) => now.since(last),
+            None => now.clone(),
+        };
+        let passes = counted.get(PerfCounter::UiRenderPasses);
+        if passes < 300 {
+            return;
+        }
+        eprintln!("UI thread counters:\n{}", counted.report_per(passes, "pass"));
+        *last = Some(now);
     }
 
     fn render_core(&self) {

@@ -63,6 +63,8 @@ pub struct GlyphRunImpl {
     // A two level cache optimized for single-entry read, keyed by the font
     // configuration.
     text_blob_cache: Mutex<TwoLevelCache<TextOptions, Option<TextBlob>>>,
+    /// Whether the run has been drawn (`draw`).
+    drawn: std::sync::atomic::AtomicBool,
     font_rendering_em_size: f64,
     baseline_origin: Point,
     bounds: Rect,
@@ -145,6 +147,7 @@ impl GlyphRunImpl {
             glyph_indices,
             glyph_positions,
             text_blob_cache: Mutex::new(TwoLevelCache::with_secondary_size(3)),
+            drawn: std::sync::atomic::AtomicBool::new(false),
             font_rendering_em_size,
             baseline_origin,
             bounds: run_bounds.translate(Vector::new(baseline_origin.x, baseline_origin.y)),
@@ -160,16 +163,7 @@ impl GlyphRunImpl {
     ///
     /// Returns `None` for an empty run.
     pub fn get_text_blob(&self, text_options: TextOptions, render_options: RenderOptions) -> Option<TextBlob> {
-        let mut text_options = text_options;
-
-        if text_options.text_rendering_mode == TextRenderingMode::Unspecified {
-            text_options.text_rendering_mode = if render_options.edge_mode == EdgeMode::Aliased {
-                TextRenderingMode::Alias
-            } else {
-                TextRenderingMode::Antialias
-            };
-        }
-
+        let text_options = Self::resolve_text_options(text_options, render_options);
         self.text_blob_cache.lock().unwrap().get_or_add(text_options, |text_options| {
             if self.glyph_indices.is_empty() {
                 return None;
@@ -189,6 +183,50 @@ impl GlyphRunImpl {
 
             text_blob
         })
+    }
+
+    /// The text options a blob of the run is made with: an unspecified rendering mode follows
+    /// the edge mode.
+    fn resolve_text_options(mut text_options: TextOptions, render_options: RenderOptions) -> TextOptions {
+        if text_options.text_rendering_mode == TextRenderingMode::Unspecified {
+            text_options.text_rendering_mode = if render_options.edge_mode == EdgeMode::Aliased {
+                TextRenderingMode::Alias
+            } else {
+                TextRenderingMode::Antialias
+            };
+        }
+        text_options
+    }
+
+    /// Draws the run at `origin`. An addition (FerroUI deviation, desktop-performance.md section
+    /// 9.22): a text blob is a key of Skia's text blob cache, which hashes it, keeps the GPU
+    /// blob made of it and posts a purge message when it is dropped. Text that changes every
+    /// frame makes runs that are drawn once, and each paid that for nothing. A run's first draw
+    /// is of its glyphs alone, which Skia draws without the cache; the blob is made, and cached
+    /// by Skia, when the run is drawn again.
+    pub fn draw(&self, canvas: &skia_safe::Canvas, text_options: TextOptions, render_options: RenderOptions, origin: Point, paint: &skia_safe::Paint) {
+        if self.glyph_indices.is_empty() {
+            return;
+        }
+        ferroui_base::diagnostics::perf_counters::add(
+            ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphsDrawn,
+            self.glyph_indices.len() as u64,
+        );
+        let text_options = Self::resolve_text_options(text_options, render_options);
+        let origin = skia_safe::Point::new(origin.x as f32, origin.y as f32);
+        let cached = self.text_blob_cache.lock().unwrap().try_get(&text_options);
+        if cached.is_none() && !self.drawn.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            ferroui_base::diagnostics::perf_counters::add(
+                ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphRunsFirstDrawn,
+                1,
+            );
+            let font = create_font(&self.font, text_options);
+            canvas.draw_glyphs_at(&self.glyph_indices, &self.glyph_positions[..], origin, &font, paint);
+            return;
+        }
+        if let Some(text_blob) = self.get_text_blob(text_options, render_options) {
+            canvas.draw_text_blob(text_blob, origin, paint);
+        }
     }
 }
 

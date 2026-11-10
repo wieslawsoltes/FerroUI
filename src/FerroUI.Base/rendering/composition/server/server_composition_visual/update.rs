@@ -103,6 +103,7 @@ impl UpdateContext {
             return;
         }
 
+        crate::perf_count!(RenderDirtyRectsAdded);
         self.dirty_region.add_rect(transformed);
     }
 
@@ -134,6 +135,10 @@ impl UpdateContext {
 
 impl IServerTreeVisitor for UpdateContext {
     fn pre_subgraph(&mut self, node: &Rc<ServerCompositionVisual>) -> bool {
+        crate::perf_count!(RenderUpdateVisualsVisited);
+        if node.is_dirty_for_render.get() {
+            crate::perf_count!(RenderVisualsDirty);
+        }
         let visit_children = node.is_dirty_for_render_in_subgraph.get() || node.needs_bounding_box_update.get();
 
         // If this node has an alpha mask an we caused its inner bounds to change

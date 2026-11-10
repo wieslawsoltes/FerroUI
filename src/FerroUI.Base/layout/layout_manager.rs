@@ -405,6 +405,10 @@ impl ILayoutManager for LayoutManager {
         }
         assert!(self.is_owned_root(control), "Attempt to call InvalidateMeasure on wrong LayoutManager.");
 
+        if self.running.get() {
+            crate::perf_count!(LayoutMeasureInvalidatedInPass);
+        }
+
         self.to_measure.borrow_mut().enqueue(control.to_ref());
         self.queue_layout_pass();
     }

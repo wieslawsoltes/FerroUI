@@ -41,14 +41,14 @@ const FONT_SIZE: f64 = 14.0;
 const WIDTH: f64 = 240.0;
 
 /// The gauntlet's generator: 32-bit xorshift.
-struct Rng(u32);
+pub(super) struct Rng(u32);
 
 impl Rng {
-    fn new(seed: u32) -> Self {
+    pub(super) fn new(seed: u32) -> Self {
         Self((seed.wrapping_mul(0x9E37_79B9) ^ 0xA5A5_A5A5).max(1))
     }
 
-    fn below(&mut self, bound: u32) -> u32 {
+    pub(super) fn below(&mut self, bound: u32) -> u32 {
         let mut x = self.0;
         x ^= x << 13;
         x ^= x >> 17;
@@ -58,7 +58,7 @@ impl Rng {
     }
 }
 
-fn sentence(rng: &mut Rng, min: u32, max: u32) -> String {
+pub(super) fn sentence(rng: &mut Rng, min: u32, max: u32) -> String {
     let count = min + rng.below(max - min + 1);
     let text = (0..count).map(|_| WORDS[rng.below(46) as usize]).collect::<Vec<_>>().join(" ");
     let mut chars = text.chars();

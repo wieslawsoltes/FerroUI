@@ -71,21 +71,91 @@ fn layouts_the_hold_does_not_describe_have_none() {
     let _scope = TextTestScope::new();
     // A word wider than the width is broken inside: not held.
     assert_eq!(None, layout("Supercalifragilisticexpialidocious", 30.0).width_hold());
-    // Trimmed text is not held.
-    let trimmed = TextLayout::new(
-        TEXTS[0],
-        Typeface::default_typeface(),
-        TextLayoutOptions {
-            font_size: 12.0,
-            max_width: 100.0,
-            text_trimming: Some(<dyn TextTrimming>::character_ellipsis()),
-            text_wrapping: TextWrapping::Wrap,
-            ..TextLayoutOptions::default()
-        },
-    );
+    // Text that was trimmed, or cut at the line limit, is not held.
+    let limited = |max_lines: i32, trimming: std::rc::Rc<dyn TextTrimming>| {
+        TextLayout::new(
+            TEXTS[0],
+            Typeface::default_typeface(),
+            TextLayoutOptions {
+                font_size: 12.0,
+                max_width: 100.0,
+                max_lines,
+                text_trimming: Some(trimming),
+                text_wrapping: TextWrapping::Wrap,
+                ..TextLayoutOptions::default()
+            },
+        )
+    };
+    let trimmed = limited(2, <dyn TextTrimming>::character_ellipsis());
+    assert!(trimmed.has_collapsed_lines() && trimmed.is_truncated_by_max_lines());
     assert_eq!(None, trimmed.width_hold());
+    let cut = limited(2, <dyn TextTrimming>::none());
+    assert!(!cut.has_collapsed_lines() && cut.is_truncated_by_max_lines());
+    assert_eq!(None, cut.width_hold());
+    // Trimming and a line limit that changed nothing leave the hold of the plain text
+    // (section 9.27).
+    let untouched = limited(100, <dyn TextTrimming>::character_ellipsis());
+    assert!(!untouched.has_collapsed_lines() && !untouched.is_truncated_by_max_lines());
+    assert_eq!(layout(TEXTS[0], 100.0).width_hold(), untouched.width_hold());
+    assert!(untouched.width_hold().is_some());
     // Text on one line holds from its width upwards.
     let one_line = layout("word", 300.0);
     let (low, high) = one_line.width_hold().expect("a hold");
     assert!(low < 300.0 && high == f64::INFINITY);
+}
+
+/// Section 9.27: with trimming and a line limit, a layout that claims a hold left nothing out,
+/// and at every width it holds a new layout has the same lines, none trimmed and none left out.
+#[test]
+fn a_trimmed_limited_layout_makes_the_same_lines_at_every_width_it_holds() {
+    let _scope = TextTestScope::new();
+    let limited = |text: &str, width: f64, max_lines: i32| {
+        TextLayout::new(
+            text,
+            Typeface::default_typeface(),
+            TextLayoutOptions {
+                font_size: 12.0,
+                foreground: Some(Brushes::black()),
+                max_width: width,
+                max_lines,
+                text_trimming: Some(<dyn TextTrimming>::character_ellipsis()),
+                text_wrapping: TextWrapping::Wrap,
+                ..TextLayoutOptions::default()
+            },
+        )
+    };
+    let mut held_widths = 0;
+    let mut refused = 0;
+    for text in TEXTS {
+        for max_lines in [1, 2, 3, 5, 40] {
+            for start in (20..=400).step_by(19) {
+                let start = f64::from(start);
+                let first = limited(text, start, max_lines);
+                let expected = lines(&first);
+                let Some((low, high)) = first.width_hold() else {
+                    refused += 1;
+                    continue;
+                };
+                assert!(!first.has_collapsed_lines() && !first.is_truncated_by_max_lines());
+                // The plain text has the same lines: the limit and the trimming changed nothing.
+                assert_eq!(expected, lines(&layout(text, start)));
+                let mut width = (low - 2.0).max(1.0);
+                while width < high.min(start + 400.0) + 2.0 {
+                    if low <= width && width < high {
+                        held_widths += 1;
+                        let fresh = limited(text, width, max_lines);
+                        assert_eq!(
+                            expected,
+                            lines(&fresh),
+                            "{text:?} limited to {max_lines}: created at {start}, held over {low}..{high}, other lines at {width}"
+                        );
+                        assert!(!fresh.has_collapsed_lines() && !fresh.is_truncated_by_max_lines());
+                    }
+                    width += 0.5;
+                }
+            }
+        }
+    }
+    assert!(held_widths > 10_000, "only {held_widths} widths were held");
+    assert!(refused > 100, "only {refused} layouts were refused");
 }
