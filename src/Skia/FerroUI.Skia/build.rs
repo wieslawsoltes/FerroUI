@@ -60,7 +60,11 @@ fn main() {
     if env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
         frame_build.define("FERROUI_NATIVE_FRAME_TESTS", None);
     }
+    // The texture of a pipelined frame layer (Graphite only; the source is small and has no
+    // dependency on Skia, so it is compiled for every Apple configuration).
+    println!("cargo:rerun-if-changed=gpu/graphite/pipelined_layer_texture.m");
     frame_build.file("gpu/metal/frame_completion.m")
+        .file("gpu/graphite/pipelined_layer_texture.m")
         .flag("-fobjc-arc").flag("-fblocks").compile("ferroui_frame_completion");
     println!("cargo:rustc-link-lib=framework=Metal");
     println!("cargo:rustc-link-lib=framework=IOSurface");

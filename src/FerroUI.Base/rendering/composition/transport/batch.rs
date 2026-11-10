@@ -71,6 +71,7 @@ impl BatchCompletion {
 /// shared with any thread.
 pub struct CompositionBatch {
     sequence_id: i64,
+    accepted: BatchCompletion,
     processed: BatchCompletion,
     rendered: BatchCompletion,
 }
@@ -79,6 +80,7 @@ impl CompositionBatch {
     pub(crate) fn new() -> Arc<CompositionBatch> {
         Arc::new(CompositionBatch {
             sequence_id: NEXT_SEQUENCE_ID.fetch_add(1, Ordering::SeqCst) + 1,
+            accepted: BatchCompletion::default(),
             processed: BatchCompletion::default(),
             rendered: BatchCompletion::default(),
         })
@@ -87,6 +89,26 @@ impl CompositionBatch {
     /// The process-wide sequence number of the batch.
     pub fn sequence_id(&self) -> i64 {
         self.sequence_id
+    }
+
+    /// Indicates that the render thread took the batch from the queue and is
+    /// about to apply it: from here on the batch belongs to the frame the
+    /// render thread is starting, and a batch committed now is applied by
+    /// the frame after that one. Raised before [`processed`](Self::processed),
+    /// by the same thread; a batch that is completed without being applied
+    /// raises it too.
+    ///
+    /// Not from upstream. It is what the media context holds the next
+    /// commit back for: the thread of the compositor prepares its next
+    /// batch while the render thread applies and draws this one, instead of
+    /// starting once the batch is applied (desktop-performance.md, section
+    /// 9.33). Nothing of the batch can be observed yet: who needs its
+    /// effects waits for `processed` or [`rendered`](Self::rendered).
+    ///
+    /// Continuations run synchronously on the render thread, so they should
+    /// be as short as possible.
+    pub fn accepted(&self) -> &BatchCompletion {
+        &self.accepted
     }
 
     /// Indicates that the batch got deserialized on the render thread and
@@ -109,7 +131,13 @@ impl CompositionBatch {
         &self.rendered
     }
 
+    pub(crate) fn notify_accepted(&self) {
+        self.accepted.try_set();
+    }
+
     pub(crate) fn notify_processed(&self) {
+        // A batch is never processed without having been accepted.
+        self.accepted.try_set();
         self.processed.try_set();
     }
 

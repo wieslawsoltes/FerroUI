@@ -1,4 +1,5 @@
 use super::{ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext};
+use crate::drawing_context_impl::CanvasSource;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
@@ -51,6 +52,30 @@ pub trait ISkiaSurface {
 
     /// Copies the surface to the canvas.
     fn blit(&self, canvas: &Canvas);
+
+    /// Begins a frame that the drawing context records as a picture, which the surface draws
+    /// by itself when the drawing context is disposed, instead of a frame drawn on the canvas
+    /// of [`surface`](Self::surface). `None` (the default): the frame is drawn on that canvas,
+    /// and [`end_drawn_frame`](Self::end_drawn_frame) is called when its drawing context is
+    /// disposed. A surface may answer differently from one frame to the next.
+    fn begin_recorded_frame(&self) -> Option<CanvasSource> {
+        None
+    }
+
+    /// The drawing context of a frame drawn on the canvas of [`surface`](Self::surface) was
+    /// disposed: a call of `surface` from now on is a read of the surface, not the frame's.
+    fn end_drawn_frame(&self) {}
+
+    /// Whether the surface holds a frame that was drawn and that its
+    /// [`blit`](Self::blit) does not show yet
+    /// (`IDrawingContextLayerImpl::has_pending_frame`). `false` by default.
+    fn has_pending_frame(&self) -> bool {
+        false
+    }
+
+    /// Makes [`blit`](Self::blit) show every frame that was drawn
+    /// (`IDrawingContextLayerImpl::complete_pending_frame`). Nothing by default.
+    fn complete_pending_frame(&self) {}
 
     /// Releases the surface.
     fn dispose(&self);

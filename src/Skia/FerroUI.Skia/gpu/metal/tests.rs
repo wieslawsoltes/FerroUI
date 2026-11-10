@@ -2306,3 +2306,5 @@ mod custom_effect_validation {
         unsafe { send(texture, sel(b"release\0")) };
     }
 }
+
+mod pipelined_frames;

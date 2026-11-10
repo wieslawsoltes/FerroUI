@@ -223,6 +223,11 @@ impl CompositionTarget {
         result: &mut Vec<(IntersectionResult, Rc<CompositionVisual>)>,
         filter: VisualFilter<'_>,
     ) {
+        // The children of a visual kept for a visual that left its tree are those of a released
+        // one: none (section 9.32).
+        if visual.is_departed() {
+            return;
+        }
         if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
             // The candidate list of the target is reused unless a query is
             // already running (a nested container).
@@ -340,8 +345,9 @@ impl CompositionTarget {
             return (None, IntersectionResult::NotCalculated);
         };
 
-        let mut queried_indexed_children = false;
-        if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
+        // A visual kept for a visual that left its tree has no children here (section 9.32).
+        let mut queried_indexed_children = visual.is_departed();
+        if !queried_indexed_children && visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
             if let Some((hit, intersection_result)) =
                 visual.try_query_first_hit_test_child::<H>(self, &input, filter, result_filter)
             {

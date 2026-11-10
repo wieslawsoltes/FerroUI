@@ -8,15 +8,29 @@ use crate::platform::{
 use crate::{Matrix, PixelSize, Rect, RoundedRect, Vector};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 /// The shared record of what was drawn on mock drawing contexts, one line
 /// per call, in call order.
 #[derive(Clone, Default)]
-pub struct DrawingLog(std::sync::Arc<std::sync::Mutex<Vec<String>>>);
+pub struct DrawingLog(std::sync::Arc<std::sync::Mutex<Vec<String>>>, std::sync::Arc<std::sync::atomic::AtomicBool>);
 
 impl DrawingLog {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Makes the mock layers that record to this log hold a frame back
+    /// ([`IDrawingContextLayerImpl::has_pending_frame`]): a blit shows the
+    /// frame before the one drawn last, until the pending frame is
+    /// completed. Such a layer logs `Blit frame <shown> of <drawn>` and
+    /// `CompletePendingFrame`.
+    pub fn hold_layer_frames_back(&self, hold: bool) {
+        self.1.store(hold, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    fn layers_hold_frames_back(&self) -> bool {
+        self.1.load(std::sync::atomic::Ordering::SeqCst)
     }
 
     /// Appends an entry.
@@ -504,11 +518,18 @@ impl IDrawingContextWithAcrylicLikeSupport for MockDrawingContextImpl {
 pub struct MockDrawingContextLayerImpl {
     log: DrawingLog,
     size: PixelSize,
+    /// For a layer that holds frames back
+    /// ([`DrawingLog::hold_layer_frames_back`]): the number of frames drawn
+    /// into the layer, and the number of the frame a blit shows.
+    drawn: AtomicU32,
+    shown: AtomicU32,
+    /// Whether a frame was drawn since the last blit.
+    drew_since_blit: AtomicBool,
 }
 
 impl MockDrawingContextLayerImpl {
     pub fn new(log: DrawingLog, size: PixelSize) -> Self {
-        Self { log, size }
+        Self { log, size, drawn: AtomicU32::new(0), shown: AtomicU32::new(0), drew_since_blit: AtomicBool::new(false) }
     }
 }
 
@@ -542,7 +563,19 @@ impl IBitmapImpl for MockDrawingContextLayerImpl {
 
 impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
     fn blit(&self, _context: &mut dyn IDrawingContextImpl) {
-        self.log.push("Blit");
+        if !self.log.layers_hold_frames_back() {
+            self.log.push("Blit");
+            return;
+        }
+        // A tick that drew a frame presents the one before it.
+        if self.drew_since_blit.swap(false, Ordering::SeqCst) {
+            self.shown.store(self.drawn.load(Ordering::SeqCst) - 1, Ordering::SeqCst);
+        }
+        self.log.push(format!(
+            "Blit frame {} of {}",
+            self.shown.load(Ordering::SeqCst),
+            self.drawn.load(Ordering::SeqCst)
+        ));
     }
 
     fn can_blit(&self) -> bool {
@@ -554,7 +587,22 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
     }
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
+        if self.log.layers_hold_frames_back() {
+            self.drawn.fetch_add(1, Ordering::SeqCst);
+            self.drew_since_blit.store(true, Ordering::SeqCst);
+        }
         Box::new(MockDrawingContextImpl::new(self.log.clone()))
+    }
+
+    fn has_pending_frame(&self) -> bool {
+        self.log.layers_hold_frames_back() && self.shown.load(Ordering::SeqCst) < self.drawn.load(Ordering::SeqCst)
+    }
+
+    fn complete_pending_frame(&self) {
+        if self.log.layers_hold_frames_back() {
+            self.log.push("CompletePendingFrame");
+            self.shown.store(self.drawn.load(Ordering::SeqCst), Ordering::SeqCst);
+        }
     }
 
     fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {

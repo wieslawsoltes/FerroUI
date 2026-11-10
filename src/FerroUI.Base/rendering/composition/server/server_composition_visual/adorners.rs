@@ -69,16 +69,16 @@ impl ServerCompositionVisual {
                 .and_then(|shared_ancestor| Self::compute_transform_from_ancestor(adorned, &shared_ancestor));
             match adorner_layer_to_adorned_visual {
                 Some(transform) => {
-                    self.own_transform.set(Some(own_transform.unwrap_or(Matrix::IDENTITY) * transform))
+                    self.set_own_transform(Some(own_transform.unwrap_or(Matrix::IDENTITY) * transform))
                 }
                 // Don't render, something is broken
-                None => self.own_transform.set(Some(Matrix::new_3x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))),
+                None => self.set_own_transform(Some(Matrix::new_3x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))),
             }
         } else if self.parent_for_transform().is_some() {
             // The WinUI `ParentForTransform` (not from upstream).
             self.update_parent_for_transform();
         } else {
-            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
+            self.set_own_transform(self.compute_own_transform_from_properties(self.transform_matrix()));
         }
 
         self.propagate_flags(true, true, false);

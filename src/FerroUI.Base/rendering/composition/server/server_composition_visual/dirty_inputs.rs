@@ -166,8 +166,15 @@ impl ServerCompositionVisual {
     }
 
     pub(super) fn on_parent_changing_core(&self) {
-        if let (Some(parent), Some(bounds)) = (self.parent(), self.transformed_sub_tree_bounds.get()) {
-            parent.add_extra_dirty_rect(bounds);
+        if let Some(parent) = self.parent() {
+            // Not upstream, which leaves the bounds on the visual: they are in the space of the
+            // parent the visual leaves, and that parent redraws them. Under its next parent, or
+            // under the same one frames later, they are not where the visual is drawn, and the
+            // update pass would redraw that place for nothing (docs/porting/
+            // desktop-performance.md, section 9.32).
+            if let Some(bounds) = self.transformed_sub_tree_bounds.take() {
+                parent.add_extra_dirty_rect(bounds);
+            }
         }
         self.att_helper_parent_changing();
         self.winui_members_parent_changing();

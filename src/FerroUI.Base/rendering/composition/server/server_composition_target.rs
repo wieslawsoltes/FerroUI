@@ -340,10 +340,10 @@ impl ServerCompositionTarget {
     }
 
     pub fn render(self: &Rc<Self>) {
+        self.drew_frame.set(false);
         if self.frame_times.borrow().is_none() && self.slow_frame_ms.is_none() {
             return self.render_frame();
         }
-        self.drew_frame.set(false);
         let start = std::time::Instant::now();
         self.render_frame();
         if self.drew_frame.get() {
@@ -358,6 +358,19 @@ impl ServerCompositionTarget {
                 eprintln!("slow frame of composition target {}: frame {frame} took {ms:.3} ms", self.id);
             }
         }
+    }
+
+    /// Whether the last [`render`](Self::render) got as far as drawing a
+    /// frame.
+    pub(crate) fn drew_frame(&self) -> bool {
+        self.drew_frame.get()
+    }
+
+    /// Whether the layer of the target holds a frame back: what the target
+    /// drew last is presented by its next frame
+    /// ([`IDrawingContextLayerImpl::has_pending_frame`]).
+    pub(crate) fn has_pending_frame(&self) -> bool {
+        self.layer.borrow().as_ref().is_some_and(|layer| layer.has_pending_frame())
     }
 
     /// The times of the frames the target drew, as a line of text: their
@@ -414,13 +427,21 @@ impl ServerCompositionTarget {
         }
         let Some(render_target) = self.render_target.borrow().clone() else { return };
 
-        if self.dirty_rects.is_empty() && !self.redraw_requested.get() && !self.update_requested.get() {
+        // A frame the layer holds back is presented by this tick, also when
+        // the tick has nothing to draw (section 9.33 of
+        // desktop-performance.md).
+        let present_pending = self.has_pending_frame();
+        if self.dirty_rects.is_empty()
+            && !self.redraw_requested.get()
+            && !self.update_requested.get()
+            && !present_pending
+        {
             return;
         }
 
         self.redraw_requested.set(self.redraw_requested.get() | !self.dirty_rects.is_empty());
 
-        if !self.redraw_requested.get() {
+        if !self.redraw_requested.get() && !present_pending {
             return;
         }
 
@@ -488,23 +509,28 @@ impl ServerCompositionTarget {
             }
 
             self.expand_dirty_rects_over_backdrops();
-            if !self.dirty_rects.is_empty() {
-                super::take_backdrop_regions();
-                self.dirty_rects.finalize_frame(render_bounds);
-                {
+            let layer = self.layer.borrow().clone();
+            // Whether the tick draws the tree. A tick that does not still
+            // presents the frame its layer holds back.
+            let draws = !self.dirty_rects.is_empty();
+            if draws || layer.as_ref().is_some_and(|layer| layer.has_pending_frame()) {
+                if draws {
+                    super::take_backdrop_regions();
+                    self.dirty_rects.finalize_frame(render_bounds);
                     use crate::diagnostics::perf_counters::{add, PerfCounter};
                     let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
                     add(PerfCounter::RenderFramesDrawn, 1);
                     add(PerfCounter::RenderDirtyBoundsPixels, (dirty.width().max(0.0) * dirty.height().max(0.0)) as u64);
                     add(PerfCounter::RenderTargetPixels, (pixel_size.width as u64) * (pixel_size.height as u64));
                 }
-                let layer = self.layer.borrow().clone();
                 match layer {
                     Some(layer) => {
-                        {
+                        if draws {
                             let mut context = layer.create_drawing_context();
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();
+                        } else {
+                            layer.complete_pending_frame();
                         }
 
                         render_target_context.clear(Colors::TRANSPARENT);
@@ -517,12 +543,15 @@ impl ServerCompositionTarget {
                         }
                         self.overlays.draw(self, &mut *render_target_context, true);
                     }
+                    // Without a layer no frame is held back: the tick draws.
                     None => {
                         self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
                         self.overlays.draw(self, &mut *render_target_context, false);
                     }
                 }
-                self.record_backdrop_regions();
+                if draws {
+                    self.record_backdrop_regions();
+                }
             }
 
             self.rendered_visuals.set(0);

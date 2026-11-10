@@ -24,6 +24,12 @@ impl ICompositionDrawListVisualExtension for BorderVisualState {
             writer.write(self.corner_radius.get());
         }
     }
+
+    // The border writes its corner radius whenever the property changes, in a tree or not
+    // (`Border::on_property_changed`).
+    fn follows_control_out_of_tree(&self) -> bool {
+        true
+    }
 }
 
 /// The composition visual of a border: a draw list visual that clips to

@@ -652,8 +652,11 @@ fn a_confined_compositor_keeps_what_renders_on_the_render_thread() {
     root.set_size(Vector::new(200.0, 150.0));
     target.set_size(Size::new(200.0, 150.0));
     MediaContext::instance().immediate_render_requested(&confined.compositor);
-    // Each wait asked the loop for a frame out of turn first.
-    assert_eq!(2, confined.render_loop.frames_requested_out_of_turn());
+    // Each wait asked the loop for a frame out of turn first, and so did
+    // each of the two batches that followed a tick with nothing to draw
+    // (the render thread of this test ticks all the time).
+    let out_of_turn = confined.render_loop.frames_requested_out_of_turn();
+    assert!((2..=4).contains(&out_of_turn), "{out_of_turn} frames were requested out of turn");
 
     // The job of the render thread has answered the first request.
     let feature = wait_for("the first request is answered", first).expect("the render thread has the feature");
@@ -1389,4 +1392,109 @@ fn render_context_notifications_return_to_ui_in_order_and_can_unsubscribe() {
     let (render_loop, log) = fixture.drop_compositor();
     wait_until("render graph released", || render_loop.task_count() == 0);
     assert!(log.violations().is_empty());
+}
+
+// --- frame pacing (desktop-performance.md, section 9.33) ---
+
+/// A render thread that ticks its loop once each time it is asked to: a
+/// compositor is confined to the thread of its first frame, so every tick
+/// of a test comes from the same one.
+struct TickedRenderThread {
+    ticks: Option<std::sync::mpsc::Sender<std::sync::mpsc::Sender<()>>>,
+    thread: Option<thread::JoinHandle<()>>,
+}
+
+impl TickedRenderThread {
+    fn start(render_loop: &Arc<ManualRenderLoop>) -> Self {
+        let (ticks, requests) = std::sync::mpsc::channel::<std::sync::mpsc::Sender<()>>();
+        let tick_loop = render_loop.clone();
+        let thread = thread::spawn(move || {
+            for done in requests {
+                tick_loop.tick();
+                let _ = done.send(());
+            }
+        });
+        Self { ticks: Some(ticks), thread: Some(thread) }
+    }
+
+    /// Ticks the loop once and returns when the tick is over.
+    fn tick(&self) {
+        let (done, ticked) = std::sync::mpsc::channel();
+        self.ticks.as_ref().expect("the render thread runs").send(done).expect("the render thread runs");
+        ticked.recv().expect("the render thread ticked");
+    }
+}
+
+impl Drop for TickedRenderThread {
+    fn drop(&mut self) {
+        self.ticks.take();
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+#[test]
+fn a_batch_is_accepted_when_the_render_thread_takes_it() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let compositor = render_thread_compositor(&render_loop, false);
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    let _visual = compositor.create_container_visual();
+    let batch = compositor.commit();
+    assert!(!batch.accepted().is_completed());
+    render_thread.tick();
+    assert!(batch.accepted().is_completed());
+    assert!(batch.processed().is_completed());
+}
+
+#[test]
+fn a_batch_that_follows_an_idle_tick_asks_for_a_frame_out_of_turn() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let compositor = render_thread_compositor(&render_loop, false);
+    let render_thread = TickedRenderThread::start(&render_loop);
+
+    // No tick came before the first batch: it waits for its tick.
+    let _first = compositor.create_container_visual();
+    compositor.commit();
+    assert_eq!(0, render_loop.frames_requested_out_of_turn());
+
+    // Nor is a batch late that follows a tick with work: the display frame
+    // of that tick has what it was given.
+    render_thread.tick();
+    let _second = compositor.create_container_visual();
+    compositor.commit();
+    assert_eq!(0, render_loop.frames_requested_out_of_turn());
+
+    // A tick that finds the batch, then one that finds nothing: the batch
+    // after it missed the tick of its display frame.
+    render_thread.tick();
+    render_thread.tick();
+    let _third = compositor.create_container_visual();
+    compositor.commit();
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+
+    // One idle tick answers one batch.
+    let _fourth = compositor.create_container_visual();
+    compositor.commit();
+    assert_eq!(1, render_loop.frames_requested_out_of_turn());
+}
+
+#[test]
+fn a_compositor_that_renders_on_its_own_thread_asks_for_no_frame_out_of_turn() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    // The loop is ticked by the thread of the compositor.
+    let render_loop = ManualRenderLoop::new();
+    let compositor = render_thread_compositor(&render_loop, false);
+
+    render_loop.tick();
+    render_loop.tick();
+    let _visual = compositor.create_container_visual();
+    compositor.commit();
+    assert_eq!(0, render_loop.frames_requested_out_of_turn());
 }

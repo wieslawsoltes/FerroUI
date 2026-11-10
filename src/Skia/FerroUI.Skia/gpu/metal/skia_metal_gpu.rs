@@ -204,6 +204,37 @@ impl ISkiaGpu for SkiaMetalGpu {
         false
     }
 
+    /// A frame layer that can draw a frame while the one before it is
+    /// presented (`gpu/graphite/pipelined_layer.rs`), unless
+    /// [`SkiaOptions::frame_pipelining`](crate::SkiaOptions::frame_pipelining)
+    /// is off; `None` otherwise, which gives the layer a surface of the
+    /// context.
+    ///
+    /// Only the layer a render target context creates carries a session:
+    /// that is the frame layer of the compositor. Every other surface is
+    /// created without one and stays a surface of the context.
+    #[cfg(not(ferro_skia_apple_ganesh))]
+    fn try_create_surface(
+        &self,
+        size: PixelSize,
+        session: Option<&Rc<dyn ISkiaGpuRenderSession>>,
+        surface_props: &skia_safe::SurfaceProps,
+    ) -> Option<Rc<dyn ISkiaSurface>> {
+        session?;
+        let context = self.context.borrow().clone()?;
+        let options = crate::SkiaOptions::current();
+        let layer = crate::gpu::graphite::PipelinedLayerSurface::try_new(
+            &context,
+            self.device.device(),
+            size,
+            surface_props,
+            options.frame_pipelining,
+            options.effective_frame_pipelining_bands(),
+        )?;
+        Some(Rc::new(layer))
+    }
+
+    #[cfg(ferro_skia_apple_ganesh)]
     fn try_create_surface(
         &self,
         _size: PixelSize,

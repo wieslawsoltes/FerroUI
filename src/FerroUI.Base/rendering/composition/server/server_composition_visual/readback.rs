@@ -26,14 +26,18 @@
 //!    update the reader will see only one (same) slot it's allowed to touch
 //!
 //! The slots are shared between the UI-thread visual and its server visual
-//! through an `Arc`; each slot is guarded by its own mutex, which is never
-//! contended when the protocol above is followed.
+//! through an `Arc`. The values of a slot are atomics (not from upstream,
+//! which writes plain fields): the protocol above keeps the reader away from
+//! the slot the writer is writing, and the lock of the readback indices, held
+//! for the whole write and taken by the reader to move to a newer revision,
+//! orders the write of a revision before every read of it
+//! (desktop-performance.md, 9.30).
 
 use super::ServerCompositionVisual;
 use crate::platform::LtrbRect;
+use crate::rendering::composition::server::ReadbackQueueEntry;
 use crate::Matrix;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Mutex, PoisonError};
+use std::sync::atomic::{AtomicI64, AtomicU64, Ordering};
 
 /// What the UI thread reads back from a server visual.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -50,35 +54,93 @@ pub struct ReadbackData {
     pub subtree_bounds: Option<LtrbRect>,
 }
 
+/// The visual is visible.
+const FLAG_VISIBLE: u64 = 1;
+/// The slot has transformed subtree bounds.
+const FLAG_TRANSFORMED_SUBTREE_BOUNDS: u64 = 1 << 1;
+/// The slot has subtree bounds.
+const FLAG_SUBTREE_BOUNDS: u64 = 1 << 2;
+
+/// The values of one revision. The revision itself is kept beside the one of
+/// the other slot, in [`VisualReadback`].
 struct Slot {
-    revision: AtomicU64,
-    data: Mutex<ReadbackData>,
+    matrix: [AtomicU64; 9],
+    target_id: AtomicI64,
+    flags: AtomicU64,
+    transformed_subtree_bounds: [AtomicU64; 4],
+    subtree_bounds: [AtomicU64; 4],
+}
+
+fn store_rect(slot: &[AtomicU64; 4], rect: Option<LtrbRect>) {
+    if let Some(rect) = rect {
+        for (value, part) in slot.iter().zip([rect.left, rect.top, rect.right, rect.bottom]) {
+            value.store(part.to_bits(), Ordering::Relaxed);
+        }
+    }
+}
+
+fn load_rect(slot: &[AtomicU64; 4], present: bool) -> Option<LtrbRect> {
+    present.then(|| {
+        let [left, top, right, bottom] = slot.each_ref().map(|value| f64::from_bits(value.load(Ordering::Relaxed)));
+        LtrbRect { left, top, right, bottom }
+    })
 }
 
 impl Slot {
     fn new() -> Self {
         Self {
-            revision: AtomicU64::new(u64::MAX),
-            data: Mutex::new(ReadbackData {
-                matrix: Matrix::IDENTITY,
-                revision: u64::MAX,
-                target_id: 0,
-                visible: false,
-                transformed_subtree_bounds: None,
-                subtree_bounds: None,
-            }),
+            matrix: Default::default(),
+            target_id: AtomicI64::new(0),
+            flags: AtomicU64::new(0),
+            transformed_subtree_bounds: Default::default(),
+            subtree_bounds: Default::default(),
         }
     }
 
-    fn read(&self) -> ReadbackData {
-        *self.data.lock().unwrap_or_else(PoisonError::into_inner)
+    fn read(&self, revision: u64) -> ReadbackData {
+        let [m11, m12, m13, m21, m22, m23, m31, m32, m33] =
+            self.matrix.each_ref().map(|value| f64::from_bits(value.load(Ordering::Relaxed)));
+        let flags = self.flags.load(Ordering::Relaxed);
+        ReadbackData {
+            matrix: Matrix::new_3x3(m11, m12, m13, m21, m22, m23, m31, m32, m33),
+            revision,
+            target_id: self.target_id.load(Ordering::Relaxed),
+            visible: flags & FLAG_VISIBLE != 0,
+            transformed_subtree_bounds: load_rect(
+                &self.transformed_subtree_bounds,
+                flags & FLAG_TRANSFORMED_SUBTREE_BOUNDS != 0,
+            ),
+            subtree_bounds: load_rect(&self.subtree_bounds, flags & FLAG_SUBTREE_BOUNDS != 0),
+        }
+    }
+
+    fn write(&self, data: &ReadbackData) {
+        let m = &data.matrix;
+        for (value, part) in self.matrix.iter().zip([m.m11, m.m12, m.m13, m.m21, m.m22, m.m23, m.m31, m.m32, m.m33]) {
+            value.store(part.to_bits(), Ordering::Relaxed);
+        }
+        self.target_id.store(data.target_id, Ordering::Relaxed);
+        let mut flags = 0;
+        if data.visible {
+            flags |= FLAG_VISIBLE;
+        }
+        if data.transformed_subtree_bounds.is_some() {
+            flags |= FLAG_TRANSFORMED_SUBTREE_BOUNDS;
+        }
+        if data.subtree_bounds.is_some() {
+            flags |= FLAG_SUBTREE_BOUNDS;
+        }
+        self.flags.store(flags, Ordering::Relaxed);
+        store_rect(&self.transformed_subtree_bounds, data.transformed_subtree_bounds);
+        store_rect(&self.subtree_bounds, data.subtree_bounds);
     }
 }
 
-/// The two readback slots of a visual.
+/// The two readback slots of a visual. The revisions of both come first, so
+/// that choosing a slot reads one place.
 pub struct VisualReadback {
-    readback0: Slot,
-    readback1: Slot,
+    revisions: [AtomicU64; 2],
+    slots: [Slot; 2],
 }
 
 impl Default for VisualReadback {
@@ -89,73 +151,108 @@ impl Default for VisualReadback {
 
 impl VisualReadback {
     pub fn new() -> Self {
-        Self { readback0: Slot::new(), readback1: Slot::new() }
+        Self { revisions: [AtomicU64::new(u64::MAX), AtomicU64::new(u64::MAX)], slots: [Slot::new(), Slot::new()] }
     }
 
-    pub fn get_readback(&self, reader_revision: u64) -> Option<ReadbackData> {
-        let slot0_revision = self.readback0.revision.load(Ordering::SeqCst);
-        let slot1_revision = self.readback1.revision.load(Ordering::SeqCst);
-
-        if slot0_revision <= reader_revision && slot1_revision <= reader_revision {
-            // Pick the newest one, it's guaranteed to be not touched by the writer
-            return Some(if slot1_revision > slot0_revision { self.readback1.read() } else { self.readback0.read() });
-        }
-
-        if slot0_revision <= reader_revision {
-            return Some(self.readback0.read());
-        }
-
-        if slot1_revision <= reader_revision {
-            return Some(self.readback1.read());
-        }
-
-        // No readback was written for this visual yet
-        None
-    }
-
-    /// The revision of the readback [`get_readback`](Self::get_readback) would return for
-    /// `reader_revision`, read without taking a slot's lock or copying its data.
-    pub fn readback_revision(&self, reader_revision: u64) -> Option<u64> {
-        let slot0_revision = self.readback0.revision.load(Ordering::SeqCst);
-        let slot1_revision = self.readback1.revision.load(Ordering::SeqCst);
+    /// The slot a reader at `reader_revision` reads, with its revision.
+    fn slot_for_read(&self, reader_revision: u64) -> Option<(usize, u64)> {
+        let slot0_revision = self.revisions[0].load(Ordering::SeqCst);
+        let slot1_revision = self.revisions[1].load(Ordering::SeqCst);
         match (slot0_revision <= reader_revision, slot1_revision <= reader_revision) {
-            (true, true) => Some(slot0_revision.max(slot1_revision)),
-            (true, false) => Some(slot0_revision),
-            (false, true) => Some(slot1_revision),
+            // Pick the newest one, it's guaranteed to be not touched by the writer
+            (true, true) if slot1_revision > slot0_revision => Some((1, slot1_revision)),
+            (true, _) => Some((0, slot0_revision)),
+            (false, true) => Some((1, slot1_revision)),
+            // No readback was written for this visual yet
             (false, false) => None,
         }
     }
 
-    pub fn update_readback(&self, writer_revision: u64, reader_revision: u64, mut data: ReadbackData) {
-        let revision0 = self.readback0.revision.load(Ordering::SeqCst);
-        let revision1 = self.readback1.revision.load(Ordering::SeqCst);
+    pub fn get_readback(&self, reader_revision: u64) -> Option<ReadbackData> {
+        let (slot, revision) = self.slot_for_read(reader_revision)?;
+        Some(self.slots[slot].read(revision))
+    }
+
+    /// The revision of the readback [`get_readback`](Self::get_readback) would return for
+    /// `reader_revision`, read without copying its data.
+    pub fn readback_revision(&self, reader_revision: u64) -> Option<u64> {
+        self.slot_for_read(reader_revision).map(|(_, revision)| revision)
+    }
+
+    /// Writes `data` as the revision `writer_revision`; its own `revision` is
+    /// ignored.
+    pub fn update_readback(&self, writer_revision: u64, reader_revision: u64, data: ReadbackData) {
+        let revision0 = self.revisions[0].load(Ordering::SeqCst);
+        let revision1 = self.revisions[1].load(Ordering::SeqCst);
         let slot = if revision0 > reader_revision {
             // Future revision is in slot0
-            &self.readback0
+            0
         } else if revision1 > reader_revision {
             // Future revision is in slot1
-            &self.readback1
+            1
         } else if revision0 < revision1 {
             // No future revisions, overwrite the oldest one since reader will always pick the newest
-            &self.readback0
+            0
         } else {
-            &self.readback1
+            1
         };
 
-        let mut guard = slot.data.lock().unwrap_or_else(PoisonError::into_inner);
-        slot.revision.store(writer_revision, Ordering::SeqCst);
-        data.revision = writer_revision;
-        *guard = data;
+        // The revision first: from here on the reader leaves the slot alone.
+        self.revisions[slot].store(writer_revision, Ordering::SeqCst);
+        self.slots[slot].write(&data);
     }
 }
 
 impl ServerCompositionVisual {
+    /// Has the readback pass write the visual, with the values it has when
+    /// the pass runs.
     pub(super) fn enqueue_for_readback_update(&self) {
-        if !self.enqueued_for_readback_update.get() {
-            if let (Some(compositor), Some(this)) = (self.compositor(), self.rc()) {
-                self.enqueued_for_readback_update.set(true);
-                compositor.enqueue_visual_for_readback_update_pass(this);
+        let Some(compositor) = self.compositor() else { return };
+        let pass = compositor.readback_pass();
+        if self.readback_enqueued_pass.get() == pass {
+            if self.readback_snapshot.get() {
+                // The values changed after the update walk copied them.
+                let Some(this) = self.rc() else { return };
+                compositor.set_readback_entry(self.readback_queue_index.get(), ReadbackQueueEntry::Visual(this));
+                self.readback_snapshot.set(false);
             }
+            return;
+        }
+
+        let Some(this) = self.rc() else { return };
+        self.readback_queue_index.set(compositor.push_readback_entry(ReadbackQueueEntry::Visual(this)));
+        self.readback_enqueued_pass.set(pass);
+        self.readback_snapshot.set(false);
+    }
+
+    /// Has the readback pass write the values the visual has now (not from
+    /// upstream, where the pass reads every visual): the update walk calls it
+    /// with the visual at hand, and the pass, which runs after the frame is
+    /// drawn, does not have to bring the visual back from memory
+    /// (desktop-performance.md, 9.30). A change announced later in the frame
+    /// turns the entry back into a read of the visual.
+    pub(super) fn snapshot_for_readback_update(&self) {
+        let Some(compositor) = self.compositor() else { return };
+        let pass = compositor.readback_pass();
+        let data = self.readback_data(0);
+        if self.readback_enqueued_pass.get() == pass {
+            compositor.set_readback_snapshot(self.readback_queue_index.get(), &self.readback, data);
+        } else {
+            let entry = ReadbackQueueEntry::Snapshot(self.readback.clone(), data);
+            self.readback_queue_index.set(compositor.push_readback_entry(entry));
+            self.readback_enqueued_pass.set(pass);
+        }
+        self.readback_snapshot.set(true);
+    }
+
+    /// Sets the own transform of the visual, one of the values the readback
+    /// copies.
+    pub(super) fn set_own_transform(&self, transform: Option<Matrix>) {
+        self.own_transform.set(transform);
+        // `true` here may be left from an earlier frame: the enqueueing
+        // sorts that out.
+        if self.readback_snapshot.get() {
+            self.enqueue_for_readback_update();
         }
     }
 
@@ -163,19 +260,18 @@ impl ServerCompositionVisual {
         self.readback.get_readback(reader_revision)
     }
 
+    fn readback_data(&self, revision: u64) -> ReadbackData {
+        ReadbackData {
+            matrix: self.own_transform.get().unwrap_or(Matrix::IDENTITY),
+            revision,
+            target_id: self.root().map_or(-1, |root| root.id()),
+            transformed_subtree_bounds: self.transformed_sub_tree_bounds.get(),
+            subtree_bounds: self.sub_tree_bounds.get(),
+            visible: self.visible(),
+        }
+    }
+
     pub fn update_readback(&self, writer_revision: u64, reader_revision: u64) {
-        self.enqueued_for_readback_update.set(false);
-        self.readback.update_readback(
-            writer_revision,
-            reader_revision,
-            ReadbackData {
-                matrix: self.own_transform.get().unwrap_or(Matrix::IDENTITY),
-                revision: writer_revision,
-                target_id: self.root().map_or(-1, |root| root.id()),
-                transformed_subtree_bounds: self.transformed_sub_tree_bounds.get(),
-                subtree_bounds: self.sub_tree_bounds.get(),
-                visible: self.visible(),
-            },
-        );
+        self.readback.update_readback(writer_revision, reader_revision, self.readback_data(writer_revision));
     }
 }

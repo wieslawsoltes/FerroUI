@@ -17,6 +17,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::{EffectiveViewportChangedEventArgs, LayoutableImpl, Orientation};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::rendering::composition::KeptCompositionVisuals;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, BoxedValue,
@@ -44,7 +45,7 @@ pub struct VirtualizingStackPanel {
     /// The ancestor that implements the scroll anchor provider contract.
     scroll_anchor_provider: RefCell<Option<WeakRef<Visual>>>,
     viewport: Cell<Rect>,
-    recycle_pool: RefCell<HashMap<RecycleKey, Vec<Ref<Control>>>>,
+    recycle_pool: RefCell<HashMap<RecycleKey, Vec<PooledElement>>>,
     focused_element: RefCell<Option<Ref<Control>>>,
     focused_index: Cell<i32>,
     realizing_element: RefCell<Option<Ref<Control>>>,
@@ -314,7 +315,27 @@ impl VisualImpl for VirtualizingStackPanel {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
         *this.scroll_anchor_provider.borrow_mut() = None;
+        // A panel that is out of the tree keeps no composition visual for what is in its pool
+        // (not upstream, section 9.32). They are taken out of the pool before they are released.
+        let kept: Vec<KeptCompositionVisuals> = this
+            .recycle_pool
+            .borrow_mut()
+            .values_mut()
+            .flatten()
+            .filter_map(|pooled| pooled.kept.take())
+            .collect();
+        drop(kept);
     }
+}
+
+/// An element in the recycle pool of the panel.
+struct PooledElement {
+    /// The composition visuals of the element and of everything under it, kept while the
+    /// element is in the pool: an element that is taken from the pool is shown with the
+    /// composition visuals it had (not upstream, docs/porting/desktop-performance.md, section
+    /// 9.32). Before `element`: they are released while the element is alive.
+    kept: Option<KeptCompositionVisuals>,
+    element: Ref<Control>,
 }
 
 impl VirtualizingPanelImpl for VirtualizingStackPanel {
@@ -1380,12 +1401,16 @@ impl VirtualizingStackPanel {
     ) -> Option<Ref<Control>> {
         let recycle_key = recycle_key?;
 
-        let recycled = self.recycle_pool.borrow_mut().get_mut(&recycle_key).and_then(Vec::pop)?;
+        let PooledElement { kept, element: recycled } =
+            self.recycle_pool.borrow_mut().get_mut(&recycle_key).and_then(Vec::pop)?;
         ferroui_base::perf_count!(ContainersReused);
 
         recycled.set_current_value(Visual::is_visible_property(), true);
         generator.prepare_item_container(&recycled, item, index);
         self.add_internal_child(&recycled);
+        // What is back in the tree has its composition visuals again; whatever left the element
+        // while it was in the pool lets go of its own here (section 9.32).
+        drop(kept);
         generator.item_container_prepared(&recycled, item, index);
         Some(recycled)
     }
@@ -1443,7 +1468,7 @@ impl VirtualizingStackPanel {
                     self.generator().clear_item_container(element);
                     self.push_to_recycle_pool(recycle_key, element);
                     element.set_current_value(Visual::is_visible_property(), false);
-                    self.remove_internal_child(element);
+                    self.remove_pooled_child(recycle_key, element);
                 }
             }
         }
@@ -1466,7 +1491,7 @@ impl VirtualizingStackPanel {
                 self.generator().clear_item_container(element);
                 self.push_to_recycle_pool(recycle_key, element);
                 element.set_current_value(Visual::is_visible_property(), false);
-                self.remove_internal_child(element);
+                self.remove_pooled_child(recycle_key, element);
             }
         }
     }
@@ -1490,7 +1515,34 @@ impl VirtualizingStackPanel {
     }
 
     fn push_to_recycle_pool(&self, recycle_key: RecycleKey, element: &Ref<Control>) {
-        self.recycle_pool.borrow_mut().entry(recycle_key).or_default().push(element.clone());
+        self.recycle_pool
+            .borrow_mut()
+            .entry(recycle_key)
+            .or_default()
+            .push(PooledElement { kept: None, element: element.clone() });
+    }
+
+    /// Takes an element that was just pushed to the recycle pool out of the visual tree. Not
+    /// upstream, which removes it and nothing more: the composition visuals of the element and
+    /// of everything under it are kept with the pooled element, so that the element is shown
+    /// with them when it is taken from the pool (docs/porting/desktop-performance.md, section
+    /// 9.32). The pool bounds what is kept, and the panel lets go of all of it when it leaves
+    /// the tree itself.
+    fn remove_pooled_child(&self, recycle_key: RecycleKey, element: &Ref<Control>) {
+        let kept = element.leave_tree_keeping_composition_visuals(|| self.remove_internal_child(element));
+        let Some(kept) = kept else { return };
+        let mut pool = self.recycle_pool.borrow_mut();
+        let pooled = pool
+            .get_mut(&recycle_key)
+            .and_then(|pooled| pooled.iter_mut().rev().find(|pooled| pooled.element == *element));
+        match pooled {
+            Some(pooled) => pooled.kept = Some(kept),
+            // Something took the element from the pool while it left the tree: nothing is kept.
+            None => {
+                drop(pool);
+                drop(kept);
+            }
+        }
     }
 
     fn update_element_index(&self, element: &Ref<Control>, old_index: i32, new_index: i32) {

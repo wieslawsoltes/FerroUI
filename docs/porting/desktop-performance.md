@@ -1514,6 +1514,20 @@ What is kept and where:
   its text, so long texts go sooner); it looks for the ones to release once in 1,024 new
   layouts or 16 KiB of new text, so keeping them costs a constant amount for a layout made. A
   shared layout does not keep the run cache of the block that made it.
+- A cache that is full keeps a text from the second time it is asked for. Full means that the
+  last look for layouts to release found 4,096 that nothing holds, or 64 KiB of their text:
+  from then on a layout that is added takes the place of another. The layout of a text that is
+  asked for once (a clock, a counter, a value that never comes back) is then made for its block
+  alone, as a layout that cannot be shared is, and the block releases it. Without that every
+  such text pushed out a layout that could have been found again, and was itself released by
+  the cache long after its memory was last used: the benchmark with texts that are new every
+  time cost 14.0 % more than without a cache, and costs 3.8 % less with this rule (alternating
+  runs against the commit before section 9.27; the texts that repeat went from 10.8 % to
+  13.6 % less). The cache remembers the
+  texts it was asked for and did not keep by sixteen bits of the hash of the request, four to
+  a slot of 16,384 (128 KiB, made when the cache is first full); a text that looks like one of
+  them is kept at its first request, which is what happens to every text while there is room.
+  A program with fewer texts than the cache keeps never sees any of this.
 - Every change of the fonts of a thread (a font collection added or removed, glyph typefaces
   invalidated: the generation the glyph typeface lookups already follow) lets all kept layouts
   go, so no layout shaped with a font that is gone is found. A layout that is still shown stays
@@ -1533,6 +1547,7 @@ Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_
 `a_layout_made_of_what_can_change_is_not_shared`,
 `disposing_a_shared_layout_leaves_it_to_its_other_holders`,
 `the_layouts_nothing_holds_are_let_go_from_the_oldest`,
+`a_full_cache_keeps_a_text_from_its_second_request`,
 `long_texts_nothing_holds_are_let_go_by_their_length`,
 `a_change_of_the_fonts_lets_every_layout_go`) and `text_block_tests.rs`
 (`text_blocks_that_show_the_same_text_the_same_way_share_a_layout`,
@@ -1543,12 +1558,15 @@ Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_
 and is measured, with texts that repeat and with texts that are new every time; the second is
 the cost the cache adds to a layout it cannot find).
 
-Counters (`--features counters`): `text layout cache hits`, `text layout cache misses` and
-`text layout cache evictions`, beside `text layouts created`.
+Counters (`--features counters`): `text layout cache hits`, `text layout cache misses`,
+`text layout cache evictions` and `text layout cache: first requests of a text, not kept`,
+beside `text layouts created`.
 
 Gauntlet (tier 16), Skia window, per render pass: text layouts created 796 to 450 (346 found,
 446 made and kept, 418 let go: the cache is full and turns over, as the table of this section
-says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507.
+says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507. With
+the rule for a full cache the same frames find as many layouts (346), keep 242 of the ones
+they make and let 244 go; 186 are first requests, whose layout stays with its block.
 
 | Gauntlet, tier 16, direct drawing | Frames a second | UI thread, ms a frame | Render thread, ms a frame |
 |---|---|---|---|
@@ -1578,3 +1596,534 @@ width changes with every frame of an animation; they are shaped once all the sam
 run cache of their text block (upstream), and only wrapped again. What is left of the cost of a
 changing text is the cost of making a layout of a short text, of which shaping is a seventh and
 allocation a quarter.
+
+### 9.30 The pushed states of a drawing context and the readback pass
+
+Two costs of a frame that are not work on the scene but the way two small pieces of state are
+kept. Both were found by sampling the gauntlet with the Graphite stage moved off the render
+thread, where the render thread itself is what limits the rate.
+
+**The pushed states of a drawing context.** A `DrawingContext` remembers what was pushed (a
+transform, a clip, an opacity) to pop it in reverse order. Upstream rents that stack from a
+pool, and FerroUI took it from a pool of the thread: a lookup of the thread's storage, a
+borrow, and a block on the heap of a few bytes for every context that pushes, which is every
+visual that draws. The states are now stored in the context itself
+(`StateStack = SmallVec<[PushedStateType; 16]>`, `media/drawing_context.rs`); a context with
+more than sixteen nested states moves them to the heap as a vector does. Nothing about the
+order of pushes and pops changes, and `states` is `None` before the first push and after the
+disposal as before.
+
+**The readback pass.** The UI thread reads four values of a server visual back (its matrix to
+the root, its target, whether it is visible, and its subtree bounds). Upstream collects the
+visuals whose values changed in a queue and visits each one more time after the targets were
+rendered (`ServerCompositionVisual.UpdateReadback`). In the gauntlet that is several thousand
+visuals a frame, and each visit touches three places that are not in the cache any more: the
+visual, the readback it shares with the UI thread, and the lock of that. FerroUI keeps the
+pass and its place in the frame, and changes what it has to touch:
+
+- The update walk takes the copy of the four values at the moment it has finalized the bounds
+  of a visual (`readback.rs`, `snapshot_for_readback_update`), when the visual is being worked on anyway.
+  The queue of the pass holds the copy beside the readback it is written to
+  (`ReadbackQueueEntry`, `server/server_compositor.rs`), so the pass writes without visiting
+  the visual.
+- A change that is announced after the copy was taken (an adorner, a value set by a later
+  pass) turns the entry of the visual back into a visit, so the pass writes what upstream's
+  pass would have read.
+- A visual is in the queue once for a pass by the number of the pass, where upstream sets a
+  flag in the visual and the pass clears it in every visual again.
+- The two slots of a readback are atomics. The protocol of the slots is upstream's (one
+  writer, one reader, the reader never reads the slot that is written), and the lock of the
+  readback indices, held for the whole write and taken by the reader to move to a newer
+  revision, still orders the write of a revision before every read of it. What went away is a
+  lock for each slot that this protocol never contended.
+
+The copy relies on two things the code states where it takes it: the own transform of a visual
+is written only through `set_own_transform` and before the update walk, and the values the
+copy holds are final once the walk has finalized the bounds of the visual.
+
+What it measures (M3 Pro, gauntlet at tier 16, cycle-aligned means of alternating runs):
+
+| | Before | After |
+|---|---|---|
+| Readback pass, render thread, Graphite stage on its own threads | about 1.5 ms a frame (7.4 % of the thread) | about 0.75 ms a frame (3.9 %) |
+| Frame rate, Graphite stage on the render thread | 34.9 fps | 35.4 fps (inside the noise of the runs) |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and neither
+change moves the rate. They are kept for the configuration in which the render thread's own
+passes are the limit, and because neither adds a code path: the stack is the same stack in
+another place and the pass is the same pass with fewer places to touch.
+
+What a program can see: nothing. The values the UI thread reads back and the revision they
+belong to are the same, and so is the order in which states pop.
+
+Tests: `drawing_context_tests.rs`
+(`more_states_than_the_context_stores_in_itself_pop_in_reverse_order`) and
+`server_composition_visual/readback_tests.rs` (`nothing_is_read_before_the_first_write`,
+`every_value_survives_a_slot`, `a_reader_keeps_its_revision_while_newer_ones_are_written`,
+`two_writes_of_one_revision_leave_the_last`, `the_pass_writes_what_the_update_walk_left`,
+`a_change_announced_after_the_copy_is_read_by_the_pass`,
+`a_visual_is_in_the_queue_once_per_pass`, `the_visuals_of_a_pass_share_its_revision`).
+
+### 9.31 A render data that is read again, the observers of a resource, the paint of a solid fill
+
+Three costs on the render thread that are storage handed back and fetched again for every
+visual whose drawing changed, every frame. They were found by sampling the gauntlet with the
+Graphite stage on its own threads: the largest single entry of the render thread's self time
+was the allocator's `free`, and the copy and the reset of `SkPaint` followed it.
+
+**A render data that is read again.** Since section 9.28 a visual whose drawing changed keeps
+its render data, and the server-side object reads the new recording when the batch arrives
+(`ServerCompositionRenderData::deserialize_changes_core`). Upstream's shape of that read is a
+reset followed by a new stream, whose resources are walked afterwards to observe them: the
+buffer of the operations, the table of the resources and the list of the resources the data
+observes are freed and allocated again. Now the object lets go of what it drew and keeps where it was stored
+(`release_content`: the subscriptions are removed, the custom draw operations disposed, the
+stream emptied by `RenderDataStream::recycle`, which already bounds what a recycled stream may
+keep), reads the new recording into that storage, and subscribes to each server-side resource
+at the moment the stream resolves it. `reset`, which a disposal uses, releases the storage as
+before.
+
+**The observers of a resource.** A render resource tells its observers when it was
+invalidated. Upstream walks its dictionary in place; here the list is behind a `RefCell` and
+an observer may change it while it is told, so it is copied first. The copy was a vector on the heap for every invalidated resource in every frame; a resource has
+one or two observers, so the copy is now a `SmallVec` of four on the stack
+(`ServerRenderResourceCore::queued_invalidate`). Who is told is the same: every observer
+that is in the list when the invalidation starts, once.
+
+**The paint of a solid fill.** The Skia drawing context keeps one paint for fills and resets
+it after each (`PaintWrapper::dispose`), which is a destruction and a construction of a
+`SkPaint`. A solid colour fill sets two things on the paint, the anti-aliasing and the colour,
+and every fill sets both before anything else. So the paint of a solid fill goes back
+unreset (`PaintWrapper::release_fill`) and the next fill starts from it. The wrapper knows
+that it is still such a paint because its paint is private: `paint_mut`, the only way to
+configure it further, clears the mark, and a fill with a shader, a stroke, a blend mode or
+anything else is reset as before. The one other user of the kept paint, the acrylic material
+rectangle, resets what it takes. No Skia behaviour is replaced and no Skia call is made that
+was not made before; one call is left out where its result is already there.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the same
+binary without and with the three changes, 51 s each, cycle-aligned means):
+
+| | Before | After |
+|---|---|---|
+| Frame rate | 52.6 to 52.9 fps | 54.5 fps |
+| Render thread, per frame | | 0.6 to 0.8 ms less |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and the
+rate does not move.
+
+What a program can see: nothing. A render data draws its last recording and follows the
+resources of that recording only, the observers of a resource are told as before, and every
+fill has the pixels it had.
+
+Tests: `render_resource_tests.rs`
+(`a_replaced_recording_observes_the_resources_of_the_new_drawing`),
+`render_data_tests.rs` (`the_custom_operations_of_a_replaced_recording_are_released`, which
+now runs through the kept storage), `server/server_render_resource.rs`
+(`every_observer_is_told_once_however_many_there_are`,
+`an_observer_added_twice_is_told_once_and_stays_until_it_is_removed_twice`,
+`an_observer_may_remove_itself_and_others_while_it_is_told`,
+`an_observer_added_while_the_others_are_told_is_told_the_next_time`,
+`a_dropped_observer_is_pruned_and_a_disposed_resource_tells_nobody`) and the Skia render
+tests (`a_fill_draws_the_same_after_any_other_fill`, six kinds of fill in all thirty-six
+orders compared pixel by pixel with the fill drawn first in a context, and
+`consecutive_solid_fills_each_have_their_colour_opacity_and_edge_mode`).
+
+### 9.32 A visual that leaves its tree for a moment or for a pool keeps its composition visual
+
+A virtualizing panel that recycles a row takes the row out of the visual tree
+(`VirtualizingStackPanel::recycle_element`, as upstream: the container is cleared, pooled, hidden
+and removed) and puts it back when the next item needs a container, in the same layout pass
+or in a later one. Leaving the tree ran `Visual::detach_from_compositor` for the row and for every element
+under it, which lets go of the composition visual, and entering it again created a new one. A
+gauntlet frame recycles rows all the time, so every frame made and released composition
+visuals and their server-side objects by the hundred: allocations on the UI thread, a
+serialized object each, and on the render thread the same again plus the removal of the old
+ones. The new objects are wherever the allocator had room, so the walks of the UI thread and
+of the render thread lost their locality as the run went on: the recording of a frame took
+5.4 ms at the start of a run and 7.8 ms forty seconds later.
+
+**What is kept for a pass.** A visual that leaves its tree asks its renderer to keep its composition
+visual until the renderer's next update pass (`IRenderer::keep_departed_composition_visual`).
+The renderer holds the composition visual beside a weak reference to the visual, so it keeps
+no visual alive, and it queues an update pass. A visual that is in a tree again before that
+pass, with the same compositor, rejoins with the composition visual it had
+(`Visual::attach_to_compositor_core`): the object, its server-side object, its render data
+and its place under its parent are the ones from before, and the synchronisation that follows
+any attachment writes whatever changed meanwhile. A visual that is not back by then is
+released in that pass exactly as it was released at once before
+(`CompositingRenderer::release_departed`, which also runs when the renderer stops or is
+disposed), and so is the composition visual of a visual that was dropped. The update pass
+always comes before the commit that would send the batch, so the render thread never sees a
+composition visual that waits.
+
+**What is kept for a pool.** One pass is not enough for a list whose rows are of more than
+one kind. A recycled row waits in the pool of its recycle key until an item of its kind needs
+a container, and that is often a later frame: with only the rule above, a gauntlet frame
+still created 35 composition visuals and kept 2.4. So the element that pools says so.
+`Visual::leave_tree_keeping_composition_visuals(leave)` runs `leave`, which takes the visual
+out of its tree, and hands back what the visual and everything under it would have given to
+the renderer for one pass, as a `KeptCompositionVisuals`
+(`IRenderer::keep_composition_visuals_departing_in`; a renderer without composition runs
+`leave` and keeps nothing). Whoever holds that value decides how long the composition
+visuals wait, and releases them by dropping it: what is back in a tree by then is left
+alone, and everything else is released exactly as the update pass releases what it kept.
+`VirtualizingStackPanel` holds one beside each element of its recycle pool
+(`remove_pooled_child`), lets go of it right after the element is a child again
+(`get_recycled_element`), and lets go of all of them when the panel itself leaves the visual
+tree. What waits is bounded by the pool, which already keeps the far larger elements
+themselves: a composition visual and its server-side object for each visual of a pooled
+element, with the render data it last had. The same conditions as for one pass decide what
+may be kept, the calls nest (a removal inside another collects for itself), and a removal
+that unwinds leaves what it collected to the next update pass.
+
+**When it is not kept.** Only a composition visual that nothing but the synchronisation of
+the visual tree wrote to is kept, because only then is the kept one the same as a new one
+would be after its first synchronisation. It is released at once, as before, when
+
+- it was handed out: `Visual::composition_visual` and the public `attach_to_compositor`
+  mark it (`ElementCompositionPreview`, animations, lights, effects and an application ask
+  that way); the synchronisation itself reads it with `own_composition_visual`, which marks
+  nothing;
+- the visual has a child composition visual or composition extras (facades, transitions,
+  lights, a theme shadow, a layer, unloading visuals, show or hide requests);
+- the composition visual draws acrylic, or has an extension that does not say that it follows
+  its control out of the tree
+  (`ICompositionDrawListVisualExtension::follows_control_out_of_tree`, `false` unless
+  overridden). The border's does: `Border` writes its corner radius to it whether or not the
+  border is in a tree;
+- the renderer is stopped, disposed or in its update pass (no pass will follow in which to
+  release it), or the renderer has none of this (the default of the two new `IRenderer`
+  methods is to refuse).
+
+A visual that returns under another renderer rejoins only when the composition visual is not
+in the tree of another target (`IRenderer::rejoins_departed_composition_visual`); under
+another compositor it never does. A visual that returns under another parent in the same pass
+keeps its composition visual and leaves the children of the old composition parent at once,
+since a composition visual has one parent.
+
+**While it waits.** A visual out of the tree has no composition visual: `composition_visual`
+answers `None` as before, the renderer's dirty lists ignore the visual, and hit testing does
+not find it. The last point needs care, because the composition visual is still a child of
+its parent until the update pass: a waiting draw list visual reports no draw list to the hit
+test and its children are not visited (`DrawListData::departed`,
+`CompositionTarget::hit_test_children`, `hit_test_first_core`). What waits for a pool goes
+through update passes: in the first of them its topmost composition visual leaves the
+children of its composition parent, as that of any removed visual does, and from then on the
+kept visuals are a subtree of their own that is in no tree, which the render thread neither
+walks nor draws. Where the visual was shown is redrawn in that pass, as for any visual that
+leaves.
+
+**An empty record for every visual that left a tree.** `detach_from_compositor` first releases
+the theme shadow visual, and that release went through the accessor that creates the
+composition extras of a visual when it has none. So every visual that left a tree once had
+extras from then on, empty ones, and missed every short path that asks whether a visual has
+extras: the child synchronisation of section 9.28 and the transitions check among them. The
+release, the end of a show or hide request, the removal of an unloading visual and the change
+of the transitions now leave a visual without extras as it is
+(`Visual::change_composition_extras`).
+
+**The bounds of a server-side visual that changes its parent.** A server-side visual
+remembers the bounds of its subtree in the space of its parent, and hands them to the parent
+as an extra dirty rectangle when the parent changes
+(`ServerCompositionVisual.OnParentChanging`), so that the place it leaves is redrawn. It
+went on remembering them, and the next update under the new parent added the same bounds to
+the dirty region again, now read in the space of the new parent: a rectangle that belongs to
+no place the visual is or was. Upstream does the same; there it is a redraw of a few pixels
+too many after a rare reparenting, here every row that comes back from a pool is reparented.
+The bounds are now forgotten when they are handed to the old parent
+(`on_parent_changing_core`), and the next update computes them for the place the visual is
+in.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the build of
+section 9.31 against the same with this section, cycle-aligned means):
+
+| Measure | Section 9.31 | With this section |
+|---|---|---|
+| Frames per second, two runs each | 53.7, 54.0 | 58.5, 59.4 |
+| UI thread pass, ms | 17.3 to 17.5 | 15.9 to 16.6 |
+| Render tick, ms | 17.0 to 18.0 | 14.4 to 15.1 |
+| Picture recording, ms, at the start and at the end of a run | 5.4 and 7.9, 5.6 and 8.1 | 4.9 to 5.5 throughout |
+| Composition visuals created per pass, after the first 300 passes | 35.3 | 0.0 |
+| Composition visuals kept per pass | 0 | 37.8 to 47.0 |
+
+The recording time that grew over a run no longer grows: the server visuals
+that the rows left behind and made again are the same ones now, and the dirty rectangle of a
+row that comes back is the rectangle of the place it is in. The display runs at 60 frames per
+second, so 60 is the most this measure can show.
+
+What a program can see: a composition visual that the program asked for is never kept, so
+whatever a program holds or changed is released when its visual leaves the tree, as before.
+The identity of a composition visual that nobody asked for now survives a removal and an
+addition within one update pass, which a program can only observe by walking the composition
+tree down from a composition visual it did ask for; what it changes on a visual reached that
+way stays changed on the kept one, where a new one would have started over. The diagnostic
+tools ask for the composition visuals they show, which only means that what they inspect is
+not kept. A row that comes out of a recycle pool has the composition visuals it went in
+with, under the same rule; a pooled element whose composition visual a program asked for is
+not kept, so nothing changes for it.
+
+Tests: `compositor_tests.rs`
+(`visual_back_before_the_update_pass_keeps_its_composition_visuals`,
+`visual_back_in_the_tree_is_synchronized_with_what_changed_meanwhile`,
+`visual_not_back_by_the_update_pass_releases_its_composition_visuals`,
+`composition_visuals_kept_for_a_dropped_visual_are_released`,
+`composition_visual_handed_out_is_released_when_its_visual_leaves`,
+`composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stopped`,
+`visual_out_of_the_tree_is_not_hit_through_what_is_kept_for_it`,
+`visual_moved_to_another_parent_in_one_pass_keeps_its_composition_visuals`,
+`child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_visual`,
+`composition_visual_kept_for_one_compositor_is_not_used_with_another`,
+`visual_that_leaves_its_tree_gains_no_composition_extras`; for a pool
+`visual_taken_out_for_a_pool_keeps_its_composition_visuals_across_update_passes`,
+`composition_visuals_kept_for_a_pool_are_released_by_what_holds_them`,
+`composition_visuals_kept_for_a_pool_outlive_no_visual`,
+`child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool`,
+`visuals_taken_out_inside_one_another_are_kept_by_the_innermost`,
+`nothing_is_kept_for_a_pool_outside_of_a_tree_or_while_rendering_is_stopped`,
+`composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer`; for the bounds
+`visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is`) and the
+counter checks `composition_work_of_a_row_taken_out_of_the_tree_and_put_back`
+(`compositor_tests.rs`) and `composition_work_of_rows_that_wait_in_the_recycle_pool`
+(`virtualizing_stack_panel_tests.rs`), which the performance gate runs with the counters
+`composition visuals created` and `composition visuals kept` (`scripts/perf/gate.py`,
+`COUNTER_CHECKS`).
+
+### 9.33 The UI thread starts on its next frame when its batch is taken, and a late frame layer draws while the frame before it is presented
+
+After sections 9.26 to 9.32 a gauntlet frame at tier 16 cost the UI thread about 15 ms and
+the render thread about 38 ms, and the two ran one after the other more than they had to: the
+UI thread held its next commit back until the render thread had deserialized the batch
+before, and the render thread spent most of its tick inside Graphite, which sorts the draws
+of a frame, prepares their text and builds its passes on the thread that draws and snaps.
+Neither is work that can be made much smaller without repeating what Skia does. What can
+change is when it runs and on which thread. This section has three parts: when a commit may
+follow the one before it, what happens to a batch that just misses its tick, and a frame
+layer of the Skia backend that draws on threads of its own.
+
+**A batch is accepted when the render thread takes it.** `CompositionBatch` has a third
+completion, `accepted`, before `processed` and `rendered`: the render thread raises it when it
+takes the batch from the queue (`ServerCompositor::apply_pending_batches`), before it reads
+the first change. From then on the batch belongs to the frame that thread is starting, and a
+batch committed now is applied by the frame after it. `MediaContext` holds the next commit
+back until the batch before it is accepted, where upstream waits until it is processed
+(`MediaContext::commit_compositor`). The UI thread therefore prepares its next batch while the
+render thread applies and draws this one. One batch at most waits in the queue either way,
+so nothing piles up, and nothing of an accepted batch can be observed: whoever needs its
+effects still waits for `processed` or `rendered`. A batch that is completed without being
+applied raises `accepted` too.
+
+**A batch that follows an idle tick is drawn in the display frame it was made for.** With a
+render thread, a batch that is committed a moment after the tick of its display frame waits
+for the next tick, a whole display frame, although the render thread has nothing to do. The
+queue remembers a tick that applied no batch and drew no frame (`BatchQueue::note_idle_tick`),
+and the first batch enqueued after such a tick asks the render loop for a tick out of turn
+(`Compositor::enqueue_batch`, `IRenderLoop::request_frame_out_of_turn`, which
+`ThreadProxyRenderTimer::request_tick_out_of_turn` serves on the timer thread). One idle tick
+answers one batch, so no display frame gets a second frame, and a compositor that renders on
+the thread that commits asks for nothing.
+
+**A frame layer that holds a frame back.** `IDrawingContextLayerImpl` has two new methods,
+both with defaults that change nothing: `has_pending_frame` (the frame drawn into the layer
+last is not what `blit` shows yet) and `complete_pending_frame`. A layer that says so is
+presented once more by its owner when no further frame follows:
+
+- `ServerCompositionTarget::render_frame` presents in a tick that has nothing to draw when
+  its layer holds a frame back, after `complete_pending_frame`;
+- `ServerCompositor` asks for another tick while a layer of an active target holds a frame
+  back (`has_pending_frames`), never while rendering is stopped;
+- the batches a tick applied are reported as `rendered` at the end of that tick, unless a
+  layer holds the frame of the tick back: then they are reported at the end of the next
+  tick, which presents their frame (`ServerCompositor::notify_batches_rendered`). They wait
+  one tick and never longer, and a compositor that is dropped answers them;
+- a synchronous render (`Compositor::render` on the thread of the compositor, and the wait
+  of `MediaContext::immediate_render_requested` for `rendered`) returns with the committed
+  frame presented, as before.
+
+**The pipelined frame layer of Graphite on Metal.** The frame layer of a window (the layer a
+render target context creates, no other surface) is a `PipelinedLayerSurface`
+(`gpu/graphite/pipelined_layer.rs`) unless `SkiaOptions::frame_pipelining` is `Off`. It draws
+its frames in one of two ways:
+
+- *directly*, as an ordinary layer: the drawing context draws on the surface of the layer
+  with the recorder of the context. Every layer begins like this;
+- *pipelined*: the drawing context records the frame as a picture
+  (`ISkiaSurface::begin_recorded_frame`). When it is disposed, the picture goes to the band
+  threads of the context: the layer is divided into horizontal bands of equal height, two
+  by default, and each band has a thread. Each thread owns a Graphite recorder and a surface
+  that wraps the texture of the layer, plays the picture under the clip of its band, snaps
+  its recorder and keeps the recording. The render thread does not
+  wait: it draws the layer onto the target as the frame before left it, flushes, and then
+  tells the threads to insert their recordings. The frame is on the screen one frame later
+  than it was drawn, and the render thread is free for the next one in the meantime.
+
+Nothing of Skia is repeated: the picture, the clip and the playback are Skia's, and the
+bands differ from one playback only in the clip Skia applies. What changed is the thread that
+asks.
+
+`SkiaOptions::frame_pipelining` is a `SkiaFramePipelining`: `Off`, `Adaptive` (the default)
+or `On` (every frame, for tests and measurements). An adaptive layer pipelines after four
+frames in a row that were late (a frame is late when it cost more than half of the time to
+the frame after it, and 4 ms at least), draws directly again after ninety light frames in a
+row, starts over after a pause of 100 ms, and stays direct for 120 frames after a frame that
+only the recorder of the context draws. An application whose frames are light never
+pipelines one, has no threads for it, and shows every frame in the tick that drew it, as
+upstream does.
+
+`SkiaOptions::frame_pipelining_bands` is the number of bands, and of threads: two by default
+(`DEFAULT_FRAME_PIPELINING_BANDS`), and a value outside 1 to 16
+(`MAX_FRAME_PIPELINING_BANDS`) is brought into that range
+(`SkiaOptions::effective_frame_pipelining_bands`). With one band the whole frame is drawn by
+one thread beside the render thread. A band is 64 pixels high at least, so a layer has the
+bands it is asked for or as many as fit it (`band_count`): a layer of 200 rows that is asked
+for eight has three. A layer that is asked to be divided and has room for one band only, and
+a layer lower than 64 pixels, is an ordinary layer. The threads belong to the GPU context
+and are made once, by its first layer that pipelines a frame, as many as that layer has
+bands; a layer of the same context that asks for more draws in as many bands as there are
+threads. What the number of bands buys and costs is measured below.
+
+**Frames only the recorder of the context draws.** A pipelined layer draws such a frame
+directly (the recorded picture is played on the recorder of the context), and because the
+same draws are counted in direct frames (`ISkiaGrContext::note_direct_only_draw`), a layer
+whose frames keep having them never begins to pipeline:
+
+- a draw with an image filter: a filter reads around the pixels it writes, across the clip
+  of a band;
+- a lease of the Skia API (`ISkiaApiLeaseFeature`): what the client draws belongs to the
+  recorder the lease hands out. In a recorded frame the lease records what its client draws
+  into a picture of its own (`RecordedLeases`), which the context draws into the frame in
+  its place, and the frame is then played on the recorder of the context. What a client of
+  a lease can see in such a frame: the lease has no surface, the canvas does not carry the
+  clip of the context (the drawing is clipped all the same), and the state it leaves on the
+  canvas does not last to its next `with_sk_canvas`;
+- a frame of a retained GPU producer, whose storage is held until the next flush of the
+  context only.
+
+**The order on the GPU** is the order of insertion: what the recorder of the context has
+pending when the frame ends, the draw of the layer onto the target with the flush of the
+tick, then the recordings of the bands, from the top band down (`InsertOrder`). The next frame
+of the layer, the next read of the layer and the next flush of the context wait for the
+bands before they add anything, so a second window that shares the context waits for the
+frame in the threads (at most what is left of it) before its own flush. The fixed order of
+the bands costs nothing, because the insertions are serialized by the lock of the context
+anyway, and it is what makes a frame the same every time it is drawn: Graphite resolves the
+pixel where an antialiased edge crosses the boundary between two clips in favour of the band
+that is inserted second, so with the bands racing for the lock that one pixel differed from
+run to run (by 6 of 255 in the test scene).
+
+**What the pixels are.** A pipelined frame is, byte for byte, the frame the ordinary layer
+draws when it draws the same content band by band, under the same clips, with the recorder
+of the context and each band a recording of its own
+(`a_pipelined_frame_shows_what_the_layer_draws_band_by_band`,
+`a_frame_in_any_number_of_bands_shows_what_the_layer_draws_band_by_band` for one, three and
+four bands, `the_frames_of_a_pipelined_layer_follow_each_other_in_order`). Against a frame drawn in one
+piece it differs as any frame Skia draws under a clip differs: a gradient fill rounds
+differently by 1 of 255 at isolated pixels, and the pixel where an antialiased edge crosses
+the clip boundary differs by about the coverage of one sample. In the test scene (rounded
+rectangles, gradients, antialiased lines and text across the boundary) that is 7 of 81,920
+pixels and 6 of 255 at most (`a_pipelined_frame_differs_from_an_unclipped_frame_as_any_clipped_frame_does`,
+which bounds it). Direct frames have drawn under such clips all along: every partial redraw
+draws under the clip of its dirty rectangle. Text is drawn by the same Skia code from the
+same strikes; each band has a glyph atlas of its own, so a glyph that several bands draw is
+rasterized and uploaded once for each, with the same result.
+
+**A band is a recording of its own, and Graphite decides about multisampling for each
+recording.** Graphite draws the draws of a recording in passes it builds for that recording.
+When one draw of a pass needs multisampling (in the test scene a stroked ellipse that is
+not a circle), the whole pass is multisampled, and the shapes Graphite otherwise draws with
+coverage it computes (lines, rectangles) get the edges multisampling gives them. A frame
+that is drawn directly is one recording, so one such draw anywhere in the frame decides
+for all of it. Of a pipelined frame, the bands that contain such a draw are multisampled
+and the others are not: every band is drawn exactly as a frame that contains the draws of
+that band alone. Both renderings are Skia's own for the same draws, and which one a shape
+gets already depends on what else is in its frame when frames are drawn directly; with
+bands it depends on what else is in its band. In the test scene, in four bands, the two
+bands with the ellipse are byte for byte the frame drawn as one recording, and in the two
+without it the antialiased edge pixels of lines and rectangles differ, by up to 52 of 255
+(`a_band_is_drawn_as_a_frame_with_its_draws_alone_is`, which bounds it at half a percent of
+the pixels). This holds for the default two bands as for any other number, and it is the
+one place where a pipelined frame can be told from a direct one by more than a clip does.
+
+**When the threads are not used.** A band that fails to record or to insert ends the
+threads of the context (a recording that was snapped and never inserted would make every
+later recording of its recorder fail), the frame is replayed on the recorder of the context,
+and the layers of that context draw directly from then on. A frame that ends while the
+context is in use or disposed is played directly. A layer that is disposed with a frame in
+the threads waits for it and leaves the context usable
+(`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
+
+What a program can see: with the default, a window whose frames cost the render thread more
+than half a refresh interval four times in a row shows its frames one refresh later than
+before and at the rate of the display instead of half of it; a `rendered` completion of such a
+frame is raised one tick later, when the frame is presented. A program that needs every frame
+in the tick that drew it sets `SkiaOptions { frame_pipelining: SkiaFramePipelining::Off, .. }`.
+A custom drawing operation that leases the Skia API keeps its frame on the recorder of the
+context, with the differences listed above when the frame was recorded. The counters `skia:
+layers that began to pipeline their frames`, `skia: frames pipelined`, `skia: recorded frames
+played on the recorder of the context` and `skia: reads of a pipelined layer while a frame is
+drawn` tell what a run did.
+
+What it measures (M3 Pro, gauntlet at tier 16, 60 Hz, quiet machine, runs of 51 s, two runs
+each; the frames per second are the mean of a run):
+
+| Configuration | Frames per second |
+|---|---|
+| Section 9.32, every frame drawn directly | 39.60 / 39.52 |
+| This section, the defaults (`Adaptive`, two bands) | 59.99 / 59.95 |
+
+The display refreshes sixty times a second, so the benchmark is at its cap. What the number
+of bands changes is where the time goes (the stage timed by a build made for the
+measurement; the processor time is that of the whole process for a frame):
+
+| Bands | Frames per second | Slowest band | All bands together | Inserting the recordings | Processor time for a frame |
+|---|---|---|---|---|---|
+| 1 | 60.08 / 59.85 | 13.4 ms | 13.4 ms | 2.2 ms | 27.5 ms |
+| 2 (default) | 59.93 / 59.98 | 8.2 ms | 15.6 ms | 2.4 ms | 29.0 ms |
+| 3 | | 9.0 ms | 25.3 ms | 2.4 ms | |
+| 4 | 60.05 / 59.94 | 8.0 ms | 27.1 ms | 2.5 ms | 32.3 ms |
+| 6 | | 9.3 ms | 43.1 ms | 2.7 ms | |
+| 8 | 60.03 / 60.05 | 9.5 ms | 57.4 ms | 2.8 ms | 43.8 ms |
+
+Two bands are the default because nothing is gained after them in this frame: the slowest
+band, which is what a frame waits for, is as slow with four or eight bands as with two, and
+every further band costs about 4.5 ms of a core whatever its share of the frame is (with
+eight bands the threads spill onto the efficiency cores). One band already frees the render
+thread, and is the choice for a machine with few cores; its recording takes 13.4 ms, which
+fits a 60 Hz frame and does not fit a 120 Hz frame, where two bands do.
+
+**The picture of a frame is recorded without a bounding hierarchy.** Skia can keep the
+bounds of the draws of a picture in a tree, so that a playback under a clip skips the draws
+outside it without looking at them (`begin_recording(bounds, true)`). Measured the same way:
+building the tree costs the render thread 3.2 ms a frame, when the picture is finished, and
+saves the slowest band 0.7 ms with two bands, 1.2 ms with four and 1.6 ms with eight (all
+bands together 1.4 ms, 5.4 ms and 14 ms). The render thread is the thread the stage exists
+to free, so the picture is recorded without the tree; the cost of a band is mostly what
+Graphite does for a recording of its own, not the walk over the draws outside it.
+
+Tests: `render_thread_tests.rs` (`a_batch_is_accepted_when_the_render_thread_takes_it`,
+`a_batch_that_follows_an_idle_tick_asks_for_a_frame_out_of_turn`,
+`a_compositor_that_renders_on_its_own_thread_asks_for_no_frame_out_of_turn`),
+`thread_proxy_render_timer.rs` (`ticks_out_of_turn_on_its_own_thread_while_started`),
+`compositor_tests.rs` (`a_frame_a_layer_holds_back_is_presented_by_the_tick_after`,
+`the_batches_of_a_stream_of_held_frames_are_rendered_a_tick_later`,
+`a_synchronous_render_presents_the_frame_a_layer_holds_back`,
+`no_batch_waits_for_a_held_frame_once_rendering_is_stopped`), `pipelined_layer.rs`
+(`a_layer_pipelines_after_four_late_frames_in_a_row`,
+`a_late_frame_costs_half_its_period_and_four_milliseconds_at_least`,
+`a_pipelined_layer_draws_directly_again_after_ninety_light_frames`,
+`a_pause_begins_a_new_stream_that_is_drawn_directly`,
+`a_frame_that_needs_the_recorder_of_the_context_holds_the_layer_off`,
+`the_options_can_ask_for_pipelined_frames_always_or_never`,
+`the_threads_insert_in_the_order_the_bands_were_sent_in`,
+`a_turn_that_is_dropped_passes_to_the_next`) and, on a Metal device,
+`gpu/metal/tests/pipelined_frames.rs` (the pixel tests named above,
+`a_layer_has_the_bands_it_is_asked_for_as_far_as_they_fit_it`,
+`a_layer_has_no_more_bands_than_its_context_has_threads`,
+`the_options_ask_for_two_bands_by_default_and_for_sixteen_at_most`,
+`the_bands_of_a_layer_are_disjoint_and_cover_it`,
+`a_pending_frame_is_completed_on_request`,
+`a_frame_with_an_image_filter_is_drawn_by_the_recorder_of_the_context`,
+`a_frame_that_leases_the_skia_api_is_drawn_by_the_recorder_of_the_context`,
+`an_adaptive_layer_draws_its_first_frames_directly`,
+`a_layer_is_ordinary_when_pipelining_is_off_or_the_layer_is_too_low`,
+`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).

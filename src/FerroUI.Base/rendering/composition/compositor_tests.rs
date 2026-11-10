@@ -1976,3 +1976,810 @@ fn an_unchanged_drawing_is_not_sent_again_and_its_area_is_drawn_again() {
     let changed = comp.draw_list().expect("a drawing");
     assert!(!Rc::ptr_eq(&draw_list, &changed));
 }
+
+// --- composition visuals kept across a leave-and-return (desktop-performance.md, 9.32) -----
+
+/// The composition visual of `visual` as the visual tree sees it: asking for it here does not
+/// hand it out.
+fn own_visual(visual: &Visual) -> Rc<super::CompositionVisual> {
+    (*visual.own_composition_visual().expect("the visual is attached")).clone()
+}
+
+fn draw_list_of(visual: &Rc<super::CompositionVisual>) -> Option<Rc<super::drawing::CompositionRenderData>> {
+    super::CompositionDrawListVisual::from_visual(visual).expect("a draw list visual").draw_list()
+}
+
+fn own_server_visual(s: &CompositorCanvas, visual: &Visual) -> Rc<ServerCompositionVisual> {
+    let id = own_visual(visual).server();
+    s.compositor.server().get::<ServerCompositionVisual>(id).expect("the server visual exists")
+}
+
+#[test]
+fn visual_back_before_the_update_pass_keeps_its_composition_visuals() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let objects = s.compositor.server().object_count();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+    let control_server = own_server_visual(&s, &control);
+    let child_server = own_server_visual(&s, &child);
+
+    // What a virtualizing panel does when it recycles a row: out of the tree and back.
+    s.canvas.remove(&control);
+    assert!(control.composition_visual_departed());
+    assert!(child.composition_visual_departed());
+    // A visual that is out of the tree has no composition visual, kept or not.
+    assert!(control.composition_visual().is_none());
+    assert!(child.composition_visual().is_none());
+    s.canvas.add(&control);
+    assert!(!control.composition_visual_departed());
+    assert!(!child.composition_visual_departed());
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)));
+
+    s.events.rects.borrow_mut().clear();
+    s.run_jobs();
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)));
+    assert!(Rc::ptr_eq(&control_server, &own_server_visual(&s, &control)));
+    assert!(Rc::ptr_eq(&child_server, &own_server_visual(&s, &child)));
+    assert!(Rc::ptr_eq(&child_visual.parent().unwrap(), &control_visual));
+    assert!(Rc::ptr_eq(&control_visual.parent().unwrap(), &own_visual(&s.canvas)));
+    assert!(draw_list_of(&child_visual).is_some());
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn visual_back_in_the_tree_is_synchronized_with_what_changed_meanwhile() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+
+    s.canvas.remove(&control);
+    // Out of the tree: it moves, turns translucent, and its child changes its drawing.
+    control.set_bounds(Rect::new(100.0, 100.0, 40.0, 30.0));
+    control.set_opacity(0.5);
+    child.set_background(Some(Brushes::blue()));
+    s.canvas.add(&control);
+    s.events.rects.borrow_mut().clear();
+    // The place it was shown at and the place it is shown at now.
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0), Rect::new(110.0, 110.0, 20.0, 10.0)]);
+
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert_eq!(0.5, own_server_visual(&s, &control).opacity());
+    s.assert_hit_test(115.0, 115.0, None, &[&child]);
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+}
+
+#[test]
+fn visual_not_back_by_the_update_pass_releases_its_composition_visuals() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+
+    s.canvas.remove(&control);
+    assert!(control.composition_visual_departed());
+    s.events.rects.borrow_mut().clear();
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0)]);
+
+    assert!(!control.composition_visual_departed());
+    assert!(!child.composition_visual_departed());
+    assert!(control.own_composition_visual().is_none());
+    assert!(child.own_composition_visual().is_none());
+    assert!(control_visual.parent().is_none());
+    assert!(child_visual.parent().is_none());
+    assert_eq!(0, control_visual.children().count());
+    assert!(draw_list_of(&child_visual).is_none());
+    assert!(!child_visual.is_departed());
+
+    drop((control_visual, child_visual));
+    // The disposal of dropped objects rides on a later batch.
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(baseline, s.compositor.server().object_count());
+
+    // It is attached again later with composition visuals of its own.
+    s.canvas.add(&control);
+    s.run_jobs();
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn composition_visuals_kept_for_a_dropped_visual_are_released() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+    let weak_control = control.downgrade();
+    let weak_child = child.downgrade();
+
+    s.canvas.remove(&control);
+    drop((control, child));
+    // The renderer keeps the composition visuals, not the visuals.
+    assert!(weak_control.upgrade().is_none());
+    assert!(weak_child.upgrade().is_none());
+    // Nothing is hit through what is kept for a visual that is gone.
+    assert!(s.renderer.hit_test(Point::new(45.0, 65.0), &s.root, None).is_empty());
+    s.run_jobs();
+
+    assert!(control_visual.parent().is_none());
+    assert_eq!(0, control_visual.children().count());
+    assert!(child_visual.parent().is_none());
+    assert!(draw_list_of(&child_visual).is_none());
+    // The composition visual and its children no longer refer to each other.
+    assert_eq!(1, Rc::strong_count(&child_visual));
+    drop((control_visual, child_visual));
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(baseline, s.compositor.server().object_count());
+}
+
+#[test]
+fn composition_visual_handed_out_is_released_when_its_visual_leaves() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    // Something asked for the composition visual of the child: it may hold it or have changed it.
+    let handed_out = child.composition_visual().unwrap();
+    let control_visual = own_visual(&control);
+
+    s.canvas.remove(&control);
+    assert!(control.composition_visual_departed());
+    assert!(!child.composition_visual_departed());
+    assert!(handed_out.draw_list().is_none());
+    s.canvas.add(&control);
+    s.run_jobs();
+
+    // The parent kept its own; the child has a new one, as upstream.
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert!(!Rc::ptr_eq(&handed_out, &own_visual(&child)));
+    assert!(handed_out.parent().is_none());
+    assert_eq!(1, control_visual.children().count());
+    assert!(Rc::ptr_eq(&control_visual.children().get(0), &own_visual(&child)));
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stopped() {
+    let s = CompositorCanvas::new();
+    let host = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
+    let plain = TestBorder::filled(30.0, 0.0, 20.0, 20.0);
+    s.canvas.add(&host);
+    s.canvas.add(&plain);
+    s.run_jobs();
+    let extra = s.compositor.create_solid_color_visual();
+    host.set_child_composition_visual(Some((*extra).clone()));
+    s.run_jobs();
+
+    s.canvas.remove(&host);
+    assert!(!host.composition_visual_departed());
+    assert!(host.own_composition_visual().is_none());
+    s.run_jobs();
+
+    // No update pass runs while the renderer is stopped, so nothing is kept for one.
+    s.renderer.stop();
+    s.canvas.remove(&plain);
+    assert!(!plain.composition_visual_departed());
+    assert!(plain.own_composition_visual().is_none());
+    s.renderer.start();
+    s.run_jobs();
+
+    // And what was kept when the renderer stops is released there.
+    s.canvas.add(&plain);
+    s.run_jobs();
+    let plain_visual = own_visual(&plain);
+    s.canvas.remove(&plain);
+    assert!(plain.composition_visual_departed());
+    s.renderer.stop();
+    assert!(!plain.composition_visual_departed());
+    assert!(plain.own_composition_visual().is_none());
+    assert!(draw_list_of(&plain_visual).is_none());
+    s.renderer.start();
+}
+
+#[test]
+fn visual_out_of_the_tree_is_not_hit_through_what_is_kept_for_it() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    let under = TestBorder::filled(30.0, 50.0, 40.0, 30.0);
+    s.canvas.add(&under);
+    s.canvas.add(&control);
+    s.assert_hit_test(45.0, 65.0, None, &[&child, &under]);
+    s.assert_hit_test_first(45.0, 65.0, None, Some(&child));
+
+    s.canvas.remove(&control);
+    // Before the update pass: the composition visuals of the control and its child are kept,
+    // and are hit tested as released ones.
+    assert!(child.composition_visual_departed());
+    let hit = s.renderer.hit_test(Point::new(45.0, 65.0), &s.root, None);
+    assert_eq!(vec![under.clone().upcast::<Visual>()], hit);
+    let first = s.renderer.hit_test_first(Point::new(45.0, 65.0), &s.root, None);
+    assert_eq!(Some(under.clone().upcast::<Visual>()), first);
+
+    s.canvas.add(&control);
+    s.assert_hit_test(45.0, 65.0, None, &[&child, &under]);
+}
+
+/// Moves `child` from one parent to another in one pass and reports what was invalidated.
+fn move_between_parents(hand_out: bool) -> Vec<String> {
+    let s = CompositorCanvas::new();
+    let from = TestBorder::new();
+    from.set_bounds(Rect::new(0.0, 0.0, 50.0, 50.0));
+    let to = TestBorder::new();
+    to.set_bounds(Rect::new(100.0, 0.0, 50.0, 50.0));
+    let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    let grandchild = TestBorder::filled(5.0, 5.0, 5.0, 5.0);
+    grandchild.set_background(Some(Brushes::blue()));
+    child.add(&grandchild);
+    from.add(&child);
+    s.canvas.add(&from);
+    s.canvas.add(&to);
+    s.run_jobs();
+    if hand_out {
+        let _ = child.composition_visual();
+        let _ = grandchild.composition_visual();
+    }
+    let child_visual = own_visual(&child);
+
+    s.events.rects.borrow_mut().clear();
+    from.remove(&child);
+    assert_eq!(!hand_out, child.composition_visual_departed());
+    to.add(&child);
+    s.run_jobs();
+
+    assert_eq!(!hand_out, Rc::ptr_eq(&child_visual, &own_visual(&child)));
+    assert_eq!(0, own_visual(&from).children().count());
+    assert_eq!(1, own_visual(&to).children().count());
+    assert!(Rc::ptr_eq(&own_visual(&child).parent().unwrap(), &own_visual(&to)));
+    assert!(Rc::ptr_eq(&own_visual(&grandchild).parent().unwrap(), &own_visual(&child)));
+    let server_children = own_server_visual(&s, &to).children().unwrap().list();
+    assert_eq!(1, server_children.len());
+    assert!(Rc::ptr_eq(&server_children[0], &own_server_visual(&s, &child)));
+    assert!(own_server_visual(&s, &from).children().is_none_or(|children| children.list().is_empty()));
+
+    let mut rects: Vec<String> = s.events.rects.borrow().iter().map(|r| r.to_string()).collect();
+    rects.sort();
+    rects.dedup();
+    s.assert_hit_test(117.0, 17.0, None, &[&grandchild, &child]);
+    s.assert_hit_test(17.0, 17.0, None, &[]);
+    rects
+}
+
+#[test]
+fn visual_moved_to_another_parent_in_one_pass_keeps_its_composition_visuals() {
+    let kept = move_between_parents(false);
+    let released = move_between_parents(true);
+    // The same is invalidated whether the composition visuals were kept or made again: where
+    // the child was and where it is.
+    assert_eq!(released, kept);
+    assert!(kept.contains(&Rect::new(10.0, 10.0, 20.0, 20.0).to_string()), "{kept:?}");
+    assert!(kept.contains(&Rect::new(110.0, 10.0, 20.0, 20.0).to_string()), "{kept:?}");
+}
+
+/// What the compositor redraws for a visual that is under another parent, at another place,
+/// with the composition visual it had: where it was and where it is, and not the place its
+/// old bounds name under its new parent.
+#[test]
+fn visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is() {
+    let s = CompositorCanvas::new();
+    let from = TestBorder::new();
+    from.set_bounds(Rect::new(0.0, 0.0, 50.0, 50.0));
+    let to = TestBorder::new();
+    to.set_bounds(Rect::new(100.0, 200.0, 50.0, 50.0));
+    let child = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    from.add(&child);
+    s.canvas.add(&from);
+    s.canvas.add(&to);
+    s.run_jobs();
+    let child_visual = own_visual(&child);
+
+    s.events.rects.borrow_mut().clear();
+    from.remove(&child);
+    child.set_bounds(Rect::new(20.0, 5.0, 20.0, 20.0));
+    to.add(&child);
+    s.assert_rects(&[Rect::new(10.0, 10.0, 20.0, 20.0), Rect::new(120.0, 205.0, 20.0, 20.0)]);
+    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)));
+}
+
+#[test]
+fn child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_visual() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+
+    s.canvas.remove(&control);
+    control.remove(&child);
+    s.canvas.add(&control);
+    s.events.rects.borrow_mut().clear();
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0)]);
+
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert_eq!(0, control_visual.children().count());
+    assert!(!child.composition_visual_departed());
+    assert!(child.own_composition_visual().is_none());
+    assert!(child_visual.parent().is_none());
+    assert!(draw_list_of(&child_visual).is_none());
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+}
+
+#[test]
+fn composition_visual_kept_for_one_compositor_is_not_used_with_another() {
+    let s = CompositorCanvas::new();
+    let control = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
+    s.canvas.add(&control);
+    s.run_jobs();
+    let kept = own_visual(&control);
+    let other = Compositor::with_scheduler(
+        ManualRenderLoop::new(),
+        None,
+        true,
+        &MediaContext::instance().scheduler(),
+        Dispatcher::ui_thread(),
+        None,
+        None,
+    );
+
+    s.canvas.remove(&control);
+    assert!(control.composition_visual_departed());
+    let created = control.attach_to_compositor(&other);
+    assert!(!Rc::ptr_eq(&kept, &created));
+    assert!(Rc::ptr_eq(created.compositor(), &other));
+    assert!(!kept.is_departed());
+    assert!(draw_list_of(&kept).is_none());
+    control.detach_from_compositor();
+    s.run_jobs();
+}
+
+/// A visual that leaves its tree, or ends a request it never made, is given no composition
+/// extras: a visual without them is the one the synchronisation answers on its short paths.
+#[test]
+fn visual_that_leaves_its_tree_gains_no_composition_extras() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    assert!(!control.has_composition_extras());
+
+    s.canvas.remove(&control);
+    s.run_jobs();
+    assert!(!control.has_composition_extras());
+    assert!(!child.has_composition_extras());
+
+    control.remove_composition_hide_request();
+    control.remove_composition_show_request();
+    assert!(!control.has_composition_extras());
+}
+
+/// How many composition visuals a row costs when it is recycled (the counter check
+/// `composition_work` of `scripts/perf/gate.py`; the counts are asserted with the feature
+/// `perf-counters`): none is created for a row that is back in the same pass, the row that
+/// stays out for an update pass has its own made again, and the row that is kept for a pool
+/// stays out for as many passes as the pool has it and has none made.
+#[test]
+fn composition_work_of_a_row_taken_out_of_the_tree_and_put_back() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter};
+
+    let s = CompositorCanvas::new();
+    let (row, cell) = decorator_with_child();
+    s.canvas.add(&row);
+    s.run_jobs();
+    let objects = s.compositor.server().object_count();
+
+    let before = perf_counters::snapshot();
+    for _ in 0..8 {
+        s.canvas.remove(&row);
+        s.canvas.add(&row);
+        s.run_jobs();
+    }
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    assert!(cell.own_composition_visual().is_some());
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(16, work.get(PerfCounter::CompositionVisualsKept));
+    }
+
+    let before = perf_counters::snapshot();
+    s.canvas.remove(&row);
+    s.run_jobs();
+    s.canvas.add(&row);
+    s.run_jobs();
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    if perf_counters::ENABLED {
+        assert_eq!(2, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsKept));
+    }
+
+    let before = perf_counters::snapshot();
+    for _ in 0..8 {
+        let kept = row.leave_tree_keeping_composition_visuals(|| s.canvas.remove(&row));
+        for _ in 0..3 {
+            s.canvas.invalidate_visual();
+            s.run_jobs();
+        }
+        s.canvas.add(&row);
+        drop(kept);
+        s.run_jobs();
+    }
+    let work = perf_counters::snapshot().since(&before);
+    assert_eq!(objects, s.compositor.server().object_count());
+    if perf_counters::ENABLED {
+        assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
+        assert_eq!(16, work.get(PerfCounter::CompositionVisualsKept));
+    }
+}
+
+// --- composition visuals kept for a pool (desktop-performance.md, 9.32) ---------------------
+
+/// Takes `control` out of the canvas as a recycling panel takes a row out for its pool.
+fn take_out_for_a_pool(s: &CompositorCanvas, control: &Ref<TestBorder>) -> Option<super::KeptCompositionVisuals> {
+    control.leave_tree_keeping_composition_visuals(|| s.canvas.remove(control))
+}
+
+#[test]
+fn visual_taken_out_for_a_pool_keeps_its_composition_visuals_across_update_passes() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let objects = s.compositor.server().object_count();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+    let control_server = own_server_visual(&s, &control);
+    let child_server = own_server_visual(&s, &child);
+
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    assert_eq!(2, kept.len());
+    assert!(!kept.is_empty());
+    s.events.rects.borrow_mut().clear();
+    // Where it was shown is redrawn, as for any visual that leaves.
+    s.assert_rects(&[Rect::new(40.0, 60.0, 20.0, 10.0)]);
+    for _ in 0..3 {
+        s.canvas.invalidate_visual();
+        s.run_jobs();
+    }
+
+    // Still kept after update passes, as a subtree that is in no tree: nothing shows it and
+    // nothing is hit through it.
+    assert!(control.composition_visual_departed());
+    assert!(child.composition_visual_departed());
+    assert!(control.composition_visual().is_none());
+    assert!(control_visual.parent().is_none());
+    assert_eq!(0, own_visual(&s.canvas).children().count());
+    assert!(Rc::ptr_eq(&child_visual.parent().unwrap(), &control_visual));
+    assert!(draw_list_of(&child_visual).is_some());
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+
+    // Out of the pool: it changed there, and is shown with the composition visuals it had.
+    control.set_bounds(Rect::new(100.0, 100.0, 40.0, 30.0));
+    s.canvas.add(&control);
+    kept.release();
+    assert!(!control.composition_visual_departed());
+    assert!(!child.composition_visual_departed());
+    s.events.rects.borrow_mut().clear();
+    s.assert_rects(&[Rect::new(110.0, 110.0, 20.0, 10.0)]);
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert!(Rc::ptr_eq(&child_visual, &own_visual(&child)));
+    assert!(Rc::ptr_eq(&control_server, &own_server_visual(&s, &control)));
+    assert!(Rc::ptr_eq(&child_server, &own_server_visual(&s, &child)));
+    assert!(Rc::ptr_eq(&control_visual.parent().unwrap(), &own_visual(&s.canvas)));
+    assert_eq!(objects, s.compositor.server().object_count());
+    s.assert_hit_test(115.0, 115.0, None, &[&child]);
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+}
+
+#[test]
+fn composition_visuals_kept_for_a_pool_are_released_by_what_holds_them() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    s.run_jobs();
+    assert!(control.composition_visual_departed());
+
+    // Dropping it is releasing it.
+    drop(kept);
+    assert!(!control.composition_visual_departed());
+    assert!(!child.composition_visual_departed());
+    assert!(control.own_composition_visual().is_none());
+    assert!(child.own_composition_visual().is_none());
+    assert!(child_visual.parent().is_none());
+    assert_eq!(0, control_visual.children().count());
+    assert!(draw_list_of(&child_visual).is_none());
+    assert!(!child_visual.is_departed());
+    drop((control_visual, child_visual));
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(baseline, s.compositor.server().object_count());
+
+    // It is attached again later with composition visuals of its own.
+    s.canvas.add(&control);
+    s.run_jobs();
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn composition_visuals_kept_for_a_pool_outlive_no_visual() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let child_visual = own_visual(&child);
+    let weak_control = control.downgrade();
+
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    s.run_jobs();
+    drop((control, child));
+    // What is kept refers to the composition visuals, not to the visuals.
+    assert!(weak_control.upgrade().is_none());
+    assert!(child_visual.is_departed());
+
+    kept.release();
+    assert!(!child_visual.is_departed());
+    assert!(child_visual.parent().is_none());
+    assert!(draw_list_of(&child_visual).is_none());
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    // The composition visual and its parent no longer refer to each other.
+    assert_eq!(1, Rc::strong_count(&child_visual));
+    drop(child_visual);
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert_eq!(baseline, s.compositor.server().object_count());
+}
+
+#[test]
+fn child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let child_visual = own_visual(&child);
+
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    s.run_jobs();
+    control.remove(&child);
+    s.canvas.add(&control);
+    drop(kept);
+    s.run_jobs();
+
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    assert_eq!(0, control_visual.children().count());
+    assert!(!child.composition_visual_departed());
+    assert!(child.own_composition_visual().is_none());
+    assert!(child_visual.parent().is_none());
+    assert!(draw_list_of(&child_visual).is_none());
+    s.assert_hit_test(45.0, 65.0, None, &[]);
+}
+
+#[test]
+fn visuals_taken_out_inside_one_another_are_kept_by_the_innermost() {
+    let s = CompositorCanvas::new();
+    let first = TestBorder::filled(0.0, 0.0, 20.0, 20.0);
+    let second = TestBorder::filled(30.0, 0.0, 20.0, 20.0);
+    let third = TestBorder::filled(60.0, 0.0, 20.0, 20.0);
+    for control in [&first, &second, &third] {
+        s.canvas.add(control);
+    }
+    s.run_jobs();
+    let second_visual = own_visual(&second);
+
+    let mut inner = None;
+    let outer = first.leave_tree_keeping_composition_visuals(|| {
+        s.canvas.remove(&first);
+        inner = take_out_for_a_pool(&s, &second);
+        // The outer one goes on after the inner one.
+        s.canvas.remove(&third);
+    });
+    assert_eq!(Some(2), outer.as_ref().map(super::KeptCompositionVisuals::len));
+    assert_eq!(Some(1), inner.as_ref().map(super::KeptCompositionVisuals::len));
+    s.run_jobs();
+
+    drop(outer);
+    assert!(!first.composition_visual_departed());
+    assert!(!third.composition_visual_departed());
+    assert!(second.composition_visual_departed());
+    s.canvas.add(&second);
+    drop(inner);
+    s.run_jobs();
+    assert!(Rc::ptr_eq(&second_visual, &own_visual(&second)));
+
+    // After the scopes a visual that leaves is released in the next update pass again.
+    s.canvas.remove(&second);
+    assert!(second.composition_visual_departed());
+    s.run_jobs();
+    assert!(!second.composition_visual_departed());
+    assert!(second.own_composition_visual().is_none());
+}
+
+#[test]
+fn nothing_is_kept_for_a_pool_outside_of_a_tree_or_while_rendering_is_stopped() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+
+    // In no tree: the departure runs, once, and nothing is kept.
+    let mut runs = 0;
+    assert!(control.leave_tree_keeping_composition_visuals(|| runs += 1).is_none());
+    assert_eq!(1, runs);
+
+    s.canvas.add(&control);
+    s.run_jobs();
+    s.renderer.stop();
+    assert!(take_out_for_a_pool(&s, &control).is_none());
+    assert!(!control.composition_visual_departed());
+    assert!(control.own_composition_visual().is_none());
+    assert!(child.own_composition_visual().is_none());
+    s.renderer.start();
+
+    // What a pool keeps is not released when rendering stops: the pool holds it, and the
+    // visual is shown with it once it is back.
+    s.canvas.add(&control);
+    s.run_jobs();
+    let control_visual = own_visual(&control);
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    s.renderer.stop();
+    assert!(control.composition_visual_departed());
+    s.renderer.start();
+    s.canvas.add(&control);
+    drop(kept);
+    s.run_jobs();
+    assert!(Rc::ptr_eq(&control_visual, &own_visual(&control)));
+    s.assert_hit_test(45.0, 65.0, None, &[&child]);
+}
+
+#[test]
+fn composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer() {
+    let s = CompositorCanvas::new();
+    let (control, child) = decorator_with_child();
+    s.canvas.add(&control);
+    s.run_jobs();
+    let child_visual = own_visual(&child);
+
+    let kept = take_out_for_a_pool(&s, &control).expect("the composition visuals are kept");
+    s.renderer.dispose();
+    // The pool still decides: nothing is released behind it.
+    assert!(child.composition_visual_departed());
+    drop(kept);
+    assert!(!child.composition_visual_departed());
+    assert!(child.own_composition_visual().is_none());
+    assert!(draw_list_of(&child_visual).is_none());
+}
+
+// --- layers that hold a frame back (desktop-performance.md, section 9.33) ---
+
+/// The canvas with mock layers that hold a frame back, its log and its
+/// server target.
+fn canvas_with_held_frames() -> (CompositorCanvas, crate::rendering::testing::DrawingLog, Rc<ServerCompositionTarget>) {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let target = s
+        .compositor
+        .server()
+        .get::<ServerCompositionTarget>(s.renderer.composition_target().server())
+        .expect("the target of the renderer exists");
+    log.hold_layer_frames_back(true);
+    (s, log, target)
+}
+
+#[test]
+fn a_frame_a_layer_holds_back_is_presented_by_the_tick_after() {
+    let (s, log, target) = canvas_with_held_frames();
+    assert!(!target.has_pending_frame());
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let batch = s.compositor.commit();
+    log.clear();
+    s.render_loop.tick();
+    // The tick drew its frame into the layer and presented the one before.
+    assert_eq!(1, log.count("Blit frame 0 of 1"), "{:?}", log.entries());
+    assert_eq!(0, log.count("CompletePendingFrame"));
+    assert!(target.has_pending_frame());
+    assert!(batch.processed().is_completed());
+    assert!(!batch.rendered().is_completed());
+
+    // Nothing changes: the next tick presents the frame, and only then is
+    // the batch rendered.
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(vec!["CompletePendingFrame"], log.entries().into_iter().filter(|e| e.starts_with("Complete")).collect::<Vec<_>>());
+    assert_eq!(1, log.count("Blit frame 1 of 1"), "{:?}", log.entries());
+    assert_eq!(0, log.count("FillRectangle"), "the tick presents, it draws nothing: {:?}", log.entries());
+    assert!(!target.has_pending_frame());
+    assert!(batch.rendered().is_completed());
+
+    // The stream has ended: the ticks that follow present nothing.
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(0, log.count("Blit"), "{:?}", log.entries());
+}
+
+#[test]
+fn the_batches_of_a_stream_of_held_frames_are_rendered_a_tick_later() {
+    let (s, log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let first = s.compositor.commit();
+    s.render_loop.tick();
+    assert!(!first.rendered().is_completed());
+
+    // The next frame of the stream presents the first one.
+    s.canvas.add(&TestBorder::filled(130.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let second = s.compositor.commit();
+    log.clear();
+    s.render_loop.tick();
+    assert_eq!(1, log.count("Blit frame 1 of 2"), "{:?}", log.entries());
+    assert_eq!(0, log.count("CompletePendingFrame"), "a tick that draws completes the frame before it by itself");
+    assert!(first.rendered().is_completed());
+    assert!(!second.rendered().is_completed());
+    assert!(target.has_pending_frame());
+
+    s.render_loop.tick();
+    assert!(second.rendered().is_completed());
+    assert!(!target.has_pending_frame());
+}
+
+#[test]
+fn a_synchronous_render_presents_the_frame_a_layer_holds_back() {
+    let (s, log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    let batch = s.compositor.commit();
+    log.clear();
+    s.compositor.render_on_this_thread();
+    let presented: Vec<String> =
+        log.entries().into_iter().filter(|e| e.starts_with("Blit") || e.starts_with("Complete")).collect();
+    assert_eq!(vec!["Blit frame 0 of 1", "CompletePendingFrame", "Blit frame 1 of 1"], presented);
+    assert!(!target.has_pending_frame());
+    assert!(batch.rendered().is_completed());
+}
+
+#[test]
+fn no_batch_waits_for_a_held_frame_once_rendering_is_stopped() {
+    let (s, _log, target) = canvas_with_held_frames();
+
+    s.canvas.add(&TestBorder::filled(30.0, 50.0, 20.0, 10.0));
+    Dispatcher::ui_thread().run_jobs(None);
+    s.render_loop.tick();
+    assert!(target.has_pending_frame());
+
+    // No tick presents the frame any more: a batch is answered at once.
+    s.compositor.server().stop_rendering();
+    let batch = s.compositor.commit();
+    s.render_loop.tick();
+    assert!(batch.rendered().is_completed());
+}

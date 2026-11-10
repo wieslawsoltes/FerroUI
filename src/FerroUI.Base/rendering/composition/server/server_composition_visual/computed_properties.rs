@@ -146,7 +146,7 @@ impl ServerCompositionVisual {
             // With the WinUI members (the relative adjustments, the rotation
             // axis, pixel snapping) applied; a visual with a
             // `ParentForTransform` is completed by the adorner pass.
-            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
+            self.set_own_transform(self.compute_own_transform_from_properties(self.transform_matrix()));
             if self.parent_for_transform().is_some() {
                 self.adorner_helper_enqueue_for_adorner_update();
             }

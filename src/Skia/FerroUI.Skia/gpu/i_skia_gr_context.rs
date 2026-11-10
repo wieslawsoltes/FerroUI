@@ -74,6 +74,19 @@ pub trait ISkiaGrContext {
         image.clone()
     }
 
+    /// Tells the context that the frame being drawn draws what only the
+    /// thread and the recorder of the context draw as upstream draws it: an
+    /// image filter (it reads around the pixels it writes), a lease of the
+    /// Skia API (what the client draws belongs to the recorder the lease
+    /// hands out), a frame of a GPU producer (its storage is held until the
+    /// next flush of the context only). A drawing that renders into a
+    /// texture it draws again in later frames belongs here too.
+    ///
+    /// Nothing by default. A context whose frame layers can be drawn by
+    /// other threads (Graphite on Metal, `graphite/pipelined_layer.rs`)
+    /// counts the calls, and a layer with such draws is drawn directly.
+    fn note_direct_only_draw(&self) {}
+
     /// Whether the GPU device behind the context was lost.
     fn is_lost(&self) -> bool;
 

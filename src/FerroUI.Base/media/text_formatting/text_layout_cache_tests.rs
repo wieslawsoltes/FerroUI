@@ -221,9 +221,13 @@ fn the_layouts_nothing_holds_are_let_go_from_the_oldest() {
     let properties = plain(12.0);
     let held = layout("held", &properties, f64::INFINITY);
 
+    // Every text is asked for twice, as a text that is shown again is: once the cache is
+    // full it keeps a text from its second request.
     let count = IDLE_CAPACITY + IDLE_CAPACITY / 2;
     for index in 0..count {
-        drop(layout(&index.to_string(), &properties, f64::INFINITY));
+        let text = index.to_string();
+        drop(layout(&text, &properties, f64::INFINITY));
+        drop(layout(&text, &properties, f64::INFINITY));
     }
 
     let cache_len = kept();
@@ -239,9 +243,64 @@ fn the_layouts_nothing_holds_are_let_go_from_the_oldest() {
     let before = kept();
     drop(layout(&(count - 1).to_string(), &properties, f64::INFINITY));
     assert_eq!(before, kept());
-    // The first one is not.
-    drop(layout("0", &properties, f64::INFINITY));
+    // The first one is not: it is made again, and kept again when it is asked for once more.
+    let first = layout("0", &properties, f64::INFINITY);
+    assert!(!first.is_shared());
+    assert_eq!(before, kept());
+    drop(first);
+    let first = layout("0", &properties, f64::INFINITY);
+    assert!(first.is_shared());
     assert_eq!(before + 1, kept());
+}
+
+#[test]
+fn a_full_cache_keeps_a_text_from_its_second_request() {
+    let _scope = TextTestScope::new();
+
+    let properties = plain(12.0);
+
+    // While there is room, a text is kept when it is first asked for.
+    let early = layout("early", &properties, f64::INFINITY);
+    assert!(early.is_shared());
+    assert_eq!(1, kept());
+    drop(early);
+
+    // Texts that are asked for once fill the cache, and then leave it alone: nothing is kept
+    // of them, and nothing is let go for them.
+    for index in 0..2 * IDLE_CAPACITY {
+        drop(layout(&format!("once {index}"), &properties, f64::INFINITY));
+    }
+    let full = kept();
+    assert!(full >= IDLE_CAPACITY && full <= IDLE_CAPACITY + IDLE_CAPACITY / 4, "{full} layouts are kept");
+    // (But for the few that look like a text that was seen before: the cache remembers
+    // sixteen bits of a request.)
+    let mut taken_for_seen = 0;
+    for index in 0..2 * IDLE_CAPACITY {
+        let once = layout(&format!("never again {index}"), &properties, f64::INFINITY);
+        taken_for_seen += usize::from(once.is_shared());
+    }
+    assert!(taken_for_seen <= 4, "{taken_for_seen} texts were kept at their first request");
+    assert_eq!(full + taken_for_seen, kept());
+    let full = kept();
+
+    // A text that comes back is kept from then on, and shared.
+    let first = layout("twice", &properties, f64::INFINITY);
+    assert!(!first.is_shared());
+    assert_eq!(full, kept());
+    let second = layout("twice", &properties, f64::INFINITY);
+    assert!(second.is_shared());
+    assert!(!Rc::ptr_eq(&first, &second));
+    assert_eq!(full + 1, kept());
+    let third = layout("twice", &properties, f64::INFINITY);
+    assert!(Rc::ptr_eq(&second, &third));
+    assert_eq!("twice", line_text(&*first.text_lines()[0]));
+    assert_eq!(first.width(), third.width());
+
+    // A change of the fonts empties the cache, which has room again.
+    FontManager::current().invalidate_glyph_typefaces();
+    let after = layout("after", &properties, f64::INFINITY);
+    assert!(after.is_shared());
+    assert_eq!(1, kept());
 }
 
 #[test]
@@ -255,7 +314,9 @@ fn long_texts_nothing_holds_are_let_go_by_their_length() {
     let count = 4 * IDLE_TEXT_CAPACITY / MAX_TEXT_LENGTH;
     assert!(count < IDLE_CAPACITY);
     for index in 0..count {
+        // Twice: a full cache keeps a text from its second request.
         let text = format!("{index:0width$}", width = MAX_TEXT_LENGTH);
+        drop(layout(&text, &properties, f64::INFINITY));
         drop(layout(&text, &properties, f64::INFINITY));
     }
 

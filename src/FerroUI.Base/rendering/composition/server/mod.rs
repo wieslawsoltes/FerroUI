@@ -81,7 +81,7 @@ pub use server_composition_simple_geometry::ServerCompositionSimpleGeometry;
 // upstream; they belong to this namespace.
 pub use super::brushes::{ServerCompositionSimpleContentBrush, ServerCompositionSimpleImageBrush};
 pub use server_composition_simple_transform::ServerCompositionSimpleTransform;
-pub(crate) use server_compositor::OBJECT_END_MAGIC;
+pub(crate) use server_compositor::{ReadbackQueueEntry, OBJECT_END_MAGIC};
 pub use server_compositor::{BatchQueue, CompositorClock, ServerCompositor};
 pub use server_list::ServerList;
 pub use composition_target_overlays::CompositionTargetOverlays;

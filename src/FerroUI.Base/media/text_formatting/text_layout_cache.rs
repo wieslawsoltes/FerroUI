@@ -11,6 +11,13 @@
 //! the cache releases it when it lets it go. Layouts that something still holds are never let
 //! go; of the ones nothing holds, the [`IDLE_CAPACITY`] used last are kept, as far as their
 //! text is within [`IDLE_TEXT_CAPACITY`].
+//!
+//! A cache that is full keeps a text from the second time it is asked for: the layout of a
+//! text that is seen once (a counter, a clock, a value that never comes back) stays with its
+//! owner, as a layout that cannot be shared does, and costs the cache a lookup and nothing
+//! else. Without that every such text took the place of a layout that could be used again,
+//! and was let go, long after its memory was last touched, by the look for layouts to let go
+//! that it had made necessary.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -35,6 +42,12 @@ pub(crate) const MAX_TEXT_LENGTH: usize = 256;
 
 /// How many layouts are added between two looks for layouts to let go.
 const SWEEP_INTERVAL: usize = IDLE_CAPACITY / 4;
+
+/// The slots of the table of the texts a full cache was asked for and did not keep.
+const SEEN_SLOTS: usize = 16 * 1024;
+
+/// The texts a slot of that table remembers.
+const SEEN_WAYS: usize = 4;
 
 /// What a plain text layout is made of, beside its text.
 pub(crate) struct PlainTextLayoutRequest<'a> {
@@ -224,6 +237,12 @@ struct State {
     sweep_at: usize,
     /// The text of the layouts added since layouts to let go were looked for.
     added_text: usize,
+    /// Whether the last look for layouts to let go found as many idle ones as the cache keeps:
+    /// a layout that is added now takes the place of another.
+    full: bool,
+    /// The texts a full cache was asked for and did not keep, by sixteen bits of the hash of
+    /// their request ([`SEEN_WAYS`] to a slot, zero for none). Empty until the cache is full.
+    seen: Vec<[u16; SEEN_WAYS]>,
 }
 
 impl State {
@@ -236,6 +255,26 @@ impl State {
         self.count = 0;
         self.sweep_at = SWEEP_INTERVAL;
         self.added_text = 0;
+        self.full = false;
+    }
+
+    /// Whether a request of this hash was seen before, which it is from now on. Two requests
+    /// can look the same here (sixteen bits of a slot): the second of them is then kept at
+    /// its first request, as every text is while the cache has room.
+    fn seen_before(&mut self, hash: u64) -> bool {
+        if self.seen.is_empty() {
+            self.seen = vec![[0; SEEN_WAYS]; SEEN_SLOTS];
+        }
+        let slot = &mut self.seen[hash as usize & (SEEN_SLOTS - 1)];
+        let mark = ((hash >> 48) as u16).max(1);
+        if slot.contains(&mark) {
+            return true;
+        }
+        // A free place, else the place of one of the texts seen before, by bits of the hash
+        // that the slot and the mark do not use.
+        let way = slot.iter().position(|seen| *seen == 0).unwrap_or((hash >> 32) as usize % SEEN_WAYS);
+        slot[way] = mark;
+        false
     }
 
     /// Whether enough was added to look for layouts to let go.
@@ -255,10 +294,13 @@ impl State {
             .map(|entry| (entry.last_used, entry.key.text.len()))
             .collect();
 
+        let idle_text = idle.iter().map(|(_, length)| length).sum::<usize>();
+        self.full = idle.len() >= IDLE_CAPACITY || idle_text >= IDLE_TEXT_CAPACITY;
+
         // The first layout, from the one used last, that is beyond either capacity: it and
         // every idle layout used before it go. Ticks are unique.
         let mut cut = None;
-        if idle.len() > IDLE_CAPACITY || idle.iter().map(|(_, length)| length).sum::<usize>() > IDLE_TEXT_CAPACITY {
+        if idle.len() > IDLE_CAPACITY || idle_text > IDLE_TEXT_CAPACITY {
             idle.sort_unstable_by(|a, b| b.0.cmp(&a.0));
             let mut text = 0;
             for (index, (last_used, length)) in idle.iter().enumerate() {
@@ -308,8 +350,10 @@ impl TextLayoutCache {
     }
 
     /// The layout of `request`: the one kept for it, else the one `create` makes, which is
-    /// kept. `create` makes the layout of the text of the request in one run of the default
-    /// run properties of its paragraph properties, with its trimming and constraint.
+    /// kept, unless the cache is full and is asked for the text for the first time: then the
+    /// layout is its caller's alone. `create` makes the layout of the text of the request in
+    /// one run of the default run properties of its paragraph properties, with its trimming
+    /// and constraint.
     pub(crate) fn get_or_create(
         &self,
         request: &PlainTextLayoutRequest<'_>,
@@ -340,6 +384,11 @@ impl TextLayoutCache {
                 entry.last_used = tick;
                 crate::perf_count!(TextLayoutCacheHits);
                 return entry.layout.clone();
+            }
+            if state.full && !state.seen_before(hash) {
+                drop(state);
+                crate::perf_count!(TextLayoutCacheFirstRequests);
+                return Rc::new(create());
             }
         }
 
