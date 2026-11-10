@@ -1514,6 +1514,20 @@ What is kept and where:
   its text, so long texts go sooner); it looks for the ones to release once in 1,024 new
   layouts or 16 KiB of new text, so keeping them costs a constant amount for a layout made. A
   shared layout does not keep the run cache of the block that made it.
+- A cache that is full keeps a text from the second time it is asked for. Full means that the
+  last look for layouts to release found 4,096 that nothing holds, or 64 KiB of their text:
+  from then on a layout that is added takes the place of another. The layout of a text that is
+  asked for once (a clock, a counter, a value that never comes back) is then made for its block
+  alone, as a layout that cannot be shared is, and the block releases it. Without that every
+  such text pushed out a layout that could have been found again, and was itself released by
+  the cache long after its memory was last used: the benchmark with texts that are new every
+  time cost 14.0 % more than without a cache, and costs 3.8 % less with this rule (alternating
+  runs against the commit before section 9.27; the texts that repeat went from 10.8 % to
+  13.6 % less). The cache remembers the
+  texts it was asked for and did not keep by sixteen bits of the hash of the request, four to
+  a slot of 16,384 (128 KiB, made when the cache is first full); a text that looks like one of
+  them is kept at its first request, which is what happens to every text while there is room.
+  A program with fewer texts than the cache keeps never sees any of this.
 - Every change of the fonts of a thread (a font collection added or removed, glyph typefaces
   invalidated: the generation the glyph typeface lookups already follow) lets all kept layouts
   go, so no layout shaped with a font that is gone is found. A layout that is still shown stays
@@ -1533,6 +1547,7 @@ Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_
 `a_layout_made_of_what_can_change_is_not_shared`,
 `disposing_a_shared_layout_leaves_it_to_its_other_holders`,
 `the_layouts_nothing_holds_are_let_go_from_the_oldest`,
+`a_full_cache_keeps_a_text_from_its_second_request`,
 `long_texts_nothing_holds_are_let_go_by_their_length`,
 `a_change_of_the_fonts_lets_every_layout_go`) and `text_block_tests.rs`
 (`text_blocks_that_show_the_same_text_the_same_way_share_a_layout`,
@@ -1543,12 +1558,15 @@ Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_
 and is measured, with texts that repeat and with texts that are new every time; the second is
 the cost the cache adds to a layout it cannot find).
 
-Counters (`--features counters`): `text layout cache hits`, `text layout cache misses` and
-`text layout cache evictions`, beside `text layouts created`.
+Counters (`--features counters`): `text layout cache hits`, `text layout cache misses`,
+`text layout cache evictions` and `text layout cache: first requests of a text, not kept`,
+beside `text layouts created`.
 
 Gauntlet (tier 16), Skia window, per render pass: text layouts created 796 to 450 (346 found,
 446 made and kept, 418 let go: the cache is full and turns over, as the table of this section
-says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507.
+says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507. With
+the rule for a full cache the same frames find as many layouts (346), keep 242 of the ones
+they make and let 244 go; 186 are first requests, whose layout stays with its block.
 
 | Gauntlet, tier 16, direct drawing | Frames a second | UI thread, ms a frame | Render thread, ms a frame |
 |---|---|---|---|
