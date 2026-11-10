@@ -2783,3 +2783,84 @@ fn no_batch_waits_for_a_held_frame_once_rendering_is_stopped() {
     s.render_loop.tick();
     assert!(batch.rendered().is_completed());
 }
+
+// --- the rarely set properties of a visual (not from upstream) ------------------------
+
+/// The properties of a visual that few visuals set are in a second block,
+/// which a visual of an element that is only placed and drawn never makes,
+/// on either side.
+#[test]
+fn a_visual_that_sets_no_rare_property_has_no_second_block() {
+    let s = CompositorCanvas::new();
+    let border = TestBorder::filled(10.0, 20.0, 100.0, 50.0);
+    s.canvas.add(&border);
+    s.run_jobs();
+
+    let visual = border.composition_visual().expect("the border is attached");
+    assert!(!visual.visual_props().has_rare_properties());
+    assert!(!s.server_visual(&border).visual_props().has_rare_properties());
+
+    // A read without the block is the value the property is made with.
+    assert_eq!(visual.scale(), Vector3D::new(1.0, 1.0, 1.0));
+    assert_eq!(visual.transform_matrix(), Matrix::IDENTITY);
+    assert_eq!(visual.rotation_angle(), 0.0);
+    assert!(visual.clip().is_none());
+    let server = s.server_visual(&border);
+    assert_eq!(server.visual_props().scale(), Vector3D::new(1.0, 1.0, 1.0));
+    assert_eq!(server.visual_props().transform_matrix(), Matrix::IDENTITY);
+}
+
+/// A write of the value a rare property is made with does not make the
+/// block: the synchronization of an element writes its clip and its
+/// transform whether they changed or not.
+#[test]
+fn a_write_of_the_initial_value_of_a_rare_property_makes_no_second_block() {
+    let s = CompositorCanvas::new();
+    let border = TestBorder::filled(10.0, 20.0, 100.0, 50.0);
+    s.canvas.add(&border);
+    s.run_jobs();
+
+    let visual = border.composition_visual().expect("the border is attached");
+    visual.set_scale(Vector3D::new(1.0, 1.0, 1.0));
+    visual.set_transform_matrix(Matrix::IDENTITY);
+    visual.set_rotation_angle(0.0);
+    visual.set_clip(None);
+    s.run_jobs();
+
+    assert!(!visual.visual_props().has_rare_properties());
+    assert!(!s.server_visual(&border).visual_props().has_rare_properties());
+}
+
+/// A rare property that is given another value is read back as that value on
+/// both sides, and keeps what it is given after that, the initial value
+/// included.
+#[test]
+fn a_rare_property_that_is_set_is_kept_on_both_sides() {
+    let s = CompositorCanvas::new();
+    let border = TestBorder::filled(10.0, 20.0, 100.0, 50.0);
+    s.canvas.add(&border);
+    s.run_jobs();
+
+    let visual = border.composition_visual().expect("the border is attached");
+    visual.set_scale(Vector3D::new(2.0, 3.0, 1.0));
+    visual.set_rotation_angle(0.5);
+    s.run_jobs();
+
+    assert!(visual.visual_props().has_rare_properties());
+    assert_eq!(visual.scale(), Vector3D::new(2.0, 3.0, 1.0));
+    assert_eq!(visual.rotation_angle(), 0.5);
+    // The properties of the block that were not set are as they are made.
+    assert_eq!(visual.transform_matrix(), Matrix::IDENTITY);
+    assert_eq!(visual.rotation_axis(), Vector3D::new(0.0, 0.0, 1.0));
+
+    let server = s.server_visual(&border);
+    assert!(server.visual_props().has_rare_properties());
+    assert_eq!(server.visual_props().scale(), Vector3D::new(2.0, 3.0, 1.0));
+    assert_eq!(server.visual_props().rotation_angle(), 0.5);
+    assert_eq!(server.visual_props().transform_matrix(), Matrix::IDENTITY);
+
+    visual.set_scale(Vector3D::new(1.0, 1.0, 1.0));
+    s.run_jobs();
+    assert_eq!(visual.scale(), Vector3D::new(1.0, 1.0, 1.0));
+    assert_eq!(s.server_visual(&border).visual_props().scale(), Vector3D::new(1.0, 1.0, 1.0));
+}

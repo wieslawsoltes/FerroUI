@@ -134,8 +134,9 @@ pub trait IServerVisualContent: 'static {
 /// the [`ServerCompositionTarget`] for new dirty rects.
 pub struct ServerCompositionVisual {
     this: Weak<ServerCompositionVisual>,
+    // The compositor is the one of `object`: a visual has no reference of
+    // its own to it, which would be eight bytes of every visual of a tree.
     object: ServerObject,
-    compositor: Weak<ServerCompositor>,
     props: ServerCompositionContainerVisualProps,
     content: Box<dyn IServerVisualContent>,
     children: Option<Rc<ServerCompositionVisualCollection>>,
@@ -211,7 +212,6 @@ impl ServerCompositionVisual {
             ServerCompositionVisual {
                 this: this.clone(),
                 object: ServerObject::new(compositor, owner),
-                compositor: Rc::downgrade(compositor),
                 props: ServerCompositionContainerVisualProps::new(),
                 content,
                 children,
@@ -257,7 +257,7 @@ impl ServerCompositionVisual {
 
     /// The compositor of the visual, while it is alive.
     pub fn compositor(&self) -> Option<Rc<ServerCompositor>> {
-        self.compositor.upgrade()
+        self.object.compositor()
     }
 
     /// The `ServerObject` part: activation and animations.
@@ -493,7 +493,7 @@ impl ServerCompositionContainerVisualHooks for ServerCompositionVisual {}
 
 impl IServerPropertyHost for ServerCompositionVisual {
     fn server_compositor(&self) -> Option<Rc<ServerCompositor>> {
-        self.compositor.upgrade()
+        self.object.compositor()
     }
 
     fn set_value(&self, property: &'static CompositionProperty, change: ServerValueChange<'_>) {

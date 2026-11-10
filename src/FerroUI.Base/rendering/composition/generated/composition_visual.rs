@@ -44,6 +44,7 @@ use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
+use std::cell::OnceCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -258,34 +259,16 @@ pub struct CompositionVisualProps {
     parent: OptionCell<Rc<dyn ICompositionObject>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: OptionCell<Arc<dyn IGeometryImpl>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
-    translation: Cell<Vector3D>,
     size: Cell<Vector>,
-    anchor_point: Cell<Vector>,
-    center_point: Cell<Vector3D>,
-    rotation_angle: Cell<f32>,
-    orientation: Cell<Quaternion>,
-    scale: Cell<Vector3D>,
-    transform_matrix: Cell<Matrix>,
-    adorned_visual: OptionCell<Rc<dyn ICompositionObject>>,
-    adorner_is_clipped: Cell<bool>,
-    opacity_mask_brush: OptionCell<BatchResource<dyn IBrush>>,
-    effect: OptionCell<Arc<dyn IImmutableEffect>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
-    cache_mode: OptionCell<Rc<dyn ICompositionObject>>,
-    composition_clip: OptionCell<Rc<dyn ICompositionObject>>,
-    rotation_axis: Cell<Vector3D>,
-    relative_offset_adjustment: Cell<Vector3D>,
-    relative_size_adjustment: Cell<Vector>,
     is_hit_test_visible: Cell<bool>,
     is_pixel_snapping_enabled: Cell<bool>,
-    border_mode: Cell<CompositionBorderMode>,
-    backface_visibility: Cell<CompositionBackfaceVisibility>,
-    composite_mode: Cell<CompositionCompositeMode>,
-    parent_for_transform: OptionCell<Rc<dyn ICompositionObject>>,
+    /// The rarely set properties, once one of them has another value than the
+    /// one it is made with.
+    rare: OnceCell<Box<CompositionVisualRareProps>>,
 }
 
 impl Default for CompositionVisualProps {
@@ -305,34 +288,14 @@ impl CompositionVisualProps {
             parent: OptionCell::new(),
             visible: Cell::new(Default::default()),
             opacity: Cell::new(Default::default()),
-            clip: OptionCell::new(),
             clip_to_bounds: Cell::new(Default::default()),
             offset: Cell::new(Default::default()),
-            translation: Cell::new(Default::default()),
             size: Cell::new(Default::default()),
-            anchor_point: Cell::new(Default::default()),
-            center_point: Cell::new(Default::default()),
-            rotation_angle: Cell::new(Default::default()),
-            orientation: Cell::new(Default::default()),
-            scale: Cell::new(Default::default()),
-            transform_matrix: Cell::new(Default::default()),
-            adorned_visual: OptionCell::new(),
-            adorner_is_clipped: Cell::new(Default::default()),
-            opacity_mask_brush: OptionCell::new(),
-            effect: OptionCell::new(),
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
-            cache_mode: OptionCell::new(),
-            composition_clip: OptionCell::new(),
-            rotation_axis: Cell::new(Default::default()),
-            relative_offset_adjustment: Cell::new(Default::default()),
-            relative_size_adjustment: Cell::new(Default::default()),
             is_hit_test_visible: Cell::new(Default::default()),
             is_pixel_snapping_enabled: Cell::new(Default::default()),
-            border_mode: Cell::new(Default::default()),
-            backface_visibility: Cell::new(Default::default()),
-            composite_mode: Cell::new(Default::default()),
-            parent_for_transform: OptionCell::new(),
+            rare: OnceCell::new(),
         }
     }
 
@@ -348,10 +311,6 @@ impl CompositionVisualProps {
         self.visible.set(true);
         self.opacity.set(1.0);
         self.clip_to_bounds.set(true);
-        self.orientation.set(Quaternion::IDENTITY);
-        self.scale.set(Vector3D::new(1.0, 1.0, 1.0));
-        self.transform_matrix.set(Matrix::IDENTITY);
-        self.rotation_axis.set(Vector3D::new(0.0, 0.0, 1.0));
         self.is_hit_test_visible.set(true);
         host.register_for_serialization();
     }
@@ -502,24 +461,24 @@ impl CompositionVisualProps {
 
     /// `Clip` (internal).
     pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
-        self.clip.get()
+        self.rare_clip()
     }
 
     /// Sets `Clip` (internal).
     pub fn set_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
         let mut changed = false;
-        let old_value = self.clip.get();
+        let old_value = self.rare_clip();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_clip_change(host, &old_value, &value);
             CompositionVisualHooks::on_clip_changing(host);
             changed = true;
             // Update the backing value
-            self.clip.set(value.clone());
+            self.store_rare_clip(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CLIP);
             host.register_for_serialization();
         }
-        self.clip.set(value);
+        self.store_rare_clip(value);
         if changed {
             CompositionVisualHooks::on_clip_changed(host);
         }
@@ -621,13 +580,13 @@ impl CompositionVisualProps {
 
     /// `Translation` (animated).
     pub fn translation(&self) -> Vector3D {
-        self.translation.get()
+        self.rare_translation()
     }
 
     /// Sets `Translation` (animated).
     pub fn set_translation(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
-        let old_value = self.translation.get();
+        let old_value = self.rare_translation();
         CompositionVisualHooks::on_animated_property_assigned(host, "Translation");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_translation_property().base());
@@ -639,7 +598,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_translation_changing(host);
             changed = true;
             // Update the backing value
-            self.translation.set(value);
+            self.store_rare_translation(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::TRANSLATION);
             host.register_for_serialization();
@@ -660,7 +619,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "Translation", ExpressionVariant::create(value));
             }
         }
-        self.translation.set(value);
+        self.store_rare_translation(value);
         if changed {
             CompositionVisualHooks::on_translation_changed(host);
         }
@@ -715,13 +674,13 @@ impl CompositionVisualProps {
 
     /// `AnchorPoint` (animated).
     pub fn anchor_point(&self) -> Vector {
-        self.anchor_point.get()
+        self.rare_anchor_point()
     }
 
     /// Sets `AnchorPoint` (animated).
     pub fn set_anchor_point(&self, host: &dyn CompositionVisualHooks, value: Vector) {
         let mut changed = false;
-        let old_value = self.anchor_point.get();
+        let old_value = self.rare_anchor_point();
         CompositionVisualHooks::on_animated_property_assigned(host, "AnchorPoint");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_anchor_point_property().base());
@@ -733,7 +692,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_anchor_point_changing(host);
             changed = true;
             // Update the backing value
-            self.anchor_point.set(value);
+            self.store_rare_anchor_point(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ANCHOR_POINT);
             host.register_for_serialization();
@@ -754,7 +713,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "AnchorPoint", ExpressionVariant::create(value));
             }
         }
-        self.anchor_point.set(value);
+        self.store_rare_anchor_point(value);
         if changed {
             CompositionVisualHooks::on_anchor_point_changed(host);
         }
@@ -762,13 +721,13 @@ impl CompositionVisualProps {
 
     /// `CenterPoint` (animated).
     pub fn center_point(&self) -> Vector3D {
-        self.center_point.get()
+        self.rare_center_point()
     }
 
     /// Sets `CenterPoint` (animated).
     pub fn set_center_point(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
-        let old_value = self.center_point.get();
+        let old_value = self.rare_center_point();
         CompositionVisualHooks::on_animated_property_assigned(host, "CenterPoint");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_center_point_property().base());
@@ -780,7 +739,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_center_point_changing(host);
             changed = true;
             // Update the backing value
-            self.center_point.set(value);
+            self.store_rare_center_point(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CENTER_POINT);
             host.register_for_serialization();
@@ -801,7 +760,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
             }
         }
-        self.center_point.set(value);
+        self.store_rare_center_point(value);
         if changed {
             CompositionVisualHooks::on_center_point_changed(host);
         }
@@ -809,13 +768,13 @@ impl CompositionVisualProps {
 
     /// `RotationAngle` (animated).
     pub fn rotation_angle(&self) -> f32 {
-        self.rotation_angle.get()
+        self.rare_rotation_angle()
     }
 
     /// Sets `RotationAngle` (animated).
     pub fn set_rotation_angle(&self, host: &dyn CompositionVisualHooks, value: f32) {
         let mut changed = false;
-        let old_value = self.rotation_angle.get();
+        let old_value = self.rare_rotation_angle();
         CompositionVisualHooks::on_animated_property_assigned(host, "RotationAngle");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_rotation_angle_property().base());
@@ -827,7 +786,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_rotation_angle_changing(host);
             changed = true;
             // Update the backing value
-            self.rotation_angle.set(value);
+            self.store_rare_rotation_angle(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_ANGLE);
             host.register_for_serialization();
@@ -848,7 +807,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
             }
         }
-        self.rotation_angle.set(value);
+        self.store_rare_rotation_angle(value);
         if changed {
             CompositionVisualHooks::on_rotation_angle_changed(host);
         }
@@ -856,13 +815,13 @@ impl CompositionVisualProps {
 
     /// `Orientation` (animated, default `Quaternion::IDENTITY`).
     pub fn orientation(&self) -> Quaternion {
-        self.orientation.get()
+        self.rare_orientation()
     }
 
     /// Sets `Orientation` (animated, default `Quaternion::IDENTITY`).
     pub fn set_orientation(&self, host: &dyn CompositionVisualHooks, value: Quaternion) {
         let mut changed = false;
-        let old_value = self.orientation.get();
+        let old_value = self.rare_orientation();
         CompositionVisualHooks::on_animated_property_assigned(host, "Orientation");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_orientation_property().base());
@@ -874,7 +833,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_orientation_changing(host);
             changed = true;
             // Update the backing value
-            self.orientation.set(value);
+            self.store_rare_orientation(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ORIENTATION);
             host.register_for_serialization();
@@ -895,7 +854,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "Orientation", ExpressionVariant::create(value));
             }
         }
-        self.orientation.set(value);
+        self.store_rare_orientation(value);
         if changed {
             CompositionVisualHooks::on_orientation_changed(host);
         }
@@ -903,13 +862,13 @@ impl CompositionVisualProps {
 
     /// `Scale` (animated, default `Vector3D::new(1.0, 1.0, 1.0)`).
     pub fn scale(&self) -> Vector3D {
-        self.scale.get()
+        self.rare_scale()
     }
 
     /// Sets `Scale` (animated, default `Vector3D::new(1.0, 1.0, 1.0)`).
     pub fn set_scale(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
-        let old_value = self.scale.get();
+        let old_value = self.rare_scale();
         CompositionVisualHooks::on_animated_property_assigned(host, "Scale");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_scale_property().base());
@@ -921,7 +880,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_scale_changing(host);
             changed = true;
             // Update the backing value
-            self.scale.set(value);
+            self.store_rare_scale(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::SCALE);
             host.register_for_serialization();
@@ -942,7 +901,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
             }
         }
-        self.scale.set(value);
+        self.store_rare_scale(value);
         if changed {
             CompositionVisualHooks::on_scale_changed(host);
         }
@@ -950,13 +909,13 @@ impl CompositionVisualProps {
 
     /// `TransformMatrix` (internal, animated, default `Matrix::IDENTITY`).
     pub fn transform_matrix(&self) -> Matrix {
-        self.transform_matrix.get()
+        self.rare_transform_matrix()
     }
 
     /// Sets `TransformMatrix` (internal, animated, default `Matrix::IDENTITY`).
     pub fn set_transform_matrix(&self, host: &dyn CompositionVisualHooks, value: Matrix) {
         let mut changed = false;
-        let old_value = self.transform_matrix.get();
+        let old_value = self.rare_transform_matrix();
         CompositionVisualHooks::on_animated_property_assigned(host, "TransformMatrix");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_transform_matrix_property().base());
@@ -968,7 +927,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_transform_matrix_changing(host);
             changed = true;
             // Update the backing value
-            self.transform_matrix.set(value);
+            self.store_rare_transform_matrix(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::TRANSFORM_MATRIX);
             host.register_for_serialization();
@@ -989,7 +948,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
             }
         }
-        self.transform_matrix.set(value);
+        self.store_rare_transform_matrix(value);
         if changed {
             CompositionVisualHooks::on_transform_matrix_changed(host);
         }
@@ -997,24 +956,24 @@ impl CompositionVisualProps {
 
     /// `AdornedVisual` (internal).
     pub fn adorned_visual(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.adorned_visual.get()
+        self.rare_adorned_visual()
     }
 
     /// Sets `AdornedVisual` (internal).
     pub fn set_adorned_visual(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.adorned_visual.get();
+        let old_value = self.rare_adorned_visual();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_adorned_visual_change(host, &old_value, &value);
             CompositionVisualHooks::on_adorned_visual_changing(host);
             changed = true;
             // Update the backing value
-            self.adorned_visual.set(value.clone());
+            self.store_rare_adorned_visual(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ADORNED_VISUAL);
             host.register_for_serialization();
         }
-        self.adorned_visual.set(value);
+        self.store_rare_adorned_visual(value);
         if changed {
             CompositionVisualHooks::on_adorned_visual_changed(host);
         }
@@ -1022,24 +981,24 @@ impl CompositionVisualProps {
 
     /// `AdornerIsClipped` (internal).
     pub fn adorner_is_clipped(&self) -> bool {
-        self.adorner_is_clipped.get()
+        self.rare_adorner_is_clipped()
     }
 
     /// Sets `AdornerIsClipped` (internal).
     pub fn set_adorner_is_clipped(&self, host: &dyn CompositionVisualHooks, value: bool) {
         let mut changed = false;
-        let old_value = self.adorner_is_clipped.get();
+        let old_value = self.rare_adorner_is_clipped();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_adorner_is_clipped_change(host, old_value, value);
             CompositionVisualHooks::on_adorner_is_clipped_changing(host);
             changed = true;
             // Update the backing value
-            self.adorner_is_clipped.set(value);
+            self.store_rare_adorner_is_clipped(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ADORNER_IS_CLIPPED);
             host.register_for_serialization();
         }
-        self.adorner_is_clipped.set(value);
+        self.store_rare_adorner_is_clipped(value);
         if changed {
             CompositionVisualHooks::on_adorner_is_clipped_changed(host);
         }
@@ -1047,24 +1006,24 @@ impl CompositionVisualProps {
 
     /// `OpacityMaskBrush` (private to the class).
     pub fn opacity_mask_brush_transport_field(&self) -> Option<BatchResource<dyn IBrush>> {
-        self.opacity_mask_brush.get()
+        self.rare_opacity_mask_brush()
     }
 
     /// Sets `OpacityMaskBrush` (private to the class).
     pub fn set_opacity_mask_brush_transport_field(&self, host: &dyn CompositionVisualHooks, value: Option<BatchResource<dyn IBrush>>) {
         let mut changed = false;
-        let old_value = self.opacity_mask_brush.get();
+        let old_value = self.rare_opacity_mask_brush();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_opacity_mask_brush_change(host, &old_value, &value);
             CompositionVisualHooks::on_opacity_mask_brush_changing(host);
             changed = true;
             // Update the backing value
-            self.opacity_mask_brush.set(value.clone());
+            self.store_rare_opacity_mask_brush(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::OPACITY_MASK_BRUSH);
             host.register_for_serialization();
         }
-        self.opacity_mask_brush.set(value);
+        self.store_rare_opacity_mask_brush(value);
         if changed {
             CompositionVisualHooks::on_opacity_mask_brush_changed(host);
         }
@@ -1072,24 +1031,24 @@ impl CompositionVisualProps {
 
     /// `Effect` (internal).
     pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
-        self.effect.get()
+        self.rare_effect()
     }
 
     /// Sets `Effect` (internal).
     pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
         let mut changed = false;
-        let old_value = self.effect.get();
+        let old_value = self.rare_effect();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_effect_change(host, &old_value, &value);
             CompositionVisualHooks::on_effect_changing(host);
             changed = true;
             // Update the backing value
-            self.effect.set(value.clone());
+            self.store_rare_effect(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::EFFECT);
             host.register_for_serialization();
         }
-        self.effect.set(value);
+        self.store_rare_effect(value);
         if changed {
             CompositionVisualHooks::on_effect_changed(host);
         }
@@ -1147,24 +1106,24 @@ impl CompositionVisualProps {
 
     /// `CacheMode` (internal).
     pub fn cache_mode(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.cache_mode.get()
+        self.rare_cache_mode()
     }
 
     /// Sets `CacheMode` (internal).
     pub fn set_cache_mode(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.cache_mode.get();
+        let old_value = self.rare_cache_mode();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_cache_mode_change(host, &old_value, &value);
             CompositionVisualHooks::on_cache_mode_changing(host);
             changed = true;
             // Update the backing value
-            self.cache_mode.set(value.clone());
+            self.store_rare_cache_mode(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::CACHE_MODE);
             host.register_for_serialization();
         }
-        self.cache_mode.set(value);
+        self.store_rare_cache_mode(value);
         if changed {
             CompositionVisualHooks::on_cache_mode_changed(host);
         }
@@ -1172,24 +1131,24 @@ impl CompositionVisualProps {
 
     /// `CompositionClip` (FerroUI overlay).
     pub fn composition_clip(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.composition_clip.get()
+        self.rare_composition_clip()
     }
 
     /// Sets `CompositionClip` (FerroUI overlay).
     pub fn set_composition_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.composition_clip.get();
+        let old_value = self.rare_composition_clip();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_composition_clip_change(host, &old_value, &value);
             CompositionVisualHooks::on_composition_clip_changing(host);
             changed = true;
             // Update the backing value
-            self.composition_clip.set(value.clone());
+            self.store_rare_composition_clip(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITION_CLIP);
             host.register_for_serialization();
         }
-        self.composition_clip.set(value);
+        self.store_rare_composition_clip(value);
         if changed {
             CompositionVisualHooks::on_composition_clip_changed(host);
         }
@@ -1197,13 +1156,13 @@ impl CompositionVisualProps {
 
     /// `RotationAxis` (animated, default `Vector3D::new(0.0, 0.0, 1.0)`, FerroUI overlay).
     pub fn rotation_axis(&self) -> Vector3D {
-        self.rotation_axis.get()
+        self.rare_rotation_axis()
     }
 
     /// Sets `RotationAxis` (animated, default `Vector3D::new(0.0, 0.0, 1.0)`, FerroUI overlay).
     pub fn set_rotation_axis(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
-        let old_value = self.rotation_axis.get();
+        let old_value = self.rare_rotation_axis();
         CompositionVisualHooks::on_animated_property_assigned(host, "RotationAxis");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base());
@@ -1215,7 +1174,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_rotation_axis_changing(host);
             changed = true;
             // Update the backing value
-            self.rotation_axis.set(value);
+            self.store_rare_rotation_axis(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_AXIS);
             host.register_for_serialization();
@@ -1236,7 +1195,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "RotationAxis", ExpressionVariant::create(value));
             }
         }
-        self.rotation_axis.set(value);
+        self.store_rare_rotation_axis(value);
         if changed {
             CompositionVisualHooks::on_rotation_axis_changed(host);
         }
@@ -1244,13 +1203,13 @@ impl CompositionVisualProps {
 
     /// `RelativeOffsetAdjustment` (animated, FerroUI overlay).
     pub fn relative_offset_adjustment(&self) -> Vector3D {
-        self.relative_offset_adjustment.get()
+        self.rare_relative_offset_adjustment()
     }
 
     /// Sets `RelativeOffsetAdjustment` (animated, FerroUI overlay).
     pub fn set_relative_offset_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
         let mut changed = false;
-        let old_value = self.relative_offset_adjustment.get();
+        let old_value = self.rare_relative_offset_adjustment();
         CompositionVisualHooks::on_animated_property_assigned(host, "RelativeOffsetAdjustment");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base());
@@ -1262,7 +1221,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_relative_offset_adjustment_changing(host);
             changed = true;
             // Update the backing value
-            self.relative_offset_adjustment.set(value);
+            self.store_rare_relative_offset_adjustment(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT);
             host.register_for_serialization();
@@ -1283,7 +1242,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "RelativeOffsetAdjustment", ExpressionVariant::create(value));
             }
         }
-        self.relative_offset_adjustment.set(value);
+        self.store_rare_relative_offset_adjustment(value);
         if changed {
             CompositionVisualHooks::on_relative_offset_adjustment_changed(host);
         }
@@ -1291,13 +1250,13 @@ impl CompositionVisualProps {
 
     /// `RelativeSizeAdjustment` (animated, FerroUI overlay).
     pub fn relative_size_adjustment(&self) -> Vector {
-        self.relative_size_adjustment.get()
+        self.rare_relative_size_adjustment()
     }
 
     /// Sets `RelativeSizeAdjustment` (animated, FerroUI overlay).
     pub fn set_relative_size_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector) {
         let mut changed = false;
-        let old_value = self.relative_size_adjustment.get();
+        let old_value = self.rare_relative_size_adjustment();
         CompositionVisualHooks::on_animated_property_assigned(host, "RelativeSizeAdjustment");
         if !old_value.differs(&value) {
             host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base());
@@ -1309,7 +1268,7 @@ impl CompositionVisualProps {
             CompositionVisualHooks::on_relative_size_adjustment_changing(host);
             changed = true;
             // Update the backing value
-            self.relative_size_adjustment.set(value);
+            self.store_rare_relative_size_adjustment(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT);
             host.register_for_serialization();
@@ -1330,7 +1289,7 @@ impl CompositionVisualProps {
                 host.start_animation_group(&animation, "RelativeSizeAdjustment", ExpressionVariant::create(value));
             }
         }
-        self.relative_size_adjustment.set(value);
+        self.store_rare_relative_size_adjustment(value);
         if changed {
             CompositionVisualHooks::on_relative_size_adjustment_changed(host);
         }
@@ -1388,24 +1347,24 @@ impl CompositionVisualProps {
 
     /// `BorderMode` (FerroUI overlay).
     pub fn border_mode(&self) -> CompositionBorderMode {
-        self.border_mode.get()
+        self.rare_border_mode()
     }
 
     /// Sets `BorderMode` (FerroUI overlay).
     pub fn set_border_mode(&self, host: &dyn CompositionVisualHooks, value: CompositionBorderMode) {
         let mut changed = false;
-        let old_value = self.border_mode.get();
+        let old_value = self.rare_border_mode();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_border_mode_change(host, old_value, value);
             CompositionVisualHooks::on_border_mode_changing(host);
             changed = true;
             // Update the backing value
-            self.border_mode.set(value);
+            self.store_rare_border_mode(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BORDER_MODE);
             host.register_for_serialization();
         }
-        self.border_mode.set(value);
+        self.store_rare_border_mode(value);
         if changed {
             CompositionVisualHooks::on_border_mode_changed(host);
         }
@@ -1413,24 +1372,24 @@ impl CompositionVisualProps {
 
     /// `BackfaceVisibility` (FerroUI overlay).
     pub fn backface_visibility(&self) -> CompositionBackfaceVisibility {
-        self.backface_visibility.get()
+        self.rare_backface_visibility()
     }
 
     /// Sets `BackfaceVisibility` (FerroUI overlay).
     pub fn set_backface_visibility(&self, host: &dyn CompositionVisualHooks, value: CompositionBackfaceVisibility) {
         let mut changed = false;
-        let old_value = self.backface_visibility.get();
+        let old_value = self.rare_backface_visibility();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_backface_visibility_change(host, old_value, value);
             CompositionVisualHooks::on_backface_visibility_changing(host);
             changed = true;
             // Update the backing value
-            self.backface_visibility.set(value);
+            self.store_rare_backface_visibility(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BACKFACE_VISIBILITY);
             host.register_for_serialization();
         }
-        self.backface_visibility.set(value);
+        self.store_rare_backface_visibility(value);
         if changed {
             CompositionVisualHooks::on_backface_visibility_changed(host);
         }
@@ -1438,24 +1397,24 @@ impl CompositionVisualProps {
 
     /// `CompositeMode` (FerroUI overlay).
     pub fn composite_mode(&self) -> CompositionCompositeMode {
-        self.composite_mode.get()
+        self.rare_composite_mode()
     }
 
     /// Sets `CompositeMode` (FerroUI overlay).
     pub fn set_composite_mode(&self, host: &dyn CompositionVisualHooks, value: CompositionCompositeMode) {
         let mut changed = false;
-        let old_value = self.composite_mode.get();
+        let old_value = self.rare_composite_mode();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_composite_mode_change(host, old_value, value);
             CompositionVisualHooks::on_composite_mode_changing(host);
             changed = true;
             // Update the backing value
-            self.composite_mode.set(value);
+            self.store_rare_composite_mode(value);
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITE_MODE);
             host.register_for_serialization();
         }
-        self.composite_mode.set(value);
+        self.store_rare_composite_mode(value);
         if changed {
             CompositionVisualHooks::on_composite_mode_changed(host);
         }
@@ -1463,24 +1422,24 @@ impl CompositionVisualProps {
 
     /// `ParentForTransform` (FerroUI overlay).
     pub fn parent_for_transform(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.parent_for_transform.get()
+        self.rare_parent_for_transform()
     }
 
     /// Sets `ParentForTransform` (FerroUI overlay).
     pub fn set_parent_for_transform(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.parent_for_transform.get();
+        let old_value = self.rare_parent_for_transform();
         if old_value.differs(&value) {
             CompositionVisualHooks::validate_parent_for_transform_change(host, &old_value, &value);
             CompositionVisualHooks::on_parent_for_transform_changing(host);
             changed = true;
             // Update the backing value
-            self.parent_for_transform.set(value.clone());
+            self.store_rare_parent_for_transform(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::PARENT_FOR_TRANSFORM);
             host.register_for_serialization();
         }
-        self.parent_for_transform.set(value);
+        self.store_rare_parent_for_transform(value);
         if changed {
             CompositionVisualHooks::on_parent_for_transform_changed(host);
         }
@@ -1626,7 +1585,7 @@ impl CompositionVisualProps {
             writer.write(self.opacity.get());
         }
         if changed.contains(CompositionVisualChangedFields::CLIP) {
-            writer.write_value(self.clip.get());
+            writer.write_value(self.rare_clip());
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_clip_to_bounds_property().base()));
@@ -1641,7 +1600,7 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_translation_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::TRANSLATION) {
-            writer.write(self.translation.get());
+            writer.write(self.rare_translation());
         }
         if changed.contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_size_property().base()));
@@ -1651,44 +1610,44 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_anchor_point_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT) {
-            writer.write(self.anchor_point.get());
+            writer.write(self.rare_anchor_point());
         }
         if changed.contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_center_point_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::CENTER_POINT) {
-            writer.write(self.center_point.get());
+            writer.write(self.rare_center_point());
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_angle_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rotation_angle.get());
+            writer.write(self.rare_rotation_angle());
         }
         if changed.contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_orientation_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::ORIENTATION) {
-            writer.write(self.orientation.get());
+            writer.write(self.rare_orientation());
         }
         if changed.contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_scale_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::SCALE) {
-            writer.write(self.scale.get());
+            writer.write(self.rare_scale());
         }
         if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_transform_matrix_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.transform_matrix.get());
+            writer.write(self.rare_transform_matrix());
         }
         if changed.contains(CompositionVisualChangedFields::ADORNED_VISUAL) {
-            writer.write_server_object(self.adorned_visual.get().map(|o| o.server()));
+            writer.write_server_object(self.rare_adorned_visual().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::ADORNER_IS_CLIPPED) {
-            writer.write(self.adorner_is_clipped.get());
+            writer.write(self.rare_adorner_is_clipped());
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_MASK_BRUSH) {
-            writer.write_resource(self.opacity_mask_brush.get());
+            writer.write_resource(self.rare_opacity_mask_brush());
         }
         if changed.contains(CompositionVisualChangedFields::EFFECT) {
-            writer.write_value(self.effect.get());
+            writer.write_value(self.rare_effect());
         }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {
             writer.write(self.render_options.get());
@@ -1697,25 +1656,25 @@ impl CompositionVisualProps {
             writer.write(self.text_options.get());
         }
         if changed.contains(CompositionVisualChangedFields::CACHE_MODE) {
-            writer.write_server_object(self.cache_mode.get().map(|o| o.server()));
+            writer.write_server_object(self.rare_cache_mode().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
-            writer.write_server_object(self.composition_clip.get().map(|o| o.server()));
+            writer.write_server_object(self.rare_composition_clip().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
-            writer.write(self.rotation_axis.get());
+            writer.write(self.rare_rotation_axis());
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
-            writer.write(self.relative_offset_adjustment.get());
+            writer.write(self.rare_relative_offset_adjustment());
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base()));
         } else if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
-            writer.write(self.relative_size_adjustment.get());
+            writer.write(self.rare_relative_size_adjustment());
         }
         if changed.contains(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE) {
             writer.write(self.is_hit_test_visible.get());
@@ -1724,18 +1683,519 @@ impl CompositionVisualProps {
             writer.write(self.is_pixel_snapping_enabled.get());
         }
         if changed.contains(CompositionVisualChangedFields::BORDER_MODE) {
-            writer.write(self.border_mode.get());
+            writer.write(self.rare_border_mode());
         }
         if changed.contains(CompositionVisualChangedFields::BACKFACE_VISIBILITY) {
-            writer.write(self.backface_visibility.get());
+            writer.write(self.rare_backface_visibility());
         }
         if changed.contains(CompositionVisualChangedFields::COMPOSITE_MODE) {
-            writer.write(self.composite_mode.get());
+            writer.write(self.rare_composite_mode());
         }
         if changed.contains(CompositionVisualChangedFields::PARENT_FOR_TRANSFORM) {
-            writer.write_server_object(self.parent_for_transform.get().map(|o| o.server()));
+            writer.write_server_object(self.rare_parent_for_transform().map(|o| o.server()));
         }
         self.changed_fields_of_composition_visual.set(CompositionVisualChangedFields::empty());
+    }
+}
+
+/// The properties of [`CompositionVisualProps`] that nearly every object leaves at the value it
+/// is made with: made when one of them is first given another value.
+struct CompositionVisualRareProps {
+    clip: OptionCell<Arc<dyn IGeometryImpl>>,
+    translation: Cell<Vector3D>,
+    anchor_point: Cell<Vector>,
+    center_point: Cell<Vector3D>,
+    rotation_angle: Cell<f32>,
+    orientation: Cell<Quaternion>,
+    scale: Cell<Vector3D>,
+    transform_matrix: Cell<Matrix>,
+    adorned_visual: OptionCell<Rc<dyn ICompositionObject>>,
+    adorner_is_clipped: Cell<bool>,
+    opacity_mask_brush: OptionCell<BatchResource<dyn IBrush>>,
+    effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    cache_mode: OptionCell<Rc<dyn ICompositionObject>>,
+    composition_clip: OptionCell<Rc<dyn ICompositionObject>>,
+    rotation_axis: Cell<Vector3D>,
+    relative_offset_adjustment: Cell<Vector3D>,
+    relative_size_adjustment: Cell<Vector>,
+    border_mode: Cell<CompositionBorderMode>,
+    backface_visibility: Cell<CompositionBackfaceVisibility>,
+    composite_mode: Cell<CompositionCompositeMode>,
+    parent_for_transform: OptionCell<Rc<dyn ICompositionObject>>,
+}
+
+impl CompositionVisualRareProps {
+    fn new() -> Self {
+        Self {
+            clip: OptionCell::new(),
+            translation: Cell::new(Default::default()),
+            anchor_point: Cell::new(Default::default()),
+            center_point: Cell::new(Default::default()),
+            rotation_angle: Cell::new(Default::default()),
+            orientation: Cell::new(Quaternion::IDENTITY),
+            scale: Cell::new(Vector3D::new(1.0, 1.0, 1.0)),
+            transform_matrix: Cell::new(Matrix::IDENTITY),
+            adorned_visual: OptionCell::new(),
+            adorner_is_clipped: Cell::new(Default::default()),
+            opacity_mask_brush: OptionCell::new(),
+            effect: OptionCell::new(),
+            cache_mode: OptionCell::new(),
+            composition_clip: OptionCell::new(),
+            rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
+            relative_offset_adjustment: Cell::new(Default::default()),
+            relative_size_adjustment: Cell::new(Default::default()),
+            border_mode: Cell::new(Default::default()),
+            backface_visibility: Cell::new(Default::default()),
+            composite_mode: Cell::new(Default::default()),
+            parent_for_transform: OptionCell::new(),
+        }
+    }
+}
+
+impl CompositionVisualProps {
+    /// Whether one of the rarely set properties was given a value other than the
+    /// one it is made with.
+    pub fn has_rare_properties(&self) -> bool {
+        self.rare.get().is_some()
+    }
+
+    #[cold]
+    fn rare_block(&self) -> &CompositionVisualRareProps {
+        self.rare.get_or_init(|| Box::new(CompositionVisualRareProps::new()))
+    }
+
+    #[inline]
+    fn rare_clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
+        match self.rare.get() {
+            Some(rare) => rare.clip.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_clip(&self, value: Option<Arc<dyn IGeometryImpl>>) {
+        match self.rare.get() {
+            Some(rare) => rare.clip.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().clip.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_translation(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.translation.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_translation(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.translation.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().translation.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_anchor_point(&self) -> Vector {
+        match self.rare.get() {
+            Some(rare) => rare.anchor_point.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_anchor_point(&self, value: Vector) {
+        match self.rare.get() {
+            Some(rare) => rare.anchor_point.set(value),
+            None => {
+                let initial: Vector = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().anchor_point.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_center_point(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.center_point.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_center_point(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.center_point.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().center_point.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_rotation_angle(&self) -> f32 {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_angle.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_rotation_angle(&self, value: f32) {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_angle.set(value),
+            None => {
+                let initial: f32 = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().rotation_angle.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_orientation(&self) -> Quaternion {
+        match self.rare.get() {
+            Some(rare) => rare.orientation.get(),
+            None => Quaternion::IDENTITY,
+        }
+    }
+
+    #[inline]
+    fn store_rare_orientation(&self, value: Quaternion) {
+        match self.rare.get() {
+            Some(rare) => rare.orientation.set(value),
+            None => {
+                let initial: Quaternion = Quaternion::IDENTITY;
+                if value.differs(&initial) {
+                    self.rare_block().orientation.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_scale(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.scale.get(),
+            None => Vector3D::new(1.0, 1.0, 1.0),
+        }
+    }
+
+    #[inline]
+    fn store_rare_scale(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.scale.set(value),
+            None => {
+                let initial: Vector3D = Vector3D::new(1.0, 1.0, 1.0);
+                if value.differs(&initial) {
+                    self.rare_block().scale.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_transform_matrix(&self) -> Matrix {
+        match self.rare.get() {
+            Some(rare) => rare.transform_matrix.get(),
+            None => Matrix::IDENTITY,
+        }
+    }
+
+    #[inline]
+    fn store_rare_transform_matrix(&self, value: Matrix) {
+        match self.rare.get() {
+            Some(rare) => rare.transform_matrix.set(value),
+            None => {
+                let initial: Matrix = Matrix::IDENTITY;
+                if value.differs(&initial) {
+                    self.rare_block().transform_matrix.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_adorned_visual(&self) -> Option<Rc<dyn ICompositionObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.adorned_visual.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_adorned_visual(&self, value: Option<Rc<dyn ICompositionObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.adorned_visual.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().adorned_visual.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_adorner_is_clipped(&self) -> bool {
+        match self.rare.get() {
+            Some(rare) => rare.adorner_is_clipped.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_adorner_is_clipped(&self, value: bool) {
+        match self.rare.get() {
+            Some(rare) => rare.adorner_is_clipped.set(value),
+            None => {
+                let initial: bool = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().adorner_is_clipped.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_opacity_mask_brush(&self) -> Option<BatchResource<dyn IBrush>> {
+        match self.rare.get() {
+            Some(rare) => rare.opacity_mask_brush.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_opacity_mask_brush(&self, value: Option<BatchResource<dyn IBrush>>) {
+        match self.rare.get() {
+            Some(rare) => rare.opacity_mask_brush.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().opacity_mask_brush.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        match self.rare.get() {
+            Some(rare) => rare.effect.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_effect(&self, value: Option<Arc<dyn IImmutableEffect>>) {
+        match self.rare.get() {
+            Some(rare) => rare.effect.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().effect.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_cache_mode(&self) -> Option<Rc<dyn ICompositionObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.cache_mode.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_cache_mode(&self, value: Option<Rc<dyn ICompositionObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.cache_mode.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().cache_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_composition_clip(&self) -> Option<Rc<dyn ICompositionObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.composition_clip.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_composition_clip(&self, value: Option<Rc<dyn ICompositionObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.composition_clip.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().composition_clip.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_rotation_axis(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_axis.get(),
+            None => Vector3D::new(0.0, 0.0, 1.0),
+        }
+    }
+
+    #[inline]
+    fn store_rare_rotation_axis(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_axis.set(value),
+            None => {
+                let initial: Vector3D = Vector3D::new(0.0, 0.0, 1.0);
+                if value.differs(&initial) {
+                    self.rare_block().rotation_axis.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_relative_offset_adjustment(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.relative_offset_adjustment.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_relative_offset_adjustment(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.relative_offset_adjustment.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().relative_offset_adjustment.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_relative_size_adjustment(&self) -> Vector {
+        match self.rare.get() {
+            Some(rare) => rare.relative_size_adjustment.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_relative_size_adjustment(&self, value: Vector) {
+        match self.rare.get() {
+            Some(rare) => rare.relative_size_adjustment.set(value),
+            None => {
+                let initial: Vector = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().relative_size_adjustment.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_border_mode(&self) -> CompositionBorderMode {
+        match self.rare.get() {
+            Some(rare) => rare.border_mode.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_border_mode(&self, value: CompositionBorderMode) {
+        match self.rare.get() {
+            Some(rare) => rare.border_mode.set(value),
+            None => {
+                let initial: CompositionBorderMode = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().border_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backface_visibility(&self) -> CompositionBackfaceVisibility {
+        match self.rare.get() {
+            Some(rare) => rare.backface_visibility.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backface_visibility(&self, value: CompositionBackfaceVisibility) {
+        match self.rare.get() {
+            Some(rare) => rare.backface_visibility.set(value),
+            None => {
+                let initial: CompositionBackfaceVisibility = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backface_visibility.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_composite_mode(&self) -> CompositionCompositeMode {
+        match self.rare.get() {
+            Some(rare) => rare.composite_mode.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_composite_mode(&self, value: CompositionCompositeMode) {
+        match self.rare.get() {
+            Some(rare) => rare.composite_mode.set(value),
+            None => {
+                let initial: CompositionCompositeMode = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().composite_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_parent_for_transform(&self) -> Option<Rc<dyn ICompositionObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.parent_for_transform.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_parent_for_transform(&self, value: Option<Rc<dyn ICompositionObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.parent_for_transform.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().parent_for_transform.set(value);
+                }
+            }
+        }
     }
 }
 
@@ -1803,34 +2263,16 @@ pub struct ServerCompositionVisualProps {
     parent: OptionCell<Rc<dyn IServerObject>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: OptionCell<Arc<dyn IGeometryImpl>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
-    translation: Cell<Vector3D>,
     size: Cell<Vector>,
-    anchor_point: Cell<Vector>,
-    center_point: Cell<Vector3D>,
-    rotation_angle: Cell<f32>,
-    orientation: Cell<Quaternion>,
-    scale: Cell<Vector3D>,
-    transform_matrix: Cell<Matrix>,
-    adorned_visual: OptionCell<Rc<dyn IServerObject>>,
-    adorner_is_clipped: Cell<bool>,
-    opacity_mask_brush: OptionCell<ServerResourceRef<dyn IBrush>>,
-    effect: OptionCell<Arc<dyn IImmutableEffect>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
-    cache_mode: OptionCell<Rc<dyn IServerObject>>,
-    composition_clip: OptionCell<Rc<dyn IServerObject>>,
-    rotation_axis: Cell<Vector3D>,
-    relative_offset_adjustment: Cell<Vector3D>,
-    relative_size_adjustment: Cell<Vector>,
     is_hit_test_visible: Cell<bool>,
     is_pixel_snapping_enabled: Cell<bool>,
-    border_mode: Cell<CompositionBorderMode>,
-    backface_visibility: Cell<CompositionBackfaceVisibility>,
-    composite_mode: Cell<CompositionCompositeMode>,
-    parent_for_transform: OptionCell<Rc<dyn IServerObject>>,
+    /// The rarely set properties, once one of them has another value than the
+    /// one it is made with.
+    rare: OnceCell<Box<ServerCompositionVisualRareProps>>,
     /// Whether the first changes of the object were read: they report
     /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) as changed.
     defaults_reported: Cell<bool>,
@@ -1865,34 +2307,14 @@ impl ServerCompositionVisualProps {
             parent: OptionCell::new(),
             visible: Cell::new(true),
             opacity: Cell::new(1.0),
-            clip: OptionCell::new(),
             clip_to_bounds: Cell::new(true),
             offset: Cell::new(Default::default()),
-            translation: Cell::new(Default::default()),
             size: Cell::new(Default::default()),
-            anchor_point: Cell::new(Default::default()),
-            center_point: Cell::new(Default::default()),
-            rotation_angle: Cell::new(Default::default()),
-            orientation: Cell::new(Quaternion::IDENTITY),
-            scale: Cell::new(Vector3D::new(1.0, 1.0, 1.0)),
-            transform_matrix: Cell::new(Matrix::IDENTITY),
-            adorned_visual: OptionCell::new(),
-            adorner_is_clipped: Cell::new(Default::default()),
-            opacity_mask_brush: OptionCell::new(),
-            effect: OptionCell::new(),
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
-            cache_mode: OptionCell::new(),
-            composition_clip: OptionCell::new(),
-            rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
-            relative_offset_adjustment: Cell::new(Default::default()),
-            relative_size_adjustment: Cell::new(Default::default()),
             is_hit_test_visible: Cell::new(true),
             is_pixel_snapping_enabled: Cell::new(Default::default()),
-            border_mode: Cell::new(Default::default()),
-            backface_visibility: Cell::new(Default::default()),
-            composite_mode: Cell::new(Default::default()),
-            parent_for_transform: OptionCell::new(),
+            rare: OnceCell::new(),
             defaults_reported: Cell::new(false),
         }
     }
@@ -2045,8 +2467,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IGeometryImpl>>>(
                 "Clip",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).clip.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).clip.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_clip(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_clip(v),
                 None,
                 None,
             )
@@ -2055,11 +2477,11 @@ impl ServerCompositionVisualProps {
 
     /// `Clip`.
     pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
-        self.clip.get()
+        self.rare_clip()
     }
 
     pub fn set_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
-        let old_value = self.clip.get();
+        let old_value = self.rare_clip();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_clip_changing(host);
@@ -2071,7 +2493,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.clip.set(value.clone()),
+                assign: &mut || self.store_rare_clip(value.clone()),
             },
         );
         if changed {
@@ -2136,21 +2558,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
                 "Translation",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).translation.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).translation.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).translation.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).translation.set(v.cast_or_default::<Vector3D>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_translation(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_translation(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_translation())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_translation(v.cast_or_default::<Vector3D>())),
             )
         })
     }
 
     /// `Translation` (animated).
     pub fn translation(&self) -> Vector3D {
-        self.translation.get()
+        self.rare_translation()
     }
 
     pub fn set_translation(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
-        self.translation.set(value);
+        self.store_rare_translation(value);
         host.remove_animation_for_property(Self::id_of_translation_property().base());
     }
 
@@ -2186,21 +2608,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector>(
                 "AnchorPoint",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).anchor_point.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).anchor_point.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).anchor_point.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).anchor_point.set(v.cast_or_default::<Vector>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_anchor_point(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_anchor_point(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_anchor_point())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_anchor_point(v.cast_or_default::<Vector>())),
             )
         })
     }
 
     /// `AnchorPoint` (animated).
     pub fn anchor_point(&self) -> Vector {
-        self.anchor_point.get()
+        self.rare_anchor_point()
     }
 
     pub fn set_anchor_point(&self, host: &dyn ServerCompositionVisualHooks, value: Vector) {
-        self.anchor_point.set(value);
+        self.store_rare_anchor_point(value);
         host.remove_animation_for_property(Self::id_of_anchor_point_property().base());
     }
 
@@ -2211,21 +2633,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
                 "CenterPoint",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).center_point.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).center_point.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).center_point.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).center_point.set(v.cast_or_default::<Vector3D>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_center_point(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_center_point(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_center_point())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_center_point(v.cast_or_default::<Vector3D>())),
             )
         })
     }
 
     /// `CenterPoint` (animated).
     pub fn center_point(&self) -> Vector3D {
-        self.center_point.get()
+        self.rare_center_point()
     }
 
     pub fn set_center_point(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
-        self.center_point.set(value);
+        self.store_rare_center_point(value);
         host.remove_animation_for_property(Self::id_of_center_point_property().base());
     }
 
@@ -2236,21 +2658,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, f32>(
                 "RotationAngle",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).rotation_angle.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).rotation_angle.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rotation_angle.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).rotation_angle.set(v.cast_or_default::<f32>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_rotation_angle(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_rotation_angle(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_rotation_angle())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_rotation_angle(v.cast_or_default::<f32>())),
             )
         })
     }
 
     /// `RotationAngle` (animated).
     pub fn rotation_angle(&self) -> f32 {
-        self.rotation_angle.get()
+        self.rare_rotation_angle()
     }
 
     pub fn set_rotation_angle(&self, host: &dyn ServerCompositionVisualHooks, value: f32) {
-        self.rotation_angle.set(value);
+        self.store_rare_rotation_angle(value);
         host.remove_animation_for_property(Self::id_of_rotation_angle_property().base());
     }
 
@@ -2261,21 +2683,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Quaternion>(
                 "Orientation",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).orientation.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).orientation.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).orientation.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).orientation.set(v.cast_or_default::<Quaternion>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_orientation(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_orientation(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_orientation())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_orientation(v.cast_or_default::<Quaternion>())),
             )
         })
     }
 
     /// `Orientation` (animated).
     pub fn orientation(&self) -> Quaternion {
-        self.orientation.get()
+        self.rare_orientation()
     }
 
     pub fn set_orientation(&self, host: &dyn ServerCompositionVisualHooks, value: Quaternion) {
-        self.orientation.set(value);
+        self.store_rare_orientation(value);
         host.remove_animation_for_property(Self::id_of_orientation_property().base());
     }
 
@@ -2286,21 +2708,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
                 "Scale",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).scale.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).scale.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).scale.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).scale.set(v.cast_or_default::<Vector3D>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_scale(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_scale(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_scale())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_scale(v.cast_or_default::<Vector3D>())),
             )
         })
     }
 
     /// `Scale` (animated).
     pub fn scale(&self) -> Vector3D {
-        self.scale.get()
+        self.rare_scale()
     }
 
     pub fn set_scale(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
-        self.scale.set(value);
+        self.store_rare_scale(value);
         host.remove_animation_for_property(Self::id_of_scale_property().base());
     }
 
@@ -2311,21 +2733,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Matrix>(
                 "TransformMatrix",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).transform_matrix.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).transform_matrix.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_transform_matrix(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_transform_matrix(v),
                 None,
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).transform_matrix.set(v.cast_or_default::<Matrix>())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_transform_matrix(v.cast_or_default::<Matrix>())),
             )
         })
     }
 
     /// `TransformMatrix` (animated).
     pub fn transform_matrix(&self) -> Matrix {
-        self.transform_matrix.get()
+        self.rare_transform_matrix()
     }
 
     pub fn set_transform_matrix(&self, host: &dyn ServerCompositionVisualHooks, value: Matrix) {
-        self.transform_matrix.set(value);
+        self.store_rare_transform_matrix(value);
         host.remove_animation_for_property(Self::id_of_transform_matrix_property().base());
     }
 
@@ -2336,8 +2758,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "AdornedVisual",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).adorned_visual.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).adorned_visual.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_adorned_visual(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_adorned_visual(v),
                 None,
                 None,
             )
@@ -2346,11 +2768,11 @@ impl ServerCompositionVisualProps {
 
     /// `AdornedVisual`.
     pub fn adorned_visual(&self) -> Option<Rc<dyn IServerObject>> {
-        self.adorned_visual.get()
+        self.rare_adorned_visual()
     }
 
     pub fn set_adorned_visual(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.adorned_visual.get();
+        let old_value = self.rare_adorned_visual();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_adorned_visual_changing(host);
@@ -2362,7 +2784,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || self.adorned_visual.set(value.clone()),
+                assign: &mut || self.store_rare_adorned_visual(value.clone()),
             },
         );
         if changed {
@@ -2377,9 +2799,9 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, bool>(
                 "AdornerIsClipped",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).adorner_is_clipped.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).adorner_is_clipped.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).adorner_is_clipped.get())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_adorner_is_clipped(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_adorner_is_clipped(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_adorner_is_clipped())),
                 None,
             )
         })
@@ -2387,11 +2809,11 @@ impl ServerCompositionVisualProps {
 
     /// `AdornerIsClipped`.
     pub fn adorner_is_clipped(&self) -> bool {
-        self.adorner_is_clipped.get()
+        self.rare_adorner_is_clipped()
     }
 
     pub fn set_adorner_is_clipped(&self, host: &dyn ServerCompositionVisualHooks, value: bool) {
-        let old_value = self.adorner_is_clipped.get();
+        let old_value = self.rare_adorner_is_clipped();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_adorner_is_clipped_changing(host);
@@ -2403,7 +2825,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.adorner_is_clipped.set(value),
+                assign: &mut || self.store_rare_adorner_is_clipped(value),
             },
         );
         if changed {
@@ -2418,8 +2840,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<ServerResourceRef<dyn IBrush>>>(
                 "OpacityMaskBrush",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).opacity_mask_brush.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_opacity_mask_brush(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_opacity_mask_brush(v),
                 None,
                 None,
             )
@@ -2428,11 +2850,11 @@ impl ServerCompositionVisualProps {
 
     /// `OpacityMaskBrush`.
     pub fn opacity_mask_brush(&self) -> Option<ServerResourceRef<dyn IBrush>> {
-        self.opacity_mask_brush.get()
+        self.rare_opacity_mask_brush()
     }
 
     pub fn set_opacity_mask_brush(&self, host: &dyn ServerCompositionVisualHooks, value: Option<ServerResourceRef<dyn IBrush>>) {
-        let old_value = self.opacity_mask_brush.get();
+        let old_value = self.rare_opacity_mask_brush();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_opacity_mask_brush_changing(host);
@@ -2444,7 +2866,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || self.opacity_mask_brush.set(value.clone()),
+                assign: &mut || self.store_rare_opacity_mask_brush(value.clone()),
             },
         );
         if changed {
@@ -2459,8 +2881,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IImmutableEffect>>>(
                 "Effect",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).effect.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).effect.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_effect(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_effect(v),
                 None,
                 None,
             )
@@ -2469,11 +2891,11 @@ impl ServerCompositionVisualProps {
 
     /// `Effect`.
     pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
-        self.effect.get()
+        self.rare_effect()
     }
 
     pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
-        let old_value = self.effect.get();
+        let old_value = self.rare_effect();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_effect_changing(host);
@@ -2485,7 +2907,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.effect.set(value.clone()),
+                assign: &mut || self.store_rare_effect(value.clone()),
             },
         );
         if changed {
@@ -2582,8 +3004,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "CacheMode",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).cache_mode.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).cache_mode.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_cache_mode(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_cache_mode(v),
                 None,
                 None,
             )
@@ -2592,11 +3014,11 @@ impl ServerCompositionVisualProps {
 
     /// `CacheMode`.
     pub fn cache_mode(&self) -> Option<Rc<dyn IServerObject>> {
-        self.cache_mode.get()
+        self.rare_cache_mode()
     }
 
     pub fn set_cache_mode(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.cache_mode.get();
+        let old_value = self.rare_cache_mode();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_cache_mode_changing(host);
@@ -2608,7 +3030,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || self.cache_mode.set(value.clone()),
+                assign: &mut || self.store_rare_cache_mode(value.clone()),
             },
         );
         if changed {
@@ -2623,8 +3045,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "CompositionClip",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).composition_clip.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).composition_clip.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_composition_clip(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_composition_clip(v),
                 None,
                 None,
             )
@@ -2633,11 +3055,11 @@ impl ServerCompositionVisualProps {
 
     /// `CompositionClip`.
     pub fn composition_clip(&self) -> Option<Rc<dyn IServerObject>> {
-        self.composition_clip.get()
+        self.rare_composition_clip()
     }
 
     pub fn set_composition_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.composition_clip.get();
+        let old_value = self.rare_composition_clip();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_composition_clip_changing(host);
@@ -2649,7 +3071,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || self.composition_clip.set(value.clone()),
+                assign: &mut || self.store_rare_composition_clip(value.clone()),
             },
         );
         if changed {
@@ -2664,21 +3086,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
                 "RotationAxis",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rotation_axis.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.set(v.cast_or_default::<Vector3D>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_rotation_axis(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_rotation_axis(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_rotation_axis())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_rotation_axis(v.cast_or_default::<Vector3D>())),
             )
         })
     }
 
     /// `RotationAxis` (animated).
     pub fn rotation_axis(&self) -> Vector3D {
-        self.rotation_axis.get()
+        self.rare_rotation_axis()
     }
 
     pub fn set_rotation_axis(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
-        self.rotation_axis.set(value);
+        self.store_rare_rotation_axis(value);
         host.remove_animation_for_property(Self::id_of_rotation_axis_property().base());
     }
 
@@ -2689,21 +3111,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
                 "RelativeOffsetAdjustment",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.set(v.cast_or_default::<Vector3D>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_relative_offset_adjustment(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_relative_offset_adjustment(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_relative_offset_adjustment())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_relative_offset_adjustment(v.cast_or_default::<Vector3D>())),
             )
         })
     }
 
     /// `RelativeOffsetAdjustment` (animated).
     pub fn relative_offset_adjustment(&self) -> Vector3D {
-        self.relative_offset_adjustment.get()
+        self.rare_relative_offset_adjustment()
     }
 
     pub fn set_relative_offset_adjustment(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
-        self.relative_offset_adjustment.set(value);
+        self.store_rare_relative_offset_adjustment(value);
         host.remove_animation_for_property(Self::id_of_relative_offset_adjustment_property().base());
     }
 
@@ -2714,21 +3136,21 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Vector>(
                 "RelativeSizeAdjustment",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.set(v),
-                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.get())),
-                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.set(v.cast_or_default::<Vector>())),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_relative_size_adjustment(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_relative_size_adjustment(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rare_relative_size_adjustment())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).store_rare_relative_size_adjustment(v.cast_or_default::<Vector>())),
             )
         })
     }
 
     /// `RelativeSizeAdjustment` (animated).
     pub fn relative_size_adjustment(&self) -> Vector {
-        self.relative_size_adjustment.get()
+        self.rare_relative_size_adjustment()
     }
 
     pub fn set_relative_size_adjustment(&self, host: &dyn ServerCompositionVisualHooks, value: Vector) {
-        self.relative_size_adjustment.set(value);
+        self.store_rare_relative_size_adjustment(value);
         host.remove_animation_for_property(Self::id_of_relative_size_adjustment_property().base());
     }
 
@@ -2821,8 +3243,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, CompositionBorderMode>(
                 "BorderMode",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).border_mode.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).border_mode.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_border_mode(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_border_mode(v),
                 None,
                 None,
             )
@@ -2831,11 +3253,11 @@ impl ServerCompositionVisualProps {
 
     /// `BorderMode`.
     pub fn border_mode(&self) -> CompositionBorderMode {
-        self.border_mode.get()
+        self.rare_border_mode()
     }
 
     pub fn set_border_mode(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionBorderMode) {
-        let old_value = self.border_mode.get();
+        let old_value = self.rare_border_mode();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_border_mode_changing(host);
@@ -2847,7 +3269,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.border_mode.set(value),
+                assign: &mut || self.store_rare_border_mode(value),
             },
         );
         if changed {
@@ -2862,8 +3284,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, CompositionBackfaceVisibility>(
                 "BackfaceVisibility",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).backface_visibility.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).backface_visibility.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_backface_visibility(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_backface_visibility(v),
                 None,
                 None,
             )
@@ -2872,11 +3294,11 @@ impl ServerCompositionVisualProps {
 
     /// `BackfaceVisibility`.
     pub fn backface_visibility(&self) -> CompositionBackfaceVisibility {
-        self.backface_visibility.get()
+        self.rare_backface_visibility()
     }
 
     pub fn set_backface_visibility(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionBackfaceVisibility) {
-        let old_value = self.backface_visibility.get();
+        let old_value = self.rare_backface_visibility();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_backface_visibility_changing(host);
@@ -2888,7 +3310,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.backface_visibility.set(value),
+                assign: &mut || self.store_rare_backface_visibility(value),
             },
         );
         if changed {
@@ -2903,8 +3325,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, CompositionCompositeMode>(
                 "CompositeMode",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).composite_mode.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).composite_mode.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_composite_mode(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_composite_mode(v),
                 None,
                 None,
             )
@@ -2913,11 +3335,11 @@ impl ServerCompositionVisualProps {
 
     /// `CompositeMode`.
     pub fn composite_mode(&self) -> CompositionCompositeMode {
-        self.composite_mode.get()
+        self.rare_composite_mode()
     }
 
     pub fn set_composite_mode(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionCompositeMode) {
-        let old_value = self.composite_mode.get();
+        let old_value = self.rare_composite_mode();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_composite_mode_changing(host);
@@ -2929,7 +3351,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || self.composite_mode.set(value),
+                assign: &mut || self.store_rare_composite_mode(value),
             },
         );
         if changed {
@@ -2944,8 +3366,8 @@ impl ServerCompositionVisualProps {
             CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
                 "ParentForTransform",
                 "ServerCompositionVisual",
-                |obj| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.get(),
-                |obj, v| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.set(v),
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_parent_for_transform(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_parent_for_transform(v),
                 None,
                 None,
             )
@@ -2954,11 +3376,11 @@ impl ServerCompositionVisualProps {
 
     /// `ParentForTransform`.
     pub fn parent_for_transform(&self) -> Option<Rc<dyn IServerObject>> {
-        self.parent_for_transform.get()
+        self.rare_parent_for_transform()
     }
 
     pub fn set_parent_for_transform(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.parent_for_transform.get();
+        let old_value = self.rare_parent_for_transform();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualHooks::on_parent_for_transform_changing(host);
@@ -2970,7 +3392,7 @@ impl ServerCompositionVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || self.parent_for_transform.set(value.clone()),
+                assign: &mut || self.store_rare_parent_for_transform(value.clone()),
             },
         );
         if changed {
@@ -3063,7 +3485,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_translation_property().base(),
-                ExpressionVariant::create(self.translation.get()),
+                ExpressionVariant::create(self.rare_translation()),
                 committed_at,
                 animation,
             );
@@ -3091,7 +3513,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_anchor_point_property().base(),
-                ExpressionVariant::create(self.anchor_point.get()),
+                ExpressionVariant::create(self.rare_anchor_point()),
                 committed_at,
                 animation,
             );
@@ -3105,7 +3527,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_center_point_property().base(),
-                ExpressionVariant::create(self.center_point.get()),
+                ExpressionVariant::create(self.rare_center_point()),
                 committed_at,
                 animation,
             );
@@ -3119,7 +3541,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_rotation_angle_property().base(),
-                ExpressionVariant::create(self.rotation_angle.get()),
+                ExpressionVariant::create(self.rare_rotation_angle()),
                 committed_at,
                 animation,
             );
@@ -3133,7 +3555,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_orientation_property().base(),
-                ExpressionVariant::create(self.orientation.get()),
+                ExpressionVariant::create(self.rare_orientation()),
                 committed_at,
                 animation,
             );
@@ -3147,7 +3569,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_scale_property().base(),
-                ExpressionVariant::create(self.scale.get()),
+                ExpressionVariant::create(self.rare_scale()),
                 committed_at,
                 animation,
             );
@@ -3161,7 +3583,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_transform_matrix_property().base(),
-                ExpressionVariant::create(self.transform_matrix.get()),
+                ExpressionVariant::create(self.rare_transform_matrix()),
                 committed_at,
                 animation,
             );
@@ -3207,7 +3629,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_rotation_axis_property().base(),
-                ExpressionVariant::create(self.rotation_axis.get()),
+                ExpressionVariant::create(self.rare_rotation_axis()),
                 committed_at,
                 animation,
             );
@@ -3221,7 +3643,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_relative_offset_adjustment_property().base(),
-                ExpressionVariant::create(self.relative_offset_adjustment.get()),
+                ExpressionVariant::create(self.rare_relative_offset_adjustment()),
                 committed_at,
                 animation,
             );
@@ -3235,7 +3657,7 @@ impl ServerCompositionVisualProps {
             };
             host.set_animated_value(
                 Self::id_of_relative_size_adjustment_property().base(),
-                ExpressionVariant::create(self.relative_size_adjustment.get()),
+                ExpressionVariant::create(self.rare_relative_size_adjustment()),
                 committed_at,
                 animation,
             );
@@ -3327,5 +3749,506 @@ impl ServerCompositionVisualProps {
             return Some(Self::id_of_is_pixel_snapping_enabled_property().base());
         }
         None
+    }
+}
+
+/// The properties of [`ServerCompositionVisualProps`] that nearly every object leaves at the value it
+/// is made with: made when one of them is first given another value.
+struct ServerCompositionVisualRareProps {
+    clip: OptionCell<Arc<dyn IGeometryImpl>>,
+    translation: Cell<Vector3D>,
+    anchor_point: Cell<Vector>,
+    center_point: Cell<Vector3D>,
+    rotation_angle: Cell<f32>,
+    orientation: Cell<Quaternion>,
+    scale: Cell<Vector3D>,
+    transform_matrix: Cell<Matrix>,
+    adorned_visual: OptionCell<Rc<dyn IServerObject>>,
+    adorner_is_clipped: Cell<bool>,
+    opacity_mask_brush: OptionCell<ServerResourceRef<dyn IBrush>>,
+    effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    cache_mode: OptionCell<Rc<dyn IServerObject>>,
+    composition_clip: OptionCell<Rc<dyn IServerObject>>,
+    rotation_axis: Cell<Vector3D>,
+    relative_offset_adjustment: Cell<Vector3D>,
+    relative_size_adjustment: Cell<Vector>,
+    border_mode: Cell<CompositionBorderMode>,
+    backface_visibility: Cell<CompositionBackfaceVisibility>,
+    composite_mode: Cell<CompositionCompositeMode>,
+    parent_for_transform: OptionCell<Rc<dyn IServerObject>>,
+}
+
+impl ServerCompositionVisualRareProps {
+    fn new() -> Self {
+        Self {
+            clip: OptionCell::new(),
+            translation: Cell::new(Default::default()),
+            anchor_point: Cell::new(Default::default()),
+            center_point: Cell::new(Default::default()),
+            rotation_angle: Cell::new(Default::default()),
+            orientation: Cell::new(Quaternion::IDENTITY),
+            scale: Cell::new(Vector3D::new(1.0, 1.0, 1.0)),
+            transform_matrix: Cell::new(Matrix::IDENTITY),
+            adorned_visual: OptionCell::new(),
+            adorner_is_clipped: Cell::new(Default::default()),
+            opacity_mask_brush: OptionCell::new(),
+            effect: OptionCell::new(),
+            cache_mode: OptionCell::new(),
+            composition_clip: OptionCell::new(),
+            rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
+            relative_offset_adjustment: Cell::new(Default::default()),
+            relative_size_adjustment: Cell::new(Default::default()),
+            border_mode: Cell::new(Default::default()),
+            backface_visibility: Cell::new(Default::default()),
+            composite_mode: Cell::new(Default::default()),
+            parent_for_transform: OptionCell::new(),
+        }
+    }
+}
+
+impl ServerCompositionVisualProps {
+    /// Whether one of the rarely set properties was given a value other than the
+    /// one it is made with.
+    pub fn has_rare_properties(&self) -> bool {
+        self.rare.get().is_some()
+    }
+
+    #[cold]
+    fn rare_block(&self) -> &ServerCompositionVisualRareProps {
+        self.rare.get_or_init(|| Box::new(ServerCompositionVisualRareProps::new()))
+    }
+
+    #[inline]
+    fn rare_clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
+        match self.rare.get() {
+            Some(rare) => rare.clip.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_clip(&self, value: Option<Arc<dyn IGeometryImpl>>) {
+        match self.rare.get() {
+            Some(rare) => rare.clip.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().clip.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_translation(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.translation.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_translation(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.translation.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().translation.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_anchor_point(&self) -> Vector {
+        match self.rare.get() {
+            Some(rare) => rare.anchor_point.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_anchor_point(&self, value: Vector) {
+        match self.rare.get() {
+            Some(rare) => rare.anchor_point.set(value),
+            None => {
+                let initial: Vector = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().anchor_point.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_center_point(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.center_point.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_center_point(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.center_point.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().center_point.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_rotation_angle(&self) -> f32 {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_angle.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_rotation_angle(&self, value: f32) {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_angle.set(value),
+            None => {
+                let initial: f32 = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().rotation_angle.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_orientation(&self) -> Quaternion {
+        match self.rare.get() {
+            Some(rare) => rare.orientation.get(),
+            None => Quaternion::IDENTITY,
+        }
+    }
+
+    #[inline]
+    fn store_rare_orientation(&self, value: Quaternion) {
+        match self.rare.get() {
+            Some(rare) => rare.orientation.set(value),
+            None => {
+                let initial: Quaternion = Quaternion::IDENTITY;
+                if value.differs(&initial) {
+                    self.rare_block().orientation.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_scale(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.scale.get(),
+            None => Vector3D::new(1.0, 1.0, 1.0),
+        }
+    }
+
+    #[inline]
+    fn store_rare_scale(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.scale.set(value),
+            None => {
+                let initial: Vector3D = Vector3D::new(1.0, 1.0, 1.0);
+                if value.differs(&initial) {
+                    self.rare_block().scale.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_transform_matrix(&self) -> Matrix {
+        match self.rare.get() {
+            Some(rare) => rare.transform_matrix.get(),
+            None => Matrix::IDENTITY,
+        }
+    }
+
+    #[inline]
+    fn store_rare_transform_matrix(&self, value: Matrix) {
+        match self.rare.get() {
+            Some(rare) => rare.transform_matrix.set(value),
+            None => {
+                let initial: Matrix = Matrix::IDENTITY;
+                if value.differs(&initial) {
+                    self.rare_block().transform_matrix.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_adorned_visual(&self) -> Option<Rc<dyn IServerObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.adorned_visual.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_adorned_visual(&self, value: Option<Rc<dyn IServerObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.adorned_visual.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().adorned_visual.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_adorner_is_clipped(&self) -> bool {
+        match self.rare.get() {
+            Some(rare) => rare.adorner_is_clipped.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_adorner_is_clipped(&self, value: bool) {
+        match self.rare.get() {
+            Some(rare) => rare.adorner_is_clipped.set(value),
+            None => {
+                let initial: bool = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().adorner_is_clipped.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_opacity_mask_brush(&self) -> Option<ServerResourceRef<dyn IBrush>> {
+        match self.rare.get() {
+            Some(rare) => rare.opacity_mask_brush.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_opacity_mask_brush(&self, value: Option<ServerResourceRef<dyn IBrush>>) {
+        match self.rare.get() {
+            Some(rare) => rare.opacity_mask_brush.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().opacity_mask_brush.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        match self.rare.get() {
+            Some(rare) => rare.effect.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_effect(&self, value: Option<Arc<dyn IImmutableEffect>>) {
+        match self.rare.get() {
+            Some(rare) => rare.effect.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().effect.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_cache_mode(&self) -> Option<Rc<dyn IServerObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.cache_mode.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_cache_mode(&self, value: Option<Rc<dyn IServerObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.cache_mode.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().cache_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_composition_clip(&self) -> Option<Rc<dyn IServerObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.composition_clip.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_composition_clip(&self, value: Option<Rc<dyn IServerObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.composition_clip.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().composition_clip.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_rotation_axis(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_axis.get(),
+            None => Vector3D::new(0.0, 0.0, 1.0),
+        }
+    }
+
+    #[inline]
+    fn store_rare_rotation_axis(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.rotation_axis.set(value),
+            None => {
+                let initial: Vector3D = Vector3D::new(0.0, 0.0, 1.0);
+                if value.differs(&initial) {
+                    self.rare_block().rotation_axis.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_relative_offset_adjustment(&self) -> Vector3D {
+        match self.rare.get() {
+            Some(rare) => rare.relative_offset_adjustment.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_relative_offset_adjustment(&self, value: Vector3D) {
+        match self.rare.get() {
+            Some(rare) => rare.relative_offset_adjustment.set(value),
+            None => {
+                let initial: Vector3D = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().relative_offset_adjustment.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_relative_size_adjustment(&self) -> Vector {
+        match self.rare.get() {
+            Some(rare) => rare.relative_size_adjustment.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_relative_size_adjustment(&self, value: Vector) {
+        match self.rare.get() {
+            Some(rare) => rare.relative_size_adjustment.set(value),
+            None => {
+                let initial: Vector = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().relative_size_adjustment.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_border_mode(&self) -> CompositionBorderMode {
+        match self.rare.get() {
+            Some(rare) => rare.border_mode.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_border_mode(&self, value: CompositionBorderMode) {
+        match self.rare.get() {
+            Some(rare) => rare.border_mode.set(value),
+            None => {
+                let initial: CompositionBorderMode = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().border_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backface_visibility(&self) -> CompositionBackfaceVisibility {
+        match self.rare.get() {
+            Some(rare) => rare.backface_visibility.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backface_visibility(&self, value: CompositionBackfaceVisibility) {
+        match self.rare.get() {
+            Some(rare) => rare.backface_visibility.set(value),
+            None => {
+                let initial: CompositionBackfaceVisibility = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backface_visibility.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_composite_mode(&self) -> CompositionCompositeMode {
+        match self.rare.get() {
+            Some(rare) => rare.composite_mode.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_composite_mode(&self, value: CompositionCompositeMode) {
+        match self.rare.get() {
+            Some(rare) => rare.composite_mode.set(value),
+            None => {
+                let initial: CompositionCompositeMode = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().composite_mode.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_parent_for_transform(&self) -> Option<Rc<dyn IServerObject>> {
+        match self.rare.get() {
+            Some(rare) => rare.parent_for_transform.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_parent_for_transform(&self, value: Option<Rc<dyn IServerObject>>) {
+        match self.rare.get() {
+            Some(rare) => rare.parent_for_transform.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().parent_for_transform.set(value);
+                }
+            }
+        }
     }
 }

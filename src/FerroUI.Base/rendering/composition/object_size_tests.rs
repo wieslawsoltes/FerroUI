@@ -6,7 +6,9 @@
 //! are a quarter apart, so one field too many costs every visual a quarter of
 //! its size. The sizes below are the ones the visuals fit in now
 //! (desktop-performance.md, section 9.39); a field that is added to one of
-//! them belongs in a box, behind an `Option`, if most visuals do not use it.
+//! them belongs in a box, behind an `Option`, if most visuals do not use it,
+//! and a generated property that few visuals set belongs in `RARE_FIELDS` of
+//! the generator, which keeps it in a second block.
 
 use super::server::ServerCompositionVisual;
 use super::visual::CompositionVisual;
@@ -17,9 +19,9 @@ const RC_HEADER: usize = 2 * size_of::<usize>();
 
 #[test]
 #[cfg(target_pointer_width = "64")]
-fn a_visual_of_the_ui_thread_fits_a_block_of_896_bytes() {
+fn a_visual_of_the_ui_thread_fits_a_block_of_512_bytes() {
     assert!(
-        size_of::<CompositionVisual>() + RC_HEADER <= 896,
+        size_of::<CompositionVisual>() + RC_HEADER <= 512,
         "CompositionVisual is {} bytes",
         size_of::<CompositionVisual>()
     );
@@ -27,9 +29,9 @@ fn a_visual_of_the_ui_thread_fits_a_block_of_896_bytes() {
 
 #[test]
 #[cfg(target_pointer_width = "64")]
-fn a_visual_of_the_server_fits_a_block_of_1024_bytes() {
+fn a_visual_of_the_server_fits_a_block_of_640_bytes() {
     assert!(
-        size_of::<ServerCompositionVisual>() + RC_HEADER <= 1024,
+        size_of::<ServerCompositionVisual>() + RC_HEADER <= 640,
         "ServerCompositionVisual is {} bytes",
         size_of::<ServerCompositionVisual>()
     );
