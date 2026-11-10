@@ -90416,8 +90416,8 @@
    "batch": "F",
    "winui": "CheckBox: DefaultCheckBoxStyle (CheckBox_themeresources.xaml).",
    "status": "ported",
-   "deviations": 5,
-   "date": "2026-10-17"
+   "deviations": 6,
+   "date": "2026-11-10"
   },
   {
    "document": "ComboBox.xaml",
@@ -91642,7 +91642,7 @@
   "CalendarDatePicker": 11,
   "CalendarDayButton": 10,
   "CalendarItem": 16,
-  "CheckBox": 5,
+  "CheckBox": 6,
   "DataValidationErrors": 2,
   "DatePicker": 15,
   "DateTimePickerShared": 10,
