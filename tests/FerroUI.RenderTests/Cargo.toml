@@ -25,6 +25,7 @@ ferroui-skia.workspace = true
 ferroui-vello = { workspace = true, optional = true }
 ferroui-harfbuzz.workspace = true
 ferroui-themes-simple.workspace = true
+ferroui-themes-winui.workspace = true
 # The images are decoded for the comparison by a decoder that is not the
 # one of the render backend, as upstream compares with a library of its own.
 png.workspace = true

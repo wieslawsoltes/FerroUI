@@ -123,8 +123,12 @@ timestamps, including CameraX use-case rebinds. A pure orientation decomposition
 combines the desired transform with the transform already sampled from
 SurfaceTexture, so rotation/mirroring is applied once. Tagged SDR BT.709 and
 BT.601 profiles are normalized to sRGB in the required GPU conversion pass.
-Unknown, wide-gamut and HDR tags are rejected. Dataspace tags require API 33;
-for an independently known untagged source, `AndroidCameraProvider` accepts an
+Unknown, wide-gamut and HDR tags are rejected. Dataspace tags require API 33.
+CameraX preview explicitly requests `DynamicRange.SDR` and verifies the resolved
+`SurfaceRequest` range before providing a surface. Unresolved or HDR producer
+ranges are rejected rather than being sent into the SDR GPU pipeline. See the
+[CameraX dynamic-range contract](https://developer.android.com/reference/androidx/camera/core/Preview.Builder#setDynamicRange(androidx.camera.core.DynamicRange)).
+For an independently known untagged source, `AndroidCameraProvider` accepts an
 explicit `untagged_sdr_color` contract (sRGB or Rec.709). Native tags take priority.
 The default is None, and does not guess a color space. The mobile sample's
 `cameraSdrSrgb` launch option declares the synthetic emulator source explicitly;

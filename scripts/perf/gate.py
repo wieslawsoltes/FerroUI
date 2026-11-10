@@ -69,7 +69,8 @@ TDG_PACKAGE = "ferroui-treedatagrid-benchmarks"
 # gauntlet follows the Cranpose benchmark and is synced with it): the scenes of the frame
 # benchmarks, timed headless and in a desktop window, and the micro-benchmarks of the framework's
 # tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`), of element construction, of
-# text blocks measured and arranged at two widths and of text blocks whose text changes.
+# text blocks measured and arranged at two widths, of text blocks whose text changes and of the
+# bidirectional algorithm at two lengths of each shape of text.
 FRAMES_PACKAGE = "ferroui-frame-benchmarks"
 FRAMES_CRATE = Path("tests/FerroUI.FrameBenchmarks")
 FRAMES_BINARY = "frame-benchmarks"
@@ -78,7 +79,8 @@ FRAMEWORK_CRATE = Path("tests/FerroUI.Benchmarks")
 FRAMEWORK_FILTER = (
     "trees::,layout_subsystem::,styling_subsystem::,property_subsystem::,"
     "layout::ElementConstructionBenchmark,"
-    "text::TextBlockConstraintBenchmark,text::TextBlockChangingTextBenchmark"
+    "text::TextBlockConstraintBenchmark,text::TextBlockChangingTextBenchmark,"
+    "text::BidiScalingBenchmark"
 )
 # The categories of the framework benchmarks a base has to have to be measured with its own copy
 # of them; a base without one of them is measured with the candidate's.

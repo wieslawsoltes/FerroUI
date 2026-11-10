@@ -1453,6 +1453,19 @@ pub fn selecting_items_control() -> El<ferroui_controls::primitives::SelectingIt
     El::new()
 }
 
+pub use ferroui_controls::SelectionIndicator;
+
+impl ViewClass for ferroui_controls::SelectionIndicator {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SelectionIndicator>::new()
+    }
+}
+
+/// Starts an element of [`SelectionIndicator`](ferroui_controls::SelectionIndicator).
+pub fn selection_indicator() -> El<ferroui_controls::SelectionIndicator> {
+    El::new()
+}
+
 pub use ferroui_controls::Separator;
 
 impl ViewClass for ferroui_controls::Separator {

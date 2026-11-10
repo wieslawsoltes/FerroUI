@@ -75879,37 +75879,37 @@ fn build_controls_winuicontrols_xaml_deferred_338(
     panel_2.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_1);
     // Controls/WinUIControls.xaml(510,20) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
-    // Controls/WinUIControls.xaml(510,20) Rectangle
-    let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
-    rectangle_0.begin_init();
-    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(rectangle_0.clone()));
-    // Controls/WinUIControls.xaml(510,30) Name
-    rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 510, 30)?;
+    // Controls/WinUIControls.xaml(510,20) SelectionIndicator
+    let selection_indicator_0 = ::ferroui_controls::SelectionIndicator::new();
+    selection_indicator_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&selection_indicator_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(selection_indicator_0.clone()));
+    // Controls/WinUIControls.xaml(510,39) Name
+    selection_indicator_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&selection_indicator_0)), 510, 39)?;
     // Controls/WinUIControls.xaml(511,30) Width
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 511, 30)?;
+    rt::bind_dynamic_resource(&context, selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 511, 30)?;
     // Controls/WinUIControls.xaml(512,30) Height
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewSelectionIndicatorHeight", 512, 30)?;
+    rt::bind_dynamic_resource(&context, selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewSelectionIndicatorHeight", 512, 30)?;
     // Controls/WinUIControls.xaml(513,30) Fill
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewSelectionIndicatorForeground", 513, 30)?;
+    rt::bind_dynamic_resource(&context, selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewSelectionIndicatorForeground", 513, 30)?;
     // Controls/WinUIControls.xaml(510,20) Opacity
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
+    selection_indicator_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
     // Controls/WinUIControls.xaml(515,30) RadiusX (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
     let provided_7 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_x_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 515, 30)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
-    rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 515, position: 30 }, ::core::option::Option::Some(priority_3))?;
+    rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_x_property(), value_0, &rt::ResourceChoice { name: "RadiusX", member: "Rectangle.RadiusX", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 515, position: 30 }, ::core::option::Option::Some(priority_3))?;
     // Controls/WinUIControls.xaml(516,30) RadiusY (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewSelectionIndicatorRadius"));
     let provided_8 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::shapes::Rectangle::radius_y_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 516, 30)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_8);
-    rt::assign_resource_value(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 516, position: 30 }, ::core::option::Option::Some(priority_4))?;
+    rt::assign_resource_value(selection_indicator_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Rectangle::radius_y_property(), value_1, &rt::ResourceChoice { name: "RadiusY", member: "Rectangle.RadiusY", index: 1, unset: false, instance: rt::ValueHandle::Of(::ferroui_base::data::core::ValueType::of::<f64>), null: false, line: 516, position: 30 }, ::core::option::Option::Some(priority_4))?;
     context.pop_parent();
-    rt::invoked(rectangle_0.try_end_init(), 510, 20)?;
+    rt::invoked(selection_indicator_0.try_end_init(), 510, 20)?;
     context.pop_parent();
     rt::invoked(panel_2.try_end_init(), 509, 18)?;
     // Controls/WinUIControls.xaml(518,18) Children

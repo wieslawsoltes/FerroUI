@@ -507,7 +507,7 @@
               <Panel x:Name="PresenterContentRootGrid">
                 <!-- Wrap SelectionIndicator in a grid so that its offset is 0,0 - this enables the offset animation. -->
                 <Panel x:Name="SelectionIndicatorGrid" HorizontalAlignment="Left" VerticalAlignment="Center">
-                  <Rectangle x:Name="SelectionIndicator"
+                  <SelectionIndicator x:Name="SelectionIndicator"
                              Width="{DynamicResource NavigationViewSelectionIndicatorWidth}"
                              Height="{DynamicResource NavigationViewSelectionIndicatorHeight}"
                              Fill="{DynamicResource NavigationViewSelectionIndicatorForeground}"

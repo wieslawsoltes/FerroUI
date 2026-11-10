@@ -2534,3 +2534,70 @@ What it costs, and what it does not:
   itself, for two documents, a relative text and no URI; the kept direct property is
   compared for a derived class, for a class the property is added to after the answer
   was kept, and for a class outside its owners.
+
+### 9.39 The bidi algorithm is linear in the length of a paragraph
+
+The levels of a paragraph are resolved by `BidiAlgorithm` (`media/text_formatting/unicode/`)
+once for every paragraph the text formatter is given. Three of its steps cost more for a
+character the longer the paragraph was, and one of them made a paragraph of numbers cost
+the square of its length. It was found in the profile of a text block whose text is digits
+only (the paragraph patch of the patchwork benchmark of the cross-framework comparison,
+section 8), where rule W2 was the first entry.
+
+- **Rule W2** changes a European number to an Arabic number when the last strong class
+  before it is an Arabic letter. It was resolved by a search backward from each European
+  number to the last strong class or the start of the run sequence. Text with no strong
+  class before its numbers (digits, spaces and separators only) searched to the start for
+  every digit.
+- **A level run was removed from the list when a run sequence took it.** The runs of a
+  paragraph are in a list; every sequence removed its runs from it (`RemoveAt`), which
+  moves all later runs down, once for each run.
+- **The run an isolate continues in was found by reading the list** (`FindRunForIndex`),
+  from its start, for every isolate initiator that has a matching end.
+
+**Each is now one pass or one lookup.** Rule W2 walks the sequence forward and remembers
+whether the last strong class was an Arabic letter. A level run has a flag that says a
+sequence took it: the list is not changed while the sequences are made, and it is cleared
+when they all are (`LevelRun` is the size it was, 24 bytes). The runs are in the order of
+the text, so the run that starts at an index is found by halving the list.
+
+`text::BidiScalingBenchmark` (`tests/FerroUI.Benchmarks`) resolves seven shapes of text at
+1 024 and 16 384 code units, so that the cost for a character can be compared between the
+two lengths. One run of each build on the same machine, which was not quiet (the figures
+of the shapes that did not change differ by its load):
+
+| Shape | 1 024 before | 1 024 after | 16 384 before | 16 384 after | |
+|---|---|---|---|---|---|
+| Prose | 6.72 us | 6.55 us | 110.2 us | 108.1 us | |
+| Numbers and spaces | 302.4 us | 6.84 us | 76 487 us | 109.0 us | 702 times |
+| Arabic with numbers | 10.41 us | 9.52 us | 167.9 us | 153.0 us | |
+| Hebrew, Latin, numbers | 8.59 us | 7.93 us | 138.7 us | 126.5 us | |
+| Brackets | 11.55 us | 10.57 us | 197.1 us | 179.7 us | |
+| Isolates | 66.56 us | 18.93 us | 13 462 us | 331.0 us | 40.7 times |
+| Embeddings | 15.82 us | 9.94 us | 1 471 us | 159.1 us | 9.2 times |
+
+Before, sixteen times the text cost 253 times as much for numbers, 202 times for isolates
+and 93 times for embeddings; after, between 15.9 and 17.5 times for every shape. The
+benchmark is part of the framework filter of the local gate (`scripts/perf/gate.py`).
+
+What it costs, and what it does not:
+
+- **Memory: none.** The flag of a level run is in the padding the structure had; nothing
+  else is kept.
+- **The levels are the ones the old code gave.** The two versions were run side by side
+  (the old file as a module of a test build, not kept in the tree) over every sequence of
+  up to five of the twenty-three classes at a left to right, a right to left and an
+  automatic paragraph level (20.2 million cases), four million random sequences of six to
+  forty-eight classes and one and a half million sequences of isolates, embeddings and
+  overrides of up to three hundred classes: the resolved levels, the classes the weak
+  rules changed and the paragraph level were equal for every one, and so was the one case
+  in which the old code stops with an error (below). The sequences had no bracket pairs;
+  the rule of the brackets is not changed.
+- **Three tests are kept** (`bidi_algorithm_tests`):
+  `a_european_number_becomes_arabic_after_an_arabic_letter` (rule W2 across a run
+  sequence), `resolves_a_long_paragraph_of_numbers` and
+  `resolves_a_long_paragraph_of_isolates_and_embeddings`, which resolve paragraphs long
+  enough that the old cost would not finish in the time of a test.
+- **Not changed:** an isolate whose end is after a paragraph separator, in classes given
+  to `process_classes` directly, stops with "Internal error" as it did. The text formatter
+  gives the algorithm one paragraph at a time, where it cannot happen.
