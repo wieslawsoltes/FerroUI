@@ -1663,3 +1663,68 @@ Tests: `drawing_context_tests.rs`
 `two_writes_of_one_revision_leave_the_last`, `the_pass_writes_what_the_update_walk_left`,
 `a_change_announced_after_the_copy_is_read_by_the_pass`,
 `a_visual_is_in_the_queue_once_per_pass`, `the_visuals_of_a_pass_share_its_revision`).
+
+### 9.31 A render data that is read again, the observers of a resource, the paint of a solid fill
+
+Three costs on the render thread that are storage handed back and fetched again for every
+visual whose drawing changed, every frame. They were found by sampling the gauntlet with the
+Graphite stage on its own threads: the largest single entry of the render thread's self time
+was the allocator's `free`, and the copy and the reset of `SkPaint` followed it.
+
+**A render data that is read again.** Since section 9.28 a visual whose drawing changed keeps
+its render data, and the server-side object reads the new recording when the batch arrives
+(`ServerCompositionRenderData::deserialize_changes_core`). Upstream's shape of that read is a
+reset followed by a new stream, whose resources are walked afterwards to observe them: the
+buffer of the operations, the table of the resources and the list of the resources the data
+observes are freed and allocated again. Now the object lets go of what it drew and keeps where it was stored
+(`release_content`: the subscriptions are removed, the custom draw operations disposed, the
+stream emptied by `RenderDataStream::recycle`, which already bounds what a recycled stream may
+keep), reads the new recording into that storage, and subscribes to each server-side resource
+at the moment the stream resolves it. `reset`, which a disposal uses, releases the storage as
+before.
+
+**The observers of a resource.** A render resource tells its observers when it was
+invalidated. Upstream walks its dictionary in place; here the list is behind a `RefCell` and
+an observer may change it while it is told, so it is copied first. The copy was a vector on the heap for every invalidated resource in every frame; a resource has
+one or two observers, so the copy is now a `SmallVec` of four on the stack
+(`ServerRenderResourceCore::queued_invalidate`). Who is told is the same: every observer
+that is in the list when the invalidation starts, once.
+
+**The paint of a solid fill.** The Skia drawing context keeps one paint for fills and resets
+it after each (`PaintWrapper::dispose`), which is a destruction and a construction of a
+`SkPaint`. A solid colour fill sets two things on the paint, the anti-aliasing and the colour,
+and every fill sets both before anything else. So the paint of a solid fill goes back
+unreset (`PaintWrapper::release_fill`) and the next fill starts from it. The wrapper knows
+that it is still such a paint because its paint is private: `paint_mut`, the only way to
+configure it further, clears the mark, and a fill with a shader, a stroke, a blend mode or
+anything else is reset as before. The one other user of the kept paint, the acrylic material
+rectangle, resets what it takes. No Skia behaviour is replaced and no Skia call is made that
+was not made before; one call is left out where its result is already there.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the same
+binary without and with the three changes, 51 s each, cycle-aligned means):
+
+| | Before | After |
+|---|---|---|
+| Frame rate | 52.6 to 52.9 fps | 54.5 fps |
+| Render thread, per frame | | 0.6 to 0.8 ms less |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and the
+rate does not move.
+
+What a program can see: nothing. A render data draws its last recording and follows the
+resources of that recording only, the observers of a resource are told as before, and every
+fill has the pixels it had.
+
+Tests: `render_resource_tests.rs`
+(`a_replaced_recording_observes_the_resources_of_the_new_drawing`),
+`render_data_tests.rs` (`the_custom_operations_of_a_replaced_recording_are_released`, which
+now runs through the kept storage), `server/server_render_resource.rs`
+(`every_observer_is_told_once_however_many_there_are`,
+`an_observer_added_twice_is_told_once_and_stays_until_it_is_removed_twice`,
+`an_observer_may_remove_itself_and_others_while_it_is_told`,
+`an_observer_added_while_the_others_are_told_is_told_the_next_time`,
+`a_dropped_observer_is_pruned_and_a_disposed_resource_tells_nobody`) and the Skia render
+tests (`a_fill_draws_the_same_after_any_other_fill`, six kinds of fill in all thirty-six
+orders compared pixel by pixel with the fill drawn first in a context, and
+`consecutive_solid_fills_each_have_their_colour_opacity_and_edge_mode`).
