@@ -23,6 +23,14 @@ const initScript = `(() => {
         if (name.toLowerCase() === "video") __catalogVideos.push(result);
         return result;
     };
+    globalThis.__holdCameraTransfers = false;
+    globalThis.__heldCameraTransfers = [];
+    const post = Worker.prototype.postMessage;
+    Worker.prototype.postMessage = function(message, ...rest) {
+        if (message?.ferrouiCmd === "mediaFrame" && __holdCameraTransfers) {
+            __heldCameraTransfers.push(() => post.call(this, message, ...rest));
+        } else { post.call(this, message, ...rest); }
+    };
     const acquire = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia = options => {
         __catalogCameraRequests++;
@@ -101,10 +109,23 @@ try {
     await until(s => s?.status.includes("camera(s); permission"), "camera discovery");
     assert.equal(await page.evaluate("__catalogCameraRequests"), 0);
     await page.setPermission("camera", "granted");
+    if (threaded) {
+        await page.evaluate("__holdCameraTransfers=true");
+        await click("Start camera");
+        await page.waitFor("__heldCameraTransfers.length > 0");
+        await sleep(250);
+        assert.equal((await state()).imports, 0, "unreceived frames must not be imported");
+        await click("Stop camera");
+        assert.ok((await state()).frames > 0, "a pending transfer still owns its native storage");
+        await page.evaluate("__holdCameraTransfers=false; __heldCameraTransfers.splice(0).forEach(deliver=>deliver())");
+        await until(s => !s.cameraActive && s.frames===0 && s.quarantine===0, "cancelled transfer retirement");
+    }
+    const requestsBeforeStart = await page.evaluate("__catalogCameraRequests");
     await click("Start camera");
     const camera = await until(s => s?.cameraActive && s.imports > 0, "synthetic browser camera preview");
-    assert.equal(await page.evaluate("__catalogCameraRequests"), 1);
+    assert.equal(await page.evaluate("__catalogCameraRequests"), requestsBeforeStart + 1);
     assert.equal(camera.previewAttempts, 0);
+    assert.equal(camera.analysisAttempts, 0);
     await click("Capture photo");
     await until(s => s?.status.startsWith("Photo "), "independently decoded photo");
     await click("Stop camera");
@@ -115,8 +136,37 @@ try {
     await click("Decode bundled QR image");
     const qr = await until(s => s?.status.startsWith("Decoded 2 QR code(s):"), "offline QR image");
     assert.ok(qr.status.includes("ferroui-native-qr-left") && qr.status.includes("ferroui-native-qr-right"));
-    assert.equal(await page.evaluate("__catalogCameraRequests"), 1);
+    assert.equal(await page.evaluate("__catalogCameraRequests"), requestsBeforeStart + 1);
     console.log("CATALOG_BROWSER_QR_PASS", qr.status);
+    assert.equal(page.requests.filter(url=>/\/qr-worker\.js(?:\?|$)/.test(url)).length, 0, "QR decoder must stay lazy");
+    const fixture = fs.readFileSync("samples/ControlCatalog/Assets/Media/qr-multiple.png").toString("base64");
+    await page.evaluate(`(async()=>{
+        const image=await createImageBitmap(await (await fetch("data:image/png;base64,${fixture}")).blob());
+        const canvas=document.createElement("canvas");canvas.width=640;canvas.height=480;
+        const context=canvas.getContext("2d");
+        const draw=()=>{context.fillStyle="white";context.fillRect(0,0,640,480);context.drawImage(image,64,112);};
+        draw();const timer=setInterval(draw,33);
+        const original=navigator.mediaDevices;
+        Object.defineProperty(navigator,"mediaDevices",{configurable:true,value:{
+            enumerateDevices:original.enumerateDevices.bind(original),
+            getUserMedia:async options=>{
+                if(options.audio!==false)throw new Error("QR capture requested audio");
+                __catalogCameraRequests++;
+                const stream=canvas.captureStream(30);const track=stream.getVideoTracks()[0];
+                const settings=track.getSettings.bind(track);track.getSettings=()=>({...settings(),width:640,height:480,frameRate:30});
+                const stop=track.stop.bind(track);track.stop=()=>{clearInterval(timer);image.close();stop();};
+                globalThis.__qrTrack=track;return stream;
+            }
+        }});
+    })()`);
+    await click("Start scanning");
+    const live = await until(s=>s?.status.startsWith("Last detected:") && s.status.includes("ferroui-native-qr-left") && s.status.includes("ferroui-native-qr-right"), "live QR analysis worker");
+    assert.equal(live.previewAttempts,0);assert.ok(live.analysisAttempts>0&&live.analysisBytes>0);
+    assert.ok(page.requests.some(url=>/\/qr-worker\.js(?:\?|$)/.test(url)), "live scanning must load the decoder worker");
+    await click("Stop camera");
+    await until(s=>!s.cameraActive&&s.frames===0&&s.reads===0&&s.quarantine===0,"QR camera retirement");
+    assert.equal(await page.evaluate("__qrTrack.readyState"),"ended");
+    console.log("CATALOG_BROWSER_LIVE_QR_PASS",JSON.stringify(live));
     assert.deepEqual(page.errors, []);
     console.log("CATALOG_BROWSER_MEDIA_PASS");
 } finally {

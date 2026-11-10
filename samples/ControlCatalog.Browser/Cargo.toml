@@ -19,7 +19,7 @@ name = "control-catalog-browser"
 path = "program.rs"
 
 [dependencies]
-ferroui-media-browser = { workspace = true, features = ["controls"] }
+ferroui-media-browser = { workspace = true, features = ["controls", "qr"] }
 ferroui-media-video-browser.workspace = true
 ferroui-media-camera-browser.workspace = true
 ferroui-media-camera.workspace = true
