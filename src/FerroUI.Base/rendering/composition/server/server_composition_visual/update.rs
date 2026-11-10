@@ -89,7 +89,8 @@ impl UpdateContext {
             (Some(bounds), None) => node.transformed_sub_tree_bounds.set(Some(bounds)),
         }
 
-        node.enqueue_for_readback_update();
+        // The bounds are final: the readback takes them from here.
+        node.snapshot_for_readback_update();
     }
 
     fn add_to_dirty_region(&self, bounds: Option<LtrbRect>) {

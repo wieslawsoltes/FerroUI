@@ -1,6 +1,6 @@
 use super::{
-    CompositorPools, IServerCompositionLight, IServerObject, IServerRenderResource, ReadbackIndices,
-    ServerCompositionTarget, ServerCompositionVisual, ServerCompositorAnimations, ServerObjectId,
+    CompositorPools, IServerCompositionLight, IServerObject, IServerRenderResource, ReadbackData, ReadbackIndices,
+    ServerCompositionTarget, ServerCompositionVisual, ServerCompositorAnimations, ServerObjectId, VisualReadback,
 };
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
@@ -92,6 +92,14 @@ const COMMIT_GRACE_TICKS: i32 = 10;
 /// thread, unlike the [`ServerJob`] of a batch.
 type RenderThreadJob = Box<dyn FnOnce(&ServerCompositor)>;
 
+/// What the readback pass writes for one visual.
+pub(crate) enum ReadbackQueueEntry {
+    /// The visual, which the pass reads the values of.
+    Visual(Rc<ServerCompositionVisual>),
+    /// The slots of a visual and the values the update walk left it with.
+    Snapshot(Arc<VisualReadback>, ReadbackData),
+}
+
 /// Server-side counterpart of the compositor: owns the server objects,
 /// applies the batches committed by the UI thread and renders.
 ///
@@ -121,7 +129,11 @@ pub struct ServerCompositor {
     render_resources_invalidation_set: RefCell<HashSet<*const ()>>,
     // TODO: parallel processing maybe
     visual_own_properties_recompute_pass: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
-    visual_readback_update_pass_queue: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
+    /// What the next readback pass writes, a visual at most once.
+    visual_readback_update_pass_queue: RefCell<Vec<ReadbackQueueEntry>>,
+    /// The number of the next readback pass, which the visuals in its queue
+    /// are stamped with. Starts at one: zero is a visual in no queue.
+    visual_readback_pass: Cell<u64>,
     adorner_update_queue: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
     /// The visual surfaces of the compositor, for their live updates.
     visual_surfaces: RefCell<Vec<Weak<super::ServerCompositionVisualSurface>>>,
@@ -190,7 +202,8 @@ impl ServerCompositor {
             render_resources_invalidation_queue: RefCell::new(VecDeque::new()),
             render_resources_invalidation_set: RefCell::new(HashSet::new()),
             visual_own_properties_recompute_pass: RefCell::new(VecDeque::new()),
-            visual_readback_update_pass_queue: RefCell::new(VecDeque::new()),
+            visual_readback_update_pass_queue: RefCell::new(Vec::new()),
+            visual_readback_pass: Cell::new(1),
             adorner_update_queue: RefCell::new(VecDeque::new()),
             visual_surfaces: RefCell::new(Vec::new()),
             lights: RefCell::new(Vec::new()),
@@ -499,25 +512,80 @@ impl ServerCompositor {
         self.visual_own_properties_recompute_pass.borrow_mut().push_back(visual);
     }
 
-    fn visual_readback_update_pass(&self) {
+    pub(crate) fn visual_readback_update_pass(&self) {
         if self.visual_readback_update_pass_queue.borrow().is_empty() {
             return;
         }
+
+        // The queue is taken whole and the next pass starts before the
+        // entries are written: a visual enqueued from here on is in the queue
+        // of the next pass.
+        let mut entries = std::mem::take(&mut *self.visual_readback_update_pass_queue.borrow_mut());
+        self.visual_readback_pass.set(self.visual_readback_pass.get() + 1);
 
         // visual.HitTest is waiting for this lock to be released, so we need to be quick
         // this is why we have a queue in the first place
         let scope = self.readback.begin_write();
         let read = self.readback.read_revision();
         let write = self.readback.write_revision();
-        loop {
-            let Some(visual) = self.visual_readback_update_pass_queue.borrow_mut().pop_front() else { break };
-            visual.update_readback(write, read);
+        for entry in entries.drain(..) {
+            match entry {
+                ReadbackQueueEntry::Visual(visual) => visual.update_readback(write, read),
+                ReadbackQueueEntry::Snapshot(readback, data) => readback.update_readback(write, read, data),
+            }
         }
         drop(scope);
+
+        // The storage of the queue is kept for the next pass.
+        let mut queue = self.visual_readback_update_pass_queue.borrow_mut();
+        if queue.is_empty() {
+            *queue = entries;
+        }
     }
 
-    pub fn enqueue_visual_for_readback_update_pass(&self, visual: Rc<ServerCompositionVisual>) {
-        self.visual_readback_update_pass_queue.borrow_mut().push_back(visual);
+    /// How many visuals the next readback pass writes.
+    #[cfg(test)]
+    pub(crate) fn readback_queue_len(&self) -> usize {
+        self.visual_readback_update_pass_queue.borrow().len()
+    }
+
+    /// The number of the readback pass the queue is collected for.
+    pub(crate) fn readback_pass(&self) -> u64 {
+        self.visual_readback_pass.get()
+    }
+
+    /// Adds an entry to the queue of the readback pass and returns where it
+    /// is.
+    pub(crate) fn push_readback_entry(&self, entry: ReadbackQueueEntry) -> usize {
+        let mut queue = self.visual_readback_update_pass_queue.borrow_mut();
+        queue.push(entry);
+        queue.len() - 1
+    }
+
+    /// Replaces the entry at `index` of the queue of the readback pass.
+    pub(crate) fn set_readback_entry(&self, index: usize, entry: ReadbackQueueEntry) {
+        let previous = match self.visual_readback_update_pass_queue.borrow_mut().get_mut(index) {
+            Some(slot) => std::mem::replace(slot, entry),
+            None => return,
+        };
+        // A visual is released outside the borrow of the queue.
+        drop(previous);
+    }
+
+    /// Makes the entry at `index` of the queue of the readback pass a copy
+    /// of the values `data` for the slots `readback`.
+    pub(crate) fn set_readback_snapshot(&self, index: usize, readback: &Arc<VisualReadback>, data: ReadbackData) {
+        let mut queue = self.visual_readback_update_pass_queue.borrow_mut();
+        let previous = match queue.get_mut(index) {
+            Some(ReadbackQueueEntry::Snapshot(_, values)) => {
+                *values = data;
+                return;
+            }
+            Some(slot) => std::mem::replace(slot, ReadbackQueueEntry::Snapshot(readback.clone(), data)),
+            None => return,
+        };
+        drop(queue);
+        drop(previous);
     }
 
     pub fn enqueue_adorner_update(&self, visual: Rc<ServerCompositionVisual>) {
