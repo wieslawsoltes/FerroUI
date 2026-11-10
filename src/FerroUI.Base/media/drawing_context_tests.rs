@@ -92,6 +92,44 @@ fn pushed_states_are_popped_in_reverse_order_on_dispose() {
     );
 }
 
+/// The stack of a context holds its first states in the context and the
+/// ones past them on the heap: the order of the pops is the same on both
+/// sides of that border (desktop-performance.md, 9.30).
+#[test]
+fn more_states_than_the_context_stores_in_itself_pop_in_reverse_order() {
+    const DEPTH: usize = 40;
+    let log = DrawingLog::new();
+    let mut platform_impl = quiet(&log);
+    let mut core = PlatformDrawingContext::borrowed(&mut platform_impl);
+    let mut context = DrawingContext::new(&mut core);
+    let mut states = Vec::new();
+    let mut expected = Vec::new();
+    for level in 0..DEPTH {
+        if level % 2 == 0 {
+            states.push(context.push_opacity(0.5));
+            expected.push("PushOpacity 0.5");
+        } else {
+            states.push(context.push_clip(Rect::new(0.0, 0.0, 10.0, 10.0)));
+            expected.push("PushClip 0, 0, 10, 10");
+        }
+    }
+    // Half of them are popped by hand, across the border, the rest by the
+    // disposal.
+    for level in (DEPTH / 4..DEPTH).rev() {
+        context.pop(states.pop().expect("a state per level"));
+        expected.push(if level % 2 == 0 { "PopOpacity" } else { "PopClip" });
+    }
+    let state = context.push_opacity(0.5);
+    expected.push("PushOpacity 0.5");
+    context.pop(state);
+    expected.push("PopOpacity");
+    context.dispose();
+    for level in (0..DEPTH / 4).rev() {
+        expected.push(if level % 2 == 0 { "PopOpacity" } else { "PopClip" });
+    }
+    assert_eq!(log.entries(), expected);
+}
+
 #[test]
 fn borrowed_core_is_not_disposed_and_owned_core_is() {
     let log = DrawingLog::new();
