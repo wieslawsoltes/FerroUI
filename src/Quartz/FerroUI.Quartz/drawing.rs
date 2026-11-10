@@ -37,7 +37,11 @@ pub struct GlyphRun {
     pub origin: Point,
     pub ids: Vec<u16>,
     pub positions: Vec<f64>,
-    pub outlines: BezPath,
+    /// The outline of every glyph, from the font's shapes, at its position.
+    glyph_outlines: Vec<(Point, Option<Arc<BezPath>>)>,
+    /// The outlines of the glyphs placed, made the first time they are asked for: drawing
+    /// through the native glyph path never asks for them.
+    outlines: std::sync::OnceLock<BezPath>,
     #[cfg(feature = "metal")]
     color_indices: Vec<usize>,
     pub bounds: Rect,
@@ -57,9 +61,9 @@ impl GlyphRun {
             .expect("Quartz typeface")
             .font
             .clone();
-        let mut ids = Vec::new();
-        let mut positions = Vec::new();
-        let mut outlines = BezPath::new();
+        let mut ids = Vec::with_capacity(glyphs.len());
+        let mut positions = Vec::with_capacity(glyphs.len() * 2);
+        let mut glyph_outlines = Vec::with_capacity(glyphs.len());
         #[cfg(feature = "metal")]
         let mut color_indices = Vec::new();
         let mut x = origin.x;
@@ -68,66 +72,35 @@ impl GlyphRun {
             ids.push(g.glyph_index);
             let p = Point::new(x + g.glyph_offset.x, origin.y + g.glyph_offset.y);
             positions.extend([p.x, p.y]);
-            unsafe {
-                // Bitmap/color glyphs can have ink without any outline path.
-                let mut b = [0.0; 4];
-                ffi::q_glyph_bounds(font.raw(), g.glyph_index, size, b.as_mut_ptr());
-                if b.iter().all(|x| x.is_finite()) && b[2] > 0.0 && b[3] > 0.0 {
-                    let r = kurbo::Rect::new(
-                        p.x + b[0],
-                        p.y + b[1],
-                        p.x + b[0] + b[2],
-                        p.y + b[1] + b[3],
-                    );
-                    ink = Some(ink.map_or(r, |old| old.union(r)));
+            let shape = font.shapes.get(size, simulations, g.glyph_index, || {
+                glyph_shape(&font, g.glyph_index, size, simulations)
+            });
+            let b = shape.bounds;
+            let inked = b.iter().all(|x| x.is_finite()) && b[2] > 0.0 && b[3] > 0.0;
+            // Bitmap/color glyphs can have ink without any outline path.
+            if inked {
+                let r = kurbo::Rect::new(p.x + b[0], p.y + b[1], p.x + b[0] + b[2], p.y + b[1] + b[3]);
+                ink = Some(ink.map_or(r, |old| old.union(r)));
+            }
+            match shape.outline {
+                Some((outline, bounds)) => {
+                    if let Some(r) = bounds {
+                        let r = r + kurbo::Vec2::new(p.x, p.y);
+                        ink = Some(ink.map_or(r, |old| old.union(r)));
+                    }
+                    glyph_outlines.push((p, Some(outline)));
                 }
-                let raw = ffi::q_glyph_path(font.raw(), g.glyph_index, size);
-                if !raw.is_null() {
-                    let path = ffi::Owned::new(raw);
-                    let mut outline = geometry::from_native(path.0);
-                    if simulations.contains(FontSimulations::Oblique) {
-                        outline = kurbo::Affine::new([1., 0., -0.2, 1., 0., 0.]) * outline;
-                    }
-                    if simulations.contains(FontSimulations::Bold) {
-                        let raw = geometry::native(&outline);
-                        let stroke = ffi::Owned::new(ffi::q_stroke(
-                            raw.0,
-                            size / 24.,
-                            1,
-                            1,
-                            10.,
-                            std::ptr::null(),
-                            0,
-                            0.,
-                        ));
-                        let union = ffi::q_combine(raw.0, stroke.0, 0, 0, 0);
-                        if !union.is_null() {
-                            outline = geometry::from_native(ffi::Owned::new(union).0);
-                        }
-                    }
-                    outlines.extend(
-                        (kurbo::Affine::translate((p.x, p.y)) * outline)
-                            .elements()
-                            .iter()
-                            .copied(),
-                    );
-                } else if b.iter().all(|v| v.is_finite()) && b[2] > 0. && b[3] > 0. {
+                None => {
                     #[cfg(feature = "metal")]
-                    color_indices.push(ids.len() - 1);
+                    if inked {
+                        color_indices.push(ids.len() - 1);
+                    }
+                    glyph_outlines.push((p, None));
                 }
             }
             x += g.glyph_advance;
         }
-        let b = ink.map_or_else(
-            || outlines.bounding_box(),
-            |ink| {
-                if outlines.is_empty() {
-                    ink
-                } else {
-                    ink.union(outlines.bounding_box())
-                }
-            },
-        );
+        let b = ink.unwrap_or_default();
         let bounds = Rect::new(b.x0, b.y0, b.width(), b.height());
         Self {
             font,
@@ -136,11 +109,52 @@ impl GlyphRun {
             origin,
             ids,
             positions,
-            outlines,
+            glyph_outlines,
+            outlines: std::sync::OnceLock::new(),
             #[cfg(feature = "metal")]
             color_indices,
             bounds,
         }
+    }
+
+    /// The outlines of the glyphs placed.
+    pub fn outlines(&self) -> &BezPath {
+        self.outlines.get_or_init(|| {
+            let mut outlines = BezPath::new();
+            for (p, outline) in &self.glyph_outlines {
+                if let Some(outline) = outline {
+                    outlines.extend((kurbo::Affine::translate((p.x, p.y)) * &**outline).elements().iter().copied());
+                }
+            }
+            outlines
+        })
+    }
+}
+
+/// The ink bounds and the outline of `glyph` of `font` at `size` with `simulations`.
+fn glyph_shape(font: &NativeFont, glyph: u16, size: f64, simulations: FontSimulations) -> crate::fonts::GlyphShape {
+    unsafe {
+        let mut bounds = [0.0; 4];
+        ffi::q_glyph_bounds(font.raw(), glyph, size, bounds.as_mut_ptr());
+        let raw = ffi::q_glyph_path(font.raw(), glyph, size);
+        let outline = (!raw.is_null()).then(|| {
+            let path = ffi::Owned::new(raw);
+            let mut outline = geometry::from_native(path.0);
+            if simulations.contains(FontSimulations::Oblique) {
+                outline = kurbo::Affine::new([1., 0., -0.2, 1., 0., 0.]) * outline;
+            }
+            if simulations.contains(FontSimulations::Bold) {
+                let raw = geometry::native(&outline);
+                let stroke = ffi::Owned::new(ffi::q_stroke(raw.0, size / 24., 1, 1, 10., std::ptr::null(), 0, 0.));
+                let union = ffi::q_combine(raw.0, stroke.0, 0, 0, 0);
+                if !union.is_null() {
+                    outline = geometry::from_native(ffi::Owned::new(union).0);
+                }
+            }
+            let bounds = (!outline.elements().is_empty()).then(|| outline.bounding_box());
+            (Arc::new(outline), bounds)
+        });
+        crate::fonts::GlyphShape { bounds, outline }
     }
 }
 #[cfg(feature = "metal")]
@@ -162,11 +176,7 @@ impl DrawingContext {
             #[cfg(feature = "metal")]
             ffi::qm_text_options(
                 c,
-                self.text_options
-                    .last()
-                    .copied()
-                    .unwrap_or_default()
-                    .text_hinting_mode as i32,
+                native_hinting(self.text_options.last().copied().unwrap_or_default().text_hinting_mode),
             );
             ffi::q_glyphs(
                 c,
@@ -208,11 +218,11 @@ impl IGlyphRunImpl for GlyphRun {
         self.bounds
     }
     fn get_intersections(&self, lower: f32, upper: f32) -> Vec<f32> {
-        if !lower.is_finite() || !upper.is_finite() || upper <= lower || self.outlines.is_empty() {
+        if !lower.is_finite() || !upper.is_finite() || upper <= lower || self.outlines().is_empty() {
             return vec![];
         }
         let path = geometry::native(
-            &(kurbo::Affine::translate((-self.origin.x, -self.origin.y)) * self.outlines.clone()),
+            &(kurbo::Affine::translate((-self.origin.x, -self.origin.y)) * self.outlines().clone()),
         );
         let bytes = unsafe {
             ffi::Owned::new(ffi::q_path_intercepts(path.0, lower as f64, upper as f64)).bytes()
@@ -364,6 +374,26 @@ pub struct DrawingContext {
     pixels: Vec<effects::PixelState>,
 }
 impl DrawingContext {
+    /// Saves the state and clips to `rect` with corners of `radii` as a coverage function of the
+    /// renderer's shaders, without a mask (desktop-performance.md section 9.19). Returns `false`,
+    /// with nothing saved, when the renderer cannot (another clip is in effect, the transform
+    /// turns the axes, no Metal renderer): the caller clips with the geometry.
+    fn push_analytic_clip(&mut self, rect: Rect, radii: Vector) -> bool {
+        if !self.prepare() {
+            return false;
+        }
+        let values = [rect.x, rect.y, rect.width, rect.height, radii.x, radii.y];
+        let mut applied = false;
+        self.bitmap.context(|c| unsafe {
+            ffi::q_save(c);
+            applied = ffi::q_clip_rounded(c, values.as_ptr()) != 0;
+            if !applied {
+                ffi::q_restore(c);
+            }
+        });
+        applied
+    }
+
     pub fn new(bitmap: Bitmap, scaled: bool, finished: Option<Box<dyn FnOnce()>>) -> Self {
         let dpi = IBitmapImpl::dpi(&bitmap);
         bitmap.context(|c| unsafe { ffi::q_save(c) });
@@ -924,7 +954,7 @@ impl IDrawingContextImpl for DrawingContext {
                         g,
                         b,
                         a,
-                        text.text_hinting_mode as i32,
+                        native_hinting(text.text_hinting_mode),
                         (mode == TextRenderingMode::Alias || options.edge_mode == EdgeMode::Aliased)
                             as i32,
                         options.bitmap_interpolation_mode as i32,
@@ -975,7 +1005,7 @@ impl IDrawingContextImpl for DrawingContext {
                     },
                     ..options
                 });
-                let path = kurbo::Affine::translate((0., shift)) * run.outlines.clone();
+                let path = kurbo::Affine::translate((0., shift)) * run.outlines();
                 self.fill(
                     &path,
                     FillRule::NonZero,
@@ -986,19 +1016,34 @@ impl IDrawingContextImpl for DrawingContext {
                 self.options.pop();
             }
             #[cfg(not(feature = "metal"))]
-            self.fill(&run.outlines, FillRule::NonZero, brush, run.bounds);
+            self.fill(run.outlines(), FillRule::NonZero, brush, run.bounds);
         }
     }
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
         Rc::new(Bitmap::new(size, Vector::new(96., 96.)))
     }
     fn push_clip(&mut self, r: Rect) {
-        self.push_geometry_clip(&*Geometry::rectangle(r))
+        if !self.push_analytic_clip(r, Vector::new(0.0, 0.0)) {
+            self.push_geometry_clip(&*Geometry::rectangle(r))
+        }
     }
     fn push_clip_rounded(&mut self, r: RoundedRect) {
-        self.push_geometry_clip(&*Geometry::new(rounded(r), FillRule::NonZero))
+        let uniform = r.radii_top_left == r.radii_top_right
+            && r.radii_top_left == r.radii_bottom_left
+            && r.radii_top_left == r.radii_bottom_right;
+        if !(uniform && self.push_analytic_clip(r.rect, r.radii_top_left)) {
+            self.push_geometry_clip(&*Geometry::new(rounded(r), FillRule::NonZero))
+        }
     }
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
+        // A region of one rectangle (the dirty area of a frame that changed everywhere) is an
+        // analytic clip: the clips inside it stay analytic too (section 9.19).
+        if let [r] = region.rects()[..] {
+            let rect = Rect::new(r.left as f64, r.top as f64, (r.right - r.left) as f64, (r.bottom - r.top) as f64);
+            if self.push_analytic_clip(rect, Vector::new(0.0, 0.0)) {
+                return;
+            }
+        }
         let mut path = BezPath::new();
         for r in region.rects() {
             path.extend(
@@ -1165,5 +1210,17 @@ impl IDrawingContextImpl for DrawingContext {
 impl Drop for DrawingContext {
     fn drop(&mut self) {
         self.dispose()
+    }
+}
+
+/// The hinting the renderer is given for `mode`: an unspecified mode is strong hinting, as the Skia
+/// backend resolves it (`text_rendering_settings.rs`). The renderer draws hinted text from Core
+/// Text glyph images in its atlas and unhinted text (`None`) as outlines; passing the unspecified
+/// mode through drew every text that asked for nothing as outlines flattened on the processor.
+#[cfg(feature = "metal")]
+fn native_hinting(mode: ferroui_base::media::TextHintingMode) -> i32 {
+    match mode {
+        ferroui_base::media::TextHintingMode::Unspecified => ferroui_base::media::TextHintingMode::Strong as i32,
+        mode => mode as i32,
     }
 }

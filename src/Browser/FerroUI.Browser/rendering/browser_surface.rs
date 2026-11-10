@@ -95,15 +95,65 @@ impl BrowserSurface {
         self.render_size.set(PixelSize::new(pixel_width as i32, pixel_height as i32));
         self.client_size.set(self.render_size.get().to_size(dpr));
         self.scaling.set(dpr);
-        if old_client_size != self.client_size.get() {
-            for (_, handler) in self.size_changed.snapshot().iter() {
-                handler();
-            }
-        }
+        // A resize lays out and immediately paints/commits the view. Its renderer must already
+        // know the new scaling, or the first frame uses the old scale inside the new pixel size.
         if (old_scaling - dpr).abs() > 0.0001 {
             for (_, handler) in self.scaling_changed.snapshot().iter() {
                 handler();
             }
         }
+        if old_client_size != self.client_size.get() {
+            for (_, handler) in self.size_changed.snapshot().iter() {
+                handler();
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ferroui_controls::testing::{CompositorTestServices, TestServices, UnitTestApplication};
+
+    #[test]
+    fn resizing_notifies_the_renderer_of_scaling_before_it_can_paint() {
+        let _app = UnitTestApplication::start(TestServices::new());
+        let surface = Rc::new(BrowserSurface {
+            compositor: CompositorTestServices::create_dummy_compositor(None),
+            js_surface: RefCell::new(None),
+            scaling: Cell::new(1.0),
+            client_size: Cell::new(Size::new(1.0, 1.0)),
+            render_size: Cell::new(PixelSize::new(1, 1)),
+            size_changed: HandlerList::new(),
+            scaling_changed: HandlerList::new(),
+        });
+        let renderer_scaling = Rc::new(Cell::new(1.0));
+        surface.scaling_changed({
+            let surface = Rc::downgrade(&surface);
+            let renderer_scaling = renderer_scaling.clone();
+            Rc::new(move || renderer_scaling.set(surface.upgrade().unwrap().scaling()))
+        });
+        let paints = Rc::new(Cell::new(0));
+        surface.size_changed({
+            let surface = Rc::downgrade(&surface);
+            let renderer_scaling = renderer_scaling.clone();
+            let paints = paints.clone();
+            Rc::new(move || {
+                // BrowserTopLevelImpl lays out and immediately paints/commits from this event.
+                let surface = surface.upgrade().unwrap();
+                assert_eq!(renderer_scaling.get(), surface.scaling());
+                assert_eq!(
+                    PixelSize::from_size_ceiling(surface.client_size(), renderer_scaling.get()),
+                    surface.render_size(),
+                );
+                paints.set(paints.get() + 1);
+            })
+        });
+
+        // Startup on Retina, then moves/zooms to displays with other scale factors.
+        surface.on_size_changed(1600.0, 1200.0, 2.0);
+        surface.on_size_changed(1250.0, 750.0, 1.25);
+        surface.on_size_changed(1200.0, 800.0, 1.0);
+        assert_eq!(paints.get(), 3);
     }
 }

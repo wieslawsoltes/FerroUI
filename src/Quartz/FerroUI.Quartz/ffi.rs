@@ -74,6 +74,10 @@ extern "C" {
     pub fn q_restore(ctx: Ptr);
     pub fn q_clear(ctx: Ptr, w: f64, h: f64, r: f64, g: f64, b: f64, a: f64);
     pub fn q_clip(ctx: Ptr, path: Ptr, evenodd: i32);
+    /// A rectangle clip with equal elliptical corners `[x, y, width, height, rx, ry]` as a
+    /// coverage function of the shaders (desktop-performance.md section 9.19); 0 when it is not
+    /// applied (another clip is in effect, the transform turns the axes, no Metal renderer).
+    pub fn q_clip_rounded(ctx: Ptr, rect: *const f64) -> i32;
     pub fn q_fill(ctx: Ptr, path: Ptr, evenodd: i32, r: f64, g: f64, b: f64, a: f64);
     pub fn q_gradient(
         ctx: Ptr,

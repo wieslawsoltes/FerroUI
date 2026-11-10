@@ -50,6 +50,7 @@ jobs:
         run: |
           node scripts/browser/build-webapp.mjs build
           (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
+          node scripts/browser/tests/canvas_size.test.mjs
       - name: Skia features of the target
         run: |
           # An unsupported feature combination makes the Skia bindings build Skia from source.
@@ -81,6 +82,8 @@ jobs:
         run: scripts/build-browser.sh themed_view --webapp-prebuilt
       - name: Behaviour tests in headless Chrome
         run: node scripts/browser/tests/themed_view.test.mjs
+      - name: Initial size and first-frame DPI in headless Chrome
+        run: node scripts/browser/tests/startup_size.test.mjs
       - name: Build the storage view site
         run: scripts/build-browser.sh storage_view --webapp-prebuilt
       - name: Storage behaviour tests in headless Chrome
@@ -152,6 +155,8 @@ jobs:
         run: scripts/build-browser.sh themed_view --threads --webapp-prebuilt
       - name: Behaviour tests on the render thread and on one thread, in headless Chrome
         run: node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+      - name: Initial size and first-frame DPI with threads in headless Chrome
+        run: node scripts/browser/tests/startup_size.test.mjs target/browser-threads/themed_view
       - name: Build the storage view site with threads
         run: scripts/build-browser.sh storage_view --threads --webapp-prebuilt
       - name: Storage behaviour tests with threads, in headless Chrome

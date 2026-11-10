@@ -958,6 +958,7 @@ context then reports itself lost (`GraphiteGrContext::is_lost`) and is made agai
 lost device. docs/porting/skia-retained-text.md has what Graphite keeps across frames and what it
 does not. Window (gauntlet tier 16, 60 Hz, the two builds alternately): 28.1 / 29.5 / 28.6 to
 29.9 / 29.8 / 29.8 frames a second.
+
 ### 9.18 Removing a control from the queue of Loaded events takes constant time
 
 A control attached to a tree waits in a queue for its `Loaded` event; one detached before the
@@ -971,6 +972,69 @@ Tests: `control.rs` (`loaded_queue_tests`), the leak tests of the controls (a re
 not held by the queue). `ElementConstructionBenchmark` (the still wall's tiles, created, attached
 to a styled root and laid out): attaching and detaching 10,000 tiles 1,375 to 195 ms, with layout
 1,517 to 338 ms; 1,000 tiles 26.6 to 12.9 ms. The local gate is unchanged.
+
+### 9.19 The native renderer clips rectangles and rounded rectangles analytically
+
+The native Metal renderer (`ferroui-quartz`) made every clip a mask: a texture the size of the
+clip, the clip's path flattened into edges on the processor and a compute pass writing its
+coverage, for every clip in every frame. A frame's dirty region (section 9.10) was such a mask
+too, so every clip inside it was one as well: the still wall (58,696 tiles, each clipped to its
+rounded bounds) made tens of thousands of masks a frame.
+
+A rectangle clip and a rectangle clip with equal elliptical corners, under a transform that keeps
+the axes, are now coverage functions of the shaders (`qm_clip_rounded`, `clip_rectangle` and
+`clip_rounded` in `shaders.metal`): the parameters of every draw carry the rectangle clip in effect
+(the intersection of the rectangle clips, the area of each pixel inside it) and one rounded
+rectangle, and the work of a draw is cropped to their pixels. A region of one rectangle (the
+dirty area of a frame that changed everywhere) is a rectangle clip. A rounded clip inside a rounded
+clip, a clip under a rotation or a skew, a region of several rectangles and any other geometry
+clip with a mask as before; the mask is drawn through the analytic clips in effect and takes them
+in. Tests: the renderer's tests, its parity tests with Skia included. Window, frames a second:
+still wall (tier 20) 0.1 to 60 (the display's rate), gauntlet (tier 16) 2.8 to 4.2.
+
+### 9.20 The native renderer: glyph shapes, boxes, turned clips and repeated runs
+
+Glyph shapes. A glyph run of the native renderer asked Core Text for the ink bounds and the
+outline of every glyph it held, each through a copy of the font at the run's size
+(`CTFontCreateCopyWithAttributes`), and built the outline of the whole run when it was created.
+Text that changes every frame creates its runs every frame (the line metrics of a text layout come
+from its runs): on the gauntlet that was 80% of the user interface thread. The font now keeps the
+bounds and the outline of each glyph at each size and simulation (`GlyphShapes`, at most 16,384 a
+font), and a run builds its outline only when it is asked for one (its geometry, its intersections
+with an underline, drawing it as outlines); drawing it through native glyphs never asks.
+
+Boxes. A rounded rectangle, a rectangle under a transform that turns it, and either inside a mask
+clip were paths: curves flattened to a quarter of a pixel, edges prepared and a coverage image
+looked up or rasterized at every position. Every solid box without a shadow is now a box: the
+shaders test the same four samples a pixel against the box and its elliptical corners
+(`box_coverage` in `shaders.metal`), in the box's own space when the transform turns it (the
+samples mapped through the inverse transform). A sample within the flattening tolerance of a
+corner may land on the other side of it than with the path; the box is the exact one. Aliased
+rounded rectangles stay paths.
+
+Turned clips. A rectangle or rounded rectangle clip under a transform that turns it was a mask (a
+texture, a compute pass, and the end of the render pass around it). When no other analytic clip
+with corners is in effect it is now the analytic clip of section 9.19 kept in its own space.
+
+Glyph strikes and repeated runs. Every glyph run made two copies of its font (at its size and its
+device size) and looked its caches up by hashing them; the copies are now kept by font, size and
+scale and the caches key fonts by identity. Every glyph run with native hinting was also prepared
+for reuse (a copy of each of its draws); on the gauntlet not one of a million prepared runs was
+reused, as its text changes or moves every frame. A run is now prepared when it repeats: one seen
+once is remembered by its hash and drawn directly. Still text is prepared one frame later.
+
+Uploads and batches. The uploads of a command buffer are slices of one pooled arena where each
+flush took a buffer of its own; paths and general draws, which share a format, share a batch, and a
+draw that samples no image takes the batch's image, so text and the shapes around it make one
+batch: half the command buffers of a gauntlet frame.
+
+Tests: the renderer's tests, parity tests of rounded boxes against their paths (clipped, turned and
+cut by the canvas), of boxes inside analytic clips, and of analytic clips (axis-aligned and turned)
+against mask clips of the same shapes. Window, frames a second, gauntlet (tier 16), interleaved
+A/B: 3.7 (section 9.19) to 4.0 (rounded boxes), 5.1 (glyph shapes), 5.7 (glyph strikes and boxes in
+mask clips), 6.3 (turned boxes), 6.65 (turned clips), 8.5 (repeated runs). The still wall stays at
+the display's rate. The uploads and the batches change the frame rate by less than the noise; the
+gauntlet's frame is now held about evenly by the render thread and by the GPU.
 
 ### 9.21 Walks of the tree stop where nothing changes; per-element work made on use
 
