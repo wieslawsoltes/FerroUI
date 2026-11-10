@@ -92,6 +92,11 @@ pub(crate) struct ValueStore {
     is_evaluating: Cell<u32>,
     frame_generation: Cell<u32>,
     styling: Cell<u32>,
+    /// Set while a styling batch is open (`styling > 0`) when a reevaluation was
+    /// put off or a frame was inserted. The end of the outermost batch
+    /// reevaluates the store only when this is set, and clears it: a batch that
+    /// changed nothing leaves the effective values as they are.
+    reevaluation_pending: Cell<bool>,
     /// The nearest ancestor that holds inherited values. `Some(Weak)` pointing
     /// at the owner itself when the owner holds inherited values.
     inheritance_ancestor: RefCell<Option<WeakRef<FerroObject>>>,
@@ -116,6 +121,7 @@ impl ValueStore {
             is_evaluating: Cell::new(0),
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
+            reevaluation_pending: Cell::new(false),
             inheritance_ancestor: RefCell::new(None),
             inherited_lookups: RefCell::new(Vec::new()),
             inherited_lookups_generation: Cell::new(0),
@@ -182,7 +188,10 @@ impl ValueStore {
         let styling = self.styling.get() - 1;
         self.styling.set(styling);
         if styling == 0 {
-            self.reevaluate_effective_values(owner, None);
+            crate::perf_count!(StylingPassesCompleted);
+            if self.reevaluation_pending.replace(false) {
+                self.reevaluate_effective_values(owner, None);
+            }
         }
     }
 
@@ -779,6 +788,7 @@ impl ValueStore {
     /// `ancestor` is the new ancestor for the owner's children when the owner
     /// holds no inherited values itself.
     pub fn on_inheritance_ancestor_changed(&self, owner: &FerroObject, ancestor: Option<&Ref<FerroObject>>) {
+        crate::perf_count!(InheritanceAncestorWalkVisits);
         let is_self = ancestor.is_some_and(|a| {
             let a: &FerroObject = a;
             std::ptr::eq(a, owner)
@@ -837,6 +847,7 @@ impl ValueStore {
         old_value: &dyn Any,
         new_value: &dyn Any,
     ) {
+        crate::perf_count!(InheritedEffectiveValueWalkVisits);
         // If the inherited value is set locally, propagation stops here.
         if self.is_set(property) {
             return;
@@ -932,6 +943,9 @@ impl ValueStore {
         frame.base().set_owner(Some(owner.to_weak()));
         self.frames.borrow_mut().insert(index, frame);
         self.frame_generation.set(self.frame_generation.get().wrapping_add(1));
+        if self.styling.get() > 0 {
+            self.reevaluation_pending.set(true);
+        }
         index
     }
 
@@ -1095,12 +1109,14 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                self.reevaluation_pending.set(true);
                 return;
             }
 
             let generation = self.frame_generation.get();
 
             // Notify the existing effective value that reevaluation is starting.
+            crate::perf_count!(SingleValueReevaluations);
             if let Some(current) = &current {
                 current.begin_reevaluation(ignore_local_value);
             }
@@ -1182,10 +1198,13 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                self.reevaluation_pending.set(true);
                 return;
             }
 
             let generation = self.frame_generation.get();
+
+            crate::perf_count!(FullValueReevaluations);
 
             // Notify the existing effective values that reevaluation is
             // starting. They are visited in place, as the original indexes
@@ -1193,6 +1212,7 @@ impl ValueStore {
             // value records and calls nothing that could reach the store, so
             // no copy of the list is needed for the visit.
             for (_, value) in self.effective_values.borrow().iter() {
+                crate::perf_count!(ReevaluatedEffectiveValues);
                 value.begin_reevaluation(false);
             }
 
@@ -1213,6 +1233,7 @@ impl ValueStore {
                         break;
                     }
                     let entry = frame.base().get_entry(j);
+                    crate::perf_count!(ReevaluatedFrameEntries);
                     let property = entry.property();
                     let effective = self.get_effective_value(property);
 

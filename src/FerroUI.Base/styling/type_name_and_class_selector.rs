@@ -51,6 +51,10 @@ impl TypeNameAndClassSelector {
         result
     }
 
+    pub(super) fn own_target_type(&self) -> Option<&'static TypeInfo> {
+        self.target_type
+    }
+
     /// The name of the control to match.
     #[allow(dead_code)]
     pub fn name(&self) -> Option<String> {

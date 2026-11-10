@@ -1,6 +1,6 @@
 use super::resource_key::ResourceKeyBuildHasher;
 use super::{
-    resource_provider_ptr_eq, IDeferredContent, IResourceDictionary, IResourceNode, IResourceProvider,
+    resource_provider_ptr_eq, DeferredResourceGroup, IDeferredContent, IResourceDictionary, IResourceNode, IResourceProvider,
     IThemeVariantProvider, ResourceHostRef, ResourceKey, ResourceProvider, ResourceProviderImpl, ResourceValue,
     ResourcesChangedEventArgs,
 };
@@ -18,6 +18,115 @@ enum ResourceItem {
     Value(ResourceValue),
     Deferred(Rc<dyn IDeferredContent>),
     NotSharedDeferred(Rc<dyn IDeferredContent>),
+    IndexedDeferred(Rc<DeferredResourceGroup>, usize),
+}
+
+#[cfg(test)]
+#[test]
+fn indexed_resources_do_not_increase_dictionary_entry_size() {
+    assert_eq!(std::mem::size_of::<ResourceItem>(), 3 * std::mem::size_of::<usize>());
+}
+
+#[cfg(test)]
+#[test]
+fn deferred_source_destruction_can_reenter_dictionary_after_realization() {
+    use super::{DeferredContentFailed, IDeferredResourceGroup};
+    use crate::WeakRef;
+    use std::cell::Cell;
+    struct Source {
+        owner: WeakRef<ResourceDictionary>,
+        drops: Rc<Cell<usize>>,
+        builds: Rc<Cell<usize>>,
+    }
+    impl Drop for Source {
+        fn drop(&mut self) {
+            assert_eq!(self.owner.upgrade().unwrap().count(), 1);
+            self.drops.set(self.drops.get() + 1);
+        }
+    }
+    impl IDeferredContent for Source {
+        fn build(&self, _: Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue> {
+            self.builds.set(self.builds.get() + 1);
+            Some(Rc::new(42_i32))
+        }
+    }
+    impl IDeferredResourceGroup for Source {
+        fn try_build(&self, _: usize, provider: Option<&Rc<dyn IServiceProvider>>) -> Result<Option<BoxedValue>, DeferredContentFailed> {
+            Ok(self.build(provider))
+        }
+    }
+    for indexed in [false, true] {
+        let dictionary = ResourceDictionary::new();
+        let drops = Rc::new(Cell::new(0));
+        let builds = Rc::new(Cell::new(0));
+        let source = Rc::new(Source { owner: dictionary.downgrade(), drops: drops.clone(), builds: builds.clone() });
+        if indexed {
+            dictionary.add_indexed_deferred(ResourceKey::from("Key"), DeferredResourceGroup::new(source), 0);
+        } else {
+            dictionary.add_deferred("Key", source);
+        }
+        assert_eq!(builds.get(), 0);
+        let value = dictionary.try_get_value(&ResourceKey::from("Key")).unwrap().unwrap();
+        assert_eq!(*value.downcast_ref::<i32>().unwrap(), 42);
+        assert!(Rc::ptr_eq(&value, &dictionary.try_get_value(&ResourceKey::from("Key")).unwrap().unwrap()));
+        assert_eq!(builds.get(), 1);
+        assert_eq!(drops.get(), 1);
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn indexed_group_is_told_of_a_realized_row_and_not_of_a_failed_build() {
+    use super::{DeferredContentFailed, IDeferredResourceGroup};
+    use std::cell::Cell;
+    #[derive(Default)]
+    struct Source {
+        fail: Cell<bool>,
+        builds: Cell<usize>,
+        released: RefCell<Vec<usize>>,
+    }
+    impl IDeferredResourceGroup for Source {
+        fn try_build(&self, index: usize, _: Option<&Rc<dyn IServiceProvider>>) -> Result<Option<BoxedValue>, DeferredContentFailed> {
+            self.builds.set(self.builds.get() + 1);
+            if self.fail.get() {
+                return Err(DeferredContentFailed);
+            }
+            Ok(Some(Rc::new(index as i32)))
+        }
+        fn release(&self, index: usize) {
+            self.released.borrow_mut().push(index);
+        }
+    }
+    // A development build with hot reload keeps every row buildable: a reload can restore a
+    // saved deferred entry.
+    let told = |rows: &[usize]| if cfg!(all(debug_assertions, feature = "hot-reload")) { Vec::new() } else { rows.to_vec() };
+    let dictionary = ResourceDictionary::new();
+    let source = Rc::new(Source::default());
+    let group = DeferredResourceGroup::new(source.clone());
+    for (index, key) in ["First", "Second", "Third"].into_iter().enumerate() {
+        dictionary.add_indexed_deferred(ResourceKey::from(key), group.clone(), index);
+    }
+    drop(group);
+
+    source.fail.set(true);
+    assert!(dictionary.try_get_value(&ResourceKey::from("Second")).is_none());
+    assert!(dictionary.contains_deferred_key(&ResourceKey::from("Second")));
+    assert!(source.released.borrow().is_empty());
+
+    source.fail.set(false);
+    let value = dictionary.try_get_value(&ResourceKey::from("Second")).unwrap().unwrap();
+    assert_eq!(*value.downcast_ref::<i32>().unwrap(), 1);
+    assert_eq!(*source.released.borrow(), told(&[1]));
+    // The value is cached: the row is neither built nor released again.
+    assert!(Rc::ptr_eq(&value, &dictionary.try_get_value(&ResourceKey::from("Second")).unwrap().unwrap()));
+    assert_eq!(source.builds.get(), 2);
+    assert_eq!(*source.released.borrow(), told(&[1]));
+
+    // The other rows keep their indices.
+    assert!(dictionary.contains_deferred_key(&ResourceKey::from("First")));
+    let third = dictionary.try_get_value(&ResourceKey::from("Third")).unwrap().unwrap();
+    assert_eq!(*third.downcast_ref::<i32>().unwrap(), 2);
+    assert_eq!(*source.released.borrow(), told(&[1, 2]));
 }
 
 struct DeferredItem<F: Fn(Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue>>(F);
@@ -401,6 +510,14 @@ impl ResourceDictionary {
         self.add_item(key.into(), ResourceItem::Deferred(deferred_content));
     }
 
+    /// Adds one shared, lazy resource described by an index in a compiled group.
+    /// The entry is self-contained so dictionary snapshots and transfers retain
+    /// its source; realization is not an application write.
+    #[doc(hidden)]
+    pub fn add_indexed_deferred(&self, key: ResourceKey, group: Rc<DeferredResourceGroup>, index: usize) {
+        self.add_item(key, ResourceItem::IndexedDeferred(group, index));
+    }
+
     /// Adds a resource that is built from `deferred_content` every time it is
     /// requested.
     pub fn add_not_shared_deferred(&self, key: impl Into<ResourceKey>, deferred_content: Rc<dyn IDeferredContent>) {
@@ -457,11 +574,11 @@ impl ResourceDictionary {
     /// deferred.
     pub fn try_get_value(&self, key: &ResourceKey) -> Option<ResourceValue> {
         let item = self.inner.borrow().get(key).cloned()?;
-        let (deferred, shared) = match item {
+        let item = match item {
             ResourceItem::Value(value) => return Some(value),
-            ResourceItem::Deferred(deferred) => (deferred, true),
-            ResourceItem::NotSharedDeferred(deferred) => (deferred, false),
+            item => item,
         };
+        let shared = !matches!(&item, ResourceItem::NotSharedDeferred(_));
 
         // Avoid simple reentrancy, which could commonly occur on redefining
         // the resource.
@@ -480,11 +597,26 @@ impl ResourceDictionary {
         let _reset = Reset(&self.last_deferred_item_key);
         // A build that failed reported its error itself (to the error scope of a load, #567):
         // the resource is then not found here, and stays deferred.
-        let Ok(value) = deferred.try_build(None) else {
+        // Retain the source through replacement and through the Reset guard.
+        // Its destructor may reenter the dictionary; it must not run while the
+        // map is mutably borrowed by insert.
+        let built = match &item {
+            ResourceItem::Deferred(deferred) | ResourceItem::NotSharedDeferred(deferred) => deferred.try_build(None),
+            ResourceItem::IndexedDeferred(group, index) => group.0.try_build(*index, None),
+            ResourceItem::Value(_) => unreachable!(),
+        };
+        let Ok(value) = built else {
             return None;
         };
         if shared {
             self.inner.borrow_mut().insert(key.clone(), ResourceItem::Value(value.clone()));
+            // The entry holds the value now: the group can let go of what it kept for this row.
+            // A development reload can restore a saved deferred entry, so the row stays
+            // buildable there.
+            #[cfg(not(all(debug_assertions, feature = "hot-reload")))]
+            if let ResourceItem::IndexedDeferred(group, index) = &item {
+                group.0.release(*index);
+            }
         }
         Some(value)
     }
@@ -501,7 +633,7 @@ impl ResourceDictionary {
     pub fn contains_deferred_key(&self, key: &ResourceKey) -> bool {
         matches!(
             self.inner.borrow().get(key),
-            Some(ResourceItem::Deferred(_) | ResourceItem::NotSharedDeferred(_))
+            Some(ResourceItem::Deferred(_) | ResourceItem::NotSharedDeferred(_) | ResourceItem::IndexedDeferred(_, _))
         )
     }
 

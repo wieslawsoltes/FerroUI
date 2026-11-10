@@ -434,6 +434,17 @@ impl IResourceProvider for StyleBaseHandle {
 }
 
 impl IStyle for StyleBaseHandle {
+    fn indexed_style(&self) -> Option<&super::Style> {
+        self.0.downcast_ref::<super::Style>()
+    }
+
+    fn children_for_target<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        match self.0.children.get() {
+            Some(children) => children.candidates(target),
+            None => super::StyleCandidates::all(empty_styles()),
+        }
+    }
+
     fn children(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         match self.0.children.get() {
             Some(children) => children.snapshot(),

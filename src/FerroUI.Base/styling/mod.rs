@@ -31,6 +31,7 @@ mod property_equals_selector;
 mod property_setter_template_instance;
 mod screen_queries;
 mod selector;
+mod selector_candidates;
 mod selector_match;
 mod selectors;
 mod setter;
@@ -79,6 +80,8 @@ pub(crate) use property_equals_selector::PropertyEqualsSelector;
 pub(crate) use property_setter_template_instance::PropertySetterTemplateInstance;
 pub(crate) use screen_queries::{HeightQuery, WidthQuery};
 pub use selector::Selector;
+#[doc(hidden)]
+pub use selector_candidates::StyleCandidates;
 pub(crate) use selector::SelectorNode;
 pub use selector_match::{SelectorMatch, SelectorMatchResult};
 pub use selectors::Selectors;
@@ -114,3 +117,6 @@ mod style_tests;
 
 #[cfg(test)]
 mod container_tests;
+
+#[cfg(test)]
+mod selector_candidate_tests;

@@ -366,3 +366,48 @@ fn template_bindings_are_bound_in_order() {
         ["target background", "source background", "target padding", "source padding"]
     );
 }
+
+fn candidate_width() -> &'static FerroProperty {
+    ferroui_base::layout::Layoutable::width_property()
+}
+
+#[test]
+fn generated_type_candidates_keep_template_activators_and_selector_replacement() {
+    use ferroui_base::styling::IStyle;
+    static MISS: &[SelectorStep] = &[SelectorStep::Nesting, SelectorStep::Template, SelectorStep::OfType(Button::TYPE)];
+    static HIT: &[SelectorStep] = &[SelectorStep::Nesting, SelectorStep::Template, SelectorStep::OfType(Border::TYPE), SelectorStep::Class(":active")];
+    let rule = |selector| StyleMember::Style { parent: false, selector: Some(selector), members: &[
+        StyleMember::Setter(ThemeSetter { property: candidate_width, form: SetterForm::Plain, value: ThemeValue::Double(42.0) }),
+    ], line: 1, position: 1 };
+    let mut members = vec![StyleMember::TargetType(Button::TYPE)];
+    members.extend((0..8).map(|_| rule(MISS)));
+    members.push(rule(HIT));
+    let table = ControlThemeTable { parent: false, members: Box::leak(members.into_boxed_slice()) };
+    let theme = theme_of(&build_control_theme(&context(), &table).unwrap());
+    let handle: Rc<dyn IStyle> = theme.clone().into();
+    let target = Border::new();
+    assert_eq!(handle.children_for_target(&target).count(), 1);
+    let last = nested_style(theme.upcast_ref::<StyleBase>(), 8);
+    let original = last.selector();
+    Style::__markup_set_Selector(&last, build_selector(MISS));
+    // Replacing a generated selector deoptimizes its cached exclusions.
+    let button = Button::new();
+    assert_eq!(handle.children_for_target(&button).count(), 9);
+    Style::__markup_set_Selector(&last, original);
+    last.enable_selector_index();
+    assert_eq!(handle.children_for_target(&button).count(), 8);
+    assert_eq!(handle.children_for_target(&target).count(), 1);
+    let parent = Button::new();
+    parent.set_theme(theme);
+    target.set_templated_parent(parent.clone());
+    target.apply_styling();
+    // An absent pseudo-class still installs an activator; both state changes
+    // must be observed by the original selector after candidate filtering.
+    assert!(target.width().is_nan());
+    target.pseudo_classes().add_pseudo(":active");
+    assert_eq!(target.width(), 42.0);
+    assert!(last.selector().unwrap().match_(&target, last.parent().as_deref(), false).is_match());
+    target.pseudo_classes().remove_pseudo(":active");
+    assert!(target.width().is_nan());
+    assert!(!last.selector().unwrap().match_(&target, last.parent().as_deref(), false).is_match());
+}
