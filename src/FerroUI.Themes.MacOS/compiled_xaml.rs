@@ -18864,12 +18864,12 @@ fn build_controls_macoscontrols_xaml_unit_89(
     // Controls/MacOSControls.xaml(484,4) Content (resource)
     let deferred_287 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_540, 484, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_287) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 484, 4)?;
-    // Controls/MacOSControls.xaml(863,4) Content (resource)
-    let deferred_288 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_542, 863, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_288) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 863, 4)?;
-    // Controls/MacOSControls.xaml(907,4) Content (resource)
-    let deferred_289 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_544, 907, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_289) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 907, 4)?;
+    // Controls/MacOSControls.xaml(855,4) Content (resource)
+    let deferred_288 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_542, 855, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_288) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 855, 4)?;
+    // Controls/MacOSControls.xaml(899,4) Content (resource)
+    let deferred_289 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_544, 899, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_289) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 899, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -44928,52 +44928,64 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_358: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_536: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-collapsed")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_536: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconBox")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Icon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconColumn")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_539: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":info-badge-collapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_539: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Icon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_540: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_540: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-collapsed")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconBox")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconColumn")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_543: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_543: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":info-badge-collapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_544: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_544: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_546: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":closed-compact-and-top-level-item")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_546: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_547: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGridHost")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_547: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_548: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_548: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_549: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":on-top-navigation-primary")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_549: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_550: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NavigationViewItemPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_550: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":closed-compact-and-top-level-item")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicatorGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGridHost")];
+
+/// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_552: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+
+/// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_553: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":on-top-navigation-primary")];
+
+/// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_554: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NavigationViewItemPresenter")];
+
+/// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicatorGrid")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_317() -> &'static ::ferroui_base::FerroProperty {
@@ -44986,7 +44998,7 @@ fn build_controls_macoscontrols_xaml_property_318() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_552: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_556: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGrid")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_319() -> &'static ::ferroui_base::FerroProperty {
@@ -44994,7 +45006,7 @@ fn build_controls_macoscontrols_xaml_property_319() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_553: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Popup as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChildrenFlyout")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_557: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Popup as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChildrenFlyout")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_320() -> &'static ::ferroui_base::FerroProperty {
@@ -45002,10 +45014,10 @@ fn build_controls_macoscontrols_xaml_property_320() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_554: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-only")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_558: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-only")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-only")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_559: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-only")];
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_540`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45027,40 +45039,32 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_541, parent: true, line: 501, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_536),
             line: 617,
             position: 6,
             members: &[
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 618,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPointerOver") }),
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                    line: 621,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
-                    ],
-                },
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPointerOver") }),
+            ],
+        },
+        rt::StyleMember::Style {
+            parent: true,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
+            line: 620,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_3),
-            line: 626,
+            line: 624,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 627,
+                    line: 625,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPressed") }),
@@ -45069,7 +45073,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                    line: 630,
+                    line: 628,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPressed") }),
@@ -45080,13 +45084,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_15),
-            line: 635,
+            line: 633,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 636,
+                    line: 634,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelected") }),
@@ -45095,7 +45099,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                    line: 639,
+                    line: 637,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelected") }),
@@ -45105,40 +45109,32 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_16),
-            line: 644,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538),
+            line: 642,
             position: 6,
             members: &[
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 645,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPointerOver") }),
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                    line: 648,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPointerOver") }),
-                    ],
-                },
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPointerOver") }),
+            ],
+        },
+        rt::StyleMember::Style {
+            parent: true,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_539),
+            line: 645,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_17),
-            line: 653,
+            line: 649,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 654,
+                    line: 650,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPressed") }),
@@ -45147,7 +45143,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                    line: 657,
+                    line: 653,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPressed") }),
@@ -45158,7 +45154,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_173),
-            line: 662,
+            line: 658,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_31, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemDisabledThemeOpacity") }),
@@ -45166,14 +45162,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_536),
-            line: 667,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_540),
+            line: 663,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
-                    line: 668,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
+                    line: 664,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -45181,8 +45177,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538),
-                    line: 671,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542),
+                    line: 667,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(8.0_f64) }),
@@ -45192,8 +45188,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_539),
-            line: 677,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_543),
+            line: 673,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -45201,14 +45197,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_540),
-            line: 682,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_544),
+            line: 678,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
-                    line: 683,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545),
+                    line: 679,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
@@ -45216,8 +45212,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542),
-                    line: 686,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_546),
+                    line: 682,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
@@ -45227,8 +45223,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_543),
-            line: 691,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_547),
+            line: 687,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_94, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_540_value_4) }),
@@ -45236,8 +45232,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_544),
-            line: 695,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_548),
+            line: 691,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_81, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
@@ -45245,8 +45241,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545),
-            line: 698,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_549),
+            line: 694,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_81, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPressed") }),
@@ -45254,14 +45250,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_546),
-            line: 703,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_550),
+            line: 699,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_11),
-                    line: 704,
+                    line: 700,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactItemContentPresenterMargin") }),
@@ -45269,8 +45265,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_547),
-                    line: 707,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551),
+                    line: 703,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -45278,8 +45274,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_548),
-                    line: 710,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_552),
+                    line: 706,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_203, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
@@ -45293,14 +45289,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_549),
-            line: 721,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_553),
+            line: 717,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_550),
-                    line: 722,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_554),
+                    line: 718,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemMargin") }),
@@ -45309,17 +45305,17 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                    line: 725,
+                    line: 721,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NavigationViewItemButtonMargin", line: 727, position: 35 } }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NavigationViewItemButtonMargin", line: 723, position: 35 } }),
                     ],
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551),
-                    line: 729,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555),
+                    line: 725,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([16.0_f64, 0.0_f64, 16.0_f64, 4.0_f64]) }),
@@ -45330,7 +45326,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: false,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_258),
-                    line: 734,
+                    line: 730,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
@@ -45341,8 +45337,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_547),
-                    line: 740,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551),
+                    line: 736,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -45350,8 +45346,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_552),
-                    line: 743,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_556),
+                    line: 739,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
@@ -45359,8 +45355,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538),
-                    line: 746,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542),
+                    line: 742,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
@@ -45368,8 +45364,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
-                    line: 749,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
+                    line: 745,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
@@ -45381,7 +45377,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_11),
-                    line: 755,
+                    line: 751,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentPresenterMargin") }),
@@ -45391,8 +45387,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
-                    line: 760,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545),
+                    line: 756,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_203, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
@@ -45401,8 +45397,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_548),
-                    line: 764,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_552),
+                    line: 760,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_203, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(3_i32) }),
@@ -45412,8 +45408,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_553),
-                    line: 769,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_557),
+                    line: 765,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_540_value_13) }),
@@ -45421,40 +45417,32 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
-                    line: 773,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_536),
+                    line: 769,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 774,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPointerOver") }),
-                            ],
-                        },
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 777,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPointerOver") }),
-                            ],
-                        },
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
+                    line: 772,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPointerOver") }),
                     ],
                 },
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_3),
-                    line: 781,
+                    line: 775,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 782,
+                            line: 776,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPressed") }),
@@ -45463,7 +45451,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 785,
+                            line: 779,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPressed") }),
@@ -45474,13 +45462,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_15),
-                    line: 789,
+                    line: 783,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 790,
+                            line: 784,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelected") }),
@@ -45489,7 +45477,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 793,
+                            line: 787,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelected") }),
@@ -45499,7 +45487,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_16),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538),
+                    line: 791,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_539),
+                    line: 794,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_17),
                     line: 797,
                     position: 8,
                     members: &[
@@ -45509,39 +45515,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                             line: 798,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPointerOver") }),
-                            ],
-                        },
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 801,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPointerOver") }),
-                            ],
-                        },
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_17),
-                    line: 805,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 806,
-                            position: 10,
-                            members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPressed") }),
                             ],
                         },
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 809,
+                            line: 801,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPressed") }),
@@ -45552,13 +45532,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_6),
-                    line: 814,
+                    line: 806,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 815,
+                            line: 807,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_31, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(1.0_f64) }),
@@ -45567,7 +45547,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_249),
-                            line: 818,
+                            line: 810,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundDisabled") }),
@@ -45577,14 +45557,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_554),
-                    line: 823,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_558),
+                    line: 815,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_248),
-                            line: 824,
+                            line: 816,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(36.0_f64) }),
@@ -45594,8 +45574,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
-                            line: 829,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
+                            line: 821,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([10.0_f64, 0.0_f64, 10.0_f64, 0.0_f64]) }),
@@ -45604,7 +45584,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_11),
-                            line: 832,
+                            line: 824,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -45612,8 +45592,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551),
-                            line: 835,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555),
+                            line: 827,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -45621,8 +45601,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
-                            line: 838,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545),
+                            line: 830,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemIconOnlyExpandChevronMargin") }),
@@ -45632,14 +45612,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555),
-                    line: 843,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_559),
+                    line: 835,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_537),
-                            line: 844,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
+                            line: 836,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -45647,8 +45627,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_538),
-                            line: 847,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_542),
+                            line: 839,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
@@ -45657,7 +45637,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_11),
-                            line: 850,
+                            line: 842,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentOnlyContentPresenterMargin") }),
@@ -45665,8 +45645,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_551),
-                            line: 853,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_555),
+                            line: 845,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([12.0_f64, 0.0_f64, 12.0_f64, 4.0_f64]) }),
@@ -45674,8 +45654,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_541),
-                            line: 856,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_545),
+                            line: 848,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentOnlyExpandChevronMargin") }),
@@ -45715,7 +45695,7 @@ fn build_controls_macoscontrols_xaml_deferred_540_value_3() -> ::ferroui_base::m
 fn build_controls_macoscontrols_xaml_deferred_540_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 692, 42)?;
+    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 688, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
 }
 
@@ -45765,16 +45745,16 @@ fn build_controls_macoscontrols_xaml_deferred_540_value_13() -> ::ferroui_base::
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_556: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":header-text-collapsed")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_560: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":header-text-collapsed")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_557: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_561: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_558: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_562: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_559: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top-mode"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_563: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top-mode"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_542`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45787,17 +45767,17 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_542_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_303, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_542_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_543, parent: true, line: 872, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_543, parent: true, line: 864, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_556),
-            line: 893,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_560),
+            line: 885,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_557),
-                    line: 894,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_561),
+                    line: 886,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -45805,8 +45785,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_558),
-                    line: 897,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_562),
+                    line: 889,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
@@ -45816,8 +45796,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_559),
-            line: 902,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_563),
+            line: 894,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemInnerHeaderMargin") }),
@@ -45837,10 +45817,10 @@ fn build_controls_macoscontrols_xaml_deferred_542_value_1() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_560: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal-line-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_564: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal-line-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_561: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_565: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_544`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45851,11 +45831,11 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_303, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_544_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_545, parent: true, line: 914, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_545, parent: true, line: 906, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_560),
-            line: 924,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_564),
+            line: 916,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactItemSeparatorMargin") }),
@@ -45863,8 +45843,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_561),
-            line: 927,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_565),
+            line: 919,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(24.0_f64) }),
@@ -45888,67 +45868,67 @@ fn build_controls_macoscontrols_xaml_deferred_544_value_1() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_562: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":back-button-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BackButton")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_566: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":back-button-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BackButton")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_563: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":back-button-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BackButton")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_567: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":back-button-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_BackButton")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_564: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pane-toggle-button-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneToggleButton")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_568: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pane-toggle-button-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneToggleButton")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_565: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pane-toggle-button-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneToggleButton")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_569: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pane-toggle-button-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PaneToggleButton")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_566: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left-header-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LeftHeaderPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_570: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left-header-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LeftHeaderPresenter")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_567: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left-header-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LeftHeaderPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_571: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":left-header-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LeftHeaderPresenter")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_568: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Icon")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_572: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Icon")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_569: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Icon")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_573: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Icon")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_570: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":title-text-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_574: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":title-text-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_571: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":title-text-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_575: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":title-text-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_572: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":subtitle-text-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_576: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":subtitle-text-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_573: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":subtitle-text-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_577: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":subtitle-text-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_574: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenterGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_578: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenterGrid")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_575: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenterGrid")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_579: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenterGrid")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_576: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right-header-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RightHeaderPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_580: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right-header-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RightHeaderPresenter")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_577: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right-header-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RightHeaderPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_581: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right-header-visible"), rt::SelectorStep::Class(":deactivated"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_RightHeaderPresenter")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_578: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":negative-inset-spacing"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftHeaderPaddingColumn")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_582: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":negative-inset-spacing"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftHeaderPaddingColumn")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_579: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded-height"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_583: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded-height"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_LayoutRoot")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_580: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_584: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_581: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_585: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SubtitleText")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_582: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_586: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_546`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45961,7 +45941,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_547, parent: true, line: 49, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_562),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_566),
             line: 155,
             position: 6,
             members: &[
@@ -45970,7 +45950,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_563),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_567),
             line: 158,
             position: 6,
             members: &[
@@ -45979,7 +45959,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_564),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_568),
             line: 162,
             position: 6,
             members: &[
@@ -45988,7 +45968,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_565),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_569),
             line: 165,
             position: 6,
             members: &[
@@ -45997,7 +45977,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_566),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_570),
             line: 169,
             position: 6,
             members: &[
@@ -46006,7 +45986,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_567),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_571),
             line: 172,
             position: 6,
             members: &[
@@ -46015,7 +45995,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_568),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_572),
             line: 176,
             position: 6,
             members: &[
@@ -46024,7 +46004,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_569),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_573),
             line: 179,
             position: 6,
             members: &[
@@ -46033,7 +46013,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_570),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_574),
             line: 183,
             position: 6,
             members: &[
@@ -46042,7 +46022,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_571),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_575),
             line: 186,
             position: 6,
             members: &[
@@ -46051,7 +46031,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_572),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_576),
             line: 190,
             position: 6,
             members: &[
@@ -46060,7 +46040,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_573),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_577),
             line: 193,
             position: 6,
             members: &[
@@ -46069,7 +46049,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_574),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_578),
             line: 197,
             position: 6,
             members: &[
@@ -46078,7 +46058,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_575),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_579),
             line: 200,
             position: 6,
             members: &[
@@ -46087,7 +46067,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_576),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_580),
             line: 204,
             position: 6,
             members: &[
@@ -46096,7 +46076,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_577),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_581),
             line: 207,
             position: 6,
             members: &[
@@ -46105,7 +46085,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_578),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_582),
             line: 211,
             position: 6,
             members: &[
@@ -46114,7 +46094,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_579),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_583),
             line: 215,
             position: 6,
             members: &[
@@ -46123,7 +46103,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_580),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_584),
             line: 219,
             position: 6,
             members: &[
@@ -46132,7 +46112,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_581),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_585),
             line: 222,
             position: 6,
             members: &[
@@ -46141,7 +46121,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_582),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_586),
             line: 225,
             position: 6,
             members: &[
@@ -82086,138 +82066,138 @@ fn build_controls_macoscontrols_xaml_deferred_541(
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(863,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(855,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_542(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(863,4) ControlTheme
+    // Controls/MacOSControls.xaml(855,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(872,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(864,10)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_543(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/MacOSControls.xaml(872,10) Grid
+    // Controls/MacOSControls.xaml(864,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/MacOSControls.xaml(872,15) Name
+    // Controls/MacOSControls.xaml(864,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemHeaderRootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 872, 15)?;
-    // Controls/MacOSControls.xaml(873,12) Children
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 864, 15)?;
+    // Controls/MacOSControls.xaml(865,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(873,12) Grid
+    // Controls/MacOSControls.xaml(865,12) Grid
     let grid_1 = ::ferroui_controls::Grid::new();
     grid_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(grid_1.clone()));
-    // Controls/MacOSControls.xaml(873,17) Name
+    // Controls/MacOSControls.xaml(865,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerHeaderGrid")));
-    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 873, 17)?;
-    // Controls/MacOSControls.xaml(873,12) Height
+    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 865, 17)?;
+    // Controls/MacOSControls.xaml(865,12) Height
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_0);
-    // Controls/MacOSControls.xaml(873,12) HorizontalAlignment
+    // Controls/MacOSControls.xaml(865,12) HorizontalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_1);
-    // Controls/MacOSControls.xaml(876,17) Margin
-    rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemInnerHeaderMargin", 876, 17)?;
-    // Controls/MacOSControls.xaml(878,14) Children
+    // Controls/MacOSControls.xaml(868,17) Margin
+    rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemInnerHeaderMargin", 868, 17)?;
+    // Controls/MacOSControls.xaml(870,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(878,14) ContentPresenter
+    // Controls/MacOSControls.xaml(870,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
-    // Controls/MacOSControls.xaml(878,31) Name
+    // Controls/MacOSControls.xaml(870,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderText")));
-    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 878, 31)?;
-    // Controls/MacOSControls.xaml(878,14) VerticalAlignment
+    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 870, 31)?;
+    // Controls/MacOSControls.xaml(870,14) VerticalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_2);
-    // Controls/MacOSControls.xaml(878,14) Margin
+    // Controls/MacOSControls.xaml(870,14) Margin
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, -1.0_f64), priority_3);
-    // Controls/MacOSControls.xaml(881,31) Content (setter chosen at run time)
+    // Controls/MacOSControls.xaml(873,31) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 881, 31)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 873, 31)?;
     } else {
-        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 881, 31)?, priority_4);
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 873, 31)?, priority_4);
     }
-    // Controls/MacOSControls.xaml(882,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 882, 31)?;
-    // Controls/MacOSControls.xaml(878,14) FontFamily
+    // Controls/MacOSControls.xaml(874,31) ContentTemplate
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 874, 31)?;
+    // Controls/MacOSControls.xaml(870,14) FontFamily
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_family_property(), ::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default")), priority_5);
-    // Controls/MacOSControls.xaml(878,14) FontSize
+    // Controls/MacOSControls.xaml(870,14) FontSize
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_size_property(), 14.0_f64, priority_6);
-    // Controls/MacOSControls.xaml(878,14) FontWeight
-    let value_1 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 885, 31)?;
+    // Controls/MacOSControls.xaml(870,14) FontWeight
+    let value_1 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 877, 31)?;
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_weight_property(), ::core::clone::Clone::clone(&value_1), priority_7);
-    // Controls/MacOSControls.xaml(878,14) TextWrapping
+    // Controls/MacOSControls.xaml(870,14) TextWrapping
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::text_wrapping_property(), ::ferroui_base::media::TextWrapping::NoWrap, priority_8);
-    rt::invoked(content_presenter_0.try_end_init(), 878, 14)?;
+    rt::invoked(content_presenter_0.try_end_init(), 870, 14)?;
     context.pop_parent();
-    rt::invoked(grid_1.try_end_init(), 873, 12)?;
+    rt::invoked(grid_1.try_end_init(), 865, 12)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 872, 10)?;
+    rt::invoked(grid_0.try_end_init(), 864, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(907,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(899,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_544(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(907,4) ControlTheme
+    // Controls/MacOSControls.xaml(899,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(914,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(906,10)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_545(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/MacOSControls.xaml(914,10) Grid
+    // Controls/MacOSControls.xaml(906,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/MacOSControls.xaml(914,15) Name
+    // Controls/MacOSControls.xaml(906,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemSeparatorRootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 914, 15)?;
-    // Controls/MacOSControls.xaml(915,12) Children
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 906, 15)?;
+    // Controls/MacOSControls.xaml(907,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(915,12) Rectangle
+    // Controls/MacOSControls.xaml(907,12) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
     rectangle_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(rectangle_0.clone()));
-    // Controls/MacOSControls.xaml(915,22) Name
+    // Controls/MacOSControls.xaml(907,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorLine")));
-    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 915, 22)?;
-    // Controls/MacOSControls.xaml(916,22) Height
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 916, 22)?;
-    // Controls/MacOSControls.xaml(917,22) Fill
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewItemSeparatorForeground", 917, 22)?;
-    // Controls/MacOSControls.xaml(918,22) Margin
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemSeparatorMargin", 918, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 907, 22)?;
+    // Controls/MacOSControls.xaml(908,22) Height
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 908, 22)?;
+    // Controls/MacOSControls.xaml(909,22) Fill
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewItemSeparatorForeground", 909, 22)?;
+    // Controls/MacOSControls.xaml(910,22) Margin
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemSeparatorMargin", 910, 22)?;
     context.pop_parent();
-    rt::invoked(rectangle_0.try_end_init(), 915, 12)?;
+    rt::invoked(rectangle_0.try_end_init(), 907, 12)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 914, 10)?;
+    rt::invoked(grid_0.try_end_init(), 906, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 

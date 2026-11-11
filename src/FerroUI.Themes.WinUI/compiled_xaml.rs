@@ -22190,12 +22190,12 @@ fn build_controls_winuicontrols_xaml_unit_64(
     // Controls/WinUIControls.xaml(482,4) Content (resource)
     let deferred_180 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_337, 482, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_180) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 482, 4)?;
-    // Controls/WinUIControls.xaml(861,4) Content (resource)
-    let deferred_181 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_339, 861, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_181) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 861, 4)?;
-    // Controls/WinUIControls.xaml(905,4) Content (resource)
-    let deferred_182 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_341, 905, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_182) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 905, 4)?;
+    // Controls/WinUIControls.xaml(853,4) Content (resource)
+    let deferred_181 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_339, 853, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_181) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 853, 4)?;
+    // Controls/WinUIControls.xaml(897,4) Content (resource)
+    let deferred_182 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_341, 897, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_182) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 897, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -38895,52 +38895,64 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_230: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_344: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-collapsed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_344: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Icon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconColumn")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_347: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":info-badge-collapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_347: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Icon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_348: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_348: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-collapsed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconBox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconColumn")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_351: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_351: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":info-badge-collapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_352: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_352: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_354: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":closed-compact-and-top-level-item")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_354: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_355: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGridHost")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_355: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_356: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_356: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_357: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":on-top-navigation-primary")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_357: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Class(":chevron-visible-closed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronIcon")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_358: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NavigationViewItemPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_358: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":closed-compact-and-top-level-item")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicatorGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGridHost")];
+
+/// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_360: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InfoBadgePresenter")];
+
+/// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_361: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":on-top-navigation-primary")];
+
+/// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_362: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NavigationViewItemPresenter")];
+
+/// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicatorGrid")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_231() -> &'static ::ferroui_base::FerroProperty {
@@ -38953,7 +38965,7 @@ fn build_controls_winuicontrols_xaml_property_232() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_360: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_364: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentGrid")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_233() -> &'static ::ferroui_base::FerroProperty {
@@ -38961,7 +38973,7 @@ fn build_controls_winuicontrols_xaml_property_233() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_361: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Popup as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChildrenFlyout")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_365: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Popup as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChildrenFlyout")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_234() -> &'static ::ferroui_base::FerroProperty {
@@ -38969,10 +38981,10 @@ fn build_controls_winuicontrols_xaml_property_234() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_362: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-only")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_366: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon-only")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-only")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_367: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":content-only")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_337`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -38994,40 +39006,32 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_338, parent: true, line: 499, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_1),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_344),
             line: 615,
             position: 6,
             members: &[
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 616,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPointerOver") }),
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                    line: 619,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
-                    ],
-                },
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPointerOver") }),
+            ],
+        },
+        rt::StyleMember::Style {
+            parent: true,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
+            line: 618,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_4),
-            line: 624,
+            line: 622,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 625,
+                    line: 623,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundPressed") }),
@@ -39036,7 +39040,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                    line: 628,
+                    line: 626,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPressed") }),
@@ -39047,13 +39051,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_16),
-            line: 633,
+            line: 631,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 634,
+                    line: 632,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelected") }),
@@ -39062,7 +39066,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                    line: 637,
+                    line: 635,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelected") }),
@@ -39072,40 +39076,32 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_17),
-            line: 642,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346),
+            line: 640,
             position: 6,
             members: &[
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 643,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPointerOver") }),
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                    line: 646,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPointerOver") }),
-                    ],
-                },
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPointerOver") }),
+            ],
+        },
+        rt::StyleMember::Style {
+            parent: true,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_347),
+            line: 643,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_18),
-            line: 651,
+            line: 647,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 652,
+                    line: 648,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackgroundSelectedPressed") }),
@@ -39114,7 +39110,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                    line: 655,
+                    line: 651,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundSelectedPressed") }),
@@ -39125,7 +39121,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_88),
-            line: 660,
+            line: 656,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_31, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemDisabledThemeOpacity") }),
@@ -39133,14 +39129,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_344),
-            line: 665,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_348),
+            line: 661,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
-                    line: 666,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
+                    line: 662,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -39148,8 +39144,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346),
-                    line: 669,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350),
+                    line: 665,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(8.0_f64) }),
@@ -39159,8 +39155,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_347),
-            line: 675,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_351),
+            line: 671,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -39168,14 +39164,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_348),
-            line: 680,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_352),
+            line: 676,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
-                    line: 681,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353),
+                    line: 677,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
@@ -39183,8 +39179,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350),
-                    line: 684,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_354),
+                    line: 680,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
@@ -39194,8 +39190,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_351),
-            line: 689,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_355),
+            line: 685,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_winuicontrols_xaml_deferred_337_value_4) }),
@@ -39203,8 +39199,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_352),
-            line: 693,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_356),
+            line: 689,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPointerOver") }),
@@ -39212,8 +39208,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353),
-            line: 696,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_357),
+            line: 692,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForegroundPressed") }),
@@ -39221,14 +39217,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_354),
-            line: 701,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_358),
+            line: 697,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_12),
-                    line: 702,
+                    line: 698,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactItemContentPresenterMargin") }),
@@ -39236,8 +39232,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_355),
-                    line: 705,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359),
+                    line: 701,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -39245,8 +39241,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_356),
-                    line: 708,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_360),
+                    line: 704,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_207, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
@@ -39260,14 +39256,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_357),
-            line: 719,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_361),
+            line: 715,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_358),
-                    line: 720,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_362),
+                    line: 716,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemMargin") }),
@@ -39276,17 +39272,17 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                    line: 723,
+                    line: 719,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NavigationViewItemButtonMargin", line: 725, position: 35 } }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NavigationViewItemButtonMargin", line: 721, position: 35 } }),
                     ],
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359),
-                    line: 727,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363),
+                    line: 723,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([16.0_f64, 0.0_f64, 16.0_f64, 4.0_f64]) }),
@@ -39297,7 +39293,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: false,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_87),
-                    line: 732,
+                    line: 728,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
@@ -39308,8 +39304,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_355),
-                    line: 738,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359),
+                    line: 734,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -39317,8 +39313,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_360),
-                    line: 741,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_364),
+                    line: 737,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
@@ -39326,8 +39322,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346),
-                    line: 744,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350),
+                    line: 740,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
@@ -39335,8 +39331,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
-                    line: 747,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
+                    line: 743,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
@@ -39348,7 +39344,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_12),
-                    line: 753,
+                    line: 749,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentPresenterMargin") }),
@@ -39358,8 +39354,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
-                    line: 758,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353),
+                    line: 754,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_207, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
@@ -39368,8 +39364,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_356),
-                    line: 762,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_360),
+                    line: 758,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_207, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(3_i32) }),
@@ -39379,8 +39375,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_361),
-                    line: 767,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_365),
+                    line: 763,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_234, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_337_value_13) }),
@@ -39388,40 +39384,32 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_1),
-                    line: 771,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_344),
+                    line: 767,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 772,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPointerOver") }),
-                            ],
-                        },
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 775,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPointerOver") }),
-                            ],
-                        },
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
+                    line: 770,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPointerOver") }),
                     ],
                 },
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_4),
-                    line: 779,
+                    line: 773,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 780,
+                            line: 774,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundPressed") }),
@@ -39430,7 +39418,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 783,
+                            line: 777,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundPressed") }),
@@ -39441,13 +39429,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_16),
-                    line: 787,
+                    line: 781,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 788,
+                            line: 782,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelected") }),
@@ -39456,7 +39444,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 791,
+                            line: 785,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelected") }),
@@ -39466,7 +39454,25 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_17),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346),
+                    line: 789,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_347),
+                    line: 792,
+                    position: 8,
+                    members: &[
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPointerOver") }),
+                    ],
+                },
+                rt::StyleMember::Style {
+                    parent: true,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_18),
                     line: 795,
                     position: 8,
                     members: &[
@@ -39476,39 +39482,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                             line: 796,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPointerOver") }),
-                            ],
-                        },
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 799,
-                            position: 10,
-                            members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPointerOver") }),
-                            ],
-                        },
-                    ],
-                },
-                rt::StyleMember::Style {
-                    parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_18),
-                    line: 803,
-                    position: 8,
-                    members: &[
-                        rt::StyleMember::Style {
-                            parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 804,
-                            position: 10,
-                            members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemBackgroundSelectedPressed") }),
                             ],
                         },
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 807,
+                            line: 799,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundSelectedPressed") }),
@@ -39519,13 +39499,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_7),
-                    line: 812,
+                    line: 804,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 813,
+                            line: 805,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_31, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(1.0_f64) }),
@@ -39534,7 +39514,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_86),
-                            line: 816,
+                            line: 808,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemForegroundDisabled") }),
@@ -39544,14 +39524,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_362),
-                    line: 821,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_366),
+                    line: 813,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_85),
-                            line: 822,
+                            line: 814,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(36.0_f64) }),
@@ -39561,8 +39541,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
-                            line: 827,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
+                            line: 819,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([10.0_f64, 0.0_f64, 10.0_f64, 0.0_f64]) }),
@@ -39571,7 +39551,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_12),
-                            line: 830,
+                            line: 822,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -39579,8 +39559,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359),
-                            line: 833,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363),
+                            line: 825,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
@@ -39588,8 +39568,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
-                            line: 836,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353),
+                            line: 828,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemIconOnlyExpandChevronMargin") }),
@@ -39599,14 +39579,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363),
-                    line: 841,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_367),
+                    line: 833,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_345),
-                            line: 842,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
+                            line: 834,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -39614,8 +39594,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_346),
-                            line: 845,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_350),
+                            line: 837,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
@@ -39624,7 +39604,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_12),
-                            line: 848,
+                            line: 840,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentOnlyContentPresenterMargin") }),
@@ -39632,8 +39612,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: false,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_359),
-                            line: 851,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_363),
+                            line: 843,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([12.0_f64, 0.0_f64, 12.0_f64, 4.0_f64]) }),
@@ -39641,8 +39621,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_349),
-                            line: 854,
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_353),
+                            line: 846,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentOnlyExpandChevronMargin") }),
@@ -39682,7 +39662,7 @@ fn build_controls_winuicontrols_xaml_deferred_337_value_3() -> ::ferroui_base::m
 fn build_controls_winuicontrols_xaml_deferred_337_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 690, 42)?;
+    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 686, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
 }
 
@@ -39737,16 +39717,16 @@ fn build_controls_winuicontrols_xaml_property_235() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_364: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":header-text-collapsed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_368: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":header-text-collapsed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_365: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderText")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_369: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderText")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_366: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_370: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_367: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top-mode"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top-mode"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InnerHeaderGrid")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_339`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -39759,17 +39739,17 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_339_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_235, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_339_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_340, parent: true, line: 870, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_340, parent: true, line: 862, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_364),
-            line: 891,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_368),
+            line: 883,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_365),
-                    line: 892,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_369),
+                    line: 884,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -39777,8 +39757,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_366),
-                    line: 895,
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_370),
+                    line: 887,
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
@@ -39788,8 +39768,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_367),
-            line: 900,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+            line: 892,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemInnerHeaderMargin") }),
@@ -39809,10 +39789,10 @@ fn build_controls_winuicontrols_xaml_deferred_339_value_1() -> ::ferroui_base::m
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_368: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal-line-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal-line-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_369: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_373: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorLine")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_341`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_341_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -39823,11 +39803,11 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_341_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_235, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_341_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_342, parent: true, line: 912, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_342, parent: true, line: 904, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_368),
-            line: 922,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+            line: 914,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactItemSeparatorMargin") }),
@@ -39835,8 +39815,8 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_341_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_369),
-            line: 925,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_373),
+            line: 917,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(24.0_f64) }),
@@ -39983,13 +39963,13 @@ fn build_controls_winuicontrols_xaml_property_237() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_370: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_237, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_237, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("AppBarButtonInnerBorder")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("AppBarButtonInnerBorder")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_238() -> &'static ::ferroui_base::FerroProperty {
@@ -40002,10 +39982,10 @@ fn build_controls_winuicontrols_xaml_selector_value_15() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_373: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_238, value: build_controls_winuicontrols_xaml_selector_value_15 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_377: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_238, value: build_controls_winuicontrols_xaml_selector_value_15 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
 
 /// The value of a property selector of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_selector_value_16() -> ::ferroui_base::BoxedValue {
@@ -40013,13 +39993,13 @@ fn build_controls_winuicontrols_xaml_selector_value_16() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_238, value: build_controls_winuicontrols_xaml_selector_value_16 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_379: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_238, value: build_controls_winuicontrols_xaml_selector_value_16 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentViewbox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentViewbox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_377: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_239() -> &'static ::ferroui_base::FerroProperty {
@@ -40027,19 +40007,19 @@ fn build_controls_winuicontrols_xaml_property_239() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_239, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_239, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_379: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentViewbox")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_383: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentViewbox")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Content")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Content")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TextLabel")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")]] }];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_347`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -40060,13 +40040,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_349, parent: true, line: 131, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_370),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
             line: 193,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 194,
                     position: 8,
                     members: &[
@@ -40075,7 +40055,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 197,
                     position: 8,
                     members: &[
@@ -40086,13 +40066,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_373),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_377),
             line: 202,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 203,
                     position: 8,
                     members: &[
@@ -40101,7 +40081,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 206,
                     position: 8,
                     members: &[
@@ -40110,7 +40090,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 209,
                     position: 8,
                     members: &[
@@ -40121,14 +40101,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_379),
             line: 214,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 216,
                     position: 8,
                     members: &[
@@ -40137,7 +40117,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
                     line: 224,
                     position: 8,
                     members: &[
@@ -40147,7 +40127,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_377),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
                     line: 228,
                     position: 8,
                     members: &[
@@ -40156,7 +40136,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 231,
                     position: 8,
                     members: &[
@@ -40166,7 +40146,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 235,
                     position: 8,
                     members: &[
@@ -40183,7 +40163,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382),
             line: 246,
             position: 6,
             members: &[
@@ -40191,7 +40171,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 249,
                     position: 8,
                     members: &[
@@ -40200,7 +40180,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 252,
                     position: 8,
                     members: &[
@@ -40209,7 +40189,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_379),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_383),
                     line: 255,
                     position: 8,
                     members: &[
@@ -40218,7 +40198,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 258,
                     position: 8,
                     members: &[
@@ -40235,7 +40215,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 265,
                     position: 8,
                     members: &[
@@ -40245,7 +40225,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 269,
                     position: 8,
                     members: &[
@@ -40254,7 +40234,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386),
                     line: 272,
                     position: 8,
                     members: &[
@@ -40271,7 +40251,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 278,
                     position: 8,
                     members: &[
@@ -40281,7 +40261,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 282,
                     position: 8,
                     members: &[
@@ -40290,7 +40270,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386),
                     line: 285,
                     position: 8,
                     members: &[
@@ -40307,7 +40287,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_371),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_375),
                     line: 291,
                     position: 8,
                     members: &[
@@ -40317,7 +40297,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 295,
                     position: 8,
                     members: &[
@@ -40326,7 +40306,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_347_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386),
                     line: 298,
                     position: 8,
                     members: &[
@@ -40460,10 +40440,10 @@ fn build_controls_winuicontrols_xaml_property_241() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_383: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_241, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_387: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_241, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("AppBarToggleButtonInnerBorder")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("AppBarToggleButtonInnerBorder")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_242() -> &'static ::ferroui_base::FerroProperty {
@@ -40471,10 +40451,10 @@ fn build_controls_winuicontrols_xaml_property_242() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_242, value: build_controls_winuicontrols_xaml_selector_value_15 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_242, value: build_controls_winuicontrols_xaml_selector_value_15 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_242, value: build_controls_winuicontrols_xaml_selector_value_16 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_390: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_242, value: build_controls_winuicontrols_xaml_selector_value_16 }];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_243() -> &'static ::ferroui_base::FerroProperty {
@@ -40482,16 +40462,16 @@ fn build_controls_winuicontrols_xaml_property_243() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_387: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_243, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_391: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_243, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowCheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_392: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowCheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowTextLabel")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowCheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OverflowCheckGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_390: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::CommandBarToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":disabled")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_394: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::CommandBarToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":disabled")] }];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_352`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -40513,13 +40493,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_354, parent: true, line: 339, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_383),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_387),
             line: 412,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 413,
                     position: 8,
                     members: &[
@@ -40528,7 +40508,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 416,
                     position: 8,
                     members: &[
@@ -40539,13 +40519,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
             line: 421,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 422,
                     position: 8,
                     members: &[
@@ -40554,7 +40534,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 425,
                     position: 8,
                     members: &[
@@ -40563,7 +40543,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 428,
                     position: 8,
                     members: &[
@@ -40574,14 +40554,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_390),
             line: 433,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 435,
                     position: 8,
                     members: &[
@@ -40590,7 +40570,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
                     line: 439,
                     position: 8,
                     members: &[
@@ -40600,7 +40580,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_377),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
                     line: 443,
                     position: 8,
                     members: &[
@@ -40609,7 +40589,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 446,
                     position: 8,
                     members: &[
@@ -40619,7 +40599,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 450,
                     position: 8,
                     members: &[
@@ -40636,7 +40616,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_387),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_391),
             line: 461,
             position: 6,
             members: &[
@@ -40644,7 +40624,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_374),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_378),
                     line: 464,
                     position: 8,
                     members: &[
@@ -40653,7 +40633,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 467,
                     position: 8,
                     members: &[
@@ -40662,7 +40642,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_379),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_383),
                     line: 470,
                     position: 8,
                     members: &[
@@ -40671,7 +40651,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_392),
                     line: 473,
                     position: 8,
                     members: &[
@@ -40688,7 +40668,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 480,
                     position: 8,
                     members: &[
@@ -40698,7 +40678,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 484,
                     position: 8,
                     members: &[
@@ -40707,7 +40687,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 487,
                     position: 8,
                     members: &[
@@ -40716,7 +40696,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 490,
                     position: 8,
                     members: &[
@@ -40725,7 +40705,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 493,
                     position: 8,
                     members: &[
@@ -40742,7 +40722,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 499,
                     position: 8,
                     members: &[
@@ -40752,7 +40732,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 503,
                     position: 8,
                     members: &[
@@ -40761,7 +40741,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 506,
                     position: 8,
                     members: &[
@@ -40770,7 +40750,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 509,
                     position: 8,
                     members: &[
@@ -40779,7 +40759,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 512,
                     position: 8,
                     members: &[
@@ -40796,7 +40776,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 518,
                     position: 8,
                     members: &[
@@ -40806,7 +40786,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 522,
                     position: 8,
                     members: &[
@@ -40815,7 +40795,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 525,
                     position: 8,
                     members: &[
@@ -40824,7 +40804,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 528,
                     position: 8,
                     members: &[
@@ -40833,7 +40813,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 531,
                     position: 8,
                     members: &[
@@ -40850,7 +40830,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 537,
                     position: 8,
                     members: &[
@@ -40861,7 +40841,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 542,
                     position: 8,
                     members: &[
@@ -40870,7 +40850,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 545,
                     position: 8,
                     members: &[
@@ -40879,7 +40859,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 548,
                     position: 8,
                     members: &[
@@ -40896,7 +40876,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 554,
                     position: 8,
                     members: &[
@@ -40906,7 +40886,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 558,
                     position: 8,
                     members: &[
@@ -40915,7 +40895,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 561,
                     position: 8,
                     members: &[
@@ -40924,7 +40904,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 564,
                     position: 8,
                     members: &[
@@ -40933,7 +40913,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 567,
                     position: 8,
                     members: &[
@@ -40950,7 +40930,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 573,
                     position: 8,
                     members: &[
@@ -40960,7 +40940,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 577,
                     position: 8,
                     members: &[
@@ -40969,7 +40949,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 580,
                     position: 8,
                     members: &[
@@ -40978,7 +40958,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 583,
                     position: 8,
                     members: &[
@@ -40987,7 +40967,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 586,
                     position: 8,
                     members: &[
@@ -41004,7 +40984,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                     line: 592,
                     position: 8,
                     members: &[
@@ -41014,7 +40994,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 596,
                     position: 8,
                     members: &[
@@ -41023,7 +41003,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                     line: 599,
                     position: 8,
                     members: &[
@@ -41032,7 +41012,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                     line: 602,
                     position: 8,
                     members: &[
@@ -41041,7 +41021,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                     line: 605,
                     position: 8,
                     members: &[
@@ -41052,7 +41032,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_387),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_391),
             line: 612,
             position: 6,
             members: &[
@@ -41064,7 +41044,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                             line: 615,
                             position: 10,
                             members: &[
@@ -41074,7 +41054,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                             line: 619,
                             position: 10,
                             members: &[
@@ -41083,7 +41063,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                             line: 622,
                             position: 10,
                             members: &[
@@ -41092,7 +41072,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                             line: 625,
                             position: 10,
                             members: &[
@@ -41101,7 +41081,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                             line: 628,
                             position: 10,
                             members: &[
@@ -41118,7 +41098,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                             line: 634,
                             position: 10,
                             members: &[
@@ -41128,7 +41108,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                             line: 638,
                             position: 10,
                             members: &[
@@ -41137,7 +41117,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                             line: 641,
                             position: 10,
                             members: &[
@@ -41146,7 +41126,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                             line: 644,
                             position: 10,
                             members: &[
@@ -41155,7 +41135,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                             line: 647,
                             position: 10,
                             members: &[
@@ -41166,13 +41146,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_390),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_394),
                     line: 652,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                             line: 653,
                             position: 10,
                             members: &[
@@ -41183,7 +41163,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                             line: 658,
                             position: 10,
                             members: &[
@@ -41192,7 +41172,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_382),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_386),
                             line: 661,
                             position: 10,
                             members: &[
@@ -41201,7 +41181,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                             line: 664,
                             position: 10,
                             members: &[
@@ -41218,7 +41198,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                             line: 670,
                             position: 10,
                             members: &[
@@ -41227,7 +41207,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                             line: 673,
                             position: 10,
                             members: &[
@@ -41236,7 +41216,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                             line: 676,
                             position: 10,
                             members: &[
@@ -41245,7 +41225,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                             line: 679,
                             position: 10,
                             members: &[
@@ -41254,7 +41234,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                             line: 682,
                             position: 10,
                             members: &[
@@ -41271,7 +41251,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_388),
                             line: 688,
                             position: 10,
                             members: &[
@@ -41281,7 +41261,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                             line: 692,
                             position: 10,
                             members: &[
@@ -41290,7 +41270,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_372),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_376),
                             line: 695,
                             position: 10,
                             members: &[
@@ -41299,7 +41279,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_389),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
                             line: 698,
                             position: 10,
                             members: &[
@@ -41308,7 +41288,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_352_THEME: rt::ControlThemeTab
                         },
                         rt::StyleMember::Style {
                             parent: true,
-                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_380),
+                            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_384),
                             line: 701,
                             position: 10,
                             members: &[
@@ -41447,7 +41427,7 @@ fn build_controls_winuicontrols_xaml_property_244() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_391: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_244, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_395: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_244, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
@@ -41455,10 +41435,10 @@ fn build_controls_winuicontrols_xaml_property_245() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_392: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_245, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_396: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_245, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_245, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorRectangle")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_397: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_245, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SeparatorRectangle")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_357`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -41471,7 +41451,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_358, parent: true, line: 722, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_391),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_395),
             line: 735,
             position: 6,
             members: &[
@@ -41481,7 +41461,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_392),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_396),
             line: 740,
             position: 6,
             members: &[
@@ -41491,7 +41471,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_393),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_397),
             line: 744,
             position: 6,
             members: &[
@@ -41719,7 +41699,7 @@ fn build_controls_winuicontrols_xaml_property_247() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_394: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("EllipsisIcon")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_398: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("EllipsisIcon")];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_248() -> &'static ::ferroui_base::FerroProperty {
@@ -41727,16 +41707,16 @@ fn build_controls_winuicontrols_xaml_property_248() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_395: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_248, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_248, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_396: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_400: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_397: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OpenBorder")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HighContrastBorder")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OpenBorder")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HighContrastBorder")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_398: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverflowButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OverflowButton")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_364`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -41755,7 +41735,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_365, parent: true, line: 865, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_394),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_398),
             line: 955,
             position: 6,
             members: &[
@@ -41764,13 +41744,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_395),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399),
             line: 959,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_396),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_400),
                     line: 960,
                     position: 8,
                     members: &[
@@ -41780,7 +41760,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_397),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
                     line: 964,
                     position: 8,
                     members: &[
@@ -41789,7 +41769,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_398),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
                     line: 967,
                     position: 8,
                     members: &[
@@ -41853,7 +41833,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_249: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChevronIcon")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ChevronIcon")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_369`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -41903,7 +41883,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403),
                     line: 110,
                     position: 8,
                     members: &[
@@ -41939,7 +41919,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403),
                     line: 123,
                     position: 8,
                     members: &[
@@ -41975,7 +41955,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_399),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403),
                     line: 136,
                     position: 8,
                     members: &[
@@ -42057,7 +42037,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_251: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_400: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootGrid")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_373`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -42094,7 +42074,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_400),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404),
                     line: 112,
                     position: 8,
                     members: &[
@@ -42193,43 +42173,43 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_255: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-open")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DividerBackgroundGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DividerBackgroundGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PrimaryButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_415: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pressed")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_SecondaryButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_376`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -42261,7 +42241,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 238,
                     position: 8,
                     members: &[
@@ -42270,7 +42250,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 241,
                     position: 8,
                     members: &[
@@ -42281,7 +42261,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407),
             line: 246,
             position: 6,
             members: &[
@@ -42291,7 +42271,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408),
             line: 251,
             position: 6,
             members: &[
@@ -42302,7 +42282,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409),
             line: 258,
             position: 6,
             members: &[
@@ -42312,7 +42292,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410),
             line: 263,
             position: 6,
             members: &[
@@ -42329,7 +42309,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 270,
                     position: 8,
                     members: &[
@@ -42340,7 +42320,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 275,
                     position: 8,
                     members: &[
@@ -42355,13 +42335,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411),
             line: 284,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 285,
                     position: 8,
                     members: &[
@@ -42372,7 +42352,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 290,
                     position: 8,
                     members: &[
@@ -42391,7 +42371,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 298,
                     position: 8,
                     members: &[
@@ -42402,7 +42382,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 303,
                     position: 8,
                     members: &[
@@ -42413,7 +42393,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412),
                     line: 308,
                     position: 8,
                     members: &[
@@ -42424,7 +42404,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413),
             line: 313,
             position: 6,
             members: &[
@@ -42434,7 +42414,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
             line: 318,
             position: 6,
             members: &[
@@ -42444,7 +42424,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_415),
             line: 323,
             position: 6,
             members: &[
@@ -42454,7 +42434,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
             line: 328,
             position: 6,
             members: &[
@@ -42470,7 +42450,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 334,
                     position: 8,
                     members: &[
@@ -42481,7 +42461,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 339,
                     position: 8,
                     members: &[
@@ -42494,13 +42474,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
             line: 346,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 347,
                     position: 8,
                     members: &[
@@ -42511,7 +42491,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 352,
                     position: 8,
                     members: &[
@@ -42530,7 +42510,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 360,
                     position: 8,
                     members: &[
@@ -42541,7 +42521,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 365,
                     position: 8,
                     members: &[
@@ -42552,7 +42532,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412),
                     line: 370,
                     position: 8,
                     members: &[
@@ -42685,7 +42665,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_380_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_400),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404),
                     line: 427,
                     position: 8,
                     members: &[
@@ -42773,7 +42753,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_263: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Border")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_383`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -42806,7 +42786,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 539,
                     position: 8,
                     members: &[
@@ -42815,7 +42795,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 542,
                     position: 8,
                     members: &[
@@ -42826,7 +42806,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_403),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407),
             line: 547,
             position: 6,
             members: &[
@@ -42836,7 +42816,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_404),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_408),
             line: 552,
             position: 6,
             members: &[
@@ -42846,7 +42826,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409),
             line: 557,
             position: 6,
             members: &[
@@ -42856,7 +42836,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410),
             line: 562,
             position: 6,
             members: &[
@@ -42872,7 +42852,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 568,
                     position: 8,
                     members: &[
@@ -42882,7 +42862,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 572,
                     position: 8,
                     members: &[
@@ -42894,7 +42874,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 578,
                     position: 8,
                     members: &[
@@ -42905,13 +42885,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_407),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411),
             line: 583,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 584,
                     position: 8,
                     members: &[
@@ -42921,7 +42901,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 588,
                     position: 8,
                     members: &[
@@ -42931,7 +42911,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 592,
                     position: 8,
                     members: &[
@@ -42948,7 +42928,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 598,
                     position: 8,
                     members: &[
@@ -42958,7 +42938,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 602,
                     position: 8,
                     members: &[
@@ -42968,7 +42948,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 606,
                     position: 8,
                     members: &[
@@ -42979,7 +42959,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_409),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413),
             line: 611,
             position: 6,
             members: &[
@@ -42989,7 +42969,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_410),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
             line: 616,
             position: 6,
             members: &[
@@ -42999,7 +42979,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_411),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_415),
             line: 621,
             position: 6,
             members: &[
@@ -43009,7 +42989,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_412),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
             line: 626,
             position: 6,
             members: &[
@@ -43025,7 +43005,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 632,
                     position: 8,
                     members: &[
@@ -43035,7 +43015,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 636,
                     position: 8,
                     members: &[
@@ -43045,7 +43025,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 640,
                     position: 8,
                     members: &[
@@ -43056,13 +43036,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_413),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
             line: 645,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 646,
                     position: 8,
                     members: &[
@@ -43072,7 +43052,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 650,
                     position: 8,
                     members: &[
@@ -43082,7 +43062,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 654,
                     position: 8,
                     members: &[
@@ -43099,7 +43079,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_401),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_405),
                     line: 660,
                     position: 8,
                     members: &[
@@ -43109,7 +43089,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_402),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_406),
                     line: 664,
                     position: 8,
                     members: &[
@@ -43119,7 +43099,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_414),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
                     line: 668,
                     position: 8,
                     members: &[
@@ -43231,31 +43211,31 @@ fn build_controls_winuicontrols_xaml_property_253() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_415: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("OuterBorder")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOff")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobOn")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchKnobBounds")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SwitchAreaGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_425: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_426: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_427: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_OffContentPresenter")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_386`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -43276,7 +43256,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_388, parent: true, line: 80, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_415),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419),
             line: 227,
             position: 6,
             members: &[
@@ -43291,7 +43271,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
                     line: 233,
                     position: 8,
                     members: &[
@@ -43301,7 +43281,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421),
                     line: 237,
                     position: 8,
                     members: &[
@@ -43312,7 +43292,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
                     line: 242,
                     position: 8,
                     members: &[
@@ -43323,7 +43303,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423),
                     line: 247,
                     position: 8,
                     members: &[
@@ -43333,7 +43313,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424),
                     line: 251,
                     position: 8,
                     members: &[
@@ -43350,7 +43330,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
                     line: 257,
                     position: 8,
                     members: &[
@@ -43360,7 +43340,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423),
                     line: 261,
                     position: 8,
                     members: &[
@@ -43370,7 +43350,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421),
                     line: 265,
                     position: 8,
                     members: &[
@@ -43383,7 +43363,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
                     line: 272,
                     position: 8,
                     members: &[
@@ -43396,7 +43376,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424),
                     line: 279,
                     position: 8,
                     members: &[
@@ -43422,7 +43402,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_425),
                     line: 288,
                     position: 8,
                     members: &[
@@ -43431,7 +43411,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_426),
                     line: 291,
                     position: 8,
                     members: &[
@@ -43440,7 +43420,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
                     line: 294,
                     position: 8,
                     members: &[
@@ -43450,7 +43430,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423),
                     line: 298,
                     position: 8,
                     members: &[
@@ -43460,7 +43440,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421),
                     line: 302,
                     position: 8,
                     members: &[
@@ -43471,7 +43451,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
                     line: 307,
                     position: 8,
                     members: &[
@@ -43482,7 +43462,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424),
                     line: 312,
                     position: 8,
                     members: &[
@@ -43499,7 +43479,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_419),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423),
                     line: 319,
                     position: 8,
                     members: &[
@@ -43508,7 +43488,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_416),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_420),
                     line: 322,
                     position: 8,
                     members: &[
@@ -43517,7 +43497,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_418),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
                     line: 325,
                     position: 8,
                     members: &[
@@ -43526,7 +43506,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_417),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_421),
                     line: 328,
                     position: 8,
                     members: &[
@@ -43535,7 +43515,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_422),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_426),
                     line: 331,
                     position: 8,
                     members: &[
@@ -43547,7 +43527,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_423),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_427),
             line: 337,
             position: 6,
             members: &[
@@ -43625,13 +43605,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_389_THEME: rt::ControlThemeTab
 };
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_428: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_425: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_429: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_426: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_430: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderInnerThumb")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_390`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_390_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -43643,7 +43623,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_390_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_391, parent: true, line: 64, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_424),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_428),
             line: 88,
             position: 6,
             members: &[
@@ -43652,7 +43632,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_390_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_425),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_429),
             line: 92,
             position: 6,
             members: &[
@@ -43661,7 +43641,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_390_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_426),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_430),
             line: 96,
             position: 6,
             members: &[
@@ -43852,7 +43832,7 @@ fn build_controls_winuicontrols_xaml_selector_value_18() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_427: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TopTickBar")]] }];
 
 /// The value of a property selector of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_selector_value_19() -> ::ferroui_base::BoxedValue {
@@ -43860,28 +43840,28 @@ fn build_controls_winuicontrols_xaml_selector_value_19() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_428: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BottomTickBar")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_429: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LeftTickBar")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_430: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_264, value: build_controls_winuicontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RightTickBar")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HorizontalTrackRect")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("VerticalTrackRect")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HorizontalTrackRect")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("VerticalTrackRect")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HorizontalThumb")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("VerticalThumb")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HorizontalThumb")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("VerticalThumb")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderContainer")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SliderContainer")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_DecreaseButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_DecreaseButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_439: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::StaticType>::TYPE)];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_265() -> &'static ::ferroui_base::FerroProperty {
@@ -43889,10 +43869,10 @@ fn build_controls_winuicontrols_xaml_property_265() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_440: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_441: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE)];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_398`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -43927,7 +43907,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_427),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431),
             line: 359,
             position: 6,
             members: &[
@@ -43936,7 +43916,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_428),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432),
             line: 362,
             position: 6,
             members: &[
@@ -43945,7 +43925,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_429),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433),
             line: 365,
             position: 6,
             members: &[
@@ -43954,7 +43934,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_430),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434),
             line: 368,
             position: 6,
             members: &[
@@ -43969,7 +43949,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435),
                     line: 375,
                     position: 8,
                     members: &[
@@ -43978,7 +43958,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436),
                     line: 378,
                     position: 8,
                     members: &[
@@ -43987,7 +43967,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437),
                     line: 381,
                     position: 8,
                     members: &[
@@ -43996,7 +43976,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438),
                     line: 384,
                     position: 8,
                     members: &[
@@ -44013,7 +43993,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435),
                     line: 390,
                     position: 8,
                     members: &[
@@ -44022,7 +44002,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436),
                     line: 393,
                     position: 8,
                     members: &[
@@ -44031,7 +44011,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437),
                     line: 396,
                     position: 8,
                     members: &[
@@ -44040,7 +44020,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438),
                     line: 399,
                     position: 8,
                     members: &[
@@ -44057,7 +44037,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_434),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438),
                     line: 405,
                     position: 8,
                     members: &[
@@ -44066,7 +44046,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_431),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435),
                     line: 408,
                     position: 8,
                     members: &[
@@ -44075,7 +44055,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_432),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436),
                     line: 411,
                     position: 8,
                     members: &[
@@ -44084,7 +44064,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_435),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_439),
                     line: 414,
                     position: 8,
                     members: &[
@@ -44093,7 +44073,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_433),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437),
                     line: 417,
                     position: 8,
                     members: &[
@@ -44104,14 +44084,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_436),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_440),
             line: 424,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlErrorTextForegroundBrush") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_437),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_441),
                     line: 426,
                     position: 8,
                     members: &[
@@ -44334,7 +44314,7 @@ fn build_controls_winuicontrols_xaml_selector_value_20() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SpinButtonsSpace")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_442: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SpinButtonsSpace")];
 
 /// The value of a property selector of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_selector_value_21() -> ::ferroui_base::BoxedValue {
@@ -44342,7 +44322,7 @@ fn build_controls_winuicontrols_xaml_selector_value_21() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_439: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SpinButtonsSpaceLeft")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_443: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SpinButtonsSpaceLeft")];
 
 /// The value of a property selector of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_selector_value_22() -> ::ferroui_base::BoxedValue {
@@ -44350,7 +44330,7 @@ fn build_controls_winuicontrols_xaml_selector_value_22() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_440: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_22 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupIndicator")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_444: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_266, value: build_controls_winuicontrols_xaml_selector_value_22 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupIndicator")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_406`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -44361,7 +44341,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_407, parent: true, line: 129, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_438),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_442),
             line: 240,
             position: 6,
             members: &[
@@ -44370,7 +44350,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_439),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_443),
             line: 243,
             position: 6,
             members: &[
@@ -44379,7 +44359,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_440),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_444),
             line: 246,
             position: 6,
             members: &[
@@ -44520,7 +44500,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_286: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_441: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_270, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_445: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_270, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
 
 /// The value of a property selector of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_selector_value_23() -> ::ferroui_base::BoxedValue {
@@ -44528,10 +44508,10 @@ fn build_controls_winuicontrols_xaml_selector_value_23() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_442: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_270, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_272, value: build_controls_winuicontrols_xaml_selector_value_23 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_446: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_270, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_272, value: build_controls_winuicontrols_xaml_selector_value_23 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_443: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_447: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_TextBox")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_410`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -44549,7 +44529,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_411, parent: true, line: 315, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_441),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_445),
             line: 352,
             position: 6,
             members: &[
@@ -44559,7 +44539,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_442),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_446),
             line: 357,
             position: 6,
             members: &[
@@ -44568,7 +44548,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_443),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_447),
             line: 361,
             position: 6,
             members: &[
@@ -44680,37 +44660,37 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_288: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_444: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_448: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_445: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":spinbuttonsvisible")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_449: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":spinbuttonsvisible")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_446: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DownSpinButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_450: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DownSpinButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_447: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("UpSpinButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_451: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("UpSpinButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_448: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputEater")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_452: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputEater")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_449: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_453: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputBox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_450: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":spinbuttonspopup"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputBox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_454: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":spinbuttonspopup"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InputBox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_451: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":upspinbuttondisabled")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":upspinbuttondisabled")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_452: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupUpSpinButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupUpSpinButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_453: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":downspinbuttondisabled")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":downspinbuttondisabled")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_454: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupDownSpinButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_458: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PopupDownSpinButton")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_413`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -44727,7 +44707,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_414, parent: true, line: 107, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_444),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_448),
             line: 230,
             position: 6,
             members: &[
@@ -44736,13 +44716,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_445),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_449),
             line: 235,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_446),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_450),
                     line: 236,
                     position: 8,
                     members: &[
@@ -44751,7 +44731,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_447),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_451),
                     line: 239,
                     position: 8,
                     members: &[
@@ -44760,7 +44740,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_448),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_452),
                     line: 242,
                     position: 8,
                     members: &[
@@ -44769,7 +44749,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_449),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_453),
                     line: 245,
                     position: 8,
                     members: &[
@@ -44781,7 +44761,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_450),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_454),
             line: 250,
             position: 6,
             members: &[
@@ -44790,13 +44770,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_451),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
             line: 255,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_447),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_451),
                     line: 256,
                     position: 8,
                     members: &[
@@ -44805,7 +44785,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_452),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456),
                     line: 259,
                     position: 8,
                     members: &[
@@ -44816,13 +44796,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_453),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457),
             line: 263,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_446),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_450),
                     line: 264,
                     position: 8,
                     members: &[
@@ -44831,7 +44811,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_454),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_458),
                     line: 267,
                     position: 8,
                     members: &[
@@ -44868,13 +44848,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_291: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronBorder")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevronBorder")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_415`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -44917,7 +44897,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
                     line: 147,
                     position: 8,
                     members: &[
@@ -44926,7 +44906,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
                     line: 150,
                     position: 8,
                     members: &[
@@ -44962,7 +44942,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
                     line: 163,
                     position: 8,
                     members: &[
@@ -44971,7 +44951,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
                     line: 166,
                     position: 8,
                     members: &[
@@ -45007,7 +44987,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
                     line: 179,
                     position: 8,
                     members: &[
@@ -45016,7 +44996,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_456),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
                     line: 182,
                     position: 8,
                     members: &[
@@ -45028,7 +45008,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461),
             line: 188,
             position: 6,
             members: &[
@@ -45141,7 +45121,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTab
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ExpanderHeaderDownStyle"), line: 253, position: 75 },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
             line: 254,
             position: 6,
             members: &[
@@ -45150,7 +45130,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461),
             line: 257,
             position: 6,
             members: &[
@@ -45184,7 +45164,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_421_THEME: rt::ControlThemeTab
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ExpanderHeaderDownStyle"), line: 263, position: 76 },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_455),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
             line: 264,
             position: 6,
             members: &[
@@ -45193,7 +45173,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_421_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_457),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461),
             line: 267,
             position: 6,
             members: &[
@@ -45252,25 +45232,25 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_298: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_458: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_462: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":up")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderContent")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_465: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_462: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_466: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":up"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_467: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":left"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_468: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_422`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45293,13 +45273,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_423, parent: true, line: 291, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_458),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_462),
             line: 335,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463),
                     line: 336,
                     position: 8,
                     members: &[
@@ -45309,7 +45289,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464),
                     line: 340,
                     position: 8,
                     members: &[
@@ -45327,7 +45307,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463),
                     line: 347,
                     position: 8,
                     members: &[
@@ -45338,7 +45318,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464),
                     line: 352,
                     position: 8,
                     members: &[
@@ -45356,7 +45336,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_459),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463),
                     line: 359,
                     position: 8,
                     members: &[
@@ -45367,7 +45347,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_460),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464),
                     line: 364,
                     position: 8,
                     members: &[
@@ -45379,7 +45359,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_461),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_465),
             line: 372,
             position: 6,
             members: &[
@@ -45388,7 +45368,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_462),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_466),
             line: 375,
             position: 6,
             members: &[
@@ -45397,7 +45377,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_463),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_467),
             line: 378,
             position: 6,
             members: &[
@@ -45406,7 +45386,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_422_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_464),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_468),
             line: 381,
             position: 6,
             members: &[
@@ -45593,7 +45573,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_301: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_465: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ScaleTransform")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_469: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ScaleTransform")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_425`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -45668,7 +45648,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_465),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_469),
                     line: 123,
                     position: 8,
                     members: &[
@@ -46164,19 +46144,19 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_309: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_466: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_470: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":first-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_467: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_471: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":last-page"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_468: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootPanel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_472: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("RootPanel")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_469: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_473: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PreviousButton")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_NextButton")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_470: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PipsPagerList"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_474: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_PipsPagerList"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE)];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_440`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -46192,7 +46172,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_441, parent: true, line: 367, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_466),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_470),
             line: 402,
             position: 6,
             members: &[
@@ -46201,7 +46181,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_467),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_471),
             line: 405,
             position: 6,
             members: &[
@@ -46216,7 +46196,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_468),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_472),
                     line: 410,
                     position: 8,
                     members: &[
@@ -46225,7 +46205,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_469),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_473),
                     line: 413,
                     position: 8,
                     members: &[
@@ -46236,7 +46216,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_470),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_474),
             line: 418,
             position: 6,
             members: &[
@@ -46306,28 +46286,28 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_314: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_471: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_475: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_472: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":photo"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PersonPictureEllipse")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_476: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":photo"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PersonPictureEllipse")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_473: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nophotoorinitials"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_477: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nophotoorinitials"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_474: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":group"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_478: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":group"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("InitialsTextBlock")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_475: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":badge"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgeGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_479: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":badge"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgeGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_476: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":badgeimage")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_480: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":badgeimage")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_477: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgeGrid")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_481: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgeGrid")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_478: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgingEllipse")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_482: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BadgingEllipse")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_443`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -46345,7 +46325,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_444, parent: true, line: 52, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_471),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_475),
             line: 101,
             position: 6,
             members: &[
@@ -46355,7 +46335,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_472),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_476),
             line: 106,
             position: 6,
             members: &[
@@ -46364,7 +46344,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_473),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_477),
             line: 110,
             position: 6,
             members: &[
@@ -46374,7 +46354,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_474),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_478),
             line: 115,
             position: 6,
             members: &[
@@ -46384,7 +46364,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_475),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_479),
             line: 120,
             position: 6,
             members: &[
@@ -46393,13 +46373,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_476),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_480),
             line: 123,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_477),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_481),
                     line: 124,
                     position: 8,
                     members: &[
@@ -46408,7 +46388,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_478),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_482),
                     line: 127,
                     position: 8,
                     members: &[
@@ -46541,7 +46521,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_446_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 89,
                     position: 8,
                     members: &[
@@ -46567,7 +46547,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_446_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 98,
                     position: 8,
                     members: &[
@@ -46593,7 +46573,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_446_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_381),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_385),
                     line: 107,
                     position: 8,
                     members: &[
@@ -46650,13 +46630,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_318: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_479: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_483: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_480: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_484: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_481: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_485: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_449`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -46670,7 +46650,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_450, parent: false, line: 119, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_479),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_483),
             line: 134,
             position: 6,
             members: &[
@@ -46680,7 +46660,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_480),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_484),
             line: 139,
             position: 6,
             members: &[
@@ -46690,7 +46670,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_481),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_485),
             line: 144,
             position: 6,
             members: &[
@@ -46732,76 +46712,76 @@ fn build_controls_winuicontrols_xaml_property_293() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_482: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firstcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_486: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firstcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_483: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firsthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_487: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firsthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_484: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firstdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_488: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":firstdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("FirstPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_485: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previouscollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_489: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previouscollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_486: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previoushidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_490: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previoushidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_487: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previousdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_491: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":previousdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PreviousPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_488: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nextcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_492: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nextcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_489: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nextdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_493: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nextdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_490: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nexthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_494: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nexthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NextPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_491: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lastcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lastcollapsed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_492: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lastdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_496: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lastdisabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_493: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lasthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_497: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":lasthidden"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_494: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":numberbox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_498: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":numberbox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BoxPanels")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BoxPanels")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_496: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberBoxDisplay")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_500: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberBoxDisplay")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_497: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":combobox")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_501: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":combobox")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_498: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ComboBoxDisplay")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_502: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ComboBoxDisplay")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":numberpanel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_503: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":numberpanel")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_500: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ItemsControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberPanelItemsRepeater")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_504: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ItemsControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberPanelItemsRepeater")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_501: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberPanelCurrentPageIndicator")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_505: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("NumberPanelCurrentPageIndicator")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_502: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":infinite")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":infinite")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_503: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SuffixTextLabel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_507: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SuffixTextLabel")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_504: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TotalNumberOfPagesLabel")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_508: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("TotalNumberOfPagesLabel")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_505: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LastPageButton")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_451`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -46816,7 +46796,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_452, parent: true, line: 159, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_482),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_486),
             line: 229,
             position: 6,
             members: &[
@@ -46825,7 +46805,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_483),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_487),
             line: 232,
             position: 6,
             members: &[
@@ -46835,7 +46815,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_484),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_488),
             line: 236,
             position: 6,
             members: &[
@@ -46844,7 +46824,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_485),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_489),
             line: 240,
             position: 6,
             members: &[
@@ -46853,7 +46833,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_486),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_490),
             line: 243,
             position: 6,
             members: &[
@@ -46863,7 +46843,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_487),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_491),
             line: 247,
             position: 6,
             members: &[
@@ -46872,7 +46852,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_488),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_492),
             line: 251,
             position: 6,
             members: &[
@@ -46881,7 +46861,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_489),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_493),
             line: 254,
             position: 6,
             members: &[
@@ -46890,7 +46870,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_490),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_494),
             line: 257,
             position: 6,
             members: &[
@@ -46900,7 +46880,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_491),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495),
             line: 262,
             position: 6,
             members: &[
@@ -46909,7 +46889,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_492),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_496),
             line: 265,
             position: 6,
             members: &[
@@ -46918,7 +46898,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_493),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_497),
             line: 268,
             position: 6,
             members: &[
@@ -46928,13 +46908,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_494),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_498),
             line: 273,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499),
                     line: 274,
                     position: 8,
                     members: &[
@@ -46943,7 +46923,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_496),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_500),
                     line: 277,
                     position: 8,
                     members: &[
@@ -46954,13 +46934,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_497),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_501),
             line: 281,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499),
                     line: 282,
                     position: 8,
                     members: &[
@@ -46969,7 +46949,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_498),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_502),
                     line: 285,
                     position: 8,
                     members: &[
@@ -46981,13 +46961,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_503),
             line: 290,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_495),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_499),
                     line: 291,
                     position: 8,
                     members: &[
@@ -46996,7 +46976,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_500),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_504),
                     line: 294,
                     position: 8,
                     members: &[
@@ -47005,7 +46985,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_501),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_505),
                     line: 297,
                     position: 8,
                     members: &[
@@ -47016,13 +46996,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_502),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
             line: 302,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_503),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_507),
                     line: 303,
                     position: 8,
                     members: &[
@@ -47031,7 +47011,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_504),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_508),
                     line: 306,
                     position: 8,
                     members: &[
@@ -47040,7 +47020,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_505),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
                     line: 309,
                     position: 8,
                     members: &[
@@ -47248,106 +47228,106 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_327: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_507: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_511: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_508: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_512: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_514: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_511: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_515: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_512: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconRoot")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_516: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":icon"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Viewbox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconRoot")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_517: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_514: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_518: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_515: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_519: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_516: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_520: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_517: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_521: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_518: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_522: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_519: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_523: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_520: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_524: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_521: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_525: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_522: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_526: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_523: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_527: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_524: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_528: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_525: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_529: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_526: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_530: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_527: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_531: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_528: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_532: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_529: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_530: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_534: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("IconContent")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_531: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_535: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":toggle"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":radio"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("KeyboardAcceleratorTextBlock")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_532: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_536: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SubItemChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SubItemChevron")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_534: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_538: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_535: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_539: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_536: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SubItemChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_540: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SubItemChevron")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_541: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_538: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_542: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":empty")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_539: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":separator")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_543: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":separator")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_464`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -47388,7 +47368,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
                     line: 212,
                     position: 8,
                     members: &[
@@ -47397,7 +47377,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_507),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_511),
                     line: 215,
                     position: 8,
                     members: &[
@@ -47408,14 +47388,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_508),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_512),
             line: 220,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemBackgroundPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 222,
                     position: 8,
                     members: &[
@@ -47424,7 +47404,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_514),
                     line: 225,
                     position: 8,
                     members: &[
@@ -47433,7 +47413,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_511),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_515),
                     line: 228,
                     position: 8,
                     members: &[
@@ -47468,7 +47448,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
                     line: 240,
                     position: 8,
                     members: &[
@@ -47477,7 +47457,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_507),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_511),
                     line: 243,
                     position: 8,
                     members: &[
@@ -47488,7 +47468,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_512),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_516),
             line: 249,
             position: 6,
             members: &[
@@ -47497,7 +47477,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_517),
             line: 255,
             position: 6,
             members: &[
@@ -47506,7 +47486,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_514),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_518),
             line: 258,
             position: 6,
             members: &[
@@ -47517,7 +47497,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_515),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_519),
             line: 263,
             position: 6,
             members: &[
@@ -47536,7 +47516,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_516),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_520),
             line: 272,
             position: 6,
             members: &[
@@ -47545,7 +47525,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_517),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_521),
             line: 275,
             position: 6,
             members: &[
@@ -47554,7 +47534,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_518),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_522),
             line: 278,
             position: 6,
             members: &[
@@ -47563,7 +47543,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_519),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_523),
             line: 281,
             position: 6,
             members: &[
@@ -47572,7 +47552,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_520),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_524),
             line: 284,
             position: 6,
             members: &[
@@ -47581,7 +47561,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_521),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_525),
             line: 288,
             position: 6,
             members: &[
@@ -47590,7 +47570,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_522),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_526),
             line: 291,
             position: 6,
             members: &[
@@ -47599,7 +47579,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_523),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_527),
             line: 294,
             position: 6,
             members: &[
@@ -47608,7 +47588,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_524),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_528),
             line: 297,
             position: 6,
             members: &[
@@ -47617,7 +47597,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_525),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_529),
             line: 300,
             position: 6,
             members: &[
@@ -47626,7 +47606,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_526),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_530),
             line: 305,
             position: 6,
             members: &[
@@ -47635,7 +47615,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_527),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_531),
             line: 308,
             position: 6,
             members: &[
@@ -47644,7 +47624,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_528),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_532),
             line: 311,
             position: 6,
             members: &[
@@ -47653,7 +47633,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_529),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
             line: 314,
             position: 6,
             members: &[
@@ -47662,7 +47642,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_530),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_534),
             line: 317,
             position: 6,
             members: &[
@@ -47671,7 +47651,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_531),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_535),
             line: 320,
             position: 6,
             members: &[
@@ -47680,7 +47660,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_532),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_536),
             line: 325,
             position: 6,
             members: &[
@@ -47690,7 +47670,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutSubItemForeground") }),
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
                     line: 330,
                     position: 8,
                     members: &[
@@ -47701,7 +47681,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_534),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_538),
             line: 335,
             position: 6,
             members: &[
@@ -47725,7 +47705,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
                     line: 342,
                     position: 8,
                     members: &[
@@ -47734,7 +47714,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
                     line: 345,
                     position: 8,
                     members: &[
@@ -47745,14 +47725,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_535),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_539),
             line: 350,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutSubItemBackgroundPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 352,
                     position: 8,
                     members: &[
@@ -47761,7 +47741,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_536),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_540),
                     line: 355,
                     position: 8,
                     members: &[
@@ -47770,7 +47750,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_514),
                     line: 358,
                     position: 8,
                     members: &[
@@ -47781,7 +47761,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_541),
             line: 363,
             position: 6,
             members: &[
@@ -47805,7 +47785,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
                     line: 370,
                     position: 8,
                     members: &[
@@ -47814,7 +47794,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
                     line: 373,
                     position: 8,
                     members: &[
@@ -47825,7 +47805,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_538),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_542),
             line: 378,
             position: 6,
             members: &[
@@ -47849,7 +47829,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
                     line: 385,
                     position: 8,
                     members: &[
@@ -47858,7 +47838,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_506),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_510),
                     line: 388,
                     position: 8,
                     members: &[
@@ -47869,7 +47849,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_539),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_543),
             line: 394,
             position: 6,
             members: &[
@@ -47952,16 +47932,16 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_469_THEME: rt::ControlThemeTab
 };
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_540: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_544: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_541: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_545: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("LayoutRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_542: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_546: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_543: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_547: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CheckGlyph")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_470`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -47984,7 +47964,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_533),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_537),
             line: 434,
             position: 6,
             members: &[
@@ -47995,7 +47975,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_540),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_544),
             line: 440,
             position: 6,
             members: &[
@@ -48004,7 +47984,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_541),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_545),
             line: 443,
             position: 6,
             members: &[
@@ -48013,7 +47993,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_542),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_546),
             line: 446,
             position: 6,
             members: &[
@@ -48022,7 +48002,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_543),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_547),
             line: 449,
             position: 6,
             members: &[
@@ -48062,19 +48042,19 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_330: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_544: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_548: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_545: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":open")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":open")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_546: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":open")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":open")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_HeaderPresenter")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_547: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentRoot"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_548: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_552: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Background")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_472`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -48092,7 +48072,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_474, parent: true, line: 82, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_544),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_548),
             line: 146,
             position: 6,
             members: &[
@@ -48102,7 +48082,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_545),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
             line: 151,
             position: 6,
             members: &[
@@ -48112,7 +48092,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_546),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
             line: 155,
             position: 6,
             members: &[
@@ -48121,13 +48101,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_547),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551),
             line: 159,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_548),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_552),
                     line: 160,
                     position: 8,
                     members: &[
@@ -48137,7 +48117,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_472_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 164,
                     position: 8,
                     members: &[
@@ -48231,7 +48211,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_335: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PressedBackground")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PressedBackground")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_478`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -48252,7 +48232,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 109,
                     position: 8,
                     members: &[
@@ -48278,7 +48258,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 118,
                     position: 8,
                     members: &[
@@ -48304,7 +48284,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 127,
                     position: 8,
                     members: &[
@@ -48330,7 +48310,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 136,
                     position: 8,
                     members: &[
@@ -48347,7 +48327,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 142,
                     position: 8,
                     members: &[
@@ -48364,7 +48344,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_478_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_549),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
                     line: 148,
                     position: 8,
                     members: &[
@@ -48434,13 +48414,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_337: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Backplate")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Backplate")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicator")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicator")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_552: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Root")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_481`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -48468,7 +48448,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 234,
                     position: 8,
                     members: &[
@@ -48494,7 +48474,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 243,
                     position: 8,
                     members: &[
@@ -48520,7 +48500,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 252,
                     position: 8,
                     members: &[
@@ -48529,7 +48509,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
                     line: 255,
                     position: 8,
                     members: &[
@@ -48555,7 +48535,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 264,
                     position: 8,
                     members: &[
@@ -48564,7 +48544,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
                     line: 267,
                     position: 8,
                     members: &[
@@ -48590,7 +48570,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 276,
                     position: 8,
                     members: &[
@@ -48599,7 +48579,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
                     line: 279,
                     position: 8,
                     members: &[
@@ -48620,7 +48600,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_552),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
             line: 288,
             position: 6,
             members: &[
@@ -48635,7 +48615,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_550),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
                     line: 293,
                     position: 8,
                     members: &[
@@ -48644,7 +48624,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_551),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
                     line: 296,
                     position: 8,
                     members: &[
@@ -48712,10 +48692,10 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_340: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BorderBackground")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("BorderBackground")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentBorder")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_558: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentBorder")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_484`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -48744,7 +48724,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
                     line: 345,
                     position: 8,
                     members: &[
@@ -48771,7 +48751,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
                     line: 355,
                     position: 8,
                     members: &[
@@ -48798,7 +48778,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
                     line: 365,
                     position: 8,
                     members: &[
@@ -48825,7 +48805,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
                     line: 375,
                     position: 8,
                     members: &[
@@ -48851,7 +48831,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_553),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
                     line: 384,
                     position: 8,
                     members: &[
@@ -48871,7 +48851,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_554),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_558),
             line: 392,
             position: 6,
             members: &[
@@ -49029,7 +49009,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_345: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pill")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("Pill")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_491`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_491_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -49107,7 +49087,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_491_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559),
                     line: 126,
                     position: 8,
                     members: &[
@@ -49170,7 +49150,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_491_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559),
                     line: 149,
                     position: 8,
                     members: &[
@@ -49206,7 +49186,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_491_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559),
                     line: 162,
                     position: 8,
                     members: &[
@@ -49515,37 +49495,37 @@ fn build_controls_winuicontrols_xaml_property_304() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentPresenter")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_558: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":dropdownopen")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_562: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":dropdownopen")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HighlightBackground")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_563: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HighlightBackground")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":dropdownopen")] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_564: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Class(":dropdownopen")] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_565: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_562: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_566: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_563: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_567: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_564: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_568: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_565: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_569: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_566: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_winuicontrols_xaml_property_303, value: build_controls_winuicontrols_xaml_selector_value_0 }];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_497`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -49592,7 +49572,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
                     line: 342,
                     position: 8,
                     members: &[
@@ -49620,7 +49600,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
                     line: 353,
                     position: 8,
                     members: &[
@@ -49648,7 +49628,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
                     line: 364,
                     position: 8,
                     members: &[
@@ -49657,7 +49637,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561),
                     line: 367,
                     position: 8,
                     members: &[
@@ -49668,14 +49648,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_558),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_562),
             line: 373,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_302, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocused") }),
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_563),
                     line: 375,
                     position: 8,
                     members: &[
@@ -49684,7 +49664,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_555),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_559),
                     line: 378,
                     position: 8,
                     members: &[
@@ -49693,7 +49673,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
                     line: 381,
                     position: 8,
                     members: &[
@@ -49702,7 +49682,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561),
                     line: 384,
                     position: 8,
                     members: &[
@@ -49713,14 +49693,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_564),
             line: 389,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_302, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocusedPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_556),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_560),
                     line: 391,
                     position: 8,
                     members: &[
@@ -49729,7 +49709,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_557),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561),
                     line: 394,
                     position: 8,
                     members: &[
@@ -49740,7 +49720,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_561),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_565),
             line: 400,
             position: 6,
             members: &[
@@ -49749,7 +49729,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_562),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_566),
             line: 404,
             position: 6,
             members: &[
@@ -49758,7 +49738,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_563),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_567),
             line: 408,
             position: 6,
             members: &[
@@ -49767,7 +49747,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_564),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_568),
             line: 412,
             position: 6,
             members: &[
@@ -49776,7 +49756,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_565),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_569),
             line: 416,
             position: 6,
             members: &[
@@ -49794,7 +49774,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_566),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
             line: 428,
             position: 6,
             members: &[
@@ -49861,10 +49841,10 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_358: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_567: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CollapsedGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("CollapsedGlyph")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_568: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandedGlyph")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_572: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandedGlyph")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_501`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_501_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -49885,7 +49865,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_501_THEME: rt::ControlThemeTab
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_567),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
                     line: 99,
                     position: 8,
                     members: &[
@@ -49894,7 +49874,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_501_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: false,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_568),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_572),
                     line: 102,
                     position: 8,
                     members: &[
@@ -49951,34 +49931,34 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_362: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_569: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_573: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicator")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("SelectionIndicator")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_572: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_576: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_573: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_577: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_578: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_579: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_576: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_577: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_581: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("PART_Header")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_578: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_582: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_503`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -50000,7 +49980,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_505, parent: true, line: 136, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_569),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_573),
             line: 190,
             position: 6,
             members: &[
@@ -50008,7 +49988,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushPointerOver") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 193,
                     position: 8,
                     members: &[
@@ -50017,7 +49997,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 196,
                     position: 8,
                     members: &[
@@ -50027,7 +50007,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 200,
                     position: 8,
                     members: &[
@@ -50038,7 +50018,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_572),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_576),
             line: 205,
             position: 6,
             members: &[
@@ -50046,7 +50026,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 208,
                     position: 8,
                     members: &[
@@ -50055,7 +50035,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 211,
                     position: 8,
                     members: &[
@@ -50065,7 +50045,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 215,
                     position: 8,
                     members: &[
@@ -50076,7 +50056,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_573),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_577),
             line: 220,
             position: 6,
             members: &[
@@ -50084,7 +50064,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushSelected") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 223,
                     position: 8,
                     members: &[
@@ -50093,7 +50073,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 226,
                     position: 8,
                     members: &[
@@ -50103,7 +50083,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 230,
                     position: 8,
                     members: &[
@@ -50114,7 +50094,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_578),
             line: 235,
             position: 6,
             members: &[
@@ -50122,7 +50102,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushDisabled") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 238,
                     position: 8,
                     members: &[
@@ -50131,7 +50111,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 241,
                     position: 8,
                     members: &[
@@ -50140,7 +50120,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 244,
                     position: 8,
                     members: &[
@@ -50151,7 +50131,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_579),
             line: 249,
             position: 6,
             members: &[
@@ -50159,7 +50139,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushSelectedPointerOver") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 252,
                     position: 8,
                     members: &[
@@ -50168,7 +50148,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 255,
                     position: 8,
                     members: &[
@@ -50178,7 +50158,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 259,
                     position: 8,
                     members: &[
@@ -50189,7 +50169,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_576),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580),
             line: 264,
             position: 6,
             members: &[
@@ -50197,7 +50177,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushSelectedPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 267,
                     position: 8,
                     members: &[
@@ -50206,7 +50186,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 270,
                     position: 8,
                     members: &[
@@ -50216,7 +50196,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 274,
                     position: 8,
                     members: &[
@@ -50227,7 +50207,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_577),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_581),
             line: 279,
             position: 6,
             members: &[
@@ -50235,7 +50215,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderBrushSelectedDisabled") }),
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_509),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_513),
                     line: 282,
                     position: 8,
                     members: &[
@@ -50244,7 +50224,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_570),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_574),
                     line: 285,
                     position: 8,
                     members: &[
@@ -50254,7 +50234,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_571),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_575),
                     line: 289,
                     position: 8,
                     members: &[
@@ -50265,7 +50245,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_578),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_582),
             line: 295,
             position: 6,
             members: &[
@@ -50798,7 +50778,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_378: &[rt::TemplateBindingRow]
 ];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_579: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("QueryButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::SymbolIcon as ::ferroui_base::StaticType>::TYPE)];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_583: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("QueryButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::SymbolIcon as ::ferroui_base::StaticType>::TYPE)];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_521`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_521_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -50818,7 +50798,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_521_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_522, parent: true, line: 137, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_579),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_583),
             line: 215,
             position: 6,
             members: &[
@@ -50940,13 +50920,13 @@ fn build_controls_winuicontrols_xaml_property_322() -> &'static ::ferroui_base::
 }
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentElement")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_584: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("ContentElement")];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_581: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-focus")]] }];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_585: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":flyout-focus")]] }];
 
 /// A selector chain of `Controls/WinUIControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_582: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderContentPresenter")];
+static BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_586: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE), rt::SelectorStep::Name("HeaderContentPresenter")];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_528`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
@@ -50991,7 +50971,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_584),
                     line: 130,
                     position: 8,
                     members: &[
@@ -51002,7 +50982,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
         },
         rt::StyleMember::Style {
             parent: true,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_581),
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_585),
             line: 134,
             position: 6,
             members: &[
@@ -51020,7 +51000,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_584),
                     line: 141,
                     position: 8,
                     members: &[
@@ -51048,7 +51028,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_580),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_584),
                     line: 151,
                     position: 8,
                     members: &[
@@ -51057,7 +51037,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
                 },
                 rt::StyleMember::Style {
                     parent: true,
-                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_582),
+                    selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_586),
                     line: 154,
                     position: 8,
                     members: &[
@@ -76305,138 +76285,138 @@ fn build_controls_winuicontrols_xaml_deferred_338(
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(861,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(853,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_339(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(861,4) ControlTheme
+    // Controls/WinUIControls.xaml(853,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_339_THEME)
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(870,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(862,10)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_340(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/WinUIControls.xaml(870,10) Grid
+    // Controls/WinUIControls.xaml(862,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/WinUIControls.xaml(870,15) Name
+    // Controls/WinUIControls.xaml(862,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemHeaderRootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 870, 15)?;
-    // Controls/WinUIControls.xaml(871,12) Children
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 862, 15)?;
+    // Controls/WinUIControls.xaml(863,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(871,12) Grid
+    // Controls/WinUIControls.xaml(863,12) Grid
     let grid_1 = ::ferroui_controls::Grid::new();
     grid_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(grid_1.clone()));
-    // Controls/WinUIControls.xaml(871,17) Name
+    // Controls/WinUIControls.xaml(863,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerHeaderGrid")));
-    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 871, 17)?;
-    // Controls/WinUIControls.xaml(871,12) Height
+    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 863, 17)?;
+    // Controls/WinUIControls.xaml(863,12) Height
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_0);
-    // Controls/WinUIControls.xaml(871,12) HorizontalAlignment
+    // Controls/WinUIControls.xaml(863,12) HorizontalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_1);
-    // Controls/WinUIControls.xaml(874,17) Margin
-    rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemInnerHeaderMargin", 874, 17)?;
-    // Controls/WinUIControls.xaml(876,14) Children
+    // Controls/WinUIControls.xaml(866,17) Margin
+    rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemInnerHeaderMargin", 866, 17)?;
+    // Controls/WinUIControls.xaml(868,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(876,14) ContentPresenter
+    // Controls/WinUIControls.xaml(868,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
-    // Controls/WinUIControls.xaml(876,31) Name
+    // Controls/WinUIControls.xaml(868,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderText")));
-    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 876, 31)?;
-    // Controls/WinUIControls.xaml(876,14) VerticalAlignment
+    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 868, 31)?;
+    // Controls/WinUIControls.xaml(868,14) VerticalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_2);
-    // Controls/WinUIControls.xaml(876,14) Margin
+    // Controls/WinUIControls.xaml(868,14) Margin
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, -1.0_f64), priority_3);
-    // Controls/WinUIControls.xaml(879,31) Content (setter chosen at run time)
+    // Controls/WinUIControls.xaml(871,31) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 879, 31)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 871, 31)?;
     } else {
-        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 879, 31)?, priority_4);
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 871, 31)?, priority_4);
     }
-    // Controls/WinUIControls.xaml(880,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 880, 31)?;
-    // Controls/WinUIControls.xaml(876,14) FontFamily
+    // Controls/WinUIControls.xaml(872,31) ContentTemplate
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 872, 31)?;
+    // Controls/WinUIControls.xaml(868,14) FontFamily
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_family_property(), ::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default")), priority_5);
-    // Controls/WinUIControls.xaml(876,14) FontSize
+    // Controls/WinUIControls.xaml(868,14) FontSize
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_size_property(), 14.0_f64, priority_6);
-    // Controls/WinUIControls.xaml(876,14) FontWeight
-    let value_1 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 883, 31)?;
+    // Controls/WinUIControls.xaml(868,14) FontWeight
+    let value_1 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 875, 31)?;
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::font_weight_property(), ::core::clone::Clone::clone(&value_1), priority_7);
-    // Controls/WinUIControls.xaml(876,14) TextWrapping
+    // Controls/WinUIControls.xaml(868,14) TextWrapping
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::text_wrapping_property(), ::ferroui_base::media::TextWrapping::NoWrap, priority_8);
-    rt::invoked(content_presenter_0.try_end_init(), 876, 14)?;
+    rt::invoked(content_presenter_0.try_end_init(), 868, 14)?;
     context.pop_parent();
-    rt::invoked(grid_1.try_end_init(), 871, 12)?;
+    rt::invoked(grid_1.try_end_init(), 863, 12)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 870, 10)?;
+    rt::invoked(grid_0.try_end_init(), 862, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(905,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(897,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_341(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(905,4) ControlTheme
+    // Controls/WinUIControls.xaml(897,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_341_THEME)
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(912,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(904,10)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_342(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/WinUIControls.xaml(912,10) Grid
+    // Controls/WinUIControls.xaml(904,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/WinUIControls.xaml(912,15) Name
+    // Controls/WinUIControls.xaml(904,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemSeparatorRootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 912, 15)?;
-    // Controls/WinUIControls.xaml(913,12) Children
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 904, 15)?;
+    // Controls/WinUIControls.xaml(905,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(913,12) Rectangle
+    // Controls/WinUIControls.xaml(905,12) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
     rectangle_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(rectangle_0.clone()));
-    // Controls/WinUIControls.xaml(913,22) Name
+    // Controls/WinUIControls.xaml(905,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorLine")));
-    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 913, 22)?;
-    // Controls/WinUIControls.xaml(914,22) Height
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 914, 22)?;
-    // Controls/WinUIControls.xaml(915,22) Fill
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewItemSeparatorForeground", 915, 22)?;
-    // Controls/WinUIControls.xaml(916,22) Margin
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemSeparatorMargin", 916, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 905, 22)?;
+    // Controls/WinUIControls.xaml(906,22) Height
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 906, 22)?;
+    // Controls/WinUIControls.xaml(907,22) Fill
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationViewItemSeparatorForeground", 907, 22)?;
+    // Controls/WinUIControls.xaml(908,22) Margin
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewItemSeparatorMargin", 908, 22)?;
     context.pop_parent();
-    rt::invoked(rectangle_0.try_end_init(), 913, 12)?;
+    rt::invoked(rectangle_0.try_end_init(), 905, 12)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 912, 10)?;
+    rt::invoked(grid_0.try_end_init(), 904, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 

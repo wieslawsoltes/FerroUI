@@ -90740,7 +90740,7 @@
    "winui": "NavigationView: {NavigationView}, {NavigationViewItem}, {NavigationViewItemHeader}, {NavigationViewItemSeparator} (NavigationView.xaml), MUX_NavigationViewItemPresenterStyleWhenOnLeftPane and MUX_NavigationViewItemPresenterStyleWhenOnTopPane folded into the item, MUX_NavigationViewSettingsItemStyleWhenOnTopPane, NavigationViewPaneSearchButtonStyle (NavigationView_themeresources.xaml), with PaneToggleButtonStyle of DrawerPage.xaml and the back button styles of NavigationPage.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 33,
-   "date": "2026-10-29"
+   "date": "2026-11-11"
   },
   {
    "document": "NotificationCard.xaml",
@@ -90883,7 +90883,7 @@
    "winui": "PersonPicture: {PersonPicture}, DefaultPersonPictureStyle (PersonPicture.xaml, PersonPicture_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 0,
-   "date": "not committed"
+   "date": "2026-11-05"
   },
   {
    "document": "PagerControl.xaml",
@@ -91059,7 +91059,7 @@
    "winui": "SplitView: DefaultSplitViewStyle (SplitView_themeresources.xaml).",
    "status": "ported",
    "deviations": 7,
-   "date": "2026-10-31"
+   "date": "2026-11-08"
   },
   {
    "document": "TabControl.xaml",

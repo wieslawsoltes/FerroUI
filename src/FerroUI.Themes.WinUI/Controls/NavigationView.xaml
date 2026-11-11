@@ -52,7 +52,7 @@
   - NavigationViewItemPresenter has no FerroUI control: the template of NavigationViewItem holds
     its template for the left pane in the element NavigationViewItemPresenter, and the states
     OnTopNavigationPrimary (:on-top-navigation-primary) restyle it as the presenter of the top
-    pane. The states of the presenter are the pseudo-classes of the item: :pointerover, :pressed,
+    pane. The presenter uses :pointerover on LayoutRoot and these pseudo-classes of the item: :pressed,
     :selected, :disabled; :icon-collapsed (IconCollapsed), :icon-only and :content-only
     (NavigationViewIconPositionStates); :info-badge-collapsed; :chevron-visible-open,
     :chevron-visible-closed; :closed-compact-and-top-level-item. The opacity of SelectionIndicator
@@ -612,13 +612,11 @@
     </Setter>
 
     <!-- PointerStates (MUX_NavigationViewItemPresenterStyleWhenOnLeftPane): PointerOver -->
-    <Style Selector="^:pointerover">
-      <Style Selector="^ /template/ Border#LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPointerOver}" />
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundPointerOver}" />
-      </Style>
+    <Style Selector="^ /template/ Border#LayoutRoot:pointerover">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^ /template/ Border#LayoutRoot:pointerover ContentPresenter#Icon, ^ /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundPointerOver}" />
     </Style>
     <!-- Pressed -->
     <Style Selector="^:pressed">
@@ -639,13 +637,11 @@
       </Style>
     </Style>
     <!-- PointerOverSelected -->
-    <Style Selector="^:selected:pointerover">
-      <Style Selector="^ /template/ Border#LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelectedPointerOver}" />
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundSelectedPointerOver}" />
-      </Style>
+    <Style Selector="^:selected /template/ Border#LayoutRoot:pointerover">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelectedPointerOver}" />
+    </Style>
+    <Style Selector="^:selected /template/ Border#LayoutRoot:pointerover ContentPresenter#Icon, ^:selected /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundSelectedPointerOver}" />
     </Style>
     <!-- PressedSelected -->
     <Style Selector="^:selected:pressed">
@@ -690,7 +686,7 @@
       <Setter Property="RenderTransform" Value="rotate(180deg)" />
     </Style>
     <!-- PointerChevronStates: the foreground of a visible chevron under the pointer and pressed. -->
-    <Style Selector="^:pointerover:chevron-visible-open /template/ TextBlock#ExpandCollapseChevronIcon, ^:pointerover:chevron-visible-closed /template/ TextBlock#ExpandCollapseChevronIcon">
+    <Style Selector="^:chevron-visible-open /template/ Border#LayoutRoot:pointerover TextBlock#ExpandCollapseChevronIcon, ^:chevron-visible-closed /template/ Border#LayoutRoot:pointerover TextBlock#ExpandCollapseChevronIcon">
       <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundPointerOver}" />
     </Style>
     <Style Selector="^:pressed:chevron-visible-open /template/ TextBlock#ExpandCollapseChevronIcon, ^:pressed:chevron-visible-closed /template/ TextBlock#ExpandCollapseChevronIcon">
@@ -768,13 +764,11 @@
         <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
       </Style>
       <!-- PointerStates of the top pane. -->
-      <Style Selector="^:pointerover">
-        <Style Selector="^ /template/ Border#LayoutRoot">
-          <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundPointerOver}" />
-        </Style>
-        <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
-          <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundPointerOver}" />
-        </Style>
+      <Style Selector="^ /template/ Border#LayoutRoot:pointerover">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Border#LayoutRoot:pointerover ContentPresenter#Icon, ^ /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundPointerOver}" />
       </Style>
       <Style Selector="^:pressed">
         <Style Selector="^ /template/ Border#LayoutRoot">
@@ -792,13 +786,11 @@
           <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelected}" />
         </Style>
       </Style>
-      <Style Selector="^:selected:pointerover">
-        <Style Selector="^ /template/ Border#LayoutRoot">
-          <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundSelectedPointerOver}" />
-        </Style>
-        <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
-          <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelectedPointerOver}" />
-        </Style>
+      <Style Selector="^:selected /template/ Border#LayoutRoot:pointerover">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundSelectedPointerOver}" />
+      </Style>
+      <Style Selector="^:selected /template/ Border#LayoutRoot:pointerover ContentPresenter#Icon, ^:selected /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelectedPointerOver}" />
       </Style>
       <Style Selector="^:selected:pressed">
         <Style Selector="^ /template/ Border#LayoutRoot">
