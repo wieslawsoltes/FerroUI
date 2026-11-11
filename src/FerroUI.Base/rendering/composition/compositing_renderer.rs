@@ -3,8 +3,8 @@ use super::hit_testing::{GeometryCompositionHitTester, ICompositionHitTester, Po
 use super::server::RenderSurfaces;
 use super::{
     release_kept_composition_visuals, CompositionDrawItem, CompositionDrawListVisual, CompositionTarget,
-    CompositionTransparencyLevel, CompositionVisual, Compositor, KeptComposition, KeptCompositionVisual,
-    KeptCompositionVisuals,
+    CompositionEntry, CompositionHitTarget, CompositionTransparencyLevel, CompositionVisual, Compositor, HitFilters,
+    KeptComposition, KeptCompositionVisual, KeptCompositionVisuals,
 };
 use crate::media::{DrawingContext, Geometry, GeometryHitTestResult, IntersectionResult, MediaContext};
 use crate::reactive::{Disposable, IDisposable, Subscription};
@@ -352,56 +352,93 @@ impl CompositingRenderer {
     ) -> Option<impl Fn(&Rc<CompositionVisual>) -> bool + 'a> {
         filter.map(move |filter| {
             move |v: &Rc<CompositionVisual>| match CompositionDrawListVisual::from_visual(v) {
-                Some(dlv) => dlv.visual().is_some_and(|visual| {
-                    if !filter(&visual) {
-                        return false;
-                    }
-                    if std::ptr::eq::<Visual>(&*visual, root) {
-                        return true;
-                    }
-                    let mut parent = visual.visual_parent();
-                    while let Some(ancestor) = parent {
-                        if ancestor.has_composition_visual() {
-                            break;
-                        }
-                        if !filter(&ancestor) {
-                            return false;
-                        }
-                        if std::ptr::eq::<Visual>(&*ancestor, root) {
-                            break;
-                        }
-                        parent = ancestor.visual_parent();
-                    }
-                    true
-                }),
+                Some(dlv) => dlv.visual().is_some_and(|visual| Self::passes_filter(filter, &visual, root)),
                 None => true,
             }
         })
     }
 
-    /// What a hit test under a root without a composition visual tests (section 9.41): the
-    /// composition visuals nearest below the root, which are children of the composition
-    /// visual of the nearest visual above it that has one, and the input in the coordinates of
-    /// that visual. `None` when the root is in no tree or the filter rejects it.
+    /// The filter of a hit test, for what the visuals without a composition visual drew
+    /// (section 9.42): it is asked for the visual that drew, and for the visuals above it as
+    /// [`composition_filter`](Self::composition_filter) asks.
+    fn composition_item_filter<'a>(
+        filter: Option<&'a dyn Fn(&Visual) -> bool>,
+        root: &'a Visual,
+    ) -> Option<impl Fn(&Rc<CompositionDrawItem>) -> bool + 'a> {
+        filter.map(move |filter| {
+            move |item: &Rc<CompositionDrawItem>| {
+                item.element().is_some_and(|visual| Self::passes_filter(filter, &visual, root))
+            }
+        })
+    }
+
+    /// Whether `filter` accepts `visual` and the visuals above it that have no composition
+    /// visual, up to `root`.
+    fn passes_filter(filter: &dyn Fn(&Visual) -> bool, visual: &Ref<Visual>, root: &Visual) -> bool {
+        if !filter(visual) {
+            return false;
+        }
+        if std::ptr::eq::<Visual>(&**visual, root) {
+            return true;
+        }
+        let mut parent = visual.visual_parent();
+        while let Some(ancestor) = parent {
+            if ancestor.has_composition_visual() {
+                break;
+            }
+            if !filter(&ancestor) {
+                return false;
+            }
+            if std::ptr::eq::<Visual>(&*ancestor, root) {
+                break;
+            }
+            parent = ancestor.visual_parent();
+        }
+        true
+    }
+
+    /// What a hit test under a root without a composition visual tests (sections 9.41 and
+    /// 9.42): what the root drew, and the composition visuals and the drawings nearest below
+    /// it, in the order they are shown. All of them are of the composition visual of the
+    /// nearest visual above the root that has one, children of it or items in it. The input is
+    /// given in the coordinates that visual has in the last layout, and, when they are others,
+    /// in those of the composition visual that showed its children in the last frame. `None`
+    /// when the root is in no tree or the filter rejects it.
+    #[allow(clippy::type_complexity)]
     fn hit_test_below<H: ICompositionHitTester>(
         input: &H::Input,
         root: &Visual,
         filter: Option<&dyn Fn(&Visual) -> bool>,
-    ) -> Option<(Vec<Rc<CompositionVisual>>, H::Input)> {
+    ) -> Option<(Vec<CompositionHitTarget>, H::Input, Option<H::Input>)> {
         if !root.is_attached_to_visual_tree()
             || root.composition_visual_departed()
             || filter.is_some_and(|filter| !filter(root))
         {
             return None;
         }
-        let visuals = root
-            .nearest_composition_descendants()
-            .iter()
-            .filter_map(|visual| visual.own_composition_visual())
-            .map(|visual| (*visual).clone())
-            .collect();
+        let mut entries = Vec::new();
+        root.collect_composition_entries(&mut entries);
+        let mut targets = Vec::with_capacity(entries.len() + 1);
+        if let Some(item) = root.composition_item().filter(|item| !item.is_departed()) {
+            targets.push(CompositionHitTarget::Item(item));
+        }
+        for entry in entries {
+            match entry {
+                CompositionEntry::Visual(visual) => {
+                    if let Some(visual) = visual.own_composition_visual() {
+                        targets.push(CompositionHitTarget::Visual((*visual).clone()));
+                    }
+                }
+                CompositionEntry::Item(_, item) => targets.push(CompositionHitTarget::Item(item)),
+            }
+        }
         let offset = root.composition_offset(false);
-        Some((visuals, H::transform(input, Matrix::create_translation(offset.x, offset.y))))
+        let layout_input = H::transform(input, Matrix::create_translation(offset.x, offset.y));
+        let parent_input = root
+            .nearest_composition_ancestor()
+            .and_then(|ancestor| ancestor.own_composition_visual())
+            .and_then(|holder| CompositionTarget::last_frame_input::<H>(&holder, &layout_input));
+        Some((targets, layout_input, parent_input))
     }
 
     fn hit_test_all<H: ICompositionHitTester>(
@@ -411,27 +448,33 @@ impl CompositingRenderer {
         filter: Option<&dyn Fn(&Visual) -> bool>,
     ) -> Vec<(Ref<Visual>, IntersectionResult)> {
         let f = Self::composition_filter(filter, root);
-        let f = f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionVisual>) -> bool);
+        let item_f = Self::composition_item_filter(filter, root);
+        let filters = HitFilters {
+            visual: f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionVisual>) -> bool),
+            result: None,
+            item: item_f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionDrawItem>) -> bool),
+        };
 
         let res = match root.own_composition_visual() {
             Some(root_visual) => {
                 let root_visual: Rc<CompositionVisual> = (*root_visual).clone();
-                let Some(res) = self.composition_target.try_hit_test::<H>(input, Some(&root_visual), f) else {
+                let Some(res) = self.composition_target.hit_test_targets::<H>(input, &root_visual, filters) else {
                     return Vec::new();
                 };
                 res
             }
             None => {
-                let Some((visuals, parent_input)) = Self::hit_test_below::<H>(input, root, filter) else {
+                let Some((targets, layout_input, parent_input)) = Self::hit_test_below::<H>(input, root, filter) else {
                     return Vec::new();
                 };
-                self.composition_target.hit_test_siblings::<H>(&visuals, &parent_input, f)
+                let parent_input = parent_input.as_ref().unwrap_or(&layout_input);
+                self.composition_target.hit_test_siblings::<H>(&targets, parent_input, &layout_input, filters)
             }
         };
 
         let mut result = Vec::new();
-        for (intersection, v) in res {
-            if let Some(visual) = CompositionDrawListVisual::from_visual(&v).and_then(|dv| dv.visual()) {
+        for (intersection, target) in res {
+            if let Some(visual) = target.element() {
                 if filter.is_none_or(|filter| filter(&visual)) {
                     result.push((visual, intersection));
                 }
@@ -447,20 +490,26 @@ impl CompositingRenderer {
         filter: Option<&dyn Fn(&Visual) -> bool>,
     ) -> Option<(Ref<Visual>, IntersectionResult)> {
         let f = Self::composition_filter(filter, root);
-        let f = f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionVisual>) -> bool);
+        let item_f = Self::composition_item_filter(filter, root);
         let result_filter = |v: &Rc<CompositionVisual>| CompositionDrawListVisual::from_visual(v).is_some();
+        let filters = HitFilters {
+            visual: f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionVisual>) -> bool),
+            result: Some(&result_filter),
+            item: item_f.as_ref().map(|f| f as &dyn Fn(&Rc<CompositionDrawItem>) -> bool),
+        };
 
         let (hit, intersection) = match root.own_composition_visual() {
             Some(root_visual) => {
                 let root_visual: Rc<CompositionVisual> = (*root_visual).clone();
-                self.composition_target.try_hit_test_first::<H>(input, Some(&root_visual), f, Some(&result_filter))
+                self.composition_target.hit_test_first_target::<H>(input, &root_visual, filters)
             }
             None => {
-                let (visuals, parent_input) = Self::hit_test_below::<H>(input, root, filter)?;
-                self.composition_target.hit_test_first_sibling::<H>(&visuals, &parent_input, f, Some(&result_filter))
+                let (targets, layout_input, parent_input) = Self::hit_test_below::<H>(input, root, filter)?;
+                let parent_input = parent_input.as_ref().unwrap_or(&layout_input);
+                self.composition_target.hit_test_first_sibling::<H>(&targets, parent_input, &layout_input, filters)
             }
         };
-        let visual = CompositionDrawListVisual::from_visual(&hit?)?.visual()?;
+        let visual = hit?.element()?;
         Some((visual, intersection))
     }
 

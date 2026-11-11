@@ -230,8 +230,10 @@ ferro_class! {
         /// Whether the visual has a composition visual of its own whatever it draws: a class
         /// whose [`create_composition_visual`](Self::create_composition_visual) makes a
         /// composition visual that shows something itself says so here. Any other visual gets
-        /// its composition visual once it draws something, sets something the compositor
-        /// applies, or is asked for it (docs/porting/desktop-performance.md, section 9.41).
+        /// its composition visual once it sets something the compositor applies, or is asked
+        /// for it (docs/porting/desktop-performance.md, section 9.41); until then what it draws
+        /// is an item of the composition visual of the nearest visual above it that has one
+        /// (section 9.42).
         fn requires_composition_visual(this) -> bool;
     }
 }
@@ -1607,42 +1609,6 @@ impl Visual {
     #[inline]
     pub(crate) fn was_seen_without_composition_visual(&self) -> bool {
         self.elided_state.get() & ELIDED_SEEN != 0
-    }
-
-    /// The composition visuals nearest below this visual, in the order they are shown: for each
-    /// visual child in Z order its composition visual, or, when it has none, those nearest
-    /// below it (section 9.41).
-    fn collect_composition_children(&self, out: &mut Vec<Ref<Visual>>) {
-        let Some(children) = self.visual_children_snapshot() else { return };
-        if self.has_non_uniform_z_index_children() && children.len() > 1 {
-            let mut sorted: Vec<(i32, usize)> =
-                children.iter().enumerate().map(|(index, child)| (child.z_index(), index)).collect();
-            // The indices keep the order of elements with the same Z index.
-            sorted.sort_unstable();
-            for (_, index) in sorted {
-                children[index].collect_composition_child(out);
-            }
-        } else {
-            for child in children.iter() {
-                child.collect_composition_child(out);
-            }
-        }
-    }
-
-    fn collect_composition_child(&self, out: &mut Vec<Ref<Visual>>) {
-        if self.has_composition_visual() {
-            out.push(self.to_ref());
-        } else {
-            self.collect_composition_children(out);
-        }
-    }
-
-    /// The visuals nearest below this one that have a composition visual, in the order they
-    /// are shown (section 9.41).
-    pub(crate) fn nearest_composition_descendants(&self) -> Vec<Ref<Visual>> {
-        let mut nearest = Vec::new();
-        self.collect_composition_children(&mut nearest);
-        nearest
     }
 
     /// What is below the composition visual of this visual, in the order it is shown: for each

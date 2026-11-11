@@ -179,6 +179,7 @@ pub use composition_solid_color_visual::CompositionSolidColorVisual;
 pub use composition_surface::CompositionSurface;
 pub use composition_surface_visual::CompositionSurfaceVisual;
 pub use composition_target::CompositionTarget;
+pub(crate) use composition_target::{holder_passes, CompositionHitTarget, HitFilters};
 pub use compositing_renderer::CompositingRenderer;
 pub(crate) use composition_draw_item::{CompositionDrawItem, CompositionEntry, DrawItemList};
 pub(crate) use kept_composition_visuals::{release_kept_composition_visuals, KeptComposition, KeptCompositionVisual};

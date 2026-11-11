@@ -2,7 +2,7 @@
 //! of the container class are members of [`CompositionVisual`].
 
 use super::hit_testing::{CompositionHitTestAabbTree, ICompositionHitTester};
-use super::{CompositionTarget, CompositionVisual};
+use super::{CompositionHitTarget, CompositionTarget, CompositionVisual, HitFilters};
 use crate::media::IntersectionResult;
 use std::rc::Rc;
 
@@ -65,9 +65,9 @@ impl CompositionVisual {
         &self,
         target: &CompositionTarget,
         input: &H::Input,
-        filter: Option<&dyn Fn(&Rc<CompositionVisual>) -> bool>,
-        result_filter: Option<&dyn Fn(&Rc<CompositionVisual>) -> bool>,
-    ) -> Option<(Option<Rc<CompositionVisual>>, IntersectionResult)> {
+        layout_input: &H::Input,
+        filters: HitFilters<'_>,
+    ) -> Option<(Option<CompositionHitTarget>, IntersectionResult)> {
         if self.children().count() < HIT_TEST_AABB_TREE_THRESHOLD {
             *self.hit_test_children.borrow_mut() = None;
             return None;
@@ -76,7 +76,7 @@ impl CompositionVisual {
         let read_revision = self.compositor().readback().read_revision();
         let mut tree = self.hit_test_children.borrow_mut();
         let tree = tree.get_or_insert_with(|| Box::new(CompositionHitTestAabbTree::new(self.children().clone())));
-        Some(tree.query_first::<H>(target, input, filter, result_filter, read_revision))
+        Some(tree.query_first_target::<H>(target, input, layout_input, filters, read_revision))
     }
 
     fn update_hit_test_child_order(&self, tree: &mut CompositionHitTestAabbTree) {

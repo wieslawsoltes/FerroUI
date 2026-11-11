@@ -1,6 +1,7 @@
 use super::{is_hit, ICompositionHitTester};
 use crate::media::{Geometry, IntersectionResult, MatrixTransform};
 use crate::platform::{IGeometryImpl, LtrbRect};
+use crate::rendering::composition::drawing::CompositionRenderData;
 use crate::rendering::composition::CompositionVisual;
 use crate::{Matrix, Rect, Ref, Size};
 
@@ -19,6 +20,10 @@ impl ICompositionHitTester for GeometryCompositionHitTester {
 
     fn hit_test(visual: &CompositionVisual, input: &Ref<Geometry>) -> IntersectionResult {
         visual.hit_test_geometry(input)
+    }
+
+    fn hit_test_drawing(data: &CompositionRenderData, input: &Ref<Geometry>) -> IntersectionResult {
+        data.hit_test_geometry(input)
     }
 
     fn transformed_sub_tree_bounds_match(bounds: LtrbRect, input: &Ref<Geometry>) -> bool {
