@@ -20,7 +20,7 @@ use ferroui_controls::{
 };
 use ferroui_media::{MediaError, MediaSubscription};
 use ferroui_media_camera::{CameraCapture, CameraError, CameraFormat, CameraProvider};
-use ferroui_media_camera_controls::{CameraPreview, CameraProviderFactory};
+use ferroui_media_camera_controls::{CameraPreview, CameraProviderFactory, QrPreview};
 use ferroui_media_controls::TextureFrameImporter;
 use ferroui_media_qr::{QrAnalysis, QrAnalysisGate, QrCandidate, QrError};
 use ferroui_media_video::{MediaPlayerProvider, MediaSource};
@@ -73,6 +73,7 @@ struct State {
     budget: FrameBudget,
     video: Ref<MediaPlayerElement>,
     camera: Ref<CameraPreview>,
+    qr_preview: Option<Ref<QrPreview>>,
     status: Ref<TextBlock>,
     photo: Ref<Image>,
     photo_pending: Cell<bool>,
@@ -92,6 +93,9 @@ impl State {
     fn stop(&self) {
         self.epoch.set(self.epoch.get() + 1);
         self.gate.stop();
+        if let Some(preview) = &self.qr_preview {
+            preview.set_detections(&[]);
+        }
         self.qr_source.set(None);
         if let Some(timer) = self.timer.borrow_mut().take() {
             timer.dispose();
@@ -274,12 +278,15 @@ impl State {
                         let result = pending.await;
                         if let Some(s) = weak.upgrade().filter(|s| s.active(epoch)) {
                             match result {
-                                Ok(values) if !values.is_empty() => {
-                                    s.status(format!("Last detected: {}", results_text(&values)))
+                                Ok(values) => {
+                                    if let Some(preview) = &s.qr_preview {
+                                        preview.set_detections(&values);
+                                    }
+                                    if !values.is_empty() {
+                                        s.status(format!("Last detected: {}", results_text(&values)));
+                                    }
                                 }
-                                Ok(_)
-                                | Err(QrError::StaleFrame | QrError::Cancelled | QrError::Busy) => {
-                                }
+                                Err(QrError::StaleFrame | QrError::Cancelled | QrError::Busy) => {}
                                 Err(e) => s.status(format!("QR analysis: {e:?}")),
                             }
                         }
@@ -533,12 +540,17 @@ pub fn qr_page() -> Ref<Page> {
 }
 fn page(mode: Mode) -> Ref<Page> {
     let providers = PROVIDERS.with(|p| p.borrow().clone());
+    let qr_preview = (mode == Mode::Qr).then(QrPreview::new);
+    let camera = qr_preview
+        .as_ref()
+        .map_or_else(CameraPreview::new, |view| view.clone().upcast());
     let state = Rc::new(State {
         mode,
         providers,
         budget: FrameBudget::new(Default::default()),
         video: MediaPlayerElement::new(),
-        camera: CameraPreview::new(),
+        camera,
+        qr_preview,
         status: TextBlock::new(),
         photo: Image::new(),
         photo_pending: Cell::new(false),
@@ -569,7 +581,7 @@ fn page(mode: Mode) -> Ref<Page> {
     description.set_text(Some(match mode {
         Mode::Video => "Play the bundled video or open a file/URL. Autoplay is off. Navigating away closes the player.",
         Mode::Camera => "Discover devices without acquiring a camera. Start requests consent; Stop or navigation releases capture. Photos stay in memory.",
-        Mode::Qr => "Decode the bundled two-symbol image offline, or explicitly start live scanning where this host supports it. Results are displayed as text.",
+        Mode::Qr => "Decode the bundled two-symbol image offline, or explicitly start live scanning where this host supports it. Live detections are outlined in the camera preview.",
     }));
     description.set_text_wrapping(TextWrapping::Wrap);
     state.status.set_text_wrapping(TextWrapping::Wrap);
