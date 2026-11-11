@@ -26,7 +26,7 @@ required-features = ["capture"]
 
 [features]
 default = []
-desktop = ["dep:ferroui-desktop", "theme"]
+desktop = ["dep:ferroui-desktop", "dep:ferroui-x11", "theme"]
 theme = ["dep:ferroui-themes-winui"]
 quartz-metal = ["desktop", "ferroui-desktop/quartz-metal", "dep:ferroui-native"]
 capture = ["dep:ferroui-headless", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "theme"]
@@ -68,6 +68,7 @@ ferroui-media-video-windows.workspace = true
 ferroui-media-camera-windows.workspace = true
 ferroui-media-opengl.workspace = true
 [target.'cfg(target_os = "linux")'.dependencies]
+ferroui-x11 = { workspace = true, optional = true }
 ferroui-media-linux = {workspace=true,features=["controls"]}
 ferroui-media-video-linux.workspace = true
 ferroui-media-camera-linux.workspace = true

@@ -351,11 +351,11 @@ fn media_transport_template_keeps_native_actions_accessible_at_narrow_widths() {
         let parts = transport.get_visual_descendants();
         parts.into_iter().find_map(|v| v.cast::<Slider>().filter(|s| s.name().as_deref() == Some(name))).unwrap()
     };
-    for width in [160., 240., 320., 640., 960.] {
+    for width in [160., 200., 224., 240., 320., 640., 960.] {
         transport.measure(Size::new(width, 180.));
         transport.arrange(Rect::new(0., 0., width, transport.desired_size().height));
         let mut centers = Vec::new();
-        for name in ["MediaPlayPause", "MediaStop", "MediaMute", "MediaFullWindow"] {
+        for name in ["MediaPlayPause", "MediaStop", "MediaMute", "MediaFullWindow", "MediaMore"] {
             let part = button(name);
             if !part.is_visible() {
                 continue;
@@ -374,6 +374,7 @@ fn media_transport_template_keeps_native_actions_accessible_at_narrow_widths() {
     transport.set_is_compact(true);
     assert!(!button("MediaStop").is_visible());
     assert!(!slider("MediaVolume").is_visible());
+    assert!(button("MediaMore").is_visible());
     transport.set_is_seek_bar_visible(false);
     transport.set_is_full_window_button_visible(false);
     assert!(!slider("MediaSeek").is_visible());

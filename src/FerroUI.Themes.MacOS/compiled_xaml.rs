@@ -48535,7 +48535,7 @@ fn build_controls_macoscontrols_xaml_deferred_55(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(35,14) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
-    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 8_i32), 35, 19)?;
+    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 9_i32), 35, 19)?;
     // Controls/MacOSControls.xaml(35,19) ColumnDefinition
     let column_definition_0 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_0));
@@ -48560,6 +48560,9 @@ fn build_controls_macoscontrols_xaml_deferred_55(
     // Controls/MacOSControls.xaml(35,19) ColumnDefinition
     let column_definition_7 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_7));
+    // Controls/MacOSControls.xaml(35,19) ColumnDefinition
+    let column_definition_8 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_8));
     ::ferroui_controls::Grid::__markup_set_ColumnDefinitions(&grid_0, ::core::clone::Clone::clone(&column_definitions_0));
     // Controls/MacOSControls.xaml(36,16) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
@@ -48765,6 +48768,37 @@ fn build_controls_macoscontrols_xaml_deferred_55(
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     button_3.set_value_with_priority(::ferroui_controls::ToolTip::tip_property(), rt::string_object("Enter full window"), priority_48);
     rt::invoked(button_3.try_end_init(), 48, 16)?;
+    // Controls/MacOSControls.xaml(50,16) Children
+    let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
+    // Controls/MacOSControls.xaml(50,16) Button
+    let button_4 = ::ferroui_controls::Button::new();
+    button_4.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&button_4).upcast::<::ferroui_controls::Control>());
+    // Controls/MacOSControls.xaml(50,23) Name
+    button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MediaMore")));
+    rt::register_name_value(name_scope.as_ref(), "MediaMore", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_4)), 50, 23)?;
+    // Controls/MacOSControls.xaml(50,16) Column
+    let priority_49 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_49);
+    // Controls/MacOSControls.xaml(50,16) Width
+    let priority_50 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 40.0_f64, priority_50);
+    // Controls/MacOSControls.xaml(50,16) Height
+    let priority_51 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_51);
+    // Controls/MacOSControls.xaml(50,16) Padding
+    let priority_52 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::padding_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_52);
+    // Controls/MacOSControls.xaml(50,16) MinWidth
+    let priority_53 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 0.0_f64, priority_53);
+    // Controls/MacOSControls.xaml(51,23) Name
+    let priority_54 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_controls::automation::AutomationProperties::name_property(), ::core::option::Option::Some(::std::string::String::from("More playback controls")), priority_54);
+    // Controls/MacOSControls.xaml(51,74) Tip
+    let priority_55 = ::ferroui_base::data::BindingPriority::Template;
+    button_4.set_value_with_priority(::ferroui_controls::ToolTip::tip_property(), rt::string_object("More playback controls"), priority_55);
+    rt::invoked(button_4.try_end_init(), 50, 16)?;
     rt::invoked(grid_0.try_end_init(), 35, 14)?;
     rt::invoked(stack_panel_0.try_end_init(), 30, 12)?;
     rt::invoked(border_0.try_end_init(), 29, 10)?;

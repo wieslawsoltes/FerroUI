@@ -4,18 +4,18 @@ use ferroui_base::{
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
-    layout::{LayoutableImpl, VerticalAlignment},
-    media::{IImage, Stretch},
+    layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment},
+    media::{Brushes, IImage, Stretch, TextWrapping},
     reactive::{IDisposable, Subscription},
     rendering::composition::{ElementComposition, ICompositionGpuInterop, RenderContextState},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Thickness,
     StyledElementImpl, StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::{Control, ControlImpl, Image, Panel, PanelImpl, TextBlock};
 use ferroui_media_video::{
     MediaError, MediaErrorKind, MediaEvent, MediaFuture, MediaPlaybackState, MediaPlayer,
-    MediaPlayerEvent, MediaPlayerProvider, MediaSource, MediaSubscription, WeakMediaPlayer,
+    MediaPlayerEvent, MediaPlayerProvider, MediaSource, MediaSubscription, MediaTrackKind, WeakMediaPlayer,
 };
 use std::{
     cell::{Cell, RefCell},
@@ -34,6 +34,7 @@ pub struct MediaPlayerElement {
     base: Panel,
     presenter: RefCell<Option<Ref<MediaPlayerPresenter>>>,
     poster: RefCell<Option<Ref<Image>>>,
+    caption: RefCell<Option<Ref<TextBlock>>>,
     full_window: RefCell<Option<crate::full_window::FullWindow>>,
     chrome: RefCell<Option<Ref<MediaTransportControls>>>,
     player: RefCell<Option<MediaPlayer>>,
@@ -84,11 +85,28 @@ impl FerroObjectImpl for MediaPlayerElement {
                 view.set_is_full_window(!view.is_full_window());
             }
         })));
+        let weak = this.to_ref().downgrade();
+        chrome.set_zoom_handler(Rc::new(move |zoomed| {
+            if let Some(view) = weak.upgrade() {
+                view.update_stretch(zoomed);
+            }
+        }));
         chrome.set_vertical_alignment(VerticalAlignment::Bottom);
         chrome.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
         chrome.set_is_visible(false);
         let placeholder = TextBlock::new();
         placeholder.set_text(Some("No media"));
+        let caption = TextBlock::new();
+        caption.set_is_visible(false);
+        caption.set_is_hit_test_visible(false);
+        caption.set_vertical_alignment(VerticalAlignment::Bottom);
+        caption.set_horizontal_alignment(HorizontalAlignment::Center);
+        caption.set_text_wrapping(TextWrapping::Wrap);
+        caption.set_padding(Thickness::new(8., 4., 8., 4.));
+        caption.set_margin(Thickness::new(12., 0., 12., 12.));
+        caption.set_background(Some(Brushes::black()));
+        caption.set_foreground(Some(Brushes::white()));
+        caption.set_z_index(1);
         let weak = this.to_ref().downgrade();
         *this.presentation_subscription.borrow_mut() =
             Some(presenter.errors().subscribe(move |error| {
@@ -129,12 +147,14 @@ impl FerroObjectImpl for MediaPlayerElement {
         placeholder.set_z_index(1);
         this.children().add(&presenter);
         this.children().add(&poster);
+        this.children().add(&caption);
         this.children().add(&chrome);
         this.children().add(&placeholder);
         *this.placeholder.borrow_mut() = Some(placeholder);
         *this.presenter.borrow_mut() = Some(presenter);
         *this.chrome.borrow_mut() = Some(chrome);
         *this.poster.borrow_mut() = Some(poster);
+        *this.caption.borrow_mut() = Some(caption);
     }
     fn on_property_changed(this: &Self, args: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, args);
@@ -143,12 +163,8 @@ impl FerroObjectImpl for MediaPlayerElement {
                 this.apply_source_uri();
             }
         } else if args.property() == Self::stretch_property().as_property() {
-            if let Some(presenter) = this.presenter.borrow().as_ref() {
-                presenter.set_stretch(this.stretch());
-            }
-            if let Some(poster) = this.poster.borrow().as_ref() {
-                poster.set_stretch(this.stretch());
-            }
+            let zoomed = this.chrome.borrow().as_ref().is_some_and(|chrome| chrome.is_zoomed());
+            this.update_stretch(zoomed);
         } else if args.property() == Self::poster_source_property().as_property() {
             if let Some(poster) = this.poster.borrow().as_ref() {
                 poster.set_source(this.poster_source());
@@ -159,6 +175,10 @@ impl FerroObjectImpl for MediaPlayerElement {
         } else if args.property() == Self::are_transport_controls_enabled_property().as_property() {
             if let Some(chrome) = this.chrome.borrow().as_ref() {
                 chrome.set_is_visible(this.are_transport_controls_enabled());
+            }
+            if let Some(caption) = this.caption.borrow().as_ref() {
+                let bottom = if this.are_transport_controls_enabled() { 100. } else { 12. };
+                caption.set_margin(Thickness::new(12., 0., 12., bottom));
             }
         } else if args.property() == Self::autoplay_property().as_property() {
             if let Some(player) = this.media_player() {
@@ -208,6 +228,7 @@ impl MediaPlayerElement {
             presenter: RefCell::new(None),
             chrome: RefCell::new(None),
             poster: RefCell::new(None),
+            caption: RefCell::new(None),
             full_window: RefCell::new(None),
             player: RefCell::new(None),
             shared_player: RefCell::new(None),
@@ -429,6 +450,15 @@ impl MediaPlayerElement {
     }
     pub fn set_stretch(&self, value: Stretch) {
         self.set_value(Self::stretch_property(), value);
+    }
+    fn update_stretch(&self, zoomed: bool) {
+        let stretch = if zoomed { Stretch::UniformToFill } else { self.stretch() };
+        if let Some(presenter) = self.presenter.borrow().as_ref() {
+            presenter.set_stretch(stretch);
+        }
+        if let Some(poster) = self.poster.borrow().as_ref() {
+            poster.set_stretch(stretch);
+        }
     }
     pub fn poster_source(&self) -> Option<Rc<dyn IImage>> {
         self.get_value(Self::poster_source_property())
@@ -722,6 +752,7 @@ impl MediaPlayerElement {
         });
     }
     fn subscribe(&self) {
+        self.show_caption(None);
         if self.subscription.borrow().is_some() {
             return;
         }
@@ -738,6 +769,7 @@ impl MediaPlayerElement {
                         MediaPlayerEvent::IntentChanged(
                             ferroui_media_video::PlaybackIntent::Stop,
                         ) => {
+                            view.show_caption(None);
                             view.show_placeholder(true);
                             if let Some(presenter) = view.presenter.borrow().as_ref() {
                                 presenter.present_latest();
@@ -751,6 +783,7 @@ impl MediaPlayerElement {
                                     | MediaPlaybackState::Opening
                                     | MediaPlaybackState::Failed
                             ) {
+                                view.show_caption(None);
                                 if let Some(placeholder) = view.placeholder.borrow().as_ref() {
                                     placeholder.set_text(Some(match state.state {
                                         MediaPlaybackState::Opening => "Opening media",
@@ -769,10 +802,22 @@ impl MediaPlayerElement {
                                 view.errors.emit(error);
                             }
                         }
+                        MediaPlayerEvent::TrackSelectionChanged(MediaTrackKind::Captions) => {
+                            view.show_caption(None);
+                            view.start_polling();
+                        }
                         _ => {}
                     }
                 }
             }));
+        }
+    }
+    fn show_caption(&self, text: Option<&str>) {
+        if let Some(caption) = self.caption.borrow().as_ref() {
+            if caption.text().as_deref() != text {
+                caption.set_text(text);
+                caption.set_is_visible(text.is_some());
+            }
         }
     }
     fn stop_polling(&self) {
@@ -786,7 +831,7 @@ impl MediaPlayerElement {
         // transition, or before a newly sought frame reaches the producer fence.
         // Ended has the same race: Play is accepted before its native restart
         // changes state, with no pending import yet to keep the timer alive.
-        self.settling_ticks.set(30);
+        self.settling_ticks.set(PLAYBACK_SETTLING_TICKS);
         if !self.is_attached_to_visual_tree() || self.timer.borrow().is_some() {
             return;
         }
@@ -823,6 +868,13 @@ impl MediaPlayerElement {
                 let settling = view.settling_ticks.get();
                 view.settling_ticks.set(settling.saturating_sub(1));
                 let state = player.playback_session().state;
+                if matches!(state, MediaPlaybackState::Playing | MediaPlaybackState::Paused)
+                    && player.requested_state() != ferroui_media_video::PlaybackIntent::Stop
+                {
+                    view.show_caption(player.caption_text().as_deref());
+                } else {
+                    view.show_caption(None);
+                }
                 // Settled paused images stop polling. Producer/import work keeps
                 // its bounded storage alive until readiness or a reported failure.
                 let keep = matches!(
@@ -844,7 +896,7 @@ impl MediaPlayerElement {
                 }
                 keep
             },
-            Duration::from_millis(33),
+            Duration::from_millis(PRESENTATION_POLL_MS),
             DispatcherPriority::RENDER,
         );
         *self.timer.borrow_mut() = Some(timer);
@@ -862,6 +914,11 @@ impl MediaPlayerElement {
         player.play()
     }
 }
+
+// Media Foundation hands frames to ANGLE asynchronously. At the old 33 ms
+// polling interval a single import could take several source-frame intervals.
+const PRESENTATION_POLL_MS: u64 = if cfg!(windows) { 10 } else { 33 };
+const PLAYBACK_SETTLING_TICKS: u32 = (1000 / PRESENTATION_POLL_MS) as u32;
 
 #[cfg(test)]
 mod readiness_tests {
@@ -939,7 +996,7 @@ mod readiness_tests {
         let window = Window::new();
         window.set_content(Some(Control::boxed(view.clone())));
         window.show();
-        for _ in 0..40 {
+        for _ in 0..=PLAYBACK_SETTLING_TICKS {
             tick();
         }
         assert!(
@@ -958,7 +1015,7 @@ mod readiness_tests {
         );
         let reads = native.reads.get();
         native.state.set(MediaPlaybackState::Playing);
-        for _ in 0..40 {
+        for _ in 0..=PLAYBACK_SETTLING_TICKS {
             tick();
         }
         assert!(native.reads.get() > reads && view.timer.borrow().is_some());
@@ -1180,7 +1237,7 @@ mod readiness_tests {
         let window = Window::new();
         window.set_content(Some(Control::boxed(view.clone())));
         window.show();
-        for _ in 0..65 {
+        for _ in 0..=PLAYBACK_SETTLING_TICKS {
             tick();
         }
         assert!(

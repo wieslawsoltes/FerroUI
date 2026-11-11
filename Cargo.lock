@@ -627,6 +627,12 @@ dependencies = [
  "ferroui-android",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-video",
+ "ferroui-media-video-android",
 ]
 
 [[package]]
@@ -2554,6 +2560,7 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-android",
  "ferroui-media-video",
+ "serde_json",
 ]
 
 [[package]]
@@ -7953,6 +7960,7 @@ dependencies = [
  "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-winui",
+ "ferroui-x11",
 ]
 
 [[package]]

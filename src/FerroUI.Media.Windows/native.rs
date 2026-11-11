@@ -6,6 +6,8 @@ use std::{
     ptr::NonNull,
     rc::Rc,
     sync::Arc,
+    task::Poll,
+    time::Duration,
 };
 
 #[cfg(all(test, feature = "native-frame-tests"))]
@@ -14,6 +16,7 @@ mod native_frame_tests {
     use ferroui_opengl::IPlatformGraphicsOpenGlContextFactory;
     extern "C" {
         fn ferro_windows_test_frames() -> i32;
+        fn ferro_windows_test_recording() -> i32;
         fn ferro_windows_test_mp4_geometry() -> i32;
         fn ferro_windows_test_alias(display: isize, egl: *const Egl, gl: *const isize) -> i32;
     }
@@ -83,6 +86,11 @@ mod native_frame_tests {
     #[test]
     fn independent_d3d11_frames_and_admission() {
         assert_eq!(unsafe { ferro_windows_test_frames() }, 0);
+    }
+
+    #[test]
+    fn native_camera_sample_records_decodable_silent_mp4() {
+        assert_eq!(unsafe { ferro_windows_test_recording() }, 0);
     }
 
     #[test]
@@ -192,6 +200,8 @@ extern "C" {
     fn ferro_windows_intent(s: *mut c_void, intent: i32);
     fn ferro_windows_seek(s: *mut c_void, ns: u64) -> u64;
     fn ferro_windows_audio(s: *mut c_void, volume: f64, muted: i32);
+    fn ferro_windows_can_set_rate(s: *mut c_void) -> i32;
+    fn ferro_windows_set_rate(s: *mut c_void, rate: f64) -> i32;
     fn ferro_windows_take(s: *mut c_void) -> *mut c_void;
     fn ferro_windows_frame_info(f: *mut c_void, out: *mut FrameInfo);
     fn ferro_windows_frame_release(f: *mut c_void);
@@ -205,6 +215,13 @@ extern "C" {
     fn ferro_windows_photo_rgb(f: *mut c_void, rgb: *mut u8, length: u64) -> i32;
     fn ferro_windows_devices() -> *mut c_char;
     fn ferro_windows_string_release(s: *mut c_char);
+    fn ferro_windows_can_record(s: *mut c_void) -> i32;
+    fn ferro_windows_record(s: *mut c_void) -> *mut c_void;
+    fn ferro_windows_record_finish(r: *mut c_void);
+    fn ferro_windows_record_cancel(r: *mut c_void);
+    fn ferro_windows_record_release(r: *mut c_void);
+    fn ferro_windows_record_poll(r: *mut c_void, out: *mut RecordingInfo) -> i32;
+    fn ferro_windows_record_copy(r: *mut c_void, bytes: *mut u8, length: u64) -> i32;
 }
 fn unsupported(s: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::Unsupported, s)
@@ -293,6 +310,20 @@ impl Drop for Session {
 #[derive(Clone)]
 pub struct NativeSession(Arc<Session>);
 impl NativeSession {
+    pub fn supports_recording(&self) -> bool {
+        unsafe { ferro_windows_can_record(self.0 .0.as_ptr()) != 0 }
+    }
+
+    pub fn record(&self) -> Result<NativeRecording, MediaError> {
+        if !self.supports_recording() {
+            return Err(unsupported(
+                "Native H.264 recording is unavailable for this camera format",
+            ));
+        }
+        NonNull::new(unsafe { ferro_windows_record(self.0 .0.as_ptr()) })
+            .map(NativeRecording)
+            .ok_or_else(|| failure("The native recording worker is unavailable"))
+    }
     #[cfg(feature = "synthetic-camera")]
     pub fn fixture_photo_status() -> (bool, bool) {
         extern "C" {
@@ -379,6 +410,16 @@ impl NativeSession {
     pub fn audio(&self, v: f64, m: bool) {
         unsafe { ferro_windows_audio(self.0 .0.as_ptr(), v, m as i32) }
     }
+    pub fn supports_playback_rate(&self) -> bool {
+        unsafe { ferro_windows_can_set_rate(self.0 .0.as_ptr()) != 0 }
+    }
+    pub fn set_playback_rate(&self, rate: f64) -> Result<(), MediaError> {
+        if unsafe { ferro_windows_set_rate(self.0 .0.as_ptr(), rate) } != 0 {
+            Ok(())
+        } else {
+            Err(unsupported("Playback rate is unavailable for this Windows audio endpoint"))
+        }
+    }
     pub fn take_frame(&self) -> Result<Option<NativeFrame>, MediaError> {
         self.state()?;
         Ok(
@@ -394,6 +435,89 @@ impl NativeSession {
             .into_owned();
         unsafe { ferro_windows_string_release(text.as_ptr()) };
         Ok(result)
+    }
+}
+
+#[repr(C)]
+struct RecordingInfo {
+    width: u32,
+    height: u32,
+    duration_ns: u64,
+    length: u64,
+    error: [c_char; 512],
+}
+
+pub struct EncodedRecording {
+    pub bytes: Arc<[u8]>,
+    pub width: u32,
+    pub height: u32,
+    pub duration: Duration,
+}
+
+pub struct NativeRecording(NonNull<c_void>);
+impl NativeRecording {
+    pub fn started(&self) -> Poll<Result<(), MediaError>> {
+        self.poll().map(|result| result.map(|_| ()))
+    }
+
+    pub fn finish(&self) {
+        unsafe { ferro_windows_record_finish(self.0.as_ptr()) }
+    }
+
+    pub fn cancel(&self) {
+        unsafe { ferro_windows_record_cancel(self.0.as_ptr()) }
+    }
+
+    fn poll(&self) -> Poll<Result<(i32, RecordingInfo), MediaError>> {
+        let mut info = std::mem::MaybeUninit::uninit();
+        let state = unsafe { ferro_windows_record_poll(self.0.as_ptr(), info.as_mut_ptr()) };
+        let info = unsafe { info.assume_init() };
+        match state {
+            0 => Poll::Pending,
+            1 | 2 => Poll::Ready(Ok((state, info))),
+            -2 => Poll::Ready(Err(MediaError::new(
+                MediaErrorKind::Cancelled,
+                "Recording cancelled",
+            ))),
+            _ => {
+                let message = unsafe { CStr::from_ptr(info.error.as_ptr()) }.to_string_lossy();
+                Poll::Ready(Err(failure(format!(
+                    "Windows H.264 recording failed: {message}"
+                ))))
+            }
+        }
+    }
+
+    pub fn encoded(&self) -> Poll<Result<EncodedRecording, MediaError>> {
+        let (state, info) = match self.poll()? {
+            Poll::Ready(info) => info,
+            Poll::Pending => return Poll::Pending,
+        };
+        if state != 2 {
+            return Poll::Pending;
+        }
+        if !(1..=256 * 1024 * 1024).contains(&info.length) {
+            return Poll::Ready(Err(failure("Invalid native recording length")));
+        }
+        let mut bytes = Arc::<[u8]>::new_uninit_slice(info.length as usize);
+        let destination = Arc::get_mut(&mut bytes).unwrap().as_mut_ptr().cast();
+        if unsafe { ferro_windows_record_copy(self.0.as_ptr(), destination, info.length) } == 0 {
+            return Poll::Ready(Err(MediaError::new(
+                MediaErrorKind::Cancelled,
+                "Recording cancelled",
+            )));
+        }
+        Poll::Ready(Ok(EncodedRecording {
+            bytes: unsafe { bytes.assume_init() },
+            width: info.width,
+            height: info.height,
+            duration: Duration::from_nanos(info.duration_ns),
+        }))
+    }
+}
+impl Drop for NativeRecording {
+    fn drop(&mut self) {
+        unsafe { ferro_windows_record_release(self.0.as_ptr()) }
     }
 }
 struct Frame(NonNull<c_void>);

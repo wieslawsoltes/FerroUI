@@ -1,4 +1,4 @@
-//! CameraX capture, consent and still output, independently of video and QR.
+//! CameraX preview, consent, still capture and silent video recording.
 #![cfg(target_os = "android")]
 #![forbid(unsafe_code)]
 use ferroui_android::{interop::java::*, FerroActivity, FerroAndroidApplication};
@@ -402,6 +402,36 @@ impl NativeCameraSession for Session {
             Poll::Pending
         })
     }
+    fn supports_video_recording(&self) -> bool {
+        call_boolean(&self.java, "supportsRecording", "()Z", &[])
+    }
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let Some(java) = call_object(
+            &self.java,
+            "startRecording",
+            "()Lorg/ferroui/media/camera/CameraRecordingRequest;",
+            &[],
+        )
+        .map(|request| request.to_global()) else {
+            return Box::pin(async {
+                Err(error(
+                    CameraErrorKind::NativeFailure,
+                    "No native recording request",
+                ))
+            });
+        };
+        let recording = Rc::new(AndroidRecording(java));
+        poll_native(move || {
+            if call_boolean(&recording.0, "startPending", "()Z", &[]) {
+                return Poll::Pending;
+            }
+            let failure = text(&recording.0, "error");
+            if !failure.is_empty() {
+                return Poll::Ready(Err(recording_error(failure)));
+            }
+            Poll::Ready(Ok(recording.clone() as Rc<dyn NativeCameraRecording>))
+        })
+    }
     fn set_control(&self, control: CameraControl) -> Result<(), CameraError> {
         self.check()?;
         let (kind, value) = match control {
@@ -431,5 +461,99 @@ impl NativeCameraSession for Session {
     fn stop(&self) {
         self.stream.stop();
         call_void(&self.java, "close", "()V", &[]);
+    }
+}
+
+struct AndroidRecording(JavaObject);
+
+fn recording_error(message: String) -> CameraError {
+    let kind = if message == "Recording cancelled" {
+        CameraErrorKind::Cancelled
+    } else {
+        CameraErrorKind::NativeFailure
+    };
+    error(kind, message)
+}
+
+impl NativeCameraRecording for AndroidRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        const MAX_BYTES: usize = 256 * 1024 * 1024;
+        call_void(&self.0, "finish", "()V", &[]);
+        let java = self.0.clone();
+        let mut worker = None::<std::thread::JoinHandle<Result<CameraVideo, CameraError>>>;
+        poll_native(move || {
+            if worker.as_ref().is_some_and(|worker| worker.is_finished()) {
+                return Poll::Ready(worker.take().unwrap().join().unwrap_or_else(|_| {
+                    Err(error(
+                        CameraErrorKind::NativeFailure,
+                        "Recording copy worker failed",
+                    ))
+                }));
+            }
+            if worker.is_some() || call_boolean(&java, "pending", "()Z", &[]) {
+                return Poll::Pending;
+            }
+            let failure = text(&java, "error");
+            if !failure.is_empty() {
+                return Poll::Ready(Err(recording_error(failure)));
+            }
+            let java = java.clone();
+            match std::thread::Builder::new()
+                .name("FerroUI.Media.Camera.Recording".into())
+                .spawn(move || {
+                    let Some(bytes) = call_object(&java, "takeBytes", "()[B", &[]) else {
+                        let failure = text(&java, "error");
+                        return Err(recording_error(if failure.is_empty() {
+                            "Recording output unavailable".into()
+                        } else {
+                            failure
+                        }));
+                    };
+                    let encoded = bounded_byte_array_of(&bytes, MAX_BYTES).ok_or_else(|| {
+                        error(
+                            CameraErrorKind::NativeFailure,
+                            "Recording exceeds size limit",
+                        )
+                    })?;
+                    let info = text(&java, "info");
+                    let mut fields = info.split(',');
+                    let width = fields.next().and_then(|value| value.parse().ok());
+                    let height = fields.next().and_then(|value| value.parse().ok());
+                    let duration = fields.next().and_then(|value| value.parse().ok());
+                    let (Some(width), Some(height), Some(duration)) = (width, height, duration)
+                    else {
+                        return Err(error(
+                            CameraErrorKind::NativeFailure,
+                            "Invalid recording metadata",
+                        ));
+                    };
+                    Ok(CameraVideo {
+                        encoded: encoded.into(),
+                        content_type: "video/mp4".into(),
+                        width,
+                        height,
+                        duration: Duration::from_micros(duration),
+                    })
+                }) {
+                Ok(thread) => {
+                    worker = Some(thread);
+                    Poll::Pending
+                }
+                Err(failure) => Poll::Ready(Err(error(
+                    CameraErrorKind::NativeFailure,
+                    failure.to_string(),
+                ))),
+            }
+        })
+    }
+
+    fn cancel(&self) {
+        call_void(&self.0, "cancel", "()V", &[]);
+    }
+}
+
+impl Drop for AndroidRecording {
+    fn drop(&mut self) {
+        self.cancel();
     }
 }

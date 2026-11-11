@@ -1,22 +1,33 @@
 plugins { id 'com.android.application' version '8.13.0' }
 def ferroRoot = file(providers.gradleProperty('ferroUiRoot').get())
-layout.buildDirectory = new File(ferroRoot, 'target/android-media-gradle')
+def catalog = providers.gradleProperty('ferroUiMediaCatalog').isPresent()
+def abi = providers.gradleProperty('ferroUiAbi').getOrElse('arm64-v8a')
+def rustTarget = ['arm64-v8a': 'aarch64-linux-android', 'x86_64': 'x86_64-linux-android'][abi]
+if (rustTarget == null) throw new GradleException("Unsupported Android ABI: ${abi}")
+def rustLibrary = catalog ? 'control_catalog_android' : 'portable_media_mobile'
+def rustTargetDir = providers.gradleProperty('ferroUiRustTargetDir').map { file(it) }
+    .getOrElse(new File(ferroRoot, 'target'))
+def rustBinary = new File(rustTargetDir, "${rustTarget}/debug/lib${rustLibrary}.so")
+layout.buildDirectory = new File(rustTargetDir, catalog ? 'android-catalog-media-gradle' : 'android-media-gradle')
 android {
     namespace 'org.ferroui.portablemedia'
     compileSdk 36
     ndkVersion '28.2.13676358'
     defaultConfig {
-        applicationId 'org.ferroui.portablemedia'
+        applicationId catalog ? 'org.ferroui.controlcatalog' : 'org.ferroui.portablemedia'
         minSdk 26
         targetSdk 36
         versionCode 1
         versionName '1.0'
-        ndk { abiFilters 'arm64-v8a' }
+        ndk { abiFilters abi }
+        manifestPlaceholders = [ferroLabel: catalog ? 'FerroUI Control Gallery' : 'FerroUI Portable Media',
+                                ferroLibrary: rustLibrary]
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
     sourceSets.main {
         manifest.srcFile 'AndroidManifest.xml'
-        java.srcDirs = [new File(ferroRoot, 'src/Android/FerroUI.Android/java'), file('java')]
+        java.srcDirs = [new File(ferroRoot, 'src/Android/FerroUI.Android/java')]
+        if (!catalog) java.srcDirs += file('java')
         jniLibs.srcDirs = [new File(layout.buildDirectory.get().asFile, 'native')]
     }
     packaging { jniLibs { useLegacyPackaging = false } }
@@ -24,17 +35,17 @@ android {
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Android/packaging.gradle')
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Video.Android/packaging.gradle')
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Camera.Android/packaging.gradle')
-apply from: new File(ferroRoot, 'src/FerroUI.Media.Qr.Android/packaging.gradle')
+if (!catalog) apply from: new File(ferroRoot, 'src/FerroUI.Media.Qr.Android/packaging.gradle')
 tasks.register('verifyRustLibrary') {
     doLast {
-        if (!new File(ferroRoot, 'target/aarch64-linux-android/debug/libportable_media_mobile.so').isFile()) {
-            throw new GradleException('Build portable-media-mobile for aarch64-linux-android before packaging.')
+        if (!rustBinary.isFile()) {
+            throw new GradleException("Build ${rustLibrary} for ${rustTarget} before packaging: ${rustBinary}")
         }
     }
 }
 tasks.register('copyRustLibrary', Copy) {
     dependsOn 'verifyRustLibrary'
-    from new File(ferroRoot, 'target/aarch64-linux-android/debug/libportable_media_mobile.so')
-    into new File(layout.buildDirectory.get().asFile, 'native/arm64-v8a')
+    from rustBinary
+    into new File(layout.buildDirectory.get().asFile, "native/${abi}")
 }
 tasks.named('preBuild').configure { dependsOn 'copyRustLibrary' }

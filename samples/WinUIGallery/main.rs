@@ -7,6 +7,13 @@ use ferroui_desktop::AppBuilderDesktopExtensions;
 fn main() -> std::process::ExitCode {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
     let builder = AppBuilder::configure::<winui_gallery::App>().use_platform_detect();
+    #[cfg(target_os = "linux")]
+    let builder = {
+        use ferroui_x11::{X11PlatformOptions, X11RenderingMode};
+        let mut options = X11PlatformOptions::new();
+        options.rendering_mode.insert(0, X11RenderingMode::Egl);
+        builder.with(std::rc::Rc::new(options))
+    };
     #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
     let builder = {
         let mut options = ferroui_native::FerroNativePlatformOptions::default();

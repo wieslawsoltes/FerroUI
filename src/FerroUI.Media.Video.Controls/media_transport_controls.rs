@@ -5,6 +5,7 @@ use ferroui_base::{
     interactivity::InteractiveImpl,
     layout::{LayoutableImpl, LayoutableImplExt},
     media::StreamGeometry,
+    reactive::Subscription,
     threading::Dispatcher,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
     StyledElementImpl, StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -12,11 +13,11 @@ use ferroui_base::{
 use ferroui_controls::{
     automation::AutomationProperties,
     primitives::{TemplatedControl, TemplatedControlImplExt},
-    Button, Control, ControlImpl, PathIcon, Slider, TextBlock, ToolTip,
+    Button, Control, ControlImpl, MenuFlyout, MenuItem, PathIcon, Slider, TextBlock, ToolTip,
 };
 use ferroui_media_video::{
-    MediaErrorKind, MediaFuture, MediaPlaybackState, MediaPlayer, MediaSubscription,
-    PlaybackIntent, WeakMediaPlayer,
+    MediaErrorKind, MediaFuture, MediaPlaybackState, MediaPlayer, MediaPlayerEvent,
+    MediaSubscription, MediaTrackKind, PlaybackIntent, WeakMediaPlayer,
 };
 use std::{
     cell::{Cell, RefCell},
@@ -29,6 +30,7 @@ const PAUSE: &str = "M5 3 H8 V17 H5 Z M12 3 H15 V17 H12 Z";
 const STOP: &str = "M5 5 H15 V15 H5 Z";
 const SPEAKER: &str = "M2 7 H6 L11 3 V17 L6 13 H2 Z M13 6 V8 C15 9 15 11 13 12 V14 C18 12 18 8 13 6 Z M15 2 V4 C21 7 21 13 15 16 V18 C24 14 24 6 15 2 Z";
 const MUTED: &str = "M2 7 H6 L11 3 V17 L6 13 H2 Z M14 6 L16 8 L18 6 L19.5 7.5 L17.5 9.5 L19.5 11.5 L18 13 L16 11 L14 13 L12.5 11.5 L14.5 9.5 L12.5 7.5 Z";
+const MORE: &str = "M3 8 H7 V12 H3 Z M8 8 H12 V12 H8 Z M13 8 H17 V12 H13 Z";
 fn set_icon(button: &Button, path: &str) {
     let icon = PathIcon::new();
     icon.set_width(18.);
@@ -60,10 +62,15 @@ pub struct MediaTransportControls {
     player: RefCell<Option<WeakMediaPlayer>>,
     subscription: RefCell<Option<MediaSubscription>>,
     full_window_handler: RefCell<Option<Rc<dyn Fn()>>>,
+    full_window_in_menu: Cell<bool>,
     full_window: RefCell<Option<Ref<Button>>>,
     play: RefCell<Option<Ref<Button>>>,
     stop: RefCell<Option<Ref<Button>>>,
     mute: RefCell<Option<Ref<Button>>>,
+    more: RefCell<Option<Ref<Button>>>,
+    menu_opening: RefCell<Option<Subscription>>,
+    zoom_handler: RefCell<Option<Rc<dyn Fn(bool)>>>,
+    zoomed: Cell<bool>,
     seek: RefCell<Option<Ref<Slider>>>,
     volume: RefCell<Option<Ref<Slider>>>,
     status: RefCell<Option<Ref<TextBlock>>>,
@@ -163,6 +170,13 @@ ferro_properties! { impl MediaTransportControls {
     pub fn is_volume_slider_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsVolumeSliderVisible",true) }
     pub fn is_full_window_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsFullWindowButtonVisible",true) }
     pub fn is_full_window_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsFullWindow",false) }
+    pub fn is_skip_backward_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsSkipBackwardButtonVisible",true) }
+    pub fn is_skip_forward_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsSkipForwardButtonVisible",true) }
+    pub fn is_zoom_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsZoomButtonVisible",true) }
+    pub fn is_playback_rate_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsPlaybackRateButtonVisible",true) }
+    pub fn is_audio_tracks_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsAudioTracksButtonVisible",true) }
+    pub fn is_closed_captions_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsClosedCaptionsButtonVisible",true) }
+    pub fn is_cast_button_visible_property()->StyledProperty<bool> { FerroProperty::register::<Self,_>("IsCastButtonVisible",true) }
 }}
 impl LayoutableImpl for MediaTransportControls {
     fn measure_override(this: &Self, available: Size) -> Size {
@@ -175,6 +189,7 @@ impl LayoutableImpl for MediaTransportControls {
 }
 impl VisualImpl for MediaTransportControls {
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
+        this.hide_menu();
         this.subscription.borrow_mut().take();
         this.command_generation
             .set(this.command_generation.get().wrapping_add(1));
@@ -201,6 +216,13 @@ impl FerroObjectImpl for MediaTransportControls {
             Self::is_volume_slider_visible_property().as_property(),
             Self::is_full_window_button_visible_property().as_property(),
             Self::is_full_window_property().as_property(),
+            Self::is_skip_backward_button_visible_property().as_property(),
+            Self::is_skip_forward_button_visible_property().as_property(),
+            Self::is_zoom_button_visible_property().as_property(),
+            Self::is_playback_rate_button_visible_property().as_property(),
+            Self::is_audio_tracks_button_visible_property().as_property(),
+            Self::is_closed_captions_button_visible_property().as_property(),
+            Self::is_cast_button_visible_property().as_property(),
         ]
         .contains(&args.property())
         {
@@ -217,6 +239,13 @@ impl ferroui_controls::primitives::TemplatedControlImpl for MediaTransportContro
             .set(this.command_generation.get().wrapping_add(1));
         for part in [&this.play, &this.stop, &this.mute, &this.full_window] {
             part.borrow_mut().take();
+        }
+        this.menu_opening.borrow_mut().take();
+        if let Some(button) = this.more.borrow_mut().take() {
+            if let Some(menu) = button.flyout() {
+                menu.hide();
+            }
+            button.set_flyout(None);
         }
         for part in [&this.seek, &this.volume] {
             part.borrow_mut().take();
@@ -236,6 +265,10 @@ impl ferroui_controls::primitives::TemplatedControlImpl for MediaTransportContro
         this.command_generation
             .set(this.command_generation.get().wrapping_add(1));
         let scope = args.name_scope();
+        if let Some(button) = scope.find_as::<Button>("MediaMore") {
+            this.bind_menu(&button);
+            *this.more.borrow_mut() = Some(button);
+        }
         let full_window = scope.find_as::<Button>("MediaFullWindow");
         *this.full_window.borrow_mut() = full_window.clone();
         let play = scope.find_as::<Button>("MediaPlayPause");
@@ -275,10 +308,7 @@ impl ferroui_controls::primitives::TemplatedControlImpl for MediaTransportContro
                     .upgrade()
                     .filter(|view| view.template_generation.get() == generation)
                 {
-                    let action = view.full_window_handler.borrow().clone();
-                    if let Some(action) = action {
-                        action();
-                    }
+                    view.toggle_full_window();
                 }
             });
         }
@@ -392,9 +422,14 @@ impl MediaTransportControls {
             subscription: RefCell::new(None),
             full_window: RefCell::new(None),
             full_window_handler: RefCell::new(None),
+            full_window_in_menu: Cell::new(false),
             play: RefCell::new(None),
             stop: RefCell::new(None),
             mute: RefCell::new(None),
+            more: RefCell::new(None),
+            menu_opening: RefCell::new(None),
+            zoom_handler: RefCell::new(None),
+            zoomed: Cell::new(false),
             seek: RefCell::new(None),
             volume: RefCell::new(None),
             status: RefCell::new(None),
@@ -464,17 +499,282 @@ impl MediaTransportControls {
         self.update_visibility(self.bounds().width);
         self.invalidate_measure();
     }
+    pub fn is_skip_backward_button_visible(&self) -> bool {
+        self.get_value(Self::is_skip_backward_button_visible_property())
+    }
+    pub fn set_is_skip_backward_button_visible(&self, value: bool) {
+        self.set_value(Self::is_skip_backward_button_visible_property(), value);
+    }
+    pub fn is_skip_forward_button_visible(&self) -> bool {
+        self.get_value(Self::is_skip_forward_button_visible_property())
+    }
+    pub fn set_is_skip_forward_button_visible(&self, value: bool) {
+        self.set_value(Self::is_skip_forward_button_visible_property(), value);
+    }
+    pub fn is_zoom_button_visible(&self) -> bool {
+        self.get_value(Self::is_zoom_button_visible_property())
+    }
+    pub fn set_is_zoom_button_visible(&self, value: bool) {
+        self.set_value(Self::is_zoom_button_visible_property(), value);
+    }
+    pub fn is_playback_rate_button_visible(&self) -> bool {
+        self.get_value(Self::is_playback_rate_button_visible_property())
+    }
+    pub fn set_is_playback_rate_button_visible(&self, value: bool) {
+        self.set_value(Self::is_playback_rate_button_visible_property(), value);
+    }
+    pub fn is_audio_tracks_button_visible(&self) -> bool {
+        self.get_value(Self::is_audio_tracks_button_visible_property())
+    }
+    pub fn set_is_audio_tracks_button_visible(&self, value: bool) {
+        self.set_value(Self::is_audio_tracks_button_visible_property(), value);
+    }
+    pub fn is_closed_captions_button_visible(&self) -> bool {
+        self.get_value(Self::is_closed_captions_button_visible_property())
+    }
+    pub fn set_is_closed_captions_button_visible(&self, value: bool) {
+        self.set_value(Self::is_closed_captions_button_visible_property(), value);
+    }
+    pub fn is_cast_button_visible(&self) -> bool {
+        self.get_value(Self::is_cast_button_visible_property())
+    }
+    pub fn set_is_cast_button_visible(&self, value: bool) {
+        self.set_value(Self::is_cast_button_visible_property(), value);
+    }
+    pub fn is_zoomed(&self) -> bool {
+        self.zoomed.get()
+    }
+    pub fn set_is_zoomed(&self, zoomed: bool) {
+        let handler = self.zoom_handler.borrow().clone();
+        if let Some(handler) = handler {
+            if self.zoomed.replace(zoomed) != zoomed {
+                handler(zoomed);
+            }
+        }
+    }
+    pub(crate) fn set_zoom_handler(&self, handler: Rc<dyn Fn(bool)>) {
+        *self.zoom_handler.borrow_mut() = Some(handler);
+        self.update_visibility(self.bounds().width);
+    }
+    fn can_zoom(&self) -> bool {
+        self.is_zoom_button_visible() && self.zoom_handler.borrow().is_some()
+    }
+    fn toggle_full_window(&self) {
+        let action = self.full_window_handler.borrow().clone();
+        if let Some(action) = action {
+            action();
+        }
+    }
+    fn bind_menu(&self, button: &Button) {
+        set_icon(button, MORE);
+        let menu = MenuFlyout::new();
+        let weak = self.to_ref().downgrade();
+        let weak_menu = menu.downgrade();
+        *self.menu_opening.borrow_mut() = Some(menu.opening(move |_| {
+            if let (Some(view), Some(menu)) = (weak.upgrade(), weak_menu.upgrade()) {
+                view.populate_menu(&menu);
+            }
+        }));
+        button.set_flyout(&menu);
+    }
+    fn populate_menu(&self, menu: &MenuFlyout) {
+        menu.items().clear();
+        let player = self
+            .player
+            .borrow()
+            .as_ref()
+            .and_then(WeakMediaPlayer::upgrade);
+        let seekable = player
+            .as_ref()
+            .is_some_and(|p| p.playback_session().seekable);
+        if self.is_skip_backward_button_visible() {
+            self.add_menu_item(menu, "Skip back 10 seconds", seekable, |view| {
+                view.skip(false)
+            });
+        }
+        if self.is_skip_forward_button_visible() {
+            self.add_menu_item(menu, "Skip forward 30 seconds", seekable, |view| {
+                view.skip(true)
+            });
+        }
+        if self.can_zoom() {
+            let label = if self.is_zoomed() {
+                "Fit video"
+            } else {
+                "Zoom to fill"
+            };
+            self.add_menu_item(menu, label, true, |view| {
+                view.set_is_zoomed(!view.is_zoomed())
+            });
+        }
+        if self.full_window_in_menu.get() {
+            self.add_menu_item(
+                menu,
+                self.full_window_name(),
+                true,
+                Self::toggle_full_window,
+            );
+        }
+        if let Some(player) = player {
+            if self.is_playback_rate_button_visible() && player.supports_playback_rate() {
+                let submenu = MenuItem::new();
+                submenu.set_header(Some(Rc::new("Playback speed".to_owned())));
+                for rate in [0.5, 0.75, 1.0, 1.25, 1.5, 2.0] {
+                    let item = self.menu_item(&format!("{rate}×"), true, move |view| {
+                        view.player_action(|player| player.set_playback_rate(rate));
+                    });
+                    Self::mark_choice(&item, rate == player.playback_rate());
+                    submenu.items().add(Some(Control::boxed(item)));
+                }
+                menu.items().add(Some(Control::boxed(submenu)));
+            }
+            if self.is_closed_captions_button_visible() {
+                self.add_tracks(menu, &player, MediaTrackKind::Captions);
+            }
+            if self.is_audio_tracks_button_visible() {
+                self.add_tracks(menu, &player, MediaTrackKind::Audio);
+            }
+            if self.is_cast_button_visible() && player.supports_casting() {
+                self.add_menu_item(menu, "Cast to device", true, |view| {
+                    let player = view
+                        .player
+                        .borrow()
+                        .as_ref()
+                        .and_then(WeakMediaPlayer::upgrade);
+                    if let Some(player) = player {
+                        view.command(player.cast());
+                    }
+                });
+            }
+        }
+    }
+    fn add_menu_item(
+        &self,
+        menu: &MenuFlyout,
+        label: &str,
+        enabled: bool,
+        action: impl Fn(&Self) + 'static,
+    ) {
+        menu.items()
+            .add(Some(Control::boxed(self.menu_item(label, enabled, action))));
+    }
+    fn menu_item(
+        &self,
+        label: &str,
+        enabled: bool,
+        action: impl Fn(&Self) + 'static,
+    ) -> Ref<MenuItem> {
+        let item = MenuItem::new();
+        item.set_header(Some(Rc::new(label.to_owned())));
+        item.set_is_enabled(enabled);
+        let weak = self.to_ref().downgrade();
+        let generation = self.template_generation.get();
+        item.click(move |_, _| {
+            if let Some(view) = weak
+                .upgrade()
+                .filter(|v| v.template_generation.get() == generation)
+            {
+                action(&view);
+            }
+        });
+        item
+    }
+    fn mark_choice(item: &MenuItem, selected: bool) {
+        item.set_toggle_type(ferroui_controls::MenuItemToggleType::Radio);
+        item.set_is_checked(selected);
+    }
+    fn player_action(
+        &self,
+        action: impl FnOnce(&MediaPlayer) -> Result<(), ferroui_media_video::MediaError>,
+    ) {
+        let player = self
+            .player
+            .borrow()
+            .as_ref()
+            .and_then(WeakMediaPlayer::upgrade);
+        if let Some(player) = player {
+            match action(&player) {
+                Ok(()) => self.clear_error(),
+                Err(error) => self.show_error(&error.to_string()),
+            }
+        }
+    }
+    fn add_tracks(&self, menu: &MenuFlyout, player: &MediaPlayer, kind: MediaTrackKind) {
+        let tracks = player.tracks(kind);
+        let captions = kind == MediaTrackKind::Captions;
+        if tracks.len() < if captions { 1 } else { 2 } {
+            return;
+        }
+        let submenu = MenuItem::new();
+        let label = if captions {
+            "Closed captions"
+        } else {
+            "Audio tracks"
+        };
+        submenu.set_header(Some(Rc::new(label.to_owned())));
+        if captions {
+            let off = self.menu_item("Off", true, move |view| {
+                view.player_action(|player| player.select_track(kind, None));
+            });
+            Self::mark_choice(&off, !tracks.iter().any(|track| track.selected));
+            submenu.items().add(Some(Control::boxed(off)));
+        }
+        for track in tracks {
+            let id = track.id;
+            let item = self.menu_item(&track.label, true, move |view| {
+                view.player_action(|player| player.select_track(kind, Some(id)));
+            });
+            Self::mark_choice(&item, track.selected);
+            submenu.items().add(Some(Control::boxed(item)));
+        }
+        menu.items().add(Some(Control::boxed(submenu)));
+    }
+    fn skip(&self, forward: bool) {
+        let player = self
+            .player
+            .borrow()
+            .as_ref()
+            .and_then(WeakMediaPlayer::upgrade);
+        if let Some(player) = player {
+            let state = player.playback_session();
+            if !state.seekable {
+                return;
+            }
+            let target = if forward {
+                let next = state.position.saturating_add(Duration::from_secs(30));
+                state.duration.map_or(next, |end| next.min(end))
+            } else {
+                state.position.saturating_sub(Duration::from_secs(10))
+            };
+            let seek = player.seek(target);
+            self.command(Box::pin(async move { seek.await.map(|_| ()) }));
+        }
+    }
     fn update_visibility(&self, width: f64) {
+        let full_window =
+            self.is_full_window_button_visible() && self.full_window_handler.borrow().is_some();
+        let more = self.is_skip_backward_button_visible()
+            || self.is_skip_forward_button_visible()
+            || self.can_zoom()
+            || self.is_playback_rate_button_visible()
+            || self.is_audio_tracks_button_visible()
+            || self.is_closed_captions_button_visible()
+            || self.is_cast_button_visible();
+        self.full_window_in_menu
+            .set(full_window && more && width < 184. && self.more.borrow().is_some());
         for (button, visible) in [
             (&self.play, self.is_play_pause_button_visible()),
             (
                 &self.stop,
-                self.is_stop_button_visible() && !self.is_compact() && width >= 200.,
+                self.is_stop_button_visible()
+                    && !self.is_compact()
+                    && width >= if more { 224. } else { 200. },
             ),
             (&self.mute, self.is_volume_button_visible()),
+            (&self.more, more),
             (
                 &self.full_window,
-                self.is_full_window_button_visible() && self.full_window_handler.borrow().is_some(),
+                full_window && !self.full_window_in_menu.get(),
             ),
         ] {
             if let Some(button) = button.borrow().as_ref() {
@@ -498,16 +798,20 @@ impl MediaTransportControls {
     }
     fn update_full_window_name(&self) {
         if let Some(button) = self.full_window.borrow().as_ref() {
-            let label = if self.is_full_window() {
-                "Exit full window"
-            } else {
-                "Enter full window"
-            };
+            let label = self.full_window_name();
             AutomationProperties::set_name(button, Some(label));
             ToolTip::set_tip(button, Some(Rc::new(label.to_owned())));
         }
     }
+    fn full_window_name(&self) -> &'static str {
+        if self.is_full_window() {
+            "Exit full window"
+        } else {
+            "Enter full window"
+        }
+    }
     pub fn set_media_player(&self, player: Option<&MediaPlayer>) {
+        self.hide_menu();
         self.command_generation
             .set(self.command_generation.get().wrapping_add(1));
         self.clear_error();
@@ -523,11 +827,25 @@ impl MediaTransportControls {
         let player = self.player.borrow().as_ref().and_then(|p| p.upgrade());
         if let Some(player) = player {
             let weak = self.to_ref().downgrade();
-            *self.subscription.borrow_mut() = Some(player.events().subscribe(move |_| {
+            *self.subscription.borrow_mut() = Some(player.events().subscribe(move |event| {
                 if let Some(view) = weak.upgrade() {
+                    if matches!(event, MediaPlayerEvent::StateChanged(state) if matches!(state.state,
+                        MediaPlaybackState::Closed | MediaPlaybackState::Failed | MediaPlaybackState::Opening)) {
+                        view.hide_menu();
+                    }
                     view.refresh();
                 }
             }));
+        }
+    }
+    fn hide_menu(&self) {
+        let menu = self
+            .more
+            .borrow()
+            .as_ref()
+            .and_then(|button| button.flyout());
+        if let Some(menu) = menu {
+            menu.hide();
         }
     }
     fn command(&self, task: MediaFuture<()>) {

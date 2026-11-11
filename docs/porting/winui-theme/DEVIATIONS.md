@@ -358,6 +358,12 @@ it. Abbreviations: CS = `controls/dev/CommonStyles/`, GX = `dxaml/xcp/dxaml/them
 | LBI-10 | `ListPickerFlyoutPresenterItemStyle` | Items of the list of a `ListPickerFlyout`. | Waived. | FerroUI has no list picker flyout. |
 | LBI-11 | `TabNavigation="Local"`, `UseSystemFocusVisuals`, `IsHoldingEnabled`, `AllowDrop`, `ContentTransitions` | Navigation, focus and input settings. | `KeyboardNavigation.TabNavigation="Local"`, the default focus adorner; the others are left out. | G-14, G-19. |
 
+## MediaTransportControls
+
+| ID | WinUI source | WinUI | FerroUI | Reason |
+|---|---|---|---|---|
+| MTC-1 | `MediaTransportControls_themeresources.xaml`, control panel | A command bar places and drops its buttons by priority. | Standard buttons and sliders retain the primary actions. A menu gives keyboard access to skip, zoom and the other actions the media provider supports. | A single compact row works with the portable playback capabilities and standard automation peers. |
+
 ## Menu
 
 | ID | WinUI source | What WinUI does | What the port does | Why |

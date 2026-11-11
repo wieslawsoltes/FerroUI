@@ -36,6 +36,7 @@ impl ApplicationImpl for App {
             .add(ferroui_themes_winui::WinUITheme::new().as_style());
         // The control themes of the InkToolbar (InkCanvas page) are in the inking crate, after the
         // WinUI theme whose resources they use.
+        ferroui_controls_inking::register_types();
         let inking = ferroui_markup_xaml::styling::StyleInclude::new(None);
         inking.set_source(ferroui_base::utilities::UriRef::parse("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml").ok());
         this.styles()

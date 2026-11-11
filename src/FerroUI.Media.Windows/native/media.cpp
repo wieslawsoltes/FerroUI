@@ -1,4 +1,4 @@
-// Windows SDK / system codecs only. Native MF video buffers are never mapped.
+// Windows SDK and system codecs. Preview never maps native video buffers.
 #include "media.h"
 #include <windows.h>
 #include <mfapi.h>
@@ -15,6 +15,7 @@
 #include <audioclient.h>
 #include <propvarutil.h>
 #include <wrl/client.h>
+#include <wrl/implements.h>
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
@@ -112,6 +113,7 @@ struct FerroWindowsFrame {
     std::weak_ptr<Session> owner;
 };
 struct Packet {HRESULT status=S_OK;DWORD stream=0,flags=0;LONGLONG pts=0;uint64_t epoch=0;ComPtr<IMFSample> sample;};
+#include "recording.inc"
 struct Session;
 class ReaderCallback final:public IMFSourceReaderCallback {
     std::atomic<ULONG> refs{1};std::weak_ptr<Session> session;
@@ -151,14 +153,22 @@ struct Session : std::enable_shared_from_this<Session> {
     const char *operation="native initialization";
     UINT requested_w=0,requested_h=0,requested_n=0,requested_d=1;
     int intent=0;double volume=1.;bool muted=false;
+    double requested_rate=1.,rate=1.;
+    bool rate_supported=false;
     uint64_t epoch=1,pending_seek=0,request_epoch=1,sequence=0;LONGLONG seek_target=0;
     bool in_flight=false,flushed=false,packet_ready=false;
     HRESULT event_error=S_OK;
     Packet packet;
+    bool recording_encoder = false;
+    bool recording_format = false;
+    std::shared_ptr<Recording> recording;
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
     ComPtr<IMFDXGIDeviceManager> manager;ComPtr<IMFSourceReader> reader;ComPtr<IMFMediaSource> camera_source;
     ComPtr<ReaderCallback> callback;
     ComPtr<IAudioClient> audio;ComPtr<IAudioRenderClient> render;ComPtr<IAudioClock> audio_clock;ComPtr<ISimpleAudioVolume> audio_volume;
+    ComPtr<IAudioClockAdjustment> audio_rate;
+    uint64_t audio_frames_written=0;
+    bool use_audio_frame_clock=false;
     UINT audio_capacity=0;UINT64 audio_frequency=0;bool has_video=true,has_audio=false,playing=false,audio_started=false;
     bool video_eos=false,audio_eos=false,prepared_frame=false,ever_played=false;LONGLONG clock_base=0,position=0;bool clock_based=false;
     Clock::time_point started;
@@ -177,8 +187,17 @@ struct Session : std::enable_shared_from_this<Session> {
     }
     LONGLONG clock_position(){
         if(!playing)return position;
-        if(has_audio){if(!audio_started||!clock_based)return position;UINT64 p=0;check(audio_clock->GetPosition(&p,nullptr));return clock_base+(LONGLONG)((long double)p*10000000/audio_frequency);}
-        return clock_base+std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-started).count()/100;
+        if(has_audio){
+            if(!audio_started||!clock_based)return position;
+            if(use_audio_frame_clock){
+                UINT padding=0;check(audio->GetCurrentPadding(&padding));
+                // Padding is counted in input PCM frames. At any endpoint rate,
+                // consuming one input frame advances media time by 1/48000 s.
+                return clock_base+(LONGLONG)((long double)(audio_frames_written-std::min<uint64_t>(padding,audio_frames_written))*10000000/48000);
+            }
+            UINT64 p=0;check(audio_clock->GetPosition(&p,nullptr));return clock_base+(LONGLONG)((long double)p*10000000/audio_frequency);
+        }
+        return clock_base+(LONGLONG)(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-started).count()/100.*rate);
     }
 };
 struct FerroWindowsSession {std::shared_ptr<Session> value;};
@@ -224,7 +243,18 @@ static void setup_audio(Session &s){
     ComPtr<IMMDevice> endpoint;check(enumerator->GetDefaultAudioEndpoint(eRender,eConsole,&endpoint));
     check(endpoint->Activate(__uuidof(IAudioClient),CLSCTX_ALL,nullptr,(void**)s.audio.GetAddressOf()));
     WAVEFORMATEX format{};format.wFormatTag=WAVE_FORMAT_PCM;format.nChannels=2;format.nSamplesPerSec=48000;format.wBitsPerSample=16;format.nBlockAlign=4;format.nAvgBytesPerSec=192000;
-    check(s.audio->Initialize(AUDCLNT_SHAREMODE_SHARED,AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM|AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,2000000,0,&format,nullptr));
+    constexpr DWORD flags=AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM|AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY;
+    HRESULT adjustable=s.audio->Initialize(AUDCLNT_SHAREMODE_SHARED,flags|AUDCLNT_STREAMFLAGS_RATEADJUST,2000000,0,&format,nullptr);
+    if(FAILED(adjustable)){
+        s.audio.Reset();
+        check(endpoint->Activate(__uuidof(IAudioClient),CLSCTX_ALL,nullptr,(void**)s.audio.GetAddressOf()));
+        check(s.audio->Initialize(AUDCLNT_SHAREMODE_SHARED,flags,2000000,0,&format,nullptr));
+    }else if(SUCCEEDED(s.audio->GetService(IID_PPV_ARGS(&s.audio_rate)))){
+        bool slow=SUCCEEDED(s.audio_rate->SetSampleRate(24000.f));
+        bool fast=SUCCEEDED(s.audio_rate->SetSampleRate(96000.f));
+        check(s.audio_rate->SetSampleRate(48000.f));
+        if(!slow||!fast)s.audio_rate.Reset();
+    }
     check(s.audio->GetBufferSize(&s.audio_capacity));check(s.audio->GetService(IID_PPV_ARGS(&s.render)));check(s.audio->GetService(IID_PPV_ARGS(&s.audio_clock)));check(s.audio_clock->GetFrequency(&s.audio_frequency));check(s.audio->GetService(IID_PPV_ARGS(&s.audio_volume)));
     if(!s.audio_frequency||s.audio_capacity>48000)throw Failure{E_NOTIMPL};
 }
@@ -256,7 +286,11 @@ static void video_type(Session &s){
         s.rotation=g.rotation;s.mirrored=g.mirror;
     }
     UINT32 fps_n=0,fps_d=1;MFGetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,&fps_n,&fps_d);
+    UINT32 scan = MFVideoInterlace_Unknown;
+    type->GetUINT32(MF_MT_INTERLACE_MODE, &scan);
     std::lock_guard<std::mutex> guard(s.lock);s.state.width=s.rotation%180?s.visible_h:s.visible_w;s.state.height=s.rotation%180?s.visible_w:s.visible_h;s.state.fps_n=fps_n;s.state.fps_d=fps_d;
+    s.recording_format = scan == MFVideoInterlace_Progressive && s.rotation == 0 &&
+        recording_profile(s.width, s.height, fps_n, fps_d);
 }
 static void prepare(const std::shared_ptr<Session> &owner){
     Session &s=*owner;runtime();
@@ -277,6 +311,7 @@ static void prepare(const std::shared_ptr<Session> &owner){
     check(attributes->SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING,TRUE));
     check(attributes->SetUINT32(MF_SOURCE_READER_DISABLE_DXVA,FALSE));
     if(s.camera){
+        s.recording_encoder = has_h264_encoder();
         s.operation="camera source activation";
 #ifdef FERROUI_SYNTHETIC_CAMERA
         if(s.source==L"ferroui:synthetic-camera"||s.source==L"ferroui:synthetic-camera/disconnect"||s.source==L"ferroui:synthetic-camera/recovery"){
@@ -367,7 +402,8 @@ static void reset(Session &s,uint64_t epoch,LONGLONG target){
     if(s.closed)return;
     PROPVARIANT value;PropVariantInit(&value);value.vt=VT_I8;value.hVal.QuadPart=target;check(s.reader->SetCurrentPosition(GUID_NULL,value));
     s.video.clear();s.pcm.clear();s.pcm_bytes=0;s.video_eos=!s.has_video;s.audio_eos=false;s.prepared_frame=false;s.position=s.clock_base=target;s.clock_based=false;
-    if(s.audio){check(s.audio->Stop());check(s.audio->Reset());}s.audio_started=false;
+    s.started=Clock::now();
+    if(s.audio){check(s.audio->Stop());check(s.audio->Reset());}s.audio_started=false;s.audio_frames_written=0;
     std::lock_guard<std::mutex> guard(s.lock);s.request_epoch=epoch;s.latest.reset();s.state.position_ns=target*100;s.state.state=0;
 }
 static void audio_packet(Session &s,const Packet &p){
@@ -383,6 +419,7 @@ static void write_audio(Session &s){
         auto &chunk=s.pcm.front();UINT frames=std::min<UINT>(available,(UINT)(chunk.bytes.size()-chunk.offset)/4);
         if(!s.clock_based){s.clock_base=chunk.pts;s.clock_based=true;}
         BYTE *out;check(s.render->GetBuffer(frames,&out));memcpy(out,chunk.bytes.data()+chunk.offset,frames*4);check(s.render->ReleaseBuffer(frames,0));
+        s.audio_frames_written+=frames;
         chunk.offset+=frames*4;s.pcm_bytes-=frames*4;available-=frames;
         if(chunk.offset==chunk.bytes.size())s.pcm.pop_front();
     }
@@ -403,11 +440,21 @@ static void run(const std::shared_ptr<Session> &owner){
     auto &s=*owner;HRESULT initialized=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
     try{
         check(initialized);prepare(owner);s.operation="native streaming";s.started=Clock::now();
+        {std::lock_guard<std::mutex> guard(s.lock);s.rate_supported=!s.camera&&(!s.has_audio||s.audio_rate.Get()!=nullptr);}
         while(!s.closed.load()){
-            int intent;uint64_t current_epoch=0,seek=0;LONGLONG target=0;double volume;bool muted;
-            {std::lock_guard<std::mutex> guard(s.lock);check(s.event_error);intent=s.intent;current_epoch=s.epoch;seek=s.pending_seek;target=s.seek_target;s.pending_seek=0;volume=s.volume;muted=s.muted;}
+            int intent;uint64_t current_epoch=0,seek=0;LONGLONG target=0;double volume,rate;bool muted;
+            {std::lock_guard<std::mutex> guard(s.lock);check(s.event_error);intent=s.intent;current_epoch=s.epoch;seek=s.pending_seek;target=s.seek_target;s.pending_seek=0;volume=s.volume;muted=s.muted;rate=s.requested_rate;}
             if(seek&&!s.camera)reset(s,seek,target);
             if(s.closed)break;
+            if(rate!=s.rate){
+                if(s.audio_rate){
+                    check(s.audio_rate->SetSampleRate((float)(48000.*rate)));
+                    s.use_audio_frame_clock=true;
+                }else if(!s.has_audio){
+                    s.clock_base=s.clock_position();s.started=Clock::now();
+                }
+                s.rate=rate;
+            }
             if((intent==1)!=s.playing){
                 if(intent==1){if(!s.ever_played&&!s.camera&&s.state.seekable)reset(s,current_epoch,s.position);s.ever_played=true;s.started=Clock::now();if(!s.has_audio)s.clock_base=s.position;if(s.audio&&s.clock_based){check(s.audio->Start());s.audio_started=true;}s.playing=true;}
                 else{s.position=s.clock_position();if(s.audio)check(s.audio->Stop());s.audio_started=false;s.playing=false;std::lock_guard<std::mutex> guard(s.lock);if(s.prepared_frame&&s.state.state!=4)s.state.state=1;}
@@ -420,7 +467,11 @@ static void run(const std::shared_ptr<Session> &owner){
                 uint64_t epoch;{std::lock_guard<std::mutex> guard(s.lock);epoch=s.epoch;}
                 if(packet.epoch==epoch){
                     ComPtr<IMFMediaType> type;check(s.reader->GetCurrentMediaType(packet.stream,&type));GUID major;check(type->GetGUID(MF_MT_MAJOR_TYPE,&major));bool video=major==MFMediaType_Video;
-                    if(packet.flags&MF_SOURCE_READERF_ENDOFSTREAM){if(video)s.video_eos=true;else s.audio_eos=true;}
+                    if (packet.flags & MF_SOURCE_READERF_ENDOFSTREAM) {
+                        if (s.camera) throw Failure{MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED};
+                        if (video) s.video_eos = true;
+                        else s.audio_eos = true;
+                    }
                     if(!s.has_video&&!s.prepared_frame&&(packet.sample||s.audio_eos)){
                         std::lock_guard<std::mutex> guard(s.lock);
                         if(packet.epoch==s.epoch){
@@ -432,7 +483,22 @@ static void run(const std::shared_ptr<Session> &owner){
                             s.state.state=s.playing?2:1;
                         }
                     }
-                    if(packet.sample){if(video){auto f=video_frame(s,packet);if(s.camera||packet.pts>=s.position)s.video.push_back(std::move(f));}else if(s.playing&&s.has_audio)audio_packet(s,packet);}
+                    if (packet.sample) {
+                        if (video) {
+                            auto frame = video_frame(s, packet);
+                            if (s.camera) {
+                                std::shared_ptr<Recording> recording;
+                                { std::lock_guard<std::mutex> guard(s.lock); recording = s.recording; }
+                                if (recording) {
+                                    if (packet.flags & MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED)
+                                        recording->cancel();
+                                    else if (!recording->worker_done)
+                                        recording->enqueue(packet);
+                                }
+                            }
+                            if (s.camera || packet.pts >= s.position) s.video.push_back(std::move(frame));
+                        } else if (s.playing && s.has_audio) audio_packet(s, packet);
+                    }
                 }
             }
             if(s.playing&&s.has_audio)write_audio(s);
@@ -445,17 +511,29 @@ static void run(const std::shared_ptr<Session> &owner){
                 s.state.position_ns=(uint64_t)std::max<LONGLONG>(0,s.playing?clock:s.position)*100;
                 if(!s.pending_seek&&s.request_epoch==s.epoch&&s.video_eos&&(!s.has_audio||s.audio_eos)&&s.video.empty()&&s.pcm.empty()){
                     UINT padding=0;if(s.audio)check(s.audio->GetCurrentPadding(&padding));
-                    if(!padding){s.state.state=4;s.intent=0;}
+                    if(!padding){s.state.state=4;s.state.seek_done=s.epoch;s.intent=0;}
                 }
                 check(s.event_error);
                 bool need=s.camera||s.playing||!s.prepared_frame;
                 if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&s.video.size()<3&&s.pcm_bytes<96000&&!(s.video_eos&&(!s.has_audio||s.audio_eos))){s.in_flight=true;s.request_epoch=s.epoch;request=true;}
             }
             if(request)check(s.reader->ReadSample(MF_SOURCE_READER_ANY_STREAM,0,nullptr,nullptr,nullptr,nullptr));
-            std::unique_lock<std::mutex> guard(s.lock);s.changed.wait_for(guard,std::chrono::milliseconds(2));
+            // ReadSample can complete before the worker enters this wait.
+            // Handle an already delivered callback without waiting on its
+            // spent notification. Keep the timeout for the clock/GPU checks.
+            std::unique_lock<std::mutex> guard(s.lock);
+            s.changed.wait_for(guard, std::chrono::milliseconds(2), [&] {
+                return s.closed || s.packet_ready || FAILED(s.event_error) ||
+                    s.pending_seek || s.intent != intent || s.requested_rate != rate;
+            });
         }
     }catch(Failure f){s.fail(f.hr);}catch(...){s.fail(E_FAIL,"Native media worker failed");}
     s.closed=true;
+    {
+        std::lock_guard<std::mutex> guard(s.lock);
+        if (s.recording) s.recording->cancel();
+        s.recording.reset();
+    }
     if(s.audio)s.audio->Stop();
     if(s.reader){
         {std::lock_guard<std::mutex> guard(s.lock);s.flushed=false;}
@@ -474,7 +552,7 @@ static void run(const std::shared_ptr<Session> &owner){
     }
     s.reader.Reset();s.callback.Reset();
     if(s.camera_source)s.camera_source->Shutdown();s.camera_source.Reset();
-    s.video.clear();s.pcm.clear();{std::lock_guard<std::mutex> guard(s.lock);s.latest.reset();s.packet={};s.packet_ready=false;}s.render.Reset();s.audio_clock.Reset();s.audio_volume.Reset();s.audio.Reset();s.manager.Reset();
+    s.video.clear();s.pcm.clear();{std::lock_guard<std::mutex> guard(s.lock);s.latest.reset();s.packet={};s.packet_ready=false;}s.render.Reset();s.audio_clock.Reset();s.audio_rate.Reset();s.audio_volume.Reset();s.audio.Reset();s.manager.Reset();
     // D3D11 destruction is deferred. Flush after releasing source resources,
     // when no future capture/presentation commands may arrive to do it for us.
     if(s.context)s.context->Flush();s.context.Reset();
@@ -487,11 +565,71 @@ FerroWindowsSession *ferro_windows_open(void *device,const uint16_t *source,int 
         auto handle=std::make_unique<FerroWindowsSession>();handle->value=s;std::thread([s]{run(s);}).detach();return handle.release();
     }catch(...){--active_sessions;return nullptr;}
 }
-void ferro_windows_close(FerroWindowsSession *s){s->value->closed=true;s->value->changed.notify_all();delete s;}
+void ferro_windows_close(FerroWindowsSession *s){
+    {
+        std::lock_guard<std::mutex> guard(s->value->lock);
+        s->value->closed = true;
+        if (s->value->recording) s->value->recording->cancel();
+    }
+    s->value->changed.notify_all();
+    delete s;
+}
+static bool can_record(const Session &s) {
+    return !s.closed && s.state.state == 2 && s.recording_encoder && s.recording_format;
+}
+int ferro_windows_can_record(FerroWindowsSession *handle) {
+    auto &s = *handle->value;
+    std::lock_guard<std::mutex> guard(s.lock);
+    return can_record(s);
+}
+FerroWindowsRecording *ferro_windows_record(FerroWindowsSession *handle) {
+    auto &s = *handle->value;
+    std::lock_guard<std::mutex> guard(s.lock);
+    if (!can_record(s) || (s.recording && !s.recording->worker_done)) return nullptr;
+    try {
+        auto recording = std::make_shared<Recording>(s.state.width, s.state.height,
+                                                     s.state.fps_n, s.state.fps_d);
+        auto result = std::make_unique<FerroWindowsRecording>();
+        result->value = recording;
+        std::thread(encode_recording, recording).detach();
+        s.recording = std::move(recording);
+        return result.release();
+    } catch (...) { return nullptr; }
+}
+void ferro_windows_record_finish(FerroWindowsRecording *handle) {
+    auto &r = *handle->value;
+    std::lock_guard<std::mutex> guard(r.lock);
+    r.finish = true;
+    r.changed.notify_one();
+}
+void ferro_windows_record_cancel(FerroWindowsRecording *handle) { handle->value->cancel(); }
+void ferro_windows_record_release(FerroWindowsRecording *handle) {
+    handle->value->cancel();
+    delete handle;
+}
+int ferro_windows_record_poll(FerroWindowsRecording *handle, FerroWindowsRecordingInfo *out) {
+    auto &r = *handle->value;
+    std::lock_guard<std::mutex> guard(r.lock);
+    *out = r.info;
+    return r.status;
+}
+int ferro_windows_record_copy(FerroWindowsRecording *handle, uint8_t *bytes, uint64_t length) {
+    auto &r = *handle->value;
+    std::lock_guard<std::mutex> guard(r.lock);
+    if (r.status != 2 || length != r.encoded.size()) return 0;
+    memcpy(bytes, r.encoded.data(), r.encoded.size());
+    return 1;
+}
 void ferro_windows_state(FerroWindowsSession *s,FerroWindowsState *out){std::lock_guard<std::mutex> guard(s->value->lock);*out=s->value->state;}
 void ferro_windows_intent(FerroWindowsSession *s,int intent){std::lock_guard<std::mutex> guard(s->value->lock);s->value->intent=intent;s->value->changed.notify_all();}
 uint64_t ferro_windows_seek(FerroWindowsSession *s,uint64_t ns){std::lock_guard<std::mutex> guard(s->value->lock);uint64_t epoch=++s->value->epoch;s->value->pending_seek=epoch;s->value->seek_target=(LONGLONG)std::min<uint64_t>(ns/100,INT64_MAX);s->value->latest.reset();s->value->changed.notify_all();return epoch;}
 void ferro_windows_audio(FerroWindowsSession *s,double volume,int muted){std::lock_guard<std::mutex> guard(s->value->lock);s->value->volume=volume;s->value->muted=muted!=0;}
+int ferro_windows_can_set_rate(FerroWindowsSession *s){std::lock_guard<std::mutex> guard(s->value->lock);return s->value->rate_supported;}
+int ferro_windows_set_rate(FerroWindowsSession *s,double rate){
+    std::lock_guard<std::mutex> guard(s->value->lock);
+    if(!s->value->rate_supported||!(rate>=0.5&&rate<=2.))return 0;
+    s->value->requested_rate=rate;s->value->changed.notify_all();return 1;
+}
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s){std::lock_guard<std::mutex> guard(s->value->lock);if(s->value->latest&&s->value->latest->info.epoch==s->value->epoch)return s->value->latest.release();return nullptr;}
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out){*out=f->info;}
 void ferro_windows_frame_release(FerroWindowsFrame *f){

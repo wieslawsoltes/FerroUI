@@ -90882,10 +90882,10 @@
     "{MediaTransportControls}"
    ],
    "batch": "B6",
-   "winui": "MediaTransportControls: {MediaTransportControls} (MediaTransportControls_themeresources.xaml), reduced to the control panel: the position slider, the time, the status, the volume and the full-window action, drawn with the Button and Slider themes. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
+   "winui": "MediaTransportControls: {MediaTransportControls} (MediaTransportControls_themeresources.xaml), with standard Button and Slider controls and a menu for additional provider-supported playback actions. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
    "status": "ported",
-   "deviations": 0,
-   "date": "2026-11-10"
+   "deviations": 1,
+   "date": "2026-11-11"
   },
   {
    "document": "CameraCaptureUI.xaml",
@@ -90896,7 +90896,7 @@
    "winui": "No WinUI style (the CameraCaptureUI of Windows is a system dialog): a CameraPreview above the capture actions, drawn with the Button theme. A control of ferroui-media-camera-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 0,
-   "date": "2026-11-10"
+   "date": "2026-11-11"
   },
   {
    "document": "PersonPicture.xaml",
@@ -91683,6 +91683,7 @@
   "Label": 3,
   "ListBox": 4,
   "ListBoxItem": 11,
+  "MediaTransportControls": 1,
   "Menu": 8,
   "MenuFlyoutPresenter": 6,
   "MenuItem": 16,
