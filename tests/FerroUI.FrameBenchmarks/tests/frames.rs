@@ -68,12 +68,12 @@ use ferroui_base::{PixelSize, Point, Ref, Vector};
 use ferroui_controls::testing::{CompositorTestServices, MockWindowingPlatform, TestServices};
 use ferroui_controls::{Application, Control, Window};
 use ferroui_themes_fluent::FluentTheme;
-use ferroui_frame_benchmarks::{Clock, FrameHost, Roboto, Scene, SCENES, STARTUP_SCENES};
+use ferroui_frame_benchmarks::{Clock, FrameHost, Roboto, Scene, SCENES, STARTUP_SCENES, WARM_UP};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{Arc, Condvar, Mutex, MutexGuard};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, Once};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -514,12 +514,28 @@ impl Drop for Gate {
     }
 }
 
+/// The frames the warm-up of the process runs.
+const PROCESS_WARM_UP_FRAMES: i32 = 30;
+
+/// Shows the scene of the warm-up and runs a few frames of it, once in the process, before the
+/// first scene that is measured. Without it the first scene carries what a process does once: the
+/// scene `lines`, the first by its name, was built and shown in 3.0 and 5 to 6.6 ms in a process
+/// that started cold and in 0.9 and 1.4 ms in one that did not.
+fn warm_up_the_process() {
+    static WARMED: Once = Once::new();
+    WARMED.call_once(|| {
+        let gate = Gate::start(&WARM_UP);
+        gate.run(PROCESS_WARM_UP_FRAMES);
+    });
+}
+
 /// Shows the scene, runs the warm-up frames and the measured ones, and prints the line of the gate
 /// and a summary.
 fn measure(scene: &Scene) {
     let bench = format!("frames/{}", scene.name);
     let frames = variable("GATE_FRAMES", 240).max(1);
     let warmup = variable("GATE_WARMUP", 60);
+    warm_up_the_process();
     let gate = Gate::start(scene);
     gate.run(warmup);
     gate.move_pointer();

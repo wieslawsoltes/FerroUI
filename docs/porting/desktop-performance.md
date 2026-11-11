@@ -635,7 +635,13 @@ What it measures:
   process without them: a start is the start of a process that has built nothing yet, and a scene
   of the start leaves the heap and the caches of the process in a state that moves the build of
   every scene measured after it (the `text` scene builds in 3.65 ms in a process of the frames
-  alone and in 4.2 to 5.0 ms after the two starts).
+  alone and in 4.2 to 5.0 ms after the two starts). Before the first scene of the frames a
+  process measures, the harness shows a small scene made of what the scenes use (text, rounded
+  borders, polylines, panels) and runs 30 frames of it, once: what a process does once is then in
+  no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
+  started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
+  started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
+  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case.
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the

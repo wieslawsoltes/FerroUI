@@ -26,4 +26,4 @@ pub mod scenes;
 pub use clock::Clock;
 pub use fonts::Roboto;
 pub use host::FrameHost;
-pub use scenes::{Scene, SCENES, STARTUP_SCENES};
+pub use scenes::{Scene, SCENES, STARTUP_SCENES, WARM_UP};

@@ -116,6 +116,17 @@ pub const STARTUP_SCENES: &[Scene] = &[
     },
 ];
 
+/// What the harness shows once in a process before the first scene of the frames it measures
+/// (`tests/frames.rs`): a little of what the scenes are made of. What a process does once (the
+/// pages of its code read from the disk, its threads, the fonts, the first layout, recording and
+/// drawing of each kind) is then in no scene's numbers, whichever scene the process runs first.
+pub const WARM_UP: Scene = Scene {
+    name: "warm-up",
+    build: warm_up,
+    pointer: false,
+    guards: "nothing: it is not measured",
+};
+
 /// The scene named `name`: a scene of the frames, or `startup/<name>` for a scene of the start.
 pub fn scene(name: &str) -> Option<&'static Scene> {
     match name.strip_prefix("startup/") {
@@ -508,6 +519,45 @@ fn lines() -> Ref<Control> {
     draw(0);
     Clock::follow(draw);
     root(&panel)
+}
+
+// --- the warm-up ----------------------------------------------------------------------------------
+
+const WARM_UP_TILES: usize = 96;
+
+fn warm_up() -> Ref<Control> {
+    let ink = brush(0xFF111827);
+    let stroke = brush(0xFF0F766E);
+    let tiles = WrapPanel::new();
+    tiles.set_item_spacing(4.0);
+    tiles.set_line_spacing(4.0);
+    let step = CHART_WIDTH / (CHART_POINTS - 1) as f64;
+    for index in 0..WARM_UP_TILES {
+        let name = label(10.0, &ink, index % 2 == 0);
+        let chart = Polyline::new();
+        chart.set_stroke(Some(stroke.clone()));
+        chart.set_stroke_thickness(1.5);
+        chart.set_width(CHART_WIDTH);
+        chart.set_height(CHART_HEIGHT);
+        let row = StackPanel::new();
+        row.set_orientation(Orientation::Horizontal);
+        row.set_spacing(4.0);
+        row.children().add(&name);
+        row.children().add(&chart);
+        let tile = rounded(brush(PALETTE[index % PALETTE.len()]), 6.0, Thickness::symmetric(6.0, 3.0), &row);
+        tiles.children().add(&tile);
+        let update = move |frame: i32| {
+            name.set_text(Some(&format!("W{:03}", (frame + index as i32) % 1_000)));
+            let points = (0..CHART_POINTS).map(|point| {
+                let angle = 0.11 * f64::from(frame) + 0.37 * index as f64 + 0.53 * point as f64;
+                Point::new(point as f64 * step, CHART_HEIGHT * (0.5 + 0.45 * angle.sin()))
+            });
+            chart.set_points(Some(Points::from_items(points)));
+        };
+        update(0);
+        Clock::follow(update);
+    }
+    root(&tiles)
 }
 
 // --- the start of a scene -------------------------------------------------------------------------
