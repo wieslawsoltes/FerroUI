@@ -1,6 +1,7 @@
 # Portable media implementation
 
 The normative behavior is in [the specification](PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md).
+The [WinUI media controls and Gallery examples](ISSUE-561.md) build on these providers and the shared texture presenter.
 This is an initial implementation, not a declaration of six-platform support.
 The [platform-agent handover](PLATFORM-HANDOVER.md) records the receiving branches,
 integration boundaries, reproducible checks and outstanding native work.

@@ -30,6 +30,11 @@ pub trait IEglWindowGlPlatformSurfaceInfo: Send + Sync {
     /// The scaling from logical units to device pixels.
     fn scaling(&self) -> f64;
 
+    /// Overrides EGL's default swap interval for this window surface.
+    fn swap_interval(&self) -> Option<i32> {
+        None
+    }
+
     /// `this as IEglWindowGlPlatformSurfaceInfoWithWaitPolicy`: the wait policy of the
     /// window, when it states one.
     fn as_info_with_wait_policy(&self) -> Option<&dyn IEglWindowGlPlatformSurfaceInfoWithWaitPolicy> {
@@ -85,12 +90,26 @@ impl IGlPlatformSurface for EglGlPlatformSurface {
             panic!("Unable to cast the context to type 'EglContext'.");
         };
         let egl_context = egl_context.this();
-        let gl_surface = match egl_context.display().create_window_surface(self.info.handle()) {
-            Ok(gl_surface) => gl_surface,
-            Err(error) => panic!("{error}"),
-        };
+        let gl_surface = create_window_surface(&egl_context, self.info.as_ref(), self.info.handle());
         Rc::new(RenderTarget::new(gl_surface, egl_context, self.info.clone()))
     }
+}
+
+fn create_window_surface(
+    context: &EglContext,
+    info: &dyn IEglWindowGlPlatformSurfaceInfo,
+    handle: isize,
+) -> Rc<EglSurface> {
+    let display = context.display();
+    let surface = display.create_window_surface(handle).unwrap_or_else(|error| panic!("{error}"));
+    if let Some(interval) = info.swap_interval() {
+        // EGL applies the interval to the current draw surface, including
+        // when a resize replaces the native surface.
+        let restore = context.make_current_with_surface(Some(&surface)).unwrap_or_else(|error| panic!("{error}"));
+        display.egl_interface().swap_interval(display.handle(), interval);
+        restore.dispose();
+    }
+    surface
 }
 
 struct RenderTarget {
@@ -149,10 +168,7 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
                     old.dispose();
                 }
                 *self.gl_surface.borrow_mut() = None;
-                let gl_surface = match self.base.context().display().create_window_surface(handle) {
-                    Ok(gl_surface) => gl_surface,
-                    Err(error) => panic!("{error}"),
-                };
+                let gl_surface = create_window_surface(self.base.context(), self.info.as_ref(), handle);
                 *self.gl_surface.borrow_mut() = Some(gl_surface.clone());
                 self.current_size.set(size);
                 self.handle.set(handle);

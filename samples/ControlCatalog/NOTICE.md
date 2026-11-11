@@ -168,3 +168,7 @@ licence for them; they are redistributed here as part of the upstream sample und
 licence. Three of the pictures
 (`delicate-arch-896885_640.jpg`, `hirsch-899118_640.jpg`, `maple-leaf-888807_640.jpg`) carry
 Pixabay file names.
+
+`Assets/person-picture-portrait.jpg`, the profile picture of the PersonPicture page, is not from
+upstream. It is an image made with a generative AI tool for this sample: it is not a photograph
+and shows no real person, and the name the page gives it is invented.

@@ -300,9 +300,15 @@ purpose acknowledges it with the label `build-output-changes`. With the label:
 - `compare.py`, `sample-freshness.py` and `catalog-freshness.py` also accept a change of features: a pull request that
   enables a feature of a crate on purpose (for example the feature `type-tables` of
   `ferroui-base`, docs/binary-size.md section 4.6) builds the same units with the same profiles,
-  some with other features. Every other field of a unit, the set of units and each revision's
+  some with other features. Every other field of a unit and each revision's
   repetition of its own graph are still required; the units built with other features are
   listed in the summary of the job.
+- `compare.py` and `catalog-freshness.py` also accept a change of the set of units: a pull request
+  that gives the measured package a dependency (a crate of controls a theme now has templates
+  for, for example) builds units the baseline does not. The units both revisions build keep
+  their profiles, each revision repeats its own graph, and the units that are added or no longer
+  built are listed in the summary of the job, which says that the two medians are then of
+  different workloads.
 - `sample-freshness.py` also accepts samples whose files the pull request changes (a demo's
   markup, for example): the changed files are listed in `changed_sample_inputs` of its report,
   and the repeated builds still compare each revision's unchanged rebuild of its own samples.

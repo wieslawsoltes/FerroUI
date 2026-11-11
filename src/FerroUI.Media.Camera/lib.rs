@@ -129,6 +129,23 @@ pub enum CameraControl {
     Focus(f64, f64),
     Exposure(f64),
 }
+/// Independently owned encoded video. Preview frames never pass through this buffer.
+#[derive(Clone, Debug)]
+pub struct CameraVideo {
+    pub encoded: Arc<[u8]>,
+    pub content_type: String,
+    pub width: u32,
+    pub height: u32,
+    pub duration: Duration,
+}
+/// Native recording owns its encoder, output and completion. Cancel must be
+/// idempotent and discard output, including output arriving after cancellation.
+/// Implementations must bound encoded output and never request microphone access.
+pub trait NativeCameraRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo>;
+    fn cancel(&self);
+}
+
 pub trait NativeCameraSession {
     /// Optional narrow platform extension (for example an analysis stream).
     /// Borrowing it never transfers ownership of the camera session.
@@ -138,6 +155,19 @@ pub trait NativeCameraSession {
     fn settings(&self) -> CameraSettings;
     fn take_frame(&self) -> Result<Option<FrameLease>, CameraError>;
     fn photo(&self) -> CameraFuture<CameraPhoto>;
+    /// Silent video recording is optional and separately advertised. Preview or
+    /// still support alone must never enable a Record button.
+    fn supports_video_recording(&self) -> bool {
+        false
+    }
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        Box::pin(async {
+            Err(CameraError::new(
+                CameraErrorKind::Unsupported,
+                "Video recording is unavailable from this camera provider",
+            ))
+        })
+    }
     fn set_control(&self, control: CameraControl) -> Result<(), CameraError>;
     fn stop(&self);
 }
@@ -312,6 +342,8 @@ impl CameraCapture {
                 native,
                 frames: Arc::new(FrameMailbox::new(source, generation)),
                 stopped: Cell::new(false),
+                recording_busy: Cell::new(false),
+                recording: RefCell::new(None),
             })))
         })
     }
@@ -320,11 +352,16 @@ struct SessionInner {
     native: Rc<dyn NativeCameraSession>,
     frames: Arc<FrameMailbox>,
     stopped: Cell<bool>,
+    recording_busy: Cell<bool>,
+    recording: RefCell<Option<std::rc::Weak<RecordingInner>>>,
 }
 impl Drop for SessionInner {
     fn drop(&mut self) {
         if !self.stopped.replace(true) {
             self.frames.clear();
+            if let Some(recording) = self.recording.get_mut().take().and_then(|r| r.upgrade()) {
+                recording.cancel();
+            }
             self.native.stop();
         }
     }
@@ -393,6 +430,44 @@ impl CameraSession {
             result
         })
     }
+    pub fn supports_video_recording(&self) -> bool {
+        !self.is_stopped() && self.0.native.supports_video_recording()
+    }
+    /// Begins one silent native recording. Dropping preparation cancels it;
+    /// stopping the camera invalidates both recording and its encoded result.
+    pub fn start_recording(&self) -> CameraFuture<CameraRecording> {
+        if self.is_stopped() {
+            return recording_error(CameraErrorKind::Disconnected, "Camera is stopped");
+        }
+        if !self.supports_video_recording() {
+            return recording_error(
+                CameraErrorKind::Unsupported,
+                "Video recording is unavailable from this camera provider",
+            );
+        }
+        if self.0.recording_busy.replace(true) {
+            return recording_error(CameraErrorKind::Busy, "A recording is already active");
+        }
+        let guard = RecordingSlot(Rc::downgrade(&self.0));
+        let pending = self.0.native.start_recording();
+        Box::pin(async move {
+            let native = pending.await?;
+            let Some(session) = guard.0.upgrade().filter(|s| !s.stopped.get()) else {
+                native.cancel();
+                return Err(CameraError::new(
+                    CameraErrorKind::Cancelled,
+                    "Camera stopped during recording preparation",
+                ));
+            };
+            let recording = Rc::new(RecordingInner {
+                native,
+                slot: guard,
+                state: Cell::new(RecordingState::Active),
+            });
+            *session.recording.borrow_mut() = Some(Rc::downgrade(&recording));
+            Ok(CameraRecording(recording))
+        })
+    }
     pub fn set_control(&self, control: CameraControl) -> Result<(), CameraError> {
         if self.0.stopped.get() {
             return Err(CameraError::new(
@@ -419,8 +494,101 @@ impl CameraSession {
     pub fn stop(&self) {
         if !self.0.stopped.replace(true) {
             self.0.frames.clear();
+            let recording = self
+                .0
+                .recording
+                .borrow_mut()
+                .take()
+                .and_then(|r| r.upgrade());
+            if let Some(recording) = recording {
+                recording.cancel();
+            }
             self.0.native.stop();
         }
+    }
+}
+
+fn recording_error<T: 'static>(kind: CameraErrorKind, message: &'static str) -> CameraFuture<T> {
+    Box::pin(async move { Err(CameraError::new(kind, message)) })
+}
+struct RecordingSlot(std::rc::Weak<SessionInner>);
+impl Drop for RecordingSlot {
+    fn drop(&mut self) {
+        if let Some(session) = self.0.upgrade() {
+            session.recording_busy.set(false);
+        }
+    }
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RecordingState {
+    Active,
+    Finishing,
+    Complete,
+    Cancelled,
+}
+struct RecordingInner {
+    native: Rc<dyn NativeCameraRecording>,
+    slot: RecordingSlot,
+    state: Cell<RecordingState>,
+}
+impl RecordingInner {
+    fn cancel(&self) {
+        if !matches!(
+            self.state.replace(RecordingState::Cancelled),
+            RecordingState::Complete | RecordingState::Cancelled
+        ) {
+            self.native.cancel();
+        }
+    }
+}
+impl Drop for RecordingInner {
+    fn drop(&mut self) {
+        if self.state.get() != RecordingState::Complete {
+            self.cancel();
+        }
+    }
+}
+/// Owned recording transaction. Drop discards unfinished output. No clone is
+/// exposed, and finish can be issued once. The capture session remains borrowed.
+pub struct CameraRecording(Rc<RecordingInner>);
+impl CameraRecording {
+    pub fn cancel(&self) {
+        self.0.cancel();
+    }
+    pub fn finish(self) -> CameraFuture<CameraVideo> {
+        if self.0.state.get() != RecordingState::Active {
+            return recording_error(
+                CameraErrorKind::InvalidRequest,
+                "Recording is no longer active",
+            );
+        }
+        self.0.state.set(RecordingState::Finishing);
+        let pending = self.0.native.finish();
+        Box::pin(async move {
+            let result = pending.await;
+            if self.0.state.get() == RecordingState::Cancelled
+                || !self.0.slot.0.upgrade().is_some_and(|s| !s.stopped.get())
+            {
+                return Err(CameraError::new(
+                    CameraErrorKind::Cancelled,
+                    "Camera recording was cancelled",
+                ));
+            }
+            let video = result?;
+            if video.encoded.is_empty()
+                || video.encoded.len() > 256 * 1024 * 1024
+                || video.width == 0
+                || video.height == 0
+                || video.duration.is_zero()
+            {
+                return Err(CameraError::new(
+                    CameraErrorKind::NativeFailure,
+                    "Recording output exceeds the encoded output contract",
+                ));
+            }
+            self.0.state.set(RecordingState::Complete);
+            Ok(video)
+        })
     }
 }
 

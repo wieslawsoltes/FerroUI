@@ -63,7 +63,7 @@ impl SleepLoopRenderTimer {
 
 impl Shared {
     fn loop_proc(&self) {
-        let mut last_tick = self.st.elapsed();
+        let mut last_deadline = self.st.elapsed();
         loop {
             if self.stopped.load(Ordering::SeqCst) {
                 self.wake_event.wait_one();
@@ -74,17 +74,24 @@ impl Shared {
 
             let now = self.st.elapsed();
             let tick_interval = Duration::from_secs_f64(1.0 / f64::from(self.desired_fps.load(Ordering::SeqCst)));
-            // Negative when the next tick is overdue.
-            if let Some(time_till_next_tick) = (last_tick + tick_interval).checked_sub(now) {
-                if time_till_next_tick.as_secs_f64() * 1000.0 > 1.0 {
-                    self.wake_event.wait_one_timeout(time_till_next_tick);
-                }
-            }
+            let deadline = last_deadline + tick_interval;
+            let interrupted = deadline
+                .checked_sub(now)
+                .filter(|remaining| *remaining > Duration::from_millis(1))
+                .is_some_and(|remaining| self.wake_event.wait_one_timeout(remaining));
             if self.released.load(Ordering::SeqCst) {
                 return;
             }
             let now = self.st.elapsed();
-            last_tick = now;
+            // Carry ordinary timer overshoot into the next wait. Scheduling a
+            // full interval after every late wake compounds Windows wait
+            // granularity into a much lower frame rate. Rebase after a wake
+            // or a missed interval so the loop never replays missed ticks.
+            last_deadline = if interrupted || now.saturating_sub(deadline) >= tick_interval {
+                now
+            } else {
+                deadline
+            };
 
             let tick = self.tick.lock().unwrap_or_else(PoisonError::into_inner).clone();
             if let Some(tick) = tick {

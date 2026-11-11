@@ -275,8 +275,19 @@ impl TexturePresenter {
                 ));
             } else {
                 view.last_error.borrow_mut().take();
-                *view.current.borrow_mut() = Some(metadata.clone());
-                view.layout_frame();
+                let previous = view.current.replace(Some(metadata.clone()));
+                // Rebuilding an identical clip for every video frame queues
+                // extra composition work. Bounds and stretch changes already
+                // relayout the current frame through on_property_changed.
+                if previous.as_ref().is_none_or(|frame| {
+                    frame.width != metadata.width
+                        || frame.height != metadata.height
+                        || frame.visible != metadata.visible
+                        || frame.rotation != metadata.rotation
+                        || frame.mirrored != metadata.mirrored
+                }) {
+                    view.layout_frame();
+                }
                 view.presented.emit(&metadata);
                 // A frame published while this one was imported was skipped (the presenter was
                 // busy): present it now. Nothing is submitted when the latest is this frame.

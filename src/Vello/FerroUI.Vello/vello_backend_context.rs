@@ -3,7 +3,8 @@ use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreat
 use crate::vello_options::VelloRenderingMode;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
-    IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformRenderInterfaceContext, IRenderTarget,
+    IDrawingContextLayerImpl, IExternalObjectsHandleWrapRenderInterfaceContextFeature,
+    IExternalObjectsRenderInterfaceContextFeature, IOptionalFeatureProvider, IPlatformRenderInterfaceContext, IRenderTarget,
 };
 use ferroui_base::{PixelSize, Vector};
 use std::any::{Any, TypeId};
@@ -85,6 +86,21 @@ impl IOptionalFeatureProvider for VelloContext {
 }
 
 impl IPlatformRenderInterfaceContext for VelloContext {
+    fn public_features(&self) -> std::collections::HashMap<TypeId, Rc<dyn Any>> {
+        if self.rendering_modes.iter().all(|mode| *mode == VelloRenderingMode::Cpu) {
+            return Default::default();
+        }
+        // Composition obtains interop from this render-thread snapshot. Direct
+        // GPU feature lookup alone is insufficient for a media presenter.
+        [
+            TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>(),
+            TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>(),
+        ]
+        .into_iter()
+        .filter_map(|kind| self.try_get_feature(kind).map(|feature| (kind, feature)))
+        .collect()
+    }
+
     /// Advances the release of the frames of producers the device reads, without waiting:
     /// whether some are still read.
     fn poll_pending_gpu_work(&self) -> bool {

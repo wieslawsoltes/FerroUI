@@ -1,5 +1,8 @@
 //! Camera-only presentation through the normal composition texture presenter.
 #![forbid(unsafe_code)]
+pub mod automation;
+mod camera_capture_ui;
+pub use camera_capture_ui::{CameraCaptureResult, CameraCaptureUI};
 #[cfg(feature = "qr")]
 mod qr_preview;
 #[cfg(feature = "qr")]
@@ -398,13 +401,44 @@ impl Drop for CameraPreview {
     }
 }
 // Shared by runtime registration and the build-time XAML metadata scanner.
-const NAMESPACES: &[(&str, &str)] = &[("ferroui_media_camera_controls", "FerroUI.Media.Camera.Controls")];
+const NAMESPACES: &[(&str, &str)] = &[(
+    "ferroui_media_camera_controls",
+    "FerroUI.Media.Camera.Controls",
+)];
+pub static ASSEMBLY: ferroui_base::metadata::MarkupAssembly =
+    ferroui_base::metadata::MarkupAssembly {
+        name: "FerroUI.Media.Camera.Controls",
+        crate_name: "ferroui_media_camera_controls",
+        xmlns_definitions: &[ferroui_base::metadata::XmlnsDefinition {
+            xml_namespace: ferroui_base::metadata::FERRO_XML_NAMESPACE,
+            namespace: "FerroUI.Media.Camera.Controls",
+        }],
+        xmlns_prefixes: &[],
+        metadata: &[],
+    };
+ferroui_base::ferro_rust_paths! {
+    classes: [crate::CameraCaptureUI, crate::CameraPreview],
+    types: [], contracts: [], generics: [], generic_contracts: [],
+}
+const TYPES: &[&ferroui_base::TypeInfo] =
+    &[CameraPreview::TYPE, CameraCaptureUI::TYPE, automation::CameraCaptureUIAutomationPeer::TYPE];
+#[cfg(feature = "qr")]
+const QR_TYPES: &[&ferroui_base::TypeInfo] = &[QrPreview::TYPE];
+/// Registers the namespaces, the assembly and the table of types of this crate (and of the
+/// crates it is built on). Cheap and idempotent. The themes of the WinUI family call it, so the
+/// table is trimmed as that of every crate of the framework (`TypeInfo::register_table`): an
+/// application that shows no camera control links none.
 pub fn register_types() {
-    ferroui_media_controls::register_types();
-    ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
-    ferroui_base::TypeInfo::register(CameraPreview::TYPE);
-    #[cfg(feature = "qr")]
-    ferroui_base::TypeInfo::register(QrPreview::TYPE);
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        ferroui_media_controls::register_types();
+        ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
+        ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
+        register_rust_paths();
+        ferroui_base::TypeInfo::register_table(TYPES);
+        #[cfg(feature = "qr")]
+        ferroui_base::TypeInfo::register_table(QR_TYPES);
+    });
 }
 
 #[cfg(test)]
@@ -555,8 +589,17 @@ mod recovery_tests {
         assert!(view.timer.borrow().is_none());
         window.set_content(Some(ferroui_controls::Control::boxed(view.clone())));
         assert!(view.session().is_some());
-        assert!(view.timer.borrow().is_some(), "polling resumes when attached again");
+        assert!(
+            view.timer.borrow().is_some(),
+            "polling resumes when attached again"
+        );
         assert_eq!(stops.get(), 0);
         session.stop();
     }
 }
+
+/// Optional media controls whose control themes belong to the WinUI family.
+pub const WINUI_ONLY_CONTROLS: &[(&ferroui_base::TypeInfo, &str)] = &[(
+    CameraCaptureUI::TYPE,
+    "Portable media UI styled by the WinUI theme and its derived themes",
+)];
