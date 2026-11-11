@@ -1,6 +1,6 @@
 # Media controls handover for #561
 
-The branch adds the WinUI controls and examples over the existing portable media stack. Windows and Linux already have native playback, GPU preview, and still-photo providers. Keep those providers and their frame admission rules. The new portable video recording contract is implemented by AVFoundation; Windows and Linux do not advertise recording yet, so their Record action is disabled.
+The WinUI media controls and their examples are built over the existing portable media stack. Windows and Linux already have native playback, GPU preview, and still-photo providers. Keep those providers and their frame admission rules. The new portable video recording contract is implemented by AVFoundation; Windows and Linux do not advertise recording yet, so their Record action is disabled.
 
 ## Windows
 
@@ -32,4 +32,4 @@ Repeat with `FERROUI_SMOKE_MEDIA_CAMERA=1` using a working camera portal. Exerci
 - Record the renderer, provider, capture source class, outcome, and whether GPU frames retired without CPU preview transfers. Separate successful runs from unsupported profiles and blocked hardware checks. Report failure messages without machine identifiers or local paths.
 - Add silent recording to the existing native camera session where the backend supports it. Implement `NativeCameraRecording` on that session and advertise it only once it works. Return bounded, independently owned encoded output; cancel on Stop, detach, or device loss. Use the existing camera samples and the native encoder. Verify that no microphone permission is requested and that the preview import path is unchanged.
 
-The portable media control tests, AVFoundation encoder fixture and native Gallery construction tests have passed locally. This handover leaves Windows and Linux runtime acceptance open.
+The portable media control tests, AVFoundation encoder fixture and native Gallery construction tests have passed on macOS. This handover leaves Windows and Linux runtime acceptance open.

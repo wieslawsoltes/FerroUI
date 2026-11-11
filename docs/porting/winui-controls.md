@@ -97,13 +97,13 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `RichEditBox` | WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4) | R8 of #243 |
 | `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
 <!-- winui-only:end -->
+- The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
 The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
 `MediaTransportControls` and `CameraCaptureUI`) are listed in their respective
 media control crates' `WINUI_ONLY_CONTROLS` constants. The WinUI family supplies
 transport and capture templates. The element and presenter use the portable
 composition surface directly. See [portable media controls](../media/ISSUE-561.md).
-- The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
 ### 5.2 The symbol font
 

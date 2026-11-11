@@ -420,16 +420,25 @@ ferroui_base::ferro_rust_paths! {
     classes: [crate::CameraCaptureUI, crate::CameraPreview],
     types: [], contracts: [], generics: [], generic_contracts: [],
 }
+const TYPES: &[&ferroui_base::TypeInfo] =
+    &[CameraPreview::TYPE, CameraCaptureUI::TYPE, automation::CameraCaptureUIAutomationPeer::TYPE];
+#[cfg(feature = "qr")]
+const QR_TYPES: &[&ferroui_base::TypeInfo] = &[QrPreview::TYPE];
+/// Registers the namespaces, the assembly and the table of types of this crate (and of the
+/// crates it is built on). Cheap and idempotent. The themes of the WinUI family call it, so the
+/// table is trimmed as that of every crate of the framework (`TypeInfo::register_table`): an
+/// application that shows no camera control links none.
 pub fn register_types() {
-    ferroui_media_controls::register_types();
-    ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
-    ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
-    register_rust_paths();
-    ferroui_base::TypeInfo::register(CameraPreview::TYPE);
-    ferroui_base::TypeInfo::register(CameraCaptureUI::TYPE);
-    ferroui_base::TypeInfo::register(automation::CameraCaptureUIAutomationPeer::TYPE);
-    #[cfg(feature = "qr")]
-    ferroui_base::TypeInfo::register(QrPreview::TYPE);
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        ferroui_media_controls::register_types();
+        ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
+        ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
+        register_rust_paths();
+        ferroui_base::TypeInfo::register_table(TYPES);
+        #[cfg(feature = "qr")]
+        ferroui_base::TypeInfo::register_table(QR_TYPES);
+    });
 }
 
 #[cfg(test)]

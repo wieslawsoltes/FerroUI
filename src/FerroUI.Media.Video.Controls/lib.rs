@@ -29,16 +29,26 @@ ferroui_base::ferro_rust_paths! {
     classes: [crate::MediaPlayerElement, crate::MediaPlayerPresenter, crate::MediaTransportControls],
     types: [], contracts: [], generics: [], generic_contracts: [],
 }
+const TYPES: &[&ferroui_base::TypeInfo] = &[
+    MediaPlayerElement::TYPE,
+    automation::MediaPlayerElementAutomationPeer::TYPE,
+    MediaPlayerPresenter::TYPE,
+    MediaTransportControls::TYPE,
+    automation::MediaTransportControlsAutomationPeer::TYPE,
+];
+/// Registers the namespaces, the assembly and the table of types of this crate (and of the
+/// crates it is built on). Cheap and idempotent. The themes of the WinUI family call it, so the
+/// table is trimmed as that of every crate of the framework (`TypeInfo::register_table`): an
+/// application that shows no media control links none.
 pub fn register_types() {
-    ferroui_media_controls::register_types();
-    ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
-    ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
-    register_rust_paths();
-    ferroui_base::TypeInfo::register(MediaPlayerElement::TYPE);
-    ferroui_base::TypeInfo::register(automation::MediaPlayerElementAutomationPeer::TYPE);
-    ferroui_base::TypeInfo::register(MediaPlayerPresenter::TYPE);
-    ferroui_base::TypeInfo::register(MediaTransportControls::TYPE);
-    ferroui_base::TypeInfo::register(automation::MediaTransportControlsAutomationPeer::TYPE);
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        ferroui_media_controls::register_types();
+        ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
+        ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
+        register_rust_paths();
+        ferroui_base::TypeInfo::register_table(TYPES);
+    });
 }
 
 /// Optional media controls whose control themes belong to the WinUI family.

@@ -35,7 +35,10 @@ pub struct MediaProviders {
     pub video: Rc<VideoFactory>,
     pub camera: Rc<CameraFactory>,
 }
-thread_local! { static PROVIDERS: RefCell<Option<MediaProviders>> = const { RefCell::new(None) }; }
+ferroui_base::ferro_thread_local! {
+    /// The native providers the host installed; none in a headless or test run.
+    static PROVIDERS: RefCell<Option<MediaProviders>> = const { RefCell::new(None) };
+}
 pub fn install(providers: MediaProviders) {
     PROVIDERS.with(|slot| *slot.borrow_mut() = Some(providers));
 }

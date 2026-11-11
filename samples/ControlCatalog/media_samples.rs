@@ -828,13 +828,29 @@ pub fn media_transport_controls_page() -> Ref<Page> { video_control_page("MediaT
 fn video_control_page(name: &str) -> Ref<Page> { page_named(Mode::Video, Some(name)) }
 fn transport_options(controls: Ref<ferroui_media_video_controls::MediaTransportControls>) -> Ref<WrapPanel> {
     let options = WrapPanel::new();
-    for (label, initial, option) in [("Compact transport", controls.is_compact(), 0), ("Show seek bar", true, 1), ("Show volume", true, 2), ("Show full window", true, 3)] {
-        let check = ferroui_controls::CheckBox::new(); check.set_content(Some(Rc::new(label.to_owned()))); check.set_is_checked(Some(initial));
-        let weak = controls.downgrade(); let weak_check = check.downgrade();
+    for (label, initial, option) in [
+        ("Compact transport", controls.is_compact(), 0),
+        ("Show seek bar", true, 1),
+        ("Show volume", true, 2),
+        ("Show full window", true, 3),
+    ] {
+        let check = ferroui_controls::CheckBox::new();
+        check.set_content(Some(Rc::new(label.to_owned())));
+        check.set_is_checked(Some(initial));
+        let weak = controls.downgrade();
+        let weak_check = check.downgrade();
         check.is_checked_changed(move |_, _| {
             if let (Some(controls), Some(check)) = (weak.upgrade(), weak_check.upgrade()) {
                 let visible = check.is_checked() == Some(true);
-                match option { 0 => controls.set_is_compact(visible), 1 => controls.set_is_seek_bar_visible(visible), 2 => { controls.set_is_volume_button_visible(visible); controls.set_is_volume_slider_visible(visible); }, _ => controls.set_is_full_window_button_visible(visible) }
+                match option {
+                    0 => controls.set_is_compact(visible),
+                    1 => controls.set_is_seek_bar_visible(visible),
+                    2 => {
+                        controls.set_is_volume_button_visible(visible);
+                        controls.set_is_volume_slider_visible(visible);
+                    }
+                    _ => controls.set_is_full_window_button_visible(visible),
+                }
             }
         });
         options.children().add(check);
@@ -848,11 +864,18 @@ pub fn camera_capture_ui_page() -> Ref<Page> {
     let budget = FrameBudget::new(Default::default());
     if let Some(providers) = PROVIDERS.with(|slot| slot.borrow().clone()) {
         let factory_budget = budget.clone();
-        capture.set_provider_factory(Some(Rc::new(move |interop| (providers.camera)(interop, factory_budget.clone()))), budget);
+        capture.set_provider_factory(
+            Some(Rc::new(move |interop| (providers.camera)(interop, factory_budget.clone()))),
+            budget,
+        );
     }
     let content = StackPanel::new(); content.set_spacing(12.); content.set_margin(Thickness::uniform(20.));
     let description = TextBlock::new(); description.set_text_wrapping(TextWrapping::Wrap);
-    description.set_text(Some("Start explicitly to request camera permission. Photos and silent video are owned encoded results. Recording is enabled only on providers with native recording support (Apple: 60 seconds / 256 MiB). Stop or navigation cancels acquisition and rejects late results."));
+    description.set_text(Some(
+        "Start explicitly to request camera permission. Photos and silent video are owned encoded results. \
+         Recording is enabled only on providers with native recording support (Apple: 60 seconds / 256 MiB). \
+         Stop or navigation cancels acquisition and rejects late results.",
+    ));
     content.children().add(description); content.children().add(&capture);
     let photo = Image::new(); photo.set_height(200.); photo.set_stretch(Stretch::Uniform);
     let result = TextBlock::new(); result.set_text_wrapping(TextWrapping::Wrap);
@@ -860,11 +883,27 @@ pub fn camera_capture_ui_page() -> Ref<Page> {
     let subscription = capture.completed().subscribe(move |value| {
         if let Some(result) = weak_result.upgrade() {
             match value {
-                CameraCaptureResult::Photo(value) => match Bitmap::from_stream(&mut Cursor::new(value.encoded.as_ref())) {
-                    Ok(bitmap) => { if let Some(photo) = weak_photo.upgrade() { photo.set_source(Some(Rc::new(bitmap))); } result.set_text(Some(&format!("{} × {} photo ({:?})", value.width, value.height, value.origin))); }
-                    Err(error) => result.set_text(Some(&error.to_string())),
-                },
-                CameraCaptureResult::Video(value) => result.set_text(Some(&format!("{} × {} video, {:.2} seconds, {} bytes", value.width, value.height, value.duration.as_secs_f64(), value.encoded.len()))),
+                CameraCaptureResult::Photo(value) => {
+                    match Bitmap::from_stream(&mut Cursor::new(value.encoded.as_ref())) {
+                        Ok(bitmap) => {
+                            if let Some(photo) = weak_photo.upgrade() {
+                                photo.set_source(Some(Rc::new(bitmap)));
+                            }
+                            result.set_text(Some(&format!(
+                                "{} × {} photo ({:?})",
+                                value.width, value.height, value.origin
+                            )));
+                        }
+                        Err(error) => result.set_text(Some(&error.to_string())),
+                    }
+                }
+                CameraCaptureResult::Video(value) => result.set_text(Some(&format!(
+                    "{} × {} video, {:.2} seconds, {} bytes",
+                    value.width,
+                    value.height,
+                    value.duration.as_secs_f64(),
+                    value.encoded.len()
+                ))),
             }
         }
     });

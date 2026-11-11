@@ -1,6 +1,14 @@
+<!--
+  Not ported from a style: CameraCaptureUI of Windows is a system dialog, and microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0)
+  has no style for it. Here it is a control in the window (docs/media/ISSUE-561.md): a
+  CameraPreview over the Start, Take photo, Record, Finish and Stop actions and a status text,
+  which are Button and TextBlock controls with the control themes of the theme.
+-->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:camera="using:FerroUI.Media.Camera.Controls">
+                    xmlns:camera="using:FerroUI.Media.Camera.Controls"
+                    x:ClassModifier="internal">
   <ControlTheme x:Key="{x:Type camera:CameraCaptureUI}" TargetType="camera:CameraCaptureUI">
     <Setter Property="Template">
       <ControlTemplate>

@@ -1,11 +1,25 @@
-<!-- Adapted from WinUI MediaTransportControls' control panel: a position slider,
-     time labels, volume controls and full-window action. Unsupported casting,
-     captions, playback-rate and track selection actions are omitted. The native
-     Button and Slider templates retain keyboard, focus and automation behavior.
-     Copyright (c) Microsoft Corporation. MIT License; see ../NOTICE.md. -->
+<!--
+  Adapted from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml (the control panel of
+    the implicit style of MediaTransportControls)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The template is reduced: play and pause, stop, the position slider, the time, a status,
+    mute, the volume and the full-window action. The casting, captions, playback rate, track
+    selection, skip and zoom actions of the upstream template are not ported, and its theme
+    resources are waived (scripts/winui-theme/waivers.json).
+  - The actions are Button and Slider controls with the control themes of the theme, which keep
+    their keyboard, focus and automation behaviour; the upstream template has a CommandBar of
+    AppBarButtons.
+  - The control shows its parts by its width, where the upstream template drops commands by their
+    dropout order (docs/media/ISSUE-561.md).
+-->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:media="using:FerroUI.Media.Video.Controls">
+                    xmlns:media="using:FerroUI.Media.Video.Controls"
+                    x:ClassModifier="internal">
   <ControlTheme x:Key="{x:Type media:MediaTransportControls}" TargetType="media:MediaTransportControls">
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />

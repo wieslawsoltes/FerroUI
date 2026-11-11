@@ -25,22 +25,6 @@
       "build_path": "::ferroui_themes_macos::compiled_xaml::build_controls_macoscontrols_xaml",
       "populate_path": null,
       "public": false
-    },
-    {
-      "uri": "ferres://ferroui.themes.macos/Controls/MediaTransportControls.xaml",
-      "root_type": "FerroUI.Controls.ResourceDictionary",
-      "class_rust_path": null,
-      "build_path": "::ferroui_themes_macos::compiled_xaml::build_controls_mediatransportcontrols_xaml",
-      "populate_path": null,
-      "public": true
-    },
-    {
-      "uri": "ferres://ferroui.themes.macos/Controls/CameraCaptureUI.xaml",
-      "root_type": "FerroUI.Controls.ResourceDictionary",
-      "class_rust_path": null,
-      "build_path": "::ferroui_themes_macos::compiled_xaml::build_controls_cameracaptureui_xaml",
-      "populate_path": null,
-      "public": true
     }
   ],
   "dependencies": [],

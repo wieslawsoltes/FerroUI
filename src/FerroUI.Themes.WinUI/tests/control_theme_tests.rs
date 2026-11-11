@@ -82,8 +82,10 @@ fn templated_controls() -> Vec<&'static TypeInfo> {
     let mut templated_controls: Vec<&'static TypeInfo> = Vec::new();
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
+    // The crates whose controls the theme has control themes for.
+    let crates = ["ferroui_controls", "ferroui_dialogs", "ferroui_media_video_controls", "ferroui_media_camera_controls"];
     for type_ in TypeInfo::registered_types() {
-        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs") || type_.module_path().starts_with("ferroui_media_video_controls") || type_.module_path().starts_with("ferroui_media_camera_controls"))
+        if !crates.iter().any(|crate_| type_.module_path().starts_with(crate_))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()
@@ -341,21 +343,31 @@ fn media_transport_template_keeps_native_actions_accessible_at_narrow_widths() {
     window.show();
     let transport = view.transport_controls();
     transport.apply_template();
-    let button = |name| transport.get_visual_descendants().find_map(|v| v.cast::<Button>().filter(|b| b.name().as_deref() == Some(name))).unwrap();
-    let slider = |name| transport.get_visual_descendants().find_map(|v| v.cast::<Slider>().filter(|s| s.name().as_deref() == Some(name))).unwrap();
+    let button = |name| {
+        let parts = transport.get_visual_descendants();
+        parts.into_iter().find_map(|v| v.cast::<Button>().filter(|b| b.name().as_deref() == Some(name))).unwrap()
+    };
+    let slider = |name| {
+        let parts = transport.get_visual_descendants();
+        parts.into_iter().find_map(|v| v.cast::<Slider>().filter(|s| s.name().as_deref() == Some(name))).unwrap()
+    };
     for width in [160., 240., 320., 640., 960.] {
         transport.measure(Size::new(width, 180.));
         transport.arrange(Rect::new(0., 0., width, transport.desired_size().height));
         let mut centers = Vec::new();
         for name in ["MediaPlayPause", "MediaStop", "MediaMute", "MediaFullWindow"] {
             let part = button(name);
-            if !part.is_visible() { continue; }
+            if !part.is_visible() {
+                continue;
+            }
             let origin = part.translate_point(Point::new(0., 0.), &transport).unwrap();
             assert!(origin.x >= 0. && origin.x + part.bounds().width <= width, "{name}, width {width}");
             assert!(AutomationProperties::get_name(&part).is_some());
             centers.push(origin.y + part.bounds().height / 2.);
         }
-        assert!(centers.len() >= 3 && centers.iter().all(|y| (*y-centers[0]).abs()<0.01));
+        // The actions that are shown are in one row.
+        assert!(centers.len() >= 3, "width {width}: {} actions", centers.len());
+        assert!(centers.iter().all(|y| (*y - centers[0]).abs() < 0.01), "width {width}: {centers:?}");
         let seek = slider("MediaSeek");
         assert!(seek.is_visible() && seek.bounds().width <= width);
     }

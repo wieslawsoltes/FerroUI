@@ -29,7 +29,7 @@
     {
       "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
       "key": "*",
-      "reason": "MediaTransportControls: no FerroUI control (no media playback)."
+      "reason": "MediaTransportControls has a focused template of its own (Controls/MediaTransportControls.xaml); the upstream style and its resources are not ported."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",

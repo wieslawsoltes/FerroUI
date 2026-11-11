@@ -472,6 +472,9 @@ void ferroui_portable_recording_release(void *p) {
     if (!p) return;
     FerroPortableRecording *request=(__bridge_transfer FerroPortableRecording *)p;
     [request cancel];
+    // The camera refers to its last recording until it records again or closes: a movie that was
+    // encoded and never copied would live as long (cancel leaves a completed recording alone).
+    @synchronized(request) { request.data=nil; }
 }
 }
 
