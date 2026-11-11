@@ -144,7 +144,12 @@ try {
         const image=await createImageBitmap(await (await fetch("data:image/png;base64,${fixture}")).blob());
         const canvas=document.createElement("canvas");canvas.width=640;canvas.height=480;
         const context=canvas.getContext("2d");
-        const draw=()=>{context.fillStyle="white";context.fillRect(0,0,640,480);context.drawImage(image,64,112);};
+        globalThis.__qrVisible=true;
+        const draw=()=>{
+            context.fillStyle="white";
+            context.fillRect(0,0,640,480);
+            if (__qrVisible) context.drawImage(image,64,112);
+        };
         draw();const timer=setInterval(draw,33);
         const original=navigator.mediaDevices;
         Object.defineProperty(navigator,"mediaDevices",{configurable:true,value:{
@@ -163,8 +168,47 @@ try {
     const live = await until(s=>s?.status.startsWith("Last detected:") && s.status.includes("ferroui-native-qr-left") && s.status.includes("ferroui-native-qr-right"), "live QR analysis worker");
     assert.equal(live.previewAttempts,0);assert.ok(live.analysisAttempts>0&&live.analysisBytes>0);
     assert.ok(page.requests.some(url=>/\/qr-worker\.js(?:\?|$)/.test(url)), "live scanning must load the decoder worker");
+    const preview = await page.element("QR preview", e => e.type === "QrPreview");
+    const scale = Math.min(preview.width / 640, preview.height / 480);
+    const videoLeft = preview.x + (preview.width - 640 * scale) / 2;
+    const videoTop = preview.y + (preview.height - 480 * scale) / 2;
+    const green = (picture, x, y) => {
+        const [r, g, b] = picture.pixel(x, y);
+        return r < 100 && g > 200 && b > 75 && b < 175;
+    };
+    const outlinePixels = (picture, frameX) => {
+        // Sample across the top edge of each code in the 640 × 480 camera fixture.
+        const left = Math.round(videoLeft + (frameX + 20) * scale);
+        const right = Math.round(videoLeft + (frameX + 130) * scale);
+        const top = Math.round(videoTop + 165 * scale);
+        let count = 0;
+        for (let x = left; x < right; x++) {
+            for (let y = top - 8; y <= top + 8; y++) {
+                if (green(picture, x, y)) count++;
+            }
+        }
+        return count;
+    };
+    async function checkOutlines(visible) {
+        let counts;
+        for (const deadline = Date.now() + 5000; Date.now() < deadline;) {
+            await page.drawn();
+            const picture = await page.screenshot();
+            counts = [117, 373].map(x => outlinePixels(picture, x));
+            if (counts.every(count => visible ? count > 40 : count === 0)) return;
+            await sleep(50);
+        }
+        assert.fail(`Expected QR outlines to be ${visible ? "visible" : "clear"}: ${counts} pixels`);
+    }
+    await checkOutlines(true);
+    await page.evaluate("__qrVisible=false");
+    await checkOutlines(false);
+    assert.equal((await state()).cameraActive, true, "clearing detections leaves the camera running");
+    await page.evaluate("__qrVisible=true");
+    await checkOutlines(true);
     await click("Stop camera");
     await until(s=>!s.cameraActive&&s.frames===0&&s.reads===0&&s.quarantine===0,"QR camera retirement");
+    await checkOutlines(false);
     assert.equal(await page.evaluate("__qrTrack.readyState"),"ended");
     console.log("CATALOG_BROWSER_LIVE_QR_PASS",JSON.stringify(live));
     assert.deepEqual(page.errors, []);
