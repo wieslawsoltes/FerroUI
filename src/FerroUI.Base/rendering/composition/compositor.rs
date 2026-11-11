@@ -1518,3 +1518,7 @@ impl<T: Send + 'static> std::future::Future for ServerJobResult<T> {
         std::task::Poll::Pending
     }
 }
+
+#[cfg(test)]
+#[path = "pending_disposals_tests.rs"]
+mod pending_disposals_tests;

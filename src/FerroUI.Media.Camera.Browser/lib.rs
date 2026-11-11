@@ -149,6 +149,7 @@ impl CameraProvider for BrowserCameraProvider {
         let request = start_native(&json).map(Request).map_err(js_error);
         let frames = producer
             .with_budget(budget.clone())
+            .with_analysis(options.enable_analysis)
             .stream(source, generation);
         Box::pin(async move {
             let request = request?;

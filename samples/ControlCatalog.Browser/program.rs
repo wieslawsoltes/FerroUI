@@ -218,11 +218,11 @@ pub fn catalog_media_state() -> String {
     };
     let counters = s.budget.counters().snapshot();
     format!(
-        "{{\"title\":{},\"status\":{},\"attached\":{},\"playing\":{},\"paused\":{},\"frame\":{},\"cameraActive\":{},\"frames\":{},\"imports\":{},\"reads\":{},\"quarantine\":{},\"previewAttempts\":{},\"previewBytes\":{}}}",
+        "{{\"title\":{},\"status\":{},\"attached\":{},\"playing\":{},\"paused\":{},\"frame\":{},\"cameraActive\":{},\"frames\":{},\"imports\":{},\"reads\":{},\"quarantine\":{},\"previewAttempts\":{},\"previewBytes\":{},\"analysisAttempts\":{},\"analysisBytes\":{}}}",
         json_string(s.title), json_string(&s.status), s.attached, s.playing, s.paused,
         s.frame, s.camera_active, s.budget.usage().frames, counters.gpu_imports,
         s.budget.gpu_reads(), s.budget.quarantined_reads(),
-        counters.preview.attempts, counters.preview.bytes
+        counters.preview.attempts, counters.preview.bytes, counters.analysis.attempts, counters.analysis.bytes
     )
 }
 
