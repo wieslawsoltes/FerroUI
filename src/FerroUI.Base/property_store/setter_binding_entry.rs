@@ -134,6 +134,14 @@ impl IValueEntry for SetterBindingEntry {
     fn as_binding_expression(self: Rc<Self>) -> Option<Rc<dyn BindingExpressionBase>> {
         self.expression()
     }
+
+    fn templated_parent_changed(&self) {
+        // An expression that was not instanced reads the templated parent
+        // when it starts.
+        if let Some(untyped) = self.instanced().as_deref().and_then(BindingExpressionBase::as_untyped) {
+            untyped.templated_parent_changed();
+        }
+    }
 }
 
 impl IBindingExpressionSink for SetterBindingEntry {

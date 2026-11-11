@@ -326,6 +326,39 @@ impl ValueStore {
         source
     }
 
+    /// Tells the binding expressions of the store that the templated parent of
+    /// the owner changed (`StyledElement::set_templated_parent`): the local
+    /// value bindings and the entries of the frames that are not shared. A
+    /// template binding reads the templated parent of its target here instead
+    /// of observing every property change of the target. The frames and the
+    /// expressions are read by index, so an expression may change the store
+    /// while it is told.
+    pub(crate) fn templated_parent_changed(&self) {
+        let mut index = 0;
+        loop {
+            let expression = self.local_value_expressions.borrow().get(index).map(|(_, e)| e.clone());
+            let Some(expression) = expression else { break };
+            if let Some(untyped) = expression.as_untyped() {
+                untyped.templated_parent_changed();
+            }
+            index += 1;
+        }
+        let mut index = 0;
+        loop {
+            let frame = self.frames.borrow().get(index).cloned();
+            let Some(frame) = frame else { break };
+            let base = frame.base();
+            if !base.is_shared() {
+                let mut entry = 0;
+                while entry < base.entry_count() {
+                    base.get_entry(entry).templated_parent_changed();
+                    entry += 1;
+                }
+            }
+            index += 1;
+        }
+    }
+
     /// The binding expression that is currently active on the property, if
     /// any.
     pub fn get_expression(&self, property: &'static FerroProperty) -> Option<Rc<dyn BindingExpressionBase>> {

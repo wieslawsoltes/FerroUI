@@ -22,6 +22,10 @@ pub struct TemplateBindingExpression {
     mode: BindingMode,
     property: Option<&'static FerroProperty>,
     has_published_value: Cell<bool>,
+    /// The subscription to the property changes of the target, in the modes that write to the
+    /// source: a change of the target property is written to the templated parent. The
+    /// templated parent of the target is told by the store of the target
+    /// (`UntypedBindingExpression::templated_parent_changed`).
     target_subscription: RefCell<Option<Subscription>>,
     parent_subscription: RefCell<Option<Subscription>>,
     /// The handlers of the property changes of the target and of the templated parent, made
@@ -161,11 +165,7 @@ impl TemplateBindingExpression {
     }
 
     fn on_target_property_changed(&self, property_id: u32) {
-        if property_id == StyledElement::templated_parent_property().id() {
-            self.on_templated_parent_changed();
-        } else if matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource)
-            && self.base.target_property().is_some_and(|p| p.id() == property_id)
-        {
+        if self.base.target_property().is_some_and(|p| p.id() == property_id) {
             if let (Some(target), Some(property)) = (self.base.try_get_target(), self.base.target_property()) {
                 self.write_value_to_source(get_property_value(&target, property));
             }
@@ -185,6 +185,9 @@ impl UntypedBindingExpression for TemplateBindingExpression {
     fn start_core(&self) {
         self.has_published_value.set(false);
         self.on_templated_parent_changed();
+        if !matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource) {
+            return;
+        }
         if let Some(target) = self.base.try_get_target() {
             let handler = self.target_handler.get_or_init(|| {
                 let weak = self.this.clone();
@@ -196,6 +199,12 @@ impl UntypedBindingExpression for TemplateBindingExpression {
             });
             let token = target.add_property_changed_handler(handler.clone());
             self.target_subscription.replace(Some(Subscription { object: target.downgrade(), token }));
+        }
+    }
+
+    fn templated_parent_changed(&self) {
+        if self.base.is_running() {
+            self.on_templated_parent_changed();
         }
     }
 

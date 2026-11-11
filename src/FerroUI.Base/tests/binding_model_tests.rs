@@ -441,6 +441,57 @@ fn template_binding_tracks_templated_parent_property() {
 }
 
 #[test]
+fn template_binding_follows_the_templated_parent_without_observing_its_target() {
+    // The store of the target tells its template bindings that the templated parent changed: a
+    // binding that does not write to the source does not observe the property changes of its
+    // target; one that writes to the source observes them, for the target property.
+    let first = Target::new();
+    first.set_value(Target::text_property(), s("first"));
+    let second = Target::new();
+    second.set_value(Target::text_property(), s("second"));
+    let child = Target::new();
+    child.bind_binding(Target::text_property(), &TemplateBinding::new(Target::text_property()));
+    assert_eq!(child.property_changed_subscriber_count(), 0);
+
+    child.set_templated_parent(&first);
+    assert_eq!(child.get_value(Target::text_property()), "first");
+    child.set_templated_parent(&second);
+    assert_eq!(child.get_value(Target::text_property()), "second");
+    first.set_value(Target::text_property(), s("not followed"));
+    assert_eq!(child.get_value(Target::text_property()), "second");
+    child.set_templated_parent(None::<Ref<FerroObject>>);
+    assert_eq!(child.get_value(Target::text_property()), "default");
+    assert_eq!(first.property_changed_subscriber_count(), 0);
+    assert_eq!(second.property_changed_subscriber_count(), 0);
+
+    let two_way = Target::new();
+    two_way.bind_binding(
+        Target::text_property(),
+        &TemplateBinding::new(Target::text_property()).with_mode(BindingMode::TwoWay),
+    );
+    assert_eq!(two_way.property_changed_subscriber_count(), 1);
+    two_way.set_templated_parent(&second);
+    assert_eq!(two_way.get_value(Target::text_property()), "second");
+}
+
+#[test]
+fn a_template_binding_of_a_style_setter_follows_the_templated_parent() {
+    // The setter entry tells the expression it instanced.
+    let parent = Target::new();
+    parent.set_value(Target::text_property(), s("parent"));
+    let styles = Styles::new();
+    let style = Style::with_selector(Selectors::of_type::<Target>());
+    let binding: Rc<dyn BindingBase> = Rc::new(TemplateBinding::new(Target::text_property()));
+    style.add_setter(Setter::new_binding_base(Target::text_property(), binding));
+    styles.add(style);
+    let child = Target::new();
+    styles.try_attach(&child, None);
+    assert_eq!(child.get_value(Target::text_property()), "default");
+    child.set_templated_parent(&parent);
+    assert_eq!(child.get_value(Target::text_property()), "parent");
+}
+
+#[test]
 fn two_way_template_binding_writes_to_templated_parent() {
     let parent = Target::new();
     parent.set_value(Target::text_property(), s("parent"));

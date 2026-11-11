@@ -627,6 +627,7 @@ impl StyledElement {
         let old = self.templated_parent();
         if old != value {
             *self.templated_parent.borrow_mut() = value.as_ref().map(Ref::downgrade);
+            self.values().templated_parent_changed();
             self.raise_direct_property_changed(Self::templated_parent_property(), &old, &value);
         }
     }

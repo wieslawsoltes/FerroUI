@@ -412,6 +412,12 @@ pub trait UntypedBindingExpression: 'static {
 
     fn update_target_core(&self) {}
 
+    /// The templated parent of the target changed: the store of the target
+    /// tells each of its binding expressions (`ValueStore::templated_parent_changed`),
+    /// so that an expression that reads the templated parent does not observe
+    /// every property change of its target to see it.
+    fn templated_parent_changed(&self) {}
+
     /// Starts the binding expression.
     fn start(&self, produce_value: bool) {
         let base = self.base();
@@ -532,6 +538,10 @@ macro_rules! impl_untyped_binding_expression {
                 self: ::std::rc::Rc<Self>,
             ) -> ::std::option::Option<::std::rc::Rc<dyn $crate::data::BindingExpressionBase>> {
                 ::std::option::Option::Some(self)
+            }
+
+            fn templated_parent_changed(&self) {
+                $crate::data::core::UntypedBindingExpression::templated_parent_changed(self)
             }
         }
 
