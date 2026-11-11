@@ -2143,7 +2143,7 @@ fn populate_winuitheme_xaml_unit_52(
     // WinUITheme.xaml(21,64) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_151)?;
     // WinUITheme.xaml(25,55) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 25, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 1.0_f64, 1.0_f64, 0.0_f64))), 25, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 25, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 25, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3514,7 +3514,7 @@ fn populate_winuitheme_xaml_unit_118(
     // WinUITheme.xaml(34,64) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_348)?;
     // WinUITheme.xaml(38,55) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 1.0_f64, 1.0_f64, 0.0_f64))), 38, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 38, 55)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4739,7 +4739,7 @@ fn populate_winuitheme_xaml_unit_184(
     // WinUITheme.xaml(47,64) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_560)?;
     // WinUITheme.xaml(51,55) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 51, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 1.0_f64, 1.0_f64, 0.0_f64))), 51, 55)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 51, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 51, 55)?;
     ::core::result::Result::Ok(())
 }
 

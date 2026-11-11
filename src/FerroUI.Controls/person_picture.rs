@@ -14,7 +14,7 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{IImageBrushSource, ImageBrush, Stretch};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty, VisualImpl,
+    FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty, Visual, VisualImpl,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -279,6 +279,12 @@ ferroui_base::ferro_properties! { impl PersonPicture {
 } }
 
 impl PersonPicture {
+    fn static_constructor() {
+        // The badge of WinUI's template is 4 units above and to the right of the picture
+        // (PersonPictureBadgeGridMargin), and a control of WinUI does not clip to its bounds.
+        Visual::clip_to_bounds_property().override_default_value::<PersonPicture>(false);
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         let badge_image_brush = ImageBrush::new();

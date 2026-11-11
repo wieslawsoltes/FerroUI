@@ -269,6 +269,19 @@ fn the_picture_keeps_itself_a_circle_and_scales_its_text() {
 }
 
 #[test]
+fn the_picture_does_not_clip_its_badge() {
+    // The badge of WinUI's template is outside the picture by its margin
+    // (PersonPictureBadgeGridMargin), and a control of WinUI does not clip to its bounds.
+    let _app = start();
+    let picture = picture();
+    let _window = show(&picture);
+    assert!(!picture.clip_to_bounds());
+    // A style or a local value still clips it.
+    picture.set_clip_to_bounds(true);
+    assert!(picture.clip_to_bounds());
+}
+
+#[test]
 fn a_tiny_picture_does_not_crash() {
     // VerifySmallWidthAndHeightDoNotCrash: the font size stays at least 1.
     let _app = start();

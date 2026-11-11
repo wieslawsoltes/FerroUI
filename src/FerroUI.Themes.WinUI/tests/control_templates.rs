@@ -650,9 +650,14 @@ fn the_person_picture_gets_its_parts_and_states_from_the_theme() {
     assert_eq!(Some("99+"), number.text().as_deref());
     assert!(number.font_size() < single_digit_size);
 
+    // The badge is half the picture, 4 units above and to the right of it
+    // (PersonPictureBadgeGridMargin), and the picture does not clip it.
     let badge_bounds = badge.bounds();
-    assert!(badge_bounds.y >= 0.0);
-    assert!(badge_bounds.right() <= picture.bounds().width);
+    assert_eq!(48.0, badge_bounds.width);
+    assert_eq!(-4.0, badge_bounds.y);
+    assert_eq!(picture.bounds().width + 4.0, badge_bounds.right());
+    assert!(!picture.clip_to_bounds());
+    // "99+" is inside the circle of the badge.
     assert!(number.bounds().x >= 0.0);
     assert!(number.bounds().right() <= badge_bounds.width);
     window.close();
