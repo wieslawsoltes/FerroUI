@@ -26,6 +26,12 @@ impl ICompositionHitTester for GeometryCompositionHitTester {
         data.hit_test_geometry(input)
     }
 
+    fn drawing_bounds_match(bounds: &dyn Fn() -> Option<LtrbRect>, input: &Ref<Geometry>) -> bool {
+        // A geometry that only touches a drawing intersects it for the backend, and does not
+        // meet its bounds.
+        bounds().is_some_and(|bounds| Self::transformed_sub_tree_bounds_match(bounds, input))
+    }
+
     fn transformed_sub_tree_bounds_match(bounds: LtrbRect, input: &Ref<Geometry>) -> bool {
         let geometry_render_bounds = input.bounds();
         bounds.intersects(LtrbRect::from_rect(geometry_render_bounds))

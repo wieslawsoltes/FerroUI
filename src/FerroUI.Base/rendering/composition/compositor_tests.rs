@@ -3453,6 +3453,38 @@ fn items_and_child_visuals_are_painted_and_hit_in_the_order_of_the_visuals() {
 }
 
 #[test]
+fn a_geometry_hits_the_items_whose_bounds_it_meets() {
+    let s = CompositorCanvas::new();
+    let first = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    let second = TestBorder::filled(0.0, 10.0, 10.0, 10.0);
+    let layer = TestBorder::layer(0.0, 20.0, 10.0, 10.0);
+    layer.set_background(Some(Brushes::blue()));
+    s.canvas.add(&first);
+    s.canvas.add(&second);
+    s.canvas.add(&layer);
+    s.run_jobs();
+    assert_eq!(visuals(&[&first, &second]), item_elements(&s.root));
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+
+    // A geometry that only touches what an item drew does not hit it, as it does not hit a
+    // composition visual it only touches.
+    assert_eq!(visuals(&[&second]), hit(5.0, 10.0, 10.0, 10.0));
+    assert_eq!(visuals(&[&first]), hit(5.0, 0.0, 10.0, 10.0));
+    assert_eq!(visuals(&[&layer, &second, &first]), hit(5.0, 5.0, 10.0, 20.0));
+    assert!(hit(10.0, 0.0, 10.0, 30.0).is_empty());
+
+    // The item is where the layout put it.
+    second.set_bounds(Rect::new(0.0, 40.0, 10.0, 10.0));
+    s.run_jobs();
+    assert!(hit(5.0, 10.0, 10.0, 10.0).is_empty());
+    assert_eq!(visuals(&[&second]), hit(5.0, 45.0, 10.0, 10.0));
+}
+
+#[test]
 fn an_item_follows_its_visual_and_the_visuals_above_it_with_the_drawing_it_has() {
     use crate::diagnostics::perf_counters::{self, PerfCounter};
 

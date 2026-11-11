@@ -614,7 +614,9 @@ What it measures:
   sections of chapter 9 it guards: `text` (text that changes every frame), `list` (a scrolling list
   of shadowed cards), `transforms` (panels moved by their render transform and opacity), `width` (a
   layout under a changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
-  canvas that move), `lines` (charts whose lines change every frame). The harness is the frame gate's; besides the times a frame, every scene
+  canvas that move), `lines` (charts whose lines change every frame), `items` (boxes drawn as items
+  of the composition visual above them, some of which are drawn anew, move, and leave the tree and
+  come back every frame). The harness is the frame gate's; besides the times a frame, every scene
   reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
   layout, recording and commit) and their sum (`startup_ms`). Alone:
 

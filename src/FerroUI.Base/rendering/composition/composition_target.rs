@@ -334,6 +334,13 @@ impl CompositionTarget {
                 return None;
             }
         }
+        let bounds = || {
+            let bounds = data.bounds()?;
+            Some(LtrbRect::new(bounds.left + x, bounds.top + y, bounds.right + x, bounds.bottom + y))
+        };
+        if !H::drawing_bounds_match(&bounds, input) {
+            return None;
+        }
         let local = H::transform(input, Matrix::create_translation(-x, -y));
         let intersection = H::hit_test_drawing(&data, &local);
         // The filter last: it is asked for the items that are hit only.

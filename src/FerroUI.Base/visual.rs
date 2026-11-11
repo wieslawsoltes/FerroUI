@@ -1403,12 +1403,22 @@ impl Visual {
     }
 
     /// Whether the visual has a composition visual of its own now. A visual attached to a tree
-    /// that has none is shown by the composition visuals of the visuals under it, which are
-    /// children of the composition visual of the nearest visual above it that has one
-    /// (docs/porting/desktop-performance.md, section 9.41).
+    /// that has none is shown by the composition visual of the nearest visual above it that has
+    /// one: what the visual draws is an item of that composition visual
+    /// ([`has_composition_item`](Self::has_composition_item)), and the composition visuals of
+    /// the visuals under it are its children (docs/porting/desktop-performance.md, sections
+    /// 9.41 and 9.42).
     #[inline]
     pub fn has_composition_visual(&self) -> bool {
         !self.composition_visual_departed.get() && self.composition_visual.is_some()
+    }
+
+    /// Whether what the visual draws is shown now by the composition visual of the nearest
+    /// visual above it that has one, as an item of it: the visual has no composition visual of
+    /// its own (docs/porting/desktop-performance.md, section 9.42).
+    #[inline]
+    pub fn has_composition_item(&self) -> bool {
+        self.composition_item.get().is_some_and(|item| !item.is_departed())
     }
 
     /// Whether visuals get their composition visuals on demand (the default), or each of them

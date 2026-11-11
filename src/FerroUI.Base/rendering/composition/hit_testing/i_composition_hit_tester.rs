@@ -21,6 +21,15 @@ pub trait ICompositionHitTester {
         IntersectionResult::Empty
     }
 
+    /// Whether `input`, in the coordinates of a composition visual, can hit a drawing whose
+    /// bounds there `bounds` gives. A composition visual is passed when the input does not meet
+    /// the bounds of what it shows, and what a visual without one drew is passed the same way
+    /// (section 9.42). A tester whose test of a drawing says as much does not ask for the
+    /// bounds.
+    fn drawing_bounds_match(_bounds: &dyn Fn() -> Option<LtrbRect>, _input: &Self::Input) -> bool {
+        true
+    }
+
     fn transformed_sub_tree_bounds_match(bounds: LtrbRect, input: &Self::Input) -> bool;
 
     fn clipped_bounds_match(visual: &CompositionVisual, input: &Self::Input) -> bool;

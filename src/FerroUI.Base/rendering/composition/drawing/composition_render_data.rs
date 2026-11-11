@@ -1,6 +1,7 @@
 use super::render_data_drawing_context::RecordedResource;
 use super::{RenderDataStream, ServerCompositionRenderData};
 use crate::media::{Geometry, IntersectionResult};
+use crate::platform::LtrbRect;
 use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::{Compositor, ICompositorSerializable};
@@ -101,6 +102,14 @@ impl CompositionRenderData {
         if let Some(compositor) = compositor {
             compositor.dispose_on_next_batch(self.server);
         }
+    }
+
+    /// The bounds of what is drawn, rounded outwards to whole units as the server-side render
+    /// data rounds them; `None` if nothing is drawn. They are calculated from the recording
+    /// each time.
+    pub(crate) fn bounds(&self) -> Option<LtrbRect> {
+        let bounds = self.stream.borrow().calculate_bounds();
+        ServerCompositionRenderData::apply_render_bounds_rounding(bounds.map(LtrbRect::from_rect))
     }
 
     /// Whether anything drawn is hit at a point.
