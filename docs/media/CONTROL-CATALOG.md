@@ -17,7 +17,11 @@ operation. Navigation away retires playback/capture and rejects stale results.
   Native hosts run this static-image work off the UI thread with one outstanding
   image job. Apple desktop also supports explicitly started live Vision analysis
   through the bounded QR analysis gate. Results are text, never automatically
-  opened links. “Last detected” is history, not a geometric overlay.
+  opened links. The live preview is a `QrPreview`
+  (`ferroui-media-camera-controls`, feature `qr`): it outlines the detections
+  of the analyzed frame while the preview still shows that source, generation
+  and frame geometry, and an outline that analysis stops refreshing expires
+  after 250 ms. “Last detected” is history and stays after the outline is gone.
 
 ## Host bindings
 

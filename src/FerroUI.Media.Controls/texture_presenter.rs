@@ -44,6 +44,7 @@ pub struct TexturePresenter {
     last_error: RefCell<Option<MediaError>>,
     errors: MediaEvent<MediaError>,
     presented: MediaEvent<FrameMetadata>,
+    cleared: MediaEvent<()>,
 }
 ferro_class!(TexturePresenter:Control);
 ferro_class_info!(TexturePresenter {
@@ -92,6 +93,7 @@ impl TexturePresenter {
             last_error: RefCell::new(None),
             errors: MediaEvent::default(),
             presented: MediaEvent::default(),
+            cleared: MediaEvent::default(),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -110,6 +112,14 @@ impl TexturePresenter {
     /// presentation-state notification, not a GPU-completion fence.
     pub fn frame_presented(&self) -> &MediaEvent<FrameMetadata> {
         &self.presented
+    }
+    /// Raised when presentation is reset or the current frame is removed.
+    pub fn frame_cleared(&self) -> &MediaEvent<()> {
+        &self.cleared
+    }
+    /// Metadata for the currently presented frame, with no pixel storage.
+    pub fn presented_frame(&self) -> Option<std::cell::Ref<'_, FrameMetadata>> {
+        std::cell::Ref::filter_map(self.current.borrow(), Option::as_ref).ok()
     }
     pub fn last_error(&self) -> Option<MediaError> {
         self.last_error.borrow().clone()
@@ -189,6 +199,7 @@ impl TexturePresenter {
         if let Some(surface) = self.surface.borrow_mut().take() {
             surface.dispose();
         }
+        self.cleared.emit(&());
     }
     /// Called on a source frame/invalidation opportunity; unchanged paused
     /// frames do not submit another import or render job.
@@ -203,6 +214,7 @@ impl TexturePresenter {
                 if let Some(surface) = self.surface.borrow().clone() {
                     surface.clear_async();
                 }
+                self.cleared.emit(&());
             }
             return;
         };
