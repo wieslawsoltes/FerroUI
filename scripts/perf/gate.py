@@ -90,12 +90,13 @@ WINDOW_SCENES = ["text", "list", "transforms", "wall", "lines"]
 
 TEST_ARGS = ["--ignored", "--nocapture", "--test-threads=1"]
 
-# The tests of the frame benchmarks that measure the start of a scene. Each runs in a process of
-# its own, and the scenes of the frames run in a process without them: a start is the start of a
-# process that has built nothing yet, and a scene of the start (thousands of elements) leaves the
-# heap and the caches of the process in a state that moves the build of every scene measured
-# after it (the build of the `text` scene by a seventh).
-START_TEST_PREFIX = "start_of_"
+# The tests of the frame benchmarks (`cargo test ... -- --list --ignored`). Each runs in a process
+# of its own: a start is the start of a process that has built nothing yet, and a scene leaves
+# the heap and the caches of the process in a state that moves what is measured after it. A
+# scene of the start (thousands of elements) moved the build of the `text` scene by a seventh,
+# and a scene of the frames the build of the one after it by as much as two thirds when the two
+# sides left the allocator in different states (a side that has fewer composition objects frees
+# other blocks). What a scene is measured after is then the same on both sides: nothing.
 FRAMES_TEST = ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--"]
 
 # The tests that assert counts of work (`ferroui_base::diagnostics::perf_counters`), each a
@@ -121,8 +122,8 @@ SUITES = {
     },
     "frames": {
         "build": ["test", "-p", FRAMES_PACKAGE, "--release", "--test", "frames", "--no-run"],
-        # The scenes of the frames; the starts follow, a process each (`run_frames`).
-        "run": [*FRAMES_TEST, *TEST_ARGS, "--skip", START_TEST_PREFIX],
+        # Not one run: each test in a process of its own (`run_frames`).
+        "run": [],
     },
     "framework": {
         "build": ["test", "-p", FRAMEWORK_PACKAGE, "--release", "--lib", "--no-run"],
@@ -144,6 +145,11 @@ ALL_SUITES = ["counters", "gauntlet", "frames", "framework", "tdg", "window"]
 #
 # - UI thread and wall time of a frame: the factor 1. The frame gate averages hundreds of frames
 #   of a deterministic workload on the CPU (raster Skia), so a few percent is a real change.
+# - Render thread and wall time are those of a frame the surface received (`presented_frames`):
+#   the loop of the benchmark does not wait for the display, and a frame of the clock that
+#   starts while the render thread still has the batch before it commits nothing and costs
+#   close to nothing. A side that presents fewer of its frames would look faster by the frames
+#   it did not draw.
 # - Render thread: 1.5. The render thread runs beside the UI thread and its time moves with
 #   where the scheduler puts the two threads (performance or efficiency cores) and with the state
 #   of Skia's glyph caches when the measured window starts.
@@ -210,6 +216,24 @@ GATE_LINE = re.compile(r"^GATE (\{.*\})\s*$")
 SIZES_LINE = re.compile(r"^SIZES (\{.*\})\s*$")
 
 
+# The times of a record that are compared for a frame the surface received.
+PRESENTED_FRAME_TIMES = ("render_ms_per_frame", "wall_ms_per_frame")
+
+
+def presented_frames(record: dict) -> float:
+    """What a time for a frame of the clock of `record` is multiplied by to be the time for a
+    frame the surface received: the frames of the clock over the frames received, when the
+    record counts both and fewer were received than the clock had (a record without the count,
+    or with as many frames received as measured, is left as it is)."""
+    frames = record.get("frames")
+    rendered = record.get("rendered")
+    if not isinstance(frames, (int, float)) or not isinstance(rendered, (int, float)):
+        return 1.0
+    if rendered <= 0 or rendered >= frames:
+        return 1.0
+    return float(frames) / float(rendered)
+
+
 def parse_gate(output: str) -> list[tuple[Metric, float]]:
     """The metrics of the `GATE {...}` and `SIZES {...}` lines of the frame gate."""
     found = []
@@ -224,10 +248,12 @@ def parse_gate(output: str) -> list[tuple[Metric, float]]:
             continue
         record = json.loads(match.group(1))
         bench = record["bench"]
+        presented = presented_frames(record)
         for name, factor in FRAME_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, FRAME_FLOOR_MS)
-                found.append((metric, float(record[name])))
+                scale = presented if name in PRESENTED_FRAME_TIMES else 1.0
+                found.append((metric, float(record[name]) * scale))
         for name, factor in STARTUP_FACTORS.items():
             if name in record:
                 metric = Metric(f"{bench} {name}", "ms", factor, STARTUP_FLOOR_MS)
@@ -367,19 +393,19 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
     return "".join(lines)
 
 
-def start_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
-    """The tests of the start the frame benchmarks of `side` have (a base may have none)."""
+def frame_tests(side: Side, env: dict[str, str], log: Path, echo: bool) -> list[str]:
+    """The tests the frame benchmarks of `side` measure with (a base may have fewer)."""
     output = run_cargo(side, [*FRAMES_TEST, "--list", "--ignored"], env, log, echo)
     names = (line.removesuffix(": test").strip() for line in output.splitlines() if line.endswith(": test"))
-    return sorted(name for name in names if name.startswith(START_TEST_PREFIX))
+    return sorted(names)
 
 
-def run_frames(side: Side, starts: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
-    """The scenes of the frames in one process, then each test of the start in its own."""
-    output = run_cargo(side, SUITES["frames"]["run"], env, log, echo)
-    for test in starts:
-        start_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
-        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, start_log, echo)
+def run_frames(side: Side, tests: list[str], env: dict[str, str], log: Path, echo: bool) -> str:
+    """Each test of the frame benchmarks in a process of its own."""
+    output = ""
+    for test in tests:
+        test_log = log.with_name(f"{log.stem}-{test}{log.suffix}")
+        output += run_cargo(side, [*FRAMES_TEST, test, "--exact", *TEST_ARGS], env, test_log, echo)
     return output
 
 
@@ -766,10 +792,10 @@ def gate(options: argparse.Namespace) -> int:
             print(f"build: {' '.join(cargo_command() + SUITES[suite]['build'])}")
             if suite == "window":
                 print(f"run:   {FRAMES_BINARY} with FRAMES_SCENE={','.join(window_scenes)}, {options.window_seconds:g} s each")
+            elif suite == "frames":
+                print(f"run:   each test in a process of its own: {variables + ' ' if variables else ''}{' '.join(cargo_command() + FRAMES_TEST)} <test> --exact {' '.join(TEST_ARGS)}")
             else:
                 print(f"run:   {variables + ' ' if variables else ''}{' '.join(cargo_command() + SUITES[suite]['run'])}")
-                if suite == "frames":
-                    print(f"run:   each test `{START_TEST_PREFIX}*` in a process of its own: {' '.join(cargo_command() + FRAMES_TEST)} <test> --exact {' '.join(TEST_ARGS)}")
         return 0
 
     base_root, copied = prepare_base(root, scratch, base_sha, suites, options.copy_gate)
@@ -784,10 +810,10 @@ def gate(options: argparse.Namespace) -> int:
         for side in (base, candidate):
             run_cargo(side, SUITES[suite]["build"], env[suite], logs / f"build-{suite}-{side.name}.log", options.verbose)
 
-    starts: dict[str, list[str]] = {}
+    frames: dict[str, list[str]] = {}
     if "frames" in suites:
         for side in (base, candidate):
-            starts[side.name] = start_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
+            frames[side.name] = frame_tests(side, env["frames"], logs / f"list-frames-{side.name}.log", options.verbose)
 
     suite_of: dict[str, str] = {}
 
@@ -804,7 +830,7 @@ def gate(options: argparse.Namespace) -> int:
                         suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
                 if suite == "frames":
-                    output = run_frames(side, starts[side.name], env[suite], log, options.verbose)
+                    output = run_frames(side, frames[side.name], env[suite], log, options.verbose)
                 else:
                     output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose)
                 if suite in ("gauntlet", "frames"):

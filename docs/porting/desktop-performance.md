@@ -633,17 +633,28 @@ What it measures:
   and the visual of the render thread); the gate compares each. With the `counters` feature
   (`--features counters`) a start also prints the allocations of each phase and the blocks it
   left alive by size class, and the counters of the framework (section 9.40). The gate runs every
-  test of the start (`start_of_*`) in a process of its own and the scenes of the frames in a
-  process without them: a start is the start of a process that has built nothing yet, and a scene
-  of the start leaves the heap and the caches of the process in a state that moves the build of
-  every scene measured after it (the `text` scene builds in 3.65 ms in a process of the frames
-  alone and in 4.2 to 5.0 ms after the two starts). Before the first scene of the frames a
+  test of the frame benchmarks in a process of its own: a start is the start of a process that
+  has built nothing yet, and a scene leaves the heap and the caches of the process in a state
+  that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
+  frames alone and in 4.2 to 5.0 ms after the two starts; the `list` scene, measured after six
+  others in one process, was built in 1.6 ms by one side of a comparison and in 2.7 ms by the
+  other, whose scenes before it had left other blocks free, and in 1.2 and 1.1 ms by the two in
+  processes of their own (section 9.42). Before the first scene of the frames a
   process measures, the harness shows a small scene made of what the scenes use (text, rounded
   borders, polylines, panels) and runs 30 frames of it, once: what a process does once is then in
   no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
   started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
   started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
   6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case.
+
+  The render thread and wall time the gate compares are those of a frame the surface received
+  (the time for a frame of the clock times `frames / rendered` of the `GATE` line, when fewer
+  frames were received than the clock had). The loop of the benchmark does not wait for a
+  display: a frame of the clock that starts while the render thread still has the batch before
+  it commits nothing and costs close to nothing, so a side that presents fewer of its frames
+  looked faster by the frames it did not draw (section 9.42: 226 to 228 of 240 frames on one
+  side, 237 to 239 on the other, which read as 5 to 7 % of wall time). The UI thread time stays
+  that of a frame of the clock: the UI thread runs every one.
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -679,6 +690,7 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
+| Render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
 | Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
