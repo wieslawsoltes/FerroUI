@@ -167,7 +167,7 @@ impl ControlImpl for PersonPicture {
                 ellipse.set_height(plate);
                 ellipse.set_width(plate);
             }
-            number.set_font_size((plate * 0.6).max(1.0));
+            number.set_font_size(Self::badge_number_font_size(plate, this.badge_number()));
             glyph.set_font_size((plate * 0.6).max(1.0));
         }
     }
@@ -465,62 +465,44 @@ impl PersonPicture {
         self.update_automation_name();
     }
 
+    fn badge_number_font_size(plate: f64, value: i32) -> f64 {
+        // Leave enough room for all three characters of "99+" in the circle.
+        let scale = if value > 99 { 0.42 } else { 0.6 };
+        (plate * scale).max(1.0)
+    }
+
     fn update_badge(&self) {
-        if self.badge_image_source().is_some() {
-            self.update_badge_image_source();
-        } else if self.badge_number() != 0 {
-            self.update_badge_number();
-        } else if !self.badge_glyph().is_empty() {
-            self.update_badge_glyph();
+        let parts = self.parts.borrow().clone();
+        let image = self.badge_image_source();
+        let number = self.badge_number();
+        let number_text = match (image.is_some(), number) {
+            (false, 1..=99) => number.to_string(),
+            (false, 100..) => "99+".to_owned(),
+            _ => String::new(),
+        };
+        let glyph = if image.is_none() && number == 0 { self.badge_glyph() } else { String::new() };
+        let state = if image.is_some() {
+            BadgeState::BadgeWithImageSource
+        } else if !number_text.is_empty() || !glyph.is_empty() {
+            BadgeState::BadgeWithoutImageSource
         } else {
-            // "No badge properties set, so clear the badge XAML"
-            self.go_to_badge_state(BadgeState::NoBadge);
-            let parts = self.parts.borrow().clone();
-            if let Some(number) = parts.badge_number_text_block {
-                number.set_text(Some(""));
+            BadgeState::NoBadge
+        };
+        self.badge_image_brush.set_source(image);
+        if let Some(text) = parts.badge_number_text_block {
+            // The plate has its size from the first size change on; before that the size of
+            // the number is the one of the template.
+            let plate = parts.badging_ellipse.as_ref().map(|plate| plate.width()).filter(|width| width.is_finite());
+            if let Some(plate) = plate {
+                text.set_font_size(Self::badge_number_font_size(plate, number));
             }
-            if let Some(glyph) = parts.badge_glyph_icon {
-                glyph.set_glyph("");
-            }
+            text.set_text(Some(&number_text));
         }
+        if let Some(icon) = parts.badge_glyph_icon {
+            icon.set_glyph(glyph);
+        }
+        self.go_to_badge_state(state);
         self.update_automation_name();
-    }
-
-    fn update_badge_number(&self) {
-        let parts = self.parts.borrow().clone();
-        let (Some(_), Some(number)) = (parts.badging_ellipse, parts.badge_number_text_block) else { return };
-        let badge_number = self.badge_number();
-        if badge_number <= 0 {
-            self.go_to_badge_state(BadgeState::NoBadge);
-            number.set_text(Some(""));
-            return;
-        }
-        // "should have badging number to show if we are here"
-        self.go_to_badge_state(BadgeState::BadgeWithoutImageSource);
-        number.set_text(Some(&if badge_number <= 99 { badge_number.to_string() } else { "99+".to_string() }));
-    }
-
-    fn update_badge_glyph(&self) {
-        let parts = self.parts.borrow().clone();
-        let (Some(_), Some(glyph)) = (parts.badging_ellipse, parts.badge_glyph_icon) else { return };
-        let badge_glyph = self.badge_glyph();
-        if badge_glyph.is_empty() {
-            self.go_to_badge_state(BadgeState::NoBadge);
-            glyph.set_glyph("");
-            return;
-        }
-        // "should have badging Glyph to show if we are here"
-        self.go_to_badge_state(BadgeState::BadgeWithoutImageSource);
-        glyph.set_glyph(badge_glyph);
-    }
-
-    fn update_badge_image_source(&self) {
-        if self.parts.borrow().badging_ellipse.is_none() {
-            return;
-        }
-        let source = self.badge_image_source();
-        self.badge_image_brush.set_source(source.clone());
-        self.go_to_badge_state(if source.is_some() { BadgeState::BadgeWithImageSource } else { BadgeState::NoBadge });
     }
 
     /// The automation name: the name of the person, and what the badge shows (WinUI's

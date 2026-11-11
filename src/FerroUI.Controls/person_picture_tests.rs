@@ -192,9 +192,16 @@ fn the_badge_shows_a_number_a_glyph_or_an_image() {
     picture.set_badge_glyph("\u{E765}");
     assert!(has(&picture, ":badge"));
     assert_eq!("\u{E765}", glyph.glyph());
+    picture.set_badge_number(120);
+    assert_eq!(Some("99+"), number.text().as_deref());
+    assert!(glyph.glyph().is_empty());
+    picture.set_badge_number(0);
+    assert_eq!("\u{E765}", glyph.glyph());
+    assert_eq!(Some(""), number.text().as_deref());
     // An image wins over the number and the glyph.
     picture.set_badge_image_source(Some(image()));
     assert!(has(&picture, ":badgeimage") && !has(&picture, ":badge"));
+    assert!(glyph.glyph().is_empty());
     let ellipse = part::<Ellipse>(&picture, "BadgingEllipse");
     assert!(ellipse.fill().is_some());
 }
