@@ -141,6 +141,10 @@ impl CompositionGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TrimEnd", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_geometry.get().contains(CompositionGeometryChangedFields::TRIM_END_ANIMATED) {
+                    self.changed_fields_of_composition_geometry.set(self.changed_fields_of_composition_geometry.get() & !CompositionGeometryChangedFields::TRIM_END);
+                }
             }
         }
         self.trim_end.set(value);
@@ -182,6 +186,10 @@ impl CompositionGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TrimOffset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_geometry.get().contains(CompositionGeometryChangedFields::TRIM_OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_geometry.set(self.changed_fields_of_composition_geometry.get() & !CompositionGeometryChangedFields::TRIM_OFFSET);
+                }
             }
         }
         self.trim_offset.set(value);
@@ -223,6 +231,10 @@ impl CompositionGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TrimStart", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_geometry.get().contains(CompositionGeometryChangedFields::TRIM_START_ANIMATED) {
+                    self.changed_fields_of_composition_geometry.set(self.changed_fields_of_composition_geometry.get() & !CompositionGeometryChangedFields::TRIM_START);
+                }
             }
         }
         self.trim_start.set(value);
@@ -270,20 +282,23 @@ impl CompositionGeometryProps {
     pub fn serialize_changes_core(&self, host: &dyn CompositionGeometryHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_composition_geometry.get();
         writer.write(changed);
+        if changed.contains(CompositionGeometryChangedFields::TRIM_END) {
+            writer.write(self.trim_end.get());
+        }
         if changed.contains(CompositionGeometryChangedFields::TRIM_END_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionGeometryProps::id_of_trim_end_property().base()));
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_END) {
-            writer.write(self.trim_end.get());
+        }
+        if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET) {
+            writer.write(self.trim_offset.get());
         }
         if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionGeometryProps::id_of_trim_offset_property().base()));
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET) {
-            writer.write(self.trim_offset.get());
+        }
+        if changed.contains(CompositionGeometryChangedFields::TRIM_START) {
+            writer.write(self.trim_start.get());
         }
         if changed.contains(CompositionGeometryChangedFields::TRIM_START_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionGeometryProps::id_of_trim_start_property().base()));
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_START) {
-            writer.write(self.trim_start.get());
         }
         self.changed_fields_of_composition_geometry.set(CompositionGeometryChangedFields::empty());
     }
@@ -414,6 +429,10 @@ impl ServerCompositionGeometryProps {
     ) {
         ServerCompositionGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionGeometryChangedFields>();
+        if changed.contains(CompositionGeometryChangedFields::TRIM_END) {
+            let value = reader.read::<f32>();
+            self.set_trim_end(host, value);
+        }
         if changed.contains(CompositionGeometryChangedFields::TRIM_END_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `TrimEnd` without an animation instance");
@@ -424,9 +443,10 @@ impl ServerCompositionGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_END) {
+        }
+        if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET) {
             let value = reader.read::<f32>();
-            self.set_trim_end(host, value);
+            self.set_trim_offset(host, value);
         }
         if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -438,9 +458,10 @@ impl ServerCompositionGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_OFFSET) {
+        }
+        if changed.contains(CompositionGeometryChangedFields::TRIM_START) {
             let value = reader.read::<f32>();
-            self.set_trim_offset(host, value);
+            self.set_trim_start(host, value);
         }
         if changed.contains(CompositionGeometryChangedFields::TRIM_START_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -452,9 +473,6 @@ impl ServerCompositionGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionGeometryChangedFields::TRIM_START) {
-            let value = reader.read::<f32>();
-            self.set_trim_start(host, value);
         }
         ServerCompositionGeometryHooks::on_fields_deserialized(host, changed);
     }

@@ -151,6 +151,10 @@ impl CompositionBitmapCacheProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RenderAtScale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_bitmap_cache.get().contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_bitmap_cache.set(self.changed_fields_of_composition_bitmap_cache.get() & !CompositionBitmapCacheChangedFields::RENDER_AT_SCALE);
+                }
             }
         }
         self.render_at_scale.set(value);
@@ -192,6 +196,10 @@ impl CompositionBitmapCacheProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "SnapsToDevicePixels", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_bitmap_cache.get().contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS_ANIMATED) {
+                    self.changed_fields_of_composition_bitmap_cache.set(self.changed_fields_of_composition_bitmap_cache.get() & !CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS);
+                }
             }
         }
         self.snaps_to_device_pixels.set(value);
@@ -233,6 +241,10 @@ impl CompositionBitmapCacheProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "EnableClearType", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_bitmap_cache.get().contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE_ANIMATED) {
+                    self.changed_fields_of_composition_bitmap_cache.set(self.changed_fields_of_composition_bitmap_cache.get() & !CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE);
+                }
             }
         }
         self.enable_clear_type.set(value);
@@ -281,20 +293,23 @@ impl CompositionBitmapCacheProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_bitmap_cache.get();
         writer.write(changed);
+        if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE) {
+            writer.write(self.render_at_scale.get());
+        }
         if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionBitmapCacheProps::id_of_render_at_scale_property().base()));
-        } else if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE) {
-            writer.write(self.render_at_scale.get());
+        }
+        if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS) {
+            writer.write(self.snaps_to_device_pixels.get());
         }
         if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionBitmapCacheProps::id_of_snaps_to_device_pixels_property().base()));
-        } else if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS) {
-            writer.write(self.snaps_to_device_pixels.get());
+        }
+        if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE) {
+            writer.write(self.enable_clear_type.get());
         }
         if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionBitmapCacheProps::id_of_enable_clear_type_property().base()));
-        } else if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE) {
-            writer.write(self.enable_clear_type.get());
         }
         self.changed_fields_of_composition_bitmap_cache.set(CompositionBitmapCacheChangedFields::empty());
     }
@@ -433,6 +448,10 @@ impl ServerCompositionBitmapCacheProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionBitmapCacheHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionBitmapCacheChangedFields>();
+        if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE) {
+            let value = reader.read::<f64>();
+            self.set_render_at_scale(host, value);
+        }
         if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RenderAtScale` without an animation instance");
@@ -443,9 +462,10 @@ impl ServerCompositionBitmapCacheProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE) {
-            let value = reader.read::<f64>();
-            self.set_render_at_scale(host, value);
+        }
+        if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS) {
+            let value = reader.read::<bool>();
+            self.set_snaps_to_device_pixels(host, value);
         }
         if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -457,9 +477,10 @@ impl ServerCompositionBitmapCacheProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS) {
+        }
+        if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE) {
             let value = reader.read::<bool>();
-            self.set_snaps_to_device_pixels(host, value);
+            self.set_enable_clear_type(host, value);
         }
         if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -471,9 +492,6 @@ impl ServerCompositionBitmapCacheProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE) {
-            let value = reader.read::<bool>();
-            self.set_enable_clear_type(host, value);
         }
         ServerCompositionBitmapCacheHooks::on_fields_deserialized(host, changed);
     }

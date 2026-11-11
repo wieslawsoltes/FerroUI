@@ -150,6 +150,10 @@ impl CompositionBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Opacity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_brush.get().contains(CompositionBrushChangedFields::OPACITY_ANIMATED) {
+                    self.changed_fields_of_composition_brush.set(self.changed_fields_of_composition_brush.get() & !CompositionBrushChangedFields::OPACITY);
+                }
             }
         }
         self.opacity.set(value);
@@ -258,10 +262,11 @@ impl CompositionBrushProps {
     pub fn serialize_changes_core(&self, host: &dyn CompositionBrushHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_composition_brush.get();
         writer.write(changed);
+        if changed.contains(CompositionBrushChangedFields::OPACITY) {
+            writer.write(self.opacity.get());
+        }
         if changed.contains(CompositionBrushChangedFields::OPACITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionBrushProps::id_of_opacity_property().base()));
-        } else if changed.contains(CompositionBrushChangedFields::OPACITY) {
-            writer.write(self.opacity.get());
         }
         if changed.contains(CompositionBrushChangedFields::TRANSFORM_ORIGIN) {
             writer.write(self.transform_origin.get());
@@ -486,6 +491,10 @@ impl ServerCompositionBrushProps {
         let compositor = host.server_compositor();
         ServerCompositionBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionBrushChangedFields>();
+        if changed.contains(CompositionBrushChangedFields::OPACITY) {
+            let value = reader.read::<f64>();
+            self.set_opacity(host, value);
+        }
         if changed.contains(CompositionBrushChangedFields::OPACITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Opacity` without an animation instance");
@@ -496,9 +505,6 @@ impl ServerCompositionBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionBrushChangedFields::OPACITY) {
-            let value = reader.read::<f64>();
-            self.set_opacity(host, value);
         }
         if changed.contains(CompositionBrushChangedFields::TRANSFORM_ORIGIN) {
             let value = reader.read::<RelativePoint>();

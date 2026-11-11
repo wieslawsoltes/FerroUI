@@ -1098,17 +1098,18 @@ class Generator:
         flag = screaming(prop.name)
         field = snake(prop.name)
         write = self.write_expr(info, self.field_get(info, field))
+        unit.emit("        if changed.contains(%s::%s) {" % (changed_type, flag))
+        unit.emit("            " + write)
+        unit.emit("        }")
         if prop.animated:
+            # A value assigned before the animation was started goes first:
+            # the animation starts from it (see `generate_client_property`).
             unit.emit("        if changed.contains(%s::%s_ANIMATED) {" % (changed_type, flag))
             unit.emit(
                 "            writer.write_value(host.pending_animations().get_and_remove(%s));"
                 % self.client_property_ref(unit, cl, prop)
             )
-            unit.emit("        } else if changed.contains(%s::%s) {" % (changed_type, flag))
-        else:
-            unit.emit("        if changed.contains(%s::%s) {" % (changed_type, flag))
-        unit.emit("            " + write)
-        unit.emit("        }")
+            unit.emit("        }")
 
     def generate_client_property(self, unit, cl, prop):
         info = self.get_type_info(prop.type)
@@ -1189,6 +1190,17 @@ class Generator:
             unit.emit("                }")
             unit.emit("                // Animation is triggered by the current field, but does not necessary affects it")
             unit.emit('                host.start_animation_group(&animation, "%s", ExpressionVariant::create(value));' % prop.name)
+            # An implicit animation of the property runs from the value the
+            # server has to the assigned one, so the assigned value is not
+            # sent ahead of it. A value assigned before an animation is
+            # started explicitly is: both flags stay set, the value is sent
+            # first and the animation starts from it.
+            unit.emit("                // The implicit animation starts from the value the server has.")
+            unit.emit("                if self.%s.get().contains(%s::%s_ANIMATED) {" % (changed_field, changed_type, flag))
+            unit.emit(
+                "                    self.%s.set(self.%s.get() & !%s::%s);" % (changed_field, changed_field, changed_type, flag)
+            )
+            unit.emit("                }")
             unit.emit("            }")
         unit.emit("        }")
         unit.emit("        " + self.field_set(info, field, "value"))
@@ -1590,11 +1602,16 @@ class Generator:
             unit.use(COMPOSITION + "::server::read_resource")
         elif info.kind == "object":
             unit.use(COMPOSITION + "::server::read_server_object")
+        unit.emit("        if changed.contains(%s::%s) {" % (changed_type, flag))
+        unit.emit("            let value = %s;" % self.read_expr(info))
+        unit.emit("            self.set_%s(host, value);" % field)
+        unit.emit("        }")
         if prop.animated:
             unit.use(
                 COMPOSITION + "::animations::AnimationInstanceFactory",
                 COMPOSITION + "::expressions::ExpressionVariant",
             )
+            # After the value of the same batch, which the animation starts from.
             unit.emit("        if changed.contains(%s::%s_ANIMATED) {" % (changed_type, flag))
             # What a batch carries is the factory of the instance; the instance
             # is created here, on the thread that runs it.
@@ -1607,12 +1624,7 @@ class Generator:
             unit.emit("                committed_at,")
             unit.emit("                animation,")
             unit.emit("            );")
-            unit.emit("        } else if changed.contains(%s::%s) {" % (changed_type, flag))
-        else:
-            unit.emit("        if changed.contains(%s::%s) {" % (changed_type, flag))
-        unit.emit("            let value = %s;" % self.read_expr(info))
-        unit.emit("            self.set_%s(host, value);" % field)
-        unit.emit("        }")
+            unit.emit("        }")
 
     def generate_server_property(self, unit, cl, prop, animated_host):
         info = self.get_type_info(prop.type)

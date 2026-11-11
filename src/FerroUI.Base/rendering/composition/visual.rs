@@ -238,6 +238,22 @@ impl CompositionVisual {
         matches!(&self.kind, CompositionVisualKind::DrawList(data) if data.is_departed())
     }
 
+    /// Whether a hit test passes through the visual to its children, in the coordinates of its
+    /// parent (docs/porting/desktop-performance.md, section 9.41): it was created for a visual
+    /// that was shown without a composition visual, and no frame was rendered with it yet. A
+    /// hit test reads where the composition visuals were in the last frame, and in that frame
+    /// what is under this one was a child of the one above it.
+    pub(crate) fn hit_tests_through(&self) -> bool {
+        self.root().is_some() && self.is_shown_through_unread()
+    }
+
+    /// Whether the visual was created for a visual that was shown without a composition
+    /// visual and no frame that a hit test reads was rendered with it (section 9.41).
+    pub(crate) fn is_shown_through_unread(&self) -> bool {
+        matches!(&self.kind, CompositionVisualKind::DrawList(data) if data.is_shown_through())
+            && self.readback_revision(self.compositor().readback().read_revision()).is_none()
+    }
+
     pub fn root(&self) -> Option<Rc<CompositionTarget>> {
         self.visual_props().root().and_then(|o| o.into_any_rc().downcast::<CompositionTarget>().ok())
     }

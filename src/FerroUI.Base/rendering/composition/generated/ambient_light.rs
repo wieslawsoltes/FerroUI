@@ -143,6 +143,10 @@ impl AmbientLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_ambient_light.get().contains(AmbientLightChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_ambient_light.set(self.changed_fields_of_ambient_light.get() & !AmbientLightChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -184,6 +188,10 @@ impl AmbientLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Intensity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_ambient_light.get().contains(AmbientLightChangedFields::INTENSITY_ANIMATED) {
+                    self.changed_fields_of_ambient_light.set(self.changed_fields_of_ambient_light.get() & !AmbientLightChangedFields::INTENSITY);
+                }
             }
         }
         self.intensity.set(value);
@@ -225,15 +233,17 @@ impl AmbientLightProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_ambient_light.get();
         writer.write(changed);
+        if changed.contains(AmbientLightChangedFields::COLOR) {
+            writer.write(self.color.get());
+        }
         if changed.contains(AmbientLightChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerAmbientLightProps::id_of_color_property().base()));
-        } else if changed.contains(AmbientLightChangedFields::COLOR) {
-            writer.write(self.color.get());
+        }
+        if changed.contains(AmbientLightChangedFields::INTENSITY) {
+            writer.write(self.intensity.get());
         }
         if changed.contains(AmbientLightChangedFields::INTENSITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerAmbientLightProps::id_of_intensity_property().base()));
-        } else if changed.contains(AmbientLightChangedFields::INTENSITY) {
-            writer.write(self.intensity.get());
         }
         self.changed_fields_of_ambient_light.set(AmbientLightChangedFields::empty());
     }
@@ -345,6 +355,10 @@ impl ServerAmbientLightProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerAmbientLightHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<AmbientLightChangedFields>();
+        if changed.contains(AmbientLightChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(AmbientLightChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -355,9 +369,10 @@ impl ServerAmbientLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(AmbientLightChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
+        }
+        if changed.contains(AmbientLightChangedFields::INTENSITY) {
+            let value = reader.read::<f32>();
+            self.set_intensity(host, value);
         }
         if changed.contains(AmbientLightChangedFields::INTENSITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -369,9 +384,6 @@ impl ServerAmbientLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(AmbientLightChangedFields::INTENSITY) {
-            let value = reader.read::<f32>();
-            self.set_intensity(host, value);
         }
         ServerAmbientLightHooks::on_fields_deserialized(host, changed);
     }

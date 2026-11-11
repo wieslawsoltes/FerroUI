@@ -74,6 +74,14 @@ pub trait IRenderer {
         false
     }
 
+    /// A visual in the visual tree of the renderer that had no composition visual was given
+    /// one outside the synchronisation of the renderer (something asked for it, or the visual
+    /// set something of the composition API): the renderer places it in the composition tree,
+    /// under the composition visual of the nearest visual above that has one and over those of
+    /// the visuals below (FerroUI addition, docs/porting/desktop-performance.md, section 9.41).
+    /// The default does nothing: a renderer without a compositor has no composition tree.
+    fn composition_visual_materialized(&self, _visual: &Visual) {}
+
     /// Runs `departure`, in which visuals leave the visual tree of the renderer, and returns the
     /// composition visuals the renderer kept for them: they live until what is returned is
     /// released or dropped, and a visual that is in a tree of the renderer again before that has

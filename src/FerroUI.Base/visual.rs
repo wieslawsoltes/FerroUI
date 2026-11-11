@@ -16,6 +16,25 @@ use crate::{
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+/// Whether a visual gets a composition visual only once it shows something or something asks
+/// for it (docs/porting/desktop-performance.md, section 9.41).
+static COMPOSITION_VISUALS_ON_DEMAND: AtomicBool = AtomicBool::new(true);
+
+/// A visual without a composition visual: the offset of a composition visual below it was
+/// computed through its position.
+const ELIDED_OFFSET_THROUGH: u8 = 1;
+/// A visual without a composition visual: its position changed since then.
+const ELIDED_OFFSET_MOVED: u8 = 2;
+/// A visual without a composition visual: an update pass of its renderer has seen it, so its
+/// bounds are those of a layout pass.
+const ELIDED_SEEN: u8 = 4;
+/// How many composition visuals, and how many visuals, the move of a visual without a
+/// composition visual re-positions below it before the visual gets a composition visual of
+/// its own instead.
+const ELIDED_MOVE_VISUALS: u32 = 8;
+const ELIDED_MOVE_NODES: u32 = 32;
 
 /// Base class for controls that provides rendering and related visual
 /// properties.
@@ -61,6 +80,9 @@ pub struct Visual {
     // synchronisation of the visual tree, which may have changed it or may hold it. Such a
     // composition visual is released when the visual leaves its tree, as upstream.
     composition_visual_handed_out: Cell<bool>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.41): what a visual without a
+    // composition visual of its own keeps for the composition visuals below it (`ELIDED_*`).
+    elided_state: Cell<u8>,
     child_composition_visual: RefCell<Option<Rc<CompositionVisual>>>,
     /// What the composition API of WinUI adds to the visual (the `Translation` facade, the
     /// requests to hide the composition visual, the layer composition visual): boxed and
@@ -197,6 +219,12 @@ ferro_class! {
         fn synchronize_composition_child_visuals(this);
         /// Copies the properties of the visual to its composition visual.
         fn synchronize_composition_properties(this);
+        /// Whether the visual has a composition visual of its own whatever it draws: a class
+        /// whose [`create_composition_visual`](Self::create_composition_visual) makes a
+        /// composition visual that shows something itself says so here. Any other visual gets
+        /// its composition visual once it draws something, sets something the compositor
+        /// applies, or is asked for it (docs/porting/desktop-performance.md, section 9.41).
+        fn requires_composition_visual(this) -> bool;
     }
 }
 
@@ -301,7 +329,17 @@ impl VisualImpl for Visual {
         this.enable_transitions();
         let renderer = e.presentation_source().renderer();
         if let Some(compositor) = renderer.compositor() {
-            this.attach_to_compositor_core(&compositor, Some(&*renderer));
+            // Not upstream (section 9.41): the root, a visual that returns with the composition
+            // visual it had and one that holds a composition visual are attached here. Any other
+            // visual gets its composition visual from the update pass of the renderer, once it
+            // is known to show something, or when something asks for it.
+            if !Self::composition_visuals_on_demand()
+                || this.visual_parent.borrow().is_none()
+                || this.composition_visual_departed.get()
+                || this.composition_visual.borrow().is_some()
+            {
+                this.attach_to_compositor_core(&compositor, Some(&*renderer));
+            }
         }
 
         this.invalidate_mirror_transform();
@@ -352,10 +390,13 @@ impl VisualImpl for Visual {
                 handler(e);
             }
         }
-        if let Some(source) = this.presentation_source() {
+        // The renderer is told once the visual is out of the tree: that is how it knows a visual
+        // that left from one that has no composition visual (section 9.41).
+        let source = this.presentation_source.borrow_mut().take();
+        if let Some(source) = source {
             source.renderer().add_dirty(this);
         }
-        *this.presentation_source.borrow_mut() = None;
+        this.elided_state.set(0);
 
         if let Some(children) = this.visual_children.get() {
             for child in children.snapshot().iter() {
@@ -405,6 +446,10 @@ impl VisualImpl for Visual {
         CompositionDrawListVisual::new(compositor, this)
     }
 
+    fn requires_composition_visual(_this: &Self) -> bool {
+        false
+    }
+
     fn detach_from_compositor(this: &Self) {
         // The shadow visual belongs to the composition visual it follows.
         this.release_theme_shadow_visual();
@@ -415,6 +460,9 @@ impl VisualImpl for Visual {
         if let Some(composition_visual) = composition_visual {
             this.release_composition_visual(&composition_visual);
         }
+        // Nothing holds a composition visual of this visual any more: in its next tree the
+        // visual gets one when it needs one (section 9.41).
+        this.composition_visual_handed_out.set(false);
     }
 
     fn synchronize_composition_child_visuals(this: &Self) {
@@ -433,11 +481,21 @@ impl VisualImpl for Visual {
             }
             return;
         }
-        let visual_children: Rc<Vec<Ref<Visual>>> =
+        let mut visual_children: Rc<Vec<Ref<Visual>>> =
             this.visual_children_snapshot().unwrap_or_else(|| Rc::new(Vec::new()));
 
+        // Not upstream (section 9.41): a child without a composition visual stands for the
+        // composition visuals nearest below it, in its own order. The list is then the one the
+        // composition children are, already in Z order.
+        let flattened = visual_children.iter().any(|child| !child.has_composition_visual());
+        if flattened {
+            let mut nearest = Vec::with_capacity(visual_children.len());
+            this.collect_composition_children(&mut nearest);
+            visual_children = Rc::new(nearest);
+        }
+
         let mut sorted_children: Option<Vec<(Ref<Visual>, usize)>> = None;
-        if this.has_non_uniform_z_index_children() && visual_children.len() > 1 {
+        if !flattened && this.has_non_uniform_z_index_children() && visual_children.len() > 1 {
             let mut sorted: Vec<(Ref<Visual>, usize)> =
                 visual_children.iter().cloned().enumerate().map(|(index, visual)| (visual, index)).collect();
             // The indices keep the order of elements with the same Z index.
@@ -545,10 +603,20 @@ impl VisualImpl for Visual {
         composition_children.clear();
         for c in 0..child_count {
             if let Some(shadow) = shadow_at(c) {
+                // The shadow is shown by the visual that shows its caster (section 9.41).
+                if let Some(old_parent) = shadow.parent() {
+                    old_parent.children().remove(shadow);
+                }
                 composition_children.add(shadow.clone());
             }
             if let Some(composition_child) = child_at(c).own_composition_visual() {
-                composition_children.add((*composition_child).clone());
+                let composition_child: Rc<CompositionVisual> = (*composition_child).clone();
+                // A composition visual that was shown by a visual further up (this visual had
+                // no composition visual then, section 9.41) leaves it: it has one parent.
+                if let Some(old_parent) = composition_child.parent() {
+                    old_parent.children().remove(&composition_child);
+                }
+                composition_children.add(composition_child);
             }
         }
 
@@ -565,6 +633,12 @@ impl VisualImpl for Visual {
 
     fn synchronize_composition_properties(this: &Self) {
         let Some(comp) = this.own_composition_visual() else { return };
+        // What was given the composition visual, or set something of the composition API on the
+        // visual, sees the offset and the parent of the composition visual: they are those of
+        // the visual tree, since the parent then has a composition visual too (section 9.41).
+        if this.is_composition_observable() {
+            this.ensure_parent_composition_visual();
+        }
         let bounds = this.bounds();
 
         // The implicit animations of the transitions, installed before the properties are
@@ -575,7 +649,7 @@ impl VisualImpl for Visual {
         // Composition property assignment replaces an animation, including assignment of
         // an unchanged API-side value. Only forward actual framework changes to the handoff
         // visual, so an unrelated repaint does not replace an application's animation.
-        let offset = crate::Vector3D::new(bounds.x, bounds.y, 0.0);
+        let offset = this.composition_offset(true);
         if comp.offset() != offset { comp.set_offset(offset); }
         let size = crate::Vector::new(bounds.width, bounds.height);
         if comp.size() != size { comp.set_size(size); }
@@ -851,7 +925,15 @@ impl Visual {
             .changed()
             .subscribe(|e| {
                 if let Some(visual) = e.sender().downcast_ref::<Visual>() {
-                    let resized = e.get_old_value::<Rect>().is_none_or(|old| old.size() != e.get_new_value::<Rect>().size());
+                    let old = e.get_old_value::<Rect>();
+                    let new = e.get_new_value::<Rect>();
+                    let resized = old.is_none_or(|old| old.size() != new.size());
+                    // The composition visuals below a visual that has none are positioned
+                    // through it (section 9.41).
+                    let state = visual.elided_state.get();
+                    if state & ELIDED_OFFSET_THROUGH != 0 && old.is_none_or(|old| old.position() != new.position()) {
+                        visual.elided_state.set(state | ELIDED_OFFSET_MOVED);
+                    }
                     if resized {
                         visual.invalidate_visual();
                     } else {
@@ -863,6 +945,17 @@ impl Visual {
         Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
         // Opacity is a composition property: its change does not record the drawing again.
         Self::opacity_property()
+            .changed()
+            .subscribe(|e| {
+                if let Some(sender) = e.sender().downcast_ref::<Visual>() {
+                    sender.invalidate_composition_properties();
+                }
+            })
+            .detach();
+        // The cache mode is a composition property too. Nothing followed its change before a
+        // visual could be without a composition visual; a visual that gets a cache mode gets
+        // one (section 9.41).
+        Self::cache_mode_property()
             .changed()
             .subscribe(|e| {
                 if let Some(sender) = e.sender().downcast_ref::<Visual>() {
@@ -912,6 +1005,7 @@ impl Visual {
             composition_visual: RefCell::new(None),
             composition_visual_departed: Cell::new(false),
             composition_visual_handed_out: Cell::new(false),
+            elided_state: Cell::new(0),
             child_composition_visual: RefCell::new(None),
             composition_extras: RefCell::new(None),
             render_transform_subscription: RefCell::new(None),
@@ -1226,12 +1320,257 @@ impl Visual {
 
     /// The composition visual of the visual, while it is attached to a
     /// visual tree rendered by a compositor.
+    ///
+    /// A visual that shows nothing itself has none until it is asked for here (section 9.41 of
+    /// docs/porting/desktop-performance.md): it is created then, and so is the one of the
+    /// visual parent, so that the offset and the parent of what is returned are those of the
+    /// visual tree. [`has_composition_visual`](Self::has_composition_visual) asks without
+    /// creating one.
     pub fn composition_visual(&self) -> Option<CompositionDrawListVisual> {
-        let composition_visual = self.own_composition_visual()?;
+        let composition_visual = match self.own_composition_visual() {
+            Some(composition_visual) => composition_visual,
+            None => self.materialize_composition_visual()?,
+        };
         // What is given out here may be changed or held by the caller: it is not kept when the
         // visual leaves its tree (section 9.32).
         self.composition_visual_handed_out.set(true);
+        self.ensure_parent_composition_visual();
         Some(composition_visual)
+    }
+
+    /// Whether the visual has a composition visual of its own now. A visual attached to a tree
+    /// that has none is shown by the composition visuals of the visuals under it, which are
+    /// children of the composition visual of the nearest visual above it that has one
+    /// (docs/porting/desktop-performance.md, section 9.41).
+    #[inline]
+    pub fn has_composition_visual(&self) -> bool {
+        !self.composition_visual_departed.get() && self.composition_visual.borrow().is_some()
+    }
+
+    /// Whether visuals get their composition visuals on demand (the default), or each of them
+    /// when it is attached to a visual tree.
+    #[inline]
+    pub fn composition_visuals_on_demand() -> bool {
+        COMPOSITION_VISUALS_ON_DEMAND.load(Ordering::Relaxed)
+    }
+
+    /// Sets whether visuals get their composition visuals on demand. With `false` every visual
+    /// has a composition visual from the moment it is attached to a visual tree, as upstream.
+    /// It applies to the visuals attached from then on; it is meant to be set once, before the
+    /// first window.
+    pub fn set_composition_visuals_on_demand(value: bool) {
+        COMPOSITION_VISUALS_ON_DEMAND.store(value, Ordering::Relaxed);
+    }
+
+    /// The nearest visual above this one that has a composition visual.
+    pub(crate) fn nearest_composition_ancestor(&self) -> Option<Ref<Visual>> {
+        let mut parent = self.visual_parent();
+        while let Some(ancestor) = parent {
+            if ancestor.has_composition_visual() {
+                return Some(ancestor);
+            }
+            parent = ancestor.visual_parent();
+        }
+        None
+    }
+
+    /// Whether the visual needs a composition visual of its own for something other than its
+    /// drawing: it is the root, it sets something the compositor applies (a transform, an
+    /// opacity, a clip, an effect, a cache mode, options, its visibility), it uses the
+    /// composition API, or it answers hit tests itself. A visual that needs none and draws
+    /// nothing has none (section 9.41).
+    pub(crate) fn needs_own_composition_visual(&self) -> bool {
+        if !Self::composition_visuals_on_demand()
+            || self.visual_parent.borrow().is_none()
+            || self.composition_extras.borrow().is_some()
+            || self.child_composition_visual.borrow().is_some()
+            || self.has_mirror_transform.get()
+            || self.has_manipulation_transform.get()
+            || self.render_options.get() != RenderOptions::default()
+            || self.text_options.get() != TextOptions::default()
+        {
+            return true;
+        }
+        let inputs = self.composition_styled_inputs();
+        inputs.opacity != 1.0
+            || inputs.clip_to_bounds
+            || inputs.has_clip
+            || inputs.has_opacity_mask
+            || inputs.has_cache_mode
+            || inputs.has_effect
+            || inputs.has_render_transform
+            || !self.is_visible()
+            || self.requires_composition_visual()
+            || self.custom_hit_test(crate::Point::default()).is_some()
+    }
+
+    /// Whether something outside the synchronisation of the visual tree may read or animate the
+    /// composition visual: it was handed out, or the visual has state of the composition API.
+    #[inline]
+    fn is_composition_observable(&self) -> bool {
+        self.composition_visual_handed_out.get() || self.composition_extras.borrow().is_some()
+    }
+
+    /// Gives the visual parent a composition visual when it has none.
+    fn ensure_parent_composition_visual(&self) {
+        if let Some(parent) = self.visual_parent() {
+            if !parent.has_composition_visual() {
+                parent.materialize_composition_visual();
+            }
+        }
+    }
+
+    /// Creates the composition visual of a visual that is attached to a tree without one, and
+    /// tells the renderer, which places it in the composition tree (section 9.41). `None` when
+    /// the visual is in no tree rendered by a compositor.
+    pub(crate) fn materialize_composition_visual(&self) -> Option<CompositionDrawListVisual> {
+        if self.composition_visual_departed.get() {
+            return None;
+        }
+        let existing = self.composition_visual.borrow().clone();
+        if existing.is_some() {
+            return existing;
+        }
+        let source = self.presentation_source()?;
+        let renderer = source.renderer();
+        let compositor = renderer.compositor()?;
+        let created = self.attach_to_compositor_core(&compositor, Some(&*renderer));
+        renderer.composition_visual_materialized(self);
+        Some(created)
+    }
+
+    /// The offset of the composition visual of the visual: its position in the nearest visual
+    /// above it that has a composition visual (section 9.41). With `mark`, the visuals between
+    /// the two remember that an offset was computed through them.
+    pub(crate) fn composition_offset(&self, mark: bool) -> crate::Vector3D {
+        let bounds = self.bounds.get();
+        let (mut x, mut y) = (bounds.x, bounds.y);
+        let mut parent = self.visual_parent();
+        while let Some(ancestor) = parent {
+            if ancestor.has_composition_visual() || !ancestor.is_attached_to_visual_tree() {
+                break;
+            }
+            let position = ancestor.bounds.get();
+            x += position.x;
+            y += position.y;
+            if mark {
+                ancestor.elided_state.set(ancestor.elided_state.get() | ELIDED_OFFSET_THROUGH);
+            }
+            parent = ancestor.visual_parent();
+        }
+        crate::Vector3D::new(x, y, 0.0)
+    }
+
+    /// Writes the offset of the composition visual again: a visual above it that has no
+    /// composition visual moved, or got one.
+    fn synchronize_composition_offset(&self) {
+        if let Some(comp) = self.own_composition_visual() {
+            let offset = self.composition_offset(true);
+            if comp.offset() != offset {
+                comp.set_offset(offset);
+            }
+        }
+    }
+
+    /// Writes the offsets of the composition visuals nearest below this visual again. `false`
+    /// when it stopped because there are more of them than `visuals_left`, or more visuals on
+    /// the way than `nodes_left`.
+    fn synchronize_composition_offsets_below(&self, visuals_left: &mut u32, nodes_left: &mut u32) -> bool {
+        let Some(children) = self.visual_children_snapshot() else { return true };
+        for child in children.iter() {
+            if *nodes_left == 0 {
+                return false;
+            }
+            *nodes_left -= 1;
+            if child.has_composition_visual() {
+                if *visuals_left == 0 {
+                    return false;
+                }
+                *visuals_left -= 1;
+                child.synchronize_composition_offset();
+            } else if child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0
+                && !child.synchronize_composition_offsets_below(visuals_left, nodes_left)
+            {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// For a visual that has a composition visual: the composition visuals below it that were
+    /// positioned through it while it had none are positioned in it (section 9.41).
+    pub(crate) fn settle_composition_offsets(&self) {
+        if self.elided_state.get() == 0 {
+            return;
+        }
+        let state = self.elided_state.replace(0);
+        if state & ELIDED_OFFSET_THROUGH != 0 {
+            let (mut visuals, mut nodes) = (u32::MAX, u32::MAX);
+            self.synchronize_composition_offsets_below(&mut visuals, &mut nodes);
+        }
+    }
+
+    /// For a visual without a composition visual, in the update pass of its renderer: the
+    /// composition visuals below it follow a change of its position. `false` when there are
+    /// too many of them: the renderer then gives the visual a composition visual, whose offset
+    /// is the one thing a later move changes.
+    pub(crate) fn move_composition_offsets_below(&self) -> bool {
+        let state = self.elided_state.get();
+        if state & ELIDED_OFFSET_MOVED == 0 {
+            return true;
+        }
+        self.elided_state.set(state & !ELIDED_OFFSET_MOVED);
+        let (mut visuals, mut nodes) = (ELIDED_MOVE_VISUALS, ELIDED_MOVE_NODES);
+        self.synchronize_composition_offsets_below(&mut visuals, &mut nodes)
+    }
+
+    /// The update pass of the renderer saw the visual without a composition visual: its bounds
+    /// are those of a layout pass from here on.
+    #[inline]
+    pub(crate) fn mark_seen_without_composition_visual(&self) {
+        self.elided_state.set(self.elided_state.get() | ELIDED_SEEN);
+    }
+
+    /// Whether an update pass saw the visual without a composition visual.
+    #[inline]
+    pub(crate) fn was_seen_without_composition_visual(&self) -> bool {
+        self.elided_state.get() & ELIDED_SEEN != 0
+    }
+
+    /// The composition visuals nearest below this visual, in the order they are shown: for each
+    /// visual child in Z order its composition visual, or, when it has none, those nearest
+    /// below it (section 9.41).
+    fn collect_composition_children(&self, out: &mut Vec<Ref<Visual>>) {
+        let Some(children) = self.visual_children_snapshot() else { return };
+        if self.has_non_uniform_z_index_children() && children.len() > 1 {
+            let mut sorted: Vec<(i32, usize)> =
+                children.iter().enumerate().map(|(index, child)| (child.z_index(), index)).collect();
+            // The indices keep the order of elements with the same Z index.
+            sorted.sort_unstable();
+            for (_, index) in sorted {
+                children[index].collect_composition_child(out);
+            }
+        } else {
+            for child in children.iter() {
+                child.collect_composition_child(out);
+            }
+        }
+    }
+
+    fn collect_composition_child(&self, out: &mut Vec<Ref<Visual>>) {
+        if self.has_composition_visual() {
+            out.push(self.to_ref());
+        } else {
+            self.collect_composition_children(out);
+        }
+    }
+
+    /// The visuals nearest below this one that have a composition visual, in the order they
+    /// are shown (section 9.41).
+    pub(crate) fn nearest_composition_descendants(&self) -> Vec<Ref<Visual>> {
+        let mut nearest = Vec::new();
+        self.collect_composition_children(&mut nearest);
+        nearest
     }
 
     /// The composition visual of the visual for the synchronisation of the visual tree with the
@@ -1376,8 +1715,24 @@ impl Visual {
     }
 
     fn with_composition_extras<R>(&self, f: impl FnOnce(&mut CompositionExtras) -> R) -> R {
-        let mut extras = self.composition_extras.borrow_mut();
-        f(extras.get_or_insert_with(Default::default))
+        let (result, created) = {
+            let mut extras = self.composition_extras.borrow_mut();
+            let created = extras.is_none();
+            (f(extras.get_or_insert_with(Default::default)), created)
+        };
+        if created {
+            self.composition_extras_created();
+        }
+        result
+    }
+
+    /// The visual has state of the composition API from here on: it has a composition visual
+    /// while it is in a tree (section 9.41). What set the state need not tell the renderer.
+    #[cold]
+    fn composition_extras_created(&self) {
+        if self.is_attached_to_visual_tree() && !self.has_composition_visual() {
+            self.materialize_composition_visual();
+        }
     }
 
     fn read_composition_extras<R>(&self, f: impl FnOnce(&CompositionExtras) -> R) -> Option<R> {
@@ -1606,15 +1961,24 @@ impl Visual {
     /// Makes sure the visual has a composition visual on `compositor` and
     /// returns it.
     pub fn attach_to_compositor(&self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
+        let had_one = self.has_composition_visual();
         let composition_visual = self.attach_to_compositor_core(compositor, None);
         self.composition_visual_handed_out.set(true);
+        if !had_one {
+            // A visual in a tree that had no composition visual: its renderer places the new
+            // one in the composition tree (section 9.41).
+            if let Some(source) = self.presentation_source() {
+                source.renderer().composition_visual_materialized(self);
+            }
+        }
+        self.ensure_parent_composition_visual();
         composition_visual
     }
 
     /// [`attach_to_compositor`](Self::attach_to_compositor) for the visual tree, which hands the
     /// composition visual to nothing. `renderer` is the renderer of the tree the visual is
     /// attached to.
-    fn attach_to_compositor_core(
+    pub(crate) fn attach_to_compositor_core(
         &self,
         compositor: &Rc<Compositor>,
         renderer: Option<&dyn IRenderer>,
@@ -1643,6 +2007,11 @@ impl Visual {
         }
         crate::perf_count!(CompositionVisualsCreated);
         let created = self.create_composition_visual(compositor);
+        if self.was_seen_without_composition_visual() {
+            // What is under the visual was shown without it until now: a hit test goes on to
+            // find it where it was shown, until a frame is rendered with the new one.
+            created.set_shown_through();
+        }
         *self.composition_visual.borrow_mut() = Some(created.clone());
         self.composition_visual_handed_out.set(false);
         self.composition_visual_created(&created);
@@ -1654,8 +2023,10 @@ impl Visual {
     /// be synchronized after the new one, and a composition visual has one parent.
     fn rejoin_composition_tree(&self, kept: &CompositionDrawListVisual) {
         let Some(old_parent) = kept.parent() else { return };
+        // The parent of a composition visual is the one of the nearest visual above that has a
+        // composition visual (section 9.41).
         let same_parent = self
-            .visual_parent()
+            .nearest_composition_ancestor()
             .and_then(|parent| parent.own_composition_visual())
             .is_some_and(|new_parent| Rc::ptr_eq(&new_parent, &old_parent));
         if !same_parent {
@@ -1857,6 +2228,11 @@ impl Visual {
         if let (Some(source), Some(old)) = (self.presentation_source(), &old) {
             let e = VisualTreeAttachmentEventArgs::new(Some(old.clone()), source);
             self.on_detached_from_visual_tree_core(&e);
+            // A parent without a composition visual does not show its children itself: the
+            // visual above it that does is told that one left (section 9.41).
+            if old.is_attached_to_visual_tree() && !old.has_composition_visual() {
+                e.presentation_source().renderer().recalculate_children(old);
+            }
         }
 
         if let Some(parent) = value {
@@ -1891,7 +2267,15 @@ impl Visual {
                     visual.set_visual_parent(Some(&this));
                 }
             }
-            NotifyCollectionChangedAction::Move | NotifyCollectionChangedAction::Reset => {}
+            NotifyCollectionChangedAction::Move | NotifyCollectionChangedAction::Reset => {
+                // The order of the children is the order of what shows them: a visual without
+                // a composition visual has the one above it that has one told (section 9.41).
+                if !self.has_composition_visual() {
+                    if let Some(source) = self.presentation_source() {
+                        source.renderer().recalculate_children(self);
+                    }
+                }
+            }
         }
     }
 }

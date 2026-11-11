@@ -2708,3 +2708,119 @@ What it costs, and what it does not:
 - **Tests:** `object_size_tests` keeps the two visuals in the allocator blocks they fit in
   now; `compositor_tests` covers the rare block on both threads and the defaults of a new
   visual; `release_excess` and `option_cell` have their own.
+
+### 9.41 Composition visuals on demand: an element that draws nothing and sets nothing has none
+
+Every attached element had a composition visual on the UI thread and a server visual on the
+render thread, made when it joined the tree. A third of the elements of the tiles start
+(117,399 of 352,187) record no drawing and set nothing the compositor applies: a panel
+without a background, a presenter, a decorator. Their two visuals did nothing but move
+their children, which an offset does as well.
+
+An attached element now has a composition visual or has none yet. It gets one, and keeps
+it until it leaves the tree, when one of these holds (`Visual::needs_own_composition_visual`):
+
+- it is the root of its presentation source;
+- its recording is not empty (`RenderDataDrawingContext::recorded_nothing`);
+- it sets something the compositor applies: an opacity other than one, a clip (to its bounds or a
+  geometry), an opacity mask, an effect, a cache mode, a render transform, a mirror or manipulation transform,
+  render or text options other than the defaults, or it is not visible;
+- it has composition extras (a layer, unloading visuals, facades, a translation, implicit
+  animations) or a child composition visual, or it casts a theme shadow (the shadow asks
+  for the visual of its caster);
+- it has a custom hit test, or its class says so (`requires_composition_visual`, a new
+  virtual beside `create_composition_visual`);
+- it is asked for: `composition_visual()` and `attach_to_compositor` make it. The parent
+  of an element whose visual was handed out has one as well, so that the `Offset` and the
+  `Parent` a caller reads keep their meaning.
+
+What an element without a composition visual changes for the others:
+
+- **Offsets.** The offset of a composition visual is the position of its element plus the
+  positions of the elements without one between it and the nearest ancestor that has one.
+  An element without a visual that moves moves the offsets of the nearest visuals below
+  it (up to eight visuals and thirty-two elements; beyond that it gets a visual).
+- **Children.** The children of a composition visual are the nearest composition visuals
+  below its element, in the Z order of each level.
+- **The update pass.** The renderer records an element first and decides then
+  (`CompositingRenderer::update_core`): an element that recorded nothing and needs nothing
+  is passed over, and the nearest ancestor with a visual synchronizes its children. A
+  visual that is made in a pass, or between two passes, is placed by the renderer
+  (`IRenderer::composition_visual_materialized`): its children leave the ancestor that
+  showed them and their offsets are taken from it.
+- **Hit testing.** The filter of a hit test is asked for the elements without a visual
+  between a visual and the element of its parent visual as well. A hit test from a root
+  without a visual tests the nearest visuals below it, topmost first. A composition visual
+  that was made for an element the compositor already showed without one has no readback
+  until the first frame with it: until then a hit test goes through it to its children
+  with the input of its parent, so what is under the pointer is found in the frame between.
+
+The process-wide switch `Visual::set_composition_visuals_on_demand(false)` gives every
+element a visual again; the start scenes are measured with both.
+
+The two start scenes, the median of seven runs that alternate the two settings of the
+switch in one build (Apple M3 Pro, release build, a quiet machine; the live heap and the
+counts are from the build with counters):
+
+| The tiles start (352,187 elements) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 352,187 | 234,791 | -33.3 % |
+| Objects in the first batch | 4,284,937 | 3,228,373 | -24.7 % |
+| Show: attach, styles, layout (ms) | 753.7 | 669.1 | -11.2 % |
+| First frame, UI thread (ms) | 394.6 | 459.1 | +16.3 % |
+| First frame, render thread (ms) | 733.5 | 586.6 | -20.0 % |
+| Show to first frame (ms) | 1080.3 | 966.8 | -10.5 % |
+| Start (ms) | 2399.6 | 2234.0 | -6.9 % |
+| Memory of the start (MB) | 2578.7 | 2439.3 | -5.4 % |
+| Live heap after the first frame (MB) | 2322.4 | 2098.4 | -9.6 % |
+
+| The controls start (24,017 visuals) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 24,017 | 14,811 | -38.3 % |
+| Objects in the first batch | 253,580 | 171,926 | -32.2 % |
+| Show: attach, styles, layout (ms) | 227.7 | 222.0 | -2.5 % |
+| First frame, UI thread (ms) | 28.0 | 30.1 | +7.5 % |
+| First frame, render thread (ms) | 24.1 | 19.2 | -20.5 % |
+| Show to first frame (ms) | 48.7 | 45.8 | -5.9 % |
+| Start (ms) | 295.5 | 288.7 | -2.3 % |
+| Memory of the start (MB) | 350.6 | 329.7 | -6.0 % |
+| Live heap after the first frame (MB) | 302.4 | 283.3 | -6.3 % |
+
+The UI thread part of the first frame grows because the visuals that are made are made
+there, in the first pass of the renderer, and no longer in the show, which shrinks by
+more. What remains is what the visuals that draw cost: in the tiles start the first frame
+leaves 799 MB allocated for 234,791 of them, 3.4 KB each on the two threads.
+
+What it costs, and what it does not:
+
+- **`composition_visual()` of an element that had none makes it,** and the server has it
+  after the next batch: code that reads the server visual right after asking waits for the
+  commit, as it does for any new visual.
+- **A visual asked for after a pass is synchronized when it is made** (offset, size, the
+  children around it), and the next pass does not synchronize its properties again: what
+  the caller sets on it in between, the `Offset` an entrance animation starts from, stays,
+  as it does on a visual that existed all along (`CompositingRenderer::place_materialized`).
+- **A class that overrides `create_composition_visual` to show something itself** (as
+  `ExperimentalAcrylicBorder` does) overrides `requires_composition_visual` to return
+  `true`; a class whose `custom_hit_test` answers only for some points does the same.
+- **The children list of a visual can be longer:** the canvas of the tiles start has the
+  visuals of the parts of its tiles as children, not the tiles. A change of the list is
+  the clear and refill it was; the hit test index is the one of a visual with thirty-two
+  children or more.
+- **The cache mode invalidates the composition properties** when it changes (it had no
+  change handler), so an element that gets one gets its visual in the next pass.
+- **A value assigned before an animation is started, in one batch, is sent ahead of the
+  animation.** The transport carried the animation or else the value, so the value was
+  lost and the server kept its own for the components a sub-channel animation does not
+  write. Nothing showed it while the two were equal. The selection indicator of a top
+  navigation view asks for the visual of its indicator, which gives the parent panel a
+  visual and moves the position of the panel out of the offset of the indicator, resets
+  `Offset` and animates `Offset.X`: the server kept the old `Y` and drew the indicator
+  below the clip of the pane. The generated serialization now writes the value and then
+  the animation; an implicit animation still starts from the value the server has
+  (DEVIATIONS.md).
+- **Tests:** `compositor_tests` covers the elements without a visual (offsets through
+  them, flattened children, an element that starts to draw, one that is asked for its
+  visual in and out of a pass, an offset set on a visual asked for after a pass, hit
+  tests from a root without a visual and through a new visual before its first frame);
+  the counter check `composition_work` counts the visuals made.

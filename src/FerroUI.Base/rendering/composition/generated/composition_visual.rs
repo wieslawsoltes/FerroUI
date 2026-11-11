@@ -404,6 +404,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Visible", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::VISIBLE);
+                }
             }
         }
         self.visible.set(value);
@@ -451,6 +455,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Opacity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::OPACITY_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::OPACITY);
+                }
             }
         }
         self.opacity.set(value);
@@ -523,6 +531,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "ClipToBounds", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::CLIP_TO_BOUNDS);
+                }
             }
         }
         self.clip_to_bounds.set(value);
@@ -570,6 +582,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -617,6 +633,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Translation", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::TRANSLATION);
+                }
             }
         }
         self.store_rare_translation(value);
@@ -664,6 +684,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Size", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::SIZE);
+                }
             }
         }
         self.size.set(value);
@@ -711,6 +735,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "AnchorPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::ANCHOR_POINT);
+                }
             }
         }
         self.store_rare_anchor_point(value);
@@ -758,6 +786,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::CENTER_POINT);
+                }
             }
         }
         self.store_rare_center_point(value);
@@ -805,6 +837,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::ROTATION_ANGLE);
+                }
             }
         }
         self.store_rare_rotation_angle(value);
@@ -852,6 +888,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Orientation", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::ORIENTATION);
+                }
             }
         }
         self.store_rare_orientation(value);
@@ -899,6 +939,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::SCALE);
+                }
             }
         }
         self.store_rare_scale(value);
@@ -946,6 +990,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::TRANSFORM_MATRIX);
+                }
             }
         }
         self.store_rare_transform_matrix(value);
@@ -1193,6 +1241,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAxis", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::ROTATION_AXIS);
+                }
             }
         }
         self.store_rare_rotation_axis(value);
@@ -1240,6 +1292,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RelativeOffsetAdjustment", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT);
+                }
             }
         }
         self.store_rare_relative_offset_adjustment(value);
@@ -1287,6 +1343,10 @@ impl CompositionVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RelativeSizeAdjustment", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_visual.get().contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT);
+                }
             }
         }
         self.store_rare_relative_size_adjustment(value);
@@ -1574,68 +1634,80 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::PARENT) {
             writer.write_server_object(self.parent.get().map(|o| o.server()));
         }
+        if changed.contains(CompositionVisualChangedFields::VISIBLE) {
+            writer.write(self.visible.get());
+        }
         if changed.contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_visible_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::VISIBLE) {
-            writer.write(self.visible.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::OPACITY) {
+            writer.write(self.opacity.get());
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_opacity_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::OPACITY) {
-            writer.write(self.opacity.get());
         }
         if changed.contains(CompositionVisualChangedFields::CLIP) {
             writer.write_value(self.rare_clip());
         }
+        if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS) {
+            writer.write(self.clip_to_bounds.get());
+        }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_clip_to_bounds_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS) {
-            writer.write(self.clip_to_bounds.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionVisualChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::TRANSLATION) {
+            writer.write(self.rare_translation());
         }
         if changed.contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_translation_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::TRANSLATION) {
-            writer.write(self.rare_translation());
+        }
+        if changed.contains(CompositionVisualChangedFields::SIZE) {
+            writer.write(self.size.get());
         }
         if changed.contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_size_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::SIZE) {
-            writer.write(self.size.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT) {
+            writer.write(self.rare_anchor_point());
         }
         if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_anchor_point_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT) {
-            writer.write(self.rare_anchor_point());
+        }
+        if changed.contains(CompositionVisualChangedFields::CENTER_POINT) {
+            writer.write(self.rare_center_point());
         }
         if changed.contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_center_point_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::CENTER_POINT) {
-            writer.write(self.rare_center_point());
+        }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE) {
+            writer.write(self.rare_rotation_angle());
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_angle_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rare_rotation_angle());
+        }
+        if changed.contains(CompositionVisualChangedFields::ORIENTATION) {
+            writer.write(self.rare_orientation());
         }
         if changed.contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_orientation_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::ORIENTATION) {
-            writer.write(self.rare_orientation());
+        }
+        if changed.contains(CompositionVisualChangedFields::SCALE) {
+            writer.write(self.rare_scale());
         }
         if changed.contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_scale_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::SCALE) {
-            writer.write(self.rare_scale());
+        }
+        if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX) {
+            writer.write(self.rare_transform_matrix());
         }
         if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_transform_matrix_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.rare_transform_matrix());
         }
         if changed.contains(CompositionVisualChangedFields::ADORNED_VISUAL) {
             writer.write_server_object(self.rare_adorned_visual().map(|o| o.server()));
@@ -1661,20 +1733,23 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
             writer.write_server_object(self.rare_composition_clip().map(|o| o.server()));
         }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
+            writer.write(self.rare_rotation_axis());
+        }
         if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
-            writer.write(self.rare_rotation_axis());
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
+            writer.write(self.rare_relative_offset_adjustment());
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
-            writer.write(self.rare_relative_offset_adjustment());
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
+            writer.write(self.rare_relative_size_adjustment());
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base()));
-        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
-            writer.write(self.rare_relative_size_adjustment());
         }
         if changed.contains(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE) {
             writer.write(self.is_hit_test_visible.get());
@@ -3419,6 +3494,10 @@ impl ServerCompositionVisualProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_parent(host, value);
         }
+        if changed.contains(CompositionVisualChangedFields::VISIBLE) {
+            let value = reader.read::<bool>();
+            self.set_visible(host, value);
+        }
         if changed.contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Visible` without an animation instance");
@@ -3429,9 +3508,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::VISIBLE) {
-            let value = reader.read::<bool>();
-            self.set_visible(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::OPACITY) {
+            let value = reader.read::<f32>();
+            self.set_opacity(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3443,13 +3523,14 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::OPACITY) {
-            let value = reader.read::<f32>();
-            self.set_opacity(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP) {
             let value = reader.read_value::<Arc<dyn IGeometryImpl>>();
             self.set_clip(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS) {
+            let value = reader.read::<bool>();
+            self.set_clip_to_bounds(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3461,9 +3542,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS) {
-            let value = reader.read::<bool>();
-            self.set_clip_to_bounds(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::OFFSET) {
+            let value = reader.read::<Vector3D>();
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3475,9 +3557,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::OFFSET) {
+        }
+        if changed.contains(CompositionVisualChangedFields::TRANSLATION) {
             let value = reader.read::<Vector3D>();
-            self.set_offset(host, value);
+            self.set_translation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3489,9 +3572,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::TRANSLATION) {
-            let value = reader.read::<Vector3D>();
-            self.set_translation(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::SIZE) {
+            let value = reader.read::<Vector>();
+            self.set_size(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3503,9 +3587,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::SIZE) {
+        }
+        if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT) {
             let value = reader.read::<Vector>();
-            self.set_size(host, value);
+            self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3517,9 +3602,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT) {
-            let value = reader.read::<Vector>();
-            self.set_anchor_point(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::CENTER_POINT) {
+            let value = reader.read::<Vector3D>();
+            self.set_center_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3531,9 +3617,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::CENTER_POINT) {
-            let value = reader.read::<Vector3D>();
-            self.set_center_point(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3545,9 +3632,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_rotation_angle(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::ORIENTATION) {
+            let value = reader.read::<Quaternion>();
+            self.set_orientation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3559,9 +3647,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::ORIENTATION) {
-            let value = reader.read::<Quaternion>();
-            self.set_orientation(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::SCALE) {
+            let value = reader.read::<Vector3D>();
+            self.set_scale(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3573,9 +3662,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::SCALE) {
-            let value = reader.read::<Vector3D>();
-            self.set_scale(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX) {
+            let value = reader.read::<Matrix>();
+            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3587,9 +3677,6 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX) {
-            let value = reader.read::<Matrix>();
-            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ADORNED_VISUAL) {
             let value = read_server_object(reader, compositor.as_ref());
@@ -3623,6 +3710,10 @@ impl ServerCompositionVisualProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_composition_clip(host, value);
         }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
+            let value = reader.read::<Vector3D>();
+            self.set_rotation_axis(host, value);
+        }
         if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RotationAxis` without an animation instance");
@@ -3633,9 +3724,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
             let value = reader.read::<Vector3D>();
-            self.set_rotation_axis(host, value);
+            self.set_relative_offset_adjustment(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3647,9 +3739,10 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
-            let value = reader.read::<Vector3D>();
-            self.set_relative_offset_adjustment(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
+            let value = reader.read::<Vector>();
+            self.set_relative_size_adjustment(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -3661,9 +3754,6 @@ impl ServerCompositionVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
-            let value = reader.read::<Vector>();
-            self.set_relative_size_adjustment(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE) {
             let value = reader.read::<bool>();

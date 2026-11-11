@@ -53,6 +53,9 @@ impl Bucket {
     }
 }
 
+/// The revision of the entry of a child that a hit test passes through: no readback has it.
+const SHOWN_THROUGH_REVISION: u64 = u64::MAX;
+
 #[derive(Clone, Copy)]
 struct Entry {
     order: i32,
@@ -871,6 +874,12 @@ impl CompositionHitTestAabbTree {
 
     fn get_bounds_state(visual: &Rc<CompositionVisual>) -> (BoundsState, LtrbRect, u64) {
         let Some(readback) = visual.try_get_valid_readback() else {
+            // A hit test passes through it to what is under it, which was shown without it in
+            // the last frame (desktop-performance.md, section 9.41): it has no bounds to index
+            // until it has a readback, whose revision replaces this one.
+            if visual.is_shown_through_unread() {
+                return (BoundsState::Unbounded, LtrbRect::default(), SHOWN_THROUGH_REVISION);
+            }
             return (BoundsState::Empty, LtrbRect::default(), 0);
         };
 
