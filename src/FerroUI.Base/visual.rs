@@ -351,7 +351,10 @@ impl VisualImpl for Visual {
                 this.attach_to_compositor_core(&compositor, Some(&*renderer));
             } else if let Some(item) = this.composition_item.get() {
                 // It is back with what it drew (section 9.42).
-                item.set_departed(false);
+                if item.is_departed() {
+                    crate::perf_count!(DrawingItemsKept);
+                    item.set_departed(false);
+                }
             }
         }
 

@@ -1,4 +1,5 @@
 use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
+use super::composition_draw_item::HIT_TEST_ITEM_CHUNK;
 use super::container_visual::HIT_TEST_AABB_TREE_THRESHOLD;
 use super::expressions::ExpressionVariant;
 use super::generated::{CompositionTargetHooks, CompositionTargetProps, ServerCompositionTargetProps};
@@ -23,6 +24,39 @@ use std::sync::atomic::{AtomicI64, Ordering};
 static NEXT_ID: AtomicI64 = AtomicI64::new(1);
 
 type VisualFilter<'a> = Option<&'a dyn Fn(&Rc<CompositionVisual>) -> bool>;
+
+/// The items of a holder that a walk over its child visuals, from the last, has not passed
+/// yet (section 9.42).
+struct ItemsBetween<'a> {
+    items: Option<&'a DrawItemList>,
+    /// The number of items painted before the child visual the walk is at.
+    end: usize,
+}
+
+impl<'a> ItemsBetween<'a> {
+    fn of(visual: &'a CompositionVisual) -> Self {
+        let items = CompositionTarget::items_of(visual);
+        Self { items, end: items.map_or(0, DrawItemList::count) }
+    }
+
+    /// The items painted after the child visual at `child` that the walk has not passed, as
+    /// the list and a range of it; the walk passes them. The children of a walk that leaves
+    /// some out are in the order of the list, so the items around one that is left out are
+    /// passed with those after the next child above it.
+    fn after(&mut self, child: usize) -> Option<(&'a DrawItemList, usize, usize)> {
+        let items = self.items?;
+        let end = self.end;
+        self.end = items.position(child).min(end);
+        (self.end < end).then_some((items, self.end, end))
+    }
+
+    /// The items painted before the first child visual of the walk.
+    fn rest(&mut self) -> Option<(&'a DrawItemList, usize, usize)> {
+        let items = self.items?;
+        let end = std::mem::take(&mut self.end);
+        (end > 0).then_some((items, 0, end))
+    }
+}
 
 /// What a hit test of the composition tree finds: a composition visual, or what a visual
 /// without one drew, which the composition visual of a visual above it shows
@@ -79,7 +113,7 @@ pub struct CompositionTarget {
     object: CompositionObject,
     props: CompositionTargetProps,
     id: i64,
-    hit_test_child_candidates: RefCell<Vec<Rc<CompositionVisual>>>,
+    hit_test_child_candidates: RefCell<Vec<(Rc<CompositionVisual>, usize)>>,
 }
 
 /// How a hit test enters a composition visual.
@@ -485,23 +519,9 @@ impl CompositionTarget {
         if visual.is_departed() {
             return;
         }
-        if let Some(items) = Self::items_of(visual) {
-            // The items and the child visuals are shown in one order: from the last, the
-            // items after a child, then the child (section 9.42). The children are not
-            // looked up in their index: the items between them are tested one by one anyway.
-            let children = visual.children();
-            let mut item_end = items.count();
-            let mut index = children.count();
-            while index > 0 {
-                index -= 1;
-                let position = items.position(index).min(item_end);
-                Self::hit_test_items::<H>(items, position, item_end, item_input, result, filters);
-                item_end = position;
-                self.hit_test_core::<H>(&children.get(index), input, item_input, result, filters);
-            }
-            Self::hit_test_items::<H>(items, 0, item_end, item_input, result, filters);
-            return;
-        }
+        // The items and the child visuals are shown in one order: from the last, the items
+        // after a child, then the child (section 9.42).
+        let mut items = ItemsBetween::of(visual);
         if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
             // The candidate list of the target is reused unless a query is
             // already running (a nested container).
@@ -512,7 +532,10 @@ impl CompositionTarget {
             candidates.clear();
             let queried = visual.try_query_hit_test_children::<H>(input, &mut candidates);
             if queried {
-                for child in &candidates {
+                for (child, index) in &candidates {
+                    if let Some((list, start, end)) = items.after(*index) {
+                        Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+                    }
                     self.hit_test_core::<H>(child, input, item_input, result, filters);
                 }
             }
@@ -523,6 +546,9 @@ impl CompositionTarget {
                 }
             }
             if queried {
+                if let Some((list, start, end)) = items.rest() {
+                    Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+                }
                 return;
             }
         }
@@ -533,7 +559,13 @@ impl CompositionTarget {
         let mut index = children.count();
         while index > 0 {
             index -= 1;
+            if let Some((list, start, end)) = items.after(index) {
+                Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
+            }
             self.hit_test_core::<H>(&children.get(index), input, item_input, result, filters);
+        }
+        if let Some((list, start, end)) = items.rest() {
+            Self::hit_test_items::<H>(list, start, end, item_input, result, filters);
         }
     }
 
@@ -546,12 +578,12 @@ impl CompositionTarget {
         result: &mut Vec<(IntersectionResult, CompositionHitTarget)>,
         filters: HitFilters<'_>,
     ) {
-        for index in (start..end).rev() {
-            let Some(item) = items.item_at(index) else { continue };
+        Self::items_that_may_be_hit::<H, ()>(items, start, end, input, &mut |item| {
             if let Some(intersection) = Self::hit_test_item::<H>(&item, input, filters) {
                 result.push((intersection, CompositionHitTarget::Item(item)));
             }
-        }
+            None
+        });
     }
 
     /// The last of the items `start..end` of a holder that is hit.
@@ -562,11 +594,40 @@ impl CompositionTarget {
         input: &H::Input,
         filters: HitFilters<'_>,
     ) -> Option<(CompositionHitTarget, IntersectionResult)> {
-        for index in (start..end).rev() {
-            let Some(item) = items.item_at(index) else { continue };
-            if let Some(intersection) = Self::hit_test_item::<H>(&item, input, filters) {
-                return Some((CompositionHitTarget::Item(item), intersection));
+        Self::items_that_may_be_hit::<H, _>(items, start, end, input, &mut |item| {
+            let intersection = Self::hit_test_item::<H>(&item, input, filters)?;
+            Some((CompositionHitTarget::Item(item), intersection))
+        })
+    }
+
+    /// Calls `each` with the items `start..end` of a holder that `input` may hit, from the
+    /// last, until it answers. A holder of `HIT_TEST_ITEM_CHUNK` items and more keeps the
+    /// bounds of every `HIT_TEST_ITEM_CHUNK` of them that follow each other
+    /// (`DrawItemList::chunk_bounds`): the items of a chunk whose bounds the input misses are
+    /// passed over together, as the children of a visual are in the buckets of its index.
+    fn items_that_may_be_hit<H: ICompositionHitTester, R>(
+        items: &DrawItemList,
+        start: usize,
+        end: usize,
+        input: &H::Input,
+        each: &mut dyn FnMut(Rc<CompositionDrawItem>) -> Option<R>,
+    ) -> Option<R> {
+        let indexed = items.count() >= HIT_TEST_ITEM_CHUNK;
+        let mut end = end;
+        while end > start {
+            let chunk = (end - 1) / HIT_TEST_ITEM_CHUNK;
+            let chunk_start = if indexed { (chunk * HIT_TEST_ITEM_CHUNK).max(start) } else { start };
+            let may_be_hit = !indexed
+                || items.chunk_bounds(chunk).is_some_and(|bounds| H::transformed_sub_tree_bounds_match(bounds, input));
+            if may_be_hit {
+                for index in (chunk_start..end).rev() {
+                    let Some(item) = items.item_at(index) else { continue };
+                    if let Some(answer) = each(item) {
+                        return Some(answer);
+                    }
+                }
             }
+            end = chunk_start;
         }
         None
     }
@@ -716,62 +777,46 @@ impl CompositionTarget {
         let layout_input = through.as_ref().unwrap_or(&input);
 
         // A visual kept for a visual that left its tree has no children here (section 9.32).
-        let mut queried_indexed_children = visual.is_departed();
-        if !queried_indexed_children {
-            if let Some(items) = Self::items_of(visual) {
-                // The items and the child visuals are shown in one order: from the last, the
-                // items after a child, then the child (section 9.42).
-                queried_indexed_children = true;
-                let item_input = layout_input;
-                let children = visual.children();
-                let mut item_end = items.count();
-                let mut index = children.count();
-                while index > 0 {
-                    index -= 1;
-                    let position = items.position(index).min(item_end);
-                    if let Some((hit, intersection_result)) =
-                        Self::hit_test_first_item::<H>(items, position, item_end, item_input, filters)
-                    {
-                        return (Some(hit), intersection_result);
-                    }
-                    item_end = position;
-                    let child = children.get(index);
-                    let (hit, intersection_result) =
-                        self.hit_test_first_core::<H>(&child, &input, layout_input, filters);
+        if !visual.is_departed() {
+            // The items and the child visuals are shown in one order: from the last, the items
+            // after a child, then the child (section 9.42).
+            let mut items = ItemsBetween::of(visual);
+            let mut test_child = |child: &Rc<CompositionVisual>, index: usize| {
+                if let Some((list, start, end)) = items.after(index) {
+                    let hit = Self::hit_test_first_item::<H>(list, start, end, layout_input, filters);
                     if hit.is_some() {
-                        return (hit, intersection_result);
+                        return hit;
                     }
                 }
-                if let Some((hit, intersection_result)) =
-                    Self::hit_test_first_item::<H>(items, 0, item_end, item_input, filters)
-                {
-                    return (Some(hit), intersection_result);
+                let (hit, intersection_result) = self.hit_test_first_core::<H>(child, &input, layout_input, filters);
+                hit.map(|hit| (hit, intersection_result))
+            };
+            let indexed = if visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
+                visual.try_query_hit_test_children_until::<H, _>(&input, &mut test_child)
+            } else {
+                None
+            };
+            let hit = match indexed {
+                Some(hit) => hit,
+                None => {
+                    // By index, from the last child, as the original: no copy of the
+                    // children of every visual the hit test enters.
+                    let children = visual.children();
+                    let mut index = children.count();
+                    let mut hit = None;
+                    while index > 0 && hit.is_none() {
+                        index -= 1;
+                        hit = test_child(&children.get(index), index);
+                    }
+                    hit
                 }
-            }
-        }
-        if !queried_indexed_children && visual.children().count() >= HIT_TEST_AABB_TREE_THRESHOLD {
-            if let Some((hit, intersection_result)) =
-                visual.try_query_first_hit_test_child::<H>(self, &input, layout_input, filters)
-            {
-                queried_indexed_children = true;
-                if hit.is_some() {
-                    return (hit, intersection_result);
-                }
-            }
-        }
-
-        if !queried_indexed_children {
-            // By index, from the last child, as the original: no copy of the
-            // children of every visual the hit test enters.
-            let children = visual.children();
-            let mut index = children.count();
-            while index > 0 {
-                index -= 1;
-                let child = children.get(index);
-                let (hit, intersection_result) = self.hit_test_first_core::<H>(&child, &input, layout_input, filters);
-                if hit.is_some() {
-                    return (hit, intersection_result);
-                }
+            };
+            let hit = hit.or_else(|| {
+                let (list, start, end) = items.rest()?;
+                Self::hit_test_first_item::<H>(list, start, end, layout_input, filters)
+            });
+            if let Some((hit, intersection_result)) = hit {
+                return (Some(hit), intersection_result);
             }
         }
 

@@ -3485,6 +3485,150 @@ fn a_geometry_hits_the_items_whose_bounds_it_meets() {
 }
 
 #[test]
+fn items_among_many_child_visuals_are_hit_in_the_order_of_the_visuals() {
+    let s = CompositorCanvas::new();
+    let place = |i: usize| TestBorder::layer((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
+    let mut layers = Vec::new();
+    for i in 0..20 {
+        layers.push(place(i));
+        s.canvas.add(&layers[i]);
+    }
+    let between = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&between);
+    for i in 20..40 {
+        layers.push(place(i));
+        s.canvas.add(&layers[i]);
+    }
+    let over = TestBorder::layer(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&over);
+    let top = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&top);
+    let first = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    first.set_z_index(-1);
+    s.canvas.add(&first);
+    s.run_jobs();
+
+    // The child visuals are looked up in their index, and the items between them are tested
+    // where they are painted (section 9.42).
+    let root_visual = own_visual(&s.root);
+    assert_eq!(visuals(&[&first, &between, &top]), item_elements(&s.root));
+    assert_eq!(41, root_visual.children().count());
+    s.assert_hit_test(10.0, 10.0, None, &[&top, &over, &between, &layers[0], &first]);
+    assert!(root_visual.hit_test_children.borrow().is_some(), "the children are indexed");
+    s.assert_hit_test_first(10.0, 10.0, None, Some(&top));
+    s.assert_hit_test(10.0, 110.0, None, &[&layers[20]]);
+    s.assert_hit_test_first(10.0, 110.0, None, Some(&layers[20]));
+    s.assert_hit_test(45.0, 45.0, None, &[]);
+    s.assert_hit_test_first(45.0, 45.0, None, None);
+
+    // The first that the filter accepts, an item or a child visual.
+    let without = |rejected: &[&Ref<TestBorder>]| {
+        let rejected = visuals(rejected);
+        move |visual: &Visual| !rejected.iter().any(|rejected| std::ptr::eq(visual, &**rejected))
+    };
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top])), Some(&over));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over])), Some(&between));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over, &between])), Some(&layers[0]));
+    s.assert_hit_test_first(10.0, 10.0, Some(&without(&[&top, &over, &between, &layers[0]])), Some(&first));
+    s.assert_hit_test(10.0, 10.0, Some(&without(&[&over, &layers[0]])), &[&top, &between, &first]);
+
+    // An item where no child visual is, between child visuals that the index leaves out.
+    between.set_bounds(Rect::new(700.0, 700.0, 40.0, 40.0));
+    s.assert_hit_test(710.0, 710.0, None, &[&between]);
+    s.assert_hit_test_first(710.0, 710.0, None, Some(&between));
+    s.assert_hit_test(10.0, 10.0, None, &[&top, &over, &layers[0], &first]);
+
+    // A geometry, as a point.
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+    assert_eq!(visuals(&[&top, &over, &layers[1], &layers[0], &first]), hit(30.0, 10.0, 30.0, 10.0));
+    assert_eq!(visuals(&[&between]), hit(690.0, 690.0, 20.0, 20.0));
+}
+
+#[test]
+fn the_items_of_a_holder_with_many_are_hit_through_the_bounds_of_their_chunks() {
+    use crate::platform::LtrbRect;
+
+    let s = CompositorCanvas::new();
+    let mut items = Vec::new();
+    for i in 0..100 {
+        let item = TestBorder::filled((i % 10) as f64 * 50.0, (i / 10) as f64 * 50.0, 40.0, 40.0);
+        s.canvas.add(&item);
+        items.push(item);
+    }
+    let overlapping = TestBorder::filled(0.0, 0.0, 40.0, 40.0);
+    s.canvas.add(&overlapping);
+    s.run_jobs();
+    let holder = own_visual(&s.root);
+    let list = || holder.draw_items().expect("the root shows items");
+    assert_eq!(101, item_elements(&s.root).len());
+
+    s.assert_hit_test(10.0, 10.0, None, &[&overlapping, &items[0]]);
+    s.assert_hit_test_first(10.0, 10.0, None, Some(&overlapping));
+    s.assert_hit_test(460.0, 460.0, None, &[&items[99]]);
+    s.assert_hit_test_first(460.0, 460.0, None, Some(&items[99]));
+    s.assert_hit_test(45.0, 45.0, None, &[]);
+    s.assert_hit_test_first(45.0, 45.0, None, None);
+    // Thirty-two items that follow each other have bounds: the first three rows and two of
+    // the fourth, and the last five items.
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 490.0)), list().chunk_bounds(3));
+    assert_eq!(None, list().chunk_bounds(4));
+
+    // An item that moves is where it is, and the bounds of its chunk with it.
+    s.canvas.remove(&overlapping);
+    s.run_jobs();
+    assert_eq!(Some(LtrbRect::new(300.0, 450.0, 490.0, 490.0)), list().chunk_bounds(3));
+    items[99].set_bounds(Rect::new(700.0, 700.0, 40.0, 40.0));
+    s.assert_hit_test(460.0, 460.0, None, &[]);
+    s.assert_hit_test(710.0, 710.0, None, &[&items[99]]);
+    s.assert_hit_test_first(710.0, 710.0, None, Some(&items[99]));
+    assert_eq!(Some(LtrbRect::new(300.0, 450.0, 740.0, 740.0)), list().chunk_bounds(3));
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+
+    // One that draws something else.
+    items[40].set_bounds(Rect::new(0.0, 200.0, 48.0, 48.0));
+    s.assert_hit_test(45.0, 245.0, None, &[&items[40]]);
+    // One that clips to its bounds is hit inside them.
+    items[41].set_clip_to_bounds(true);
+    s.assert_hit_test(60.0, 210.0, None, &[&items[41]]);
+    s.assert_hit_test(95.0, 210.0, None, &[]);
+
+    // The items after one that left are others of their chunks.
+    s.canvas.remove(&items[5]);
+    s.assert_hit_test(260.0, 10.0, None, &[]);
+    s.assert_hit_test(310.0, 10.0, None, &[&items[6]]);
+    s.assert_hit_test(710.0, 710.0, None, &[&items[99]]);
+    assert_eq!(Some(LtrbRect::new(0.0, 0.0, 490.0, 190.0)), list().chunk_bounds(0));
+    assert_eq!(Some(LtrbRect::new(350.0, 450.0, 740.0, 740.0)), list().chunk_bounds(3));
+    let added = TestBorder::filled(900.0, 900.0, 40.0, 40.0);
+    s.canvas.add(&added);
+    s.assert_hit_test(910.0, 910.0, None, &[&added]);
+    s.assert_hit_test_first(910.0, 910.0, None, Some(&added));
+
+    // A geometry that meets the bounds of one chunk.
+    let hit = |x: f64, y: f64, width: f64, height: f64| -> Vec<Ref<Visual>> {
+        let geometry =
+            RectangleGeometry::with_rect(Rect::new(x, y, width, height)).upcast::<crate::media::Geometry>();
+        s.renderer.hit_test_geometry(&geometry, &s.root, None).into_iter().map(|hit| hit.visual_hit).collect()
+    };
+    assert_eq!(visuals(&[&added, &items[99]]), hit(730.0, 730.0, 180.0, 180.0));
+    assert_eq!(visuals(&[&items[11], &items[10], &items[1], &items[0]]), hit(30.0, 30.0, 30.0, 30.0));
+
+    // Few items are tested one by one, without bounds of chunks.
+    for item in &items[20..] {
+        s.canvas.remove(item);
+    }
+    s.assert_hit_test(10.0, 10.0, None, &[&items[0]]);
+    s.assert_hit_test(910.0, 910.0, None, &[&added]);
+    assert_eq!(20, item_elements(&s.root).len());
+    assert!(!list().has_hit_bounds());
+}
+
+#[test]
 fn an_item_follows_its_visual_and_the_visuals_above_it_with_the_drawing_it_has() {
     use crate::diagnostics::perf_counters::{self, PerfCounter};
 
@@ -3763,6 +3907,7 @@ fn composition_work_of_a_row_of_items_taken_out_of_the_tree_and_put_back() {
     if perf_counters::ENABLED {
         assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
         assert_eq!(8, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(8, work.get(PerfCounter::DrawingItemsKept));
     }
 
     let before = perf_counters::snapshot();
@@ -3778,6 +3923,7 @@ fn composition_work_of_a_row_of_items_taken_out_of_the_tree_and_put_back() {
     if perf_counters::ENABLED {
         assert_eq!(1, work.get(PerfCounter::CompositionVisualsCreated));
         assert_eq!(0, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(0, work.get(PerfCounter::DrawingItemsKept));
     }
 
     let item = item_of(&cell);
@@ -3798,6 +3944,7 @@ fn composition_work_of_a_row_of_items_taken_out_of_the_tree_and_put_back() {
     if perf_counters::ENABLED {
         assert_eq!(0, work.get(PerfCounter::CompositionVisualsCreated));
         assert_eq!(8, work.get(PerfCounter::CompositionVisualsKept));
+        assert_eq!(8, work.get(PerfCounter::DrawingItemsKept));
     }
 }
 

@@ -246,6 +246,9 @@ perf_counters! {
     /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
     /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
     CompositionVisualsKept => "composition visuals kept",
+    /// `Visual::on_attached_to_visual_tree`: a visual that entered a visual tree is shown again
+    /// by the drawing item it had when it left one (desktop-performance.md, section 9.42).
+    DrawingItemsKept => "drawing items kept",
     /// `Compositor::commit`: a batch of changes was sent to the render thread.
     CompositionBatchesCommitted => "composition batches committed",
     /// `Compositor::commit`: the entries of the object stream of the batches (a server object,

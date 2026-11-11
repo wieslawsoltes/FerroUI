@@ -14,6 +14,7 @@ use super::drawing::CompositionRenderData;
 use super::server::{DRAW_ITEM_CLIP, DRAW_ITEM_CONTENT, DRAW_ITEM_OFFSET, DRAW_ITEM_REDRAWN};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::CompositionVisual;
+use crate::platform::LtrbRect;
 use crate::utilities::OptionCell;
 use crate::{Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -26,6 +27,23 @@ const CHANGES: u8 = DRAW_ITEM_CONTENT | DRAW_ITEM_REDRAWN | DRAW_ITEM_OFFSET | D
 const FRESH: u8 = 0x40;
 /// The item is counted among the updates that are being written.
 const COLLECTED: u8 = 0x80;
+
+/// The number of items of a holder that follow each other whose bounds are kept as one for
+/// hit testing, and the number from which the items of a holder have such bounds (as the
+/// children of a visual have an index from `HIT_TEST_AABB_TREE_THRESHOLD`, in buckets of as
+/// many).
+pub(crate) const HIT_TEST_ITEM_CHUNK: usize = 32;
+
+/// The bounds of what a chunk of the items of a holder draws, in the coordinates of the
+/// holder.
+#[derive(Clone, Copy)]
+enum ChunkBounds {
+    /// Not calculated since an item of the chunk changed.
+    Stale,
+    /// The items of the chunk draw nothing.
+    Empty,
+    Known(LtrbRect),
+}
 
 /// The item is in no list.
 const NO_INDEX: u32 = u32::MAX;
@@ -111,6 +129,17 @@ impl CompositionDrawItem {
         self.holder.with(|held| held.and_then(Weak::upgrade))
     }
 
+    /// A rectangle of the holder that what the item draws is inside: its clip, or the bounds
+    /// of its drawing. `None` when it draws nothing.
+    fn hit_bounds(&self) -> Option<LtrbRect> {
+        let (x, y) = self.offset.get();
+        if let Some((width, height)) = self.clip() {
+            return self.data.is_some().then(|| LtrbRect::new(x, y, x + width, y + height));
+        }
+        let bounds = self.data.get()?.bounds()?;
+        Some(LtrbRect::new(bounds.left + x, bounds.top + y, bounds.right + x, bounds.bottom + y))
+    }
+
     /// Another drawing: the one the item had is disposed.
     pub(crate) fn set_data(self: &Rc<Self>, data: Rc<CompositionRenderData>) {
         if let Some(old) = self.data.replace(Some(data)) {
@@ -158,12 +187,13 @@ impl CompositionDrawItem {
     fn mark(self: &Rc<Self>, bits: u8) {
         let pending = self.pending.get();
         self.pending.set(pending | bits);
-        if pending != 0 {
-            // Already among the updates of its holder, or written whole with its list.
-            return;
-        }
         let Some(holder) = self.holder() else { return };
-        if let Some(list) = holder.draw_items() {
+        let Some(list) = holder.draw_items() else { return };
+        // It may be hit elsewhere.
+        list.invalidate_hit_bounds(self.index.get());
+        // With something pending it is already among the updates of its holder, or written
+        // whole with its list.
+        if pending == 0 {
             list.updated.borrow_mut().push(self.clone());
             holder.register_for_serialization();
         }
@@ -217,6 +247,9 @@ pub(crate) struct DrawItemList {
     positions_changed: Cell<bool>,
     /// The items the server has that changed.
     updated: RefCell<Vec<Rc<CompositionDrawItem>>>,
+    /// The bounds of every `HIT_TEST_ITEM_CHUNK` items, once a hit test asked for them: a list
+    /// of fewer items has none.
+    hit_bounds: OptionCell<Box<Vec<ChunkBounds>>>,
 }
 
 impl DrawItemList {
@@ -230,6 +263,68 @@ impl DrawItemList {
 
     pub(crate) fn item_at(&self, index: usize) -> Option<Rc<CompositionDrawItem>> {
         self.items.borrow().get(index).cloned()
+    }
+
+    /// The bounds of what the items of the chunk `chunk` draw (the items from
+    /// `chunk * HIT_TEST_ITEM_CHUNK` on), in the coordinates of the holder; `None` when they
+    /// draw nothing. They are calculated when an item of the chunk changed since they were
+    /// last asked for: a hit test passes over the chunks it misses without a look at their
+    /// items.
+    pub(crate) fn chunk_bounds(&self, chunk: usize) -> Option<LtrbRect> {
+        let items = self.items.borrow();
+        let chunks = items.len().div_ceil(HIT_TEST_ITEM_CHUNK);
+        if chunk >= chunks {
+            return None;
+        }
+        let mut known = self.hit_bounds.take().unwrap_or_default();
+        if known.len() != chunks {
+            known.clear();
+            known.resize(chunks, ChunkBounds::Stale);
+        }
+        if let ChunkBounds::Stale = known[chunk] {
+            let start = chunk * HIT_TEST_ITEM_CHUNK;
+            let end = items.len().min(start + HIT_TEST_ITEM_CHUNK);
+            let bounds = items[start..end]
+                .iter()
+                .filter_map(|item| item.hit_bounds())
+                .reduce(|bounds, item| bounds.union(item));
+            known[chunk] = bounds.map_or(ChunkBounds::Empty, ChunkBounds::Known);
+        }
+        let bounds = match known[chunk] {
+            ChunkBounds::Known(bounds) => Some(bounds),
+            ChunkBounds::Stale | ChunkBounds::Empty => None,
+        };
+        self.hit_bounds.set(Some(known));
+        bounds
+    }
+
+    /// Whether the list keeps the bounds of its chunks.
+    #[cfg(test)]
+    pub(crate) fn has_hit_bounds(&self) -> bool {
+        self.hit_bounds.is_some()
+    }
+
+    /// The item at `index` draws something else, or elsewhere.
+    fn invalidate_hit_bounds(&self, index: u32) {
+        if let Some(mut known) = self.hit_bounds.take() {
+            if let Some(chunk) = known.get_mut(index as usize / HIT_TEST_ITEM_CHUNK) {
+                *chunk = ChunkBounds::Stale;
+            }
+            self.hit_bounds.set(Some(known));
+        }
+    }
+
+    /// The items from `index` on are others, or at other places of the list.
+    fn invalidate_hit_bounds_from(&self, index: usize) {
+        let Some(mut known) = self.hit_bounds.take() else { return };
+        let count = self.items.borrow().len();
+        if count < HIT_TEST_ITEM_CHUNK {
+            // The items of a short list are tested one by one.
+            return;
+        }
+        known.truncate(index / HIT_TEST_ITEM_CHUNK);
+        known.resize(count.div_ceil(HIT_TEST_ITEM_CHUNK), ChunkBounds::Stale);
+        self.hit_bounds.set(Some(known));
     }
 
     /// The number of items painted before the child visual `child`.
@@ -247,12 +342,15 @@ impl DrawItemList {
         positions: Vec<u32>,
     ) -> bool {
         let mut changed = false;
-        let same = {
+        // The items at the start of the list that stay.
+        let (count, kept) = {
             let current = self.items.borrow();
-            current.len() == items.len()
-                && current.iter().zip(&items).all(|(old, new)| Rc::ptr_eq(old, new) && new.is_held_by(holder))
+            let stays = |(old, new): &(&Rc<CompositionDrawItem>, &Rc<CompositionDrawItem>)| {
+                Rc::ptr_eq(old, new) && new.is_held_by(holder)
+            };
+            (current.len(), current.iter().zip(&items).take_while(stays).count())
         };
-        if !same {
+        if count != items.len() || kept != count {
             let old = std::mem::replace(&mut *self.items.borrow_mut(), items);
             for item in &old {
                 if item.is_held_by(holder) {
@@ -275,6 +373,7 @@ impl DrawItemList {
             if sent.is_none() {
                 *sent = Some(old);
             }
+            self.invalidate_hit_bounds_from(kept);
             changed = true;
         }
         if *self.child_positions.borrow() != positions {
