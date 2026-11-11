@@ -415,7 +415,9 @@ pub trait UntypedBindingExpression: 'static {
     /// The templated parent of the target changed: the store of the target
     /// tells each of its binding expressions (`ValueStore::templated_parent_changed`),
     /// so that an expression that reads the templated parent does not observe
-    /// every property change of its target to see it.
+    /// every property change of its target to see it. An expression that
+    /// holds the expressions of other bindings on its target (a multi-binding)
+    /// tells them.
     fn templated_parent_changed(&self) {}
 
     /// Starts the binding expression.

@@ -3036,7 +3036,9 @@ bindings.
   element to tell its binding expressions (`ValueStore::templated_parent_changed`): the local
   value bindings, and the entries of the frames the element does not share. A template
   binding that runs reads the new templated parent, subscribes to it and publishes, as it did
-  in its handler. A setter entry of a style (section 9.43) tells the expression it made.
+  in its handler. A setter entry of a style (section 9.43) tells the expression it made, and a
+  multi-binding the expressions of its bindings, which have its target and are no entries of
+  the store.
 - **A template binding that writes to the source** (`TwoWay`, `OneWayToSource`) still
   subscribes to the property changes of its target, for its target property.
 
