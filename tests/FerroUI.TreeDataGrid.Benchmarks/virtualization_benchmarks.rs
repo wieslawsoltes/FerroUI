@@ -38,6 +38,7 @@ use ferroui_base::{
     ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Rect, Ref, Size, StyledElementImpl, Vector,
     VisualImpl,
 };
+#[cfg(feature = "layout-benchmarks")]
 use ferroui_benchmarks::harness::Registry;
 use ferroui_controls::presenters::ScrollContentPresenter;
 use ferroui_controls::primitives::{ScrollBarVisibility, TemplatedControl};
@@ -87,6 +88,7 @@ pub struct VirtualizationBenchmarks {
     grid: Option<Ref<TreeDataGrid>>,
     scroll: Option<Ref<ScrollViewer>>,
     items: Option<Rc<FerroList<Rc<RowModel>>>>,
+    renderer_cell_template: Option<Rc<dyn IControlTemplate>>,
     /// Disposed when the benchmark is dropped, after the grid (the fields drop in the order of
     /// their declaration).
     _app: UnitTestApplicationScope,
@@ -95,8 +97,16 @@ pub struct VirtualizationBenchmarks {
 impl VirtualizationBenchmarks {
     /// `[GlobalSetup] GlobalSetup`: the application.
     pub fn new(neutral_source: bool) -> Self {
-        let app = UnitTestApplication::start(TestServices::styled_window());
-        Self { neutral_source, source_lifetime: None, window: None, grid: None, scroll: None, items: None, _app: app }
+        Self::with_services(neutral_source, TestServices::styled_window())
+    }
+
+    pub(crate) fn with_services(neutral_source: bool, services: TestServices) -> Self {
+        let app = UnitTestApplication::start(services);
+        Self { neutral_source, source_lifetime: None, window: None, grid: None, scroll: None, items: None, renderer_cell_template: None, _app: app }
+    }
+
+    pub(crate) fn set_renderer_cell_template(&mut self, template: Rc<dyn IControlTemplate>) {
+        self.renderer_cell_template = Some(template);
     }
 
     /// `[GlobalCleanup] GlobalCleanup`.
@@ -113,7 +123,7 @@ impl VirtualizationBenchmarks {
         self.grid.as_ref().expect("the iteration setup created the grid")
     }
 
-    fn scroll(&self) -> &Ref<ScrollViewer> {
+    pub(crate) fn scroll(&self) -> &Ref<ScrollViewer> {
         self.scroll.as_ref().expect("the iteration setup created the grid")
     }
 
@@ -121,12 +131,12 @@ impl VirtualizationBenchmarks {
         self.items.as_ref().expect("the iteration setup created the grid")
     }
 
-    fn window(&self) -> &Ref<Window> {
+    pub(crate) fn window(&self) -> &Ref<Window> {
         self.window.as_ref().expect("the iteration setup created the grid")
     }
 
     /// `_grid.RowsPresenter.GetRealizedElements().Count()`.
-    fn realized_row_count(&self) -> usize {
+    pub(crate) fn realized_row_count(&self) -> usize {
         self.grid().rows_presenter().expect("the rows presenter of the grid").get_realized_elements().len()
     }
 
@@ -497,6 +507,12 @@ impl VirtualizationBenchmarks {
         window.set_width(800.0);
         window.set_height(500.0);
         window.set_content(Some(Control::boxed(&grid)));
+        if let Some(template) = &self.renderer_cell_template {
+            window.styles().add(Style::with_setters(
+                Selectors::of_type::<ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell>(),
+                [Setter::new(TemplatedControl::template_property(), Some(template.clone()))],
+            ));
+        }
         let row_template: Option<Rc<dyn IControlTemplate>> = Some(row_template(always_measure_column_viewport_changes));
         window.styles().add(Style::with_setters(
             Selectors::of_type::<TreeDataGridRow>(),
@@ -745,6 +761,7 @@ impl AlwaysMeasureCellsPresenter {
 }
 
 /// Registers the benchmarks of the class for one value of `NeutralSource`.
+#[cfg(feature = "layout-benchmarks")]
 fn register_for(registry: &mut Registry, neutral_source: bool) {
     let parameters = format!("NeutralSource={neutral_source}");
     let setup = move || VirtualizationBenchmarks::new(neutral_source);
@@ -923,13 +940,14 @@ fn register_for(registry: &mut Registry, neutral_source: bool) {
         .operations_per_invoke(DETACH_REATTACH_OPERATIONS);
 }
 
+#[cfg(feature = "layout-benchmarks")]
 pub fn register(registry: &mut Registry) {
     for neutral_source in [false, true] {
         register_for(registry, neutral_source);
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "layout-benchmarks"))]
 mod tests {
     #[test]
     fn virtualization_benchmarks() {

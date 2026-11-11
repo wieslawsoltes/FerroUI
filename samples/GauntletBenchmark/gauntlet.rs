@@ -319,6 +319,8 @@ impl GauntletView {
     }
 
     fn on_frame(&self) {
+        #[cfg(windows)]
+        if crate::measurement::on_frame() { return; }
         if !self.first_frame_logged.get() {
             self.first_frame_logged.set(true);
             Launch::log("PERF first_frame");
@@ -338,6 +340,9 @@ impl GauntletView {
         }
         if let Some(top_level) = top_level {
             let view = self.to_ref();
+            #[cfg(windows)]
+            crate::measurement::request_next_scene(&top_level, move || view.on_frame());
+            #[cfg(not(windows))]
             top_level.request_animation_frame(move |_| view.on_frame());
         }
     }

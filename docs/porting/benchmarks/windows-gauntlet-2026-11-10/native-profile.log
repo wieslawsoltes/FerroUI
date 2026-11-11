@@ -1,0 +1,20 @@
+Direct2D: hardware D3D11 NVIDIA GeForce GTX 1660 Ti, feature level 0xb100, adapter 00000000:000102c7
+Direct2D slow submission work_ms=237.200 end_draw_ms=84.713 make_frame_ms=8.410 snapshot_ms=29.669 kernel_ms=29.359 end_layer_ms=9.227 path_rule_ms=0.380
+PERF first_frame
+Direct2D slow submission work_ms=286.697 end_draw_ms=90.293 make_frame_ms=15.077 snapshot_ms=33.452 kernel_ms=34.555 end_layer_ms=9.722 path_rule_ms=0.540
+Direct2D slow submission work_ms=252.454 end_draw_ms=77.697 make_frame_ms=12.082 snapshot_ms=28.773 kernel_ms=30.343 end_layer_ms=7.574 path_rule_ms=0.522
+Direct2D slow submission work_ms=253.297 end_draw_ms=78.553 make_frame_ms=10.351 snapshot_ms=30.075 kernel_ms=31.626 end_layer_ms=6.440 path_rule_ms=0.522
+Direct2D slow submission work_ms=254.167 end_draw_ms=81.726 make_frame_ms=11.783 snapshot_ms=30.235 kernel_ms=32.275 end_layer_ms=6.925 path_rule_ms=0.530
+Direct2D slow submission work_ms=360.400 end_draw_ms=114.074 make_frame_ms=15.626 snapshot_ms=43.572 kernel_ms=44.896 end_layer_ms=9.195 path_rule_ms=0.733
+Direct2D slow submission work_ms=331.966 end_draw_ms=110.646 make_frame_ms=13.432 snapshot_ms=39.922 kernel_ms=43.306 end_layer_ms=9.527 path_rule_ms=0.699
+Direct2D slow submission work_ms=226.461 end_draw_ms=71.385 make_frame_ms=8.416 snapshot_ms=26.825 kernel_ms=29.309 end_layer_ms=6.018 path_rule_ms=0.476
+Direct2D slow submission work_ms=311.246 end_draw_ms=99.453 make_frame_ms=12.448 snapshot_ms=37.873 kernel_ms=40.493 end_layer_ms=9.223 path_rule_ms=0.613
+Direct2D slow submission work_ms=347.543 end_draw_ms=102.644 make_frame_ms=14.255 snapshot_ms=41.459 kernel_ms=43.007 end_layer_ms=8.083 path_rule_ms=0.744
+Direct2D slow submission work_ms=280.887 end_draw_ms=91.513 make_frame_ms=13.200 snapshot_ms=34.319 kernel_ms=35.964 end_layer_ms=8.771 path_rule_ms=0.554
+Direct2D slow submission work_ms=294.358 end_draw_ms=90.572 make_frame_ms=11.118 snapshot_ms=34.533 kernel_ms=36.909 end_layer_ms=8.226 path_rule_ms=0.614
+Direct2D slow submission work_ms=269.100 end_draw_ms=77.977 make_frame_ms=9.811 snapshot_ms=29.270 kernel_ms=30.854 end_layer_ms=7.161 path_rule_ms=0.559
+Direct2D slow submission work_ms=247.386 end_draw_ms=75.959 make_frame_ms=9.244 snapshot_ms=30.032 kernel_ms=32.813 end_layer_ms=6.407 path_rule_ms=0.548
+Direct2D slow submission work_ms=306.101 end_draw_ms=92.159 make_frame_ms=11.885 snapshot_ms=37.323 kernel_ms=42.176 end_layer_ms=8.642 path_rule_ms=0.674
+PERF_RESULT {"backend":"direct2d","callback_fps":3.275473370046658,"client_height":594.4,"client_width":822.4,"elapsed_ms":3663.5926000000004,"first_callback_ms":1107.593,"last_scene_frame":15,"mean_ms":305.29938333333337,"measured_frames":12,"median_ms":307.5419,"metric":"desktop animation callback intervals; physical presentation not independently measured","native_statistics_including_startup_and_warmup":[5721,63156,5501,15,0,8,0,11447,0,0,2856,7975214],"p95_ms":376.3606,"pointer_over_frames":0,"render_scaling":1.25,"samples_ms":[271.1626,265.8164,376.3606,343.81850000000003,238.17260000000002,331.5184,375.2121,294.05170000000004,307.5419,280.964,261.0592,317.9146],"scenario":"gauntlet","tier":16,"warmup_frames":3}
+Direct2D slow submission work_ms=282.761 end_draw_ms=93.871 make_frame_ms=10.649 snapshot_ms=36.081 kernel_ms=39.547 end_layer_ms=9.906 path_rule_ms=0.629
+Direct2D frame profile hwnd=0000000000B30712 frames=16 work_ms=283.877 max_work_ms=360.400 present_wait_ms=0.154 active_cadence_ms=306.364 kernel_pixels_per_frame=529836 gpu_copies_per_frame=760.5

@@ -25,6 +25,7 @@ void ferro_windows_audio(FerroWindowsSession *s,double volume,int muted);
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s);
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out);
 void ferro_windows_frame_release(FerroWindowsFrame *f);
+void *ferro_windows_frame_texture(FerroWindowsFrame *f,uint32_t *slice);
 void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindowsEgl *egl,uint32_t *texture);
 void ferro_windows_alias_release(void *alias,int alive);
 int ferro_windows_photo_rgb(FerroWindowsFrame *f,uint8_t *rgb,uint64_t length);

@@ -69,6 +69,13 @@ pub trait IDrawingContextImpl {
     /// drawing context that can be blitted back onto it.
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl>;
 
+    /// Creates a temporary surface whose bitmap draws retain its image storage
+    /// after the surface is disposed. Backends with borrowed framebuffer layers
+    /// must use an owned surface here instead of their blit-optimized layer.
+    fn create_temporary_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
+        self.create_layer(size)
+    }
+
     /// Pushes a clip rectangle.
     fn push_clip(&mut self, clip: Rect);
 

@@ -560,10 +560,12 @@ mod imp {
             let locator = FerroLocator::current();
             let gl_platform = locator.get_service::<Arc<dyn IPlatformGraphics>>();
             let surface_factory = locator.get_service::<dyn IWindowsSurfaceFactory>();
-            let use_redirection_bitmap = match &surface_factory {
+            let use_redirection_bitmap = if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::NativeDirect3D11) {
+                false
+            } else { match &surface_factory {
                 Some(surface_factory) => gl_platform.is_none() || !surface_factory.requires_no_redirection_bitmap(),
                 None => true,
-            };
+            }};
 
             let default_transparency_level = if use_redirection_bitmap {
                 WindowTransparencyLevel::none()
@@ -1110,7 +1112,7 @@ mod imp {
         // Here we only adjust the DWM window attributes that have to be set from the UI thread.
 
         fn set_transparency_transparent(&self) -> bool {
-            if self.composition_effects_surface.borrow().is_some() {
+            if !self.use_redirection_bitmap || self.composition_effects_surface.borrow().is_some() {
                 return true;
             }
 

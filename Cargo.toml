@@ -6,6 +6,7 @@ resolver = "2"
 # this workspace or its lock file (tests/FerroUI.TreeDataGrid.GpuiComparison/README.md).
 exclude = ["components/FerroBoard", "external/rust-skia-bindings", "tests/FerroUI.TreeDataGrid.GpuiComparison", "tests/FerroUI.Text.Comparison"]
 members = [
+    "src/Windows/FerroUI.Direct2D",
     "tests/FerroUI.ResourceBenchmarks",
     "src/FerroUI.Media.Camera.Windows",
     "src/FerroUI.Media.Video.Windows",
@@ -416,6 +417,7 @@ ferroui-metal = { version = "=0.5.0-preview.1", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.5.0-preview.1", path = "src/FerroUI.Remote.Protocol" }
 ferroui-designer-support = { version = "=0.5.0-preview.1", path = "src/FerroUI.DesignerSupport" }
 ferroui-quartz = { version = "=0.5.0-preview.1", path = "src/Quartz/FerroUI.Quartz" }
+ferroui-direct2d = { version = "=0.5.0-preview.1", path = "src/Windows/FerroUI.Direct2D" }
 ferroui-skia = { version = "=0.5.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.5.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.5.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }

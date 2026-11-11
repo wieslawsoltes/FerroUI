@@ -49,6 +49,38 @@ default; `--features vello` adds the Vello backend, which `FERROUI_RENDERER=vell
 `vello-hybrid`, `vello-gpu`, `vello-cpu`) selects at start; on macOS `--features quartz` and
 `--features quartz-metal` use the Quartz backend.
 
+### Windows GPU backend comparison
+
+Build separate release executables for Skia/ANGLE and the native
+Direct2D/DirectWrite/D3D11 backend. Native builds use
+`--no-default-features --features direct2d-runtime-shaders`; normal Windows
+Skia builds keep the default features.
+
+The opt-in desktop measurement mode uses `PERF_WARMUP_FRAMES=60` and
+`PERF_MEASURE_FRAMES=240`. Each scene advances on the UI thread after the
+compositor reports the previous batch rendered. This keeps the same scene
+frames in both backends even when the compositor can accept batches early.
+The intervals include the UI and compositor scheduling cycle through render
+submission. The program requires a hardware backend, writes all samples and
+viewport metadata to `PERF_RESULTS_JSON`, prints `PERF_RESULT`, and closes the
+window.
+
+`PERF_CAPTURE_PATH` optionally saves a compositor snapshot after timing stops.
+The measured scene-frame range and pointer-over counts are recorded. Keep the
+pointer outside the window, and do not compile, profile or capture the desktop
+during a timed run. Windows can clamp the requested 1280×820 logical window to
+the available desktop; compare the recorded client size and render scaling.
+
+The [Windows comparison runner](../../scripts/compare-windows-gauntlet-renderers.ps1)
+runs gauntlet tier 16 and still wall tier 20 with Skia first, then native, for
+three repetitions. Pass prebuilt binaries with `-SkiaExecutable` and
+`-NativeExecutable`. Use `-Scenarios gauntlet` for animated-only runs. The runner
+checks executable hashes, scene counts, viewport, scaling and pointer conditions.
+It rejects viewport or DPI changes during the measured interval.
+It also checks that Direct2D submitted a present for each measured scene and
+recorded zero errors or pixel readbacks. Per-second `PERF fps` lines provide
+progress. Full-precision scene intervals determine the results.
+
 ## The frame gate
 
 `tests/frame_gate.rs` shows both screens in a headless window (1280 x 820 points at a scaling of

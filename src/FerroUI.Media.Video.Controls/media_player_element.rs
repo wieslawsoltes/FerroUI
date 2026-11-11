@@ -708,7 +708,8 @@ impl MediaPlayerElement {
         // transition, or before a newly sought frame reaches the producer fence.
         // Ended has the same race: Play is accepted before its native restart
         // changes state, with no pending import yet to keep the timer alive.
-        self.settling_ticks.set(30);
+        // Preserve the roughly one-second command allowance at a 16 ms tick.
+        self.settling_ticks.set(64);
         if !self.is_attached_to_visual_tree() || self.timer.borrow().is_some() {
             return;
         }
@@ -763,7 +764,9 @@ impl MediaPlayerElement {
                 }
                 keep
             },
-            Duration::from_millis(33),
+            // Sample faster than 24/30 fps sources, allowing for dispatch
+            // latency. The native media clock still selects which frame is due.
+            Duration::from_millis(16),
             DispatcherPriority::RENDER,
         );
         *self.timer.borrow_mut() = Some(timer);
@@ -858,7 +861,7 @@ mod readiness_tests {
         let window = Window::new();
         window.set_content(Some(Control::boxed(view.clone())));
         window.show();
-        for _ in 0..40 {
+        for _ in 0..80 {
             tick();
         }
         assert!(
@@ -877,7 +880,7 @@ mod readiness_tests {
         );
         let reads = native.reads.get();
         native.state.set(MediaPlaybackState::Playing);
-        for _ in 0..40 {
+        for _ in 0..80 {
             tick();
         }
         assert!(native.reads.get() > reads && view.timer.borrow().is_some());
@@ -1099,7 +1102,7 @@ mod readiness_tests {
         let window = Window::new();
         window.set_content(Some(Control::boxed(view.clone())));
         window.show();
-        for _ in 0..65 {
+        for _ in 0..80 {
             tick();
         }
         assert!(

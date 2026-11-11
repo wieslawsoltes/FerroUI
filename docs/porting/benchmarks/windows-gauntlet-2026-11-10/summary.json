@@ -1,0 +1,148 @@
+[
+  {
+    "renderers": {
+      "skia": {
+        "mean_ms": 136.36110722222213,
+        "client_width": 822.4,
+        "render_scaling": 1.25,
+        "p95_ms": 164.0323,
+        "sample_sd_ms": 62.108026053462574,
+        "runs": [
+          {
+            "callback_fps": 7.490318575982576,
+            "mean_ms": 133.50567000000004,
+            "pointer_over_frames": 0,
+            "repeat": 1,
+            "first_callback_ms": 1109.3789000000002
+          },
+          {
+            "callback_fps": 7.437974982302963,
+            "mean_ms": 134.4451954166667,
+            "pointer_over_frames": 0,
+            "repeat": 2,
+            "first_callback_ms": 941.8068000000001
+          },
+          {
+            "callback_fps": 7.085542380333932,
+            "mean_ms": 141.13245625000008,
+            "pointer_over_frames": 0,
+            "repeat": 3,
+            "first_callback_ms": 1379.7729000000002
+          }
+        ],
+        "samples": 720,
+        "callback_fps": 7.333469347460936,
+        "client_height": 594.4
+      },
+      "native": {
+        "mean_ms": 193.66544875000017,
+        "client_width": 822.4,
+        "render_scaling": 1.25,
+        "p95_ms": 267.2285,
+        "sample_sd_ms": 45.2344276737837,
+        "runs": [
+          {
+            "callback_fps": 5.109009063733326,
+            "mean_ms": 195.7326729166666,
+            "pointer_over_frames": 0,
+            "repeat": 1,
+            "first_callback_ms": 830.5089
+          },
+          {
+            "callback_fps": 5.252760608035406,
+            "mean_ms": 190.37608499999996,
+            "pointer_over_frames": 0,
+            "repeat": 2,
+            "first_callback_ms": 943.8155
+          },
+          {
+            "callback_fps": 5.13116309023031,
+            "mean_ms": 194.8875883333335,
+            "pointer_over_frames": 0,
+            "repeat": 3,
+            "first_callback_ms": 791.092
+          }
+        ],
+        "samples": 720,
+        "callback_fps": 5.163543659720558,
+        "client_height": 594.4
+      }
+    },
+    "scenario": "gauntlet",
+    "native_skia_time_ratio": 1.420239632070393,
+    "native_skia_callback_rate_ratio": 0.7041065306297802
+  },
+  {
+    "renderers": {
+      "skia": {
+        "mean_ms": 79.13497166666674,
+        "client_width": 822.4,
+        "render_scaling": 1.25,
+        "p95_ms": 80.21430000000001,
+        "sample_sd_ms": 0.6609013281407798,
+        "runs": [
+          {
+            "callback_fps": 12.63227638199603,
+            "mean_ms": 79.16229583333337,
+            "pointer_over_frames": 0,
+            "repeat": 1,
+            "first_callback_ms": 7403.0549
+          },
+          {
+            "callback_fps": 12.629898506135612,
+            "mean_ms": 79.17719999999996,
+            "pointer_over_frames": 0,
+            "repeat": 2,
+            "first_callback_ms": 7537.5435
+          },
+          {
+            "callback_fps": 12.64775436012096,
+            "mean_ms": 79.0654191666667,
+            "pointer_over_frames": 0,
+            "repeat": 3,
+            "first_callback_ms": 6821.8494
+          }
+        ],
+        "samples": 720,
+        "callback_fps": 12.636638125204767,
+        "client_height": 594.4
+      },
+      "native": {
+        "mean_ms": 26.952715277777767,
+        "client_width": 822.4,
+        "render_scaling": 1.25,
+        "p95_ms": 32.1245,
+        "sample_sd_ms": 4.998091841282732,
+        "runs": [
+          {
+            "callback_fps": 36.230273823578834,
+            "mean_ms": 27.601226666666683,
+            "pointer_over_frames": 0,
+            "repeat": 1,
+            "first_callback_ms": 6205.1394
+          },
+          {
+            "callback_fps": 37.34784023042123,
+            "mean_ms": 26.775310000000008,
+            "pointer_over_frames": 0,
+            "repeat": 2,
+            "first_callback_ms": 6444.8377
+          },
+          {
+            "callback_fps": 37.762055685752465,
+            "mean_ms": 26.481609166666676,
+            "pointer_over_frames": 0,
+            "repeat": 3,
+            "first_callback_ms": 6395.1466
+          }
+        ],
+        "samples": 720,
+        "callback_fps": 37.10201327376057,
+        "client_height": 594.4
+      }
+    },
+    "scenario": "wall",
+    "native_skia_time_ratio": 0.3405917094569555,
+    "native_skia_callback_rate_ratio": 2.936066769195336
+  }
+]

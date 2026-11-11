@@ -158,6 +158,79 @@ are thousands of layout passes each, so their test takes a while in a build with
 
 ## Reading the numbers
 
+### Windows GPU renderer comparison
+
+The original suite above uses synthetic drawing services and measures layout.
+The optional `renderer-benchmarks` mode reuses its virtualization grids with real
+platform fonts/shaping and actual GPU drawing. Build it once, then run Skia first
+and Direct2D second in separate processes, with no compilation or other benchmark
+running during either measurement:
+
+```powershell
+cargo test --locked --release -p ferroui-treedatagrid-benchmarks --no-default-features --features renderer-benchmarks --lib --no-run --target-dir target/tdg-renderer-release
+$env:FERROUI_BENCH_ITERATIONS = '15'
+$env:FERROUI_BENCH_WARMUP = '3'
+$env:FERROUI_TDG_FRAMES_PER_BATCH = '20'
+$env:FERROUI_TDG_DRAW_PATH = 'recorded'
+$env:FERROUI_TDG_BACKEND = 'skia'
+$env:FERROUI_TDG_RESULTS_JSON = 'target/tdg-renderer-skia.json'
+cargo test --locked --release -p ferroui-treedatagrid-benchmarks --no-default-features --features renderer-benchmarks --lib --target-dir target/tdg-renderer-release run_renderer_benchmarks -- --ignored --nocapture --test-threads=1
+$env:FERROUI_TDG_BACKEND = 'direct2d'
+$env:FERROUI_TDG_RESULTS_JSON = 'target/tdg-renderer-direct2d.json'
+cargo test --locked --release -p ferroui-treedatagrid-benchmarks --no-default-features --features renderer-benchmarks --lib --target-dir target/tdg-renderer-release run_renderer_benchmarks -- --ignored --nocapture --test-threads=1
+```
+
+The two processes use the same executable, viewport (800×500 physical pixels),
+scale (1), Segoe UI at size 12, row height (24), data and scrolling scripts.
+Both classic and neutral sources run stationary redraws, small vertical scrolls,
+row scrolls, small horizontal scrolls, column scrolls and far-column scrolls.
+The GPU mode adds a text-cell template bound to each cell's value; the original
+layout fixture does not need a drawable text template. Nonempty realized text is
+asserted, and captures verify that both backends draw the table.
+Skia uses hardware ANGLE/D3D11 with HarfBuzz; Direct2D uses hardware D3D11 with
+DirectWrite. The selected driver and adapter LUID, when exposed, are recorded.
+Software ANGLE adapters are rejected.
+
+Each frame lays out and draws the full window into an offscreen GPU target.
+The default `recorded` path rebuilds a production render-data stream every frame
+and replays it onto the GPU. It includes recording cost and the recorder's normal
+elimination of identity transforms and fully opaque scopes. Set
+`FERROUI_TDG_DRAW_PATH=immediate` to diagnose direct platform-context drawing:
+that path forwards every visual's opacity scope, even opacity 1, and can have
+substantially different costs from the retained compositor. Compare backends
+using the same path, and report the path with the results.
+Skia flushes/submits every frame, matching its window render session; its deferred
+recorder cannot discard previous frames when the next clear arrives. A timed
+batch ends with GPU completion (`glFinish` or a D3D11 event query), amortizing the
+synchronization over the batch. Results include total GPU-drained time, layout
+time, submission time, raw per-batch samples and dispersion. This isolates text,
+layout and rendering work; it does **not** measure retained-compositor dirty-region
+savings, input dispatch, swapchain presentation, vsync or displayed frame rate.
+
+`FERROUI_BENCH_FILTER` selects scenario-name substrings as above. Set
+`FERROUI_TDG_CAPTURE_DIR` to save one validation image per scenario/source before
+timing. These explicit exports may read pixels back; timed Direct2D batches assert
+that readback and renderer-error counters do not increase. Allocation counting
+must be disabled. The ordinary layout suite remains the default; disabling its
+`layout-benchmarks` feature keeps unrelated benchmark/theme code out of this mode.
+
+For a separate diagnostic run, `FERROUI_D3D_PROFILE=1` populates each row's
+`native_profile` with CPU nanoseconds and call counts. Slot definitions are in
+`ferroui_direct2d::profiling_statistics`; counts include warm-up batches and
+timers can nest. Leave profiling disabled for the primary renderer comparison.
+The [comparison script](../../scripts/compare-windows-tdg-renderers.ps1) runs five
+Skia-first/native-second pairs against one prebuilt executable and records its
+hash. See the [parity follow-up](../../docs/porting/windows-tdg-renderer-parity.md)
+for the latest results across all twelve workloads.
+JSON also reports recording and replay phases. Native replay enqueues batched
+commands; their execution during drawing-context disposal belongs to submission
+and total time. Compare primary GPU-drained totals across backends.
+The [Windows baseline](../../docs/porting/windows-tdg-renderer-benchmarks.md) and
+[optimization results](../../docs/porting/windows-tdg-renderer-optimization.md)
+retain measured samples and source/executable identities.
+
+### Layout-suite results
+
 The times are not comparable with the reference's: the harness, the clock, the allocator and the
 services of the test application differ. They are for comparing a change of the control with the
 state before it, measured on a quiet machine in the same build. No numbers are recorded here; a

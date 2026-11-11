@@ -236,7 +236,12 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
 
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
         self.log.push(format!("CreateLayer {size}"));
-        Rc::new(MockDrawingContextLayerImpl::new(self.log.clone(), size))
+        let mut layer = MockDrawingContextLayerImpl::new(self.log.clone(), size);
+        layer.supports_layer_effects = self.supports_layer_effects;
+        layer.supports_gpu_effects = self.supports_gpu_effects;
+        layer.supports_effects = self.supports_effects;
+        layer.log_effects = self.log_effects;
+        Rc::new(layer)
     }
 
     fn push_clip(&mut self, clip: Rect) {
@@ -518,6 +523,10 @@ impl IDrawingContextWithAcrylicLikeSupport for MockDrawingContextImpl {
 pub struct MockDrawingContextLayerImpl {
     log: DrawingLog,
     size: PixelSize,
+    supports_layer_effects: bool,
+    supports_gpu_effects: bool,
+    supports_effects: bool,
+    log_effects: bool,
     /// For a layer that holds frames back
     /// ([`DrawingLog::hold_layer_frames_back`]): the number of frames drawn
     /// into the layer, and the number of the frame a blit shows.
@@ -529,7 +538,17 @@ pub struct MockDrawingContextLayerImpl {
 
 impl MockDrawingContextLayerImpl {
     pub fn new(log: DrawingLog, size: PixelSize) -> Self {
-        Self { log, size, drawn: AtomicU32::new(0), shown: AtomicU32::new(0), drew_since_blit: AtomicBool::new(false) }
+        Self {
+            log,
+            size,
+            supports_layer_effects: false,
+            supports_gpu_effects: false,
+            supports_effects: false,
+            log_effects: false,
+            drawn: AtomicU32::new(0),
+            shown: AtomicU32::new(0),
+            drew_since_blit: AtomicBool::new(false),
+        }
     }
 }
 
@@ -591,7 +610,12 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
             self.drawn.fetch_add(1, Ordering::SeqCst);
             self.drew_since_blit.store(true, Ordering::SeqCst);
         }
-        Box::new(MockDrawingContextImpl::new(self.log.clone()))
+        let mut context = MockDrawingContextImpl::new(self.log.clone());
+        context.supports_layer_effects = self.supports_layer_effects;
+        context.supports_gpu_effects = self.supports_gpu_effects;
+        context.supports_effects = self.supports_effects;
+        context.log_effects = self.log_effects;
+        Box::new(context)
     }
 
     fn has_pending_frame(&self) -> bool {

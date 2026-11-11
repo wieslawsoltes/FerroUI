@@ -1,0 +1,30 @@
+{
+  "source_revision": "9532b8a7f0dfa1f07eb84ea0b1ebaf4fd6eb1060",
+  "executable_sha256": {
+    "skia": "9ABC626168289054A657929439511F391BFB7D24E0ABC3A278F7A5E9E2E1EFB6",
+    "native": "A81B7C54C6AC9EBC2CC5FB44146C352B7C6A93036EE2DD497CE9D24A1792256A"
+  },
+  "started_utc": "2026-11-11T10:25:46.3530070Z",
+  "measured_frames": 240,
+  "order": [
+    "skia",
+    "native"
+  ],
+  "source_changes": [],
+  "per_second_callback_reporting": true,
+  "font_sha256": [
+    {
+      "Path": "<checkout>\\src\\FerroUI.Themes.Material\\Assets\\Roboto-Regular.ttf",
+      "Hash": "BDC144D49DEE7CF60C77A69A1EBC288CB0E8BE25E05F2F3B7B3225E8014615F8"
+    },
+    {
+      "Path": "<checkout>\\src\\FerroUI.Themes.Material\\Assets\\Roboto-Bold.ttf",
+      "Hash": "C84122B6DC2CFA81B702EC0D753B8F794522B8B7F6BBC3284627C1C35EA6F764"
+    }
+  ],
+  "repetitions": 3,
+  "scenarios": [
+    "gauntlet"
+  ],
+  "warmup_frames": 60
+}

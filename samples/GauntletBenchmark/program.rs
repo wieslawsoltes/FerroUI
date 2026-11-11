@@ -16,10 +16,15 @@ use ferroui_desktop::AppBuilderDesktopExtensions;
 use gauntlet_benchmark::{App, Launch};
 
 fn variable(name: &str, fallback: i32) -> i32 {
-    std::env::var(name).ok().and_then(|value| value.trim().parse().ok()).unwrap_or(fallback)
+    std::env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse().ok())
+        .unwrap_or(fallback)
 }
 
 fn main() -> std::process::ExitCode {
+    #[cfg(windows)]
+    gauntlet_benchmark::measurement::start();
     Launch::set(Launch {
         tier: variable("PERF_TIER", 5),
         freeze: variable("PERF_FREEZE", 0),
@@ -27,15 +32,45 @@ fn main() -> std::process::ExitCode {
     });
     let args: Vec<String> = std::env::args().skip(1).collect();
     let builder = AppBuilder::configure::<App>();
+    // A desktop GPU comparison must not silently select the software fallback.
+    #[cfg(windows)]
+    let builder = if std::env::var_os("PERF_MEASURE_FRAMES").is_some() {
+        builder.with(std::rc::Rc::new(ferroui_win32::Win32PlatformOptions {
+            rendering_mode: vec![if cfg!(feature = "direct2d") {
+                ferroui_win32::Win32RenderingMode::Direct3D11
+            } else {
+                ferroui_win32::Win32RenderingMode::AngleEgl
+            }],
+            graphics_adapter_selection_callback: Some(std::rc::Rc::new(|adapters| {
+                assert!(!adapters.is_empty(), "No ANGLE adapters available");
+                println!("PERF_GPU {:?}", adapters[0]);
+                assert!(
+                    !adapters[0]
+                        .description
+                        .as_deref()
+                        .unwrap_or_default()
+                        .to_lowercase()
+                        .contains("basic render"),
+                    "Software ANGLE adapter rejected"
+                );
+                0
+            })),
+            ..Default::default()
+        }))
+    } else {
+        builder
+    };
     #[cfg(all(target_os = "macos", feature = "quartz"))]
-    let builder = builder.with(std::rc::Rc::new(ferroui_native::FerroNativePlatformOptions {
-        rendering_mode: vec![if cfg!(feature = "quartz-metal") {
-            ferroui_native::FerroNativeRenderingMode::Metal
-        } else {
-            ferroui_native::FerroNativeRenderingMode::Software
-        }],
-        ..Default::default()
-    }));
+    let builder = builder.with(std::rc::Rc::new(
+        ferroui_native::FerroNativePlatformOptions {
+            rendering_mode: vec![if cfg!(feature = "quartz-metal") {
+                ferroui_native::FerroNativeRenderingMode::Metal
+            } else {
+                ferroui_native::FerroNativeRenderingMode::Software
+            }],
+            ..Default::default()
+        },
+    ));
     let builder = builder.use_platform_detect();
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);

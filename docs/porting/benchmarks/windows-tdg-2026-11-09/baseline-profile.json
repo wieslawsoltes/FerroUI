@@ -1,0 +1,1864 @@
+{
+  "adapter_luid": [
+    199,
+    2,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "backend": "direct2d",
+  "draw_path": "recorded",
+  "driver": "hardware D3D11 / Direct2D / DirectWrite",
+  "font": "Segoe UI",
+  "font_size": 12,
+  "frames_per_batch": 20,
+  "gpu_completion": "wait once per batch; no presentation/vsync",
+  "measured_batches": 5,
+  "rows": [
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.003829,
+        "median": 0.00388,
+        "p95": 0.0040149999999999995,
+        "samples": [
+          0.00388,
+          0.00392,
+          0.0040149999999999995,
+          0.003655,
+          0.003675
+        ],
+        "sd": 0.00015769432456496326
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 13007100
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 7900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 100300
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 4624000
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 59400
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 416100
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 239800
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.130641,
+        "median": 0.13108499999999998,
+        "p95": 0.131935,
+        "samples": [
+          0.13108499999999998,
+          0.12926500000000002,
+          0.131935,
+          0.13164,
+          0.12928
+        ],
+        "sd": 0.0012860083592263231
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.045722,
+        "median": 0.04568,
+        "p95": 0.046225,
+        "samples": [
+          0.04568,
+          0.045985,
+          0.04557,
+          0.046225,
+          0.04515
+        ],
+        "sd": 0.0004105575477323485
+      },
+      "scenario": "stationary_redraw",
+      "submission_ms_per_frame": {
+        "mean": 0.32202600000000003,
+        "median": 0.32068,
+        "p95": 0.3267,
+        "samples": [
+          0.3267,
+          0.320635,
+          0.3251,
+          0.32068,
+          0.317015
+        ],
+        "sd": 0.0038779011720259174
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.340902,
+        "median": 0.33937,
+        "p95": 0.34577,
+        "samples": [
+          0.34577,
+          0.33925,
+          0.344165,
+          0.33937,
+          0.335955
+        ],
+        "sd": 0.003996671427575707
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.042276999999999995,
+        "median": 0.042835,
+        "p95": 0.04709,
+        "samples": [
+          0.04709,
+          0.042835,
+          0.03487,
+          0.041705000000000006,
+          0.044884999999999994
+        ],
+        "sd": 0.004622467685122309
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 12728100
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 10000
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 133700
+        },
+        {
+          "calls": 27675,
+          "nanoseconds": 6615300
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 10200
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 83600
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 106800
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 526100
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 48300
+        },
+        {
+          "calls": 27621,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 58100
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 332900
+        },
+        {
+          "calls": 27675,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 22,
+      "recording_ms_per_frame": {
+        "mean": 0.160437,
+        "median": 0.170025,
+        "p95": 0.17502500000000001,
+        "samples": [
+          0.15405,
+          0.17129,
+          0.17502500000000001,
+          0.170025,
+          0.131795
+        ],
+        "sd": 0.01791427524350344
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.05695599999999999,
+        "median": 0.05963500000000001,
+        "p95": 0.06044499999999999,
+        "samples": [
+          0.055564999999999996,
+          0.060395,
+          0.06044499999999999,
+          0.05963500000000001,
+          0.04874
+        ],
+        "sd": 0.005015336977711468
+      },
+      "scenario": "vertical_small_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.431419,
+        "median": 0.446835,
+        "p95": 0.44755,
+        "samples": [
+          0.43068,
+          0.44704999999999995,
+          0.44755,
+          0.446835,
+          0.38498
+        ],
+        "sd": 0.026922654122504334
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.45001199999999997,
+        "median": 0.46545,
+        "p95": 0.46599500000000005,
+        "samples": [
+          0.44950999999999997,
+          0.46545,
+          0.46599500000000005,
+          0.46545,
+          0.403655
+        ],
+        "sd": 0.026839073335344504
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.18477899999999997,
+        "median": 0.180875,
+        "p95": 0.234205,
+        "samples": [
+          0.180875,
+          0.234205,
+          0.21085499999999996,
+          0.150355,
+          0.14760500000000001
+        ],
+        "sd": 0.037765879176844264
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 15175800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 11100
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 161100
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 7445300
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 212600
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 1766700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 184100
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 601600
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 1095000
+        },
+        {
+          "calls": 25209,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 859200
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 367400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.15723,
+        "median": 0.166955,
+        "p95": 0.195285,
+        "samples": [
+          0.166955,
+          0.195285,
+          0.17304,
+          0.12826500000000002,
+          0.122605
+        ],
+        "sd": 0.030945826051343328
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.063001,
+        "median": 0.06384500000000001,
+        "p95": 0.08009000000000001,
+        "samples": [
+          0.06384500000000001,
+          0.08009000000000001,
+          0.06872999999999999,
+          0.051745000000000006,
+          0.050595
+        ],
+        "sd": 0.012310301275760882
+      },
+      "scenario": "vertical_row_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.6048409999999999,
+        "median": 0.6012700000000001,
+        "p95": 0.789955,
+        "samples": [
+          0.6012700000000001,
+          0.789955,
+          0.6500999999999999,
+          0.49876,
+          0.48412000000000005
+        ],
+        "sd": 0.1246545832691281
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.625244,
+        "median": 0.6223799999999999,
+        "p95": 0.8106500000000001,
+        "samples": [
+          0.6223799999999999,
+          0.8106500000000001,
+          0.6702049999999999,
+          0.518785,
+          0.5042
+        ],
+        "sd": 0.12489019924517698
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.04010300000000001,
+        "median": 0.03516,
+        "p95": 0.0606,
+        "samples": [
+          0.03455,
+          0.03525,
+          0.0606,
+          0.034955,
+          0.03516
+        ],
+        "sd": 0.011461343507634699
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 11404400
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 9100
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 110400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 4889200
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 4000
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 29900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 80200
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 417300
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 17600
+        },
+        {
+          "calls": 26439,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 15100
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 230400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.135288,
+        "median": 0.127985,
+        "p95": 0.17136,
+        "samples": [
+          0.12238500000000001,
+          0.127985,
+          0.17136,
+          0.13065,
+          0.12405999999999999
+        ],
+        "sd": 0.02042418560187897
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.048743,
+        "median": 0.045405,
+        "p95": 0.06135500000000001,
+        "samples": [
+          0.044265,
+          0.045405,
+          0.06135500000000001,
+          0.047805,
+          0.044884999999999994
+        ],
+        "sd": 0.007176720699595328
+      },
+      "scenario": "horizontal_small_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.37240699999999993,
+        "median": 0.350205,
+        "p95": 0.46667999999999993,
+        "samples": [
+          0.338325,
+          0.350205,
+          0.46667999999999993,
+          0.36157,
+          0.345255
+        ],
+        "sd": 0.05337738690213298
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.391596,
+        "median": 0.36955,
+        "p95": 0.48656000000000005,
+        "samples": [
+          0.357365,
+          0.36955,
+          0.48656000000000005,
+          0.38054,
+          0.363965
+        ],
+        "sd": 0.05376257078581718
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 1.260562,
+        "median": 1.2155799999999999,
+        "p95": 1.455575,
+        "samples": [
+          1.0155600000000002,
+          1.2155799999999999,
+          1.1813600000000002,
+          1.455575,
+          1.434735
+        ],
+        "sd": 0.1848571213329364
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 14504300
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 11600
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 168100
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 12961500
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 2041900
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 6738700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 266100
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 630800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14490,
+          "nanoseconds": 1224300
+        },
+        {
+          "calls": 42,
+          "nanoseconds": 28300
+        },
+        {
+          "calls": 11928,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 6685700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 387400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.157604,
+        "median": 0.15552000000000002,
+        "p95": 0.18539,
+        "samples": [
+          0.123475,
+          0.15552000000000002,
+          0.149515,
+          0.18539,
+          0.17412
+        ],
+        "sd": 0.023871550379060007
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.091504,
+        "median": 0.089445,
+        "p95": 0.10436000000000001,
+        "samples": [
+          0.073005,
+          0.089445,
+          0.08768,
+          0.10436000000000001,
+          0.10303
+        ],
+        "sd": 0.012837453700013879
+      },
+      "scenario": "horizontal_column_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 1.7547979999999999,
+        "median": 1.693775,
+        "p95": 2.023275,
+        "samples": [
+          1.417675,
+          1.693775,
+          1.6487849999999997,
+          2.023275,
+          1.9904800000000002
+        ],
+        "sd": 0.2531009603300628
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 1.7747190000000004,
+        "median": 1.713495,
+        "p95": 2.04332,
+        "samples": [
+          1.4373999999999998,
+          1.713495,
+          1.668905,
+          2.04332,
+          2.0104750000000005
+        ],
+        "sd": 0.2532076604636994
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 1.156928,
+        "median": 1.058135,
+        "p95": 1.42524,
+        "samples": [
+          1.00152,
+          1.058135,
+          1.42524,
+          1.046045,
+          1.2536999999999998
+        ],
+        "sd": 0.17857973872335017
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 14575700
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 9500
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 154600
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 12162100
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 2274900
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 6363200
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 226300
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 545500
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14490,
+          "nanoseconds": 1201300
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 14500
+        },
+        {
+          "calls": 11949,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 6284400
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 341800
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": false,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.13541799999999998,
+        "median": 0.12065000000000001,
+        "p95": 0.17195500000000002,
+        "samples": [
+          0.11870499999999999,
+          0.119265,
+          0.17195500000000002,
+          0.12065000000000001,
+          0.146515
+        ],
+        "sd": 0.023539506048343508
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.088682,
+        "median": 0.082735,
+        "p95": 0.106375,
+        "samples": [
+          0.078945,
+          0.082735,
+          0.106375,
+          0.079515,
+          0.09584000000000001
+        ],
+        "sd": 0.012025899966322685
+      },
+      "scenario": "horizontal_far_column_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 1.6105820000000002,
+        "median": 1.4753,
+        "p95": 1.978995,
+        "samples": [
+          1.39489,
+          1.4753,
+          1.978995,
+          1.4523199999999998,
+          1.751405
+        ],
+        "sd": 0.24770465020362462
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 1.631729,
+        "median": 1.499225,
+        "p95": 1.999625,
+        "samples": [
+          1.414865,
+          1.499225,
+          1.999625,
+          1.472845,
+          1.772085
+        ],
+        "sd": 0.24742610185669578
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.0038489999999999996,
+        "median": 0.003845,
+        "p95": 0.00396,
+        "samples": [
+          0.00396,
+          0.003855,
+          0.003845,
+          0.00378,
+          0.0038050000000000002
+        ],
+        "sd": 0.00006904708538381614
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 10986500
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 9600
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 101300
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 4831300
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 57700
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 404200
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 209800
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.131851,
+        "median": 0.131915,
+        "p95": 0.132465,
+        "samples": [
+          0.13142,
+          0.132465,
+          0.13132000000000002,
+          0.131915,
+          0.132135
+        ],
+        "sd": 0.00048204512236925813
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.044628,
+        "median": 0.044395,
+        "p95": 0.04507,
+        "samples": [
+          0.04503,
+          0.04507,
+          0.044305,
+          0.044395,
+          0.044340000000000004
+        ],
+        "sd": 0.00038682360320952503
+      },
+      "scenario": "stationary_redraw",
+      "submission_ms_per_frame": {
+        "mean": 0.31533500000000003,
+        "median": 0.31522,
+        "p95": 0.31671499999999997,
+        "samples": [
+          0.31671499999999997,
+          0.316545,
+          0.31378999999999996,
+          0.31522,
+          0.314405
+        ],
+        "sd": 0.0012877936558315652
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.33361599999999997,
+        "median": 0.33342499999999997,
+        "p95": 0.33511,
+        "samples": [
+          0.33511,
+          0.334955,
+          0.33196,
+          0.33342499999999997,
+          0.33263
+        ],
+        "sd": 0.0013942713150603245
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.04398200000000001,
+        "median": 0.0417,
+        "p95": 0.06151000000000001,
+        "samples": [
+          0.0426,
+          0.06151000000000001,
+          0.033475,
+          0.0417,
+          0.040625
+        ],
+        "sd": 0.010440482867185795
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 12431700
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 10000
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 129400
+        },
+        {
+          "calls": 27675,
+          "nanoseconds": 5820200
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 7600
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 74700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 105700
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 449000
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 41200
+        },
+        {
+          "calls": 27621,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 54,
+          "nanoseconds": 35900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 303600
+        },
+        {
+          "calls": 27675,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 22,
+      "recording_ms_per_frame": {
+        "mean": 0.14182699999999998,
+        "median": 0.12730000000000002,
+        "p95": 0.205995,
+        "samples": [
+          0.131365,
+          0.205995,
+          0.12730000000000002,
+          0.12233999999999998,
+          0.122135
+        ],
+        "sd": 0.03607470523095096
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.054808,
+        "median": 0.05082,
+        "p95": 0.072075,
+        "samples": [
+          0.05405,
+          0.072075,
+          0.05082,
+          0.048624999999999995,
+          0.04847
+        ],
+        "sd": 0.009912463492997087
+      },
+      "scenario": "vertical_small_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.40752799999999995,
+        "median": 0.37154000000000004,
+        "p95": 0.55892,
+        "samples": [
+          0.383145,
+          0.55892,
+          0.37154000000000004,
+          0.36297999999999997,
+          0.361055
+        ],
+        "sd": 0.08507859385591653
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.42614399999999997,
+        "median": 0.39018,
+        "p95": 0.5773349999999999,
+        "samples": [
+          0.40232,
+          0.5773349999999999,
+          0.39018,
+          0.38139,
+          0.379495
+        ],
+        "sd": 0.08499817714221872
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.15815099999999999,
+        "median": 0.146445,
+        "p95": 0.20276999999999998,
+        "samples": [
+          0.146445,
+          0.14421499999999998,
+          0.154755,
+          0.14257,
+          0.20276999999999998
+        ],
+        "sd": 0.025379115774589147
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 13166400
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 10900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 149500
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 6175800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 161700
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 1556200
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 176700
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 463600
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 988600
+        },
+        {
+          "calls": 25209,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 1251,
+          "nanoseconds": 708200
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 392000
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.131781,
+        "median": 0.12463500000000001,
+        "p95": 0.157565,
+        "samples": [
+          0.13182,
+          0.12219500000000001,
+          0.12463500000000001,
+          0.12269,
+          0.157565
+        ],
+        "sd": 0.014919946129259317
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.05284700000000001,
+        "median": 0.05177,
+        "p95": 0.060105,
+        "samples": [
+          0.05177,
+          0.05009,
+          0.05025,
+          0.05202,
+          0.060105
+        ],
+        "sd": 0.0041493336814481425
+      },
+      "scenario": "vertical_row_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.511505,
+        "median": 0.489545,
+        "p95": 0.62151,
+        "samples": [
+          0.490275,
+          0.47227500000000006,
+          0.489545,
+          0.48392,
+          0.62151
+        ],
+        "sd": 0.06191522359242514
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.5310409999999999,
+        "median": 0.5087200000000001,
+        "p95": 0.64147,
+        "samples": [
+          0.509995,
+          0.49137499999999995,
+          0.5087200000000001,
+          0.5036449999999999,
+          0.64147
+        ],
+        "sd": 0.062168435660711306
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 0.038164,
+        "median": 0.034499999999999996,
+        "p95": 0.05278000000000001,
+        "samples": [
+          0.034499999999999996,
+          0.033940000000000005,
+          0.05278000000000001,
+          0.03528,
+          0.03432
+        ],
+        "sd": 0.008185174402540244
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 11054400
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 7900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 99100
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 4547200
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 2600
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 23700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 79300
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 343000
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 13000
+        },
+        {
+          "calls": 26439,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 10200
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 230400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.12283,
+        "median": 0.12265999999999999,
+        "p95": 0.124345,
+        "samples": [
+          0.12265999999999999,
+          0.12168000000000001,
+          0.124345,
+          0.12177,
+          0.123695
+        ],
+        "sd": 0.0011745690699145755
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.044461,
+        "median": 0.044184999999999995,
+        "p95": 0.045905,
+        "samples": [
+          0.0439,
+          0.043665,
+          0.045905,
+          0.04465,
+          0.044184999999999995
+        ],
+        "sd": 0.0008867595502727899
+      },
+      "scenario": "horizontal_small_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 0.345502,
+        "median": 0.34290000000000004,
+        "p95": 0.36459,
+        "samples": [
+          0.34055,
+          0.33475,
+          0.36459,
+          0.34472,
+          0.34290000000000004
+        ],
+        "sd": 0.011312177951217006
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 0.364163,
+        "median": 0.36143000000000003,
+        "p95": 0.38346,
+        "samples": [
+          0.359155,
+          0.353355,
+          0.38346,
+          0.363415,
+          0.36143000000000003
+        ],
+        "sd": 0.011426897326046135
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 1.021032,
+        "median": 1.019295,
+        "p95": 1.0339399999999999,
+        "samples": [
+          1.019295,
+          1.030425,
+          1.0148300000000001,
+          1.0339399999999999,
+          1.00667
+        ],
+        "sd": 0.01120930339048768
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 13252800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 9900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 146400
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 10609500
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 1745800
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 5840900
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 228500
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 452500
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14490,
+          "nanoseconds": 1071100
+        },
+        {
+          "calls": 42,
+          "nanoseconds": 26200
+        },
+        {
+          "calls": 11928,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14532,
+          "nanoseconds": 5524700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 321200
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.127882,
+        "median": 0.12586,
+        "p95": 0.135475,
+        "samples": [
+          0.130555,
+          0.135475,
+          0.12316,
+          0.12586,
+          0.12436
+        ],
+        "sd": 0.005088929897335985
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.075337,
+        "median": 0.075505,
+        "p95": 0.076505,
+        "samples": [
+          0.07421,
+          0.076505,
+          0.075505,
+          0.07611,
+          0.074355
+        ],
+        "sd": 0.0010276709103599264
+      },
+      "scenario": "horizontal_column_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 1.4277379999999997,
+        "median": 1.428165,
+        "p95": 1.442715,
+        "samples": [
+          1.428165,
+          1.442715,
+          1.41923,
+          1.441385,
+          1.407195
+        ],
+        "sd": 0.015042725650625937
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 1.4469739999999998,
+        "median": 1.44734,
+        "p95": 1.46182,
+        "samples": [
+          1.44734,
+          1.46182,
+          1.438415,
+          1.46095,
+          1.426345
+        ],
+        "sd": 0.01512182503866512
+      }
+    },
+    {
+      "layout_ms_per_frame": {
+        "mean": 1.017981,
+        "median": 1.01821,
+        "p95": 1.028915,
+        "samples": [
+          1.022415,
+          1.01821,
+          1.015015,
+          1.00535,
+          1.028915
+        ],
+        "sd": 0.008769328223986175
+      },
+      "native_profile": [
+        {
+          "calls": 140,
+          "nanoseconds": 14696800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 9800
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 147200
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 11138800
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 2036400
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 5856300
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 219000
+        },
+        {
+          "calls": 280,
+          "nanoseconds": 439700
+        },
+        {
+          "calls": 0,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14490,
+          "nanoseconds": 1088600
+        },
+        {
+          "calls": 21,
+          "nanoseconds": 15100
+        },
+        {
+          "calls": 11949,
+          "nanoseconds": 0
+        },
+        {
+          "calls": 14511,
+          "nanoseconds": 5815700
+        },
+        {
+          "calls": 140,
+          "nanoseconds": 308000
+        },
+        {
+          "calls": 26460,
+          "nanoseconds": 0
+        }
+      ],
+      "neutral_source": true,
+      "realized_rows": 21,
+      "recording_ms_per_frame": {
+        "mean": 0.12181000000000002,
+        "median": 0.121945,
+        "p95": 0.12392,
+        "samples": [
+          0.12141500000000001,
+          0.12392,
+          0.121945,
+          0.11874,
+          0.12303
+        ],
+        "sd": 0.0019710181379175595
+      },
+      "replay_ms_per_frame": {
+        "mean": 0.075108,
+        "median": 0.07506499999999999,
+        "p95": 0.0766,
+        "samples": [
+          0.0766,
+          0.07494999999999999,
+          0.075205,
+          0.07372000000000001,
+          0.07506499999999999
+        ],
+        "sd": 0.001023331568945274
+      },
+      "scenario": "horizontal_far_column_scrolls",
+      "submission_ms_per_frame": {
+        "mean": 1.431318,
+        "median": 1.43557,
+        "p95": 1.444095,
+        "samples": [
+          1.437055,
+          1.43557,
+          1.4290550000000002,
+          1.410815,
+          1.444095
+        ],
+        "sd": 0.012646526993605788
+      },
+      "text_cells": 189,
+      "total_ms_per_frame": {
+        "mean": 1.451519,
+        "median": 1.4557250000000002,
+        "p95": 1.46418,
+        "samples": [
+          1.457275,
+          1.4557250000000002,
+          1.44923,
+          1.431185,
+          1.46418
+        ],
+        "sd": 0.01254824659065965
+      }
+    }
+  ],
+  "scale": 1,
+  "viewport_pixels": [
+    800,
+    500
+  ],
+  "warmup_batches": 2
+}

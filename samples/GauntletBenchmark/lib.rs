@@ -10,6 +10,8 @@ mod app;
 mod gauntlet;
 mod perf_data;
 mod wall;
+#[cfg(windows)]
+pub mod measurement;
 
 pub use app::{App, DeviceRoboto, Launch};
 pub use gauntlet::{Clock, GauntletView};

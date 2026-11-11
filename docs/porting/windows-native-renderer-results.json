@@ -1,0 +1,555 @@
+{
+  "toolchain": "rustc 1.93.0 (254b59607 2026-01-19)\nbinary: rustc\ncommit-hash: 254b59607d4417e9dffbc307138ae5c86280fe4c\ncommit-date: 2026-01-19\nhost: x86_64-pc-windows-msvc\nrelease: 1.93.0\nLLVM version: 21.1.8",
+  "revision": "2ae89e43d432901090af2446924a4e3e7de7c08e",
+  "os": {
+    "Caption": "Microsoft Windows 11 Pro",
+    "Version": "10.0.26200",
+    "BuildNumber": "26200"
+  },
+  "results": [
+    {
+      "shaderCompiler": "Skia built-in SkSL",
+      "prerequisites": [
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.3624 (WinBuild.160101.0800)",
+          "name": "advapi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-synch-l1-2-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-convert-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-environment-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-heap-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-locale-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-math-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-runtime-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-stdio-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "bcryptprimitives.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "combase.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "d3d11.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "d3d9.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "dcomp.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "dwmapi.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "dxgi.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "gdi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "imm32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "kernel32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "msctf.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "msvcp140.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7171 (WinBuild.160101.0800)",
+          "name": "ntdll.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "ole32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "oleaut32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "opengl32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7015 (WinBuild.160101.0800)",
+          "name": "shell32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "7.2.26100.8875 (WinBuild.160101.0800)",
+          "name": "uiautomationcore.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "user32.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140_1.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140.dll"
+        }
+      ],
+      "files": [
+        {
+          "bytes": 42464768,
+          "name": "hello-world.exe",
+          "sha256": "5ccb9453e598fc8e11df166809f7090bbf8b58eb05f36b1a894b171f0425fad9"
+        }
+      ],
+      "gzipBytes": 15558431,
+      "seconds": 770.7764021,
+      "backend": "skia",
+      "command": "cargo build --locked --profile dist -p hello-world --no-default-features --features skia",
+      "buildAttempts": 1,
+      "runtimeShaders": true,
+      "deployedBytes": 42464768.0,
+      "executableBytes": 42464768
+    },
+    {
+      "shaderCompiler": "Build-time compiled kernels only",
+      "prerequisites": [
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.3624 (WinBuild.160101.0800)",
+          "name": "advapi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-synch-l1-2-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-heap-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-locale-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-math-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-runtime-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-stdio-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "bcryptprimitives.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "combase.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.1 (WinBuild.160101.0800)",
+          "name": "d2d1.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "d3d11.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "dcomp.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "dwmapi.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.1 (WinBuild.160101.0800)",
+          "name": "dwrite.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "gdi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "imm32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "kernel32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "msctf.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "msvcp140.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7171 (WinBuild.160101.0800)",
+          "name": "ntdll.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "ole32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "oleaut32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "opengl32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7015 (WinBuild.160101.0800)",
+          "name": "shell32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "7.2.26100.8875 (WinBuild.160101.0800)",
+          "name": "uiautomationcore.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "user32.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140_1.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140.dll"
+        }
+      ],
+      "files": [
+        {
+          "bytes": 28883968,
+          "name": "hello-world.exe",
+          "sha256": "f4bc8f3df7336e27d73c9f48c1017a4eda308d79ed5a6f9b19e7e3b0b2ebf6c3"
+        }
+      ],
+      "gzipBytes": 10124067,
+      "seconds": 653.0310436,
+      "backend": "direct2d",
+      "command": "cargo build --locked --profile dist -p hello-world --no-default-features --features direct2d",
+      "buildAttempts": 1,
+      "runtimeShaders": false,
+      "deployedBytes": 28883968.0,
+      "executableBytes": 28883968
+    },
+    {
+      "shaderCompiler": "Naga WGSL-to-HLSL and Windows d3dcompiler_47.dll",
+      "prerequisites": [
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.3624 (WinBuild.160101.0800)",
+          "name": "advapi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-synch-l1-2-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-core-winrt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-heap-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-locale-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-math-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-runtime-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-stdio-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": null,
+          "name": "api-ms-win-crt-string-l1-1-0.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "bcryptprimitives.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "combase.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.1 (WinBuild.160101.0800)",
+          "name": "d2d1.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "d3d11.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "dcomp.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "dwmapi.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.1 (WinBuild.160101.0800)",
+          "name": "dwrite.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "gdi32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "imm32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "kernel32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "msctf.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "msvcp140.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7171 (WinBuild.160101.0800)",
+          "name": "ntdll.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.6725 (WinBuild.160101.0800)",
+          "name": "ole32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "oleaut32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7019 (WinBuild.160101.0800)",
+          "name": "opengl32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.7015 (WinBuild.160101.0800)",
+          "name": "shell32.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "7.2.26100.8875 (WinBuild.160101.0800)",
+          "name": "uiautomationcore.dll"
+        },
+        {
+          "kind": "Windows system/API set",
+          "installedVersion": "10.0.26100.8875 (WinBuild.160101.0800)",
+          "name": "user32.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140_1.dll"
+        },
+        {
+          "kind": "VC runtime",
+          "installedVersion": "14.50.35719.0",
+          "name": "vcruntime140.dll"
+        }
+      ],
+      "files": [
+        {
+          "bytes": 30820864,
+          "name": "hello-world.exe",
+          "sha256": "e0a6359ab1a3d6de32a168118c2ee6ffe0a2e4ebf303342a3b26040121d2869f"
+        }
+      ],
+      "gzipBytes": 10887986,
+      "seconds": 621.1637153,
+      "backend": "direct2d-runtime-shaders",
+      "command": "cargo build --locked --profile dist -p hello-world --no-default-features --features direct2d-runtime-shaders",
+      "buildAttempts": 1,
+      "runtimeShaders": true,
+      "deployedBytes": 30820864.0,
+      "executableBytes": 30820864
+    }
+  ],
+  "profile": "dist",
+  "cargoLockSha256": "54398bf277b077ac7890fa8f52d70dbdde78ce937a739d13870afb060453bc4a",
+  "gpu": [
+    {
+      "Name": "NVIDIA GeForce GTX 1660 Ti",
+      "DriverVersion": "32.0.16.1088"
+    }
+  ],
+  "target": "x86_64-pc-windows-msvc"
+}

@@ -1,0 +1,21 @@
+{
+  "executable_sha256": "F72D08734CDE34672E207B9E3D9535AACF883996711AEBFBDC8B22456488D485",
+  "order": [
+    "skia",
+    "direct2d"
+  ],
+  "repetitions": 5,
+  "settings": {
+    "FERROUI_TDG_CAPTURE_DIR": null,
+    "FERROUI_TDG_RESULTS_JSON": null,
+    "FERROUI_D3D_PROFILE": null,
+    "FERROUI_TDG_FRAMES_PER_BATCH": "20",
+    "FERROUI_TDG_BACKEND": null,
+    "FERROUI_BENCH_WARMUP": "3",
+    "FERROUI_BENCH_ITERATIONS": "15",
+    "FERROUI_TDG_DRAW_PATH": "recorded"
+  },
+  "started_utc": "2026-11-09T16:45:34.8879370Z",
+  "revision": "ddd74187892886f9f7df32a713e8685de657ab87",
+  "source_changes": []
+}

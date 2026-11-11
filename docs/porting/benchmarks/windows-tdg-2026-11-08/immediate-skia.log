@@ -1,0 +1,18 @@
+
+running 1 test
+test renderer_benchmarks::run_renderer_benchmarks ... TDG_GPU_BACKEND skia Some([199, 2, 1, 0, 0, 0, 0, 0]) ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 Ti Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1088)
+TDG_GPU_RESULT stationary_redraw neutral=false mean_ms=0.366781
+TDG_GPU_RESULT vertical_small_scrolls neutral=false mean_ms=0.450013
+TDG_GPU_RESULT vertical_row_scrolls neutral=false mean_ms=0.587073
+TDG_GPU_RESULT horizontal_small_scrolls neutral=false mean_ms=0.404189
+TDG_GPU_RESULT horizontal_column_scrolls neutral=false mean_ms=1.766169
+TDG_GPU_RESULT horizontal_far_column_scrolls neutral=false mean_ms=1.759752
+TDG_GPU_RESULT stationary_redraw neutral=true mean_ms=0.383647
+TDG_GPU_RESULT vertical_small_scrolls neutral=true mean_ms=0.422138
+TDG_GPU_RESULT vertical_row_scrolls neutral=true mean_ms=0.565175
+TDG_GPU_RESULT horizontal_small_scrolls neutral=true mean_ms=0.450458
+TDG_GPU_RESULT horizontal_column_scrolls neutral=true mean_ms=1.807682
+TDG_GPU_RESULT horizontal_far_column_scrolls neutral=true mean_ms=1.797761
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.44s

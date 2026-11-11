@@ -11,7 +11,27 @@ use crate::rendering::composition::brushes::paint_composition_brush;
 use crate::rendering::composition::server::IServerObject;
 use crate::{Point, Rect, RelativePoint, RoundedRect};
 use std::any::Any;
+use std::cell::Cell;
 use std::rc::Rc;
+
+crate::ferro_thread_local! {
+    static BOUNDED_EFFECT_CONTEXT: Cell<Option<usize>> = const { Cell::new(None) };
+}
+
+pub(crate) fn is_bounded_effect_context(canvas: &dyn IDrawingContextImpl) -> bool {
+    let identity = canvas as *const dyn IDrawingContextImpl as *const () as usize;
+    BOUNDED_EFFECT_CONTEXT.with(|current| current.get() == Some(identity))
+}
+
+fn with_bounded_effect_context(canvas: &mut dyn IDrawingContextImpl, paint: impl FnOnce(&mut dyn IDrawingContextImpl)) {
+    struct Restore(Option<usize>);
+    impl Drop for Restore {
+        fn drop(&mut self) { BOUNDED_EFFECT_CONTEXT.with(|current| current.set(self.0)); }
+    }
+    let identity = canvas as *mut dyn IDrawingContextImpl as *mut () as usize;
+    let _restore = Restore(BOUNDED_EFFECT_CONTEXT.with(|current| current.replace(Some(identity))));
+    paint(canvas);
+}
 
 /// The brush of the render thread that stands for a composition brush the
 /// drawing contexts cannot draw: what `as_brush` of such a server brush
@@ -139,6 +159,52 @@ impl CompositionPaintedBrush {
         if canvas.as_drawing_context_impl_with_layer_effects().is_none() || bounds.width <= 0.0 || bounds.height <= 0.0 {
             return;
         }
+        fn can_isolate(brush: &Rc<dyn IServerObject>, depth: usize) -> bool {
+            use crate::rendering::composition::brushes::{ServerCompositionEffectBrush, ServerXamlCompositionBrush};
+            if depth >= 32 { return false; }
+            if let Some(effect) = brush.as_any().downcast_ref::<ServerCompositionEffectBrush>() {
+                return effect.can_paint_in_isolation();
+            }
+            if let Some(xaml) = brush.as_any().downcast_ref::<ServerXamlCompositionBrush>() {
+                // Keep the graph's single-image opacity path for translucent
+                // wrappers, even on contexts that flatten ordinary opacity.
+                return xaml.brush_props().opacity() == 1.0
+                    && xaml.composition_brush().is_some_and(|brush| can_isolate(&brush, depth + 1));
+            }
+            false
+        }
+        // The outer stroke/glyph mask needs the same bound as the graph it
+        // contains. Otherwise a small effect still creates window-sized masks.
+        let transform = canvas.transform();
+        let pixels = bounds.transform_to_aabb(transform);
+        let (x, y) = (pixels.x.floor(), pixels.y.floor());
+        let (width, height) = (pixels.right().ceil() - x, pixels.bottom().ceil() - y);
+        if can_isolate(&self.object, 0) && transform.try_invert().is_some()
+            && [x, y, width, height].iter().all(|v| v.is_finite())
+            && width > 0.0 && height > 0.0 && width <= 16384.0 && height <= 16384.0 {
+            let layer = canvas.create_temporary_layer(crate::PixelSize::new(width as i32, height as i32));
+            let mut context = layer.create_drawing_context();
+            if context.as_drawing_context_impl_with_layer_effects().is_some() {
+                context.clear(Colors::TRANSPARENT);
+                context.set_transform(transform * crate::Matrix::create_translation(-x, -y));
+                with_bounded_effect_context(&mut *context, |context| self.paint_coverage(context, shape, bounds, pen));
+                context.dispose();
+                canvas.set_transform(crate::Matrix::IDENTITY);
+                canvas.draw_bitmap(&*layer, 1.0, Rect::new(0.0, 0.0, width, height), Rect::new(x, y, width, height));
+                canvas.set_transform(transform);
+                layer.dispose();
+                return;
+            }
+            context.dispose();
+            layer.dispose();
+        }
+        self.paint_coverage(canvas, shape, bounds, pen);
+    }
+
+    fn paint_coverage(&self, canvas: &mut dyn IDrawingContextImpl, shape: PaintedShape<'_>, bounds: Rect, pen: Option<&ImmutablePen>) {
+        // The coverage can never contribute outside these bounds. Give every
+        // backend that limit before it allocates the paint and mask layers.
+        canvas.push_clip(bounds);
         canvas.push_layer(bounds);
         self.paint(canvas, bounds);
         if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
@@ -153,6 +219,7 @@ impl CompositionPaintedBrush {
             layers.pop_blend_layer();
         }
         canvas.pop_layer();
+        canvas.pop_clip();
     }
 }
 

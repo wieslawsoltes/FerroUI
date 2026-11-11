@@ -69,7 +69,7 @@ pub use frame_time_graph::FrameTimeGraph;
 pub use i_server_clock_item::IServerClockItem;
 pub use readback_indices::{ReadbackIndices, ReadbackWriteScope};
 pub use render_scope::{brush_light_ids, draw_backdrop, painting_visual, MAX_BACKDROP_DEPTH};
-pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids};
+pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids, with_canvas_origin};
 pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_brush::{
     ServerCompositionSimpleBrush, ServerCompositionSimpleConicGradientBrush, ServerCompositionSimpleGradientBrush,

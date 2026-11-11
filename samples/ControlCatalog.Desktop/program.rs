@@ -179,6 +179,10 @@ fn main() -> std::process::ExitCode {
     });
     #[cfg(not(feature = "animation-probe"))]
     let exit_code = builder.start_with_classic_desktop_lifetime(&args);
+    #[cfg(all(windows, feature = "direct2d"))]
+    if std::env::var_os("FERROUI_D3D_STATS").is_some() {
+        eprintln!("Direct2D [surfaces, paths, images, presents, readbacks, uploads, imports, copies, errors, completed media reads, compute dispatches, compute pixels]: {:?}", ferroui_direct2d::statistics());
+    }
     // With `FERROUI_VELLO_PERF` the Vello backend says where the time of its
     // frames went.
     #[cfg(feature = "vello")]

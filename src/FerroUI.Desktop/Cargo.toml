@@ -16,7 +16,8 @@ path = "lib.rs"
 
 [features]
 default = ["skia"]
-skia = ["dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+skia = ["dep:ferroui-skia", "dep:ferroui-harfbuzz", "ferroui-win32/angle"]
+direct2d = ["dep:ferroui-direct2d", "ferroui-win32/native-d3d11"]
 # Experimental macOS 13+ system text and drawing backend.
 quartz = ["dep:ferroui-quartz"]
 quartz-metal = ["quartz", "ferroui-quartz/metal"]
@@ -33,7 +34,8 @@ ferroui-native.workspace = true
 ferroui-quartz = { workspace = true, optional = true }
 
 [target.'cfg(windows)'.dependencies]
-ferroui-win32 = { workspace = true, features = ["angle"] }
+ferroui-win32 = { workspace = true, default-features = false }
+ferroui-direct2d = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 ferroui-x11.workspace = true

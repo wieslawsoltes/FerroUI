@@ -1,0 +1,433 @@
+{
+  "sourceRevision": "2ae89e43d432901090af2446924a4e3e7de7c08e",
+  "date": "2026-11-08",
+  "hardware": {
+    "os": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200"
+    },
+    "gpu": [
+      {
+        "Name": "NVIDIA GeForce GTX 1660 Ti",
+        "DriverVersion": "32.0.16.1088"
+      }
+    ],
+    "device": "Hardware D3D11 feature level 11.1",
+    "adapterLuid": "00000000:000102c7",
+    "dpiPercent": 175
+  },
+  "nativeRust": {
+    "passed": 38,
+    "failed": 0,
+    "ignored": 1,
+    "note": "Ignored test is the separate lighting-work benchmark; it was exercised earlier in this investigation."
+  },
+  "sharedComposition": {
+    "passed": 586,
+    "failed": 0
+  },
+  "nativeSdk": {
+    "passed": true,
+    "d3dDebugErrors": 0,
+    "d3dDebugWarnings": 0
+  },
+  "defaultSkia": {
+    "windowsBuild": true,
+    "windowsCatalogRuntime": true,
+    "linuxDesktopCheck": true,
+    "linuxEnvironment": "Ubuntu / WSL, default Skia/HarfBuzz/X11; source reconstructed from the clean 16cf886c8 archive plus every changed tracked file archived at sourceRevision."
+  },
+  "catalog": {
+    "darkPages": [
+      "Home",
+      "TextBlock",
+      "TextBox",
+      "Image",
+      "TabbedPage",
+      "Visuals",
+      "Composition brushes",
+      "Shadows and lights",
+      "Effect brushes",
+      "Acrylic brush",
+      "Blend and colour effects",
+      "Lighting",
+      "Reveal",
+      "Colour effects",
+      "Image effects",
+      "Shader effects",
+      "Interactive effects",
+      "Page transitions"
+    ],
+    "lightPages": [
+      "Home",
+      "TextBlock",
+      "Image",
+      "Composition brushes",
+      "Acrylic brush",
+      "Reveal",
+      "Shader effects"
+    ],
+    "nativeErrors": 0,
+    "physicalWindowSize": "960x700 logical / 1680x1225 physical",
+    "comparison": "Native and Skia captures inspected side by side. Layout/effects agree broadly; font antialiasing, blur rounding and animation capture-time differences remain. TextBox/TabbedPage are overview galleries."
+  },
+  "media": {
+    "video": {
+      "sourceRevision": "2ae89e43d432901090af2446924a4e3e7de7c08e",
+      "passed": true,
+      "gpuImports": 4,
+      "gpuCopies": 4,
+      "gpuConversions": 5,
+      "cpuPixelTransferAttempts": 0,
+      "cpuPixelTransferBytes": 0,
+      "navigationRetirement": true,
+      "backendErrors": 0,
+      "readbacks": 0
+    },
+    "physicalCamera": {
+      "discovered": 0,
+      "captureVerified": false,
+      "requestedCaptureResult": "Unavailable; explicit camera capture trial timed out at stage 20."
+    },
+    "syntheticCamera": {
+      "sourceRevision": "974ad0a1867a262a5062e2e3b9075b363da4fb8b",
+      "passed": true,
+      "explicitTestFeature": true,
+      "description": "GPU-generated, in-process Media Foundation fixture",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "cpuPixelTransferAttempts": 0,
+      "cpuPixelTransferBytes": 0,
+      "navigationRetirement": true,
+      "backendErrors": 0,
+      "readbacks": 0
+    }
+  },
+  "helloWorldDeploymentRuntime": [
+    {
+      "exitCode": 0,
+      "backend": "skia"
+    },
+    {
+      "exitCode": 0,
+      "backend": "direct2d"
+    },
+    {
+      "exitCode": 0,
+      "backend": "direct2d-runtime-shaders"
+    }
+  ],
+  "runtimeShaderCompiler": {
+    "loading": "Dynamic load from Windows System32; no compiler DLL is shipped",
+    "name": "d3dcompiler_47.dll",
+    "installedVersion": "10.0.26100.7171 (WinBuild.160101.0800)",
+    "sha256": "966831459d861636a59ecc39dce6be98a3a48ec2d2146d7730edfb0c0f16d2cf"
+  },
+  "reveal": {
+    "beforeRevision": "974ad0a1867a262a5062e2e3b9075b363da4fb8b",
+    "afterRevision": "2ae89e43d432901090af2446924a4e3e7de7c08e",
+    "before": {
+      "Frames": 31,
+      "Min": 2.085,
+      "Median": 15.403,
+      "P95": 18.351,
+      "Max": 20.206
+    },
+    "after": {
+      "Frames": 29,
+      "Min": 2.574,
+      "Median": 14.243,
+      "P95": 16.407,
+      "Max": 19.433
+    },
+    "method": "Two identical pointer drags (330,310 to 890,385) after warmup; 1100x800 logical window, 175% DPI, dark theme, optimized fast-release builds, one active catalog, compilation idle, no screenshots during each measurement. Text/accessibility refresh followed each drag. Small diagnostic samples, not sustained frame-rate validation."
+  },
+  "limitations": [
+    "Physical camera capture was not verified: Windows discovered no cameras.",
+    "Full catalog parity and all subpage interactions are not established by selected capture coverage.",
+    "Earlier Windows versions, multiple GPUs/monitors and macOS execution of the shared changes were not validated on this machine.",
+    "Reveal still has occasional frames above the 16.7 ms budget.",
+    "An indivisible shaping span beyond the native DirectWrite input limit without a safe boundary reports an error."
+  ],
+  "artifacts": [
+    {
+      "path": "target/native-evidence/catalog-native-final.exe",
+      "bytes": 143227904,
+      "sha256": "e4d1524fc6eb1d18751cc72edffef9a4eacdb701cb6303e61ee70ac7e62ee4b0"
+    },
+    {
+      "path": "target/native-evidence/catalog-skia-final.exe",
+      "bytes": 292782592,
+      "sha256": "127bd6c955963c4a3d0b66cf5b12f280fe99a8237bb46530ec04e68d1ce3cdc5"
+    },
+    {
+      "path": "target/native-evidence/catalog-native-final-fixture.exe",
+      "bytes": 143262720,
+      "sha256": "70eac7496ca59182ae219284760ca2476d30a9c0d315d0d580d4ae4541faecc8"
+    },
+    {
+      "path": "target/native-evidence/native-final-sdk.log",
+      "bytes": 1383,
+      "sha256": "5feda6d1f2d302045fd6dc0906476072d525a611022909134d46a3cc336f509c"
+    },
+    {
+      "path": "target/native-evidence/native-final-shared-isolation-tests.log",
+      "bytes": 13821,
+      "sha256": "4925fb81d6ae55f451b73536c20d1f5bd4df9ffa7ace4dee67ce414e89e5cb9d"
+    },
+    {
+      "path": "target/native-evidence/shared-final-composition-tests.log",
+      "bytes": 116166,
+      "sha256": "a1d05b7339bb6f2184e92a9a35fb632d077caa1c9b056e74cfdbc5c5bb30c78a"
+    },
+    {
+      "path": "target/native-evidence/linux-wsl-final-default-desktop-check.log",
+      "bytes": 21681,
+      "sha256": "be9fd6e34937b25163f032acbe3ccafc6e8c915d2fcf0cfcf9e8ff8577bde8e2"
+    },
+    {
+      "path": "target/native-evidence/media-final-video.log",
+      "bytes": 2083,
+      "sha256": "b7b90d57463e4f16813c2a832de97921eed1b5a5022e2ea8c0294135a4d28b51"
+    },
+    {
+      "path": "target/native-evidence/media-final-synthetic.log",
+      "bytes": 3111,
+      "sha256": "e4016dadae16d10dce231a4dd2bdd490270b4b78a5916bf68d695b4b6b727387"
+    },
+    {
+      "path": "target/native-evidence/media-final-normal.log",
+      "bytes": 7213,
+      "sha256": "7b4fb2b8699851d75238e310f653bd9f19481607675cd85103bc4ea17ab47982"
+    },
+    {
+      "path": "target/native-evidence/reveal-isolation-baseline-sweep-1.log",
+      "bytes": 2056,
+      "sha256": "a52b734db5f2767d73fb634c234fb88a7f974527034478d7806192b9d43b1431"
+    },
+    {
+      "path": "target/native-evidence/reveal-isolation-baseline-sweep-2.log",
+      "bytes": 1844,
+      "sha256": "28413dbf53bf970a48a8d92e46c3dded78563ce8b5178f78a8d7143724b986aa"
+    },
+    {
+      "path": "target/native-evidence/reveal-isolation-final-sweep-1.log",
+      "bytes": 1034,
+      "sha256": "76b6caf83ab653d3837d5680b7ab171064ce225539a7fde854e5785f26ba5ff4"
+    },
+    {
+      "path": "target/native-evidence/reveal-isolation-final-sweep-2.log",
+      "bytes": 1401,
+      "sha256": "3df16891fed228fd4016cb068bdd2ab9efccc47bf4fc5cdc13303cb8df648380"
+    },
+    {
+      "path": "target/native-evidence/size-final-comparison.log",
+      "bytes": 51747,
+      "sha256": "766fe2616b4349d83854a8fadc1ba88e1c670271c25cd6691cb20308e02e3d7f"
+    }
+  ],
+  "catalogCaptures": [
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/01-home-window.png",
+      "sha256": "a13dab61dd018942e5ad205a823c0fb0db631330de24aac28a403c8d1660ca8d"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/02-textblock-window.png",
+      "sha256": "1bcb75b3e55124817edb13cf26bf5774ce95adf77b96e37b5989a60364f49f08"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/03-textbox-window.png",
+      "sha256": "9ab3b87aaf5585753b6dd5f7f4c29494372a8a5a0fa37bdf1cab277f3b5454c7"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/04-image-window.png",
+      "sha256": "c172560ede8110866058c3d9a6090422e9fa39d6acccf38204060ec373e03aa0"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/05-tabbedpage-window.png",
+      "sha256": "99fa868edd70e960b9347d86e5eab5d19356cf14b2bbb2afc63c21c3fdc11251"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/06-visuals-window.png",
+      "sha256": "1777ba4cebaa3c58a0362c48f21287926aa10fe5db5c0c1c216664869793ebda"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/07-composition-brushes-window.png",
+      "sha256": "960f85daa15dc35a59262a9a5f90eb5cc14855e313fb385d097bf984050def7b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/08-shadows-and-lights-window.png",
+      "sha256": "99af50a6515d938af03211f147e07bbc9bd1604e706d7385bd580f7d411722aa"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/09-effect-brushes-window.png",
+      "sha256": "b3c4fa5c0b4ad5137ebad176833cd1ad94b714303223c768cb7abdddf462bf8b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/10-acrylic-brush-window.png",
+      "sha256": "b649934de083270512f68d3381fede6f68c7bb650743b32bf5cef62a7d2c701f"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/11-blend-and-colour-effects-window.png",
+      "sha256": "10a26b4f16b1b57583b16c8d254fde8449db8b63706194cd8f87fabca234d23b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/12-lighting-window.png",
+      "sha256": "812d823870077f4bc23eed2ab10f51f6ea3248d672d4a36e1100b1b177cab891"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/13-reveal-window.png",
+      "sha256": "3b59ae56e01ac41527ba92963bc17a108bff2bcf509ae4e7967b8278669ad2e5"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/14-colour-effects-window.png",
+      "sha256": "b47ef3e7f79b9f8e3d1e381ed3bb05d169d4d62d37f350f024ae8cbcef99a810"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/15-image-effects-window.png",
+      "sha256": "478626738045c60c78763b2253045e4f2f97c32497c405b1e98348ff3d8d6db7"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/16-shader-effects-window.png",
+      "sha256": "a7bb291e3241546671945fbe1001ca290a2c33c3e79c6a7b253eed57e01f9ba8"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/17-interactive-effects-window.png",
+      "sha256": "24f3f99d72c30af3d5e90187c5a82d9ee530928531b167bc58bbaa63968f5f0e"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-dark/18-page-transitions-window.png",
+      "sha256": "ddb770f1e8b9e2e44ec40ae3f3197217ca74ae4bab8af2db3f8dbc2cef487a66"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/01-home-window.png",
+      "sha256": "860a454879b32dc270913affb529e7c31d193bcce11cc149660d17598b6cb02f"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/02-textblock-window.png",
+      "sha256": "88e356c8a955638aed03aeec486c9d37bc2b5321e59186b8b2c132a0058f8d13"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/03-textbox-window.png",
+      "sha256": "4cd44e52222e30a58c9ebb6101479a162db4a0b0d9644f6cb7217425b41b3f83"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/04-image-window.png",
+      "sha256": "51e06d5dee14f6352931e7af5ce80cbb9765bb545e8d789070d7d633cde5ac4e"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/05-tabbedpage-window.png",
+      "sha256": "854a0ba95f8221ea056b82fff60f745fdc4d86e85ab63366ff008a4b7785cd1a"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/06-visuals-window.png",
+      "sha256": "31fe6f4be9067456cf722e82436ca0283a32691b3e40929298971d4351980653"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/07-composition-brushes-window.png",
+      "sha256": "5f316e32d95f33472cb15252e155a9e133826af19352affba5442c0c2d120023"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/08-shadows-and-lights-window.png",
+      "sha256": "018ce188367fca1abd3e685e8e597b5a8fc8d8ff723be010f0bba414fac8daaa"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/09-effect-brushes-window.png",
+      "sha256": "39191b71bec8320d41334a283f2c0dcde4a7479bc37b13841c12beb5cb075fb6"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/10-acrylic-brush-window.png",
+      "sha256": "d7e855d15558b7c520179dd9ab40c0760adb536e350e867115267a4d8f937ffd"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/11-blend-and-colour-effects-window.png",
+      "sha256": "3df22c21ad214e5e1522e3f6b4eef6747214fe6b0b544baf7eb59deb1b649269"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/12-lighting-window.png",
+      "sha256": "4f8988613345eaf602e7e5feb58238a5987f0fdd6a1a907490d80f80703aa8d7"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/13-reveal-window.png",
+      "sha256": "c7aad0c2836e20cba6b84052d2b289d73502c4a83c65c9aa1a01e0dfd0f3da37"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/14-colour-effects-window.png",
+      "sha256": "29f36ba78154d4fea172ec974229dcf0b5065c44d1ed2fa8272b417946b00d38"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/15-image-effects-window.png",
+      "sha256": "378cbada6bd53b7c72a76a30b41e11d053103875d75e86facc741fce2a90e630"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/16-shader-effects-window.png",
+      "sha256": "15bbdecd196cad98f96924a0270195d35a1fa22fc2d0100bd5aa4f26dcdbfeff"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/17-interactive-effects-window.png",
+      "sha256": "fb820a8235efed1c18c20f4a5cafdabdf9e10bd995cf066e6c23cbf04f274755"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-dark/18-page-transitions-window.png",
+      "sha256": "c1911253e49851d4bdf5a6f68e55de95d1e0178aabb6b2fe44faf72154196b79"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/01-home-window.png",
+      "sha256": "5a202db3385332d1d920e1bbf33dc0d62c0a489de7c8b1555cadc66a21b4675b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/02-textblock-window.png",
+      "sha256": "bfb41cb5be7be20bb66f652967389da97ec440237082ce6954fc73b46e72ee0d"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/03-image-window.png",
+      "sha256": "66ef6db8051b3558a2b5398630ec0e6a82d9fcd9bfdeb5e59ba2af3c51068dd7"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/04-composition-brushes-window.png",
+      "sha256": "29917acfdd81abd74cf7911d7f4a9e4cd674e42ec22b191133f30c10052468cd"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/05-acrylic-brush-window.png",
+      "sha256": "d66d6172bd3a0d63374303217c8fc1edc9125c73a6ab450e650f974c1be1952b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/06-reveal-window.png",
+      "sha256": "e033d42415f37789686c58e94fd60c7f0d24cccfaed4732266af3fd4ed5dea56"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-native-light/07-shader-effects-window.png",
+      "sha256": "d262db2303442aa95fb079a5e68789adc63594d476156102addd7afb203344ee"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/01-home-window.png",
+      "sha256": "d2f46b4ff5140c240e1d7663f27e1ab253fa267ddfa0ea67c917bfe326543be8"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/02-textblock-window.png",
+      "sha256": "a9333dd5fb48eeec62d184a27fe01e52ed1531f881b3f5541dfe0d6d269be429"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/03-image-window.png",
+      "sha256": "6f4dad68984e3346cb6652c36013d323193a2acc9dab9e991cbda789136a171f"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/04-composition-brushes-window.png",
+      "sha256": "1b7b1931b74f46aba8e3bd60d27f2c8ab01fdf814c0465064fbcf4e7180ddb2b"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/05-acrylic-brush-window.png",
+      "sha256": "160a8807676b96c019ef03f827a17c6cffc182dd82a8db622a9bf95f482a1bda"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/06-reveal-window.png",
+      "sha256": "c82bbd67906e76772519aa041aab43c96e140739b474fda5e937787efde2f219"
+    },
+    {
+      "path": "target/native-evidence/final-2ae-skia-light/07-shader-effects-window.png",
+      "sha256": "7a87c7a91cfab6c48831e6064f0bf225aae2c610090dd1fa17ccf5f7b929a48c"
+    }
+  ]
+}

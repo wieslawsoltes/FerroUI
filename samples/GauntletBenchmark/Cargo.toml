@@ -51,9 +51,16 @@ ferroui-harfbuzz = { workspace = true }
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native = { workspace = true, optional = true }
 
+[target.'cfg(windows)'.dependencies]
+ferroui-win32 = { workspace = true, default-features = false }
+ferroui-direct2d = { workspace = true, optional = true }
+serde_json.workspace = true
+
 [features]
 default = ["skia"]
 skia = ["ferroui-desktop/skia"]
+direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d"]
+direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
 quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
 quartz-metal = ["quartz", "ferroui-desktop/quartz-metal"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),

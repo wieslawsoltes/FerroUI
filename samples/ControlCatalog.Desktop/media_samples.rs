@@ -56,13 +56,22 @@ fn video(
             Rc::new(ferroui_media_apple::AppleTextureImporter),
         ))
     }
-    #[cfg(windows)]
+    #[cfg(all(windows, not(feature = "direct2d")))]
     {
         Ok((
             Rc::new(ferroui_media_video_windows::WindowsVideoProvider {
                 frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
             }),
             Rc::new(ferroui_media_windows::NativeGlTextureImporter),
+        ))
+    }
+    #[cfg(all(windows, feature = "direct2d"))]
+    {
+        Ok((
+            Rc::new(ferroui_media_video_windows::WindowsVideoProvider {
+                frames: ferroui_media_windows::WindowsFrameProducer::from_direct2d(interop, budget)?,
+            }),
+            Rc::new(ferroui_direct2d::D3D11TextureImporter),
         ))
     }
     #[cfg(target_os = "linux")]
@@ -116,7 +125,7 @@ fn camera(
             Rc::new(ferroui_media_apple::AppleTextureImporter),
         ))
     }
-    #[cfg(windows)]
+    #[cfg(all(windows, not(feature = "direct2d")))]
     {
         Ok((
             Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::new(
@@ -125,6 +134,15 @@ fn camera(
             )),
             Rc::new(ferroui_media_windows::NativeGlTextureImporter),
         ))
+    }
+    #[cfg(all(windows, feature = "direct2d"))]
+    {
+        let frames = ferroui_media_windows::WindowsFrameProducer::from_direct2d(interop, budget).map_err(camera_error)?;
+        #[cfg(feature = "direct2d-media-test-fixtures")]
+        if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() == Ok("1") {
+            return Ok((Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::synthetic(frames)), Rc::new(ferroui_direct2d::D3D11TextureImporter)));
+        }
+        Ok((Rc::new(ferroui_media_camera_windows::WindowsCameraProvider::new(frames)), Rc::new(ferroui_direct2d::D3D11TextureImporter)))
     }
     #[cfg(target_os = "linux")]
     {
@@ -140,6 +158,10 @@ fn camera(
 }
 
 fn gpu_checkpoint(label: &str) {
+    #[cfg(all(windows, feature = "direct2d"))]
+    if std::env::var_os("FERROUI_D3D_STATS").is_some() {
+        println!("CATALOG_GPU_CHECKPOINT {label} {:?}", ferroui_direct2d::statistics());
+    }
     #[cfg(all(target_os = "macos", feature = "quartz-metal"))]
     if std::env::var_os("FERROUI_METAL_STATS").is_some() {
         println!(
@@ -161,6 +183,11 @@ pub fn smoke() {
         time::{Duration, Instant},
     };
     let capture_camera = std::env::var("FERROUI_SMOKE_MEDIA_CAMERA").as_deref() == Ok("1");
+    // Optional sustained delivery observation, after the normal warmup. Imports
+    // count newly admitted video frames, independently of UI progress redraws.
+    let video_observation_ms = std::env::var("FERROUI_SMOKE_MEDIA_VIDEO_MS")
+        .ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0).min(30000);
+    let video_observation = Cell::new(None::<(Instant, u64)>);
     let stage = Cell::new(0);
     let report_at = Cell::new(0u64);
     let began = Instant::now();
@@ -192,7 +219,7 @@ pub fn smoke() {
             match stage.get() {
                 0 => {
                     gpu_checkpoint("start");
-                    if let Some(window) = super::main_window() { window.set_title(Some("AUTOMATED MEDIA TEST — Quartz Metal".into())); }
+                    if let Some(window) = super::main_window() { window.set_title(Some("AUTOMATED MEDIA TEST — native GPU".into())); }
                     if control_catalog::select_page("Video") {
                         stage.set(1);
                     }
@@ -219,6 +246,17 @@ pub fn smoke() {
                         if counts.preview != PixelTransferCount::default() || counts.analysis != PixelTransferCount::default() || counts.photo != PixelTransferCount::default() || counts.diagnostic != PixelTransferCount::default() || counts.probe != PixelTransferCount::default() {
                             fail("Video CPU pixel transfer");
                             return false;
+                        }
+                        if video_observation_ms > 0 {
+                            let (start, imports) = video_observation.get().unwrap_or_else(|| {
+                                let observation = (Instant::now(), counts.gpu_imports);
+                                video_observation.set(Some(observation));
+                                observation
+                            });
+                            let elapsed = start.elapsed();
+                            if elapsed < Duration::from_millis(video_observation_ms) { return true; }
+                            let delivered = counts.gpu_imports - imports;
+                            println!("CATALOG_VIDEO_DELIVERY frames={delivered} elapsed_ms={} fps={:.2}", elapsed.as_millis(), delivered as f64 / elapsed.as_secs_f64());
                         }
                         gpu_checkpoint("video");
                         println!("CATALOG_VIDEO_PASS autoplay=false shared_texture=true counters={:?}",s.budget.counters().snapshot());

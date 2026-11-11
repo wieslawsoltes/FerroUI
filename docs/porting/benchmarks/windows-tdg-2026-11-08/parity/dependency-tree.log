@@ -1,0 +1,463 @@
+control-catalog-desktop v0.5.0-preview.1 (<checkout>\samples\ControlCatalog.Desktop)
+control-catalog v0.5.0-preview.1 (<checkout>\samples\ControlCatalog)
+custom-effects v0.5.0-preview.1 (<checkout>\samples\CustomEffects)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base)
+bitflags v2.13.2
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System)
+smallvec v1.16.2
+icu_locale_core v2.4.0
+displaydoc v0.2.7 (proc-macro)
+proc-macro2 v1.0.107
+unicode-ident v1.0.26
+quote v1.0.47
+proc-macro2 v1.0.107 (*)
+syn v3.0.6
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+unicode-ident v1.0.26
+litemap v0.8.3
+tinystr v0.8.5
+displaydoc v0.2.7 (proc-macro) (*)
+zerovec v0.11.9
+yoke v0.8.4
+stable_deref_trait v1.2.1
+yoke-derive v0.8.4 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+synstructure v0.14.0
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+zerofrom v0.1.8
+zerofrom-derive v0.1.8 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+synstructure v0.14.0 (*)
+zerofrom v0.1.8 (*)
+zerovec-derive v0.11.7 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+writeable v0.6.4
+zerovec v0.11.9 (*)
+paste v1.0.15 (proc-macro)
+rust_decimal v1.43.0
+arrayvec v0.7.8
+num-traits v0.2.19
+libm v0.2.16
+rustc-hash v2.1.3
+smallvec v1.16.2
+time v0.3.55
+deranged v0.5.8
+num-conv v0.2.2
+powerfmt v0.2.0
+time-core v0.1.9
+url v2.5.8
+form_urlencoded v1.2.2
+percent-encoding v2.3.2
+idna v1.1.0
+idna_adapter v1.2.2
+icu_normalizer v2.4.0
+icu_collections v2.4.0
+displaydoc v0.2.7 (proc-macro) (*)
+potential_utf v0.1.6
+zerovec v0.11.9 (*)
+utf8_iter v1.0.4
+yoke v0.8.4 (*)
+zerofrom v0.1.8 (*)
+zerovec v0.11.9 (*)
+icu_normalizer_data v2.4.0
+icu_provider v2.4.0
+displaydoc v0.2.7 (proc-macro) (*)
+icu_locale_core v2.4.0 (*)
+writeable v0.6.4
+yoke v0.8.4 (*)
+zerofrom v0.1.8 (*)
+zerotrie v0.2.5
+displaydoc v0.2.7 (proc-macro) (*)
+yoke v0.8.4 (*)
+zerofrom v0.1.8 (*)
+zerovec v0.11.9 (*)
+smallvec v1.16.2
+zerovec v0.11.9 (*)
+icu_properties v2.4.0
+displaydoc v0.2.7 (proc-macro) (*)
+icu_collections v2.4.0 (*)
+icu_locale_core v2.4.0 (*)
+icu_properties_data v2.4.0
+icu_provider v2.4.0 (*)
+zerotrie v0.2.5 (*)
+zerovec v0.11.9 (*)
+smallvec v1.16.2
+utf8_iter v1.0.4
+percent-encoding v2.3.2
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls)
+bitflags v2.13.2
+encoding_rs v0.8.42
+cfg-if v1.0.5
+core_detect v1.0.0
+multiversion_no_op v1.0.0 (proc-macro)
+scopeguard v1.2.0
+simdutf8 v0.1.5
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-remote-protocol v0.5.0-preview.1 (<checkout>\src\FerroUI.Remote.Protocol)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+uuid v1.28.0
+getrandom v0.4.3
+cfg-if v1.0.5
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+rustc-hash v2.1.3
+url v2.5.8 (*)
+ferroboard-controls v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Controls)
+ferroboard-core v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Core)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+flate2 v1.1.10
+crc32fast v1.5.2
+cfg-if v1.0.5
+miniz_oxide v0.9.1
+adler2 v2.0.1
+simd-adler32 v0.3.10
+indexmap v2.14.2
+equivalent v1.0.2
+hashbrown v0.17.1
+foldhash v0.2.0
+jiff v0.2.38
+jiff-core v0.1.2
+jiff-tzdb-platform v0.1.3
+jiff-tzdb v0.1.9
+windows-link v0.2.1
+parking_lot v0.12.5
+lock_api v0.4.14
+scopeguard v1.2.0
+parking_lot_core v0.9.12
+cfg-if v1.0.5
+smallvec v1.16.2
+windows-link v0.2.1
+serde v1.0.229
+serde_core v1.0.229
+serde_derive v1.0.229 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+serde_json v1.0.151
+itoa v1.0.18
+memchr v2.8.3
+serde_core v1.0.229
+zmij v1.0.23
+sys-locale v0.3.2
+time v0.3.55 (*)
+uuid v1.28.0 (*)
+windows-sys v0.61.2
+windows-link v0.2.1
+ferroboard-core-ferro v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Core.Ferro)
+ferroboard-core v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Core) (*)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+indexmap v2.14.2 (*)
+url v2.5.8 (*)
+ferroboard-core v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Core) (*)
+ferroboard-core-ferro v0.1.0 (<checkout>\components\FerroBoard\src\FerroBoard.Core.Ferro) (*)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-controls-color-picker v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls.ColorPicker)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+url v2.5.8 (*)
+ferroui-controls-inking v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls.Inking)
+bitflags v2.13.2
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-microcom v0.5.0-preview.1 (<checkout>\src\FerroUI.MicroCom)
+uuid v1.28.0 (*)
+ferroui-themes-winui v0.5.0-preview.1 (<checkout>\src\FerroUI.Themes.WinUI)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-dialogs v0.5.0-preview.1 (<checkout>\src\FerroUI.Dialogs)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+sysinfo v0.37.2
+libc v0.2.190
+windows v0.61.3
+windows-collections v0.2.0
+windows-core v0.61.2
+windows-implement v0.60.2 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v2.0.119
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+unicode-ident v1.0.26
+windows-interface v0.59.3 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v2.0.119 (*)
+windows-link v0.1.3
+windows-result v0.3.4
+windows-link v0.1.3
+windows-strings v0.4.2
+windows-link v0.1.3
+windows-core v0.61.2 (*)
+windows-future v0.2.1
+windows-core v0.61.2 (*)
+windows-link v0.1.3
+windows-threading v0.1.0
+windows-link v0.1.3
+windows-link v0.1.3
+windows-numerics v0.2.0
+windows-core v0.61.2 (*)
+windows-link v0.1.3
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-win32 v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Win32)
+bitflags v2.13.2
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-microcom v0.5.0-preview.1 (<checkout>\src\FerroUI.MicroCom) (*)
+ferroui-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.OpenGL)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+paste v1.0.15 (proc-macro)
+ferroui-vulkan v0.5.0-preview.1 (<checkout>\src\FerroUI.Vulkan)
+ash v0.38.0+1.3.281
+libloading v0.8.9
+windows-link v0.2.1
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+url v2.5.8 (*)
+windows-sys v0.61.2 (*)
+windows-sys v0.61.2 (*)
+ferroui-controls-livecharts v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls.LiveCharts)
+bitflags v2.13.2
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-livecharts v0.5.0-preview.1 (<checkout>\src\FerroUI.LiveCharts)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+serde_json v1.0.151 (*)
+ferroui-controls-repeater v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls.Repeater)
+bitflags v2.13.2
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+rustc-hash v2.1.3
+ferroui-controls-treedatagrid v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.Controls.TreeDataGrid)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-treedatagrid-core v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.TreeDataGrid.Core)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+rustc-hash v2.1.3
+rustc-hash v2.1.3
+ferroui-dialogs v0.5.0-preview.1 (<checkout>\src\FerroUI.Dialogs) (*)
+ferroui-livecharts v0.5.0-preview.1 (<checkout>\src\FerroUI.LiveCharts) (*)
+ferroui-markup v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-media-camera v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-camera-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera.Controls)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-camera v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera) (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls) (*)
+ferroui-media-qr v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Qr)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+rxing v0.9.3
+chrono v0.4.45
+num-traits v0.2.19 (*)
+windows-link v0.2.1
+codepage-437 v0.1.0
+encoding_rs v0.8.42 (*)
+num v0.4.3
+num-bigint v0.4.8
+num-integer v0.1.47
+num-traits v0.2.19 (*)
+num-traits v0.2.19 (*)
+num-complex v0.4.6
+num-traits v0.2.19 (*)
+num-integer v0.1.47 (*)
+num-iter v0.1.46
+num-integer v0.1.47 (*)
+num-traits v0.2.19 (*)
+num-rational v0.4.2
+num-bigint v0.4.8 (*)
+num-integer v0.1.47 (*)
+num-traits v0.2.19 (*)
+num-traits v0.2.19 (*)
+once_cell v1.21.4
+regex v1.13.1
+aho-corasick v1.1.5
+memchr v2.8.3
+memchr v2.8.3
+regex-automata v0.4.18
+aho-corasick v1.1.5 (*)
+memchr v2.8.3
+regex-syntax v0.8.11
+regex-syntax v0.8.11
+thiserror v2.0.21
+thiserror-impl v2.0.21 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v3.0.6 (*)
+unicode-segmentation v1.13.3
+ferroui-media-video v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-video-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video.Controls)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls) (*)
+ferroui-media-video v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video) (*)
+ferroui-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.OpenGL) (*)
+ferroui-themes-winui v0.5.0-preview.1 (<checkout>\src\FerroUI.Themes.WinUI) (*)
+image v0.25.10
+bytemuck v1.25.2
+byteorder-lite v0.1.0
+moxcms v0.8.1
+num-traits v0.2.19 (*)
+pxfm v0.1.30
+num-traits v0.2.19 (*)
+png v0.18.1
+bitflags v2.13.2
+crc32fast v1.5.2 (*)
+fdeflate v0.3.7
+simd-adler32 v0.3.10
+flate2 v1.1.10 (*)
+miniz_oxide v0.8.9
+adler2 v2.0.1
+simd-adler32 v0.3.10
+mini-mvvm v0.5.0-preview.1 (<checkout>\samples\MiniMvvm)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+treedatagrid-demo v0.5.0-preview.1 (<checkout>\samples\TreeDataGridDemo)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-controls-treedatagrid v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.Controls.TreeDataGrid) (*)
+ferroui-markup v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-treedatagrid-core v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.TreeDataGrid.Core) (*)
+mini-mvvm v0.5.0-preview.1 (<checkout>\samples\MiniMvvm) (*)
+sample-support v0.5.0-preview.1 (<checkout>\samples\SampleSupport)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+serde v1.0.229 (*)
+serde_json v1.0.151 (*)
+unicode-normalization v0.1.25
+tinyvec v1.13.3
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-desktop v0.5.0-preview.1 (<checkout>\src\FerroUI.Desktop)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-direct2d v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Direct2D)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls) (*)
+kurbo v0.13.1
+arrayvec v0.7.8
+polycool v0.4.0
+arrayvec v0.7.8
+smallvec v1.16.2
+naga v30.0.1
+arrayvec v0.7.8
+bit-set v0.10.0
+bit-vec v0.9.1
+bitflags v2.13.2
+cfg-if v1.0.5
+codespan-reporting v0.13.1
+unicode-width v0.2.2
+half v2.7.1
+cfg-if v1.0.5
+num-traits v0.2.19 (*)
+zerocopy v0.8.62
+zerocopy-derive v0.8.62 (proc-macro)
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+syn v2.0.119 (*)
+hashbrown v0.17.1 (*)
+indexmap v2.14.2 (*)
+libm v0.2.16
+log v0.4.34
+naga-types v30.0.1
+hashbrown v0.17.1 (*)
+indexmap v2.14.2 (*)
+rustc-hash v1.1.0
+thiserror v2.0.21 (*)
+num-traits v0.2.19 (*)
+once_cell v1.21.4
+rustc-hash v1.1.0
+thiserror v2.0.21 (*)
+unicode-ident v1.0.26
+ferroui-win32 v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Win32) (*)
+ferroui-diagnostics v0.5.0-preview.1 (<checkout>\src\FerroUI.Diagnostics)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-controls-color-picker v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls.ColorPicker) (*)
+ferroui-controls-treedatagrid v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.Controls.TreeDataGrid) (*)
+ferroui-markup v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup) (*)
+ferroui-markup-xaml v0.5.0-preview.1 (<checkout>\src\Markup\FerroUI.Markup.Xaml) (*)
+ferroui-themes-winui v0.5.0-preview.1 (<checkout>\src\FerroUI.Themes.WinUI) (*)
+ferroui-treedatagrid-core v0.5.0-preview.1 (<checkout>\src\TreeDataGrid\FerroUI.TreeDataGrid.Core) (*)
+regex v1.13.1 (*)
+ferroui-direct2d v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Direct2D) (*)
+ferroui-headless-vnc v0.5.0-preview.1 (<checkout>\src\Headless\FerroUI.Headless.Vnc)
+bitflags v2.13.2
+des v0.9.0
+cipher v0.5.2
+crypto-common v0.2.2
+hybrid-array v0.4.15
+typenum v1.20.1
+inout v0.2.3
+hybrid-array v0.4.15 (*)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-headless v0.5.0-preview.1 (<checkout>\src\Headless\FerroUI.Headless)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Controls) (*)
+ferroui-system v0.5.0-preview.1 (<checkout>\src\FerroUI.System) (*)
+flate2 v1.1.10 (*)
+getrandom v0.4.3 (*)
+jpeg-encoder v0.7.1
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-camera v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera) (*)
+ferroui-media-camera-windows v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera.Windows)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-camera v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Camera) (*)
+ferroui-media-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.OpenGL)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls) (*)
+ferroui-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.OpenGL) (*)
+ferroui-media-windows v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Windows)
+ferroui-base v0.5.0-preview.1 (<checkout>\src\FerroUI.Base) (*)
+ferroui-direct2d v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Direct2D) (*)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.OpenGL) (*)
+ferroui-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.OpenGL) (*)
+jpeg-encoder v0.7.1
+serde_json v1.0.151 (*)
+ferroui-media-controls v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Controls) (*)
+ferroui-media-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.OpenGL) (*)
+ferroui-media-video v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video) (*)
+ferroui-media-video-windows v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video.Windows)
+ferroui-media v0.5.0-preview.1 (<checkout>\src\FerroUI.Media) (*)
+ferroui-media-opengl v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.OpenGL) (*)
+ferroui-media-video v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Video) (*)
+ferroui-media-windows v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Windows) (*)
+ferroui-media-windows v0.5.0-preview.1 (<checkout>\src\FerroUI.Media.Windows) (*)
+ferroui-win32 v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Win32) (*)

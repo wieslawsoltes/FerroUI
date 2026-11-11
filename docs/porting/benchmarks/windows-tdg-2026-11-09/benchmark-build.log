@@ -1,0 +1,362 @@
+warning: unused import: `IBitmapImpl`
+ --> src\FerroUI.Base\media\imaging\render_target_bitmap.rs:3:29
+  |
+3 | use crate::platform::{self, IBitmapImpl, IDrawingContextImpl, IRenderTargetBitmapImpl};
+  |                             ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `IBitmapImpl`
+ --> src\FerroUI.Base\media\imaging\writeable_bitmap.rs:5:42
+  |
+5 | use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, IWriteableBitmapImpl, PixelFormat};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `IServerAnimatedPropertyHost`
+ --> src\FerroUI.Base\rendering\composition\animations\animation_instance_base.rs:6:49
+  |
+6 |     CompositionProperty, IAnimatedServerObject, IServerAnimatedPropertyHost, IServerClockItem, ServerCompositor,
+  |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> src\FerroUI.Base\rendering\composition\brushes\server_simple_image_brush.rs:8:5
+  |
+8 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src\FerroUI.Base\rendering\composition\server\server_composition_drawing_surface.rs:2:23
+  |
+2 | use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostError};
+  |                       ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src\FerroUI.Base\rendering\composition\server\server_composition_surface.rs:2:23
+  |
+2 | use crate::platform::{IBitmapImpl, IDrawingContextImpl};
+  |                       ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src\FerroUI.Base\rendering\composition\server\server_compositor.rs:6:23
+  |
+6 | use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
+  |                       ^^^^^^^^^^^
+
+warning: method `is_disposed` is never used
+   --> src\FerroUI.Base\rendering\composition\server\server_composition_target.rs:122:19
+    |
+119 | impl ServerCompositionTarget {
+    | ---------------------------- method in this implementation
+...
+122 |     pub(crate) fn is_disposed(&self) -> bool {
+    |                   ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `new_shared` and `is_shared` are never used
+  --> src\FerroUI.Base\property_store\value_frame.rs:30:12
+   |
+17 | impl ValueFrameBase {
+   | ------------------- associated items in this implementation
+...
+30 |     pub fn new_shared(priority: BindingPriority, type_: FrameType) -> Self {
+   |            ^^^^^^^^^^
+...
+36 |     pub fn is_shared(&self) -> bool {
+   |            ^^^^^^^^^
+
+warning: methods `is_evaluating`, `remove_frame`, and `get_priority` are never used
+   --> src\FerroUI.Base\property_store\value_store.rs:157:12
+    |
+105 | impl ValueStore {
+    | --------------- methods in this implementation
+...
+157 |     pub fn is_evaluating(&self) -> bool {
+    |            ^^^^^^^^^^^^^
+...
+871 |     pub fn remove_frame(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) -> bool {
+    |            ^^^^^^^^^^^^
+...
+919 |     pub fn get_priority(&self, property: &FerroProperty) -> BindingPriority {
+    |            ^^^^^^^^^^^^
+
+warning: method `with_sender` is never used
+   --> src\FerroUI.Base\ferro_property_changed_event_args.rs:117:19
+    |
+ 20 | impl<'a> FerroPropertyChangedEventArgs<'a> {
+    | ------------------------------------------ method in this implementation
+...
+117 |     pub(crate) fn with_sender<'b>(&'b self, sender: &'b FerroObject) -> FerroPropertyChangedEventArgs<'b> {
+    |                   ^^^^^^^^^^^
+
+warning: method `base` is never used
+   --> src\FerroUI.Base\ferro_property_metadata.rs:408:8
+    |
+407 | pub trait PropertyMetadata: Sized + 'static {
+    |           ---------------- method in this trait
+408 |     fn base(&self) -> &FerroPropertyMetadata;
+    |        ^^^^
+
+warning: method `default_metadata` is never used
+   --> src\FerroUI.Base\ferro_property_metadata.rs:628:12
+    |
+604 | impl<M: PropertyMetadata> MetadataTable<M> {
+    | ------------------------------------------ method in this implementation
+...
+628 |     pub fn default_metadata(&self) -> &Rc<M> {
+    |            ^^^^^^^^^^^^^^^^
+
+warning: method `properties` is never used
+  --> src\FerroUI.Base\ferro_property_registry.rs:63:19
+   |
+53 | impl FerroPropertyRegistry {
+   | -------------------------- method in this implementation
+...
+63 |     pub(crate) fn properties(&self) -> Vec<&'static FerroProperty> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `rooted_visual_children_count` is never used
+    --> src\FerroUI.Base\visual.rs:1423:19
+     |
+ 778 | impl Visual {
+     | ----------- associated function in this implementation
+...
+1423 |     pub(crate) fn rooted_visual_children_count() -> i32 {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `ferroui-base` (lib) generated 15 warnings
+warning: `ferroui-base` (lib) generated 15 warnings (15 duplicates)
+warning: unused doc comment
+   --> src\FerroUI.Controls\markup_types\contracts.rs:180:1
+    |
+180 | /// The types declared in this file.
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+    |
+    = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+    = note: `#[warn(unused_doc_comments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `IDisposable`
+  --> src\FerroUI.Controls\combo_box.rs:26:63
+   |
+26 | use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
+   |                                                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `is_disposed` is never used
+   --> src\FerroUI.Controls\animation\connected_animation.rs:355:19
+    |
+132 | impl ConnectedAnimation {
+    | ----------------------- method in this implementation
+...
+355 |     pub(crate) fn is_disposed(&self) -> bool {
+    |                   ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `sprite` is never read
+   --> src\FerroUI.Controls\media\reveal_focus.rs:163:5
+    |
+159 | struct ShownGlow {
+    |        --------- field in this struct
+...
+163 |     sprite: Option<SpriteVisual>,
+    |     ^^^^^^
+
+warning: field `icon` is never read
+  --> src\FerroUI.Controls\title_bar.rs:52:5
+   |
+47 | struct Parts {
+   |        ----- field in this struct
+...
+52 |     icon: Option<Ref<Control>>,
+   |     ^^^^
+
+warning: field `presenter` is never read
+   --> src\FerroUI.Controls\navigation_view_item.rs:134:5
+    |
+132 | struct Parts {
+    |        ----- field in this struct
+133 |     root_grid: Option<Ref<Panel>>,
+134 |     presenter: Option<Ref<Control>>,
+    |     ^^^^^^^^^
+    |
+    = note: `Parts` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: associated function `with_behavior_from` is never used
+   --> src\FerroUI.Controls\documents\hyperlink.rs:225:19
+    |
+176 | impl Hyperlink {
+    | -------------- associated function in this implementation
+...
+225 |     pub(crate) fn with_behavior_from(source: &Self) -> Ref<Self> {
+    |                   ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `from_fields`, `visible_text`, `same_snapshot`, and `visible_slice` are never used
+   --> src\FerroUI.Controls\rich_text\rich_text_field_story.rs:285:19
+    |
+281 | impl FieldStory {
+    | --------------- associated items in this implementation
+...
+285 |     pub(crate) fn new(
+    |                   ^^^
+...
+292 |     pub(crate) fn from_fields(
+    |                   ^^^^^^^^^^^
+...
+453 |     pub(crate) fn visible_text(&self) -> &str {
+    |                   ^^^^^^^^^^^^
+...
+471 |     pub(crate) fn same_snapshot(&self, other: &Self) -> bool {
+    |                   ^^^^^^^^^^^^^
+...
+670 |     pub(super) fn visible_slice(
+    |                   ^^^^^^^^^^^^^
+
+warning: method `set_root` is never used
+   --> src\FerroUI.Controls\calendar\calendar.rs:576:19
+    |
+468 | impl Calendar {
+    | ------------- method in this implementation
+...
+576 |     pub(crate) fn set_root(&self, value: Option<Ref<Panel>>) {
+    |                   ^^^^^^^^
+
+warning: method `set_month_view` is never used
+   --> src\FerroUI.Controls\calendar\calendar_item.rs:330:19
+    |
+189 | impl CalendarItem {
+    | ----------------- method in this implementation
+...
+330 |     pub(crate) fn set_month_view(&self, value: Option<Ref<Grid>>) {
+    |                   ^^^^^^^^^^^^^^
+
+warning: bounds on generic parameters in type aliases are not enforced
+  --> src\FerroUI.Controls\platform\win32_properties.rs:48:25
+   |
+48 | type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+   |                       --^^^^^^
+   |                       | |
+   |                       | will not be checked at usage sites of the type alias
+   |                       help: remove this bound
+   |
+   = note: this is a known limitation of the type checker that may be lifted in a future edition.
+           see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information
+   = note: `#[warn(type_alias_bounds)]` on by default
+
+warning: `ferroui-controls` (lib) generated 11 warnings (run `cargo fix --lib -p ferroui-controls` to apply 1 suggestion)
+warning: unused import: `std::error::Error`
+ --> src\FerroUI.OpenGL\composition\task_support.rs:9:5
+  |
+9 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `std::rc::Rc`
+  --> src\FerroUI.OpenGL\composition\task_support.rs:12:5
+   |
+12 | use std::rc::Rc;
+   |     ^^^^^^^^^^^
+
+warning: unused import: `ferroui_base::reactive::IDisposable`
+ --> src\FerroUI.OpenGL\controls\open_gl_control_base.rs:9:5
+  |
+9 | use ferroui_base::reactive::IDisposable;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `is_import_memory_fd_ext_available` and `is_import_semaphore_fd_ext_available` are never used
+   --> src\FerroUI.OpenGL\entry_points.rs:122:21
+    |
+100 |           impl $Owner {
+    |           ----------- methods in this implementation
+...
+122 |               $vis fn [<is_ $name _available>](&self) -> bool {
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: src\FerroUI.OpenGL\features\external_objects_open_gl_extension_feature.rs:24:1
+    |
+ 24 | / gl_entry_points! {
+ 25 | |     table ExternalObjectsEntryPoints for ExternalObjectsInterface.ext(get, info: ());
+ 26 | |
+ 27 | |     optional safe pub(crate) fn import_memory_fd_ext(memory: u32, size: u64, handle_type: i32, fd: i32)
+...   |
+ 74 | |     optional unsafe pub(crate) fn get_unsigned_bytev_ext(target: i32, data: *mut u8) = get("glGetUnsignedBytevEXT");
+ 75 | | }
+    | |_- in this macro invocation
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+    = note: this warning originates in the macro `gl_entry_points` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused imports: `cell::RefCell` and `collections::HashMap`
+ --> src\Markup\FerroUI.Markup.Xaml\populate_overrides.rs:5:11
+  |
+5 | use std::{cell::RefCell, collections::HashMap, rc::Rc};
+  |           ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `INameScope`
+  --> src\Markup\FerroUI.Markup.Xaml\markup_extensions\x_bind\deferred_element.rs:12:30
+   |
+12 | use ferroui_base::controls::{INameScope, NameScope};
+   |                              ^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> src\Markup\FerroUI.Markup.Xaml\data\dynamic_resource_expression.rs:73:19
+   |
+72 | impl DynamicResourceExpression {
+   | ------------------------------ associated function in this implementation
+73 |     pub(crate) fn new(
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `key` and `previous` are never read
+  --> src\Markup\FerroUI.Markup.Xaml\populate_overrides.rs:20:5
+   |
+19 | pub struct PopulateOverrideGuard {
+   |            --------------------- fields in this struct
+20 |     key: usize,
+   |     ^^^
+21 |     previous: Option<PopulateOverride>,
+   |     ^^^^^^^^
+
+warning: `ferroui-opengl` (lib) generated 4 warnings (run `cargo fix --lib -p ferroui-opengl` to apply 2 suggestions)
+warning: `ferroui-markup-xaml` (lib) generated 4 warnings (run `cargo fix --lib -p ferroui-markup-xaml` to apply 1 suggestion)
+   Compiling ferroui-direct2d v0.5.0-preview.1 (<checkout>\src\Windows\FerroUI.Direct2D)
+warning: unreachable pattern
+   --> src\Skia\FerroUI.Skia\gpu\open_gl\gl_skia_external_objects_feature.rs:621:49
+    |
+617 |             ImportedImageSource::External(image) | ImportedImageSource::ExternalFrame(image, _) => image.dispose(),
+    |                                                    -------------------------------------------- matches all the relevant values
+...
+621 |             ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {} // The frame lease owns storage.
+    |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `set` is never used
+  --> src\Skia\FerroUI.Skia\geometry_impl.rs:87:12
+   |
+75 | impl<T: Clone> Shared<T> {
+   | ------------------------ method in this implementation
+...
+87 |     pub fn set(&self, value: T) {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `ScreensBaseImplExt`
+   --> src\Windows\FerroUI.Win32\window_impl_app_wnd_proc.rs:480:51
+    |
+480 |     use ferroui_controls::platform::{IScreenImpl, ScreensBaseImplExt};
+    |                                                   ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferroui-skia` (lib) generated 2 warnings
+warning: `ferroui-win32` (lib) generated 1 warning (run `cargo fix --lib -p ferroui-win32` to apply 1 suggestion)
+   Compiling ferroui-treedatagrid-benchmarks v0.5.0-preview.1 (<checkout>\tests\FerroUI.TreeDataGrid.Benchmarks)
+    Finished `release` profile [optimized] target(s) in 1m 04s
+  Executable unittests lib.rs (target/tdg-renderer-release\release\deps\ferroui_treedatagrid_benchmarks-b0697de91f0ec0ec.exe)

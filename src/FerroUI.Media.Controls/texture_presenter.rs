@@ -39,7 +39,7 @@ pub struct TexturePresenter {
     surface: RefCell<Option<CompositionDrawingSurface>>,
     visual: RefCell<Option<CompositionSurfaceVisual>>,
     generation: Cell<u64>,
-    busy: Cell<bool>,
+    in_flight: Cell<u8>,
     current: RefCell<Option<FrameMetadata>>,
     last_error: RefCell<Option<MediaError>>,
     errors: MediaEvent<MediaError>,
@@ -88,7 +88,7 @@ impl TexturePresenter {
             surface: RefCell::new(None),
             visual: RefCell::new(None),
             generation: Cell::new(0),
-            busy: Cell::new(false),
+            in_flight: Cell::new(0),
             current: RefCell::new(None),
             last_error: RefCell::new(None),
             errors: MediaEvent::default(),
@@ -190,7 +190,7 @@ impl TexturePresenter {
         );
         self.current.borrow_mut().take();
         self.interop.borrow_mut().take();
-        self.busy.set(false);
+        self.in_flight.set(0);
         ElementComposition::set_element_child_visual(&self.to_ref(), None);
         if let Some(visual) = self.visual.borrow_mut().take() {
             visual.set_surface(None);
@@ -204,7 +204,10 @@ impl TexturePresenter {
     /// Called on a source frame/invalidation opportunity; unchanged paused
     /// frames do not submit another import or render job.
     pub fn present_latest(&self) {
-        if self.busy.get() {
+        // A UI acknowledgement can take another render interval. Keep two
+        // immutable updates in flight so it does not serialize video delivery;
+        // the shared frame budget still bounds producer/GPU storage.
+        if self.in_flight.get() >= 2 {
             return;
         }
         let frame = self.source.borrow().as_ref().and_then(|s| s.latest());
@@ -218,12 +221,7 @@ impl TexturePresenter {
             }
             return;
         };
-        if self
-            .current
-            .borrow()
-            .as_ref()
-            .is_some_and(|m| m.identity == frame.metadata().identity)
-        {
+        if self.current.borrow().as_ref().is_some_and(|m| m.identity == frame.metadata().identity) {
             return;
         }
         let (Some(interop), Some(surface), Some(importer)) = (
@@ -253,16 +251,29 @@ impl TexturePresenter {
         let validity = frame.clone();
         let task =
             surface.update_shared_frame_async(&*imported.image, frame, imported.producer_ready);
+        // Import, update and disposal are ordered render-thread jobs. Retire the
+        // temporary import in that same batch; the acquired bitmap/GPU read
+        // owns its lease independently. Waiting for the UI completion callback
+        // adds a whole round trip and can exhaust the bounded frame budget.
+        imported.image.dispose_async();
         let complete = task.clone();
         let weak = self.to_ref().downgrade();
         let generation = self.generation.get();
-        self.busy.set(true);
+        // Publish geometry with the matching update batch. Reuse unchanged
+        // geometry instead of rebuilding the visual's clip on every frame.
+        let relayout = self.current.borrow().as_ref().is_none_or(|old| {
+            old.width != metadata.width || old.height != metadata.height
+                || old.visible != metadata.visible || old.rotation != metadata.rotation
+                || old.mirrored != metadata.mirrored
+        });
+        *self.current.borrow_mut() = Some(metadata.clone());
+        if relayout { self.layout_frame(); }
+        self.in_flight.set(self.in_flight.get() + 1);
         task.on_completed(move || {
-            imported.image.dispose_async();
             let Some(view) = weak.upgrade().filter(|v| v.generation.get() == generation) else {
                 return;
             };
-            view.busy.set(false);
+            view.in_flight.set(view.in_flight.get().saturating_sub(1));
             if !validity.is_current() {
                 view.present_latest();
                 return;
@@ -275,11 +286,8 @@ impl TexturePresenter {
                 ));
             } else {
                 view.last_error.borrow_mut().take();
-                *view.current.borrow_mut() = Some(metadata.clone());
-                view.layout_frame();
                 view.presented.emit(&metadata);
-                // A frame published while this one was imported was skipped (the presenter was
-                // busy): present it now. Nothing is submitted when the latest is this frame.
+                // Pick up a newer mailbox frame when a bounded update slot opens.
                 view.present_latest();
             }
         });
@@ -378,6 +386,85 @@ pub fn frame_layout(frame: &FrameMetadata, bounds: Size, stretch: Stretch) -> Op
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ferroui_base::platform::*;
+    use ferroui_base::media::imaging::BitmapEncoderOptions;
+    use ferroui_base::{PixelSize, Vector};
+    use ferroui_controls::testing::{CompositorTestServices, TestServices};
+    use std::any::Any;
+
+    struct LeaseBitmap(FrameLease);
+    impl IBitmapImpl for LeaseBitmap {
+        fn dpi(&self) -> Vector { Vector::new(96., 96.) }
+        fn pixel_size(&self) -> PixelSize { PixelSize::new(self.0.metadata().width as i32, self.0.metadata().height as i32) }
+        fn version(&self) -> i32 { 1 }
+        fn save(&self, _: &mut dyn std::io::Write, _: &BitmapEncoderOptions) -> std::io::Result<()> { unreachable!() }
+        fn dispose(&self) {}
+        fn as_any(&self) -> &dyn Any { self }
+    }
+    struct Imported;
+    impl IPlatformRenderInterfaceImportedObject for Imported { fn dispose(&self) {} }
+    impl IPlatformRenderInterfaceImportedImage for Imported {
+        fn acquire_shared_bitmap(&self, frame: FrameLease) -> Result<Arc<SharedBitmapImpl>, FrameError> { Ok(Arc::new(LeaseBitmap(frame))) }
+        fn snapshot_with_keyed_mutex(&self, _: u32, _: u32) -> Arc<SharedBitmapImpl> { unreachable!() }
+        fn snapshot_with_semaphores(&self, _: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>, _: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>) -> Arc<SharedBitmapImpl> { unreachable!() }
+        fn snapshot_with_timeline_semaphores(&self, _: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>, _: u64, _: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>, _: u64) -> Arc<SharedBitmapImpl> { unreachable!() }
+        fn snapshot_with_automatic_sync(&self) -> Arc<SharedBitmapImpl> { unreachable!() }
+    }
+    struct Feature;
+    impl IExternalObjectsRenderInterfaceContextFeature for Feature {
+        fn supported_image_handle_types(&self) -> Vec<String> { vec!["Fake".into()] }
+        fn supported_semaphore_types(&self) -> Vec<String> { vec![] }
+        fn import_image(&self, _: Rc<dyn IPlatformHandle>, _: PlatformGraphicsExternalImageProperties) -> Rc<dyn IPlatformRenderInterfaceImportedImage> { Rc::new(Imported) }
+        fn import_shared_image(&self, _: Arc<dyn ICompositionImportableSharedGpuContextImage>) -> Rc<dyn IPlatformRenderInterfaceImportedImage> { unreachable!() }
+        fn import_semaphore(&self, _: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> { unreachable!() }
+        fn get_synchronization_capabilities(&self, _: &str) -> CompositionGpuImportedImageSynchronizationCapabilities { CompositionGpuImportedImageSynchronizationCapabilities::AUTOMATIC }
+        fn device_uuid(&self) -> Option<Vec<u8>> { None }
+        fn device_luid(&self) -> Option<Vec<u8>> { None }
+    }
+    struct Importer(Cell<usize>);
+    impl TextureFrameImporter for Importer {
+        fn import(&self, interop: &dyn ICompositionGpuInterop, _: &FrameLease) -> Result<ImportedTextureFrame, MediaError> {
+            self.0.set(self.0.get() + 1);
+            let image = interop.import_image(Rc::new(PlatformHandle::new(1, Some("Fake"))), PlatformGraphicsExternalImageProperties { width: 400, height: 200, ..Default::default() });
+            let producer_ready = GpuCompletion::new();
+            producer_ready.complete();
+            Ok(ImportedTextureFrame { image, producer_ready })
+        }
+    }
+
+    #[test]
+    fn two_frames_can_be_queued_before_acknowledgement_and_the_latest_waits_within_the_bound() {
+        let services = CompositorTestServices::start(TestServices::styled_window());
+        let compositor = services.compositor();
+        let interop = CompositionInterop::new(compositor, Rc::new(Feature));
+        let view = TexturePresenter::new();
+        let source = Arc::new(FrameMailbox::new(1, 1));
+        let budget = FrameBudget::new(Default::default());
+        let importer = Rc::new(Importer(Cell::new(0)));
+        view.set_frame_source(Some(source.clone()), Some(importer.clone()));
+        *view.interop.borrow_mut() = Some(interop);
+        *view.surface.borrow_mut() = Some(compositor.create_drawing_surface());
+        for sequence in 1..=3 {
+            let mut m = metadata();
+            m.identity.sequence = sequence;
+            source.publish(budget.lease(m, ()).unwrap()).unwrap();
+            view.present_latest();
+            view.present_latest(); // The pending identity must not be imported twice.
+            assert_eq!(importer.0.get(), sequence.min(2) as usize);
+        }
+        assert_eq!(view.in_flight.get(), 2);
+        assert_eq!(view.current.borrow().as_ref().unwrap().identity.sequence, 2);
+        assert!(budget.usage().frames <= 3);
+        services.run_jobs();
+        assert_eq!(importer.0.get(), 3, "the latest queued mailbox frame must use an opened slot");
+        services.run_jobs();
+        assert_eq!(view.in_flight.get(), 0);
+        assert_eq!(view.current.borrow().as_ref().unwrap().identity.sequence, 3);
+        view.set_frame_source(None, None);
+        drop(source);
+        services.run_jobs();
+        assert_eq!(budget.usage().frames, 0);
+    }
     fn metadata() -> FrameMetadata {
         FrameMetadata {
             identity: FrameIdentity {

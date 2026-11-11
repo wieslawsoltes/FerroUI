@@ -16,25 +16,42 @@
 //!
 //! See `README.md` for how to run the benchmarks and what differs from the reference.
 
+#[cfg(feature = "layout-benchmarks")]
 pub mod column_geometry_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod column_layout_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod column_width_batch_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod element_factory_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod first_layout_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod neutral_source_benchmarks;
+#[cfg(feature = "layout-benchmarks")]
 pub mod template_cell_recycling_benchmarks;
 pub mod virtualization_benchmarks;
 
+#[cfg(feature = "layout-benchmarks")]
 pub mod paired_scroll_comparison;
+#[cfg(feature = "layout-benchmarks")]
 pub mod revision_scroll_comparison;
 
+#[cfg(feature = "layout-benchmarks")]
 mod program;
+#[cfg(all(windows, feature = "renderer-benchmarks"))]
+mod renderer_benchmarks;
+#[cfg(all(not(windows), feature = "renderer-benchmarks"))]
+compile_error!("renderer-benchmarks compares the Windows Skia/ANGLE and Direct2D backends");
 
+#[cfg(feature = "layout-benchmarks")]
 pub use program::{compare_scroll_revisions, paired_vertical_scroll, run};
 
+#[cfg(feature = "layout-benchmarks")]
 use ferroui_benchmarks::harness::Registry;
 
 /// Registers every benchmark of the crate, class by class.
+#[cfg(feature = "layout-benchmarks")]
 pub fn register(registry: &mut Registry) {
     column_geometry_benchmarks::register(registry);
     column_layout_benchmarks::register(registry);

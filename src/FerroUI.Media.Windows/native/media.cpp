@@ -413,7 +413,7 @@ static void run(const std::shared_ptr<Session> &owner){
             if(s.playing&&s.has_audio)write_audio(s);
             LONGLONG clock=s.clock_position();
             present_video(s,clock);
-            bool request=false;
+            bool request=false;DWORD request_stream=MF_SOURCE_READER_ANY_STREAM;
             {std::lock_guard<std::mutex> guard(s.lock);
                 if(s.playing&&s.state.state!=5)s.state.state=2;
                 if(s.has_audio&&s.playing){UINT padding=0;check(s.audio->GetCurrentPadding(&padding));s.state.buffering=(s.audio_started&&padding==0&&!s.audio_eos)?1:0;}else s.state.buffering=0;
@@ -424,10 +424,21 @@ static void run(const std::shared_ptr<Session> &owner){
                 }
                 check(s.event_error);
                 bool need=s.camera||s.playing||!s.prepared_frame;
-                if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&s.video.size()<3&&s.pcm_bytes<96000&&!(s.video_eos&&(!s.has_audio||s.audio_eos))){s.in_flight=true;s.request_epoch=s.epoch;request=true;}
+                bool video_room=!s.video_eos&&s.video.size()<3;
+                bool audio_room=s.has_audio&&!s.audio_eos&&s.pcm_bytes<96000;
+                // Backpressure is per stream. A full video queue must not stop
+                // audio reads: video is timed by that audio clock, so doing so
+                // can starve the clock needed to drain the video queue itself.
+                if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&(video_room||audio_room)){
+                    request_stream=video_room?(audio_room?MF_SOURCE_READER_ANY_STREAM:MF_SOURCE_READER_FIRST_VIDEO_STREAM):MF_SOURCE_READER_FIRST_AUDIO_STREAM;
+                    s.in_flight=true;s.request_epoch=s.epoch;request=true;
+                }
             }
-            if(request)check(s.reader->ReadSample(MF_SOURCE_READER_ANY_STREAM,0,nullptr,nullptr,nullptr,nullptr));
-            std::unique_lock<std::mutex> guard(s.lock);s.changed.wait_for(guard,std::chrono::milliseconds(2));
+            if(request)check(s.reader->ReadSample(request_stream,0,nullptr,nullptr,nullptr,nullptr));
+            std::unique_lock<std::mutex> guard(s.lock);
+            s.changed.wait_for(guard,std::chrono::milliseconds(2),[&]{
+                return s.closed.load()||s.packet_ready||FAILED(s.event_error)||s.pending_seek||((s.intent==1)!=s.playing);
+            });
         }
     }catch(Failure f){s.fail(f.hr);}catch(...){s.fail(E_FAIL,"Native media worker failed");}
     s.closed=true;
@@ -469,6 +480,9 @@ uint64_t ferro_windows_seek(FerroWindowsSession *s,uint64_t ns){std::lock_guard<
 void ferro_windows_audio(FerroWindowsSession *s,double volume,int muted){std::lock_guard<std::mutex> guard(s->value->lock);s->value->volume=volume;s->value->muted=muted!=0;}
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s){std::lock_guard<std::mutex> guard(s->value->lock);if(s->value->latest&&s->value->latest->info.epoch==s->value->epoch)return s->value->latest.release();return nullptr;}
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out){*out=f->info;}
+// Borrowed immutable texture; the caller synchronously AddRefs it and retains f
+// through the consumer's event query. No Map/readback/CPU pixel access.
+void *ferro_windows_frame_texture(FerroWindowsFrame *f,uint32_t *slice){*slice=f->slice;return f->texture.Get();}
 void ferro_windows_frame_release(FerroWindowsFrame *f){
     auto owner=f->owner.lock();auto context=f->context;
     delete f;

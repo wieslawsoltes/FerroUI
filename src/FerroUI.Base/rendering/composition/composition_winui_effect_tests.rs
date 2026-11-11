@@ -10,7 +10,7 @@ use crate::media::{Colors, EffectExtensions, IEffect, ImmutableBlurEffect};
 use crate::platform::LtrbRect;
 use crate::rendering::composition::effects::{
     blur_amount_to_radius, CanvasComposite, ColorSourceEffect, CompositeEffect, CrossFadeEffect, GaussianBlurEffect,
-    GraphicsEffectSource, OpacityEffect, SaturationEffect,
+    EffectBorderMode, GraphicsEffectSource, OpacityEffect, SaturationEffect,
 };
 use crate::rendering::composition::server::{ServerCompositionEffectBrush, ServerLayerVisual};
 use crate::rendering::composition::{
@@ -398,4 +398,150 @@ fn a_backdrop_brush_over_nothing_draws_nothing() {
 
     let entries = log.entries();
     assert!(!entries.iter().any(|e| e.starts_with("DrawRectangle") && e.contains("0, 0, 100, 50")), "{entries:?}");
+}
+
+#[test]
+fn pointwise_effect_brushes_bound_all_intermediates_and_restore_fractional_dpi_transform() {
+    use crate::platform::IDrawingContextImpl;
+    use crate::{Matrix, PixelSize, Rect};
+    let s = CompositorCanvas::new();
+    let factory = s.compositor.create_effect_factory(SaturationEffect {
+        saturation: 0.0,
+        source: Some(ColorSourceEffect { color: Colors::RED, ..Default::default() }.into()),
+        ..Default::default()
+    });
+    let brush = factory.create_brush();
+    s.run_jobs();
+    let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).unwrap();
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_layer_effects = true;
+    let transform = Matrix::create_scale(1.75, 1.75);
+    context.set_transform(transform);
+    server.paint(&mut context, Rect::new(20.2, 30.3, 100.0, 50.0));
+    let entries = log.entries();
+    assert!(entries.contains(&format!("CreateLayer {}", PixelSize::new(176, 88))), "{entries:?}");
+    assert!(entries.iter().any(|entry| entry.starts_with("PushColorMatrixLayer")), "{entries:?}");
+    assert!(entries.contains(&"DrawBitmap 1 0, 0, 176, 88 35, 53, 176, 88".to_string()), "{entries:?}");
+    assert_eq!(context.transform(), transform);
+}
+
+#[test]
+fn backdrop_matrices_are_bounded_but_soft_blurs_keep_the_original_canvas() {
+    use crate::Rect;
+    let s = CompositorCanvas::new();
+    let backdrop = s.compositor.create_backdrop_brush();
+    let matrix = s.compositor.create_effect_factory(SaturationEffect { source: parameter("backdrop"), ..Default::default() }).create_brush();
+    matrix.set_source_parameter("backdrop", Some((*backdrop).clone()));
+    let blur = s.compositor.create_effect_factory(GaussianBlurEffect {
+        source: Some(ColorSourceEffect { color: Colors::RED, ..Default::default() }.into()),
+        ..Default::default()
+    }).create_brush();
+    s.run_jobs();
+    for (brush, bounded) in [(&matrix, true), (&blur, false)] {
+        let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).unwrap();
+        let log = DrawingLog::new();
+        let mut context = MockDrawingContextImpl::new(log.clone());
+        context.supports_layer_effects = true;
+        context.supports_effects = true;
+        server.paint(&mut context, Rect::new(0.0, 0.0, 100.0, 50.0));
+        assert_eq!(log.entries().iter().any(|entry| entry.starts_with("CreateLayer")), bounded, "{:?}", log.entries());
+    }
+}
+
+#[test]
+fn hard_blur_targets_include_the_sampling_halo_at_fractional_dpi() {
+    use crate::media::{EffectExtensions, IEffect, ImmutableBlurEffect};
+    use crate::platform::IDrawingContextImpl;
+    use crate::{Matrix, PixelSize, Rect};
+    let s = CompositorCanvas::new();
+    let brush = s.compositor.create_effect_factory(GaussianBlurEffect {
+        blur_amount: 10.0,
+        border_mode: EffectBorderMode::Hard,
+        source: Some(ColorSourceEffect { color: Colors::RED, ..Default::default() }.into()),
+        ..Default::default()
+    }).create_brush();
+    s.run_jobs();
+    let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).unwrap();
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_layer_effects = true;
+    context.supports_effects = true;
+    let transform = Matrix::create_scale(1.75, 1.75);
+    context.set_transform(transform);
+    server.paint(&mut context, Rect::new(20.2, 30.3, 100.0, 50.0));
+    let padding = EffectExtensions::get_effect_output_padding(Some(&ImmutableBlurEffect::new(
+        crate::rendering::composition::effects::blur_amount_to_radius(10.0)) as &dyn IEffect)).left;
+    let bounds = Rect::new(20.2, 30.3, 100.0, 50.0).inflate(padding).transform_to_aabb(transform);
+    let size = PixelSize::new((bounds.right().ceil() - bounds.x.floor()) as i32,
+        (bounds.bottom().ceil() - bounds.y.floor()) as i32);
+    let entries = log.entries();
+    assert!(entries.contains(&format!("CreateLayer {size}")), "{entries:?}");
+    assert_eq!(log.count("PushEffect"), 1, "{entries:?}");
+    assert_eq!(context.transform(), transform);
+    assert_eq!(log.count("PushClip"), log.count("PopClip"));
+}
+
+#[test]
+fn effect_masks_reuse_fresh_layers_but_isolate_later_source_over_siblings() {
+    use crate::rendering::composition::effects::AlphaMaskEffect;
+    use crate::Rect;
+    let s = CompositorCanvas::new();
+    let masked = || AlphaMaskEffect {
+        source: Some(ColorSourceEffect { color: Colors::RED, ..Default::default() }.into()),
+        alpha_mask: Some(ColorSourceEffect { color: Colors::BLUE, ..Default::default() }.into()),
+        ..Default::default()
+    };
+    let first = s.compositor.create_effect_factory(SaturationEffect {
+        source: Some(masked().into()), ..Default::default()
+    }).create_brush();
+    let later = s.compositor.create_effect_factory(SaturationEffect {
+        source: Some(CompositeEffect {
+            mode: CanvasComposite::SourceOver,
+            sources: vec![ColorSourceEffect { color: Colors::GREEN, ..Default::default() }.into(), masked().into()],
+            ..Default::default()
+        }.into()), ..Default::default()
+    }).create_brush();
+    s.run_jobs();
+    for (brush, expected_isolation) in [(&first, 0), (&later, 1)] {
+        let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).unwrap();
+        let log = DrawingLog::new();
+        let mut context = MockDrawingContextImpl::new(log.clone());
+        context.supports_layer_effects = true;
+        server.paint(&mut context, Rect::new(0.0, 0.0, 40.0, 30.0));
+        let entries = log.entries();
+        assert_eq!(entries.iter().filter(|entry| entry.starts_with("PushLayer ")).count(), expected_isolation, "{entries:?}");
+        assert_eq!(entries.iter().filter(|entry| *entry == "PopLayer").count(), expected_isolation, "{entries:?}");
+        assert_eq!(entries.iter().filter(|entry| entry.starts_with("PushBlendLayer ")).count(), 1, "{entries:?}");
+        assert_eq!(entries.iter().filter(|entry| *entry == "PopBlendLayer").count(), 1, "{entries:?}");
+    }
+}
+
+#[test]
+fn pointwise_effect_stroke_coverage_uses_a_brush_sized_target() {
+    use crate::media::{IPen, Pen};
+    use crate::platform::IDrawingContextImpl;
+    use crate::rendering::composition::drawing::{draw_with_painted_brushes, CompositionPaintedBrush, PaintedShape};
+    use crate::{Matrix, Rect, RoundedRect};
+    let s = CompositorCanvas::new();
+    let brush = s.compositor.create_effect_factory(SaturationEffect {
+        source: Some(ColorSourceEffect { color: Colors::RED, ..Default::default() }.into()),
+        ..Default::default()
+    }).create_brush();
+    s.run_jobs();
+    let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).unwrap();
+    let painted = Rc::new(CompositionPaintedBrush::new(server));
+    let pen: Rc<dyn IPen> = Pen::with_brush(Some(painted), 1.0).into();
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_layer_effects = true;
+    let transform = Matrix::create_translation(1000.0, 2000.0);
+    context.set_transform(transform);
+    assert!(draw_with_painted_brushes(&mut context, None, Some(&*pen),
+        PaintedShape::Rectangle(RoundedRect::from_rect(Rect::new(20.0, 30.0, 100.0, 50.0))), None));
+    let entries = log.entries();
+    let allocations: Vec<_> = entries.iter().filter(|entry| entry.starts_with("CreateLayer")).map(String::as_str).collect();
+    assert_eq!(allocations, ["CreateLayer 112, 62"], "{entries:?}");
+    assert!(entries.contains(&"DrawBitmap 1 0, 0, 112, 62 1014, 2024, 112, 62".to_string()), "{entries:?}");
+    assert_eq!(context.transform(), transform);
 }

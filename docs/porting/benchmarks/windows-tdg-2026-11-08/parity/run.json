@@ -1,0 +1,16 @@
+{
+  "aggregation": "All 75 measured batch samples per workload per backend; sample standard deviation; no discarded samples",
+  "capture": false,
+  "source_revision": "1cdef8437a98cefa7394bea41b824e27cb5889c1",
+  "order": [
+    "skia",
+    "direct2d"
+  ],
+  "frames_per_batch": 20,
+  "iterations": 15,
+  "timing": "GPU drained per batch; no presentation/vsync",
+  "executable_sha256": "C0C7C53C77E7331B7AF2BA57866783C1334E8CDE4444850EC403D535DA024F4B",
+  "profiling": false,
+  "warmup": 3,
+  "repetitions": 5
+}

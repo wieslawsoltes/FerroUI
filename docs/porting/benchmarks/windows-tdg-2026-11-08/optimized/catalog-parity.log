@@ -1,0 +1,10 @@
+Screenshots of ["Renderer parity"] to target/native-evidence/tdg-final-parity-capture, 3.5s a page
+Will close the main window after 20000 ms
+Screenshots: the window asked for a client area of 800 by 600
+Screenshots: the window is at 160, 160 with a frame of 836.8 by 632 and a client area of 822.4 by 624.8 (render scaling 1.25); the working area of its screen is PixelRect { x: 0, y: 0, width: 1024, height: 708 }, in units of which a unit of the window is 1.25
+Screenshots: the window did not fit its screen: moved to 0, 0 with a client area of 804 by 559
+Selecting Renderer parity
+CATALOG_RENDERER_PARITY_PASS text_quality=native selection=rtl replacement=true undo=true
+Screenshot of Renderer parity: target/native-evidence/tdg-final-parity-capture\01-renderer-parity.png (1005 by 699, the frame of the framework)
+Screenshot of Renderer parity: target/native-evidence/tdg-final-parity-capture\01-renderer-parity-window.png (1005 by 699, the window as the system composed it; 68 colour(s) among its samples, content reaches 1005 by 699)
+Screenshots written: closing the main window

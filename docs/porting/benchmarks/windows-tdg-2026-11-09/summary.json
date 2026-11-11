@@ -1,0 +1,134 @@
+[
+  {
+    "skia_sd_ms": 0.07094633884407552,
+    "final_sd_ms": 0.021638590644103024,
+    "final_ms": 0.30440326666666667,
+    "neutral_source": false,
+    "before_ms": 0.35472766666666666,
+    "native_skia_ratio": 0.7312580305795825,
+    "skia_ms": 0.41627339999999985,
+    "reduction_percent": 14.186770508455782,
+    "scenario": "stationary_redraw"
+  },
+  {
+    "skia_sd_ms": 0.09491823206294436,
+    "final_sd_ms": 0.0628216412334975,
+    "final_ms": 0.4054096,
+    "neutral_source": false,
+    "before_ms": 0.4264745555555556,
+    "native_skia_ratio": 0.8384358227113525,
+    "skia_ms": 0.48353086666666667,
+    "reduction_percent": 4.939322939938329,
+    "scenario": "vertical_small_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.11493763825979175,
+    "final_sd_ms": 0.09788426877571677,
+    "final_ms": 0.5418684000000002,
+    "neutral_source": false,
+    "before_ms": 0.6146322222222222,
+    "native_skia_ratio": 0.8540681854839348,
+    "skia_ms": 0.6344556666666668,
+    "reduction_percent": 11.83859543828374,
+    "scenario": "vertical_row_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.07871593779144975,
+    "final_sd_ms": 0.0415815028420523,
+    "final_ms": 0.3622403333333332,
+    "neutral_source": false,
+    "before_ms": 0.42566000000000004,
+    "native_skia_ratio": 0.7960142191307811,
+    "skia_ms": 0.45506766666666665,
+    "reduction_percent": 14.89913702642175,
+    "scenario": "horizontal_small_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.17420163214236273,
+    "final_sd_ms": 0.20676990440370455,
+    "final_ms": 1.4842563333333332,
+    "neutral_source": false,
+    "before_ms": 1.6115353333333335,
+    "native_skia_ratio": 0.8926614808757249,
+    "skia_ms": 1.662731466666667,
+    "reduction_percent": 7.897996237956129,
+    "scenario": "horizontal_column_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.244795199830076,
+    "final_sd_ms": 0.2298676144741491,
+    "final_ms": 1.550284133333333,
+    "neutral_source": false,
+    "before_ms": 1.7189918888888893,
+    "native_skia_ratio": 0.8844545121505196,
+    "skia_ms": 1.752813866666667,
+    "reduction_percent": 9.814342734601533,
+    "scenario": "horizontal_far_column_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.06014173254259661,
+    "final_sd_ms": 0.04118299776967792,
+    "final_ms": 0.3265538,
+    "neutral_source": true,
+    "before_ms": 0.36619111111111113,
+    "native_skia_ratio": 0.7865162820182626,
+    "skia_ms": 0.41519013333333327,
+    "reduction_percent": 10.824214435692358,
+    "scenario": "stationary_redraw"
+  },
+  {
+    "skia_sd_ms": 0.07769213642325078,
+    "final_sd_ms": 0.047965595046566153,
+    "final_ms": 0.3997712666666665,
+    "neutral_source": true,
+    "before_ms": 0.4094583333333332,
+    "native_skia_ratio": 0.8149730150746184,
+    "skia_ms": 0.4905331333333334,
+    "reduction_percent": 2.365824768494973,
+    "scenario": "vertical_small_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.13821115646850066,
+    "final_sd_ms": 0.07305195118790708,
+    "final_ms": 0.5361512666666666,
+    "neutral_source": true,
+    "before_ms": 0.5315009999999999,
+    "native_skia_ratio": 0.7786139276805903,
+    "skia_ms": 0.6885970666666665,
+    "reduction_percent": -0.8749309345921663,
+    "scenario": "vertical_row_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.09629055962315589,
+    "final_sd_ms": 0.0500284502189135,
+    "final_ms": 0.3954293333333333,
+    "neutral_source": true,
+    "before_ms": 0.43757711111111114,
+    "native_skia_ratio": 0.7583302425773593,
+    "skia_ms": 0.5214474,
+    "reduction_percent": 9.632080085440197,
+    "scenario": "horizontal_small_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.31474437709844805,
+    "final_sd_ms": 0.2220897522629043,
+    "final_ms": 1.5927829333333332,
+    "neutral_source": true,
+    "before_ms": 1.6774622222222222,
+    "native_skia_ratio": 0.8375079419858633,
+    "skia_ms": 1.9018123333333339,
+    "reduction_percent": 5.048059370106706,
+    "scenario": "horizontal_column_scrolls"
+  },
+  {
+    "skia_sd_ms": 0.30450948263710764,
+    "final_sd_ms": 0.20514822978232058,
+    "final_ms": 1.6050111333333328,
+    "neutral_source": true,
+    "before_ms": 1.5512611111111112,
+    "native_skia_ratio": 0.8407673765941903,
+    "skia_ms": 1.9089835999999996,
+    "reduction_percent": -3.4649242372692735,
+    "scenario": "horizontal_far_column_scrolls"
+  }
+]

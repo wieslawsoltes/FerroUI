@@ -1,0 +1,35 @@
+{
+  "font_sha256": [
+    {
+      "Path": "<checkout>\\src\\FerroUI.Themes.Material\\Assets\\Roboto-Regular.ttf",
+      "Hash": "BDC144D49DEE7CF60C77A69A1EBC288CB0E8BE25E05F2F3B7B3225E8014615F8"
+    },
+    {
+      "Path": "<checkout>\\src\\FerroUI.Themes.Material\\Assets\\Roboto-Bold.ttf",
+      "Hash": "C84122B6DC2CFA81B702EC0D753B8F794522B8B7F6BBC3284627C1C35EA6F764"
+    }
+  ],
+  "repetitions": 1,
+  "source_changes": [
+    " M src/Windows/FerroUI.Direct2D/bitmap.rs",
+    " M src/Windows/FerroUI.Direct2D/drawing.rs",
+    " M src/Windows/FerroUI.Direct2D/ffi.rs",
+    " M src/Windows/FerroUI.Direct2D/native.cpp"
+  ],
+  "executable_sha256": {
+    "native": "8B1FA26ABD545D67F0A0F3915CBA832C6210B4BA79C34A17887FC5D4B70337F9",
+    "skia": "5079D1896242769FACD9DCAFF94C99818FA1F6AF2C42BEC2C31C4DD54AF1CBDF"
+  },
+  "scenarios": [
+    "gauntlet"
+  ],
+  "measured_frames": 48,
+  "warmup_frames": 60,
+  "order": [
+    "skia",
+    "native"
+  ],
+  "per_second_callback_reporting": true,
+  "source_revision": "c0af8274c7c693bedba727891f0155f87d437f37",
+  "started_utc": "2026-11-11T09:59:18.8771557Z"
+}

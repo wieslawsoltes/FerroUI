@@ -656,6 +656,7 @@ dependencies = [
  "ferroui-desktop",
  "ferroui-devtools",
  "ferroui-diagnostics",
+ "ferroui-direct2d",
  "ferroui-headless",
  "ferroui-headless-vnc",
  "ferroui-linuxframebuffer",
@@ -1997,6 +1998,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-direct2d",
  "ferroui-harfbuzz",
  "ferroui-native",
  "ferroui-quartz",
@@ -2046,6 +2048,19 @@ dependencies = [
  "ferroui-system",
  "sysinfo",
  "url",
+]
+
+[[package]]
+name = "ferroui-direct2d"
+version = "0.5.0-preview.1"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "kurbo",
+ "naga",
 ]
 
 [[package]]
@@ -2613,6 +2628,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "cc",
  "ferroui-base",
+ "ferroui-direct2d",
  "ferroui-media",
  "ferroui-media-opengl",
  "ferroui-opengl",
@@ -3096,11 +3112,18 @@ dependencies = [
 name = "ferroui-treedatagrid-benchmarks"
 version = "0.5.0-preview.1"
 dependencies = [
+ "cc",
  "ferroui-base",
  "ferroui-benchmarks",
  "ferroui-controls",
  "ferroui-controls-treedatagrid",
+ "ferroui-direct2d",
+ "ferroui-harfbuzz",
+ "ferroui-opengl",
+ "ferroui-skia",
  "ferroui-treedatagrid-core",
+ "ferroui-win32",
+ "serde_json",
 ]
 
 [[package]]
@@ -3569,11 +3592,14 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-direct2d",
  "ferroui-harfbuzz",
  "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",
+ "ferroui-win32",
+ "serde_json",
  "url",
 ]
 
@@ -3789,6 +3815,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-direct2d",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-native",

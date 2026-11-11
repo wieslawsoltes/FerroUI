@@ -74,7 +74,11 @@ impl ImmediateRenderer {
         } else {
             PushedState::NONE
         };
-        let s_opacity = context.push_opacity(opacity);
+        let s_opacity = if opacity == 1.0 {
+            PushedState::NONE
+        } else {
+            context.push_opacity(opacity)
+        };
         let clip_to_bounds = visual.clip_to_bounds();
         let s_clip = if clip_to_bounds {
             match visual.clip_to_bounds_radius() {

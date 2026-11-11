@@ -1,0 +1,20 @@
+
+running 1 test
+test renderer_benchmarks::run_renderer_benchmarks ... TDG_GPU_BACKEND direct2d Some([199, 2, 1, 0, 0, 0, 0, 0]) hardware D3D11 / Direct2D / DirectWrite
+Direct2D: hardware D3D11 NVIDIA GeForce GTX 1660 Ti, feature level 0xb100, adapter 00000000:000102c7
+TDG_GPU_RESULT stationary_redraw neutral=false mean_ms=0.331635
+TDG_GPU_RESULT vertical_small_scrolls neutral=false mean_ms=0.391362
+TDG_GPU_RESULT vertical_row_scrolls neutral=false mean_ms=0.518422
+TDG_GPU_RESULT horizontal_small_scrolls neutral=false mean_ms=0.372519
+TDG_GPU_RESULT horizontal_column_scrolls neutral=false mean_ms=1.496808
+TDG_GPU_RESULT horizontal_far_column_scrolls neutral=false mean_ms=1.483931
+TDG_GPU_RESULT stationary_redraw neutral=true mean_ms=0.327472
+TDG_GPU_RESULT vertical_small_scrolls neutral=true mean_ms=0.388254
+TDG_GPU_RESULT vertical_row_scrolls neutral=true mean_ms=0.517648
+TDG_GPU_RESULT horizontal_small_scrolls neutral=true mean_ms=0.366155
+TDG_GPU_RESULT horizontal_column_scrolls neutral=true mean_ms=1.483823
+TDG_GPU_RESULT horizontal_far_column_scrolls neutral=true mean_ms=1.500794
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.58s
+
