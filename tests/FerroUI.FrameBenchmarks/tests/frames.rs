@@ -529,6 +529,7 @@ const PROCESS_WARM_UP_FRAMES: i32 = 30;
 fn warm_up_the_process() {
     static WARMED: Once = Once::new();
     WARMED.call_once(|| {
+        ferroui_frame_benchmarks::page_in_the_program();
         let gate = Gate::start(&WARM_UP);
         gate.run(PROCESS_WARM_UP_FRAMES);
     });
@@ -584,6 +585,9 @@ fn measure_start(scene: &Scene) {
     if let Some(wait) = std::env::var("FERROUI_GATE_START_DELAY_MS").ok().and_then(|wait| wait.parse().ok()) {
         std::thread::sleep(Duration::from_millis(wait));
     }
+    // A start is of a process that has built nothing yet, with its program in memory: the pages
+    // of the program the start runs through are not read from the disk inside it.
+    ferroui_frame_benchmarks::page_in_the_program();
     let counters = ferroui_base::diagnostics::perf_counters::snapshot();
     let gate = Gate::start(scene);
     let first = gate.first_frame();
