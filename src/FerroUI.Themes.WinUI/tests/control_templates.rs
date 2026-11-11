@@ -647,9 +647,26 @@ fn the_person_picture_gets_its_parts_and_states_from_the_theme() {
     assert!(!part(&picture, "BadgeGrid").is_visible());
     picture.set_badge_number(3);
     window.update_layout();
-    assert!(part(&picture, "BadgeGrid").is_visible());
+    let badge = part(&picture, "BadgeGrid");
+    assert!(badge.is_visible());
     let number = part(&picture, "BadgeNumberTextBlock").cast::<TextBlock>().expect("a text block");
     assert_eq!(Some("3"), number.text().as_deref());
+    let single_digit_size = number.font_size();
+    picture.set_badge_number(120);
+    window.update_layout();
+    assert_eq!(Some("99+"), number.text().as_deref());
+    assert!(number.font_size() < single_digit_size);
+
+    // The badge is half the picture, 4 units above and to the right of it
+    // (PersonPictureBadgeGridMargin), and the picture does not clip it.
+    let badge_bounds = badge.bounds();
+    assert_eq!(48.0, badge_bounds.width);
+    assert_eq!(-4.0, badge_bounds.y);
+    assert_eq!(picture.bounds().width + 4.0, badge_bounds.right());
+    assert!(!picture.clip_to_bounds());
+    // "99+" is inside the circle of the badge.
+    assert!(number.bounds().x >= 0.0);
+    assert!(number.bounds().right() <= badge_bounds.width);
     window.close();
 }
 
