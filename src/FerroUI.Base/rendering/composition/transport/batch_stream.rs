@@ -19,6 +19,7 @@ use crate::rendering::composition::{
     CompositionTransparencyLevel,
 };
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
+use crate::utilities::ReleaseExcess;
 use crate::{
     CornerRadius, Matrix, Point, Rect, RelativePoint, RelativeRect, RelativeScalar, RelativeUnit, RoundedRect, Size,
     Vector, Vector3D,
@@ -173,11 +174,17 @@ impl BatchStreamData {
         Self::default()
     }
 
-    /// Empties both streams, keeping their capacity for reuse.
+    /// Empties both streams. Their storage is kept for the next batch, up
+    /// to what an emptied buffer keeps
+    /// ([`RETAINED_BUFFER_BYTES`](crate::utilities::RETAINED_BUFFER_BYTES)):
+    /// the batch of the first frame of a large tree is not the size of the
+    /// ones that follow it.
     pub(crate) fn reset(&mut self) {
         self.objects.clear();
         self.structs.clear();
         self.struct_read_offset = 0;
+        self.objects.release_excess();
+        self.structs.release_excess();
     }
 }
 

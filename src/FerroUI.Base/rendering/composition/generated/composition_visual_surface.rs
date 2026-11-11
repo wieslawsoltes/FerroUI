@@ -24,10 +24,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -77,7 +77,7 @@ pub trait CompositionVisualSurfaceHooks: ICompositionObjectHost {
 /// The UI-thread properties of `CompositionVisualSurface`.
 pub struct CompositionVisualSurfaceProps {
     changed_fields_of_composition_visual_surface: Cell<CompositionVisualSurfaceChangedFields>,
-    source_visual: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    source_visual: OptionCell<Rc<dyn ICompositionObject>>,
     source_offset: Cell<Vector>,
     source_size: Cell<Vector>,
 }
@@ -95,7 +95,7 @@ impl CompositionVisualSurfaceProps {
     pub fn new() -> Self {
         Self {
             changed_fields_of_composition_visual_surface: Cell::new(CompositionVisualSurfaceChangedFields::empty()),
-            source_visual: RefCell::new(None),
+            source_visual: OptionCell::new(),
             source_offset: Cell::new(Default::default()),
             source_size: Cell::new(Default::default()),
         }
@@ -114,24 +114,24 @@ impl CompositionVisualSurfaceProps {
 
     /// `SourceVisual` (FerroUI overlay).
     pub fn source_visual(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.source_visual.borrow().clone()
+        self.source_visual.get()
     }
 
     /// Sets `SourceVisual` (FerroUI overlay).
     pub fn set_source_visual(&self, host: &dyn CompositionVisualSurfaceHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.source_visual.borrow().clone();
+        let old_value = self.source_visual.get();
         if old_value.differs(&value) {
             CompositionVisualSurfaceHooks::validate_source_visual_change(host, &old_value, &value);
             CompositionVisualSurfaceHooks::on_source_visual_changing(host);
             changed = true;
             // Update the backing value
-            *self.source_visual.borrow_mut() = value.clone();
+            self.source_visual.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_visual_surface.set(self.changed_fields_of_composition_visual_surface.get() | CompositionVisualSurfaceChangedFields::SOURCE_VISUAL);
             host.register_for_serialization();
         }
-        *self.source_visual.borrow_mut() = value;
+        self.source_visual.set(value);
         if changed {
             CompositionVisualSurfaceHooks::on_source_visual_changed(host);
         }
@@ -252,7 +252,7 @@ impl CompositionVisualSurfaceProps {
         let changed = self.changed_fields_of_composition_visual_surface.get();
         writer.write(changed);
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_VISUAL) {
-            writer.write_server_object(self.source_visual.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.source_visual.get().map(|o| o.server()));
         }
         if changed.contains(CompositionVisualSurfaceChangedFields::SOURCE_OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualSurfaceProps::id_of_source_offset_property().base()));
@@ -280,7 +280,7 @@ pub trait ServerCompositionVisualSurfaceHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerCompositionVisualSurface`.
 pub struct ServerCompositionVisualSurfaceProps {
-    source_visual: RefCell<Option<Rc<dyn IServerObject>>>,
+    source_visual: OptionCell<Rc<dyn IServerObject>>,
     source_offset: Cell<Vector>,
     source_size: Cell<Vector>,
 }
@@ -296,7 +296,7 @@ impl ServerCompositionVisualSurfaceProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            source_visual: RefCell::new(None),
+            source_visual: OptionCell::new(),
             source_offset: Cell::new(Default::default()),
             source_size: Cell::new(Default::default()),
         }
@@ -318,8 +318,8 @@ impl ServerCompositionVisualSurfaceProps {
             CompositionProperty::register::<ServerCompositionVisualSurfaceProps, Option<Rc<dyn IServerObject>>>(
                 "SourceVisual",
                 "ServerCompositionVisualSurface",
-                |obj| props_of::<ServerCompositionVisualSurfaceProps>(obj).source_visual.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionVisualSurfaceProps>(obj).source_visual.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionVisualSurfaceProps>(obj).source_visual.get(),
+                |obj, v| props_of::<ServerCompositionVisualSurfaceProps>(obj).source_visual.set(v),
                 None,
                 None,
             )
@@ -328,11 +328,11 @@ impl ServerCompositionVisualSurfaceProps {
 
     /// `SourceVisual`.
     pub fn source_visual(&self) -> Option<Rc<dyn IServerObject>> {
-        self.source_visual.borrow().clone()
+        self.source_visual.get()
     }
 
     pub fn set_source_visual(&self, host: &dyn ServerCompositionVisualSurfaceHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.source_visual.borrow().clone();
+        let old_value = self.source_visual.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionVisualSurfaceHooks::on_source_visual_changing(host);
@@ -344,7 +344,7 @@ impl ServerCompositionVisualSurfaceProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.source_visual.borrow_mut() = value.clone(),
+                assign: &mut || self.source_visual.set(value.clone()),
             },
         );
         if changed {

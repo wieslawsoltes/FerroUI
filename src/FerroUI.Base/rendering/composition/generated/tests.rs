@@ -658,7 +658,7 @@ fn object_references_cross_by_id() {
 }
 
 #[test]
-fn default_values_reach_the_server() {
+fn default_values_are_on_the_server_without_crossing() {
     let fixture = Fixture::new();
     let visual = fixture.create::<CompositionVisualProps, ServerCompositionVisualProps>();
     visual.props.initialize_defaults(&*visual);
@@ -673,7 +673,8 @@ fn default_values_reach_the_server() {
     assert_eq!(visual.props.offset(), Vector3D::default());
     assert!(visual.props.clip().is_none());
 
-    // Before the batch the server block holds the defaults of the types.
+    // The server block is made with the same defaults: the first batch of the visual, which it
+    // still has, carries none of them.
     fixture.compositor.commit();
     fixture.render_loop.tick();
     let server = fixture.server::<ServerCompositionVisualProps>(visual.server);
@@ -683,20 +684,53 @@ fn default_values_reach_the_server() {
     assert_eq!(server.props.orientation(), Quaternion::IDENTITY);
     assert_eq!(server.props.scale(), Vector3D::new(1.0, 1.0, 1.0));
     assert_eq!(server.props.transform_matrix(), Matrix::IDENTITY);
+    assert_eq!(server.props.rotation_axis(), Vector3D::new(0.0, 0.0, 1.0));
+    assert!(server.props.is_hit_test_visible());
     assert_eq!(server.props.offset(), Vector3D::default());
-    // An animated property set directly removes the animation of the
-    // property.
     let log = server.take_log();
-    assert!(log.contains(&"remove_animation Opacity".to_string()));
+    assert!(log.contains(&"values_invalidated".to_string()), "{log:?}");
     // (The non-animated properties the WinUI overlay adds to the visual, with their defaults, are
-    // set as values; the animated properties of the upstream schema are not.)
-    for name in ["Visible", "Opacity", "ClipToBounds", "Orientation", "Scale", "TransformMatrix"] {
+    // set as values; the properties of the upstream schema are neither set nor do they remove an
+    // animation, which a new server object cannot have.)
+    for name in
+        ["Visible", "Opacity", "ClipToBounds", "Orientation", "Scale", "TransformMatrix", "RotationAxis", "IsHitTestVisible"]
+    {
         assert!(!log.iter().any(|entry| entry.starts_with(&format!("set_value {name}"))), "{log:?}");
+        assert!(!log.iter().any(|entry| entry == &format!("remove_animation {name}")), "{log:?}");
     }
 
     let fresh = ServerCompositionVisualProps::new();
-    assert!(!fresh.visible());
-    assert_eq!(fresh.opacity(), 0.0);
+    assert!(fresh.visible());
+    assert_eq!(fresh.opacity(), 1.0);
+    assert!(fresh.clip_to_bounds());
+    assert_eq!(fresh.orientation(), Quaternion::IDENTITY);
+    assert_eq!(fresh.scale(), Vector3D::new(1.0, 1.0, 1.0));
+    assert_eq!(fresh.transform_matrix(), Matrix::IDENTITY);
+    assert_eq!(fresh.rotation_axis(), Vector3D::new(0.0, 0.0, 1.0));
+    assert!(fresh.is_hit_test_visible());
+}
+
+#[test]
+fn a_default_value_that_is_changed_crosses() {
+    let fixture = Fixture::new();
+    let visual = fixture.create::<CompositionVisualProps, ServerCompositionVisualProps>();
+    visual.props.initialize_defaults(&*visual);
+    // Changed before the first batch, and changed back after it.
+    visual.props.set_opacity(&*visual, 0.5);
+    visual.props.set_visible(&*visual, false);
+    fixture.run();
+    let server = fixture.server::<ServerCompositionVisualProps>(visual.server);
+    assert_eq!(server.props.opacity(), 0.5);
+    assert!(!server.props.visible());
+    assert!(server.props.clip_to_bounds());
+    server.take_log();
+
+    visual.props.set_opacity(&*visual, 1.0);
+    visual.props.set_visible(&*visual, true);
+    fixture.run();
+    assert_eq!(server.props.opacity(), 1.0);
+    assert!(server.props.visible());
+    assert!(server.take_log().contains(&"remove_animation Opacity".to_string()));
 }
 
 #[test]

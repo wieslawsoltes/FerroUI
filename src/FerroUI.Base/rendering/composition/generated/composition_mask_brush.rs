@@ -20,10 +20,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -71,8 +71,8 @@ pub trait CompositionMaskBrushHooks: CompositionBrushHooks {
 pub struct CompositionMaskBrushProps {
     base: CompositionBrushProps,
     changed_fields_of_composition_mask_brush: Cell<CompositionMaskBrushChangedFields>,
-    source: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    mask: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    source: OptionCell<Rc<dyn ICompositionObject>>,
+    mask: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for CompositionMaskBrushProps {
@@ -89,8 +89,8 @@ impl CompositionMaskBrushProps {
         Self {
             base: CompositionBrushProps::new(),
             changed_fields_of_composition_mask_brush: Cell::new(CompositionMaskBrushChangedFields::empty()),
-            source: RefCell::new(None),
-            mask: RefCell::new(None),
+            source: OptionCell::new(),
+            mask: OptionCell::new(),
         }
     }
 
@@ -113,24 +113,24 @@ impl CompositionMaskBrushProps {
 
     /// `Source` (FerroUI overlay).
     pub fn source(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     /// Sets `Source` (FerroUI overlay).
     pub fn set_source(&self, host: &dyn CompositionMaskBrushHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         if old_value.differs(&value) {
             CompositionMaskBrushHooks::validate_source_change(host, &old_value, &value);
             CompositionMaskBrushHooks::on_source_changing(host);
             changed = true;
             // Update the backing value
-            *self.source.borrow_mut() = value.clone();
+            self.source.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_mask_brush.set(self.changed_fields_of_composition_mask_brush.get() | CompositionMaskBrushChangedFields::SOURCE);
             host.register_for_serialization();
         }
-        *self.source.borrow_mut() = value;
+        self.source.set(value);
         if changed {
             CompositionMaskBrushHooks::on_source_changed(host);
         }
@@ -138,24 +138,24 @@ impl CompositionMaskBrushProps {
 
     /// `Mask` (FerroUI overlay).
     pub fn mask(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.mask.borrow().clone()
+        self.mask.get()
     }
 
     /// Sets `Mask` (FerroUI overlay).
     pub fn set_mask(&self, host: &dyn CompositionMaskBrushHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.mask.borrow().clone();
+        let old_value = self.mask.get();
         if old_value.differs(&value) {
             CompositionMaskBrushHooks::validate_mask_change(host, &old_value, &value);
             CompositionMaskBrushHooks::on_mask_changing(host);
             changed = true;
             // Update the backing value
-            *self.mask.borrow_mut() = value.clone();
+            self.mask.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_mask_brush.set(self.changed_fields_of_composition_mask_brush.get() | CompositionMaskBrushChangedFields::MASK);
             host.register_for_serialization();
         }
-        *self.mask.borrow_mut() = value;
+        self.mask.set(value);
         if changed {
             CompositionMaskBrushHooks::on_mask_changed(host);
         }
@@ -181,10 +181,10 @@ impl CompositionMaskBrushProps {
         let changed = self.changed_fields_of_composition_mask_brush.get();
         writer.write(changed);
         if changed.contains(CompositionMaskBrushChangedFields::SOURCE) {
-            writer.write_server_object(self.source.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.source.get().map(|o| o.server()));
         }
         if changed.contains(CompositionMaskBrushChangedFields::MASK) {
-            writer.write_server_object(self.mask.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.mask.get().map(|o| o.server()));
         }
         self.changed_fields_of_composition_mask_brush.set(CompositionMaskBrushChangedFields::empty());
     }
@@ -206,8 +206,8 @@ pub trait ServerCompositionMaskBrushHooks: ServerCompositionBrushHooks {
 /// The server-side properties of `ServerCompositionMaskBrush`.
 pub struct ServerCompositionMaskBrushProps {
     base: ServerCompositionBrushProps,
-    source: RefCell<Option<Rc<dyn IServerObject>>>,
-    mask: RefCell<Option<Rc<dyn IServerObject>>>,
+    source: OptionCell<Rc<dyn IServerObject>>,
+    mask: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerCompositionMaskBrushProps {
@@ -222,8 +222,8 @@ impl ServerCompositionMaskBrushProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionBrushProps::new(),
-            source: RefCell::new(None),
-            mask: RefCell::new(None),
+            source: OptionCell::new(),
+            mask: OptionCell::new(),
         }
     }
 
@@ -248,8 +248,8 @@ impl ServerCompositionMaskBrushProps {
             CompositionProperty::register::<ServerCompositionMaskBrushProps, Option<Rc<dyn IServerObject>>>(
                 "Source",
                 "ServerCompositionMaskBrush",
-                |obj| props_of::<ServerCompositionMaskBrushProps>(obj).source.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionMaskBrushProps>(obj).source.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionMaskBrushProps>(obj).source.get(),
+                |obj, v| props_of::<ServerCompositionMaskBrushProps>(obj).source.set(v),
                 None,
                 None,
             )
@@ -258,11 +258,11 @@ impl ServerCompositionMaskBrushProps {
 
     /// `Source`.
     pub fn source(&self) -> Option<Rc<dyn IServerObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     pub fn set_source(&self, host: &dyn ServerCompositionMaskBrushHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionMaskBrushHooks::on_source_changing(host);
@@ -274,7 +274,7 @@ impl ServerCompositionMaskBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.source.borrow_mut() = value.clone(),
+                assign: &mut || self.source.set(value.clone()),
             },
         );
         if changed {
@@ -289,8 +289,8 @@ impl ServerCompositionMaskBrushProps {
             CompositionProperty::register::<ServerCompositionMaskBrushProps, Option<Rc<dyn IServerObject>>>(
                 "Mask",
                 "ServerCompositionMaskBrush",
-                |obj| props_of::<ServerCompositionMaskBrushProps>(obj).mask.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionMaskBrushProps>(obj).mask.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionMaskBrushProps>(obj).mask.get(),
+                |obj, v| props_of::<ServerCompositionMaskBrushProps>(obj).mask.set(v),
                 None,
                 None,
             )
@@ -299,11 +299,11 @@ impl ServerCompositionMaskBrushProps {
 
     /// `Mask`.
     pub fn mask(&self) -> Option<Rc<dyn IServerObject>> {
-        self.mask.borrow().clone()
+        self.mask.get()
     }
 
     pub fn set_mask(&self, host: &dyn ServerCompositionMaskBrushHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.mask.borrow().clone();
+        let old_value = self.mask.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionMaskBrushHooks::on_mask_changing(host);
@@ -315,7 +315,7 @@ impl ServerCompositionMaskBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.mask.borrow_mut() = value.clone(),
+                assign: &mut || self.mask.set(value.clone()),
             },
         );
         if changed {

@@ -31,14 +31,20 @@ ferroui_base::ferro_properties! {
         /// Deviation (DEVIATIONS.md, Behaviors): the reference adds and removes the same static
         /// method with `PropertyChanged +=` and `-=`; a handler of a Rust object has no identity
         /// to remove it by, so the token of the subscription is kept on the control.
-        fn selection_animation_subscription_property() -> AttachedProperty<Option<u64>> {
-            FerroProperty::register_attached::<SelectingItemsControlBehavior, SelectingItemsControl, Option<u64>>(
+        fn selection_animation_subscription_property() -> AttachedProperty<Option<SelectionAnimationSubscription>> {
+            FerroProperty::register_attached::<SelectingItemsControlBehavior, SelectingItemsControl, Option<SelectionAnimationSubscription>>(
                 "SelectionAnimationSubscription",
                 None,
             )
         }
     }
 }
+
+/// The token of the property changed handler of a control whose selection is animated. It is
+/// the handler's and says nothing about the control: no two subscriptions have the same one,
+/// so it is a type of its own and not a number that reads as a value of the control.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SelectionAnimationSubscription(u64);
 
 impl SelectingItemsControlBehavior {
     /// Initializes the attached-property change handler.
@@ -60,8 +66,8 @@ impl SelectingItemsControlBehavior {
         if args.new_value().downcast_ref::<bool>() == Some(&true) {
             let token = selecting_items_control
                 .add_property_changed_handler(Rc::new(Self::selecting_items_control_property_changed));
-            selecting_items_control.set_value(subscription, Some(token));
-        } else if let Some(token) = selecting_items_control.get_value(subscription) {
+            selecting_items_control.set_value(subscription, Some(SelectionAnimationSubscription(token)));
+        } else if let Some(SelectionAnimationSubscription(token)) = selecting_items_control.get_value(subscription) {
             selecting_items_control.remove_property_changed_handler(token);
             selecting_items_control.clear_value(subscription);
         }

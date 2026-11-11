@@ -12,7 +12,6 @@ use crate::rendering::{
 };
 use crate::threading::DispatcherPriority;
 use crate::utilities::HandlerList;
-use rustc_hash::FxHashSet;
 use crate::{Point, Rect, Ref, Size, Visual};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -28,73 +27,145 @@ crate::ferro_thread_local! {
     static RENDERERS: RefCell<HashMap<u64, Weak<CompositingRenderer>>> = RefCell::new(HashMap::new());
 }
 
-/// A set of visuals that keeps the order in which they were added.
-///
-/// A removal drops the key at once and leaves its entry in the list, which is compacted when the
-/// stale entries are half of it or the set is read, so that removing is amortised constant time,
-/// as in the reference's `HashSet<Visual>`, instead of a scan of the list for every visual that is
-/// invalidated while it has no composition visual (DEVIATIONS.md, corrected divergences). The
-/// visuals the set yields are unchanged; a removed visual is released at the next compaction.
-#[derive(Default)]
-struct VisualSet {
-    items: Vec<Ref<Visual>>,
-    keys: FxHashSet<*const Visual>,
-    /// The entries of `items` whose key was removed.
-    stale: usize,
+/// The epochs of the sets of the renderers: each is used by one renderer, from one clearing of
+/// its sets to the next.
+static NEXT_SETS_EPOCH: AtomicU64 = AtomicU64::new(1);
+
+/// One of the sets of visuals a renderer keeps for its next update pass.
+#[derive(Clone, Copy)]
+enum VisualSet {
+    /// The visuals whose drawing changed.
+    Dirty = 0,
+    /// The visuals whose composition properties changed but whose drawing did not.
+    PropertiesDirty = 1,
+    /// The visuals whose child composition visuals have to be synchronized.
+    RecalculateChildren = 2,
 }
 
-impl VisualSet {
-    fn add(&mut self, visual: &Visual) {
-        if self.keys.insert(visual as *const Visual) {
-            self.items.push(visual.to_ref());
+/// The sets of visuals of a renderer, each in the order in which its visuals were added.
+///
+/// A visual says itself which sets it is in (`Visual::renderer_sets`): the epoch of the sets it
+/// was added to and a bit for each of them. Adding, removing and asking are a comparison of that
+/// word, where the reference hashes the visual into a `HashSet<Visual>` (DEVIATIONS.md,
+/// Rendering; docs/porting/desktop-performance.md, section 9.40). Clearing the sets takes a new
+/// epoch, so no visual is visited to forget it. A visual is in the sets of one renderer at a
+/// time: the renderer of the root it is under.
+///
+/// A removal clears the bit at once and leaves the entry in the list, which is compacted when
+/// the stale entries are half of it or the set is read, so that removing is constant time
+/// instead of a scan of the list for every visual that is invalidated while it has no
+/// composition visual. The visuals a set yields are unchanged; a removed visual is released at
+/// the next compaction.
+struct VisualSets {
+    epoch: u64,
+    items: [Vec<Ref<Visual>>; 3],
+    /// The visuals of each set.
+    live: [usize; 3],
+    /// The entries of each list whose visual was removed.
+    stale: [usize; 3],
+}
+
+impl VisualSets {
+    /// The bits of a word below its epoch: one for each set, and one more for each that marks a
+    /// visual already kept while a list is compacted.
+    const BITS: u32 = 6;
+
+    fn new() -> Self {
+        Self { epoch: Self::next_epoch(), items: Default::default(), live: [0; 3], stale: [0; 3] }
+    }
+
+    fn next_epoch() -> u64 {
+        NEXT_SETS_EPOCH.fetch_add(1, Ordering::Relaxed)
+    }
+
+    /// The bits of `visual` for these sets: none when the visual was last added to other sets,
+    /// or to these before they were cleared.
+    fn bits(&self, visual: &Visual) -> u64 {
+        let word = visual.renderer_sets.get();
+        if word >> Self::BITS == self.epoch {
+            word & ((1 << Self::BITS) - 1)
+        } else {
+            0
         }
     }
 
-    fn contains(&self, visual: &Visual) -> bool {
-        self.keys.contains(&(visual as *const Visual))
+    fn set_bits(&self, visual: &Visual, bits: u64) {
+        visual.renderer_sets.set(self.epoch << Self::BITS | bits);
     }
 
-    fn remove(&mut self, visual: &Visual) {
-        let key = visual as *const Visual;
-        if self.keys.remove(&key) {
-            self.stale += 1;
-            if self.stale * 2 >= self.items.len() {
-                self.compact();
+    fn add(&mut self, set: VisualSet, visual: &Visual) {
+        let (bits, bit) = (self.bits(visual), 1 << set as u64);
+        if bits & bit == 0 {
+            self.set_bits(visual, bits | bit);
+            self.items[set as usize].push(visual.to_ref());
+            self.live[set as usize] += 1;
+        }
+    }
+
+    fn contains(&self, set: VisualSet, visual: &Visual) -> bool {
+        self.bits(visual) & (1 << set as u64) != 0
+    }
+
+    fn remove(&mut self, set: VisualSet, visual: &Visual) {
+        let (bits, bit) = (self.bits(visual), 1 << set as u64);
+        if bits & bit != 0 {
+            self.set_bits(visual, bits & !bit);
+            let index = set as usize;
+            self.live[index] -= 1;
+            self.stale[index] += 1;
+            if self.stale[index] * 2 >= self.items[index].len() {
+                self.compact(set);
             }
         }
     }
 
-    /// Drops the stale entries (and an entry added again after its removal is kept once, at its
-    /// last place).
-    fn compact(&mut self) {
-        let mut seen = FxHashSet::with_capacity_and_hasher(self.keys.len(), Default::default());
-        let mut items = std::mem::take(&mut self.items);
+    /// Drops the stale entries of a list (and an entry added again after its removal is kept
+    /// once, at its last place).
+    fn compact(&mut self, set: VisualSet) {
+        let index = set as usize;
+        let (bit, kept) = (1 << set as u64, 1 << (set as u64 + 3));
+        let mut items = std::mem::take(&mut self.items[index]);
         items.reverse();
         items.retain(|item| {
-            let key = &**item as *const Visual;
-            self.keys.contains(&key) && seen.insert(key)
+            let bits = self.bits(item);
+            let keep = bits & bit != 0 && bits & kept == 0;
+            if keep {
+                self.set_bits(item, bits | kept);
+            }
+            keep
         });
         items.reverse();
-        self.items = items;
-        self.stale = 0;
-    }
-
-    /// The visuals of the set, in the order in which they were added.
-    fn snapshot(&mut self) -> Vec<Ref<Visual>> {
-        if self.stale > 0 {
-            self.compact();
+        for item in &items {
+            self.set_bits(item, self.bits(item) & !kept);
         }
-        self.items.clone()
+        self.live[index] = items.len();
+        self.items[index] = items;
+        self.stale[index] = 0;
     }
 
-    fn is_empty(&self) -> bool {
-        self.keys.is_empty()
+    /// The visuals of a set, in the order in which they were added.
+    ///
+    /// A visual that the sets of another renderer took since (it moved to another root between
+    /// two passes) says so in its word and is not in the set any more.
+    fn snapshot(&mut self, set: VisualSet) -> Vec<Ref<Visual>> {
+        if self.stale[set as usize] > 0 {
+            self.compact(set);
+        }
+        self.items[set as usize].iter().filter(|item| self.contains(set, item)).cloned().collect()
     }
 
+    fn is_empty(&self, set: VisualSet) -> bool {
+        self.live[set as usize] == 0
+    }
+
+    /// Empties every set.
     fn clear(&mut self) {
-        self.items.clear();
-        self.keys.clear();
-        self.stale = 0;
+        self.epoch = Self::next_epoch();
+        for items in &mut self.items {
+            items.clear();
+        }
+        self.live = [0; 3];
+        self.stale = [0; 3];
     }
 }
 
@@ -105,10 +176,8 @@ pub struct CompositingRenderer {
     root: Weak<dyn IPresentationSource>,
     compositor: Rc<Compositor>,
     recorder: RefCell<RenderDataDrawingContext>,
-    dirty: RefCell<VisualSet>,
-    /// Visuals whose composition properties changed but whose drawing did not.
-    properties_dirty: RefCell<VisualSet>,
-    recalculate_children: RefCell<VisualSet>,
+    /// The visuals of the next update pass.
+    sets: RefCell<VisualSets>,
     /// The composition visuals kept for visuals that left the tree since the last update pass,
     /// each with its visual: released in the next pass unless the visual is in a tree again
     /// (docs/porting/desktop-performance.md, section 9.32). The visuals are referred to weakly:
@@ -156,9 +225,7 @@ impl CompositingRenderer {
             root,
             compositor: compositor.clone(),
             recorder: RefCell::new(RenderDataDrawingContext::new(Some(compositor.clone()))),
-            dirty: RefCell::new(VisualSet::default()),
-            properties_dirty: RefCell::new(VisualSet::default()),
-            recalculate_children: RefCell::new(VisualSet::default()),
+            sets: RefCell::new(VisualSets::new()),
             departed: RefCell::new(Vec::new()),
             keeping: RefCell::new(None),
             queued_update: Cell::new(false),
@@ -321,7 +388,7 @@ impl CompositingRenderer {
         // Before anything is synchronized: a visual that is still out of the tree lets go of
         // its composition visual here, and its former parent is synchronized below.
         self.release_departed();
-        let dirty: Vec<Ref<Visual>> = self.dirty.borrow_mut().snapshot();
+        let dirty: Vec<Ref<Visual>> = self.sets.borrow_mut().snapshot(VisualSet::Dirty);
         for visual in &dirty {
             let Some(comp) = visual.own_composition_visual() else { continue };
 
@@ -365,21 +432,20 @@ impl CompositingRenderer {
             visual.synchronize_composition_child_visuals();
         }
         // The visuals whose properties alone changed: their drawing is kept.
-        let properties_dirty: Vec<Ref<Visual>> = self.properties_dirty.borrow_mut().snapshot();
+        let properties_dirty: Vec<Ref<Visual>> = self.sets.borrow_mut().snapshot(VisualSet::PropertiesDirty);
         for visual in &properties_dirty {
-            if visual.own_composition_visual().is_some() && !self.dirty.borrow().contains(visual) {
+            if visual.own_composition_visual().is_some() && !self.sets.borrow().contains(VisualSet::Dirty, visual) {
                 visual.synchronize_composition_properties();
             }
         }
-        self.properties_dirty.borrow_mut().clear();
-        let recalculate: Vec<Ref<Visual>> = self.recalculate_children.borrow_mut().snapshot();
+        let recalculate: Vec<Ref<Visual>> = self.sets.borrow_mut().snapshot(VisualSet::RecalculateChildren);
         for visual in &recalculate {
-            if !self.dirty.borrow().contains(visual) {
+            if !self.sets.borrow().contains(VisualSet::Dirty, visual) {
                 visual.synchronize_composition_child_visuals();
             }
         }
-        self.dirty.borrow_mut().clear();
-        self.recalculate_children.borrow_mut().clear();
+        // Nothing is added during the pass (`updating`), so the three are emptied together.
+        self.sets.borrow_mut().clear();
         if let Some(root) = self.root.upgrade() {
             self.composition_target.set_size(root.client_size());
             self.composition_target.set_scaling(root.render_scaling());
@@ -424,7 +490,8 @@ impl CompositingRenderer {
     /// Whether the renderer holds `visual` for its next update pass. For
     /// tests only.
     pub fn has_pending_update_for_unit_tests(&self, visual: &Visual) -> bool {
-        self.dirty.borrow().contains(visual) || self.recalculate_children.borrow().contains(visual)
+        let sets = self.sets.borrow();
+        sets.contains(VisualSet::Dirty, visual) || sets.contains(VisualSet::RecalculateChildren, visual)
     }
 
     fn update(&self) {
@@ -477,11 +544,12 @@ impl IRenderer for CompositingRenderer {
 
         if visual.own_composition_visual().is_none() {
             // Queuing a detached visual would keep it alive for as long as rendering is stopped.
-            self.dirty.borrow_mut().remove(visual);
-            self.recalculate_children.borrow_mut().remove(visual);
-            self.properties_dirty.borrow_mut().remove(visual);
+            let mut sets = self.sets.borrow_mut();
+            sets.remove(VisualSet::Dirty, visual);
+            sets.remove(VisualSet::RecalculateChildren, visual);
+            sets.remove(VisualSet::PropertiesDirty, visual);
         } else {
-            self.dirty.borrow_mut().add(visual);
+            self.sets.borrow_mut().add(VisualSet::Dirty, visual);
         }
 
         self.queue_update();
@@ -495,10 +563,10 @@ impl IRenderer for CompositingRenderer {
             panic!("Visual was invalidated during the render pass");
         }
         if visual.own_composition_visual().is_none() {
-            self.properties_dirty.borrow_mut().remove(visual);
+            self.sets.borrow_mut().remove(VisualSet::PropertiesDirty, visual);
             return;
         }
-        self.properties_dirty.borrow_mut().add(visual);
+        self.sets.borrow_mut().add(VisualSet::PropertiesDirty, visual);
         self.queue_update();
     }
 
@@ -509,7 +577,7 @@ impl IRenderer for CompositingRenderer {
         if self.updating.get() {
             panic!("Visual was invalidated during the render pass");
         }
-        self.recalculate_children.borrow_mut().add(visual);
+        self.sets.borrow_mut().add(VisualSet::RecalculateChildren, visual);
         self.queue_update();
     }
 
@@ -531,7 +599,11 @@ impl IRenderer for CompositingRenderer {
         }
 
         self.composition_target.set_is_enabled(true);
-        if !self.dirty.borrow().is_empty() || !self.recalculate_children.borrow().is_empty() {
+        let pending = {
+            let sets = self.sets.borrow();
+            !sets.is_empty(VisualSet::Dirty) || !sets.is_empty(VisualSet::RecalculateChildren)
+        };
+        if pending {
             self.queue_update();
         }
     }
@@ -609,9 +681,7 @@ impl IRenderer for CompositingRenderer {
         if self.is_disposed.replace(true) {
             return;
         }
-        self.dirty.borrow_mut().clear();
-        self.recalculate_children.borrow_mut().clear();
-        self.properties_dirty.borrow_mut().clear();
+        self.sets.borrow_mut().clear();
         self.release_departed();
         for (token, _) in self.scene_invalidated.snapshot().iter() {
             self.scene_invalidated.remove(*token);

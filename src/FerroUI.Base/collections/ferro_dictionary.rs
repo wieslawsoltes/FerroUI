@@ -153,8 +153,8 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Rc::new(FerroDictionaryData {
             inner: RefCell::new(Inner::with_capacity(capacity)),
-            collection_changed: HandlerList::with_ordered_ids(),
-            untyped_collection_changed: Event::with_ordered_ids(),
+            collection_changed: HandlerList::new(),
+            untyped_collection_changed: Event::new(),
             property_changed: Event::new(),
         }))
     }

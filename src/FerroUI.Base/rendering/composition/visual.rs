@@ -64,7 +64,10 @@ pub struct CompositionVisual {
     object: CompositionObject,
     pub(super) kind: CompositionVisualKind,
     children: Rc<CompositionVisualCollection>,
-    pub(super) hit_test_children: RefCell<Option<CompositionHitTestAabbTree>>,
+    /// The index of the children for hit testing, which a visual with fewer
+    /// than `HIT_TEST_AABB_TREE_THRESHOLD` children does not have: boxed, so
+    /// that such a visual (nearly every visual) is not the larger for it.
+    pub(super) hit_test_children: RefCell<Option<Box<CompositionHitTestAabbTree>>>,
     opacity_mask: RefCell<Option<Rc<dyn IBrush>>>,
     pub(super) custom_hit_test_count_in_sub_tree: Cell<i32>,
     tag: RefCell<Option<Rc<dyn Any>>>,

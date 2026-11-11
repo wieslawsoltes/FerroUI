@@ -24,10 +24,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -84,8 +84,8 @@ pub trait ServerCompositionSimplePenHooks: IServerPropertyHost {
 
 /// The server-side properties of `ServerCompositionSimplePen`.
 pub struct ServerCompositionSimplePenProps {
-    brush: RefCell<Option<ServerResourceRef<dyn IBrush>>>,
-    dash_style: RefCell<Option<Arc<ImmutableDashStyle>>>,
+    brush: OptionCell<ServerResourceRef<dyn IBrush>>,
+    dash_style: OptionCell<Arc<ImmutableDashStyle>>,
     line_cap: Cell<PenLineCap>,
     line_join: Cell<PenLineJoin>,
     miter_limit: Cell<f64>,
@@ -103,8 +103,8 @@ impl ServerCompositionSimplePenProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            brush: RefCell::new(None),
-            dash_style: RefCell::new(None),
+            brush: OptionCell::new(),
+            dash_style: OptionCell::new(),
             line_cap: Cell::new(Default::default()),
             line_join: Cell::new(Default::default()),
             miter_limit: Cell::new(Default::default()),
@@ -128,8 +128,8 @@ impl ServerCompositionSimplePenProps {
             CompositionProperty::register::<ServerCompositionSimplePenProps, Option<ServerResourceRef<dyn IBrush>>>(
                 "Brush",
                 "ServerCompositionSimplePen",
-                |obj| props_of::<ServerCompositionSimplePenProps>(obj).brush.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSimplePenProps>(obj).brush.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSimplePenProps>(obj).brush.get(),
+                |obj, v| props_of::<ServerCompositionSimplePenProps>(obj).brush.set(v),
                 None,
                 None,
             )
@@ -138,11 +138,11 @@ impl ServerCompositionSimplePenProps {
 
     /// `Brush`.
     pub fn brush(&self) -> Option<ServerResourceRef<dyn IBrush>> {
-        self.brush.borrow().clone()
+        self.brush.get()
     }
 
     pub fn set_brush(&self, host: &dyn ServerCompositionSimplePenHooks, value: Option<ServerResourceRef<dyn IBrush>>) {
-        let old_value = self.brush.borrow().clone();
+        let old_value = self.brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSimplePenHooks::on_brush_changing(host);
@@ -154,7 +154,7 @@ impl ServerCompositionSimplePenProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.brush.borrow_mut() = value.clone(),
+                assign: &mut || self.brush.set(value.clone()),
             },
         );
         if changed {
@@ -169,8 +169,8 @@ impl ServerCompositionSimplePenProps {
             CompositionProperty::register::<ServerCompositionSimplePenProps, Option<Arc<ImmutableDashStyle>>>(
                 "DashStyle",
                 "ServerCompositionSimplePen",
-                |obj| props_of::<ServerCompositionSimplePenProps>(obj).dash_style.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSimplePenProps>(obj).dash_style.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSimplePenProps>(obj).dash_style.get(),
+                |obj, v| props_of::<ServerCompositionSimplePenProps>(obj).dash_style.set(v),
                 None,
                 None,
             )
@@ -179,11 +179,11 @@ impl ServerCompositionSimplePenProps {
 
     /// `DashStyle`.
     pub fn dash_style(&self) -> Option<Arc<ImmutableDashStyle>> {
-        self.dash_style.borrow().clone()
+        self.dash_style.get()
     }
 
     pub fn set_dash_style(&self, host: &dyn ServerCompositionSimplePenHooks, value: Option<Arc<ImmutableDashStyle>>) {
-        let old_value = self.dash_style.borrow().clone();
+        let old_value = self.dash_style.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSimplePenHooks::on_dash_style_changing(host);
@@ -195,7 +195,7 @@ impl ServerCompositionSimplePenProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.dash_style.borrow_mut() = value.clone(),
+                assign: &mut || self.dash_style.set(value.clone()),
             },
         );
         if changed {

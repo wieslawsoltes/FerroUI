@@ -22,10 +22,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -75,8 +75,8 @@ pub trait ServerCompositionSimpleBrushHooks: IServerPropertyHost {
 pub struct ServerCompositionSimpleBrushProps {
     opacity: Cell<f64>,
     transform_origin: Cell<RelativePoint>,
-    transform: RefCell<Option<ServerResourceRef<dyn ITransform>>>,
-    relative_transform: RefCell<Option<ServerResourceRef<dyn ITransform>>>,
+    transform: OptionCell<ServerResourceRef<dyn ITransform>>,
+    relative_transform: OptionCell<ServerResourceRef<dyn ITransform>>,
 }
 
 impl Default for ServerCompositionSimpleBrushProps {
@@ -92,8 +92,8 @@ impl ServerCompositionSimpleBrushProps {
         Self {
             opacity: Cell::new(Default::default()),
             transform_origin: Cell::new(Default::default()),
-            transform: RefCell::new(None),
-            relative_transform: RefCell::new(None),
+            transform: OptionCell::new(),
+            relative_transform: OptionCell::new(),
         }
     }
 
@@ -195,8 +195,8 @@ impl ServerCompositionSimpleBrushProps {
             CompositionProperty::register::<ServerCompositionSimpleBrushProps, Option<ServerResourceRef<dyn ITransform>>>(
                 "Transform",
                 "ServerCompositionSimpleBrush",
-                |obj| props_of::<ServerCompositionSimpleBrushProps>(obj).transform.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSimpleBrushProps>(obj).transform.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSimpleBrushProps>(obj).transform.get(),
+                |obj, v| props_of::<ServerCompositionSimpleBrushProps>(obj).transform.set(v),
                 None,
                 None,
             )
@@ -205,11 +205,11 @@ impl ServerCompositionSimpleBrushProps {
 
     /// `Transform`.
     pub fn transform(&self) -> Option<ServerResourceRef<dyn ITransform>> {
-        self.transform.borrow().clone()
+        self.transform.get()
     }
 
     pub fn set_transform(&self, host: &dyn ServerCompositionSimpleBrushHooks, value: Option<ServerResourceRef<dyn ITransform>>) {
-        let old_value = self.transform.borrow().clone();
+        let old_value = self.transform.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSimpleBrushHooks::on_transform_changing(host);
@@ -221,7 +221,7 @@ impl ServerCompositionSimpleBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.transform.borrow_mut() = value.clone(),
+                assign: &mut || self.transform.set(value.clone()),
             },
         );
         if changed {
@@ -236,8 +236,8 @@ impl ServerCompositionSimpleBrushProps {
             CompositionProperty::register::<ServerCompositionSimpleBrushProps, Option<ServerResourceRef<dyn ITransform>>>(
                 "RelativeTransform",
                 "ServerCompositionSimpleBrush",
-                |obj| props_of::<ServerCompositionSimpleBrushProps>(obj).relative_transform.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSimpleBrushProps>(obj).relative_transform.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSimpleBrushProps>(obj).relative_transform.get(),
+                |obj, v| props_of::<ServerCompositionSimpleBrushProps>(obj).relative_transform.set(v),
                 None,
                 None,
             )
@@ -246,11 +246,11 @@ impl ServerCompositionSimpleBrushProps {
 
     /// `RelativeTransform`.
     pub fn relative_transform(&self) -> Option<ServerResourceRef<dyn ITransform>> {
-        self.relative_transform.borrow().clone()
+        self.relative_transform.get()
     }
 
     pub fn set_relative_transform(&self, host: &dyn ServerCompositionSimpleBrushHooks, value: Option<ServerResourceRef<dyn ITransform>>) {
-        let old_value = self.relative_transform.borrow().clone();
+        let old_value = self.relative_transform.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSimpleBrushHooks::on_relative_transform_changing(host);
@@ -262,7 +262,7 @@ impl ServerCompositionSimpleBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.relative_transform.borrow_mut() = value.clone(),
+                assign: &mut || self.relative_transform.set(value.clone()),
             },
         );
         if changed {

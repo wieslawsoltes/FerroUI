@@ -63,6 +63,13 @@ Tables in this script that carry what upstream takes from the C# type system:
     DEFAULTS         the DefaultValue expressions of the schema, in Rust
     SERVER_BASES     hand-written server base classes named by ServerBase /
                      Inherits, and whether they derive from ServerObject
+
+And one that is not from upstream:
+
+    RARE_FIELDS      (in the generator class) the properties of a class that
+                     few of its objects set; they are kept in a second block
+                     that is made when one of them is first given another
+                     value than the one it is made with
 """
 
 import argparse
@@ -538,6 +545,8 @@ class Generator:
         self.type_info_cache = {}
         self.files = {}
         self.skipped = []
+        # The fields of the class being generated that are in its second block (`RARE_FIELDS`).
+        self.rare = set()
 
     def get_type_info(self, type_name):
         if type_name not in self.type_info_cache:
@@ -644,30 +653,175 @@ class Generator:
     # ---- field access snippets ------------------------------------------
 
     @staticmethod
+    # A field of a copy type is a `Cell`. Every other type of the schema is an optional handle (an
+    # `Rc`, an `Arc`, or a value made of them) that is read by cloning it and written by replacing
+    # it, which is what an `OptionCell` does without the borrow flag of a `RefCell`: eight bytes
+    # less for each such field, and a visual, which is made for every element of a tree, has eight
+    # of them on the UI thread and eight on the server.
+    @staticmethod
     def field_decl(info, type_name):
-        return ("Cell<%s>" if info.is_copy else "RefCell<%s>") % type_name
-
-    @staticmethod
-    def field_get(info, field):
-        return ("self.%s.get()" if info.is_copy else "self.%s.borrow().clone()") % field
-
-    @staticmethod
-    def field_set(info, field, value):
         if info.is_copy:
-            return "self.%s.set(%s);" % (field, value)
-        return "*self.%s.borrow_mut() = %s;" % (field, value)
+            return "Cell<%s>" % type_name
+        assert type_name.startswith("Option<") and type_name.endswith(">"), type_name
+        return "OptionCell<%s>" % type_name[len("Option<"):-1]
+
+    @staticmethod
+    def field_cell(info):
+        return "std::cell::Cell" if info.is_copy else "crate::utilities::OptionCell"
+
+    def field_get(self, info, field, owner="self"):
+        if field in self.rare:
+            return "%s.rare_%s()" % (owner, field)
+        return "%s.%s.get()" % (owner, field)
+
+    def field_set(self, info, field, value, owner="self"):
+        if field in self.rare:
+            return "%s.store_rare_%s(%s);" % (owner, field, value)
+        return "%s.%s.set(%s);" % (owner, field, value)
+
+    # The properties of a class that nearly every object leaves at the value it is made with. They
+    # are not fields of the property block: the block holds one pointer to a second block with
+    # them, which is made when one of them is first given another value. A read of an object
+    # without the second block returns the value the field is made with, and a write of that value
+    # to such an object does nothing, so the accessors, the batches and the animations of these
+    # properties are what they are for a field of the block.
+    #
+    # A visual is made for every element of a tree, on the UI thread and on the server. Its
+    # transform other than the offset (translation, anchor and center points, rotation, scale,
+    # orientation, matrix), its geometry clip, opacity mask, effect, cache mode, adorner link and
+    # the WinUI additions are about four hundred bytes on each side, and few visuals of a tree set
+    # any of them (desktop-performance.md section 9.40).
+    RARE_FIELDS = {
+        "CompositionVisual": (
+            "Clip",
+            "Translation",
+            "AnchorPoint",
+            "CenterPoint",
+            "RotationAngle",
+            "Orientation",
+            "Scale",
+            "TransformMatrix",
+            "AdornedVisual",
+            "AdornerIsClipped",
+            "OpacityMaskBrush",
+            "Effect",
+            "CacheMode",
+            "CompositionClip",
+            "RotationAxis",
+            "RelativeOffsetAdjustment",
+            "RelativeSizeAdjustment",
+            "BorderMode",
+            "BackfaceVisibility",
+            "CompositeMode",
+            "ParentForTransform",
+        ),
+    }
+
+    def rare_props(self, cl, props):
+        names = set(self.RARE_FIELDS.get(cl.name, ()))
+        return [p for p in props if p.name in names]
+
+    def rare_initial(self, cl, prop):
+        """The value a rare field is made with, as an expression."""
+        info = self.get_type_info(prop.type)
+        if not info.is_copy:
+            return "None"
+        direct = self.direct_default(cl, prop)
+        if direct is not None:
+            return direct
+        if prop.default_value is not None:
+            raise SystemExit("rare property %s.%s has a default that is not written directly" % (cl.name, prop.name))
+        return "Default::default()"
+
+    def generate_rare(self, unit, cl, props, struct, server):
+        """The second block of `struct` and the accessors of its fields."""
+        rare = self.rare_props(cl, props)
+        if not rare:
+            return
+        rare_struct = struct[: -len("Props")] + "RareProps"
+        unit.use("std::cell::OnceCell", COMPOSITION + "::server::ServerPropertyValue")
+        unit.emit("/// The properties of [`%s`] that nearly every object leaves at the value it" % struct)
+        unit.emit("/// is made with: made when one of them is first given another value.")
+        unit.emit("struct %s {" % rare_struct)
+        for prop in rare:
+            info = self.get_type_info(prop.type)
+            unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.server_type if server else info.client_type)))
+        unit.emit("}")
+        unit.emit()
+        unit.emit("impl %s {" % rare_struct)
+        unit.emit("    fn new() -> Self {")
+        unit.emit("        Self {")
+        for prop in rare:
+            info = self.get_type_info(prop.type)
+            if info.is_copy:
+                unit.emit("            %s: Cell::new(%s)," % (snake(prop.name), self.rare_initial(cl, prop)))
+            else:
+                unit.emit("            %s: OptionCell::new()," % snake(prop.name))
+        unit.emit("        }")
+        unit.emit("    }")
+        unit.emit("}")
+        unit.emit()
+        unit.emit("impl %s {" % struct)
+        unit.emit("    /// Whether one of the rarely set properties was given a value other than the")
+        unit.emit("    /// one it is made with.")
+        unit.emit("    pub fn has_rare_properties(&self) -> bool {")
+        unit.emit("        self.rare.get().is_some()")
+        unit.emit("    }")
+        unit.emit()
+        unit.emit("    #[cold]")
+        unit.emit("    fn rare_block(&self) -> &%s {" % rare_struct)
+        unit.emit("        self.rare.get_or_init(|| Box::new(%s::new()))" % rare_struct)
+        unit.emit("    }")
+        for prop in rare:
+            info = self.get_type_info(prop.type)
+            field = snake(prop.name)
+            type_name = info.server_type if server else info.client_type
+            initial = self.rare_initial(cl, prop)
+            unit.emit()
+            unit.emit("    #[inline]")
+            unit.emit("    fn rare_%s(&self) -> %s {" % (field, type_name))
+            unit.emit("        match self.rare.get() {")
+            unit.emit("            Some(rare) => rare.%s.get()," % field)
+            unit.emit("            None => %s," % initial)
+            unit.emit("        }")
+            unit.emit("    }")
+            unit.emit()
+            unit.emit("    #[inline]")
+            unit.emit("    fn store_rare_%s(&self, value: %s) {" % (field, type_name))
+            unit.emit("        match self.rare.get() {")
+            unit.emit("            Some(rare) => rare.%s.set(value)," % field)
+            if info.is_copy:
+                unit.emit("            None => {")
+                unit.emit("                let initial: %s = %s;" % (type_name, initial))
+                unit.emit("                if value.differs(&initial) {")
+                unit.emit("                    self.rare_block().%s.set(value);" % field)
+                unit.emit("                }")
+                unit.emit("            }")
+            else:
+                unit.emit("            None => {")
+                unit.emit("                if value.is_some() {")
+                unit.emit("                    self.rare_block().%s.set(value);" % field)
+                unit.emit("                }")
+                unit.emit("            }")
+            unit.emit("        }")
+            unit.emit("    }")
+        unit.emit("}")
+        unit.emit()
 
     @staticmethod
     def field_init(info):
-        return "Cell::new(Default::default())" if info.is_copy else "RefCell::new(None)"
+        return "Cell::new(Default::default())" if info.is_copy else "OptionCell::new()"
 
     # The classes whose schema defaults of copy types are written to their fields directly when an
-    # object is made, rather than through the setters: the fields are marked changed and the object
-    # registered for serialization once, so the first batch carries the same values to the server
-    # as before. On a new object a setter's work beyond that (the change hooks, which do nothing for
-    # these properties here, the bookkeeping of animations and the lookup of an implicit animation,
-    # neither of which a new object has) changes nothing; a visual is made for every element of a
-    # tree, and its eight defaults cost a setter each.
+    # object is made, on the UI thread and on the server alike, rather than through the setters and
+    # the first batch. The object is registered for serialization once, and the server reports the
+    # defaults as changed with the first changes it reads (`DEFAULT_FIELDS`), so what follows a
+    # change of these fields on the server runs for a new object as it did when the first batch
+    # carried them. On a new object a setter's work beyond that (the change hooks, which do nothing
+    # for these properties on either side, the bookkeeping of animations and the lookup of an
+    # implicit animation, neither of which a new object has) changes nothing; a visual is made for
+    # every element of a tree, and its eight defaults cost a setter, a hundred and sixty bytes of
+    # the batch and a setter of the server each.
     DIRECT_DEFAULTS = {"CompositionVisual"}
 
     def direct_default(self, cl, prop):
@@ -689,6 +843,7 @@ class Generator:
     def generate_class(self, cl):
         unit = Unit()
         props = self.props_of(cl)
+        self.rare = set(snake(p.name) for p in self.rare_props(cl, props))
         skipped = [p for p in cl.properties if p.type.rstrip("?") in UNPORTED_TYPES]
         for prop in skipped:
             self.skipped.append((cl.name, prop.name, prop.type, UNPORTED_TYPES[prop.type.rstrip("?")]))
@@ -792,8 +947,14 @@ class Generator:
             unit.emit("    %s: Cell<%s>," % (changed_field, changed_type))
         for prop in props:
             info = self.get_type_info(prop.type)
-            unit.use("std::cell::Cell" if info.is_copy else "std::cell::RefCell")
+            unit.use(self.field_cell(info))
+            if snake(prop.name) in self.rare:
+                continue
             unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.client_type)))
+        if self.rare:
+            unit.emit("    /// The rarely set properties, once one of them has another value than the")
+            unit.emit("    /// one it is made with.")
+            unit.emit("    rare: OnceCell<Box<%sRareProps>>," % name)
         unit.emit("}")
         unit.emit()
         unit.emit("impl Default for %s {" % struct)
@@ -814,7 +975,11 @@ class Generator:
         if has_changed:
             unit.emit("            %s: Cell::new(%s::empty())," % (changed_field, changed_type))
         for prop in props:
+            if snake(prop.name) in self.rare:
+                continue
             unit.emit("            %s: %s," % (snake(prop.name), self.field_init(self.get_type_info(prop.type))))
+        if self.rare:
+            unit.emit("            rare: OnceCell::new(),")
         unit.emit("        }")
         unit.emit("    }")
         unit.emit()
@@ -837,18 +1002,20 @@ class Generator:
         unit.emit("    /// `InitializeDefaults` of this class alone.")
         unit.emit("    pub fn initialize_own_defaults(&self, host: &dyn %s) {" % hooks)
         unit.emit("        %s::initialize_defaults_extra(host);" % hooks)
-        direct_flags = []
+        has_direct = False
         for prop in props:
             direct = self.direct_default(cl, prop)
             if direct is not None:
-                unit.emit("        " + self.field_set(self.get_type_info(prop.type), snake(prop.name), direct))
-                direct_flags.append("%s::%s" % (changed_fields_type_name(cl), screaming(prop.name)))
+                # A rare field is made with its default.
+                if snake(prop.name) not in self.rare:
+                    unit.emit("        " + self.field_set(self.get_type_info(prop.type), snake(prop.name), direct))
+                has_direct = True
             elif prop.default_value is not None:
                 unit.emit("        self.set_%s(host, %s);" % (snake(prop.client_name or prop.name), self.default_value(prop)))
-        if direct_flags:
-            # The defaults written directly go to the server with the first batch (`DIRECT_DEFAULTS`).
-            field = changed_fields_field_name(cl)
-            unit.emit("        self.%s.set(self.%s.get() | %s);" % (field, field, " | ".join(direct_flags)))
+        if has_direct:
+            # The defaults written directly are the values the server object is made with: they are
+            # not marked changed and no batch carries them (`DIRECT_DEFAULTS`). The object is still
+            # serialized once, so the server reads its first changes, which report the defaults.
             unit.emit("        host.register_for_serialization();")
         unit.emit("    }")
 
@@ -912,6 +1079,7 @@ class Generator:
         unit.emit("    }")
         unit.emit("}")
         unit.emit()
+        self.generate_rare(unit, cl, props, struct, False)
 
     def write_expr(self, info, value):
         if info.kind == "value":
@@ -1225,8 +1393,22 @@ class Generator:
         for prop in props:
             info = self.get_type_info(prop.type)
             unit.use(*info.server_imports)
-            unit.use("std::cell::Cell" if info.is_copy else "std::cell::RefCell")
+            unit.use(self.field_cell(info))
+            if snake(prop.name) in self.rare:
+                continue
             unit.emit("    %s: %s," % (snake(prop.name), self.field_decl(info, info.server_type)))
+        if self.rare:
+            unit.emit("    /// The rarely set properties, once one of them has another value than the")
+            unit.emit("    /// one it is made with.")
+            unit.emit("    rare: OnceCell<Box<%sRareProps>>," % name)
+        direct_flags = [
+            "%s::%s" % (changed_type, screaming(prop.name)) for prop in props if self.direct_default(cl, prop) is not None
+        ]
+        if direct_flags:
+            unit.use("std::cell::Cell")
+            unit.emit("    /// Whether the first changes of the object were read: they report")
+            unit.emit("    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) as changed.")
+            unit.emit("    defaults_reported: Cell<bool>,")
         unit.emit("}")
         unit.emit()
         unit.emit("impl Default for %s {" % struct)
@@ -1237,8 +1419,22 @@ class Generator:
         unit.emit()
 
         unit.emit("impl %s {" % struct)
-        unit.emit("    /// Creates the properties with every field at the default of its type; the")
-        unit.emit("    /// values of the UI thread arrive with the first batch.")
+        if direct_flags:
+            unit.emit("    /// The fields an object is made with at the default of the schema, on the")
+            unit.emit("    /// UI thread and here: no batch carries these values. The first changes read")
+            unit.emit("    /// for an object report them as changed, with the fields the batch names.")
+            unit.emit("    pub const DEFAULT_FIELDS: %s = %s" % (changed_type, direct_flags[0]))
+            for flag in direct_flags[1:-1]:
+                unit.emit("        .union(%s)" % flag)
+            unit.emit("        .union(%s);" % direct_flags[-1])
+            unit.emit()
+            unit.emit("    /// Creates the properties with the fields of")
+            unit.emit("    /// [`DEFAULT_FIELDS`](Self::DEFAULT_FIELDS) at the default of the schema and")
+            unit.emit("    /// every other field at the default of its type; the other values of the UI")
+            unit.emit("    /// thread arrive with the first batch.")
+        else:
+            unit.emit("    /// Creates the properties with every field at the default of its type; the")
+            unit.emit("    /// values of the UI thread arrive with the first batch.")
         unit.emit("    pub fn new() -> Self {")
         unit.emit("        Self {")
         if base_kind == "generated":
@@ -1246,7 +1442,17 @@ class Generator:
         if cl.is_list:
             unit.emit("            list: ServerList::new(),")
         for prop in props:
-            unit.emit("            %s: %s," % (snake(prop.name), self.field_init(self.get_type_info(prop.type))))
+            if snake(prop.name) in self.rare:
+                continue
+            direct = self.direct_default(cl, prop)
+            if direct is not None:
+                unit.emit("            %s: Cell::new(%s)," % (snake(prop.name), direct))
+            else:
+                unit.emit("            %s: %s," % (snake(prop.name), self.field_init(self.get_type_info(prop.type))))
+        if self.rare:
+            unit.emit("            rare: OnceCell::new(),")
+        if direct_flags:
+            unit.emit("            defaults_reported: Cell::new(false),")
         unit.emit("        }")
         unit.emit("    }")
         unit.emit()
@@ -1303,6 +1509,9 @@ class Generator:
             unit.emit("        let changed = reader.read::<%s>();" % changed_type)
             for prop in props:
                 self.apply_deserialize_field(unit, cl, prop)
+            if direct_flags:
+                unit.emit("        // The first changes of the object: the defaults it was made with changed too.")
+                unit.emit("        let changed = if self.defaults_reported.replace(true) { changed } else { changed | Self::DEFAULT_FIELDS };")
             unit.emit("        %s::on_fields_deserialized(host, changed);" % hooks)
         unit.emit("    }")
 
@@ -1329,6 +1538,7 @@ class Generator:
 
         unit.emit("}")
         unit.emit()
+        self.generate_rare(unit, cl, props, struct, True)
 
     def generate_serialize_all_method(self, unit, cl, props):
         unit.use(COMPOSITION + "::transport::BatchStreamWriter")
@@ -1429,11 +1639,9 @@ class Generator:
         unit.emit("            CompositionProperty::register::<%s, %s>(" % (struct, info.server_type))
         unit.emit('                "%s",' % prop.name)
         unit.emit('                "%s",' % name)
-        getter = ("props_of::<%s>(obj).%s.get()" if info.is_copy else "props_of::<%s>(obj).%s.borrow().clone()") % (struct, field)
-        if info.is_copy:
-            setter = "props_of::<%s>(obj).%s.set(v)" % (struct, field)
-        else:
-            setter = "*props_of::<%s>(obj).%s.borrow_mut() = v" % (struct, field)
+        owner = "props_of::<%s>(obj)" % struct
+        getter = self.field_get(info, field, owner)
+        setter = self.field_set(info, field, "v", owner)[:-1]
         unit.emit("                |obj| %s," % getter)
         unit.emit("                |obj, v| %s," % setter)
         if is_variant:
@@ -1444,8 +1652,8 @@ class Generator:
         if prop.animated:
             unit.use(COMPOSITION + "::expressions::ExpressionVariant")
             unit.emit(
-                "                Some(|obj, v: ExpressionVariant| props_of::<%s>(obj).%s.set(v.cast_or_default::<%s>())),"
-                % (struct, field, info.server_type)
+                "                Some(|obj, v: ExpressionVariant| %s),"
+                % self.field_set(info, field, "v.cast_or_default::<%s>()" % info.server_type, owner)[:-1]
             )
         else:
             unit.emit("                None,")

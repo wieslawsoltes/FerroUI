@@ -20,10 +20,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -71,8 +71,8 @@ pub trait GeometricClipHooks: CompositionClipHooks {
 pub struct GeometricClipProps {
     base: CompositionClipProps,
     changed_fields_of_geometric_clip: Cell<GeometricClipChangedFields>,
-    geometry: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    view_box: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    geometry: OptionCell<Rc<dyn ICompositionObject>>,
+    view_box: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for GeometricClipProps {
@@ -89,8 +89,8 @@ impl GeometricClipProps {
         Self {
             base: CompositionClipProps::new(),
             changed_fields_of_geometric_clip: Cell::new(GeometricClipChangedFields::empty()),
-            geometry: RefCell::new(None),
-            view_box: RefCell::new(None),
+            geometry: OptionCell::new(),
+            view_box: OptionCell::new(),
         }
     }
 
@@ -113,24 +113,24 @@ impl GeometricClipProps {
 
     /// `Geometry` (FerroUI overlay).
     pub fn geometry(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.geometry.borrow().clone()
+        self.geometry.get()
     }
 
     /// Sets `Geometry` (FerroUI overlay).
     pub fn set_geometry(&self, host: &dyn GeometricClipHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.geometry.borrow().clone();
+        let old_value = self.geometry.get();
         if old_value.differs(&value) {
             GeometricClipHooks::validate_geometry_change(host, &old_value, &value);
             GeometricClipHooks::on_geometry_changing(host);
             changed = true;
             // Update the backing value
-            *self.geometry.borrow_mut() = value.clone();
+            self.geometry.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_geometric_clip.set(self.changed_fields_of_geometric_clip.get() | GeometricClipChangedFields::GEOMETRY);
             host.register_for_serialization();
         }
-        *self.geometry.borrow_mut() = value;
+        self.geometry.set(value);
         if changed {
             GeometricClipHooks::on_geometry_changed(host);
         }
@@ -138,24 +138,24 @@ impl GeometricClipProps {
 
     /// `ViewBox` (FerroUI overlay).
     pub fn view_box(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.view_box.borrow().clone()
+        self.view_box.get()
     }
 
     /// Sets `ViewBox` (FerroUI overlay).
     pub fn set_view_box(&self, host: &dyn GeometricClipHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.view_box.borrow().clone();
+        let old_value = self.view_box.get();
         if old_value.differs(&value) {
             GeometricClipHooks::validate_view_box_change(host, &old_value, &value);
             GeometricClipHooks::on_view_box_changing(host);
             changed = true;
             // Update the backing value
-            *self.view_box.borrow_mut() = value.clone();
+            self.view_box.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_geometric_clip.set(self.changed_fields_of_geometric_clip.get() | GeometricClipChangedFields::VIEW_BOX);
             host.register_for_serialization();
         }
-        *self.view_box.borrow_mut() = value;
+        self.view_box.set(value);
         if changed {
             GeometricClipHooks::on_view_box_changed(host);
         }
@@ -181,10 +181,10 @@ impl GeometricClipProps {
         let changed = self.changed_fields_of_geometric_clip.get();
         writer.write(changed);
         if changed.contains(GeometricClipChangedFields::GEOMETRY) {
-            writer.write_server_object(self.geometry.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.geometry.get().map(|o| o.server()));
         }
         if changed.contains(GeometricClipChangedFields::VIEW_BOX) {
-            writer.write_server_object(self.view_box.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.view_box.get().map(|o| o.server()));
         }
         self.changed_fields_of_geometric_clip.set(GeometricClipChangedFields::empty());
     }
@@ -206,8 +206,8 @@ pub trait ServerGeometricClipHooks: ServerCompositionClipHooks {
 /// The server-side properties of `ServerGeometricClip`.
 pub struct ServerGeometricClipProps {
     base: ServerCompositionClipProps,
-    geometry: RefCell<Option<Rc<dyn IServerObject>>>,
-    view_box: RefCell<Option<Rc<dyn IServerObject>>>,
+    geometry: OptionCell<Rc<dyn IServerObject>>,
+    view_box: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerGeometricClipProps {
@@ -222,8 +222,8 @@ impl ServerGeometricClipProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionClipProps::new(),
-            geometry: RefCell::new(None),
-            view_box: RefCell::new(None),
+            geometry: OptionCell::new(),
+            view_box: OptionCell::new(),
         }
     }
 
@@ -248,8 +248,8 @@ impl ServerGeometricClipProps {
             CompositionProperty::register::<ServerGeometricClipProps, Option<Rc<dyn IServerObject>>>(
                 "Geometry",
                 "ServerGeometricClip",
-                |obj| props_of::<ServerGeometricClipProps>(obj).geometry.borrow().clone(),
-                |obj, v| *props_of::<ServerGeometricClipProps>(obj).geometry.borrow_mut() = v,
+                |obj| props_of::<ServerGeometricClipProps>(obj).geometry.get(),
+                |obj, v| props_of::<ServerGeometricClipProps>(obj).geometry.set(v),
                 None,
                 None,
             )
@@ -258,11 +258,11 @@ impl ServerGeometricClipProps {
 
     /// `Geometry`.
     pub fn geometry(&self) -> Option<Rc<dyn IServerObject>> {
-        self.geometry.borrow().clone()
+        self.geometry.get()
     }
 
     pub fn set_geometry(&self, host: &dyn ServerGeometricClipHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.geometry.borrow().clone();
+        let old_value = self.geometry.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerGeometricClipHooks::on_geometry_changing(host);
@@ -274,7 +274,7 @@ impl ServerGeometricClipProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.geometry.borrow_mut() = value.clone(),
+                assign: &mut || self.geometry.set(value.clone()),
             },
         );
         if changed {
@@ -289,8 +289,8 @@ impl ServerGeometricClipProps {
             CompositionProperty::register::<ServerGeometricClipProps, Option<Rc<dyn IServerObject>>>(
                 "ViewBox",
                 "ServerGeometricClip",
-                |obj| props_of::<ServerGeometricClipProps>(obj).view_box.borrow().clone(),
-                |obj, v| *props_of::<ServerGeometricClipProps>(obj).view_box.borrow_mut() = v,
+                |obj| props_of::<ServerGeometricClipProps>(obj).view_box.get(),
+                |obj, v| props_of::<ServerGeometricClipProps>(obj).view_box.set(v),
                 None,
                 None,
             )
@@ -299,11 +299,11 @@ impl ServerGeometricClipProps {
 
     /// `ViewBox`.
     pub fn view_box(&self) -> Option<Rc<dyn IServerObject>> {
-        self.view_box.borrow().clone()
+        self.view_box.get()
     }
 
     pub fn set_view_box(&self, host: &dyn ServerGeometricClipHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.view_box.borrow().clone();
+        let old_value = self.view_box.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerGeometricClipHooks::on_view_box_changing(host);
@@ -315,7 +315,7 @@ impl ServerGeometricClipProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.view_box.borrow_mut() = value.clone(),
+                assign: &mut || self.view_box.set(value.clone()),
             },
         );
         if changed {

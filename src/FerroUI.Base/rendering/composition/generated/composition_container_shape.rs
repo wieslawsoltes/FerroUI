@@ -20,10 +20,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -66,7 +66,7 @@ pub trait CompositionContainerShapeHooks: CompositionShapeHooks {
 pub struct CompositionContainerShapeProps {
     base: CompositionShapeProps,
     changed_fields_of_composition_container_shape: Cell<CompositionContainerShapeChangedFields>,
-    shapes: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    shapes: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for CompositionContainerShapeProps {
@@ -83,7 +83,7 @@ impl CompositionContainerShapeProps {
         Self {
             base: CompositionShapeProps::new(),
             changed_fields_of_composition_container_shape: Cell::new(CompositionContainerShapeChangedFields::empty()),
-            shapes: RefCell::new(None),
+            shapes: OptionCell::new(),
         }
     }
 
@@ -106,24 +106,24 @@ impl CompositionContainerShapeProps {
 
     /// `Shapes` (FerroUI overlay).
     pub fn shapes(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.shapes.borrow().clone()
+        self.shapes.get()
     }
 
     /// Sets `Shapes` (FerroUI overlay).
     pub fn set_shapes(&self, host: &dyn CompositionContainerShapeHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.shapes.borrow().clone();
+        let old_value = self.shapes.get();
         if old_value.differs(&value) {
             CompositionContainerShapeHooks::validate_shapes_change(host, &old_value, &value);
             CompositionContainerShapeHooks::on_shapes_changing(host);
             changed = true;
             // Update the backing value
-            *self.shapes.borrow_mut() = value.clone();
+            self.shapes.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_container_shape.set(self.changed_fields_of_composition_container_shape.get() | CompositionContainerShapeChangedFields::SHAPES);
             host.register_for_serialization();
         }
-        *self.shapes.borrow_mut() = value;
+        self.shapes.set(value);
         if changed {
             CompositionContainerShapeHooks::on_shapes_changed(host);
         }
@@ -149,7 +149,7 @@ impl CompositionContainerShapeProps {
         let changed = self.changed_fields_of_composition_container_shape.get();
         writer.write(changed);
         if changed.contains(CompositionContainerShapeChangedFields::SHAPES) {
-            writer.write_server_object(self.shapes.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.shapes.get().map(|o| o.server()));
         }
         self.changed_fields_of_composition_container_shape.set(CompositionContainerShapeChangedFields::empty());
     }
@@ -168,7 +168,7 @@ pub trait ServerCompositionContainerShapeHooks: ServerCompositionShapeHooks {
 /// The server-side properties of `ServerCompositionContainerShape`.
 pub struct ServerCompositionContainerShapeProps {
     base: ServerCompositionShapeProps,
-    shapes: RefCell<Option<Rc<dyn IServerObject>>>,
+    shapes: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerCompositionContainerShapeProps {
@@ -183,7 +183,7 @@ impl ServerCompositionContainerShapeProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionShapeProps::new(),
-            shapes: RefCell::new(None),
+            shapes: OptionCell::new(),
         }
     }
 
@@ -208,8 +208,8 @@ impl ServerCompositionContainerShapeProps {
             CompositionProperty::register::<ServerCompositionContainerShapeProps, Option<Rc<dyn IServerObject>>>(
                 "Shapes",
                 "ServerCompositionContainerShape",
-                |obj| props_of::<ServerCompositionContainerShapeProps>(obj).shapes.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionContainerShapeProps>(obj).shapes.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionContainerShapeProps>(obj).shapes.get(),
+                |obj, v| props_of::<ServerCompositionContainerShapeProps>(obj).shapes.set(v),
                 None,
                 None,
             )
@@ -218,11 +218,11 @@ impl ServerCompositionContainerShapeProps {
 
     /// `Shapes`.
     pub fn shapes(&self) -> Option<Rc<dyn IServerObject>> {
-        self.shapes.borrow().clone()
+        self.shapes.get()
     }
 
     pub fn set_shapes(&self, host: &dyn ServerCompositionContainerShapeHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.shapes.borrow().clone();
+        let old_value = self.shapes.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionContainerShapeHooks::on_shapes_changing(host);
@@ -234,7 +234,7 @@ impl ServerCompositionContainerShapeProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.shapes.borrow_mut() = value.clone(),
+                assign: &mut || self.shapes.set(value.clone()),
             },
         );
         if changed {
