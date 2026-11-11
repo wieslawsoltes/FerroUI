@@ -29,13 +29,17 @@ use ferroui_controls::{Application, Border, Control, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// The class of the controls or the dialogs assembly named `name`.
+/// The crates whose controls the theme has control themes for: the controls, the dialogs and the
+/// two crates of media controls.
+const CONTROL_CRATES: &[&str] =
+    &["ferroui_controls", "ferroui_dialogs", "ferroui_media_video_controls", "ferroui_media_camera_controls"];
+
+/// The class named `name` of one of those crates.
 fn control_type(name: &str) -> &'static TypeInfo {
     let mut found = TypeInfo::registered_types().into_iter().filter(|type_| {
-        type_.name() == name
-            && (type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+        type_.name() == name && CONTROL_CRATES.iter().any(|crate_| type_.module_path().starts_with(crate_))
     });
-    let type_ = found.next().unwrap_or_else(|| panic!("{name} is not a class of the controls or the dialogs assembly"));
+    let type_ = found.next().unwrap_or_else(|| panic!("{name} is not a class of the assemblies of controls"));
     assert!(found.next().is_none(), "{name} is ambiguous");
     type_
 }
@@ -289,6 +293,9 @@ control_tests! {
     expander => "Expander";
     numeric_up_down => "NumericUpDown";
     person_picture => "PersonPicture";
+    // The media controls (docs/media/ISSUE-561.md)
+    camera_capture_ui => "CameraCaptureUI";
+    media_transport_controls => "MediaTransportControls";
     pager_control => "PagerControl";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";

@@ -262,6 +262,9 @@ document_tests! {
     controls_numeric_up_down => "/Controls/NumericUpDown.xaml";
     controls_number_box => "/Controls/NumberBox.xaml";
     controls_person_picture => "/Controls/PersonPicture.xaml";
+    // The media controls (docs/media/ISSUE-561.md)
+    controls_camera_capture_ui => "/Controls/CameraCaptureUI.xaml";
+    controls_media_transport_controls => "/Controls/MediaTransportControls.xaml";
     controls_pager_control => "/Controls/PagerControl.xaml";
     controls_pips_pager => "/Controls/PipsPager.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";

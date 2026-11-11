@@ -139,6 +139,10 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/WrapPanelPage.xaml", "WrapPanel", Icons::LAYOUT, "Wrap children onto multiple lines");
         }),
         section("Media & Graphics", Icons::MEDIA, &mut unavailable, |s| {
+            s.add_page(crate::media_samples::media_player_element_page, "MediaPlayerElement", Icons::MEDIA, "Poster, autoplay, transport and full-window presentation");
+            s.add_page(crate::media_samples::media_player_presenter_page, "MediaPlayerPresenter", Icons::MEDIA, "The shared GPU video surface, stretching and resize");
+            s.add_page(crate::media_samples::media_transport_controls_page, "MediaTransportControls", Icons::MEDIA, "Standard and compact native media transport options");
+            s.add_page(crate::media_samples::camera_capture_ui_page, "CameraCaptureUI", Icons::IMAGE, "Explicit photo and optional silent video capture");
             s.add_page(crate::media_samples::video_page, "Video", Icons::MEDIA, "Playback, seeking, volume and shared texture presentation");
             s.add_page(crate::media_samples::camera_page, "Camera", Icons::IMAGE, "Camera discovery, consent, preview and still photos");
             s.add_page(crate::media_samples::qr_page, "QR codes", Icons::TARGET, "Offline QR images and optional live camera recognition");

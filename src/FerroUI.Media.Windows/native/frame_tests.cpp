@@ -63,6 +63,94 @@ static Packet test_packet(Session &s,
   check(p.sample->AddBuffer(buffer.Get()));
   return p;
 }
+extern "C" int ferro_windows_test_recording() {
+  HRESULT initialized = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+  const char *stage = "initialization";
+  int result = 1;
+  try {
+    check(initialized);
+    runtime();
+    auto session = test_device(D3D_DRIVER_TYPE_HARDWARE);
+    session->width = 320;
+    session->height = 240;
+    auto packet = test_packet(*session);
+    auto recording = std::make_shared<Recording>(320, 240, 30, 1);
+    std::thread worker(encode_recording, recording);
+    try {
+      stage = "encoder negotiation";
+      auto wait_for = [&](int status) {
+        auto deadline = Clock::now() + std::chrono::seconds(10);
+        while (Clock::now() < deadline) {
+          {
+            std::lock_guard<std::mutex> guard(recording->lock);
+            if (recording->status < 0) {
+              fprintf(stderr, "%s\n", recording->info.error);
+              throw Failure{E_FAIL};
+            }
+            if (recording->status == status) return;
+          }
+          std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+        throw Failure{HRESULT_FROM_WIN32(WAIT_TIMEOUT)};
+      };
+      wait_for(1);
+      stage = "encoding DXGI samples";
+      for (int index = 0; index < 10; ++index) {
+        packet.pts = 100000 + index * recording->frame_duration;
+        recording->enqueue(packet);
+        std::this_thread::sleep_for(std::chrono::milliseconds(34));
+      }
+      FerroWindowsRecording handle{recording};
+      ferro_windows_record_finish(&handle);
+      wait_for(2);
+    } catch (...) {
+      recording->cancel();
+      worker.join();
+      throw;
+    }
+    worker.join();
+
+    stage = "independent MP4 decode";
+    auto stream = Microsoft::WRL::Make<MovieStream>();
+    check(stream->Write(recording->encoded.data(), static_cast<ULONG>(recording->encoded.size()), nullptr));
+    LARGE_INTEGER start{};
+    check(stream->Seek(start, STREAM_SEEK_SET, nullptr));
+    ComPtr<IMFByteStream> bytes;
+    check(MFCreateMFByteStreamOnStream(stream.Get(), &bytes));
+    ComPtr<IMFAttributes> attributes;
+    check(bytes.As(&attributes));
+    check(attributes->SetString(MF_BYTESTREAM_CONTENT_TYPE, L"video/mp4"));
+    ComPtr<IMFSourceReader> reader;
+    check(MFCreateSourceReaderFromByteStream(bytes.Get(), nullptr, &reader));
+    ComPtr<IMFMediaType> type;
+    require(reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &type) ==
+            MF_E_INVALIDSTREAMNUMBER);
+    check(reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &type));
+    GUID subtype;
+    check(type->GetGUID(MF_MT_SUBTYPE, &subtype));
+    require(subtype == MFVideoFormat_H264);
+    UINT width, height;
+    check(MFGetAttributeSize(type.Get(), MF_MT_FRAME_SIZE, &width, &height));
+    require(width == 320 && height == 240);
+    auto decoded = recording_type(*recording, MFVideoFormat_NV12);
+    check(reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, decoded.Get()));
+    int frames = 0;
+    for (int i = 0; i < 30; ++i) {
+      DWORD flags = 0;
+      ComPtr<IMFSample> sample;
+      check(reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, &flags, nullptr, &sample));
+      if (sample) ++frames;
+      if (flags & MF_SOURCE_READERF_ENDOFSTREAM) break;
+    }
+    require(frames >= 2);
+    result = 0;
+  } catch (Failure failure) {
+    fprintf(stderr, "Native recording fixture (%s): %s\n", stage, hresult(failure.hr).c_str());
+  }
+  if (SUCCEEDED(initialized)) CoUninitialize();
+  return result;
+}
+
 extern "C" int ferro_windows_test_frames() {
   HRESULT initialized = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
   const char *stage = "initialization";

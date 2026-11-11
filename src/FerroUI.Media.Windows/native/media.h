@@ -5,6 +5,12 @@ extern "C" {
 #endif
 typedef struct FerroWindowsSession FerroWindowsSession;
 typedef struct FerroWindowsFrame FerroWindowsFrame;
+typedef struct FerroWindowsRecording FerroWindowsRecording;
+typedef struct {
+    uint32_t width, height;
+    uint64_t duration_ns, length;
+    char error[512];
+} FerroWindowsRecordingInfo;
 typedef struct {
     int32_t state, seekable, buffering, error_kind;
     uint32_t width,height,fps_n,fps_d;
@@ -22,12 +28,22 @@ void ferro_windows_state(FerroWindowsSession *s,FerroWindowsState *out);
 void ferro_windows_intent(FerroWindowsSession *s,int intent);
 uint64_t ferro_windows_seek(FerroWindowsSession *s,uint64_t ns);
 void ferro_windows_audio(FerroWindowsSession *s,double volume,int muted);
+int ferro_windows_can_set_rate(FerroWindowsSession *s);
+int ferro_windows_set_rate(FerroWindowsSession *s,double rate);
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s);
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out);
 void ferro_windows_frame_release(FerroWindowsFrame *f);
 void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindowsEgl *egl,uint32_t *texture);
 void ferro_windows_alias_release(void *alias,int alive);
 int ferro_windows_photo_rgb(FerroWindowsFrame *f,uint8_t *rgb,uint64_t length);
+int ferro_windows_can_record(FerroWindowsSession *s);
+FerroWindowsRecording *ferro_windows_record(FerroWindowsSession *s);
+void ferro_windows_record_finish(FerroWindowsRecording *r);
+void ferro_windows_record_cancel(FerroWindowsRecording *r);
+void ferro_windows_record_release(FerroWindowsRecording *r);
+/* 0 pending, 1 recording, 2 complete, -1 failed, -2 cancelled. */
+int ferro_windows_record_poll(FerroWindowsRecording *r,FerroWindowsRecordingInfo *out);
+int ferro_windows_record_copy(FerroWindowsRecording *r,uint8_t *bytes,uint64_t length);
 /* Enumerates activation metadata only; does not activate/open capture devices. */
 char *ferro_windows_devices(void);
 void ferro_windows_string_release(char *text);
