@@ -236,6 +236,10 @@ perf_counters! {
     /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
     /// visual had, whose server-side object was kept.
     VisualsRecordedInPlace => "visuals recorded into their render data",
+    /// `CompositingRenderer::update_core`: the drawing of a visual without a composition visual
+    /// was recorded as an item of the composition visual above (desktop-performance.md,
+    /// section 9.42).
+    VisualsRecordedAsItems => "visuals recorded as drawing items",
     /// `Visual::attach_to_compositor_core`: a composition visual was created for a visual that
     /// entered a visual tree.
     CompositionVisualsCreated => "composition visuals created",
@@ -277,6 +281,8 @@ perf_counters! {
     RenderCanvasTransformsApplied => "render: transforms applied to the canvas",
     /// The render walk: a visual pushed its clip to bounds.
     RenderVisualClipsPushed => "render: visual clips to bounds pushed",
+    /// The render walk: a drawing item of a visual was drawn (section 9.42).
+    RenderItemsDrawn => "render: drawing items drawn",
     /// The render walk: a visual pushed its opacity.
     RenderVisualOpacitiesPushed => "render: visual opacities pushed",
     /// The render walk: a visual was drawn from its bitmap cache.

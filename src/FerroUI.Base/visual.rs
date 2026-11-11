@@ -3,10 +3,13 @@ use crate::media::{
     affects_render_source, can_value_affect_render, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
     ITransform, RenderOptions, TextOptions, Transform,
 };
-use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor, KeptCompositionVisuals};
+use crate::rendering::composition::{
+    CompositionDrawItem, CompositionDrawListVisual, CompositionEntry, CompositionVisual, Compositor,
+    KeptCompositionVisuals,
+};
 use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::{IPresentationSource, IRenderer};
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, OptionCell};
 use crate::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, ObjectType, Rect, Ref,
@@ -69,7 +72,12 @@ pub struct Visual {
     is_effectively_visible_changed: HandlerList<dyn Fn()>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
-    composition_visual: RefCell<Option<CompositionDrawListVisual>>,
+    composition_visual: OptionCell<CompositionDrawListVisual>,
+    // Not upstream (docs/porting/desktop-performance.md, section 9.42): what the visual drew,
+    // as an item of the composition visual of the nearest visual above it that has one, while
+    // it has no composition visual of its own. The two slots are as wide as the `RefCell` the
+    // first one was.
+    composition_item: OptionCell<Rc<CompositionDrawItem>>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.32): the visual left its
     // visual tree and its composition visual is kept, until the next update pass of the renderer
     // or for as long as what took the visual out of the tree keeps it, in case the visual comes
@@ -336,9 +344,12 @@ impl VisualImpl for Visual {
             if !Self::composition_visuals_on_demand()
                 || this.visual_parent.borrow().is_none()
                 || this.composition_visual_departed.get()
-                || this.composition_visual.borrow().is_some()
+                || this.composition_visual.is_some()
             {
                 this.attach_to_compositor_core(&compositor, Some(&*renderer));
+            } else if let Some(item) = this.composition_item.get() {
+                // It is back with what it drew (section 9.42).
+                item.set_departed(false);
             }
         }
 
@@ -453,10 +464,11 @@ impl VisualImpl for Visual {
     fn detach_from_compositor(this: &Self) {
         // The shadow visual belongs to the composition visual it follows.
         this.release_theme_shadow_visual();
+        this.detach_composition_item();
         if this.composition_visual_departed.get() || this.keep_departed_composition_visual() {
             return;
         }
-        let composition_visual = this.composition_visual.borrow_mut().take();
+        let composition_visual = this.composition_visual.take();
         if let Some(composition_visual) = composition_visual {
             this.release_composition_visual(&composition_visual);
         }
@@ -479,6 +491,7 @@ impl VisualImpl for Visual {
             if composition_children.count() != 0 {
                 composition_children.clear();
             }
+            composition_visual.clear_draw_items();
             return;
         }
         let mut visual_children: Rc<Vec<Ref<Visual>>> =
@@ -487,10 +500,42 @@ impl VisualImpl for Visual {
         // Not upstream (section 9.41): a child without a composition visual stands for the
         // composition visuals nearest below it, in its own order. The list is then the one the
         // composition children are, already in Z order.
+        //
+        // What the visuals between drew is shown by this composition visual, as its items
+        // (section 9.42): `items` in paint order, and for each composition child the number of
+        // them painted before it.
         let flattened = visual_children.iter().any(|child| !child.has_composition_visual());
+        let mut items: Vec<Rc<CompositionDrawItem>> = Vec::new();
+        let mut items_before: Vec<u32> = Vec::new();
         if flattened {
-            let mut nearest = Vec::with_capacity(visual_children.len());
-            this.collect_composition_children(&mut nearest);
+            let holds_items = composition_visual.holds_drawing_items();
+            let mut entries = Vec::with_capacity(visual_children.len());
+            this.collect_composition_entries(&mut entries);
+            if !holds_items && entries.iter().any(|entry| matches!(entry, CompositionEntry::Item(..))) {
+                // This composition visual shows no drawing but its own (it became the nearest
+                // one above them since they drew): they get composition visuals.
+                for entry in &entries {
+                    if let CompositionEntry::Item(visual, _) = entry {
+                        visual.materialize_composition_visual();
+                    }
+                }
+                entries.clear();
+                this.collect_composition_entries(&mut entries);
+            }
+            let mut nearest = Vec::with_capacity(entries.len());
+            for entry in entries {
+                match entry {
+                    CompositionEntry::Visual(visual) => {
+                        items_before.push(items.len() as u32);
+                        nearest.push(visual);
+                    }
+                    CompositionEntry::Item(_, item) => {
+                        if holds_items {
+                            items.push(item);
+                        }
+                    }
+                }
+            }
             visual_children = Rc::new(nearest);
         }
 
@@ -544,6 +589,22 @@ impl VisualImpl for Visual {
             shadows.as_ref().and_then(|shadows| shadows[c].as_ref())
         };
         let shadow_count = shadows.as_ref().map_or(0, |shadows| shadows.iter().flatten().count());
+
+        // Where the composition children are among the items: a shadow is where its caster is,
+        // and a child without an entry is after every item.
+        let mut positions: Vec<u32> = Vec::new();
+        if !items.is_empty() {
+            for (c, before) in items_before.iter().enumerate() {
+                if shadow_at(c).is_some() {
+                    positions.push(*before);
+                }
+                positions.push(*before);
+            }
+            while positions.last().is_some_and(|position| *position as usize == items.len()) {
+                positions.pop();
+            }
+        }
+        composition_visual.set_draw_items(items, positions);
 
         let mut expected_count = child_count + shadow_count + unloading_visuals.len();
         if child_visual.is_some() {
@@ -1002,7 +1063,8 @@ impl Visual {
             is_effectively_visible_changed: HandlerList::new(),
             render_options: Cell::new(RenderOptions::default()),
             text_options: Cell::new(TextOptions::default()),
-            composition_visual: RefCell::new(None),
+            composition_visual: OptionCell::new(),
+            composition_item: OptionCell::new(),
             composition_visual_departed: Cell::new(false),
             composition_visual_handed_out: Cell::new(false),
             elided_state: Cell::new(0),
@@ -1344,7 +1406,7 @@ impl Visual {
     /// (docs/porting/desktop-performance.md, section 9.41).
     #[inline]
     pub fn has_composition_visual(&self) -> bool {
-        !self.composition_visual_departed.get() && self.composition_visual.borrow().is_some()
+        !self.composition_visual_departed.get() && self.composition_visual.is_some()
     }
 
     /// Whether visuals get their composition visuals on demand (the default), or each of them
@@ -1393,7 +1455,9 @@ impl Visual {
         }
         let inputs = self.composition_styled_inputs();
         inputs.opacity != 1.0
-            || inputs.clip_to_bounds
+            // A visual that clips and has nothing under it is drawn clipped, as an item of
+            // the composition visual above (section 9.42).
+            || (inputs.clip_to_bounds && self.visual_children_count() != 0)
             || inputs.has_clip
             || inputs.has_opacity_mask
             || inputs.has_cache_mode
@@ -1427,7 +1491,7 @@ impl Visual {
         if self.composition_visual_departed.get() {
             return None;
         }
-        let existing = self.composition_visual.borrow().clone();
+        let existing = self.composition_visual.get();
         if existing.is_some() {
             return existing;
         }
@@ -1469,6 +1533,9 @@ impl Visual {
             if comp.offset() != offset {
                 comp.set_offset(offset);
             }
+        } else if let Some(item) = self.composition_item.get() {
+            let offset = self.composition_offset(true);
+            item.set_offset((offset.x, offset.y));
         }
     }
 
@@ -1482,13 +1549,18 @@ impl Visual {
                 return false;
             }
             *nodes_left -= 1;
-            if child.has_composition_visual() {
+            let has_composition_visual = child.has_composition_visual();
+            // What a visual without a composition visual drew is positioned as a composition
+            // visual is (section 9.42).
+            if has_composition_visual || child.composition_item.is_some() {
                 if *visuals_left == 0 {
                     return false;
                 }
                 *visuals_left -= 1;
                 child.synchronize_composition_offset();
-            } else if child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0
+            }
+            if !has_composition_visual
+                && child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0
                 && !child.synchronize_composition_offsets_below(visuals_left, nodes_left)
             {
                 return false;
@@ -1573,6 +1645,106 @@ impl Visual {
         nearest
     }
 
+    /// What is below the composition visual of this visual, in the order it is shown: for each
+    /// visual child in Z order its composition visual, or, when it has none, what it drew and
+    /// then what is below it (section 9.42).
+    pub(crate) fn collect_composition_entries(&self, out: &mut Vec<CompositionEntry>) {
+        let Some(children) = self.visual_children_snapshot() else { return };
+        if self.has_non_uniform_z_index_children() && children.len() > 1 {
+            let mut sorted: Vec<(i32, usize)> =
+                children.iter().enumerate().map(|(index, child)| (child.z_index(), index)).collect();
+            // The indices keep the order of elements with the same Z index.
+            sorted.sort_unstable();
+            for (_, index) in sorted {
+                children[index].collect_composition_entry(out);
+            }
+        } else {
+            for child in children.iter() {
+                child.collect_composition_entry(out);
+            }
+        }
+    }
+
+    fn collect_composition_entry(&self, out: &mut Vec<CompositionEntry>) {
+        if self.has_composition_visual() {
+            out.push(CompositionEntry::Visual(self.to_ref()));
+            return;
+        }
+        if let Some(item) = self.composition_item.get() {
+            if !item.is_departed() {
+                out.push(CompositionEntry::Item(self.to_ref(), item));
+            }
+        }
+        self.collect_composition_entries(out);
+    }
+
+    /// What the visual drew, as the composition visual of the nearest visual above it that has
+    /// one shows it: the visual has no composition visual of its own (section 9.42).
+    #[inline]
+    pub(crate) fn composition_item(&self) -> Option<Rc<CompositionDrawItem>> {
+        self.composition_item.get()
+    }
+
+    pub(crate) fn set_composition_item(&self, item: Option<Rc<CompositionDrawItem>>) {
+        self.composition_item.set(item);
+    }
+
+    /// The visual draws nothing any more, or what it drew is of another compositor: the
+    /// composition visual that shows the item is synchronized by the caller.
+    pub(crate) fn release_composition_item(&self) {
+        if let Some(item) = self.composition_item.take() {
+            item.release();
+        }
+    }
+
+    /// The size the drawing of the visual is clipped to as an item.
+    pub(crate) fn composition_item_clip(&self) -> Option<(f64, f64)> {
+        self.clip_to_bounds().then(|| {
+            let bounds = self.bounds.get();
+            (bounds.width, bounds.height)
+        })
+    }
+
+    /// Writes where the item of the visual is, and its clip, again.
+    pub(crate) fn synchronize_composition_item(&self) {
+        if let Some(item) = self.composition_item.get() {
+            let offset = self.composition_offset(true);
+            item.set_offset((offset.x, offset.y));
+            item.set_clip(self.composition_item_clip());
+        }
+    }
+
+    /// The visual is leaving its visual tree: the renderer keeps what it drew for its return,
+    /// as it keeps a composition visual (section 9.32), or the visual lets go of it. The
+    /// composition visual that shows it is synchronized because its visual children changed.
+    fn detach_composition_item(&self) {
+        let Some(item) = self.composition_item.get() else { return };
+        if item.is_departed() {
+            return;
+        }
+        let kept = self
+            .presentation_source
+            .borrow()
+            .as_ref()
+            .is_some_and(|source| source.renderer().keep_departed_composition_item(self));
+        if kept {
+            item.set_departed(true);
+        } else {
+            self.composition_item.set(None);
+            item.release();
+        }
+    }
+
+    /// What kept the item of the visual lets go of it: if the visual is still out of its tree
+    /// the item is released, as it would have been when the visual left (section 9.32).
+    pub(crate) fn release_departed_composition_item(&self, kept: &Rc<CompositionDrawItem>) {
+        let held = self.composition_item.with(|held| held.is_some_and(|held| Rc::ptr_eq(held, kept)));
+        if held && kept.is_departed() {
+            self.composition_item.set(None);
+            kept.release();
+        }
+    }
+
     /// The composition visual of the visual for the synchronisation of the visual tree with the
     /// composition tree, which writes to it only what it writes again when the visual is
     /// synchronized (section 9.32). Anything else asks [`composition_visual`](Self::composition_visual).
@@ -1581,7 +1753,7 @@ impl Visual {
         if self.composition_visual_departed.get() {
             return None;
         }
-        self.composition_visual.borrow().clone()
+        self.composition_visual.get()
     }
 
     /// Whether the visual left its visual tree and its composition visual is kept for its return
@@ -1613,21 +1785,16 @@ impl Visual {
     /// keeps the composition visuals of the element and of everything under it, on both sides of
     /// the compositor.
     fn keep_departed_composition_visual(&self) -> bool {
-        let kept = {
-            let composition_visual = self.composition_visual.borrow();
-            let Some(composition_visual) = composition_visual.as_ref() else { return false };
-            self.composition_visual_is_untouched(composition_visual)
-                && self
-                    .presentation_source
-                    .borrow()
-                    .as_ref()
-                    .is_some_and(|source| source.renderer().keep_departed_composition_visual(self, composition_visual))
-        };
+        let Some(composition_visual) = self.composition_visual.get() else { return false };
+        let kept = self.composition_visual_is_untouched(&composition_visual)
+            && self
+                .presentation_source
+                .borrow()
+                .as_ref()
+                .is_some_and(|source| source.renderer().keep_departed_composition_visual(self, &composition_visual));
         if kept {
             self.composition_visual_departed.set(true);
-            if let Some(composition_visual) = self.composition_visual.borrow().as_ref() {
-                composition_visual.set_departed(true);
-            }
+            composition_visual.set_departed(true);
         }
         kept
     }
@@ -1647,6 +1814,7 @@ impl Visual {
     pub(crate) fn release_orphaned_composition_visual(composition_visual: &CompositionDrawListVisual) {
         composition_visual.set_departed(false);
         composition_visual.set_draw_list(None);
+        composition_visual.clear_draw_items();
         composition_visual.set_opacity_mask(None);
         // The composition visual and its children refer to each other;
         // nothing collects such a cycle here, so the visual lets go of
@@ -1665,12 +1833,12 @@ impl Visual {
         if !self.composition_visual_departed.get() {
             return;
         }
-        let held = self.composition_visual.borrow().as_ref().is_some_and(|held| Rc::ptr_eq(held, kept));
+        let held = self.composition_visual.with(|held| held.is_some_and(|held| Rc::ptr_eq(held, kept)));
         if !held {
             return;
         }
         self.composition_visual_departed.set(false);
-        let composition_visual = self.composition_visual.borrow_mut().take();
+        let composition_visual = self.composition_visual.take();
         if let Some(composition_visual) = composition_visual {
             self.release_composition_visual(&composition_visual);
         }
@@ -1983,7 +2151,7 @@ impl Visual {
         compositor: &Rc<Compositor>,
         renderer: Option<&dyn IRenderer>,
     ) -> CompositionDrawListVisual {
-        let current = self.composition_visual.borrow().clone();
+        let current = self.composition_visual.get();
         if self.composition_visual_departed.replace(false) {
             // The visual left a tree and is in one again before the renderer released its
             // composition visual (section 9.32).
@@ -1997,7 +2165,7 @@ impl Visual {
                     self.rejoin_composition_tree(&kept);
                     return kept;
                 }
-                self.composition_visual.borrow_mut().take();
+                self.composition_visual.take();
                 self.release_composition_visual(&kept);
             }
         } else if let Some(current) = current {
@@ -2012,7 +2180,19 @@ impl Visual {
             // find it where it was shown, until a frame is rendered with the new one.
             created.set_shown_through();
         }
-        *self.composition_visual.borrow_mut() = Some(created.clone());
+        // What the visual drew as an item of the composition visual above is the drawing of
+        // its own from here on (section 9.42): the caller has that one synchronized.
+        if let Some(item) = self.composition_item.take() {
+            item.set_departed(false);
+            if let Some(data) = item.take_data() {
+                if data.is_of(compositor) {
+                    created.set_draw_list(Some(data));
+                } else {
+                    data.dispose();
+                }
+            }
+        }
+        self.composition_visual.set(Some(created.clone()));
         self.composition_visual_handed_out.set(false);
         self.composition_visual_created(&created);
         created

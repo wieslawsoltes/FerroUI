@@ -73,6 +73,11 @@ impl CompositionRenderData {
         old_stream
     }
 
+    /// Whether the render data was made for `compositor`.
+    pub(crate) fn is_of(&self, compositor: &Rc<Compositor>) -> bool {
+        std::ptr::eq(self.compositor.as_ptr(), Rc::as_ptr(compositor))
+    }
+
     /// The id of the server-side render data.
     pub fn server(&self) -> ServerObjectId {
         self.server

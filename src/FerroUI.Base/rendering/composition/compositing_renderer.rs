@@ -2,8 +2,9 @@ use super::drawing::{RecordedDrawing, RenderDataDrawingContext};
 use super::hit_testing::{GeometryCompositionHitTester, ICompositionHitTester, PointCompositionHitTester};
 use super::server::RenderSurfaces;
 use super::{
-    release_kept_composition_visuals, CompositionDrawListVisual, CompositionTarget, CompositionTransparencyLevel,
-    CompositionVisual, Compositor, KeptCompositionVisual, KeptCompositionVisuals,
+    release_kept_composition_visuals, CompositionDrawItem, CompositionDrawListVisual, CompositionTarget,
+    CompositionTransparencyLevel, CompositionVisual, Compositor, KeptComposition, KeptCompositionVisual,
+    KeptCompositionVisuals,
 };
 use crate::media::{DrawingContext, Geometry, GeometryHitTestResult, IntersectionResult, MediaContext};
 use crate::reactive::{Disposable, IDisposable, Subscription};
@@ -509,6 +510,70 @@ impl CompositingRenderer {
         comp
     }
 
+    /// What `visual`, which has no composition visual, drew in the update pass is an item of
+    /// the composition visual of the nearest visual above it that has one (section 9.42):
+    /// `item` is the one it has. Gives the drawing back when that composition visual shows no
+    /// drawing but its own: the visual then gets a composition visual.
+    fn record_item_in_pass(
+        &self,
+        visual: &Visual,
+        item: Option<Rc<CompositionDrawItem>>,
+        drawing: RecordedDrawing,
+    ) -> Option<RecordedDrawing> {
+        let Some(holder) = visual.nearest_composition_ancestor() else { return Some(drawing) };
+        let Some(holder_visual) = holder.own_composition_visual().filter(|comp| comp.holds_drawing_items()) else {
+            return Some(drawing);
+        };
+        let offset = visual.composition_offset(true);
+        let offset = (offset.x, offset.y);
+        let clip = visual.composition_item_clip();
+        let item = match (drawing, item) {
+            (RecordedDrawing::New(Some(data)), Some(item)) => {
+                item.set_data(data);
+                Some(item)
+            }
+            (RecordedDrawing::New(Some(data)), None) => {
+                let item = CompositionDrawItem::new(visual, data, offset, clip);
+                visual.set_composition_item(Some(item.clone()));
+                Some(item)
+            }
+            (RecordedDrawing::Updated, Some(item)) => {
+                crate::perf_count!(VisualsRecordedInPlace);
+                item.mark_redrawn();
+                Some(item)
+            }
+            (RecordedDrawing::Same, Some(item)) => {
+                crate::perf_count!(VisualsRecordedUnchanged);
+                item.mark_redrawn();
+                Some(item)
+            }
+            // Nothing to show.
+            (_, item) => {
+                if item.is_some() {
+                    visual.release_composition_item();
+                    self.sets.borrow_mut().add(VisualSet::ChildrenFirst, &holder);
+                }
+                None
+            }
+        };
+        if let Some(item) = item {
+            crate::perf_count!(VisualsRecordedAsItems);
+            item.set_offset(offset);
+            item.set_clip(clip);
+            // A new one, and one that another composition visual showed, is listed.
+            if !item.is_held_by(&holder_visual) {
+                self.sets.borrow_mut().add(VisualSet::ChildrenFirst, &holder);
+            }
+        }
+        visual.mark_seen_without_composition_visual();
+        // The composition visuals below follow it when it moved; when there are too many of
+        // them it gets a composition visual, which moves them all.
+        if !visual.move_composition_offsets_below() {
+            self.materialize_in_pass(visual);
+        }
+        None
+    }
+
     /// The composition visuals something asked for during the pass (a drawing, the
     /// synchronisation of another visual) get their properties and their place.
     fn place_late_in_pass(&self) {
@@ -559,9 +624,10 @@ impl CompositingRenderer {
         self.release_departed();
 
         // The visuals whose drawing changed. A visual that has no composition visual gets one
-        // here when it needs one or draws something; one that neither needs one nor draws stays
-        // without (section 9.41). The child composition visuals are synchronized after every
-        // composition visual of the pass exists.
+        // here when it needs one; one that needs none stays without (section 9.41), and what
+        // it draws is an item of the composition visual above (section 9.42). The child
+        // composition visuals and the items are synchronized after every composition visual of
+        // the pass exists.
         let dirty: Vec<Ref<Visual>> = self.sets.borrow_mut().snapshot(VisualSet::Dirty);
         for visual in &dirty {
             // It left the tree since.
@@ -569,9 +635,21 @@ impl CompositingRenderer {
                 continue;
             }
             let mut comp = visual.own_composition_visual();
+            // What it drew as an item of the composition visual above (section 9.42).
+            let mut item = if comp.is_none() { visual.composition_item() } else { None };
+            if let Some(held) = &item {
+                held.set_departed(false);
+                if held.data().is_some_and(|data| !data.is_of(&self.compositor)) {
+                    // Drawn for another compositor.
+                    visual.release_composition_item();
+                    item = None;
+                }
+            }
             if comp.is_none() && visual.needs_own_composition_visual() {
+                // The drawing of the item is the one of the new composition visual.
                 comp = Some(self.create_in_pass(visual));
                 self.created_in_pass(visual);
+                item = None;
             }
             if comp.is_some() {
                 visual.synchronize_composition_properties();
@@ -579,7 +657,10 @@ impl CompositingRenderer {
             }
             crate::perf_count!(VisualsRecorded);
 
-            let previous = comp.as_ref().and_then(|comp| comp.draw_list());
+            let previous = match &comp {
+                Some(comp) => comp.draw_list(),
+                None => item.as_ref().and_then(|item| item.data()),
+            };
             let draw_list = {
                 struct ResetRecorder<'a>(&'a RefCell<RenderDataDrawingContext>);
                 impl Drop for ResetRecorder<'_> {
@@ -595,6 +676,14 @@ impl CompositingRenderer {
                     let mut context = DrawingContext::new(&mut *recorder);
                     visual.render(&mut context);
                 }
+                if comp.is_none() {
+                    // Its drawing asked for a composition visual, which took the drawing of
+                    // the item: it is placed with the late ones.
+                    comp = visual.own_composition_visual();
+                    if comp.is_some() {
+                        item = None;
+                    }
+                }
                 if comp.is_none() && recorder.recorded_nothing() {
                     None
                 } else {
@@ -608,25 +697,28 @@ impl CompositingRenderer {
                 }
             };
             let Some(draw_list) = draw_list else {
-                // It draws nothing and needs no composition visual. One that its drawing asked
-                // for is placed with the late ones.
-                if visual.own_composition_visual().is_none() {
-                    visual.mark_seen_without_composition_visual();
-                    // The composition visuals below follow it when it moved; when there are
-                    // too many of them it gets a composition visual, which moves them all.
-                    if !visual.move_composition_offsets_below() {
-                        self.materialize_in_pass(visual);
+                // It draws nothing and has no composition visual: what it drew before is gone.
+                if item.is_some() {
+                    visual.release_composition_item();
+                    if let Some(holder) = visual.nearest_composition_ancestor() {
+                        self.sets.borrow_mut().add(VisualSet::ChildrenFirst, &holder);
                     }
+                }
+                visual.mark_seen_without_composition_visual();
+                // The composition visuals below follow it when it moved; when there are too
+                // many of them it gets a composition visual, which moves them all.
+                if !visual.move_composition_offsets_below() {
+                    self.materialize_in_pass(visual);
                 }
                 continue;
             };
-            let comp = match comp {
-                Some(comp) => comp,
-                // It draws: it has a composition visual from here on.
-                None => match visual.own_composition_visual() {
-                    // Its drawing asked for it: it is placed with the late ones.
-                    Some(comp) => comp,
-                    None => self.materialize_in_pass(visual),
+            let (comp, draw_list) = match comp {
+                Some(comp) => (comp, draw_list),
+                // It draws and needs no composition visual: its drawing is an item of the
+                // composition visual above, unless that one shows no drawing but its own.
+                None => match self.record_item_in_pass(visual, item, draw_list) {
+                    None => continue,
+                    Some(draw_list) => (self.materialize_in_pass(visual), draw_list),
                 },
             };
             match draw_list {
@@ -651,8 +743,15 @@ impl CompositingRenderer {
             if visual.own_composition_visual().is_some() {
                 visual.synchronize_composition_properties();
                 visual.settle_composition_offsets();
-            } else if visual.needs_own_composition_visual() || !visual.move_composition_offsets_below() {
+            } else if visual.needs_own_composition_visual() {
                 self.materialize_in_pass(visual);
+            } else {
+                // What it drew follows it (section 9.42), and so do the composition visuals
+                // below.
+                visual.synchronize_composition_item();
+                if !visual.move_composition_offsets_below() {
+                    self.materialize_in_pass(visual);
+                }
             }
         }
         self.place_late_in_pass();
@@ -889,8 +988,24 @@ impl IRenderer for CompositingRenderer {
         if self.is_disposed.get() || self.updating.get() || !self.composition_target.is_enabled() {
             return false;
         }
-        let kept = (visual.to_ref().downgrade(), composition_visual.clone());
+        let kept = (visual.to_ref().downgrade(), KeptComposition::Visual(composition_visual.clone()));
         // Inside `keep_composition_visuals_departing_in` it is kept for the caller of that.
+        if let Some(keeping) = self.keeping.borrow_mut().as_mut() {
+            keeping.push(kept);
+            return true;
+        }
+        self.departed.borrow_mut().push(kept);
+        self.queue_update();
+        true
+    }
+
+    fn keep_departed_composition_item(&self, visual: &Visual) -> bool {
+        // Kept only when an update pass will run to release it.
+        if self.is_disposed.get() || self.updating.get() || !self.composition_target.is_enabled() {
+            return false;
+        }
+        let Some(item) = visual.composition_item() else { return false };
+        let kept = (visual.to_ref().downgrade(), KeptComposition::Item(item));
         if let Some(keeping) = self.keeping.borrow_mut().as_mut() {
             keeping.push(kept);
             return true;

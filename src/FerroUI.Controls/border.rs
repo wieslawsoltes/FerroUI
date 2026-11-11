@@ -59,6 +59,13 @@ impl VisualImpl for Border {
         Some(this.corner_radius())
     }
 
+    // A border that clips to its bounds clips with its corner radius, which is what its
+    // composition visual does: its drawing is not an item of the composition visual above
+    // (docs/porting/desktop-performance.md, section 9.42).
+    fn requires_composition_visual(this: &Self) -> bool {
+        this.clip_to_bounds()
+    }
+
     fn create_composition_visual(
         this: &Self,
         compositor: &Rc<ferroui_base::rendering::composition::Compositor>,

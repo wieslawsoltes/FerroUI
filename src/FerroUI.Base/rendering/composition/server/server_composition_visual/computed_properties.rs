@@ -110,6 +110,14 @@ impl ServerCompositionVisual {
                 .set(self.compute_own_content_bounds().and_then(LtrbRect::null_if_zero_size));
             set_dirty_for_render = true;
             set_dirty_bounds = true;
+        } else if self.draw_items_dirty() {
+            // The drawing items changed and nothing else of the content: the bounds follow
+            // them, and the visual is not drawn again for it (section 9.42).
+            let bounds = self.compute_own_content_bounds().and_then(LtrbRect::null_if_zero_size);
+            if bounds != self.own_content_bounds.get() {
+                self.own_content_bounds.set(bounds);
+                set_dirty_bounds = true;
+            }
         }
 
         if self.clip_size_dirty.get() {
