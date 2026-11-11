@@ -24,6 +24,7 @@ use crate::harness::Registry;
 pub mod activation;
 pub mod control_theme_apply;
 pub mod detach_reattach;
+pub mod dynamic_resources;
 pub mod resource_lookup;
 pub mod selector_match;
 pub mod setter_apply;
@@ -40,4 +41,5 @@ pub fn register(registry: &mut Registry) {
     styles_changed::register(registry);
     resource_lookup::register(registry);
     detach_reattach::register(registry);
+    dynamic_resources::register(registry);
 }
