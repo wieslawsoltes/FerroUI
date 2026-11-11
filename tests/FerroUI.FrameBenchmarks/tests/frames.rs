@@ -663,14 +663,41 @@ struct Census {
     bare_chain: usize,
     /// Have no composition visual (section 9.41).
     without_visual: usize,
+    /// Of those that draw nothing and set an input: how many set each one. An element that sets
+    /// two is counted for both.
+    inputs_set: [usize; INPUT_NAMES.len()],
+    /// Of those that draw nothing and set an input: how many set exactly one, by the one.
+    one_input_set: [usize; INPUT_NAMES.len()],
+    /// Have a composition visual, draw nothing and set no input: something else asked for the
+    /// visual (it was handed out, a transition, a custom hit test, options, a child that needs
+    /// the parent to have one).
+    visual_for_another_reason: usize,
+    /// Have a composition visual and are below an element that is not visible: nothing of them
+    /// reaches a frame.
+    visuals_below_hidden: usize,
+    /// Are below an element that is not visible.
+    below_hidden: usize,
 }
+
+/// The inputs of a composition visual an element sets, in the order of `Census::inputs_set`.
+const INPUT_NAMES: [&str; 9] = [
+    "clip to bounds",
+    "not visible",
+    "opacity",
+    "a clip",
+    "a render transform",
+    "an effect",
+    "an opacity mask",
+    "a cache mode",
+    "mirrored",
+];
 
 impl Census {
     fn count(&mut self, visual: &ferroui_base::Visual, root: bool) {
-        self.walk(visual, root, 0);
+        self.walk(visual, root, 0, false);
     }
 
-    fn walk(&mut self, visual: &ferroui_base::Visual, root: bool, bare_above: usize) {
+    fn walk(&mut self, visual: &ferroui_base::Visual, root: bool, bare_above: usize, hidden_above: bool) {
         let children = visual.visual_children().to_vec();
         self.elements += 1;
         if children.is_empty() {
@@ -692,6 +719,35 @@ impl Census {
             || !visual.is_visible()
             || visual.has_mirror_transform();
         let inputs = other_inputs || visual.clip_to_bounds();
+        if hidden_above {
+            self.below_hidden += 1;
+            if has_visual {
+                self.visuals_below_hidden += 1;
+            }
+        }
+        if !draws && inputs {
+            let set = [
+                visual.clip_to_bounds(),
+                !visual.is_visible(),
+                visual.opacity() != 1.0,
+                visual.clip().is_some(),
+                visual.render_transform().is_some(),
+                visual.effect().is_some(),
+                visual.opacity_mask().is_some(),
+                visual.cache_mode().is_some(),
+                visual.has_mirror_transform(),
+            ];
+            let one = set.iter().filter(|set| **set).count() == 1;
+            for (index, _) in set.iter().enumerate().filter(|(_, set)| **set) {
+                self.inputs_set[index] += 1;
+                if one {
+                    self.one_input_set[index] += 1;
+                }
+            }
+        }
+        if has_visual && !draws && !inputs && !root {
+            self.visual_for_another_reason += 1;
+        }
         if draws {
             self.drawing += 1;
         }
@@ -715,8 +771,9 @@ impl Census {
             }
             self.bare_chain = self.bare_chain.max(chain);
         }
+        let hidden = hidden_above || !visual.is_visible();
         for child in &children {
-            self.walk(child, false, chain);
+            self.walk(child, false, chain, hidden);
         }
     }
 
@@ -735,7 +792,21 @@ impl Census {
             line("draw nothing, set nothing, under one that does neither", self.bare_under_bare),
             format!("  longest chain that draws nothing and sets nothing: {}", self.bare_chain),
             line("have no composition visual", self.without_visual),
+            line("have a composition visual, draw nothing, set nothing", self.visual_for_another_reason),
+            line("are below one that is not visible", self.below_hidden),
+            line("have a composition visual below one that is not visible", self.visuals_below_hidden),
+            "  draw nothing, set an input, by the input (and with no other input):".to_string(),
         ]
+        .into_iter()
+        .chain(INPUT_NAMES.iter().enumerate().map(|(index, name)| {
+            format!(
+                "    {name}: {} ({:.1} %), alone {}",
+                self.inputs_set[index],
+                share(self.inputs_set[index]),
+                self.one_input_set[index]
+            )
+        }))
+        .collect::<Vec<_>>()
         .join("\n")
     }
 }
