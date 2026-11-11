@@ -1,8 +1,9 @@
 //! Dynamic resources of a subtree that is attached to a tree: the panel that holds every tile of
 //! the wall is taken out of the canvas and put back, and every text of it has a dynamic resource
-//! of the root in its `Tag`, made as markup makes `Tag="{DynamicResource Accent}"`. A dynamic
-//! resource started while its control is out of the tree finds nothing; when the panel is added
-//! back the texts inherit the theme variant of the root, which looks the resource up, and the
+//! of the root in its `Tag`, made as markup makes `Tag="{DynamicResource Accent}"`. The wall is
+//! in a theme variant scope (light), as the content of a window is in the theme variant of the
+//! window. A dynamic resource of a control out of the tree finds nothing; when the panel is added
+//! back the texts inherit the theme variant of the scope, which looks the resource up, and the
 //! attachment notifies them that the resources they see changed (docs/porting/desktop-performance.md,
 //! section 9.44). `ResourceBindings` measures resource observers bound in an attached wall, and
 //! `DetachReattach` the move of a section without resources.
@@ -18,9 +19,9 @@
 use super::wall::{tag, tag_value, Wall, CONTROLS};
 use crate::harness::Registry;
 use ferroui_base::data::BindingBase;
-use ferroui_base::styling::{Selectors, Setter, Style};
+use ferroui_base::styling::{Selectors, Setter, Style, ThemeVariant};
 use ferroui_base::{BoxedValue, Ref, Visual};
-use ferroui_controls::{Control, Panel, TextBlock};
+use ferroui_controls::{Control, Panel, TextBlock, ThemeVariantScope};
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
 
@@ -63,7 +64,9 @@ impl DynamicResources {
         for tile in &wall.tiles {
             let _ = tile.text.bind_binding(Control::tag_property().as_property(), &*binding);
         }
-        wall.attach();
+        let scope = ThemeVariantScope::new();
+        scope.set_requested_theme_variant(Some(ThemeVariant::light()));
+        wall.attach_in(&scope);
         let mut this = Self { wall, section, attached: true };
         this.expect(CONTROLS, "after the attach");
         this.detach();
