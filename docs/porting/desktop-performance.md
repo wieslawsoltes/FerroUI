@@ -2968,3 +2968,48 @@ attached again (the gate, base section 9.43, 5 rounds):
   dynamic resources to a root, with and without a theme variant to inherit, and checks
   the values after the attachment, a later change and the detachment; with the counters
   it asserts one lookup for each resource in the attachment.
+
+### 9.45 A template binding is told of its templated parent by the store of its target
+
+A template binding reads a property of the templated parent of its target. To see the
+templated parent change, upstream's expression subscribes to every property change of its
+target, and so did this one: a handler (a closure in a block of its own) on the handler list
+of the target for each template binding, called for every property change of the target to
+compare the property with `TemplatedParent`. An element of a control template has several
+template bindings (a border of a button binds its background, its border brush and
+thickness, its corner radius and its padding), and its properties change many times while the
+template is applied and laid out. The start of the controls scene has 45,214 template
+bindings.
+
+- **The store tells them.** `StyledElement::set_templated_parent` asks the value store of the
+  element to tell its binding expressions (`ValueStore::templated_parent_changed`): the local
+  value bindings, and the entries of the frames the element does not share. A template
+  binding that runs reads the new templated parent, subscribes to it and publishes, as it did
+  in its handler. A setter entry of a style (section 9.43) tells the expression it made.
+- **A template binding that writes to the source** (`TwoWay`, `OneWayToSource`) still
+  subscribes to the property changes of its target, for its target property.
+
+The store is told before the property change of `TemplatedParent` is raised, where the
+handler ran with the other handlers of the target: the values the template bindings publish
+are in place when the handlers of `TemplatedParent` run.
+
+The start of the controls scene, before (section 9.44, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release build):
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 219.8 ms | 221.3 ms | +0.7 % |
+| Start (to the first frame) | 286.3 ms | 288.5 ms | +0.8 % |
+| Memory of the show | 210.8 MB | 207.1 MB | -1.8 % |
+| Memory of the start | 312.3 MB | 308.9 MB | -1.1 % |
+
+The time does not change beyond the noise (an earlier run of the gate measured -0.8 %): the
+handlers it removes were short calls, and the work of a template binding is the one value it
+publishes when its templated parent is set (section 9.43, the profile). What it removes is the
+handler block of each template binding and the entries on the handler lists of its target,
+3.4 MB in the start of the controls scene.
+
+- **Tests:** `binding_model_tests::template_binding_follows_the_templated_parent_without_observing_its_target`
+  (a template binding follows a templated parent set, replaced and cleared, with no handler
+  on its target, and a two-way one with one);
+  `a_template_binding_of_a_style_setter_follows_the_templated_parent`.
