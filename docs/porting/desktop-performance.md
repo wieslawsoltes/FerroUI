@@ -2953,6 +2953,16 @@ Pro, release build), and the counts from one run of each build with counters:
 The property changes are the same: the lookups that are left out published the value the
 property had. The memory of the starts does not change.
 
+The framework benchmark `styling_subsystem::DynamicResources` guards it: a section of 1,000
+texts whose tags are a dynamic resource of the root, in a theme variant scope, detached and
+attached again (the gate, base section 9.43, 5 rounds):
+
+| `styling_subsystem::DynamicResources` | Before | After | Change |
+|---|---:|---:|---:|
+| `reattach` | 1.862 ms | 1.693 ms | -9.1 % |
+| `detach` | 1.470 ms | 1.377 ms | -6.3 % |
+| `reattach_with_inactive_setters` (four dynamic-resource setters of a style that does not match yet) | 2.331 ms | 2.127 ms | -8.8 % |
+
 - **Tests:** `resource_tests::a_notification_is_newer_than_the_moments_before_it_was_made`;
   `dynamic_resource_expression_tests::attachment` attaches a group of elements with
   dynamic resources to a root, with and without a theme variant to inherit, and checks
