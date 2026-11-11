@@ -810,3 +810,18 @@ fn name_scope_locator_tracks_late_registration() {
     NameScopeLocator::track(&scope, "foo").subscribe_fn(move |element| r.borrow_mut().push(element.is_some()));
     assert_eq!(*results.borrow(), vec![true, true]);
 }
+
+#[test]
+fn a_notification_is_newer_than_the_moments_before_it_was_made() {
+    let before = ResourcesChangedEventArgs::last_sequence_number();
+    let e = ResourcesChangedEventArgs::create();
+    assert_eq!(ResourcesChangedEventArgs::last_sequence_number(), e.sequence_number);
+    assert!(e.is_newer_than(before));
+    assert!(!e.is_newer_than(e.sequence_number));
+    assert!(!e.is_newer_than(ResourcesChangedEventArgs::create().sequence_number));
+
+    // The numbers wrap: the first number after the largest is newer.
+    assert!(ResourcesChangedEventArgs::new(i32::MIN).is_newer_than(i32::MAX));
+    // Arguments that `create` did not number are newer than any moment.
+    assert!(ResourcesChangedEventArgs::default().is_newer_than(e.sequence_number));
+}
