@@ -68,6 +68,7 @@ FERROUI_BENCH_FILTER=styling::,ControlsBenchmark.create_button \
 |---|---|---|
 | `FERROUI_BENCH_FILTER` | none | Parts of names separated by commas; a benchmark runs when its full name contains one |
 | `FERROUI_BENCH_LIST` | not set | When set, the selected names are printed and nothing runs |
+| `FERROUI_BENCH_CLASS` | none | A class (`category::Class`); of the selected benchmarks those of that class run. The local performance gate starts one run a class with it |
 | `FERROUI_BENCH_ITERATIONS` | 15 | The measured iterations of a benchmark |
 | `FERROUI_BENCH_WARMUP` | 3 | The iterations before them |
 | `FERROUI_BENCH_MIN_ITERATION_MS` | per class | The least time of an iteration, in place of what the class states |
@@ -86,6 +87,17 @@ cargo test -p ferroui-benchmarks --release --features count-allocations --lib ru
 ```
 
 Take the times from a run without the feature: counting costs time.
+
+### Instructions and cycles
+
+Where the system counts them for a process (macOS), the table has the instructions the processor
+retires for an operation and the cycles it takes, the median of the iterations (what the hardware
+counters diagnoser of the upstream library reports). The instructions are the work of the
+operation and nothing else: two processes of one build differ by a hundredth of a percent, where
+their times differ by several. A time that changed with the same instructions is the same work
+run differently (the caches, the placement of the code), and the local performance gate says so
+([docs/porting/desktop-performance.md](../../docs/porting/desktop-performance.md), section 8.1).
+The counts are of the whole process: run on one test thread.
 
 ### Profiling text layout
 

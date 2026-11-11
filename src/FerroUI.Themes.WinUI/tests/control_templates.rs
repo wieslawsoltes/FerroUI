@@ -759,6 +759,79 @@ fn the_navigation_controls_get_their_parts_from_the_theme() {
     window.close();
 }
 
+/// The pointer-over state of a NavigationViewItem is that of its row (`LayoutRoot`), as the
+/// presenter of WinUI has it: an item is under the pointer while one of the items it shows below
+/// its row is, and that must not light the row of the parent.
+#[test]
+fn navigation_view_hover_stays_on_the_row_under_the_pointer() {
+    use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
+    use ferroui_base::input::{MouseDevice, PointerOverPreProcessor, RawInputModifiers};
+    use ferroui_base::reactive::IObserver;
+    use ferroui_base::Point;
+    use ferroui_controls::{NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    let parent = NavigationViewItem::new();
+    let child = NavigationViewItem::new();
+    parent.menu_items().add(Some(Control::boxed(&child)));
+    parent.set_is_expanded(true);
+    navigation.menu_items().add(Some(Control::boxed(&parent)));
+    navigation.set_selected_item(Some(Control::boxed(&child)));
+
+    let window = Window::new();
+    window.set_width(800.0);
+    window.set_height(600.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let row = |item: &NavigationViewItem| {
+        item.get_template_descendants()
+            .into_iter()
+            .find(|part| part.name().as_deref() == Some("LayoutRoot"))
+            .and_then(|part| part.cast::<Border>())
+            .expect("the item's row border")
+    };
+    let parent_row = row(&parent);
+    let child_row = row(&child);
+    let background = |row: &Border| {
+        row.background().unwrap().as_solid_color_brush().unwrap().color()
+    };
+    let parent_idle = background(&parent_row);
+    let child_idle = background(&child_row);
+    assert!(child.is_selected());
+
+    let root = window.presentation_source().input_root();
+    let pointer_over = PointerOverPreProcessor::new(root.clone());
+    let mouse = MouseDevice::new();
+    for (timestamp, row) in [(1, &parent_row), (2, &child_row), (3, &parent_row)] {
+        let position = row.translate_point(Point::new(4.0, 4.0), &window).unwrap();
+        let input = RawPointerEventArgs::new(
+            mouse.clone(),
+            timestamp,
+            root.clone(),
+            RawPointerEventType::Move,
+            position,
+            RawInputModifiers::NONE,
+        );
+        let hit = Some(row.clone().upcast());
+        input.set_input_hit_test_result(hit.clone(), hit);
+        pointer_over.on_next(Rc::new(input));
+        assert!(parent.is_pointer_over());
+        if row == &child_row {
+            assert_eq!(background(&parent_row), parent_idle, "hovering a child lit its parent");
+            assert_ne!(background(&child_row), child_idle);
+        } else {
+            assert_ne!(background(&parent_row), parent_idle);
+            assert_eq!(background(&child_row), child_idle);
+        }
+        assert!(child.is_selected());
+    }
+    window.close();
+}
+
 /// The menu items of a NavigationView whose pane is shorter than they are scroll in
 /// `MenuItemsScrollViewer` (the star row of `ItemsContainerGrid`), above the settings item, as in
 /// WinUI: none of them goes under the footer.
