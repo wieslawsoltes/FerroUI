@@ -756,10 +756,15 @@ mod additional {
     /// A calendar whose template has every part of the calendar item: the
     /// three buttons of the header, the month view and the year view.
     fn create_calendar(display_date: DateTime) -> (Ref<Calendar>, Ref<CalendarItem>) {
+        create_calendar_in_mode(display_date, CalendarMode::Month)
+    }
+
+    fn create_calendar_in_mode(display_date: DateTime, mode: CalendarMode) -> (Ref<Calendar>, Ref<CalendarItem>) {
         let cal = Calendar::new();
         // The default is the one of the culture at class initialisation.
         cal.set_first_day_of_week(DayOfWeek::Sunday);
         cal.set_display_date(display_date);
+        cal.set_display_mode(mode);
         let template = FuncControlTemplate::for_type::<Calendar>(|c, scope| {
             let calendar_item = CalendarItem::new();
             calendar_item.set_name(Some("PART_CalendarItem".to_string()));
@@ -907,15 +912,57 @@ mod additional {
     // --- population of the views ---------------------------------------------
 
     #[test]
+    fn calendar_can_start_in_year_or_decade_mode() {
+        let _scope = start();
+        for mode in [CalendarMode::Year, CalendarMode::Decade] {
+            let (calendar, item) = create_calendar_in_mode(date(2024, 2, 15), mode);
+            assert_eq!(mode, calendar.display_mode());
+            assert_eq!(49, item.month_view().unwrap().children().count());
+            assert_eq!(12, item.year_view().unwrap().children().count());
+            assert!(item.year_view().unwrap().is_visible());
+            assert!(!item.month_view().unwrap().is_visible());
+            assert!(date_of(&year_button(&item, 0)).is_some());
+            calendar.set_display_mode(CalendarMode::Month);
+            assert!(item.month_view().unwrap().is_visible());
+            assert_eq!(49, item.month_view().unwrap().children().count());
+        }
+    }
+
+    #[test]
+    fn alternate_view_cells_are_created_once_and_reused_across_modes() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 2, 15));
+        let year_view = item.year_view().unwrap();
+        assert_eq!(0, year_view.children().count());
+
+        calendar.set_display_mode(CalendarMode::Year);
+        assert_eq!(12, year_view.children().count());
+        let first = year_view.children().get(0);
+        assert_eq!("Jan", text_of(year_button(&item, 0).content()));
+
+        calendar.set_display_mode(CalendarMode::Decade);
+        assert_eq!(12, year_view.children().count());
+        assert!(first.ptr_eq(&year_view.children().get(0)));
+        assert_eq!("2019", text_of(year_button(&item, 0).content()));
+
+        calendar.set_display_mode(CalendarMode::Month);
+        assert_eq!(49, item.month_view().unwrap().children().count());
+        calendar.set_display_mode(CalendarMode::Year);
+        assert_eq!(12, year_view.children().count());
+        assert!(first.ptr_eq(&year_view.children().get(0)));
+        assert_eq!("Jan", text_of(year_button(&item, 0).content()));
+    }
+
+    #[test]
     fn additional_month_view_is_populated_from_the_display_date() {
         let _scope = start();
         let (calendar, item) = create_calendar(date(2024, 2, 15));
 
         let month_view = item.month_view().unwrap();
         let year_view = item.year_view().unwrap();
-        // 7 day titles and 6 rows of 7 days; 3 rows of 4 months or years.
+        // 7 day titles and 6 rows of 7 days; the hidden year view is deferred.
         assert_eq!(49, month_view.children().count());
-        assert_eq!(12, year_view.children().count());
+        assert_eq!(0, year_view.children().count());
         assert!(month_view.is_visible());
         assert!(!year_view.is_visible());
 
