@@ -122,6 +122,7 @@ impl DynamicResourceExpression {
     }
 
     fn on_start(&self) {
+        ferroui_base::perf_count!(DynamicResourceExpressionsStarted);
         let host = self.try_get_resource_host();
         if host.is_none() {
             // The target is not an IResourceHost, so we need to find one from the anchor.

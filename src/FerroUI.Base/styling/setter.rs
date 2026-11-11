@@ -3,9 +3,8 @@ use super::{
     ISetterValue, ITemplate, PropertySetterTemplateInstance, SetterBase, SetterInstance, SetterInstanceKind,
     StyleInstance, TargetPropertyPath,
 };
-use crate::data::core::SinkRef;
 use crate::data::{BindingBase, BindingPriority};
-use crate::property_store::{BoxedBindingEntry, IValueEntry, ValueFrame};
+use crate::property_store::{BoxedBindingEntry, IValueEntry, SetterBindingEntry, ValueFrame};
 use crate::reactive::IObservable;
 use crate::{AnyValue, BoxedValue, FerroProperty, PropertyValue, StyledElement, StyledProperty};
 use std::any::Any;
@@ -203,14 +202,14 @@ impl Setter {
         binding: Rc<dyn BindingBase>,
     ) -> SetterInstance {
         if !property.is_direct() {
-            // The expression is an entry of the style instance's frame: it is
-            // started when the frame's values are evaluated and stopped when
-            // the style is deactivated or detached.
-            let expression = binding.create_instance(target, Some(property), None);
+            // The entry of the style instance's frame instances the binding
+            // when its value is first asked for: the expression is created
+            // and started when the frame's values are evaluated, stopped when
+            // the style is deactivated or detached, and never created for a
+            // value that is not evaluated.
             let owner: &crate::FerroObject = target;
             let frame: &dyn ValueFrame = &**instance;
-            expression.attach(SinkRef::Store(owner.to_weak()), None, owner, property, frame.base().priority());
-            let entry: Rc<dyn IValueEntry> = expression;
+            let entry: Rc<dyn IValueEntry> = SetterBindingEntry::new(owner, property, binding, frame.base().priority());
             SetterInstance { kind: SetterInstanceKind::Entry(entry), is_setter: false }
         } else {
             target.bind_binding(property, &*binding);

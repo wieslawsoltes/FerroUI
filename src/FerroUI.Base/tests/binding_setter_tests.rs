@@ -510,3 +510,239 @@ fn can_set_class_binding_property_in_style_without_activator() {
 
     assert!(control.classes().contains("bar"));
 }
+
+// --- the binding of a setter is instanced when its value is first asked for ------
+//
+// Specific to this port: the entry a style frame has for a setter with a
+// binding makes the binding expression when the store first asks it for a
+// value (`SetterBindingEntry`). The managed original makes the expression
+// when the style is attached and starts it at the same moment as here.
+
+/// A binding that counts the expressions made from it.
+struct CountingBinding {
+    inner: Rc<ReflectionBinding>,
+    created: Cell<usize>,
+}
+
+impl CountingBinding {
+    fn new(inner: Rc<ReflectionBinding>) -> Rc<Self> {
+        Rc::new(Self { inner, created: Cell::new(0) })
+    }
+}
+
+impl crate::data::BindingBase for CountingBinding {
+    fn create_instance(
+        &self,
+        target: &crate::FerroObject,
+        target_property: Option<&'static FerroProperty>,
+        anchor: Option<&Ref<crate::FerroObject>>,
+    ) -> Rc<dyn crate::data::BindingExpressionBase> {
+        self.created.set(self.created.get() + 1);
+        self.inner.create_instance(target, target_property, anchor)
+    }
+}
+
+fn counting_style<T: crate::ObjectType + crate::Upcast<StyledElement>>(
+    class: Option<&str>,
+    property: &'static FerroProperty,
+    binding: &Rc<CountingBinding>,
+) -> Ref<Style> {
+    let selector = Selectors::of_type::<T>();
+    let selector = match class {
+        Some(class) => selector.class(class),
+        None => selector,
+    };
+    Style::with_setters(selector, [Setter::new_binding_base(property, binding.clone())])
+}
+
+#[test]
+fn setter_binding_below_the_effective_value_is_not_instanced() {
+    let foo = CountingBinding::new(ReflectionBinding::new("Foo"));
+    let bar = CountingBinding::new(ReflectionBinding::new("Bar"));
+    let root = TestRoot::new();
+    root.styles().add(counting_style::<Class1>(None, Class1::foo_property().as_property(), &foo));
+    root.styles().add(counting_style::<Class1>(None, Class1::foo_property().as_property(), &bar));
+
+    let target = Class1::new();
+    target.set_data_context(Some(Model::new_model(FooBar { foo: s("Foo"), bar: s("Bar") })));
+    set_child(&root, &target);
+
+    // The later style has the value; the binding of the earlier one was
+    // never asked for a value.
+    assert_eq!(target.get_value(Class1::foo_property()), "Bar");
+    assert_eq!((foo.created.get(), bar.created.get()), (0, 1));
+
+    remove_child(&root, &target);
+    assert_eq!(target.get_value(Class1::foo_property()), "foodefault");
+    assert_eq!((foo.created.get(), bar.created.get()), (0, 1));
+}
+
+#[test]
+fn setter_binding_of_an_inactive_style_is_instanced_when_the_style_becomes_active() {
+    let data = Data::new(None, red());
+    let control = Border::new();
+    control.set_data_context(Some(data.clone()));
+
+    let binding = CountingBinding::new(ReflectionBinding::new("Bar"));
+    let style = counting_style::<Border>(Some("foo"), Border::background_property().as_property(), &binding);
+    try_attach(&style, &control, None);
+
+    assert_eq!(control.background(), None);
+    assert_eq!(binding.created.get(), 0);
+    assert_eq!(data.property_changed_subscription_count(), 0);
+
+    control.classes().add("foo");
+    assert_eq!(control.background(), red());
+    assert_eq!(binding.created.get(), 1);
+    assert_eq!(data.property_changed_subscription_count(), 1);
+
+    control.classes().remove("foo");
+    assert_eq!(control.background(), None);
+    assert_eq!(data.property_changed_subscription_count(), 0);
+
+    // The expression that was made is the one that is started again.
+    control.classes().add("foo");
+    assert_eq!(control.background(), red());
+    assert_eq!(binding.created.get(), 1);
+    assert_eq!(data.property_changed_subscription_count(), 1);
+}
+
+#[test]
+fn setter_binding_below_a_local_value_is_instanced_when_the_local_value_is_cleared() {
+    let data = Data::new(None, red());
+    let control = Border::new();
+    control.set_data_context(Some(data.clone()));
+    control.set_background(green());
+
+    let binding = CountingBinding::new(ReflectionBinding::new("Bar"));
+    let style = counting_style::<Border>(None, Border::background_property().as_property(), &binding);
+    try_attach(&style, &control, None);
+
+    assert_eq!(control.background(), green());
+    assert_eq!(binding.created.get(), 0);
+
+    control.clear_value(Border::background_property());
+    assert_eq!(control.background(), red());
+    assert_eq!(binding.created.get(), 1);
+    assert_eq!(data.property_changed_subscription_count(), 1);
+}
+
+#[test]
+fn setter_binding_follows_its_source_and_replaces_a_current_value() {
+    let data = Data::new(None, red());
+    let control = Border::new();
+    control.set_data_context(Some(data.clone()));
+
+    let binding = CountingBinding::new(ReflectionBinding::new("Bar"));
+    let style = counting_style::<Border>(None, Border::background_property().as_property(), &binding);
+    try_attach(&style, &control, None);
+    assert_eq!(control.background(), red());
+
+    let raised = Counter::new();
+    let r = raised.clone();
+    control.property_changed(move |e| {
+        assert_eq!(e.property(), Border::background_property().as_property());
+        r.increment();
+    });
+
+    data.bar.replace(green());
+    data.property_changed.raise("Bar");
+    assert_eq!(control.background(), green());
+    assert_eq!(raised.get(), 1);
+
+    // A current value stands in for the value of the binding until the
+    // binding has another one: the change is one of the entry the current
+    // value overrides.
+    control.set_current_value(Border::background_property(), blue());
+    assert_eq!(control.background(), blue());
+    data.bar.replace(red());
+    data.property_changed.raise("Bar");
+    assert_eq!(control.background(), red());
+    assert_eq!(binding.created.get(), 1);
+}
+
+#[test]
+fn setter_binding_expression_is_the_expression_of_the_property() {
+    let data = Data::new(None, red());
+    let control = Border::new();
+    control.set_data_context(Some(data.clone()));
+
+    let binding = CountingBinding::new(ReflectionBinding::new("Bar"));
+    let style = counting_style::<Border>(Some("foo"), Border::background_property().as_property(), &binding);
+    try_attach(&style, &control, None);
+
+    // The style is not active: the property has no expression, and asking
+    // makes none.
+    let property = Border::background_property().as_property();
+    assert!(crate::data::BindingOperations::get_binding_expression_base(&control, property).is_none());
+    assert_eq!(binding.created.get(), 0);
+
+    control.classes().add("foo");
+    let first = crate::data::BindingOperations::get_binding_expression_base(&control, property).expect("expression");
+    let second = crate::data::BindingOperations::get_binding_expression_base(&control, property).expect("expression");
+    assert!(Rc::ptr_eq(&first, &second));
+    assert_eq!(first.priority(), BindingPriority::StyleTrigger);
+    assert_eq!(binding.created.get(), 1);
+}
+
+#[test]
+fn setter_binding_entry_is_a_small_record() {
+    // The entry is what a style attach creates for every setter with a
+    // binding, so it stays a fraction of a binding expression.
+    assert!(std::mem::size_of::<crate::property_store::SetterBindingEntry>() <= 64);
+}
+
+#[test]
+fn setter_binding_work_of_styles_that_are_not_evaluated() {
+    use crate::diagnostics::perf_counters::{self, PerfCounter as C};
+
+    // A counter check (with the feature `perf-counters`): thirty-two elements
+    // that each match an active style, a style below it for the same property
+    // and a style that is not active. An entry is made for every setter, and
+    // an expression only for the one whose value is the effective one.
+    let root = TestRoot::new();
+    let binding = |path: &str| -> Rc<dyn crate::data::BindingBase> { ReflectionBinding::new(path) };
+    let property = Class1::foo_property().as_property();
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>(),
+        [Setter::new_binding_base(property, binding("Foo"))],
+    ));
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>(),
+        [Setter::new_binding_base(property, binding("Bar"))],
+    ));
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("selected"),
+        [Setter::new_binding_base(property, binding("Foo"))],
+    ));
+    let data = Model::new_model(FooBar { foo: s("Foo"), bar: s("Bar") });
+
+    let before = perf_counters::snapshot();
+    let targets: Vec<_> = (0..32)
+        .map(|_| {
+            let target = Class1::new();
+            target.set_data_context(Some(data.clone()));
+            set_child(&root, &target);
+            assert_eq!(target.get_value(Class1::foo_property()), "Bar");
+            target
+        })
+        .collect();
+    let counted = perf_counters::snapshot().since(&before);
+    if perf_counters::ENABLED {
+        assert_eq!(counted.get(C::SetterBindingEntriesCreated), 96);
+        assert_eq!(counted.get(C::BindingExpressionsCreated), 32);
+        assert_eq!(counted.get(C::BindingExpressionsStarted), 32);
+    }
+
+    // The style that becomes active is instanced for the element it becomes
+    // active for.
+    let before = perf_counters::snapshot();
+    targets[0].classes().add("selected");
+    assert_eq!(targets[0].get_value(Class1::foo_property()), "Foo");
+    let counted = perf_counters::snapshot().since(&before);
+    if perf_counters::ENABLED {
+        assert_eq!(counted.get(C::SetterBindingEntriesCreated), 0);
+        assert_eq!(counted.get(C::BindingExpressionsCreated), 1);
+        assert_eq!(counted.get(C::BindingExpressionsStarted), 1);
+    }
+}
