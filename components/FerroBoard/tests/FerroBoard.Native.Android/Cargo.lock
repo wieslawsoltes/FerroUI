@@ -382,6 +382,61 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+]
+
+[[package]]
+name = "ferroui-media-camera"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-camera-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-controls",
+]
+
+[[package]]
+name = "ferroui-media-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-video"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-video-controls"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media-controls",
+ "ferroui-media-video",
+]
+
+[[package]]
 name = "ferroui-metal"
 version = "0.5.0-preview.1"
 dependencies = [
@@ -437,6 +492,8 @@ dependencies = [
  "ferroui-controls",
  "ferroui-dialogs",
  "ferroui-markup-xaml",
+ "ferroui-media-camera-controls",
+ "ferroui-media-video-controls",
 ]
 
 [[package]]

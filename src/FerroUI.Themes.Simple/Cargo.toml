@@ -41,6 +41,8 @@ ferroui-markup-xaml = { workspace = true }
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-media-video-controls.workspace = true
+ferroui-media-camera-controls.workspace = true
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The theme is loaded from its compiled markup (`compiled_xaml.rs`); the run-time XAML loader and

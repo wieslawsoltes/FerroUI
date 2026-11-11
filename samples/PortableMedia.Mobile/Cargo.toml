@@ -25,9 +25,9 @@ ferroui-media-camera.workspace = true
 ferroui-media-qr.workspace = true
 ferroui-media-camera-controls.workspace = true
 image = { version="0.25", default-features=false, features=["jpeg"] }
-ferroui-themes-simple.workspace = true
+ferroui-themes-winui.workspace = true
 [target.'cfg(target_os = "ios")'.dependencies]
-ferroui-ios.workspace = true
+ferroui-ios = {workspace=true,features=["skia"]}
 ferroui-media-metal.workspace = true
 ferroui-media-apple.workspace = true
 ferroui-media-qr-apple = {workspace=true,features=["test-fixtures"]}

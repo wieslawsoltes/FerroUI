@@ -82,8 +82,10 @@ fn templated_controls() -> Vec<&'static TypeInfo> {
     let mut templated_controls: Vec<&'static TypeInfo> = Vec::new();
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
+    // The crates whose controls the theme has control themes for.
+    let crates = ["ferroui_controls", "ferroui_dialogs", "ferroui_media_video_controls", "ferroui_media_camera_controls"];
     for type_ in TypeInfo::registered_types() {
-        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+        if !crates.iter().any(|crate_| type_.module_path().starts_with(crate_))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()

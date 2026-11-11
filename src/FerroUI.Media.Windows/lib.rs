@@ -11,7 +11,9 @@ use ferroui_media::{frames::*, *};
 #[cfg(feature = "controls")]
 pub use ferroui_media_opengl::NativeGlTextureImporter;
 use ferroui_media_opengl::{NativeGlFrameProducer, ReadyGlFrame};
-pub use native::{NativeDevice, NativeFrame, NativeSession, NativeState};
+pub use native::{
+    EncodedRecording, NativeDevice, NativeFrame, NativeRecording, NativeSession, NativeState,
+};
 
 use std::{cell::RefCell, rc::Rc, task::Poll, time::Duration};
 
@@ -88,18 +90,9 @@ impl WindowsFrameStream {
                 "GPU completion is indeterminate; retained storage is quarantined",
             ));
         }
-        if self.ready.borrow().is_some() {
-            let frame = self.ready.borrow().as_ref().unwrap().take_if_ready()?;
-            if frame.is_some() {
-                self.ready.borrow_mut().take();
-            }
-            return Ok(frame);
-        }
-        // Polling is driven by the presentation tick; no blocking wait on UI.
         let mut pending = self.pending.borrow_mut();
         if let Some(job) = pending.as_mut() {
-            let waker = std::task::Waker::noop();
-            let mut cx = std::task::Context::from_waker(waker);
+            let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
             match job.as_mut().poll(&mut cx) {
                 Poll::Pending => return Ok(None),
                 Poll::Ready(result) => {
@@ -121,10 +114,30 @@ impl WindowsFrameStream {
                             return Err(error);
                         }
                     }
-                    return Ok(None);
                 }
             }
         }
+        // Deliver a completed import on this tick and start its successor
+        // without waiting for another tick. A pending fence still owns the
+        // sole import slot until it completes.
+        let frame = {
+            let mut ready = self.ready.borrow_mut();
+            match ready.as_ref() {
+                Some(imported) => {
+                    let Some(frame) = imported.take_if_ready()? else {
+                        return Ok(None);
+                    };
+                    ready.take();
+                    Some(frame)
+                }
+                None => None,
+            }
+        };
+        *pending = self.queue_import()?;
+        Ok(frame)
+    }
+
+    fn queue_import(&self) -> Result<Option<MediaFuture<Option<ReadyGlFrame>>>, MediaError> {
         if let Some(frame) = self.native.take_frame()? {
             if frame.info().epoch == self.epoch.get() {
                 self.retry.replace(Some(frame));
@@ -180,8 +193,6 @@ impl WindowsFrameStream {
         };
         // The requested native MF video processor supplies RGB DXGI storage.
         // No framework video copy/readback is used by this import.
-        let job = native::import(&self.producer, metadata, frame);
-        *pending = Some(job);
-        Ok(None)
+        Ok(Some(native::import(&self.producer, metadata, frame)))
     }
 }

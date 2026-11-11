@@ -26,11 +26,18 @@ required-features = ["capture"]
 
 [features]
 default = []
-desktop = ["dep:ferroui-desktop", "theme"]
+desktop = ["dep:ferroui-desktop", "dep:ferroui-x11", "theme"]
 theme = ["dep:ferroui-themes-winui"]
+quartz-metal = ["desktop", "ferroui-desktop/quartz-metal", "dep:ferroui-native"]
 capture = ["dep:ferroui-headless", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "theme"]
 
 [dependencies]
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-camera-controls.workspace = true
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
@@ -49,3 +56,20 @@ ferroui-harfbuzz = { workspace = true, optional = true }
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = {workspace=true,optional=true}
+ferroui-media-apple = {workspace=true,features=["controls"]}
+ferroui-media-video-apple.workspace = true
+ferroui-media-camera-apple.workspace = true
+[target.'cfg(windows)'.dependencies]
+ferroui-media-windows = {workspace=true,features=["controls"]}
+ferroui-media-video-windows.workspace = true
+ferroui-media-camera-windows.workspace = true
+ferroui-media-opengl.workspace = true
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-x11 = { workspace = true, optional = true }
+ferroui-media-linux = {workspace=true,features=["controls"]}
+ferroui-media-video-linux.workspace = true
+ferroui-media-camera-linux.workspace = true
+ferroui-media-opengl.workspace = true
