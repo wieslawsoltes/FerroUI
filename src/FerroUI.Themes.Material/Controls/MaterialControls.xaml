@@ -83,6 +83,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SplitButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ToggleSwitch.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MediaTransportControls.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CameraCaptureUI.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NumericUpDown.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ButtonSpinner.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Expander.xaml" />

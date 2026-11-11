@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo:rerun-if-changed=native/media.c");
     println!("cargo:rerun-if-changed=native/media.h");
+    println!("cargo:rerun-if-changed=native/recording.inc");
     println!("cargo:rerun-if-changed=native/frame_tests.c");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("linux") {
         return;

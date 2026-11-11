@@ -99,6 +99,12 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
+The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
+`MediaTransportControls` and `CameraCaptureUI`) are listed in their respective
+media control crates' `WINUI_ONLY_CONTROLS` constants. The WinUI family supplies
+transport and capture templates. The element and presenter use the portable
+composition surface directly. See [portable media controls](../media/ISSUE-561.md).
+
 ### 5.2 The symbol font
 
 WinUI draws `SymbolIcon`, the default `FontIcon` and the glyphs of its templates (the back, pane toggle, settings and chevron glyphs of NavigationView, the stars of RatingControl, the severity icons of InfoBar) with the font of the theme resource `SymbolThemeFontFamily`, `Segoe Fluent Icons,Segoe MDL2 Assets` on Windows 11.
@@ -447,7 +453,7 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 
 ### 10.10 PersonPicture (G2a)
 
-`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`. The class does not clip to its bounds, where a templated control does by default: the badge of the template is 4 units above and to the right of the picture (`PersonPictureBadgeGridMargin`), as in WinUI, whose controls do not clip.
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -456,3 +462,5 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
 | The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
+| The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
+| `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |

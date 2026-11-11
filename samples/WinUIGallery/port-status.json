@@ -3916,6 +3916,66 @@
       "tests": [],
       "notes": "G1 (#418) found no SystemBackdropElement on main: the system backdrop of an element exists only inside the framework (ElementSystemBackdrop of the menu flyout presenter, crate-private). The catalog has no sample definition for the page; the element is G2 work.",
       "examples": []
+    },
+    "MediaPlayerElement": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/MediaPlayerElement.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/playback_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/playback_samples.rs",
+          "name": "media_pages_are_native_and_idle_without_a_provider"
+        }
+      ],
+      "notes": "Both source compositions use native portable MediaPlayerElement. The existing bundled Sintel H.264/AAC excerpt replaces unbundled WMV files. Load, file picker, autoplay, compact transport and full-window are wired in Rust. Desktop backend acceptance is recorded separately.",
+      "examples": []
+    },
+    "CaptureElementPreview": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/CaptureElementPreview.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/playback_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/playback_samples.rs",
+          "name": "media_pages_are_native_and_idle_without_a_provider"
+        }
+      ],
+      "notes": "The source preview uses CameraPreview through CameraCaptureUI, with explicit start/stop and no acquisition on page construction. The added capture actions return owned photos and optional silent video; recording remains disabled on providers that do not advertise it.",
+      "examples": []
+    },
+    "Sound": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Sound.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/playback_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/playback_samples.rs",
+          "name": "media_pages_are_native_and_idle_without_a_provider"
+        }
+      ],
+      "notes": "The seven two-dimensional UI sound actions play application-owned PCM cues through the native portable MediaPlayer. The toggle and volume operate that player. SpatialAudioMode is explicitly not applicable: it is a Windows UI service without a portable provider contract.",
+      "examples": []
     }
   }
 }

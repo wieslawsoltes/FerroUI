@@ -46,6 +46,9 @@ macro_rules! page {
 }
 
 pub static ADAPTATIONS: &[PageAdaptation] = &[
+    page!(ported "MediaPlayerElement", "Both compositions use the existing portable MediaPlayerElement. The shared bundled H.264/AAC Sintel excerpt replaces unbundled WMV assets. Open File uses the host storage picker; AutoPlay, poster, stretch, transport options and full-window use native controls. Platform acceptance is recorded separately in docs/media/ISSUE-561.md."),
+    page!(ported "CaptureElementPreview", "Explicit camera start/stop uses CameraPreview and the existing native camera providers, independently of video playback. CameraCaptureUI demonstrates owned photos and optional native silent video recording. Record is enabled only when the provider advertises it; no microphone is requested."),
+    page!(ported "Sound", "The two-dimensional sounds are short application-owned PCM cues played through the portable native MediaPlayer, with sound/volume controls and seven named sound actions. WinUI ElementSoundPlayer.SpatialAudioMode is Windows-specific and unavailable on the portable provider contract; the spatial example is explicitly not applicable and disabled."),
     page!("Image", "Original bitmaps, four stretch modes, decode-to-height and both NineGrid examples use native Image, Bitmap, CroppedBitmap and DrawingImage. SVG decoding and animated GIF playback remain explicit unsupported examples with visible diagnostics; exact native WinUI decoding and pixel parity remain pending."),
     page!("FlipView", "All three source compositions use native Carousel, PageSlide and PipsPager with original images, labels, horizontal/vertical layouts and the first three source data groups. WinUI container APIs, flip chrome, XY-focus, RTL and exact transition parity remain pending."),
     page!("ConnectedAnimation", "All four source compositions use the native ConnectedAnimationService with Frame/FramePage navigation, original keys, configuration choices and source image assets. ItemsControl/WrapPanel compositions explicitly adapt ListView/ItemsRepeater containers; virtualization, XY-focus, entrance transitions and exact rendering acceptance remain pending."),
@@ -148,6 +151,8 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     ferroui_controls_repeater::register_types();
     ferroui_controls_inking::register_types();
     ferroui_controls_livecharts::register_types();
+    ferroui_media_video_controls::register_types();
+    ferroui_media_camera_controls::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
     crate::frame_sample::wire(&root)?;
     crate::navigation_view_samples::wire(&root)?;
@@ -159,6 +164,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::color_picker_samples::wire(&root);
     crate::connected_animation_samples::wire(&root)?;
     crate::media_samples::wire(&root);
+    crate::playback_samples::wire(&root);
     crate::materials_samples::wire(&root);
     crate::window_samples::wire(&root);
     crate::text_samples::wire(&root);

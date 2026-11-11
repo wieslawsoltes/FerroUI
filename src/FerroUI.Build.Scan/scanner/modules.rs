@@ -372,12 +372,31 @@ impl Modules {
                 found => found,
             };
         }
+        // A glob import may bring the name as an item its module does not declare: the path
+        // of an import that is taken as written (`use crate::Name` in a module the asking
+        // module imports with `pub use module::*`, which names the asking module again and
+        // goes round until the depth ends it). Such a name does not hide the item another
+        // glob import brings; it stands when no glob import brings a declared one.
+        let mut as_written = None;
         for (source, _) in &declared.glob_sources {
             if let Some(found) = self.lookup_visiting(*source, name, None, depth + 1, visited) {
-                return Some(found);
+                if self.is_declared(&found) {
+                    return Some(found);
+                }
+                as_written.get_or_insert(found);
             }
         }
-        self.external_item(module, name)
+        as_written.or_else(|| self.external_item(module, name))
+    }
+
+    /// Whether `target` is something the scanner read: a module, a path into another crate,
+    /// or an item its module declares. An item of a known module that the module does not
+    /// declare is a path taken as written ([`Modules::resolve`]).
+    fn is_declared(&self, target: &Target) -> bool {
+        match target {
+            Target::Item { module, name, .. } => self.modules[*module].items.contains_key(name),
+            Target::Module(_) | Target::External(_) | Target::Builtin => true,
+        }
     }
 
     /// The type of another crate that `path` (a name, or a path below a module) names
@@ -610,6 +629,29 @@ mod tests {
         assert_eq!(resolved(&modules, prelude, "std::option::Other"), Some("::std::option::Other".to_string()));
         assert_eq!(resolved(&modules, prelude, "base::Brush"), Some("::base::Brush".to_string()));
         assert_eq!(resolved(&modules, prelude, "Border"), Some("::fixture::border::Border".to_string()));
+    }
+
+    /// Not from upstream: a module the root imports with a glob, which itself imports a
+    /// name from the root (`use crate::Second`), does not hide the name from the root: the
+    /// glob import of the module that declares it brings it.
+    #[test]
+    fn import_back_to_the_asking_module_does_not_hide_a_name_of_a_later_glob() {
+        let mut modules = Modules::new("fixture", &[]);
+        let first = modules.add_module(0, "first", false);
+        let second = modules.add_module(0, "second", false);
+        modules.add_item(first, "First", ItemKind::Type, true);
+        modules.add_item(second, "Second", ItemKind::Type, true);
+        glob(&mut modules, 0, "first", true);
+        glob(&mut modules, 0, "second", true);
+        import(&mut modules, first, "Second", "crate::Second", false);
+        modules.finish();
+        assert_eq!(resolved(&modules, 0, "First"), Some("::fixture::first::First".to_string()));
+        assert_eq!(resolved(&modules, 0, "Second"), Some("::fixture::second::Second".to_string()));
+        assert_eq!(resolved(&modules, first, "Second"), Some("::fixture::second::Second".to_string()));
+        assert_eq!(resolved(&modules, second, "crate::Second"), Some("::fixture::second::Second".to_string()));
+        // A name no module declares is the path of its import, as written.
+        import(&mut modules, first, "Generated", "crate::Generated", false);
+        assert_eq!(resolved(&modules, 0, "Generated"), Some("::fixture::Generated".to_string()));
     }
 
     /// Not from upstream: the public path of an item is the shortest one another crate can

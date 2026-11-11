@@ -24,6 +24,10 @@ mod ink_samples;
 mod input_samples;
 mod materials_samples;
 mod media_samples;
+pub mod playback_samples;
+#[cfg(feature = "desktop")]
+#[path = "../media_desktop.rs"]
+mod desktop_media;
 pub mod navigation;
 mod navigation_view_samples;
 mod platform_samples;
