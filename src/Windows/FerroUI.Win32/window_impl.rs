@@ -376,6 +376,12 @@ mod imp {
         fn scaling(&self) -> f64 {
             f64::from_bits(self.scaling_bits.load(Ordering::Acquire))
         }
+
+        fn swap_interval(&self) -> Option<i32> {
+            // DWM presents the redirected HWND. An additional EGL vblank
+            // wait blocks the render thread between producer and draw jobs.
+            (dwm_is_composition_enabled() == Some(true)).then_some(0)
+        }
     }
 
     impl INativePlatformHandleSurface for WindowImplPlatformHandle {

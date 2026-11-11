@@ -265,6 +265,9 @@ document_tests! {
     controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
     controls_person_picture => "/Controls/PersonPicture.xaml";
+    // The media controls (docs/media/ISSUE-561.md)
+    controls_camera_capture_ui => "/Controls/CameraCaptureUI.xaml";
+    controls_media_transport_controls => "/Controls/MediaTransportControls.xaml";
     controls_pager_control => "/Controls/PagerControl.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_frame => "/Controls/Frame.xaml";

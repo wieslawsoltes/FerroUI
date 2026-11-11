@@ -169,16 +169,32 @@ def without_features(items: list[dict]) -> list[dict]:
                   key=lambda item: json.dumps(item, sort_keys=True))
 
 
+def unit_key(item: dict) -> str:
+    """What names a unit in the reports: its package, target and kind."""
+    return f"{item.get('package')} {item.get('name')} {','.join(item.get('kind', []))}"
+
+
 def changed_features(first: list[dict], second: list[dict]) -> list[str]:
-    """The units (package, target and kind) whose features differ between two builds."""
+    """The units (package, target and kind) of both builds whose features differ between them."""
     def features(items):
         found = {}
         for item in items:
-            key = f"{item.get('package')} {item.get('name')} {','.join(item.get('kind', []))}"
-            found.setdefault(key, []).append(item.get("features", []))
+            found.setdefault(unit_key(item), []).append(item.get("features", []))
         return {key: sorted(value) for key, value in found.items()}
     first, second = features(first), features(second)
-    return sorted(key for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+    return sorted(key for key in first.keys() & second.keys() if first[key] != second[key])
+
+
+def changed_unit_set(first: list[dict], second: list[dict]) -> dict:
+    """The units only one of two builds has: those the second adds and those it no longer builds."""
+    before, after = {unit_key(item) for item in first}, {unit_key(item) for item in second}
+    return {"added": sorted(after - before), "removed": sorted(before - after)}
+
+
+def common_units(items: list[dict], other: list[dict]) -> list[dict]:
+    """The units of a build that another build has too (by package, target and kind)."""
+    keys = {unit_key(item) for item in other}
+    return [item for item in items if unit_key(item) in keys]
 
 
 def changed_outputs(first: dict, second: dict) -> list[str]:
@@ -209,9 +225,16 @@ def summarize(records: list[dict], allow_build_tool_optimization: bool = False) 
             without_features(comparable_units(row["units"], allow_build_tool_optimization))
             == without_features(comparable_units(reference_units, allow_build_tool_optimization))
             for row in records),
+        # An acknowledged change of the set of units (the same label): a pull request that gives the
+        # package a dependency builds more units. The units both revisions build keep their profiles.
+        "common_units_keep_allowed_profiles": all(
+            without_features(comparable_units(common_units(row["units"], reference_units), allow_build_tool_optimization))
+            == without_features(comparable_units(common_units(reference_units, row["units"]), allow_build_tool_optimization))
+            for row in records),
         "units_deterministic_per_revision": all(row["units"] == rows[0]["units"]
                                                 for rows in (baseline, candidate) for row in rows),
         "changed_unit_features": changed_features(reference_units, candidate[0]["units"]),
+        "changed_unit_set": changed_unit_set(reference_units, candidate[0]["units"]),
         "build_tool_optimization_experiment": allow_build_tool_optimization,
         "same_generated_rust_and_metadata": all(row["generated"] == reference_generated for row in records),
         # Each revision repeats its own generated output (what an acknowledged output change still needs).
@@ -305,6 +328,17 @@ def main() -> int:
                      f"{len(changed)} units are built with other features than the baseline's:\n\n"
                      + "".join(f"- `{name}`\n" for name in changed[:50])
                      + (f"- ... {len(changed) - 50} more\n" if len(changed) > 50 else ""))
+        unit_set = summary["changed_unit_set"]
+        if args.accept_output_changes and (unit_set["added"] or unit_set["removed"]):
+            more = max(len(unit_set["added"]) - 50, 0) + max(len(unit_set["removed"]) - 50, 0)
+            text += ("\n### Unit changes acknowledged (`build-output-changes`)\n\n"
+                     f"The units of both revisions keep their profiles: **{summary['common_units_keep_allowed_profiles']}**. "
+                     f"Each revision repeats its own units: **{summary['units_deterministic_per_revision']}**. "
+                     f"The candidate builds {len(unit_set['added'])} units the baseline does not and leaves out "
+                     f"{len(unit_set['removed'])} of the baseline's, so the two medians are of different workloads:\n\n"
+                     + "".join(f"- added `{name}`\n" for name in unit_set["added"][:50])
+                     + "".join(f"- removed `{name}`\n" for name in unit_set["removed"][:50])
+                     + (f"- ... {more} more\n" if more else ""))
         (args.output / "summary.md").write_text(text)
         print(text)
         if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -313,7 +347,7 @@ def main() -> int:
         same_outputs = summary["same_generated_rust_and_metadata"] or (
             args.accept_output_changes and summary["generated_deterministic_per_revision"])
         same_units = summary["same_units_features_and_allowed_profiles"] or (
-            args.accept_output_changes and summary["same_units_and_allowed_profiles"]
+            args.accept_output_changes and summary["common_units_keep_allowed_profiles"]
             and summary["units_deterministic_per_revision"])
         valid = same_units and same_outputs and summary["all_units_cold"]
         if not valid:

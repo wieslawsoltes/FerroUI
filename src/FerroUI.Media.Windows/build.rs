@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo:rerun-if-changed=native/media.cpp");
     println!("cargo:rerun-if-changed=native/media.h");
+    println!("cargo:rerun-if-changed=native/recording.inc");
     println!("cargo:rerun-if-changed=native/mp4_geometry.cpp");
     println!("cargo:rerun-if-changed=native/mp4_geometry_tests.cpp");
     println!("cargo:rerun-if-changed=native/frame_tests.cpp");

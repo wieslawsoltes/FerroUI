@@ -51,6 +51,32 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(compare.summarize(records)["same_units_and_allowed_profiles"])
 
 
+    def test_added_units_are_reported_and_the_units_of_both_keep_their_profiles(self):
+        # A pull request that gives the package a dependency builds more units.
+        added = UNITS + [{"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"},
+                          "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=added),
+                   dict(row("candidate", {}), units=added), row("baseline", {})]
+        summary = compare.summarize(records)
+        self.assertFalse(summary["same_units_and_allowed_profiles"])
+        self.assertTrue(summary["common_units_keep_allowed_profiles"])
+        self.assertTrue(summary["units_deterministic_per_revision"])
+        self.assertEqual(summary["changed_unit_set"], {"added": ["q q lib"], "removed": []})
+        self.assertEqual(summary["changed_unit_features"], [])
+
+    def test_a_unit_of_both_with_another_profile_is_not_an_added_unit(self):
+        other = [dict(UNITS[0], profile={"opt_level": "3"}),
+                 {"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"}, "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=other)]
+        self.assertFalse(compare.summarize(records)["common_units_keep_allowed_profiles"])
+
+    def test_a_revision_that_does_not_repeat_its_units_is_not_deterministic(self):
+        added = UNITS + [{"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"},
+                          "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=added), row("candidate", {})]
+        self.assertFalse(compare.summarize(records)["units_deterministic_per_revision"])
+
+
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])

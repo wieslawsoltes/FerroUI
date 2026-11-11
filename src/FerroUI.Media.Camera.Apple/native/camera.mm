@@ -42,6 +42,8 @@ extern "C" int ferroui_camera_frame_duration_contract() {
         && !CMTIME_IS_VALID(FerroCameraFrameDuration(30.,1.,30.,kCMTimeInvalid,maximum));
 }
 #endif
+#include "recording.inc"
+
 @class FerroPortableCamera;
 @interface FerroPortablePhoto : NSObject<AVCapturePhotoCaptureDelegate>
 @property(nonatomic,weak) FerroPortableCamera *owner;
@@ -99,6 +101,7 @@ extern "C" int ferroui_camera_frame_duration_contract() {
 @property(nonatomic,strong) AVCaptureDevice *device;
 @property(nonatomic,strong) AVCaptureVideoDataOutput *video;
 @property(nonatomic,strong) AVCapturePhotoOutput *photo;
+@property(nonatomic,strong) FerroPortableRecording *recording;
 @property(nonatomic,strong) dispatch_queue_t queue;
 @property(nonatomic,strong) id disconnectObserver,runtimeObserver;
 @property(nonatomic,copy) NSDictionary *settings;
@@ -120,6 +123,9 @@ extern "C" int ferroui_camera_frame_duration_contract() {
         _latest=CVPixelBufferRetain(buffer);
         _timestamp=CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample));
     }
+    FerroPortableRecording *recording;
+    @synchronized(self) { recording=_recording; }
+    [recording append:sample];
 }
 - (void)close {
     AVCaptureSession *session;
@@ -131,6 +137,7 @@ extern "C" int ferroui_camera_frame_duration_contract() {
         if (_latest) {CVPixelBufferRelease(_latest);_latest=nullptr;}
         _status=-6;_error=@"Camera was stopped";
         session=_session;video=_video;
+        [_recording cancel]; _recording=nil;
         _session=nil;_video=nil;_photo=nil;_device=nil;
         disconnectObserver=_disconnectObserver;runtimeObserver=_runtimeObserver;
         _disconnectObserver=nil;_runtimeObserver=nil;
@@ -426,5 +433,117 @@ extern "C" void *ferroui_camera_lifetime_fixture() {
 }
 extern "C" int ferroui_camera_lifetime_result() {
     return FerroCameraTestDrops.load()==1 && FerroCameraTestStops.load()==1;
+}
+#endif
+
+extern "C" {
+struct FerroPortableVideoInfo { uint64_t length; uint32_t width,height; double duration; };
+void *ferroui_portable_camera_record(void *p) {
+    FerroPortableCamera *owner=(__bridge FerroPortableCamera *)p;
+    @synchronized(owner) {
+        if (owner.stopped || owner.status!=1) return nullptr;
+        bool expected=false;
+        if (!FerroPortableRecordingBusy.compare_exchange_strong(expected,true)) return nullptr;
+        FerroPortableRecording *request=[FerroPortableRecording new]; request.queue=owner.queue;
+        owner.recording=request;
+        return (__bridge_retained void *)request;
+    }
+}
+void ferroui_portable_recording_finish(void *p) { [(__bridge FerroPortableRecording *)p finish]; }
+void ferroui_portable_recording_cancel(void *p) { [(__bridge FerroPortableRecording *)p cancel]; }
+int ferroui_portable_recording_state(void *p,FerroPortableVideoInfo *info) {
+    FerroPortableRecording *request=(__bridge FerroPortableRecording *)p;
+    @synchronized(request) {
+        if (request.status!=1) return request.status;
+        info->length=request.data.length; info->width=request.width; info->height=request.height; info->duration=request.duration;
+        return 1;
+    }
+}
+int ferroui_portable_recording_copy(void *p,uint8_t *bytes,size_t capacity) {
+    FerroPortableRecording *request=(__bridge FerroPortableRecording *)p;
+    @synchronized(request) {
+        if (request.status!=1 || !request.data.length || request.data.length>capacity) return 0;
+        memcpy(bytes,request.data.bytes,request.data.length);
+        request.data=nil; // Encoded output now belongs to Rust.
+        return 1;
+    }
+}
+void ferroui_portable_recording_release(void *p) {
+    if (!p) return;
+    FerroPortableRecording *request=(__bridge_transfer FerroPortableRecording *)p;
+    [request cancel];
+    // The camera refers to its last recording until it records again or closes: a movie that was
+    // encoded and never copied would live as long (cancel leaves a completed recording alone).
+    @synchronized(request) { request.data=nil; }
+}
+}
+
+#ifdef FERROUI_CAMERA_LIFETIME_TESTS
+// This in-process encoder fixture does not enumerate, authorize or open a camera.
+extern "C" int ferroui_camera_recording_contract() {
+    @autoreleasepool {
+        bool expected=false;
+        if (!FerroPortableRecordingBusy.compare_exchange_strong(expected,true)) return 0;
+        FerroPortableRecording *request=[FerroPortableRecording new];
+        request.queue=dispatch_queue_create("org.ferroui.camera.recording.fixture",DISPATCH_QUEUE_SERIAL);
+        for (int frame=0;frame<8;++frame) {
+            CVPixelBufferRef pixel=nullptr;
+            if (CVPixelBufferCreate(kCFAllocatorDefault,32,32,kCVPixelFormatType_32BGRA,
+                (__bridge CFDictionaryRef)@{(id)kCVPixelBufferIOSurfacePropertiesKey:@{}},&pixel)!=kCVReturnSuccess) {
+                [request cancel]; return 0;
+            }
+            CVPixelBufferLockBaseAddress(pixel,0);
+            memset(CVPixelBufferGetBaseAddress(pixel),frame*24,CVPixelBufferGetBytesPerRow(pixel)*32);
+            CVPixelBufferUnlockBaseAddress(pixel,0);
+            CMVideoFormatDescriptionRef format=nullptr;
+            CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault,pixel,&format);
+            CMSampleTimingInfo timing={CMTimeMake(1,30),CMTimeMake(frame,30),kCMTimeInvalid};
+            CMSampleBufferRef sample=nullptr;
+            CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault,pixel,format,&timing,&sample);
+            dispatch_sync(request.queue,^{[request append:sample];});
+            if(sample)CFRelease(sample); if(format)CFRelease(format); CVPixelBufferRelease(pixel);
+            [NSThread sleepForTimeInterval:0.015];
+        }
+        [request finish];
+        NSDate *deadline=[NSDate dateWithTimeIntervalSinceNow:10];
+        int status=0;
+        while ([deadline timeIntervalSinceNow]>0) {
+            @synchronized(request) {status=request.status;}
+            if(status!=0)break;
+            [NSThread sleepForTimeInterval:0.005];
+        }
+        if(status!=1 || request.data.length<100 || request.width!=32 || request.height!=32 || request.duration<=0.05) {
+            fprintf(stderr,"RECORD_FIXTURE output status=%d bytes=%lu size=%ux%u duration=%f\n",status,(unsigned long)request.data.length,request.width,request.height,request.duration);
+            [request cancel]; return 0;
+        }
+        // Inspect the produced container independently of the recording metadata.
+        NSURL *url=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:
+            [NSString stringWithFormat:@"ferroui-recording-test-%@.mp4",NSUUID.UUID.UUIDString]]];
+        if(![request.data writeToURL:url atomically:YES])return 0;
+        AVURLAsset *asset=[AVURLAsset URLAssetWithURL:url options:nil];
+        NSArray<AVAssetTrack *> *tracks=[asset tracksWithMediaType:AVMediaTypeVideo];
+        BOOL good=tracks.count==1 && [asset tracksWithMediaType:AVMediaTypeAudio].count==0;
+        if(good) {
+            NSError *error=nil;
+            AVAssetReader *reader=[[AVAssetReader alloc] initWithAsset:asset error:&error];
+            AVAssetReaderTrackOutput *output=[[AVAssetReaderTrackOutput alloc] initWithTrack:tracks.firstObject outputSettings:nil];
+            good=reader && [reader canAddOutput:output];
+            int samples=0;
+            if(good) {
+                [reader addOutput:output]; good=[reader startReading];
+                CMSampleBufferRef sample;
+                while(good && (sample=[output copyNextSampleBuffer])) {++samples; CFRelease(sample);}
+                good=good && samples>=2 && reader.status==AVAssetReaderStatusCompleted;
+            }
+        }
+        [[NSFileManager defaultManager] removeItemAtURL:url error:nil];
+        if(!good || FerroPortableRecordingBusy.load()){fprintf(stderr,"RECORD_FIXTURE container good=%d busy=%d tracks=%lu\n",good,(int)FerroPortableRecordingBusy.load(),(unsigned long)tracks.count);return 0;}
+        // Cancel before the first frame must retire the same slot and temp file.
+        expected=false;
+        if(!FerroPortableRecordingBusy.compare_exchange_strong(expected,true))return 0;
+        FerroPortableRecording *cancelled=[FerroPortableRecording new]; cancelled.queue=request.queue;
+        [cancelled cancel]; dispatch_sync(cancelled.queue,^{});
+        return cancelled.status==-2 && !FerroPortableRecordingBusy.load();
+    }
 }
 #endif

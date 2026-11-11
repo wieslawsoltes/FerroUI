@@ -265,6 +265,8 @@ fn a_late_photo_is_canceled_but_completed_encoded_output_is_independent() {
             )),
             frames: Arc::new(FrameMailbox::new(1, 1)),
             stopped: Cell::new(false),
+            recording_busy: Cell::new(false),
+            recording: RefCell::new(None),
         }))
     };
     let first = session(false);
@@ -325,4 +327,126 @@ fn provider_rebind_cancels_provisional_start_and_preserves_capture_identity_and_
     assert_eq!(next.starts.get(), 1);
     session.stop();
     assert_eq!(native.stops.get(), 1);
+}
+
+struct RecordingFixture {
+    cancellations: Rc<Cell<u32>>,
+}
+impl NativeCameraRecording for RecordingFixture {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        Box::pin(async {
+            Ok(CameraVideo {
+                encoded: Arc::from([1u8, 2, 3]),
+                content_type: "video/mp4".into(),
+                width: 16,
+                height: 16,
+                duration: Duration::from_secs(1),
+            })
+        })
+    }
+    fn cancel(&self) {
+        self.cancellations.set(self.cancellations.get() + 1);
+    }
+}
+struct RecordingCamera {
+    native: Native,
+    cancellations: Rc<Cell<u32>>,
+}
+impl NativeCameraSession for RecordingCamera {
+    fn settings(&self) -> CameraSettings {
+        self.native.settings()
+    }
+    fn take_frame(&self) -> Result<Option<FrameLease>, CameraError> {
+        Ok(None)
+    }
+    fn photo(&self) -> CameraFuture<CameraPhoto> {
+        self.native.photo()
+    }
+    fn supports_video_recording(&self) -> bool {
+        true
+    }
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let recording: Rc<dyn NativeCameraRecording> = Rc::new(RecordingFixture {
+            cancellations: self.cancellations.clone(),
+        });
+        Box::pin(async move { Ok(recording) })
+    }
+    fn set_control(&self, control: CameraControl) -> Result<(), CameraError> {
+        self.native.set_control(control)
+    }
+    fn stop(&self) {
+        self.native.stop();
+    }
+}
+fn recording_session() -> (CameraSession, Rc<Cell<u32>>) {
+    let cancellations = Rc::new(Cell::new(0));
+    let session = CameraSession(Rc::new(SessionInner {
+        native: Rc::new(RecordingCamera {
+            native: Native {
+                stops: Cell::new(0),
+            },
+            cancellations: cancellations.clone(),
+        }),
+        frames: Arc::new(FrameMailbox::new(100, 1)),
+        stopped: Cell::new(false),
+        recording_busy: Cell::new(false),
+        recording: RefCell::new(None),
+    }));
+    (session, cancellations)
+}
+#[test]
+fn recording_is_exclusive_and_drop_cancels_the_native_transaction() {
+    let (session, cancellations) = recording_session();
+    let recording = ready(session.start_recording()).unwrap();
+    assert_eq!(
+        ready(session.start_recording()).err().unwrap().kind,
+        CameraErrorKind::Busy
+    );
+    drop(recording);
+    assert_eq!(cancellations.get(), 1);
+    let next = ready(session.start_recording()).unwrap();
+    let video = ready(next.finish()).unwrap();
+    assert_eq!(&*video.encoded, &[1, 2, 3]);
+    assert_eq!(
+        cancellations.get(),
+        1,
+        "completed output must not be cancelled"
+    );
+    session.stop();
+    assert_eq!(
+        &*video.encoded,
+        &[1, 2, 3],
+        "encoded results outlive the capture session"
+    );
+}
+#[test]
+fn stopping_a_camera_rejects_a_pending_recording_result() {
+    let (session, cancellations) = recording_session();
+    let recording = ready(session.start_recording()).unwrap();
+    let pending = recording.finish();
+    session.stop();
+    assert_eq!(cancellations.get(), 1);
+    assert_eq!(
+        ready(pending).err().unwrap().kind,
+        CameraErrorKind::Cancelled
+    );
+    assert_eq!(cancellations.get(), 1, "native cancellation is idempotent");
+}
+#[test]
+fn dropping_recording_preparation_releases_its_admission_slot() {
+    let (session, _) = recording_session();
+    let pending = session.start_recording();
+    drop(pending);
+    assert!(ready(session.start_recording()).is_ok());
+}
+#[test]
+fn preview_support_does_not_advertise_recording() {
+    let native = Native {
+        stops: Cell::new(0),
+    };
+    assert!(!native.supports_video_recording());
+    assert_eq!(
+        ready(native.start_recording()).err().unwrap().kind,
+        CameraErrorKind::Unsupported
+    );
 }

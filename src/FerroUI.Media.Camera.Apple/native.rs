@@ -2,10 +2,11 @@
 use ferroui_media_apple::PixelBuffer;
 use ferroui_media_camera::{CameraError, CameraErrorKind, CameraPermission, CameraSelection};
 use std::{
-    ffi::{CStr, CString, c_char, c_void},
+    ffi::{c_char, c_void, CStr, CString},
     marker::PhantomData,
     ptr::NonNull,
     rc::Rc,
+    task::Poll,
 };
 extern "C" {
     fn ferroui_portable_camera_permission() -> i32;
@@ -28,6 +29,12 @@ extern "C" {
     fn ferroui_portable_photo_state(p: *mut c_void, info: *mut PhotoInfo) -> i32;
     fn ferroui_portable_photo_copy(p: *mut c_void, bytes: *mut u8, capacity: usize) -> i32;
     fn ferroui_portable_photo_release(p: *mut c_void);
+    fn ferroui_portable_camera_record(p: *mut c_void) -> *mut c_void;
+    fn ferroui_portable_recording_finish(p: *mut c_void);
+    fn ferroui_portable_recording_cancel(p: *mut c_void);
+    fn ferroui_portable_recording_state(p: *mut c_void, info: *mut VideoInfo) -> i32;
+    fn ferroui_portable_recording_copy(p: *mut c_void, bytes: *mut u8, capacity: usize) -> i32;
+    fn ferroui_portable_recording_release(p: *mut c_void);
 }
 fn failed(kind: CameraErrorKind, text: &str) -> CameraError {
     CameraError::new(kind, text)
@@ -219,6 +226,11 @@ mod tests {
         fn ferroui_camera_lifetime_fixture() -> *mut c_void;
         fn ferroui_camera_lifetime_result() -> i32;
         fn ferroui_camera_frame_duration_contract() -> i32;
+        fn ferroui_camera_recording_contract() -> i32;
+    }
+    #[test]
+    fn native_silent_video_encodes_and_cancellation_retires_the_slot() {
+        assert_eq!(unsafe { ferroui_camera_recording_contract() }, 1);
     }
     #[test]
     fn native_frame_duration_keeps_exact_supported_boundaries() {
@@ -238,5 +250,101 @@ mod tests {
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
         assert_eq!(unsafe { ferroui_camera_lifetime_result() }, 1);
+    }
+}
+
+#[repr(C)]
+#[derive(Default)]
+pub struct VideoInfo {
+    pub length: u64,
+    pub width: u32,
+    pub height: u32,
+    pub duration: f64,
+}
+pub struct Recording {
+    handle: NonNull<c_void>,
+    _thread: PhantomData<Rc<()>>,
+}
+impl Camera {
+    pub fn record(&self) -> Result<Recording, CameraError> {
+        let handle = NonNull::new(unsafe { ferroui_portable_camera_record(self.handle.as_ptr()) })
+            .ok_or_else(|| {
+                failed(
+                    CameraErrorKind::Busy,
+                    "Native recording is unavailable or busy",
+                )
+            })?;
+        Ok(Recording {
+            handle,
+            _thread: PhantomData,
+        })
+    }
+}
+impl Recording {
+    pub fn finish(&self) {
+        unsafe {
+            ferroui_portable_recording_finish(self.handle.as_ptr());
+        }
+    }
+    pub fn cancel(&self) {
+        unsafe {
+            ferroui_portable_recording_cancel(self.handle.as_ptr());
+        }
+    }
+    pub fn poll(&self) -> Poll<Result<ferroui_media_camera::CameraVideo, CameraError>> {
+        let mut info = VideoInfo::default();
+        match unsafe { ferroui_portable_recording_state(self.handle.as_ptr(), &mut info) } {
+            0 => Poll::Pending,
+            1 => {
+                if info.length == 0
+                    || info.length > 256 * 1024 * 1024
+                    || info.width == 0
+                    || info.height == 0
+                    || !info.duration.is_finite()
+                    || info.duration <= 0.
+                {
+                    return Poll::Ready(Err(failed(
+                        CameraErrorKind::NativeFailure,
+                        "Invalid encoded camera video",
+                    )));
+                }
+                let mut bytes = vec![0; info.length as usize];
+                if unsafe {
+                    ferroui_portable_recording_copy(
+                        self.handle.as_ptr(),
+                        bytes.as_mut_ptr(),
+                        bytes.len(),
+                    )
+                } != 1
+                {
+                    return Poll::Ready(Err(failed(
+                        CameraErrorKind::Cancelled,
+                        "Recording was cancelled",
+                    )));
+                }
+                Poll::Ready(Ok(ferroui_media_camera::CameraVideo {
+                    encoded: bytes.into(),
+                    content_type: "video/mp4".into(),
+                    width: info.width,
+                    height: info.height,
+                    duration: std::time::Duration::from_secs_f64(info.duration),
+                }))
+            }
+            -2 => Poll::Ready(Err(failed(
+                CameraErrorKind::Cancelled,
+                "Recording was cancelled",
+            ))),
+            _ => Poll::Ready(Err(failed(
+                CameraErrorKind::NativeFailure,
+                "Native video encoding failed",
+            ))),
+        }
+    }
+}
+impl Drop for Recording {
+    fn drop(&mut self) {
+        unsafe {
+            ferroui_portable_recording_release(self.handle.as_ptr());
+        }
     }
 }

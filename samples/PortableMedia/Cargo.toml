@@ -24,7 +24,7 @@ ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
 image = { version = "0.25", default-features = false, features = ["jpeg"] }
 ferroui-desktop.workspace = true
-ferroui-themes-fluent.workspace = true
+ferroui-themes-winui.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-skia = {workspace=true,optional=true}

@@ -236,6 +236,15 @@ impl NativeCameraSession for AppleCameraSession {
             )),
         }
     }
+    fn supports_video_recording(&self) -> bool {
+        true
+    }
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let recording = self.camera.record().map(|native| {
+            Rc::new(AppleCameraRecording(Rc::new(native))) as Rc<dyn NativeCameraRecording>
+        });
+        Box::pin(async move { recording })
+    }
     fn photo(&self) -> CameraFuture<CameraPhoto> {
         if !self.settings.native_still {
             return Box::pin(async {
@@ -307,5 +316,17 @@ impl NativeCameraSession for AppleCameraSession {
     }
     fn stop(&self) {
         self.camera.stop();
+    }
+}
+
+struct AppleCameraRecording(Rc<native::Recording>);
+impl NativeCameraRecording for AppleCameraRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        self.0.finish();
+        let native = self.0.clone();
+        wait(move || native.poll())
+    }
+    fn cancel(&self) {
+        self.0.cancel();
     }
 }

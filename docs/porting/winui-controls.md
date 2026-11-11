@@ -99,6 +99,12 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
+The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
+`MediaTransportControls` and `CameraCaptureUI`) are listed in their respective
+media control crates' `WINUI_ONLY_CONTROLS` constants. The WinUI family supplies
+transport and capture templates. The element and presenter use the portable
+composition surface directly. See [portable media controls](../media/ISSUE-561.md).
+
 ### 5.2 The symbol font
 
 WinUI draws `SymbolIcon`, the default `FontIcon` and the glyphs of its templates (the back, pane toggle, settings and chevron glyphs of NavigationView, the stars of RatingControl, the severity icons of InfoBar) with the font of the theme resource `SymbolThemeFontFamily`, `Segoe Fluent Icons,Segoe MDL2 Assets` on Windows 11.

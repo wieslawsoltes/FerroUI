@@ -66,7 +66,7 @@ impl ApplicationImpl for App {
         Self::parent_initialize(this);
         ferroui_media_video_controls::register_types();
         this.styles()
-            .add(ferroui_themes_fluent::FluentTheme::new().as_style());
+            .add(ferroui_themes_winui::WinUITheme::new().as_style());
     }
     fn on_framework_initialization_completed(this: &Self) {
         if let Some(lifetime) = this
