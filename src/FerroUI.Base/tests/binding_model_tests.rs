@@ -459,7 +459,7 @@ fn template_binding_follows_the_templated_parent_without_observing_its_target() 
     assert_eq!(child.get_value(Target::text_property()), "second");
     first.set_value(Target::text_property(), s("not followed"));
     assert_eq!(child.get_value(Target::text_property()), "second");
-    child.set_templated_parent(None::<Ref<FerroObject>>);
+    child.set_templated_parent(None::<Ref<crate::FerroObject>>);
     assert_eq!(child.get_value(Target::text_property()), "default");
     assert_eq!(first.property_changed_subscriber_count(), 0);
     assert_eq!(second.property_changed_subscriber_count(), 0);
