@@ -621,6 +621,27 @@ What it measures:
   ```sh
   cargo test -p ferroui-frame-benchmarks --release --test frames -- --ignored --nocapture --test-threads=1
   ```
+
+  The scenes of the start (`startup/tiles`: 58,696 tiles of six elements on a canvas, 352,187
+  elements; `startup/controls`: 1,600 templated controls of the Fluent theme, 24,017 visuals) are
+  shown once and measured to their first frame: the build, the show, the time from the show to
+  the first frame (`first_frame_ms`) and their sum, and the resident memory each of them added
+  (`build_mb`, `show_mb`, `first_frame_mb`, `startup_mb`). `sizes_of_an_element` prints the
+  sizes of the objects an element is made of (the element class by class, its composition visual
+  and the visual of the render thread); the gate compares each. With the `counters` feature
+  (`--features counters`) a start also prints the allocations of each phase and the blocks it
+  left alive by size class, and the counters of the framework (section 9.40). The gate runs every
+  test of the start (`start_of_*`) in a process of its own and the scenes of the frames in a
+  process without them: a start is the start of a process that has built nothing yet, and a scene
+  of the start leaves the heap and the caches of the process in a state that moves the build of
+  every scene measured after it (the `text` scene builds in 3.65 ms in a process of the frames
+  alone and in 4.2 to 5.0 ms after the two starts). Before the first scene of the frames a
+  process measures, the harness shows a small scene made of what the scenes use (text, rounded
+  borders, polylines, panels) and runs 30 frames of it, once: what a process does once is then in
+  no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
+  started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
+  started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
+  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case.
 - **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
   framework's tree mechanics on walls of small tiles, in an application with a desktop's services
   (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
@@ -659,6 +680,9 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 | TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
 | Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
 | Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
+| First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
+| Memory of a start (`build_mb`, `show_mb`, `first_frame_mb`; `startup_mb`) | 2; 1 | resident memory moves with what the allocator returns to the system; the sum less (floor 1 MB) |
+| Size of an object of an element (`sizes/...`) | 0 | exact: any growth is a regression |
 | Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
@@ -2588,3 +2612,215 @@ What it costs, and what it does not:
 - **Not changed:** an isolate whose end is after a paragraph separator, in classes given
   to `process_classes` directly, stops with "Internal error" as it did. The text formatter
   gives the algorithm one paragraph at a time, where it cannot happen.
+
+
+### 9.40 The start of a large tree: what an element costs before its first frame
+
+The frames of a scene were measured from the first; what a window costs until it shows its
+first frame was not. Two scenes of the start are measured now, phase by phase and with the
+memory each phase adds (section 7): `startup/tiles`, 58,696 tiles of six elements on a
+canvas (352,187 elements), and `startup/controls`, 1,600 templated controls of the Fluent
+theme (24,017 visuals). The tiles start is the one that shows what an element costs: it
+took 2.6 seconds and 3.7 GB, about 10.5 KB for an element, of which the element itself was
+under 2.2 KB. The rest was its composition visual on the two threads, the batch that
+carried it and the queues the first pass filled.
+
+Seven changes, each measured before the next:
+
+- **The dirty sets of the renderer are stamps on the visuals.** `CompositingRenderer` kept
+  the visuals to update, those whose properties changed and those whose children are
+  recalculated in three hash sets of handles: every invalidation of every element hashed a
+  handle and probed a table. A visual now carries the epoch of the sets of its renderer and
+  one bit for each (`Visual::renderer_sets`); the sets are lists in the order of adding
+  (`VisualSets`), and emptying them takes a new epoch and visits no visual.
+- **A new composition visual does not send its defaults.** The constructor set eight
+  defaults through the setters, so the first batch of every visual carried them: about 130
+  bytes a visual, 48 MB for the tiles. The generator writes the defaults into the fields of
+  both sides (one table, `DIRECT_DEFAULTS`), and the first changes a server visual reads
+  report the eight fields as changed, so the same inputs are dirty in the same pass.
+- **A list of handlers is one pointer wide.** `HandlerList` (`ferroui-system`) held a cell
+  with a borrow flag and the source of its tokens, thirty-two bytes for an event nobody
+  listens to, and an element has twelve of them in its base classes. The list is the
+  pointer alone, taken out of its cell for the length of an operation; the tokens come
+  from one counter of the process, so they are unique and increasing across lists.
+- **The coercion fields of an effective value are boxed, and so is the hit test index of a
+  visual.** An effective value kept the two uncoerced values of a property with a coercion
+  callback inline in every value (a `Thickness` value is 176 bytes instead of 264, a
+  reference 144 instead of 200); a visual kept the index of its children for hit testing
+  inline, 120 bytes that only a visual with thirty-two children or more uses.
+- **The handles of a generated property block are in a cell without a borrow flag.**
+  `OptionCell` is what `RefCell<Option<Rc<_>>>` was used for (a read clones, a write
+  replaces), eight bytes smaller for each of the eight handles of a visual on each side.
+- **An emptied transport buffer keeps at most four megabytes.** The streams of a batch,
+  the readback queue, the serialization queue and its set, the own-properties queue and
+  the loaded queue grew to the size of the first batch and kept it for the life of the
+  window, about 390 MB for the tiles. Each gives back what is beyond
+  `RETAINED_BUFFER_BYTES` when it is emptied (`utilities::ReleaseExcess`). The largest
+  batch of the steady-state scenes is under three percent of the limit.
+- **The rarely set properties of a visual are in a second block.** The transform other
+  than the offset, the geometry clip, the opacity mask, the effect, the cache mode, the
+  adorner link and the WinUI additions (twenty-one properties, `RARE_FIELDS` of
+  `scripts/generate_composition.py`) are about four hundred bytes on each side, and few
+  visuals set any of them. The block is made, on both threads, when one of them is first
+  given another value than the one it is made with (`has_rare_properties`).
+
+The sizes, in bytes (`sizes_of_an_element`, kept exact by the gate):
+
+| Object | Before | After |
+|---|---:|---:|
+| `Border` | 2168 | 1880 |
+| `TextBlock` | 2136 | 1848 |
+| `StackPanel` | 1864 | 1576 |
+| `CompositionVisual` (UI thread) | 1032 | 480 |
+| `ServerCompositionVisual` | 1080 | 624 |
+
+The tiles start, median of five runs alternating the two builds on a quiet machine:
+
+| Figure | Before | After | Change |
+|---|---:|---:|---:|
+| Build of the tree (`build_ms`) | 470.1 | 409.6 | -12.9 % |
+| Show: attach, styles, layout (`show_ms`) | 899.5 | 732.0 | -18.6 % |
+| First frame, UI thread (`first_ui_ms`) | 374.3 | 337.1 | -9.9 % |
+| First frame, render thread (`first_render_ms`) | 731.9 | 632.5 | -13.6 % |
+| Show to first frame (`first_frame_ms`) | 1035.3 | 898.1 | -13.3 % |
+| Start (`startup_ms`) | 2596.1 | 2201.7 | -15.2 % |
+| Memory of the build (`build_mb`) | 1422.2 | 1129.8 | -20.6 % |
+| Memory of the show (`show_mb`) | 1005.7 | 713.1 | -29.1 % |
+| Memory of the first frame (`first_frame_mb`) | 1277.4 | 1009.0 | -21.0 % |
+| Memory of the start (`startup_mb`) | 3705.3 | 2851.9 | -23.0 % |
+
+The controls start, where an element is a small part of what a control costs, was measured
+for the last change alone: 302.6 to 297.9 ms and 367.2 to 350.5 MB.
+
+What it costs, and what it does not:
+
+- **Resident memory does not show the transport buffers.** The buffers that are given
+  back are about 230 MB of heap for the tiles, and the macOS allocator keeps freed large
+  blocks resident until the system asks for memory: `first_frame_mb` is the same with and
+  without that change. What lowers the footprint is not making them, which is later work.
+- **A visual that sets a rare property pays one allocation for the block,** once, and a
+  read of such a property of a visual without the block returns the value it would be
+  made with. A visual that sets none of them never has it.
+- **A removed visual stays in a set of the renderer until the set is compacted** (when
+  the stale entries are half of the list, or the set is read), not until the removal.
+- **`HandlerList::with_shared_ids` and `with_ordered_ids` are gone:** every list has what
+  they asked for.
+- **Tests:** `object_size_tests` keeps the two visuals in the allocator blocks they fit in
+  now; `compositor_tests` covers the rare block on both threads and the defaults of a new
+  visual; `release_excess` and `option_cell` have their own.
+
+### 9.41 Composition visuals on demand: an element that draws nothing and sets nothing has none
+
+Every attached element had a composition visual on the UI thread and a server visual on the
+render thread, made when it joined the tree. A third of the elements of the tiles start
+(117,399 of 352,187) record no drawing and set nothing the compositor applies: a panel
+without a background, a presenter, a decorator. Their two visuals did nothing but move
+their children, which an offset does as well.
+
+An attached element now has a composition visual or has none yet. It gets one, and keeps
+it until it leaves the tree, when one of these holds (`Visual::needs_own_composition_visual`):
+
+- it is the root of its presentation source;
+- its recording is not empty (`RenderDataDrawingContext::recorded_nothing`);
+- it sets something the compositor applies: an opacity other than one, a clip (to its bounds or a
+  geometry), an opacity mask, an effect, a cache mode, a render transform, a mirror or manipulation transform,
+  render or text options other than the defaults, or it is not visible;
+- it has composition extras (a layer, unloading visuals, facades, a translation, implicit
+  animations) or a child composition visual, or it casts a theme shadow (the shadow asks
+  for the visual of its caster);
+- it has a custom hit test, or its class says so (`requires_composition_visual`, a new
+  virtual beside `create_composition_visual`);
+- it is asked for: `composition_visual()` and `attach_to_compositor` make it. The parent
+  of an element whose visual was handed out has one as well, so that the `Offset` and the
+  `Parent` a caller reads keep their meaning.
+
+What an element without a composition visual changes for the others:
+
+- **Offsets.** The offset of a composition visual is the position of its element plus the
+  positions of the elements without one between it and the nearest ancestor that has one.
+  An element without a visual that moves moves the offsets of the nearest visuals below
+  it (up to eight visuals and thirty-two elements; beyond that it gets a visual).
+- **Children.** The children of a composition visual are the nearest composition visuals
+  below its element, in the Z order of each level.
+- **The update pass.** The renderer records an element first and decides then
+  (`CompositingRenderer::update_core`): an element that recorded nothing and needs nothing
+  is passed over, and the nearest ancestor with a visual synchronizes its children. A
+  visual that is made in a pass, or between two passes, is placed by the renderer
+  (`IRenderer::composition_visual_materialized`): its children leave the ancestor that
+  showed them and their offsets are taken from it.
+- **Hit testing.** The filter of a hit test is asked for the elements without a visual
+  between a visual and the element of its parent visual as well. A hit test from a root
+  without a visual tests the nearest visuals below it, topmost first. A composition visual
+  that was made for an element the compositor already showed without one has no readback
+  until the first frame with it: until then a hit test goes through it to its children
+  with the input of its parent, so what is under the pointer is found in the frame between.
+
+The process-wide switch `Visual::set_composition_visuals_on_demand(false)` gives every
+element a visual again; the start scenes are measured with both.
+
+The two start scenes, the median of seven runs that alternate the two settings of the
+switch in one build (Apple M3 Pro, release build, a quiet machine; the live heap and the
+counts are from the build with counters):
+
+| The tiles start (352,187 elements) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 352,187 | 234,791 | -33.3 % |
+| Objects in the first batch | 4,284,937 | 3,228,373 | -24.7 % |
+| Show: attach, styles, layout (ms) | 753.7 | 669.1 | -11.2 % |
+| First frame, UI thread (ms) | 394.6 | 459.1 | +16.3 % |
+| First frame, render thread (ms) | 733.5 | 586.6 | -20.0 % |
+| Show to first frame (ms) | 1080.3 | 966.8 | -10.5 % |
+| Start (ms) | 2399.6 | 2234.0 | -6.9 % |
+| Memory of the start (MB) | 2578.7 | 2439.3 | -5.4 % |
+| Live heap after the first frame (MB) | 2322.4 | 2098.4 | -9.6 % |
+
+| The controls start (24,017 visuals) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 24,017 | 14,811 | -38.3 % |
+| Objects in the first batch | 253,580 | 171,926 | -32.2 % |
+| Show: attach, styles, layout (ms) | 227.7 | 222.0 | -2.5 % |
+| First frame, UI thread (ms) | 28.0 | 30.1 | +7.5 % |
+| First frame, render thread (ms) | 24.1 | 19.2 | -20.5 % |
+| Show to first frame (ms) | 48.7 | 45.8 | -5.9 % |
+| Start (ms) | 295.5 | 288.7 | -2.3 % |
+| Memory of the start (MB) | 350.6 | 329.7 | -6.0 % |
+| Live heap after the first frame (MB) | 302.4 | 283.3 | -6.3 % |
+
+The UI thread part of the first frame grows because the visuals that are made are made
+there, in the first pass of the renderer, and no longer in the show, which shrinks by
+more. What remains is what the visuals that draw cost: in the tiles start the first frame
+leaves 799 MB allocated for 234,791 of them, 3.4 KB each on the two threads.
+
+What it costs, and what it does not:
+
+- **`composition_visual()` of an element that had none makes it,** and the server has it
+  after the next batch: code that reads the server visual right after asking waits for the
+  commit, as it does for any new visual.
+- **A visual asked for after a pass is synchronized when it is made** (offset, size, the
+  children around it), and the next pass does not synchronize its properties again: what
+  the caller sets on it in between, the `Offset` an entrance animation starts from, stays,
+  as it does on a visual that existed all along (`CompositingRenderer::place_materialized`).
+- **A class that overrides `create_composition_visual` to show something itself** (as
+  `ExperimentalAcrylicBorder` does) overrides `requires_composition_visual` to return
+  `true`; a class whose `custom_hit_test` answers only for some points does the same.
+- **The children list of a visual can be longer:** the canvas of the tiles start has the
+  visuals of the parts of its tiles as children, not the tiles. A change of the list is
+  the clear and refill it was; the hit test index is the one of a visual with thirty-two
+  children or more.
+- **The cache mode invalidates the composition properties** when it changes (it had no
+  change handler), so an element that gets one gets its visual in the next pass.
+- **A value assigned before an animation is started, in one batch, is sent ahead of the
+  animation.** The transport carried the animation or else the value, so the value was
+  lost and the server kept its own for the components a sub-channel animation does not
+  write. Nothing showed it while the two were equal. The selection indicator of a top
+  navigation view asks for the visual of its indicator, which gives the parent panel a
+  visual and moves the position of the panel out of the offset of the indicator, resets
+  `Offset` and animates `Offset.X`: the server kept the old `Y` and drew the indicator
+  below the clip of the pane. The generated serialization now writes the value and then
+  the animation; an implicit animation still starts from the value the server has
+  (DEVIATIONS.md).
+- **Tests:** `compositor_tests` covers the elements without a visual (offsets through
+  them, flattened children, an element that starts to draw, one that is asked for its
+  visual in and out of a pass, an offset set on a visual asked for after a pass, hit
+  tests from a root without a visual and through a new visual before its first frame);
+  the counter check `composition_work` counts the visuals made.

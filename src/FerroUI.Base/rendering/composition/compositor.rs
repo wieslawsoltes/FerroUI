@@ -11,7 +11,7 @@ use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, ReleaseExcess};
 use rustc_hash::FxHashSet;
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::{Cell, RefCell};
@@ -719,7 +719,16 @@ impl Compositor {
                 serialized.push(object);
             }
             let _ = objects_written;
-            self.object_serialization_hash_set.borrow_mut().clear();
+            {
+                // Both are empty here. They keep their storage for the next
+                // commit, up to what an emptied buffer keeps: the commit of
+                // the first frame of a large tree serializes every object of
+                // it.
+                self.object_serialization_queue.borrow_mut().release_excess();
+                let mut queued = self.object_serialization_hash_set.borrow_mut();
+                queued.clear();
+                queued.release_excess();
+            }
             drop(serialized);
 
             disposed = std::mem::take(&mut *self.dispose_on_next_batch.borrow_mut());
@@ -759,6 +768,15 @@ impl Compositor {
             }
         }
 
+        crate::perf_count!(CompositionBatchesCommitted);
+        crate::diagnostics::perf_counters::add(
+            crate::diagnostics::perf_counters::PerfCounter::CompositionBatchObjects,
+            changes.objects.len() as u64,
+        );
+        crate::diagnostics::perf_counters::add(
+            crate::diagnostics::perf_counters::PerfCounter::CompositionBatchValueBytes,
+            changes.structs.len() as u64,
+        );
         self.enqueue_batch(CommittedBatch { batch: commit.clone(), changes, committed_at: self.clock_elapsed() });
 
         *self.pending_batch.lock().unwrap_or_else(|e| e.into_inner()) = Some(commit.clone());
@@ -1500,3 +1518,7 @@ impl<T: Send + 'static> std::future::Future for ServerJobResult<T> {
         std::task::Poll::Pending
     }
 }
+
+#[cfg(test)]
+#[path = "pending_disposals_tests.rs"]
+mod pending_disposals_tests;

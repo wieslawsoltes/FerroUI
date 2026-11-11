@@ -25,10 +25,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -102,14 +102,14 @@ pub trait CompositionTargetHooks: ICompositionObjectHost {
 /// The UI-thread properties of `CompositionTarget`.
 pub struct CompositionTargetProps {
     changed_fields_of_composition_target: Cell<CompositionTargetChangedFields>,
-    root: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    root: OptionCell<Rc<dyn ICompositionObject>>,
     is_enabled: Cell<bool>,
     debug_overlays: Cell<RendererDebugOverlays>,
     last_layout_pass_timing: Cell<LayoutPassTiming>,
     scaling: Cell<f64>,
     size: Cell<Size>,
     transparency_level: Cell<CompositionTransparencyLevel>,
-    platform_specific_scene_info: RefCell<Option<Arc<dyn Any + Send + Sync>>>,
+    platform_specific_scene_info: OptionCell<Arc<dyn Any + Send + Sync>>,
 }
 
 impl Default for CompositionTargetProps {
@@ -125,14 +125,14 @@ impl CompositionTargetProps {
     pub fn new() -> Self {
         Self {
             changed_fields_of_composition_target: Cell::new(CompositionTargetChangedFields::empty()),
-            root: RefCell::new(None),
+            root: OptionCell::new(),
             is_enabled: Cell::new(Default::default()),
             debug_overlays: Cell::new(Default::default()),
             last_layout_pass_timing: Cell::new(Default::default()),
             scaling: Cell::new(Default::default()),
             size: Cell::new(Default::default()),
             transparency_level: Cell::new(Default::default()),
-            platform_specific_scene_info: RefCell::new(None),
+            platform_specific_scene_info: OptionCell::new(),
         }
     }
 
@@ -149,24 +149,24 @@ impl CompositionTargetProps {
 
     /// `Root`.
     pub fn root(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.root.borrow().clone()
+        self.root.get()
     }
 
     /// Sets `Root`.
     pub fn set_root(&self, host: &dyn CompositionTargetHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.root.borrow().clone();
+        let old_value = self.root.get();
         if old_value.differs(&value) {
             CompositionTargetHooks::validate_root_change(host, &old_value, &value);
             CompositionTargetHooks::on_root_changing(host);
             changed = true;
             // Update the backing value
-            *self.root.borrow_mut() = value.clone();
+            self.root.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_target.set(self.changed_fields_of_composition_target.get() | CompositionTargetChangedFields::ROOT);
             host.register_for_serialization();
         }
-        *self.root.borrow_mut() = value;
+        self.root.set(value);
         if changed {
             CompositionTargetHooks::on_root_changed(host);
         }
@@ -324,24 +324,24 @@ impl CompositionTargetProps {
 
     /// `PlatformSpecificSceneInfo`.
     pub fn platform_specific_scene_info(&self) -> Option<Arc<dyn Any + Send + Sync>> {
-        self.platform_specific_scene_info.borrow().clone()
+        self.platform_specific_scene_info.get()
     }
 
     /// Sets `PlatformSpecificSceneInfo`.
     pub fn set_platform_specific_scene_info(&self, host: &dyn CompositionTargetHooks, value: Option<Arc<dyn Any + Send + Sync>>) {
         let mut changed = false;
-        let old_value = self.platform_specific_scene_info.borrow().clone();
+        let old_value = self.platform_specific_scene_info.get();
         if old_value.differs(&value) {
             CompositionTargetHooks::validate_platform_specific_scene_info_change(host, &old_value, &value);
             CompositionTargetHooks::on_platform_specific_scene_info_changing(host);
             changed = true;
             // Update the backing value
-            *self.platform_specific_scene_info.borrow_mut() = value.clone();
+            self.platform_specific_scene_info.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_target.set(self.changed_fields_of_composition_target.get() | CompositionTargetChangedFields::PLATFORM_SPECIFIC_SCENE_INFO);
             host.register_for_serialization();
         }
-        *self.platform_specific_scene_info.borrow_mut() = value;
+        self.platform_specific_scene_info.set(value);
         if changed {
             CompositionTargetHooks::on_platform_specific_scene_info_changed(host);
         }
@@ -353,7 +353,7 @@ impl CompositionTargetProps {
         let changed = self.changed_fields_of_composition_target.get();
         writer.write(changed);
         if changed.contains(CompositionTargetChangedFields::ROOT) {
-            writer.write_server_object(self.root.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.root.get().map(|o| o.server()));
         }
         if changed.contains(CompositionTargetChangedFields::IS_ENABLED) {
             writer.write(self.is_enabled.get());
@@ -374,7 +374,7 @@ impl CompositionTargetProps {
             writer.write(self.transparency_level.get());
         }
         if changed.contains(CompositionTargetChangedFields::PLATFORM_SPECIFIC_SCENE_INFO) {
-            writer.write_value(self.platform_specific_scene_info.borrow().clone());
+            writer.write_value(self.platform_specific_scene_info.get());
         }
         self.changed_fields_of_composition_target.set(CompositionTargetChangedFields::empty());
     }
@@ -413,14 +413,14 @@ pub trait ServerCompositionTargetHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerCompositionTarget`.
 pub struct ServerCompositionTargetProps {
-    root: RefCell<Option<Rc<dyn IServerObject>>>,
+    root: OptionCell<Rc<dyn IServerObject>>,
     is_enabled: Cell<bool>,
     debug_overlays: Cell<RendererDebugOverlays>,
     last_layout_pass_timing: Cell<LayoutPassTiming>,
     scaling: Cell<f64>,
     size: Cell<Size>,
     transparency_level: Cell<CompositionTransparencyLevel>,
-    platform_specific_scene_info: RefCell<Option<Arc<dyn Any + Send + Sync>>>,
+    platform_specific_scene_info: OptionCell<Arc<dyn Any + Send + Sync>>,
 }
 
 impl Default for ServerCompositionTargetProps {
@@ -434,14 +434,14 @@ impl ServerCompositionTargetProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            root: RefCell::new(None),
+            root: OptionCell::new(),
             is_enabled: Cell::new(Default::default()),
             debug_overlays: Cell::new(Default::default()),
             last_layout_pass_timing: Cell::new(Default::default()),
             scaling: Cell::new(Default::default()),
             size: Cell::new(Default::default()),
             transparency_level: Cell::new(Default::default()),
-            platform_specific_scene_info: RefCell::new(None),
+            platform_specific_scene_info: OptionCell::new(),
         }
     }
 
@@ -461,8 +461,8 @@ impl ServerCompositionTargetProps {
             CompositionProperty::register::<ServerCompositionTargetProps, Option<Rc<dyn IServerObject>>>(
                 "Root",
                 "ServerCompositionTarget",
-                |obj| props_of::<ServerCompositionTargetProps>(obj).root.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionTargetProps>(obj).root.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionTargetProps>(obj).root.get(),
+                |obj, v| props_of::<ServerCompositionTargetProps>(obj).root.set(v),
                 None,
                 None,
             )
@@ -471,11 +471,11 @@ impl ServerCompositionTargetProps {
 
     /// `Root`.
     pub fn root(&self) -> Option<Rc<dyn IServerObject>> {
-        self.root.borrow().clone()
+        self.root.get()
     }
 
     pub fn set_root(&self, host: &dyn ServerCompositionTargetHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.root.borrow().clone();
+        let old_value = self.root.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionTargetHooks::on_root_changing(host);
@@ -487,7 +487,7 @@ impl ServerCompositionTargetProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.root.borrow_mut() = value.clone(),
+                assign: &mut || self.root.set(value.clone()),
             },
         );
         if changed {
@@ -748,8 +748,8 @@ impl ServerCompositionTargetProps {
             CompositionProperty::register::<ServerCompositionTargetProps, Option<Arc<dyn Any + Send + Sync>>>(
                 "PlatformSpecificSceneInfo",
                 "ServerCompositionTarget",
-                |obj| props_of::<ServerCompositionTargetProps>(obj).platform_specific_scene_info.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionTargetProps>(obj).platform_specific_scene_info.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionTargetProps>(obj).platform_specific_scene_info.get(),
+                |obj, v| props_of::<ServerCompositionTargetProps>(obj).platform_specific_scene_info.set(v),
                 None,
                 None,
             )
@@ -758,11 +758,11 @@ impl ServerCompositionTargetProps {
 
     /// `PlatformSpecificSceneInfo`.
     pub fn platform_specific_scene_info(&self) -> Option<Arc<dyn Any + Send + Sync>> {
-        self.platform_specific_scene_info.borrow().clone()
+        self.platform_specific_scene_info.get()
     }
 
     pub fn set_platform_specific_scene_info(&self, host: &dyn ServerCompositionTargetHooks, value: Option<Arc<dyn Any + Send + Sync>>) {
-        let old_value = self.platform_specific_scene_info.borrow().clone();
+        let old_value = self.platform_specific_scene_info.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionTargetHooks::on_platform_specific_scene_info_changing(host);
@@ -774,7 +774,7 @@ impl ServerCompositionTargetProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.platform_specific_scene_info.borrow_mut() = value.clone(),
+                assign: &mut || self.platform_specific_scene_info.set(value.clone()),
             },
         );
         if changed {

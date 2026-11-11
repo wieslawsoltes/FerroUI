@@ -660,6 +660,12 @@ fn border_composition_visual_sends_the_corner_radius_to_the_server() {
     window.show();
     services.run_jobs();
 
+    // A border that draws nothing and sets nothing has no composition visual until it
+    // is asked for; the server has the visual after the next batch, with the radius.
+    assert!(!target.has_composition_visual());
+    target.composition_visual().expect("the border is attached to a composited tree");
+    services.run_jobs();
+
     let server_corner_radius = || {
         let visual = target.composition_visual().expect("the border is attached to a composited tree");
         let server = visual.compositor().server().get::<ServerCompositionVisual>(visual.server()).unwrap();
@@ -680,6 +686,7 @@ fn border_composition_visual_sends_the_corner_radius_to_the_server() {
     window.set_content(Some(Control::boxed(button.clone())));
     services.run_jobs();
     let visual = button.composition_visual().expect("the button is attached to a composited tree");
+    services.run_jobs();
     let server = visual.compositor().server().get::<ServerCompositionVisual>(visual.server()).unwrap();
     assert!(server.content_as::<ServerBorderVisual>().is_none());
 

@@ -141,6 +141,10 @@ impl CompositionEllipseGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Center", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_ellipse_geometry.get().contains(CompositionEllipseGeometryChangedFields::CENTER_ANIMATED) {
+                    self.changed_fields_of_composition_ellipse_geometry.set(self.changed_fields_of_composition_ellipse_geometry.get() & !CompositionEllipseGeometryChangedFields::CENTER);
+                }
             }
         }
         self.center.set(value);
@@ -182,6 +186,10 @@ impl CompositionEllipseGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Radius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_ellipse_geometry.get().contains(CompositionEllipseGeometryChangedFields::RADIUS_ANIMATED) {
+                    self.changed_fields_of_composition_ellipse_geometry.set(self.changed_fields_of_composition_ellipse_geometry.get() & !CompositionEllipseGeometryChangedFields::RADIUS);
+                }
             }
         }
         self.radius.set(value);
@@ -223,15 +231,17 @@ impl CompositionEllipseGeometryProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_ellipse_geometry.get();
         writer.write(changed);
+        if changed.contains(CompositionEllipseGeometryChangedFields::CENTER) {
+            writer.write(self.center.get());
+        }
         if changed.contains(CompositionEllipseGeometryChangedFields::CENTER_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionEllipseGeometryProps::id_of_center_property().base()));
-        } else if changed.contains(CompositionEllipseGeometryChangedFields::CENTER) {
-            writer.write(self.center.get());
+        }
+        if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS) {
+            writer.write(self.radius.get());
         }
         if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionEllipseGeometryProps::id_of_radius_property().base()));
-        } else if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS) {
-            writer.write(self.radius.get());
         }
         self.changed_fields_of_composition_ellipse_geometry.set(CompositionEllipseGeometryChangedFields::empty());
     }
@@ -343,6 +353,10 @@ impl ServerCompositionEllipseGeometryProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionEllipseGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionEllipseGeometryChangedFields>();
+        if changed.contains(CompositionEllipseGeometryChangedFields::CENTER) {
+            let value = reader.read::<Vector>();
+            self.set_center(host, value);
+        }
         if changed.contains(CompositionEllipseGeometryChangedFields::CENTER_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Center` without an animation instance");
@@ -353,9 +367,10 @@ impl ServerCompositionEllipseGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionEllipseGeometryChangedFields::CENTER) {
+        }
+        if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS) {
             let value = reader.read::<Vector>();
-            self.set_center(host, value);
+            self.set_radius(host, value);
         }
         if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -367,9 +382,6 @@ impl ServerCompositionEllipseGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionEllipseGeometryChangedFields::RADIUS) {
-            let value = reader.read::<Vector>();
-            self.set_radius(host, value);
         }
         ServerCompositionEllipseGeometryHooks::on_fields_deserialized(host, changed);
     }

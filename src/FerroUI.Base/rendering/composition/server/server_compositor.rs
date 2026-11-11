@@ -11,6 +11,7 @@ use crate::rendering::composition::CompositionOptions;
 use crate::rendering::PlatformRenderInterfaceContextManager;
 use crate::reactive::IDisposable;
 use crate::threading::Dispatcher;
+use crate::utilities::ReleaseExcess;
 use crate::{Matrix, PixelSize, Size, Vector};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -587,6 +588,8 @@ impl ServerCompositor {
             let Some(visual) = self.visual_own_properties_recompute_pass.borrow_mut().pop_front() else { break };
             visual.recompute_own_properties();
         }
+        // The first frame of a large tree queues every visual of it.
+        self.visual_own_properties_recompute_pass.borrow_mut().release_excess();
     }
 
     pub fn enqueue_visual_for_own_properties_update_pass(&self, visual: Rc<ServerCompositionVisual>) {
@@ -617,9 +620,12 @@ impl ServerCompositor {
         }
         drop(scope);
 
-        // The storage of the queue is kept for the next pass.
+        // The storage of the queue is kept for the next pass, up to what an
+        // emptied buffer keeps: the pass of the first frame of a large tree
+        // writes every visual of it.
         let mut queue = self.visual_readback_update_pass_queue.borrow_mut();
         if queue.is_empty() {
+            entries.release_excess();
             *queue = entries;
         }
     }

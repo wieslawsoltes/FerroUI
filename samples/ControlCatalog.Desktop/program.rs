@@ -38,6 +38,11 @@
 //! the catalog are shown one after the other, `n` milliseconds each (the
 //! role of the `--full-headless` run of the managed original, which
 //! selects every page).
+//! `FERROUI_SMOKE_PAGE_SEQUENCE=Buttons,TextBox,Buttons` instead visits those headers
+//! in order (1500 ms each unless `FERROUI_SMOKE_PAGES` is set), without taking screenshots.
+//! Pair it with `FERROUI_SMOKE_EXIT_MS` to close the window after the sequence.
+//! `FERROUI_CATALOG_NAV_TIMING=1` prints cumulative navigation timings through `Loaded`
+//! and individual markup population times. These measure UI readiness, not GPU presentation.
 //!
 //! With `FERROUI_SMOKE_SCREENSHOTS=<directory>` pictures of some pages are
 //! written to the directory as PNG files and the main window is closed
@@ -1662,6 +1667,11 @@ fn smoke_run() {
         screenshot_run(PathBuf::from(directory));
     } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_DEVTOOLS").filter(|directory| !directory.is_empty()) {
         dev_tools_run(PathBuf::from(directory));
+    } else if let Ok(sequence) = std::env::var("FERROUI_SMOKE_PAGE_SEQUENCE") {
+        // An ordered sequence permits first-visit/revisit comparisons without screenshot work.
+        let headers = sequence.split(',').map(str::trim).filter(|s| !s.is_empty()).map(str::to_string).collect();
+        let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
+        control_catalog::show_pages(headers, interval, |_, _| {}, || {});
     } else if let Some(ms) = environment_milliseconds("FERROUI_SMOKE_PAGES") {
         control_catalog::show_every_page(Duration::from_millis(ms));
     }

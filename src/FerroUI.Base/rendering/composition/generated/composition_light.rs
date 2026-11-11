@@ -23,10 +23,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -74,8 +74,8 @@ pub trait CompositionLightHooks: ICompositionObjectHost {
 /// The UI-thread properties of `CompositionLight`.
 pub struct CompositionLightProps {
     changed_fields_of_composition_light: Cell<CompositionLightChangedFields>,
-    targets: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    exclusions_from_targets: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    targets: OptionCell<Rc<dyn ICompositionObject>>,
+    exclusions_from_targets: OptionCell<Rc<dyn ICompositionObject>>,
     is_enabled: Cell<bool>,
 }
 
@@ -92,8 +92,8 @@ impl CompositionLightProps {
     pub fn new() -> Self {
         Self {
             changed_fields_of_composition_light: Cell::new(CompositionLightChangedFields::empty()),
-            targets: RefCell::new(None),
-            exclusions_from_targets: RefCell::new(None),
+            targets: OptionCell::new(),
+            exclusions_from_targets: OptionCell::new(),
             is_enabled: Cell::new(Default::default()),
         }
     }
@@ -112,24 +112,24 @@ impl CompositionLightProps {
 
     /// `Targets` (internal, FerroUI overlay).
     pub fn targets(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.targets.borrow().clone()
+        self.targets.get()
     }
 
     /// Sets `Targets` (internal, FerroUI overlay).
     pub fn set_targets(&self, host: &dyn CompositionLightHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.targets.borrow().clone();
+        let old_value = self.targets.get();
         if old_value.differs(&value) {
             CompositionLightHooks::validate_targets_change(host, &old_value, &value);
             CompositionLightHooks::on_targets_changing(host);
             changed = true;
             // Update the backing value
-            *self.targets.borrow_mut() = value.clone();
+            self.targets.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_light.set(self.changed_fields_of_composition_light.get() | CompositionLightChangedFields::TARGETS);
             host.register_for_serialization();
         }
-        *self.targets.borrow_mut() = value;
+        self.targets.set(value);
         if changed {
             CompositionLightHooks::on_targets_changed(host);
         }
@@ -137,24 +137,24 @@ impl CompositionLightProps {
 
     /// `ExclusionsFromTargets` (internal, FerroUI overlay).
     pub fn exclusions_from_targets(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.exclusions_from_targets.borrow().clone()
+        self.exclusions_from_targets.get()
     }
 
     /// Sets `ExclusionsFromTargets` (internal, FerroUI overlay).
     pub fn set_exclusions_from_targets(&self, host: &dyn CompositionLightHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.exclusions_from_targets.borrow().clone();
+        let old_value = self.exclusions_from_targets.get();
         if old_value.differs(&value) {
             CompositionLightHooks::validate_exclusions_from_targets_change(host, &old_value, &value);
             CompositionLightHooks::on_exclusions_from_targets_changing(host);
             changed = true;
             // Update the backing value
-            *self.exclusions_from_targets.borrow_mut() = value.clone();
+            self.exclusions_from_targets.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_light.set(self.changed_fields_of_composition_light.get() | CompositionLightChangedFields::EXCLUSIONS_FROM_TARGETS);
             host.register_for_serialization();
         }
-        *self.exclusions_from_targets.borrow_mut() = value;
+        self.exclusions_from_targets.set(value);
         if changed {
             CompositionLightHooks::on_exclusions_from_targets_changed(host);
         }
@@ -191,10 +191,10 @@ impl CompositionLightProps {
         let changed = self.changed_fields_of_composition_light.get();
         writer.write(changed);
         if changed.contains(CompositionLightChangedFields::TARGETS) {
-            writer.write_server_object(self.targets.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.targets.get().map(|o| o.server()));
         }
         if changed.contains(CompositionLightChangedFields::EXCLUSIONS_FROM_TARGETS) {
-            writer.write_server_object(self.exclusions_from_targets.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.exclusions_from_targets.get().map(|o| o.server()));
         }
         if changed.contains(CompositionLightChangedFields::IS_ENABLED) {
             writer.write(self.is_enabled.get());
@@ -221,8 +221,8 @@ pub trait ServerCompositionLightHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerCompositionLight`.
 pub struct ServerCompositionLightProps {
-    targets: RefCell<Option<Rc<dyn IServerObject>>>,
-    exclusions_from_targets: RefCell<Option<Rc<dyn IServerObject>>>,
+    targets: OptionCell<Rc<dyn IServerObject>>,
+    exclusions_from_targets: OptionCell<Rc<dyn IServerObject>>,
     is_enabled: Cell<bool>,
 }
 
@@ -237,8 +237,8 @@ impl ServerCompositionLightProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            targets: RefCell::new(None),
-            exclusions_from_targets: RefCell::new(None),
+            targets: OptionCell::new(),
+            exclusions_from_targets: OptionCell::new(),
             is_enabled: Cell::new(Default::default()),
         }
     }
@@ -259,8 +259,8 @@ impl ServerCompositionLightProps {
             CompositionProperty::register::<ServerCompositionLightProps, Option<Rc<dyn IServerObject>>>(
                 "Targets",
                 "ServerCompositionLight",
-                |obj| props_of::<ServerCompositionLightProps>(obj).targets.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionLightProps>(obj).targets.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionLightProps>(obj).targets.get(),
+                |obj, v| props_of::<ServerCompositionLightProps>(obj).targets.set(v),
                 None,
                 None,
             )
@@ -269,11 +269,11 @@ impl ServerCompositionLightProps {
 
     /// `Targets`.
     pub fn targets(&self) -> Option<Rc<dyn IServerObject>> {
-        self.targets.borrow().clone()
+        self.targets.get()
     }
 
     pub fn set_targets(&self, host: &dyn ServerCompositionLightHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.targets.borrow().clone();
+        let old_value = self.targets.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionLightHooks::on_targets_changing(host);
@@ -285,7 +285,7 @@ impl ServerCompositionLightProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.targets.borrow_mut() = value.clone(),
+                assign: &mut || self.targets.set(value.clone()),
             },
         );
         if changed {
@@ -300,8 +300,8 @@ impl ServerCompositionLightProps {
             CompositionProperty::register::<ServerCompositionLightProps, Option<Rc<dyn IServerObject>>>(
                 "ExclusionsFromTargets",
                 "ServerCompositionLight",
-                |obj| props_of::<ServerCompositionLightProps>(obj).exclusions_from_targets.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionLightProps>(obj).exclusions_from_targets.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionLightProps>(obj).exclusions_from_targets.get(),
+                |obj, v| props_of::<ServerCompositionLightProps>(obj).exclusions_from_targets.set(v),
                 None,
                 None,
             )
@@ -310,11 +310,11 @@ impl ServerCompositionLightProps {
 
     /// `ExclusionsFromTargets`.
     pub fn exclusions_from_targets(&self) -> Option<Rc<dyn IServerObject>> {
-        self.exclusions_from_targets.borrow().clone()
+        self.exclusions_from_targets.get()
     }
 
     pub fn set_exclusions_from_targets(&self, host: &dyn ServerCompositionLightHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.exclusions_from_targets.borrow().clone();
+        let old_value = self.exclusions_from_targets.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionLightHooks::on_exclusions_from_targets_changing(host);
@@ -326,7 +326,7 @@ impl ServerCompositionLightProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.exclusions_from_targets.borrow_mut() = value.clone(),
+                assign: &mut || self.exclusions_from_targets.set(value.clone()),
             },
         );
         if changed {

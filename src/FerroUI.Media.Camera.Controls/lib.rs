@@ -3,6 +3,11 @@
 pub mod automation;
 mod camera_capture_ui;
 pub use camera_capture_ui::{CameraCaptureResult, CameraCaptureUI};
+#[cfg(feature = "qr")]
+mod qr_preview;
+#[cfg(feature = "qr")]
+pub use qr_preview::QrPreview;
+
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,
     input::InputElementImpl,
@@ -423,6 +428,8 @@ pub fn register_types() {
     ferroui_base::TypeInfo::register(CameraPreview::TYPE);
     ferroui_base::TypeInfo::register(CameraCaptureUI::TYPE);
     ferroui_base::TypeInfo::register(automation::CameraCaptureUIAutomationPeer::TYPE);
+    #[cfg(feature = "qr")]
+    ferroui_base::TypeInfo::register(QrPreview::TYPE);
 }
 
 #[cfg(test)]

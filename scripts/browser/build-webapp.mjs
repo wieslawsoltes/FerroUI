@@ -16,7 +16,7 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repository = path.resolve(path.dirname(scriptPath), "../..");
 const webapp = path.join(repository, "src/Browser/FerroUI.Browser/webapp");
 const receiptName = ".ferroui-validated-webapp.json";
-const outputs = ["ferroui.js", "ferroui.js.map", "storage.js", "storage.js.map", "ferroui-sw.js", "ferroui-sw.js.map"];
+const outputs = ["ferroui.js", "ferroui.js.map", "storage.js", "storage.js.map", "ferroui-sw.js", "ferroui-sw.js.map", "qr-worker.js", "qr-worker.js.map", "qr-worker.LICENSE.txt"];
 const schema = 2;
 
 // A receipt is deliberately narrower than running the tools. An inherited executable config

@@ -15021,7 +15021,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_629: &[rt::ValueRow<f64>] = &[
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_WINUITHEME_XAML_ROWS_630: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CheckBoxPadding", value: [8.0_f64, 5.0_f64, 0.0_f64, 0.0_f64], line: 284, position: 38 },
+    rt::ValueRow { key: "CheckBoxPadding", value: [8.0_f64, 2.5_f64, 0.0_f64, 2.5_f64], line: 284, position: 38 },
     rt::ValueRow { key: "CheckBoxFocusVisualMargin", value: [-7.0_f64, -3.0_f64, -7.0_f64, -3.0_f64], line: 285, position: 48 },
 ];
 
@@ -29260,7 +29260,7 @@ fn build_controls_winuicontrols_xaml_deferred_118_value_2() -> ::ferroui_base::m
 
 /// A setter value of the control theme built by `build_controls_winuicontrols_xaml_deferred_118` (#568).
 fn build_controls_winuicontrols_xaml_deferred_118_value_3() -> ::ferroui_base::metadata::MarkupValue {
-    rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
+    rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
 /// A setter value of the control theme built by `build_controls_winuicontrols_xaml_deferred_118` (#568).

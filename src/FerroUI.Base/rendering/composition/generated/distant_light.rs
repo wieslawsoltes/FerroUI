@@ -23,10 +23,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -88,7 +88,7 @@ pub struct DistantLightProps {
     base: CompositionLightProps,
     changed_fields_of_distant_light: Cell<DistantLightChangedFields>,
     color: Cell<Color>,
-    coordinate_space: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    coordinate_space: OptionCell<Rc<dyn ICompositionObject>>,
     direction: Cell<Vector3D>,
     intensity: Cell<f32>,
 }
@@ -108,7 +108,7 @@ impl DistantLightProps {
             base: CompositionLightProps::new(),
             changed_fields_of_distant_light: Cell::new(DistantLightChangedFields::empty()),
             color: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             direction: Cell::new(Default::default()),
             intensity: Cell::new(Default::default()),
         }
@@ -167,6 +167,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -177,24 +181,24 @@ impl DistantLightProps {
 
     /// `CoordinateSpace` (FerroUI overlay).
     pub fn coordinate_space(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     /// Sets `CoordinateSpace` (FerroUI overlay).
     pub fn set_coordinate_space(&self, host: &dyn DistantLightHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         if old_value.differs(&value) {
             DistantLightHooks::validate_coordinate_space_change(host, &old_value, &value);
             DistantLightHooks::on_coordinate_space_changing(host);
             changed = true;
             // Update the backing value
-            *self.coordinate_space.borrow_mut() = value.clone();
+            self.coordinate_space.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() | DistantLightChangedFields::COORDINATE_SPACE);
             host.register_for_serialization();
         }
-        *self.coordinate_space.borrow_mut() = value;
+        self.coordinate_space.set(value);
         if changed {
             DistantLightHooks::on_coordinate_space_changed(host);
         }
@@ -233,6 +237,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Direction", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::DIRECTION);
+                }
             }
         }
         self.direction.set(value);
@@ -274,6 +282,10 @@ impl DistantLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Intensity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_distant_light.get().contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
+                    self.changed_fields_of_distant_light.set(self.changed_fields_of_distant_light.get() & !DistantLightChangedFields::INTENSITY);
+                }
             }
         }
         self.intensity.set(value);
@@ -322,23 +334,26 @@ impl DistantLightProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_distant_light.get();
         writer.write(changed);
-        if changed.contains(DistantLightChangedFields::COLOR_ANIMATED) {
-            writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_color_property().base()));
-        } else if changed.contains(DistantLightChangedFields::COLOR) {
+        if changed.contains(DistantLightChangedFields::COLOR) {
             writer.write(self.color.get());
         }
+        if changed.contains(DistantLightChangedFields::COLOR_ANIMATED) {
+            writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_color_property().base()));
+        }
         if changed.contains(DistantLightChangedFields::COORDINATE_SPACE) {
-            writer.write_server_object(self.coordinate_space.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.coordinate_space.get().map(|o| o.server()));
+        }
+        if changed.contains(DistantLightChangedFields::DIRECTION) {
+            writer.write(self.direction.get());
         }
         if changed.contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_direction_property().base()));
-        } else if changed.contains(DistantLightChangedFields::DIRECTION) {
-            writer.write(self.direction.get());
+        }
+        if changed.contains(DistantLightChangedFields::INTENSITY) {
+            writer.write(self.intensity.get());
         }
         if changed.contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDistantLightProps::id_of_intensity_property().base()));
-        } else if changed.contains(DistantLightChangedFields::INTENSITY) {
-            writer.write(self.intensity.get());
         }
         self.changed_fields_of_distant_light.set(DistantLightChangedFields::empty());
     }
@@ -358,7 +373,7 @@ pub trait ServerDistantLightHooks: ServerCompositionLightHooks {
 pub struct ServerDistantLightProps {
     base: ServerCompositionLightProps,
     color: Cell<Color>,
-    coordinate_space: RefCell<Option<Rc<dyn IServerObject>>>,
+    coordinate_space: OptionCell<Rc<dyn IServerObject>>,
     direction: Cell<Vector3D>,
     intensity: Cell<f32>,
 }
@@ -376,7 +391,7 @@ impl ServerDistantLightProps {
         Self {
             base: ServerCompositionLightProps::new(),
             color: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             direction: Cell::new(Default::default()),
             intensity: Cell::new(Default::default()),
         }
@@ -428,8 +443,8 @@ impl ServerDistantLightProps {
             CompositionProperty::register::<ServerDistantLightProps, Option<Rc<dyn IServerObject>>>(
                 "CoordinateSpace",
                 "ServerDistantLight",
-                |obj| props_of::<ServerDistantLightProps>(obj).coordinate_space.borrow().clone(),
-                |obj, v| *props_of::<ServerDistantLightProps>(obj).coordinate_space.borrow_mut() = v,
+                |obj| props_of::<ServerDistantLightProps>(obj).coordinate_space.get(),
+                |obj, v| props_of::<ServerDistantLightProps>(obj).coordinate_space.set(v),
                 None,
                 None,
             )
@@ -438,11 +453,11 @@ impl ServerDistantLightProps {
 
     /// `CoordinateSpace`.
     pub fn coordinate_space(&self) -> Option<Rc<dyn IServerObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     pub fn set_coordinate_space(&self, host: &dyn ServerDistantLightHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerDistantLightHooks::on_coordinate_space_changing(host);
@@ -454,7 +469,7 @@ impl ServerDistantLightProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.coordinate_space.borrow_mut() = value.clone(),
+                assign: &mut || self.coordinate_space.set(value.clone()),
             },
         );
         if changed {
@@ -524,6 +539,10 @@ impl ServerDistantLightProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerDistantLightHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<DistantLightChangedFields>();
+        if changed.contains(DistantLightChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(DistantLightChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -534,13 +553,14 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
         }
         if changed.contains(DistantLightChangedFields::COORDINATE_SPACE) {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_coordinate_space(host, value);
+        }
+        if changed.contains(DistantLightChangedFields::DIRECTION) {
+            let value = reader.read::<Vector3D>();
+            self.set_direction(host, value);
         }
         if changed.contains(DistantLightChangedFields::DIRECTION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -552,9 +572,10 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::DIRECTION) {
-            let value = reader.read::<Vector3D>();
-            self.set_direction(host, value);
+        }
+        if changed.contains(DistantLightChangedFields::INTENSITY) {
+            let value = reader.read::<f32>();
+            self.set_intensity(host, value);
         }
         if changed.contains(DistantLightChangedFields::INTENSITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -566,9 +587,6 @@ impl ServerDistantLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DistantLightChangedFields::INTENSITY) {
-            let value = reader.read::<f32>();
-            self.set_intensity(host, value);
         }
         ServerDistantLightHooks::on_fields_deserialized(host, changed);
     }

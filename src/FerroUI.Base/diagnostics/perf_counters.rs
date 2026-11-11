@@ -242,6 +242,13 @@ perf_counters! {
     /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
     /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
     CompositionVisualsKept => "composition visuals kept",
+    /// `Compositor::commit`: a batch of changes was sent to the render thread.
+    CompositionBatchesCommitted => "composition batches committed",
+    /// `Compositor::commit`: the entries of the object stream of the batches (a server object,
+    /// a marker, a handle that is sent as it is).
+    CompositionBatchObjects => "composition batch objects",
+    /// `Compositor::commit`: the bytes of the value stream of the batches.
+    CompositionBatchValueBytes => "composition batch value bytes",
     /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
     UiRenderPasses => "ui: render passes",
 

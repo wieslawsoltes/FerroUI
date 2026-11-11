@@ -2,7 +2,8 @@ require("esbuild").build({
     entryPoints: [
         "./modules/ferroui.ts",
         "./modules/storage.ts",
-        "./modules/ferroui-sw.ts"
+        "./modules/ferroui-sw.ts",
+        "./modules/qr-worker.ts"
     ],
     outdir: "../dist",
     bundle: true,
@@ -13,5 +14,8 @@ require("esbuild").build({
     sourcemap: "linked",
     loader: { ".ts": "ts" }
 })
-    .then(() => console.log("Done"))
+    .then(() => {
+        require("node:fs").copyFileSync("node_modules/jsqr/LICENSE", "../dist/qr-worker.LICENSE.txt");
+        console.log("Done");
+    })
     .catch(() => process.exit(1));

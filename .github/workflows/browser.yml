@@ -49,7 +49,7 @@ jobs:
       - name: Script module (type check, lint, bundle, pixel and text input tests)
         run: |
           node scripts/browser/build-webapp.mjs build
-          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
+          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input && npm run test:media)
           node scripts/browser/tests/canvas_size.test.mjs
       - name: Skia features of the target
         run: |

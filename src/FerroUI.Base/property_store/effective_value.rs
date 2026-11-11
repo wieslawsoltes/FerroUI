@@ -257,7 +257,10 @@ pub(crate) struct EffectiveValue<T> {
     state: EffectiveValueState,
     value: RefCell<T>,
     base_value: RefCell<Option<T>>,
-    uncommon: Option<UncommonFields<T>>,
+    /// What a property with a coercion callback keeps: boxed, so that a value
+    /// of a property without one (nearly every value) is not the larger for
+    /// it.
+    uncommon: Option<Box<UncommonFields<T>>>,
 }
 
 impl<T: Clone + 'static> EffectiveValue<T> {
@@ -375,7 +378,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
         };
-        let uncommon = metadata.coercion().map(|coercion| coercion.initialize_uncommon(&value));
+        let uncommon = metadata.coercion().map(|coercion| Box::new(coercion.initialize_uncommon(&value)));
         Self {
             metadata,
             state: EffectiveValueState::new(property),

@@ -89,10 +89,17 @@ impl FerroObjectImpl for SelectionIndicator {
             || change.property() == Visual::bounds_property().as_property()
             || change.property() == Shape::stroke_thickness_property().as_property()
         {
-            if let Some(state) = &*this.state.borrow() {
+            // The state is taken out of the cell first: asking for the composition visual of an
+            // indicator that has none yet creates it, which replaces the state.
+            let state = this.state.borrow().clone();
+            if let Some(state) = state {
                 state.radius.set(this.radius());
-                if let Some(visual) = this.composition_visual() {
-                    visual.register_for_serialization();
+                // An indicator without a composition visual has nothing to send: the visual
+                // reads the radius when it is created.
+                if this.has_composition_visual() {
+                    if let Some(visual) = this.composition_visual() {
+                        visual.register_for_serialization();
+                    }
                 }
             }
         }

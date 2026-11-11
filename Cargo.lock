@@ -2378,7 +2378,9 @@ dependencies = [
  "ferroui-browser",
  "ferroui-media",
  "ferroui-media-controls",
+ "ferroui-media-qr",
  "ferroui-opengl",
+ "serde_json",
  "wasm-bindgen",
 ]
 
@@ -2433,6 +2435,7 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-camera",
  "ferroui-media-controls",
+ "ferroui-media-qr",
 ]
 
 [[package]]

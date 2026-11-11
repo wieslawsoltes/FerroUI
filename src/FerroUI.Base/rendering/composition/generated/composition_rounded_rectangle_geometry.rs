@@ -149,6 +149,10 @@ impl CompositionRoundedRectangleGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CornerRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_rounded_rectangle_geometry.get().contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS_ANIMATED) {
+                    self.changed_fields_of_composition_rounded_rectangle_geometry.set(self.changed_fields_of_composition_rounded_rectangle_geometry.get() & !CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS);
+                }
             }
         }
         self.corner_radius.set(value);
@@ -190,6 +194,10 @@ impl CompositionRoundedRectangleGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_rounded_rectangle_geometry.get().contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_rounded_rectangle_geometry.set(self.changed_fields_of_composition_rounded_rectangle_geometry.get() & !CompositionRoundedRectangleGeometryChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -231,6 +239,10 @@ impl CompositionRoundedRectangleGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Size", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_rounded_rectangle_geometry.get().contains(CompositionRoundedRectangleGeometryChangedFields::SIZE_ANIMATED) {
+                    self.changed_fields_of_composition_rounded_rectangle_geometry.set(self.changed_fields_of_composition_rounded_rectangle_geometry.get() & !CompositionRoundedRectangleGeometryChangedFields::SIZE);
+                }
             }
         }
         self.size.set(value);
@@ -279,20 +291,23 @@ impl CompositionRoundedRectangleGeometryProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_rounded_rectangle_geometry.get();
         writer.write(changed);
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS) {
+            writer.write(self.corner_radius.get());
+        }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRoundedRectangleGeometryProps::id_of_corner_radius_property().base()));
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS) {
-            writer.write(self.corner_radius.get());
+        }
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRoundedRectangleGeometryProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE) {
+            writer.write(self.size.get());
         }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRoundedRectangleGeometryProps::id_of_size_property().base()));
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE) {
-            writer.write(self.size.get());
         }
         self.changed_fields_of_composition_rounded_rectangle_geometry.set(CompositionRoundedRectangleGeometryChangedFields::empty());
     }
@@ -431,6 +446,10 @@ impl ServerCompositionRoundedRectangleGeometryProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionRoundedRectangleGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionRoundedRectangleGeometryChangedFields>();
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS) {
+            let value = reader.read::<Vector>();
+            self.set_corner_radius(host, value);
+        }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `CornerRadius` without an animation instance");
@@ -441,9 +460,10 @@ impl ServerCompositionRoundedRectangleGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::CORNER_RADIUS) {
+        }
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET) {
             let value = reader.read::<Vector>();
-            self.set_corner_radius(host, value);
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -455,9 +475,10 @@ impl ServerCompositionRoundedRectangleGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::OFFSET) {
+        }
+        if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE) {
             let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+            self.set_size(host, value);
         }
         if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -469,9 +490,6 @@ impl ServerCompositionRoundedRectangleGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRoundedRectangleGeometryChangedFields::SIZE) {
-            let value = reader.read::<Vector>();
-            self.set_size(host, value);
         }
         ServerCompositionRoundedRectangleGeometryHooks::on_fields_deserialized(host, changed);
     }

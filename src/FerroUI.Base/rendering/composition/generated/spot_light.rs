@@ -23,10 +23,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -150,7 +150,7 @@ pub struct SpotLightProps {
     constant_attenuation: Cell<f32>,
     linear_attenuation: Cell<f32>,
     quadratic_attenuation: Cell<f32>,
-    coordinate_space: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    coordinate_space: OptionCell<Rc<dyn ICompositionObject>>,
     direction: Cell<Vector3D>,
     inner_cone_angle: Cell<f32>,
     inner_cone_color: Cell<Color>,
@@ -180,7 +180,7 @@ impl SpotLightProps {
             constant_attenuation: Cell::new(Default::default()),
             linear_attenuation: Cell::new(Default::default()),
             quadratic_attenuation: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             direction: Cell::new(Default::default()),
             inner_cone_angle: Cell::new(Default::default()),
             inner_cone_color: Cell::new(Default::default()),
@@ -252,6 +252,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "ConstantAttenuation", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::CONSTANT_ATTENUATION_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::CONSTANT_ATTENUATION);
+                }
             }
         }
         self.constant_attenuation.set(value);
@@ -293,6 +297,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "LinearAttenuation", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::LINEAR_ATTENUATION_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::LINEAR_ATTENUATION);
+                }
             }
         }
         self.linear_attenuation.set(value);
@@ -334,6 +342,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "QuadraticAttenuation", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::QUADRATIC_ATTENUATION_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::QUADRATIC_ATTENUATION);
+                }
             }
         }
         self.quadratic_attenuation.set(value);
@@ -344,24 +356,24 @@ impl SpotLightProps {
 
     /// `CoordinateSpace` (FerroUI overlay).
     pub fn coordinate_space(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     /// Sets `CoordinateSpace` (FerroUI overlay).
     pub fn set_coordinate_space(&self, host: &dyn SpotLightHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         if old_value.differs(&value) {
             SpotLightHooks::validate_coordinate_space_change(host, &old_value, &value);
             SpotLightHooks::on_coordinate_space_changing(host);
             changed = true;
             // Update the backing value
-            *self.coordinate_space.borrow_mut() = value.clone();
+            self.coordinate_space.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() | SpotLightChangedFields::COORDINATE_SPACE);
             host.register_for_serialization();
         }
-        *self.coordinate_space.borrow_mut() = value;
+        self.coordinate_space.set(value);
         if changed {
             SpotLightHooks::on_coordinate_space_changed(host);
         }
@@ -400,6 +412,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Direction", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::DIRECTION_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::DIRECTION);
+                }
             }
         }
         self.direction.set(value);
@@ -441,6 +457,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "InnerConeAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::INNER_CONE_ANGLE_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::INNER_CONE_ANGLE);
+                }
             }
         }
         self.inner_cone_angle.set(value);
@@ -482,6 +502,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "InnerConeColor", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::INNER_CONE_COLOR_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::INNER_CONE_COLOR);
+                }
             }
         }
         self.inner_cone_color.set(value);
@@ -523,6 +547,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "InnerConeIntensity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::INNER_CONE_INTENSITY_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::INNER_CONE_INTENSITY);
+                }
             }
         }
         self.inner_cone_intensity.set(value);
@@ -564,6 +592,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "OuterConeAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::OUTER_CONE_ANGLE_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::OUTER_CONE_ANGLE);
+                }
             }
         }
         self.outer_cone_angle.set(value);
@@ -605,6 +637,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "OuterConeColor", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::OUTER_CONE_COLOR_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::OUTER_CONE_COLOR);
+                }
             }
         }
         self.outer_cone_color.set(value);
@@ -646,6 +682,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "OuterConeIntensity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::OUTER_CONE_INTENSITY_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::OUTER_CONE_INTENSITY);
+                }
             }
         }
         self.outer_cone_intensity.set(value);
@@ -687,6 +727,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -728,6 +772,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "MinAttenuationCutoff", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::MIN_ATTENUATION_CUTOFF);
+                }
             }
         }
         self.min_attenuation_cutoff.set(value);
@@ -769,6 +817,10 @@ impl SpotLightProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "MaxAttenuationCutoff", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_spot_light.get().contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF_ANIMATED) {
+                    self.changed_fields_of_spot_light.set(self.changed_fields_of_spot_light.get() & !SpotLightChangedFields::MAX_ATTENUATION_CUTOFF);
+                }
             }
         }
         self.max_attenuation_cutoff.set(value);
@@ -887,73 +939,86 @@ impl SpotLightProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_spot_light.get();
         writer.write(changed);
+        if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION) {
+            writer.write(self.constant_attenuation.get());
+        }
         if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_constant_attenuation_property().base()));
-        } else if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION) {
-            writer.write(self.constant_attenuation.get());
+        }
+        if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION) {
+            writer.write(self.linear_attenuation.get());
         }
         if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_linear_attenuation_property().base()));
-        } else if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION) {
-            writer.write(self.linear_attenuation.get());
+        }
+        if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION) {
+            writer.write(self.quadratic_attenuation.get());
         }
         if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_quadratic_attenuation_property().base()));
-        } else if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION) {
-            writer.write(self.quadratic_attenuation.get());
         }
         if changed.contains(SpotLightChangedFields::COORDINATE_SPACE) {
-            writer.write_server_object(self.coordinate_space.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.coordinate_space.get().map(|o| o.server()));
+        }
+        if changed.contains(SpotLightChangedFields::DIRECTION) {
+            writer.write(self.direction.get());
         }
         if changed.contains(SpotLightChangedFields::DIRECTION_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_direction_property().base()));
-        } else if changed.contains(SpotLightChangedFields::DIRECTION) {
-            writer.write(self.direction.get());
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE) {
+            writer.write(self.inner_cone_angle.get());
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_inner_cone_angle_property().base()));
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE) {
-            writer.write(self.inner_cone_angle.get());
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR) {
+            writer.write(self.inner_cone_color.get());
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_inner_cone_color_property().base()));
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR) {
-            writer.write(self.inner_cone_color.get());
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY) {
+            writer.write(self.inner_cone_intensity.get());
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_inner_cone_intensity_property().base()));
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY) {
-            writer.write(self.inner_cone_intensity.get());
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE) {
+            writer.write(self.outer_cone_angle.get());
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_outer_cone_angle_property().base()));
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE) {
-            writer.write(self.outer_cone_angle.get());
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR) {
+            writer.write(self.outer_cone_color.get());
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_outer_cone_color_property().base()));
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR) {
-            writer.write(self.outer_cone_color.get());
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY) {
+            writer.write(self.outer_cone_intensity.get());
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_outer_cone_intensity_property().base()));
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY) {
-            writer.write(self.outer_cone_intensity.get());
+        }
+        if changed.contains(SpotLightChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(SpotLightChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_offset_property().base()));
-        } else if changed.contains(SpotLightChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF) {
+            writer.write(self.min_attenuation_cutoff.get());
         }
         if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_min_attenuation_cutoff_property().base()));
-        } else if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF) {
-            writer.write(self.min_attenuation_cutoff.get());
+        }
+        if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF) {
+            writer.write(self.max_attenuation_cutoff.get());
         }
         if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerSpotLightProps::id_of_max_attenuation_cutoff_property().base()));
-        } else if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF) {
-            writer.write(self.max_attenuation_cutoff.get());
         }
         self.changed_fields_of_spot_light.set(SpotLightChangedFields::empty());
     }
@@ -975,7 +1040,7 @@ pub struct ServerSpotLightProps {
     constant_attenuation: Cell<f32>,
     linear_attenuation: Cell<f32>,
     quadratic_attenuation: Cell<f32>,
-    coordinate_space: RefCell<Option<Rc<dyn IServerObject>>>,
+    coordinate_space: OptionCell<Rc<dyn IServerObject>>,
     direction: Cell<Vector3D>,
     inner_cone_angle: Cell<f32>,
     inner_cone_color: Cell<Color>,
@@ -1003,7 +1068,7 @@ impl ServerSpotLightProps {
             constant_attenuation: Cell::new(Default::default()),
             linear_attenuation: Cell::new(Default::default()),
             quadratic_attenuation: Cell::new(Default::default()),
-            coordinate_space: RefCell::new(None),
+            coordinate_space: OptionCell::new(),
             direction: Cell::new(Default::default()),
             inner_cone_angle: Cell::new(Default::default()),
             inner_cone_color: Cell::new(Default::default()),
@@ -1113,8 +1178,8 @@ impl ServerSpotLightProps {
             CompositionProperty::register::<ServerSpotLightProps, Option<Rc<dyn IServerObject>>>(
                 "CoordinateSpace",
                 "ServerSpotLight",
-                |obj| props_of::<ServerSpotLightProps>(obj).coordinate_space.borrow().clone(),
-                |obj, v| *props_of::<ServerSpotLightProps>(obj).coordinate_space.borrow_mut() = v,
+                |obj| props_of::<ServerSpotLightProps>(obj).coordinate_space.get(),
+                |obj, v| props_of::<ServerSpotLightProps>(obj).coordinate_space.set(v),
                 None,
                 None,
             )
@@ -1123,11 +1188,11 @@ impl ServerSpotLightProps {
 
     /// `CoordinateSpace`.
     pub fn coordinate_space(&self) -> Option<Rc<dyn IServerObject>> {
-        self.coordinate_space.borrow().clone()
+        self.coordinate_space.get()
     }
 
     pub fn set_coordinate_space(&self, host: &dyn ServerSpotLightHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.coordinate_space.borrow().clone();
+        let old_value = self.coordinate_space.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerSpotLightHooks::on_coordinate_space_changing(host);
@@ -1139,7 +1204,7 @@ impl ServerSpotLightProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.coordinate_space.borrow_mut() = value.clone(),
+                assign: &mut || self.coordinate_space.set(value.clone()),
             },
         );
         if changed {
@@ -1409,6 +1474,10 @@ impl ServerSpotLightProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerSpotLightHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<SpotLightChangedFields>();
+        if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION) {
+            let value = reader.read::<f32>();
+            self.set_constant_attenuation(host, value);
+        }
         if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `ConstantAttenuation` without an animation instance");
@@ -1419,9 +1488,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::CONSTANT_ATTENUATION) {
+        }
+        if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION) {
             let value = reader.read::<f32>();
-            self.set_constant_attenuation(host, value);
+            self.set_linear_attenuation(host, value);
         }
         if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1433,9 +1503,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::LINEAR_ATTENUATION) {
+        }
+        if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION) {
             let value = reader.read::<f32>();
-            self.set_linear_attenuation(host, value);
+            self.set_quadratic_attenuation(host, value);
         }
         if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1447,13 +1518,14 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::QUADRATIC_ATTENUATION) {
-            let value = reader.read::<f32>();
-            self.set_quadratic_attenuation(host, value);
         }
         if changed.contains(SpotLightChangedFields::COORDINATE_SPACE) {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_coordinate_space(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::DIRECTION) {
+            let value = reader.read::<Vector3D>();
+            self.set_direction(host, value);
         }
         if changed.contains(SpotLightChangedFields::DIRECTION_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1465,9 +1537,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::DIRECTION) {
-            let value = reader.read::<Vector3D>();
-            self.set_direction(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_inner_cone_angle(host, value);
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1479,9 +1552,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_inner_cone_angle(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR) {
+            let value = reader.read::<Color>();
+            self.set_inner_cone_color(host, value);
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1493,9 +1567,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_COLOR) {
-            let value = reader.read::<Color>();
-            self.set_inner_cone_color(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY) {
+            let value = reader.read::<f32>();
+            self.set_inner_cone_intensity(host, value);
         }
         if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1507,9 +1582,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::INNER_CONE_INTENSITY) {
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE) {
             let value = reader.read::<f32>();
-            self.set_inner_cone_intensity(host, value);
+            self.set_outer_cone_angle(host, value);
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1521,9 +1597,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_outer_cone_angle(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR) {
+            let value = reader.read::<Color>();
+            self.set_outer_cone_color(host, value);
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1535,9 +1612,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_COLOR) {
-            let value = reader.read::<Color>();
-            self.set_outer_cone_color(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY) {
+            let value = reader.read::<f32>();
+            self.set_outer_cone_intensity(host, value);
         }
         if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1549,9 +1627,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::OUTER_CONE_INTENSITY) {
-            let value = reader.read::<f32>();
-            self.set_outer_cone_intensity(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::OFFSET) {
+            let value = reader.read::<Vector3D>();
+            self.set_offset(host, value);
         }
         if changed.contains(SpotLightChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1563,9 +1642,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::OFFSET) {
-            let value = reader.read::<Vector3D>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF) {
+            let value = reader.read::<f32>();
+            self.set_min_attenuation_cutoff(host, value);
         }
         if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1577,9 +1657,10 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::MIN_ATTENUATION_CUTOFF) {
+        }
+        if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF) {
             let value = reader.read::<f32>();
-            self.set_min_attenuation_cutoff(host, value);
+            self.set_max_attenuation_cutoff(host, value);
         }
         if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1591,9 +1672,6 @@ impl ServerSpotLightProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(SpotLightChangedFields::MAX_ATTENUATION_CUTOFF) {
-            let value = reader.read::<f32>();
-            self.set_max_attenuation_cutoff(host, value);
         }
         ServerSpotLightHooks::on_fields_deserialized(host, changed);
     }

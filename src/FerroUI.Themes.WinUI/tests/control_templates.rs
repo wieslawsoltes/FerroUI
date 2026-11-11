@@ -300,6 +300,51 @@ control_tests! {
     tree_view_item => "TreeViewItem";
 }
 
+#[test]
+fn check_box_content_and_indicator_share_a_center_line() {
+    use ferroui_base::{Point, Visual};
+    use ferroui_controls::CheckBox;
+
+    let _app = start_themed_application();
+    for (minimum, content_height) in [(None, 14.0), (Some(44.0), 14.0), (Some(44.0), 48.0)] {
+        let check_box = CheckBox::new();
+        if let Some(minimum) = minimum {
+            check_box.set_min_height(minimum);
+        }
+        let content = Border::new();
+        content.set_width(120.0);
+        content.set_height(content_height);
+        check_box.set_content(Some(Control::boxed(&content)));
+
+        let window = Window::new();
+        window.set_width(240.0);
+        window.set_height(100.0);
+        window.set_content(Some(Control::boxed(&check_box)));
+        window.show();
+        window.update_layout();
+
+        let indicator = check_box
+            .get_visual_descendants()
+            .find(|element| element.name().as_deref() == Some("NormalRectangle"))
+            .expect("the checkbox indicator");
+        assert!(indicator.bounds().height > 0.0);
+        assert_eq!(content.bounds().height, content_height);
+        let center_y = |visual: &Visual| {
+            visual
+                .translate_point(Point::new(0.0, visual.bounds().height / 2.0), &check_box)
+                .expect("the visual belongs to the checkbox")
+                .y
+        };
+        let offset = center_y(&content) - center_y(&indicator);
+        // The content and the indicator can round to adjacent pixels at 1x.
+        assert!(
+            offset.abs() <= 1.0,
+            "content height {content_height}, minimum {minimum:?}: center offset {offset}"
+        );
+        window.close();
+    }
+}
+
 /// The window itself is themed: its template is applied when it is shown
 /// and its brushes come from the theme.
 #[test]

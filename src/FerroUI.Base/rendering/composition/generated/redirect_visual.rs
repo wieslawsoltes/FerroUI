@@ -21,10 +21,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -70,8 +70,8 @@ pub trait RedirectVisualHooks: CompositionContainerVisualHooks {
 pub struct RedirectVisualProps {
     base: CompositionContainerVisualProps,
     changed_fields_of_redirect_visual: Cell<RedirectVisualChangedFields>,
-    source: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    source_surface: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    source: OptionCell<Rc<dyn ICompositionObject>>,
+    source_surface: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for RedirectVisualProps {
@@ -88,8 +88,8 @@ impl RedirectVisualProps {
         Self {
             base: CompositionContainerVisualProps::new(),
             changed_fields_of_redirect_visual: Cell::new(RedirectVisualChangedFields::empty()),
-            source: RefCell::new(None),
-            source_surface: RefCell::new(None),
+            source: OptionCell::new(),
+            source_surface: OptionCell::new(),
         }
     }
 
@@ -112,24 +112,24 @@ impl RedirectVisualProps {
 
     /// `Source` (FerroUI overlay).
     pub fn source(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     /// Sets `Source` (FerroUI overlay).
     pub fn set_source(&self, host: &dyn RedirectVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         if old_value.differs(&value) {
             RedirectVisualHooks::validate_source_change(host, &old_value, &value);
             RedirectVisualHooks::on_source_changing(host);
             changed = true;
             // Update the backing value
-            *self.source.borrow_mut() = value.clone();
+            self.source.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_redirect_visual.set(self.changed_fields_of_redirect_visual.get() | RedirectVisualChangedFields::SOURCE);
             host.register_for_serialization();
         }
-        *self.source.borrow_mut() = value;
+        self.source.set(value);
         if changed {
             RedirectVisualHooks::on_source_changed(host);
         }
@@ -137,24 +137,24 @@ impl RedirectVisualProps {
 
     /// `SourceSurface` (internal, FerroUI overlay).
     pub fn source_surface(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.source_surface.borrow().clone()
+        self.source_surface.get()
     }
 
     /// Sets `SourceSurface` (internal, FerroUI overlay).
     pub fn set_source_surface(&self, host: &dyn RedirectVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.source_surface.borrow().clone();
+        let old_value = self.source_surface.get();
         if old_value.differs(&value) {
             RedirectVisualHooks::validate_source_surface_change(host, &old_value, &value);
             RedirectVisualHooks::on_source_surface_changing(host);
             changed = true;
             // Update the backing value
-            *self.source_surface.borrow_mut() = value.clone();
+            self.source_surface.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_redirect_visual.set(self.changed_fields_of_redirect_visual.get() | RedirectVisualChangedFields::SOURCE_SURFACE);
             host.register_for_serialization();
         }
-        *self.source_surface.borrow_mut() = value;
+        self.source_surface.set(value);
         if changed {
             RedirectVisualHooks::on_source_surface_changed(host);
         }
@@ -180,10 +180,10 @@ impl RedirectVisualProps {
         let changed = self.changed_fields_of_redirect_visual.get();
         writer.write(changed);
         if changed.contains(RedirectVisualChangedFields::SOURCE) {
-            writer.write_server_object(self.source.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.source.get().map(|o| o.server()));
         }
         if changed.contains(RedirectVisualChangedFields::SOURCE_SURFACE) {
-            writer.write_server_object(self.source_surface.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.source_surface.get().map(|o| o.server()));
         }
         self.changed_fields_of_redirect_visual.set(RedirectVisualChangedFields::empty());
     }
@@ -208,8 +208,8 @@ pub trait ServerRedirectVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerRedirectVisual`.
 pub struct ServerRedirectVisualProps {
-    source: RefCell<Option<Rc<dyn IServerObject>>>,
-    source_surface: RefCell<Option<Rc<dyn IServerObject>>>,
+    source: OptionCell<Rc<dyn IServerObject>>,
+    source_surface: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerRedirectVisualProps {
@@ -223,8 +223,8 @@ impl ServerRedirectVisualProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            source: RefCell::new(None),
-            source_surface: RefCell::new(None),
+            source: OptionCell::new(),
+            source_surface: OptionCell::new(),
         }
     }
 
@@ -244,8 +244,8 @@ impl ServerRedirectVisualProps {
             CompositionProperty::register::<ServerRedirectVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Source",
                 "ServerRedirectVisual",
-                |obj| props_of::<ServerRedirectVisualProps>(obj).source.borrow().clone(),
-                |obj, v| *props_of::<ServerRedirectVisualProps>(obj).source.borrow_mut() = v,
+                |obj| props_of::<ServerRedirectVisualProps>(obj).source.get(),
+                |obj, v| props_of::<ServerRedirectVisualProps>(obj).source.set(v),
                 None,
                 None,
             )
@@ -254,11 +254,11 @@ impl ServerRedirectVisualProps {
 
     /// `Source`.
     pub fn source(&self) -> Option<Rc<dyn IServerObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     pub fn set_source(&self, host: &dyn ServerRedirectVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerRedirectVisualHooks::on_source_changing(host);
@@ -270,7 +270,7 @@ impl ServerRedirectVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.source.borrow_mut() = value.clone(),
+                assign: &mut || self.source.set(value.clone()),
             },
         );
         if changed {
@@ -285,8 +285,8 @@ impl ServerRedirectVisualProps {
             CompositionProperty::register::<ServerRedirectVisualProps, Option<Rc<dyn IServerObject>>>(
                 "SourceSurface",
                 "ServerRedirectVisual",
-                |obj| props_of::<ServerRedirectVisualProps>(obj).source_surface.borrow().clone(),
-                |obj, v| *props_of::<ServerRedirectVisualProps>(obj).source_surface.borrow_mut() = v,
+                |obj| props_of::<ServerRedirectVisualProps>(obj).source_surface.get(),
+                |obj, v| props_of::<ServerRedirectVisualProps>(obj).source_surface.set(v),
                 None,
                 None,
             )
@@ -295,11 +295,11 @@ impl ServerRedirectVisualProps {
 
     /// `SourceSurface`.
     pub fn source_surface(&self) -> Option<Rc<dyn IServerObject>> {
-        self.source_surface.borrow().clone()
+        self.source_surface.get()
     }
 
     pub fn set_source_surface(&self, host: &dyn ServerRedirectVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.source_surface.borrow().clone();
+        let old_value = self.source_surface.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerRedirectVisualHooks::on_source_surface_changing(host);
@@ -311,7 +311,7 @@ impl ServerRedirectVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.source_surface.borrow_mut() = value.clone(),
+                assign: &mut || self.source_surface.set(value.clone()),
             },
         );
         if changed {

@@ -192,6 +192,7 @@ it. Abbreviations: CS = `controls/dev/CommonStyles/`, GX = `dxaml/xcp/dxaml/them
 | CHK-3 | The `AnimatedIcon.State` setters of `CombinedStates` (`NormalOff`, `PointerOverOn`, ...) | Select the frame of the animation. | The opacity and data of the path per check state. | G-10. |
 | CHK-4 | `ContentPresenter x:Name="ContentPresenter"` | The content presenter. | `PART_ContentPresenter`. | Template part (BTN-2). |
 | CHK-5 | `FocusVisualMargin="{StaticResource CheckBoxFocusVisualMargin}"` (-7,-3,-7,-3) | Focus visual around box and label. | `FocusAdorner` with that margin. | G-14. |
+| CHK-6 | `CheckBoxPadding` (`8,5,0,0`) and top-aligned content | A fixed top inset positions the label. | Centered content and `CheckBoxPadding` of `8,2.5,0,2.5`. | The label stays centered with the indicator at different heights and with fallback fonts. The horizontal spacing and total vertical inset are preserved. |
 
 ## DataValidationErrors
 

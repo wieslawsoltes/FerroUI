@@ -214,8 +214,8 @@ impl KeysView {
             geometry: RefCell::new(Rc::new(KeyboardGeometryOptions::default())),
             font_scale: Cell::new(1.0),
             label_font_family: RefCell::new(None),
-            key_pressed_visual: HandlerList::with_ordered_ids(),
-            key_released_visual: HandlerList::with_ordered_ids(),
+            key_pressed_visual: HandlerList::new(),
+            key_released_visual: HandlerList::new(),
             touch_subscriptions: Cell::new(None),
         }
     }

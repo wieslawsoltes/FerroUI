@@ -12,12 +12,26 @@ use ferroui_base::{
     platform::KnownPlatformGraphicsExternalImageHandleTypes,
     rendering::composition::ICompositionGpuInterop,
 };
+use ferroui_browser::interop::{
+    completion_helper::{await_promise, PromiseFuture},
+    JsObject,
+};
 use ferroui_media::{frames::*, *};
 use std::{
     cell::{Cell, RefCell},
     time::Duration,
 };
+use std::{
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll, Waker},
+};
 use wasm_bindgen::JsValue;
+
+#[cfg(feature = "qr")]
+mod qr;
+#[cfg(feature = "qr")]
+pub use qr::recognize_qr;
 
 /// Allocation policy for the active compositor context. Old generations remain
 /// charged to the same budget until their native storage actually retires.
@@ -29,6 +43,7 @@ pub struct WebGlFrameProducer {
     graphics: Acceleration,
     /// Frames go to the render worker as transferred `VideoFrame`s (#601).
     transfer: bool,
+    analysis: bool,
 }
 impl WebGlFrameProducer {
     pub fn from_interop(
@@ -57,6 +72,7 @@ impl WebGlFrameProducer {
                 // The renderer of the worker's context is not observable from the page.
                 graphics: Acceleration::Unknown,
                 transfer: true,
+                analysis: false,
             });
         }
         let context = interop
@@ -88,6 +104,7 @@ impl WebGlFrameProducer {
             budget,
             graphics,
             transfer: false,
+            analysis: false,
         })
     }
     pub fn budget(&self) -> FrameBudget {
@@ -105,6 +122,12 @@ impl WebGlFrameProducer {
     pub fn with_budget(&self, budget: FrameBudget) -> Self {
         Self {
             budget,
+            ..self.clone()
+        }
+    }
+    pub fn with_analysis(&self, enabled: bool) -> Self {
+        Self {
+            analysis: enabled,
             ..self.clone()
         }
     }
@@ -194,13 +217,21 @@ impl WebGlFrameProducer {
             Err(FrameError::BudgetExceeded) => return Ok(None),
             Err(e) => return Err(unsupported(e.to_string())),
         };
-        let frame = native::transfer(source, width, height)?;
+        let (frame, receipt) = native::transfer(
+            source,
+            width,
+            height,
+            self.analysis,
+            reservation.retirement(),
+        )?;
         self.budget
             .counters()
             .gpu_copy(GpuTransferReason::NativeImageTransfer);
         let frame = reservation.lease(frame);
-        let ready = GpuCompletion::new();
-        ready.complete();
+        let ready = FrameReadiness::Receipt {
+            pending: RefCell::new(Some(await_promise(&receipt))),
+            result: RefCell::new(None),
+        };
         Ok(Some(PendingWebGlFrame { frame, ready }))
     }
     /// The metadata of a frame of this producer, within its budget. A transferred frame has no
@@ -217,6 +248,7 @@ impl WebGlFrameProducer {
         let bytes = u64::from(width)
             .checked_mul(u64::from(height))
             .and_then(|v| v.checked_mul(4))
+            .and_then(|bytes| bytes.checked_mul(if self.transfer && self.analysis { 2 } else { 1 }))
             .ok_or_else(|| unsupported("Texture dimensions overflow"))?;
         let metadata = FrameMetadata {
             identity,
@@ -240,7 +272,7 @@ impl WebGlFrameProducer {
             planes: vec![FramePlane {
                 offset: 0,
                 stride: u64::from(width) * 4,
-                length: bytes,
+                length: u64::from(width) * u64::from(height) * 4,
             }],
             // RGBA8 storage payload is known. Browser allocation overhead and
             // decoder-owned storage are not observable through WebGL.
@@ -297,13 +329,43 @@ impl WebGlFrameProducer {
         let result = write(texture);
         ferroui_browser::rendering::schedule_webgl_completion(self.context as i32, ready.clone());
         result?;
-        Ok(Some(PendingWebGlFrame { frame, ready }))
+        Ok(Some(PendingWebGlFrame {
+            frame,
+            ready: FrameReadiness::Gpu(ready),
+        }))
     }
 }
 /// Cancellation drops the caller's view; the fence retains submitted storage.
 pub struct PendingWebGlFrame {
     frame: FrameLease,
-    ready: GpuCompletion,
+    ready: FrameReadiness,
+}
+enum FrameReadiness {
+    Gpu(GpuCompletion),
+    Receipt {
+        pending: RefCell<Option<PromiseFuture<JsObject>>>,
+        result: RefCell<Option<Result<(), MediaError>>>,
+    },
+}
+impl FrameReadiness {
+    fn poll_receipt(&self, cx: &mut Context<'_>) -> Poll<Result<(), MediaError>> {
+        let Self::Receipt { pending, result } = self else {
+            unreachable!()
+        };
+        if let Some(value) = result.borrow().as_ref() {
+            return Poll::Ready(value.clone());
+        }
+        let mut pending = pending.borrow_mut();
+        match Pin::new(pending.as_mut().unwrap()).poll(cx) {
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(value) => {
+                let value = value.map(|_| ()).map_err(|e| unsupported(e.to_string()));
+                pending.take();
+                *result.borrow_mut() = Some(value.clone());
+                Poll::Ready(value)
+            }
+        }
+    }
 }
 /// Native browser image and its source-frame timestamp, sampled synchronously
 /// with the subsequent TexImageSource transfer. No framework pixel buffer.
@@ -380,7 +442,16 @@ impl BrowserFrameStream {
 }
 impl PendingWebGlFrame {
     pub fn poll(&self) -> Result<Option<FrameLease>, MediaError> {
-        match self.ready.status() {
+        let FrameReadiness::Gpu(ready) = &self.ready else {
+            return match self
+                .ready
+                .poll_receipt(&mut Context::from_waker(Waker::noop()))
+            {
+                Poll::Pending => Ok(None),
+                Poll::Ready(value) => value.map(|_| Some(self.frame.clone())),
+            };
+        };
+        match ready.status() {
             GpuCompletionStatus::Pending => Ok(None),
             GpuCompletionStatus::Complete => Ok(Some(self.frame.clone())),
             GpuCompletionStatus::Indeterminate => Err(unsupported(
@@ -389,10 +460,12 @@ impl PendingWebGlFrame {
         }
     }
     pub async fn finish(self) -> Result<FrameLease, MediaError> {
-        self.ready
-            .wait()
-            .await
-            .map_err(|e| unsupported(e.to_string()))?;
+        match &self.ready {
+            FrameReadiness::Gpu(ready) => {
+                ready.wait().await.map_err(|e| unsupported(e.to_string()))?
+            }
+            _ => std::future::poll_fn(|cx| self.ready.poll_receipt(cx)).await?,
+        }
         Ok(self.frame)
     }
 }

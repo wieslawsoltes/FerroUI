@@ -182,7 +182,7 @@ impl Visual {
         let recipe = self.theme_shadow_recipe(elevation);
         let size = self.bounds().size();
         let visible = theme != ThemeShadowTheme::HighContrast
-            && self.composition_visual().is_some_and(|visual| visual.visible());
+            && self.own_composition_visual().is_some_and(|visual| visual.visible());
         shadow_visual.update(&recipe, Vector::new(size.width, size.height), visible);
     }
 

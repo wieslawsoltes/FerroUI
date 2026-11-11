@@ -51,7 +51,7 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Android` | `ferroui-media-android` | Shared external GLES conversion and surface ownership |
 | `FerroUI.Media.Video.Android` | `ferroui-media-video-android` | Independent Media3 playback and native presentation timestamps |
 | `FerroUI.Media.Camera.Android` | `ferroui-media-camera-android` | Independent CameraX acquisition and native JPEG |
-| `FerroUI.Media.Camera.Controls` | `ferroui-media-camera-controls` | Explicit-start CameraPreview and weak supplied sessions |
+| `FerroUI.Media.Camera.Controls` | `ferroui-media-camera-controls` | Explicit-start CameraPreview and weak supplied sessions; with the feature `qr`, QrPreview, which outlines supplied QR detections |
 | `FerroUI.Media.Qr.Apple` | `ferroui-media-qr-apple` | Optional native Vision analysis of retained CoreVideo storage |
 | `FerroUI.Media.Qr.Android` | `ferroui-media-qr-android` | Optional bundled offline ML Kit analysis of borrowed CameraX images |
 | `FerroUI.Media.Windows` | `ferroui-media-windows` | Retained MF/DXGI storage and compatible ANGLE device import; [Windows verification](WINDOWS-VERIFICATION.md) |

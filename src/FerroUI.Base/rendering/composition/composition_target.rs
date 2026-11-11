@@ -32,6 +32,16 @@ pub struct CompositionTarget {
     hit_test_child_candidates: RefCell<Vec<Rc<CompositionVisual>>>,
 }
 
+/// How a hit test enters a composition visual.
+enum Entered<Input> {
+    /// With the input in the coordinates of the visual.
+    Local(Input),
+    /// Through it to its children, with the input of its parent: the visual was created for
+    /// a visual that was shown without a composition visual and has no readback yet
+    /// (docs/porting/desktop-performance.md, section 9.41).
+    Through,
+}
+
 impl CompositionTarget {
     pub(crate) fn new(compositor: &Rc<Compositor>, surfaces: RenderSurfaces) -> Rc<CompositionTarget> {
         let id = NEXT_ID.fetch_add(1, Ordering::SeqCst) + 1;
@@ -189,12 +199,53 @@ impl CompositionTarget {
         // Need to convert transform the point using visual's readback since HitTestCore will use its inverse matrix
         // NOTE: it can technically break hit-testing of the root visual itself if it has a non-identity transform,
         // need to investigate that possibility later. We might want a separate mode for root hit-testing.
-        let readback = root.try_get_valid_readback()?;
-        let parent_input = H::transform(input, readback.matrix);
+        let parent_input = Self::root_parent_input::<H>(&root, input)?;
 
         let mut res = Vec::new();
         self.hit_test_core::<H>(&root, &parent_input, &mut res, filter);
         Some(res)
+    }
+
+    /// [`try_hit_test`](Self::try_hit_test) for a root that has no composition visual
+    /// (docs/porting/desktop-performance.md, section 9.41): `visuals` are the composition
+    /// visuals that show what is under it, in the order they are shown, all children of one
+    /// composition visual, and `parent_input` is the input in the coordinates of that one.
+    pub(crate) fn hit_test_siblings<H: ICompositionHitTester>(
+        &self,
+        visuals: &[Rc<CompositionVisual>],
+        parent_input: &H::Input,
+        filter: VisualFilter<'_>,
+    ) -> Vec<(IntersectionResult, Rc<CompositionVisual>)> {
+        self.compositor().readback().next_read();
+        let mut res = Vec::new();
+        for visual in visuals.iter().rev() {
+            self.hit_test_core::<H>(visual, parent_input, &mut res, filter);
+        }
+        res
+    }
+
+    /// The input of a hit test under `root`, given in its coordinates, in those of its parent.
+    fn root_parent_input<H: ICompositionHitTester>(root: &Rc<CompositionVisual>, input: &H::Input) -> Option<H::Input> {
+        match root.try_get_valid_readback() {
+            Some(readback) => Some(H::transform(input, readback.matrix)),
+            // In the last frame it was where its offset says, in the composition visual that
+            // showed what is under it (section 9.41).
+            None if root.hit_tests_through() => {
+                // And so were the ones above it that were created with it, up to the one that
+                // showed them all.
+                let offset = root.offset();
+                let (mut x, mut y) = (offset.x, offset.y);
+                let mut above = root.parent();
+                while let Some(visual) = above.filter(|visual| visual.hit_tests_through()) {
+                    let offset = visual.offset();
+                    x += offset.x;
+                    y += offset.y;
+                    above = visual.parent();
+                }
+                Some(H::transform(input, crate::Matrix::create_translation(x, y)))
+            }
+            None => None,
+        }
     }
 
     fn hit_test_core<H: ICompositionHitTester>(
@@ -204,7 +255,14 @@ impl CompositionTarget {
         result: &mut Vec<(IntersectionResult, Rc<CompositionVisual>)>,
         filter: VisualFilter<'_>,
     ) {
-        let Some(input) = Self::hit_test_visual::<H>(visual, parent_input, filter) else { return };
+        let input = match Self::hit_test_visual::<H>(visual, parent_input, filter) {
+            Some(Entered::Local(input)) => input,
+            Some(Entered::Through) => {
+                self.hit_test_children::<H>(visual, parent_input, result, filter);
+                return;
+            }
+            None => return,
+        };
 
         // Inspect children
         self.hit_test_children::<H>(visual, &input, result, filter);
@@ -267,7 +325,7 @@ impl CompositionTarget {
         visual: &Rc<CompositionVisual>,
         parent_input: &H::Input,
         filter: VisualFilter<'_>,
-    ) -> Option<H::Input> {
+    ) -> Option<Entered<H::Input>> {
         // A visual that is not hit test visible (WinUI `IsHitTestVisible`)
         // is skipped with its subtree.
         if !visual.visible() || !visual.is_hit_test_visible() {
@@ -280,7 +338,9 @@ impl CompositionTarget {
             }
         }
 
-        let readback = visual.try_get_valid_readback()?;
+        let Some(readback) = visual.try_get_valid_readback() else {
+            return visual.hit_tests_through().then_some(Entered::Through);
+        };
 
         if !visual.disable_sub_tree_bounds_hit_test_optimization() {
             let transformed_subtree_bounds = readback.transformed_subtree_bounds?;
@@ -303,7 +363,7 @@ impl CompositionTarget {
             }
         }
 
-        Some(input)
+        Some(Entered::Local(input))
     }
 
     /// Finds the topmost visual hit by `input` that passes `result_filter`
@@ -328,10 +388,28 @@ impl CompositionTarget {
         // Need to convert transform the point using visual's readback since HitTestCore will use its inverse matrix
         // NOTE: it can technically break hit-testing of the root visual itself if it has a non-identity transform,
         // need to investigate that possibility later. We might want a separate mode for root hit-testing.
-        let Some(readback) = root.try_get_valid_readback() else { return none };
-        let parent_input = H::transform(input, readback.matrix);
+        let Some(parent_input) = Self::root_parent_input::<H>(&root, input) else { return none };
 
         self.hit_test_first_core::<H>(&root, &parent_input, filter, result_filter)
+    }
+
+    /// [`try_hit_test_first`](Self::try_hit_test_first) for a root that has no composition
+    /// visual: see [`hit_test_siblings`](Self::hit_test_siblings).
+    pub(crate) fn hit_test_first_sibling<H: ICompositionHitTester>(
+        &self,
+        visuals: &[Rc<CompositionVisual>],
+        parent_input: &H::Input,
+        filter: VisualFilter<'_>,
+        result_filter: VisualFilter<'_>,
+    ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
+        self.compositor().readback().next_read();
+        for visual in visuals.iter().rev() {
+            let (hit, intersection) = self.hit_test_first_core::<H>(visual, parent_input, filter, result_filter);
+            if hit.is_some() {
+                return (hit, intersection);
+            }
+        }
+        (None, IntersectionResult::NotCalculated)
     }
 
     pub(crate) fn hit_test_first_core<H: ICompositionHitTester>(
@@ -341,8 +419,12 @@ impl CompositionTarget {
         filter: VisualFilter<'_>,
         result_filter: VisualFilter<'_>,
     ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
-        let Some(input) = Self::hit_test_visual::<H>(visual, parent_input, filter) else {
-            return (None, IntersectionResult::NotCalculated);
+        let (input, through) = match Self::hit_test_visual::<H>(visual, parent_input, filter) {
+            Some(Entered::Local(input)) => (input, false),
+            // What is under it is where it was in the last frame: in the coordinates of the
+            // parent, with the content of the visual not drawn yet (section 9.41).
+            Some(Entered::Through) => (parent_input.clone(), true),
+            None => return (None, IntersectionResult::NotCalculated),
         };
 
         // A visual kept for a visual that left its tree has no children here (section 9.32).
@@ -373,6 +455,9 @@ impl CompositionTarget {
             }
         }
 
+        if through {
+            return (None, IntersectionResult::NotCalculated);
+        }
         let intersection_result = H::hit_test(visual, &input);
         let hit = is_hit(intersection_result) && result_filter.is_none_or(|result_filter| result_filter(visual));
         (hit.then(|| visual.clone()), intersection_result)

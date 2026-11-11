@@ -49,6 +49,10 @@ pub(crate) struct DrawListData {
     /// (section 9.32). Until then it is hit tested as a released one is: it
     /// has no drawing and no children.
     departed: Cell<bool>,
+    /// The visual was shown without a composition visual before this one was created
+    /// (section 9.41): what is under it was drawn by the composition visual above, and the
+    /// readback of what is under it says so until the first frame with this one.
+    shown_through: Cell<bool>,
     /// The properties of the acrylic visual, when the visual is one.
     pub(super) acrylic: Option<CompositionExperimentalAcrylicVisualProps>,
     /// The part of a derived class defined outside of this module.
@@ -106,6 +110,10 @@ impl DrawListData {
 
     pub(super) fn is_departed(&self) -> bool {
         self.departed.get()
+    }
+
+    pub(super) fn is_shown_through(&self) -> bool {
+        self.shown_through.get()
     }
 
     pub(super) fn hit_test(&self, pt: Point) -> bool {
@@ -208,6 +216,7 @@ impl CompositionDrawListVisual {
             content_invalidated: Cell::new(false),
             draw_list: RefCell::new(None),
             departed: Cell::new(false),
+            shown_through: Cell::new(false),
             acrylic: acrylic.then(CompositionExperimentalAcrylicVisualProps::new),
             extension,
         };
@@ -249,6 +258,12 @@ impl CompositionDrawListVisual {
     /// Marks the visual as kept for a visual that left its tree, or as in use again.
     pub(crate) fn set_departed(&self, departed: bool) {
         self.data().departed.set(departed);
+    }
+
+    /// Marks the visual as created for a visual that was shown without a composition visual
+    /// until now (section 9.41): hit tests pass through it until it has a readback.
+    pub(crate) fn set_shown_through(&self) {
+        self.data().shown_through.set(true);
     }
 
     pub fn draw_list(&self) -> Option<Rc<CompositionRenderData>> {

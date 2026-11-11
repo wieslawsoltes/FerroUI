@@ -21,10 +21,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -120,7 +120,7 @@ pub trait CompositionNineGridBrushHooks: CompositionBrushHooks {
 pub struct CompositionNineGridBrushProps {
     base: CompositionBrushProps,
     changed_fields_of_composition_nine_grid_brush: Cell<CompositionNineGridBrushChangedFields>,
-    source: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    source: OptionCell<Rc<dyn ICompositionObject>>,
     left_inset: Cell<f32>,
     top_inset: Cell<f32>,
     right_inset: Cell<f32>,
@@ -146,7 +146,7 @@ impl CompositionNineGridBrushProps {
         Self {
             base: CompositionBrushProps::new(),
             changed_fields_of_composition_nine_grid_brush: Cell::new(CompositionNineGridBrushChangedFields::empty()),
-            source: RefCell::new(None),
+            source: OptionCell::new(),
             left_inset: Cell::new(Default::default()),
             top_inset: Cell::new(Default::default()),
             right_inset: Cell::new(Default::default()),
@@ -182,24 +182,24 @@ impl CompositionNineGridBrushProps {
 
     /// `Source` (FerroUI overlay).
     pub fn source(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     /// Sets `Source` (FerroUI overlay).
     pub fn set_source(&self, host: &dyn CompositionNineGridBrushHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         if old_value.differs(&value) {
             CompositionNineGridBrushHooks::validate_source_change(host, &old_value, &value);
             CompositionNineGridBrushHooks::on_source_changing(host);
             changed = true;
             // Update the backing value
-            *self.source.borrow_mut() = value.clone();
+            self.source.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() | CompositionNineGridBrushChangedFields::SOURCE);
             host.register_for_serialization();
         }
-        *self.source.borrow_mut() = value;
+        self.source.set(value);
         if changed {
             CompositionNineGridBrushHooks::on_source_changed(host);
         }
@@ -238,6 +238,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "LeftInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::LEFT_INSET_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::LEFT_INSET);
+                }
             }
         }
         self.left_inset.set(value);
@@ -279,6 +283,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TopInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::TOP_INSET_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::TOP_INSET);
+                }
             }
         }
         self.top_inset.set(value);
@@ -320,6 +328,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RightInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::RIGHT_INSET);
+                }
             }
         }
         self.right_inset.set(value);
@@ -361,6 +373,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BottomInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::BOTTOM_INSET);
+                }
             }
         }
         self.bottom_inset.set(value);
@@ -402,6 +418,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "LeftInsetScale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE);
+                }
             }
         }
         self.left_inset_scale.set(value);
@@ -443,6 +463,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TopInsetScale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::TOP_INSET_SCALE);
+                }
             }
         }
         self.top_inset_scale.set(value);
@@ -484,6 +508,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RightInsetScale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE);
+                }
             }
         }
         self.right_inset_scale.set(value);
@@ -525,6 +553,10 @@ impl CompositionNineGridBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BottomInsetScale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_nine_grid_brush.get().contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_nine_grid_brush.set(self.changed_fields_of_composition_nine_grid_brush.get() & !CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE);
+                }
             }
         }
         self.bottom_inset_scale.set(value);
@@ -634,47 +666,55 @@ impl CompositionNineGridBrushProps {
         let changed = self.changed_fields_of_composition_nine_grid_brush.get();
         writer.write(changed);
         if changed.contains(CompositionNineGridBrushChangedFields::SOURCE) {
-            writer.write_server_object(self.source.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.source.get().map(|o| o.server()));
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET) {
+            writer.write(self.left_inset.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_left_inset_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET) {
-            writer.write(self.left_inset.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET) {
+            writer.write(self.top_inset.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_top_inset_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET) {
-            writer.write(self.top_inset.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET) {
+            writer.write(self.right_inset.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_right_inset_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET) {
-            writer.write(self.right_inset.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET) {
+            writer.write(self.bottom_inset.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_bottom_inset_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET) {
-            writer.write(self.bottom_inset.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE) {
+            writer.write(self.left_inset_scale.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_left_inset_scale_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE) {
-            writer.write(self.left_inset_scale.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE) {
+            writer.write(self.top_inset_scale.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_top_inset_scale_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE) {
-            writer.write(self.top_inset_scale.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE) {
+            writer.write(self.right_inset_scale.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_right_inset_scale_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE) {
-            writer.write(self.right_inset_scale.get());
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE) {
+            writer.write(self.bottom_inset_scale.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionNineGridBrushProps::id_of_bottom_inset_scale_property().base()));
-        } else if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE) {
-            writer.write(self.bottom_inset_scale.get());
         }
         if changed.contains(CompositionNineGridBrushChangedFields::IS_CENTER_HOLLOW) {
             writer.write(self.is_center_hollow.get());
@@ -699,7 +739,7 @@ pub trait ServerCompositionNineGridBrushHooks: ServerCompositionBrushHooks {
 /// The server-side properties of `ServerCompositionNineGridBrush`.
 pub struct ServerCompositionNineGridBrushProps {
     base: ServerCompositionBrushProps,
-    source: RefCell<Option<Rc<dyn IServerObject>>>,
+    source: OptionCell<Rc<dyn IServerObject>>,
     left_inset: Cell<f32>,
     top_inset: Cell<f32>,
     right_inset: Cell<f32>,
@@ -723,7 +763,7 @@ impl ServerCompositionNineGridBrushProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionBrushProps::new(),
-            source: RefCell::new(None),
+            source: OptionCell::new(),
             left_inset: Cell::new(Default::default()),
             top_inset: Cell::new(Default::default()),
             right_inset: Cell::new(Default::default()),
@@ -757,8 +797,8 @@ impl ServerCompositionNineGridBrushProps {
             CompositionProperty::register::<ServerCompositionNineGridBrushProps, Option<Rc<dyn IServerObject>>>(
                 "Source",
                 "ServerCompositionNineGridBrush",
-                |obj| props_of::<ServerCompositionNineGridBrushProps>(obj).source.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionNineGridBrushProps>(obj).source.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionNineGridBrushProps>(obj).source.get(),
+                |obj, v| props_of::<ServerCompositionNineGridBrushProps>(obj).source.set(v),
                 None,
                 None,
             )
@@ -767,11 +807,11 @@ impl ServerCompositionNineGridBrushProps {
 
     /// `Source`.
     pub fn source(&self) -> Option<Rc<dyn IServerObject>> {
-        self.source.borrow().clone()
+        self.source.get()
     }
 
     pub fn set_source(&self, host: &dyn ServerCompositionNineGridBrushHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.source.borrow().clone();
+        let old_value = self.source.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionNineGridBrushHooks::on_source_changing(host);
@@ -783,7 +823,7 @@ impl ServerCompositionNineGridBrushProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.source.borrow_mut() = value.clone(),
+                assign: &mut || self.source.set(value.clone()),
             },
         );
         if changed {
@@ -1048,6 +1088,10 @@ impl ServerCompositionNineGridBrushProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_source(host, value);
         }
+        if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET) {
+            let value = reader.read::<f32>();
+            self.set_left_inset(host, value);
+        }
         if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `LeftInset` without an animation instance");
@@ -1058,9 +1102,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET) {
             let value = reader.read::<f32>();
-            self.set_left_inset(host, value);
+            self.set_top_inset(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1072,9 +1117,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET) {
             let value = reader.read::<f32>();
-            self.set_top_inset(host, value);
+            self.set_right_inset(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1086,9 +1132,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET) {
             let value = reader.read::<f32>();
-            self.set_right_inset(host, value);
+            self.set_bottom_inset(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1100,9 +1147,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE) {
             let value = reader.read::<f32>();
-            self.set_bottom_inset(host, value);
+            self.set_left_inset_scale(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1114,9 +1162,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::LEFT_INSET_SCALE) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE) {
             let value = reader.read::<f32>();
-            self.set_left_inset_scale(host, value);
+            self.set_top_inset_scale(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1128,9 +1177,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::TOP_INSET_SCALE) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE) {
             let value = reader.read::<f32>();
-            self.set_top_inset_scale(host, value);
+            self.set_right_inset_scale(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1142,9 +1192,10 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::RIGHT_INSET_SCALE) {
+        }
+        if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE) {
             let value = reader.read::<f32>();
-            self.set_right_inset_scale(host, value);
+            self.set_bottom_inset_scale(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1156,9 +1207,6 @@ impl ServerCompositionNineGridBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionNineGridBrushChangedFields::BOTTOM_INSET_SCALE) {
-            let value = reader.read::<f32>();
-            self.set_bottom_inset_scale(host, value);
         }
         if changed.contains(CompositionNineGridBrushChangedFields::IS_CENTER_HOLLOW) {
             let value = reader.read::<bool>();
