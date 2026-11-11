@@ -740,6 +740,13 @@ impl StyledElement {
         }
         assert!(old.is_none() || parent.is_none(), "The Control already has a parent.");
 
+        // The resources visible to the element change with its styling parent
+        // (its inheritance parent), and a resource looked up from here on sees
+        // them: the inherited theme variant the new parent gives, the styles
+        // applied when the element is attached. The notification is numbered
+        // now, so that a dynamic resource looked up since does not look up
+        // again when it receives it (`ResourcesChangedEventArgs::is_newer_than`).
+        let resources_changed = ResourcesChangedEventArgs::create();
         if self.inheritance_parent().is_none() || parent.is_none() {
             self.set_inheritance_parent(parent.clone().map(Ref::upcast::<FerroObject>));
         }
@@ -754,7 +761,8 @@ impl StyledElement {
         }
 
         if let Some(new_root) = self.find_logical_root() {
-            let e = LogicalTreeAttachmentEventArgs::new(new_root, this, parent.clone());
+            let e =
+                LogicalTreeAttachmentEventArgs::with_resources_changed(new_root, this, parent.clone(), resources_changed);
             self.on_attached_to_logical_tree_core(&e);
         } else if parent.is_none() {
             // If we were attached to the logical tree, we piggyback on the
@@ -766,7 +774,7 @@ impl StyledElement {
             // attached to a non-rooted control because it's unlikely that
             // dynamic resources need to be correct until the control is added
             // to the tree, and it causes a *lot* of notifications.
-            self.notify_resources_changed(ResourcesChangedEventArgs::create(), true);
+            self.notify_resources_changed(resources_changed, true);
         }
 
         self.raise_direct_property_changed(Self::parent_property(), &old, &parent);
@@ -826,7 +834,8 @@ impl StyledElement {
             *self.logical_root.borrow_mut() = Some(e.root().downgrade());
             self.reevaluate_implicit_theme();
             self.apply_styling();
-            self.notify_resources_changed(ResourcesChangedEventArgs::create(), false);
+            // One notification for the subtree, numbered when it was attached.
+            self.notify_resources_changed(e.resources_changed(), false);
             self.on_attached_to_logical_tree(e);
             if !self.attached_to_logical_tree.is_empty() {
                 for (_, handler) in self.attached_to_logical_tree.snapshot().iter() {
